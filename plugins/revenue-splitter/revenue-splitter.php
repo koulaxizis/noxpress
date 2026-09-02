@@ -7,7 +7,7 @@
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Christos Koulaxizis
- * License:           GPL-2.0-or-later
+ * License:           MIT
  * Text Domain:       revenue-splitter
  * Domain Path:       /languages
  */
@@ -20,8 +20,7 @@ define( 'RS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RS_URL', plugin_dir_url( __FILE__ ) );
 
 /*
- * Custom updater — το Action στο repo noxpress γράφει αυτόματα το
- * updates/revenue-splitter.json σε κάθε Release, και το Pages το σερβίρει.
+ * Updates: το no press hub (GitHub Pages) σερβίρει το JSON του plugin.
  * Κενό ('') = τα updates απενεργοποιούνται.
  */
 define( 'RS_UPDATE_URL', 'https://koulaxizis.github.io/noxpress/updates/revenue-splitter.json' );
@@ -51,14 +50,15 @@ function rs_bootstrap(): void {
 	require_once RS_PATH . 'includes/class-beneficiaries.php';
 	require_once RS_PATH . 'includes/class-reports.php';
 	require_once RS_PATH . 'includes/class-admin-ui.php';
-	require_once RS_PATH . 'includes/class-updater.php';
+	require_once RS_PATH . 'includes/class-np-updater.php';
 
 	RS_Lang::init();
 	RS_VAT::init();
 	RS_Beneficiaries::init();
 	RS_Reports::init();
 	RS_Admin_UI::init();
-	RS_Updater::init();
+
+	NP_Updater::init( RS_FILE, RS_VERSION, RS_UPDATE_URL, 'Revenue Splitter' );
 }
 
 function rs_missing_woo_notice(): void {
