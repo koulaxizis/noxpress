@@ -10,12 +10,16 @@
  *    — όλες zero-dependency, όλες σέβονται τα ενεργά φίλτρα.
  *  - File-based cache busting (filemtime) για assets.
  *
- * v1.1.2 AUDIT FIX: Πλήρες αρχείο — συμπληρώθηκαν οι μέθοδοι που έλειπαν
- * (current_period, valid_date, money, collect_beneficiary_names,
- * filter_report_for_display, render_settings, footer, render_widget),
- * διορθώθηκε το duplicate charset header στα exports (μία φορά, από την
- * export_headers), quoted Content-Disposition filenames, filemtime guards,
- * και τα strings των exports περνούν από __()/gettext για EN mode.
+ * v1.1.2 AUDIT FIX:
+ *  - (#3) Καθαρό μενού: το parent slug ΕΙΝΑΙ το dashboard — δεν υπάρχει
+ *    διπλή καταχώριση «Revenue Splitter» + «Dashboard» που δείχνουν στο
+ *    ίδιο σημείο.
+ *  - (#4) Το preset dropdown συγχρονίζεται με την αποθηκευμένη περίοδο
+ *    (server-side matching, default «Προσαρμοσμένο»).
+ *  - (#7) fputcsv() με explicit separator/enclosure/escape — χωρίς
+ *    deprecated implicit defaults σε PHP 8.4+.
+ *  - (#12) Label «Παραγγελίες (περιόδου)» όταν είναι ενεργό φίλτρο
+ *    δικαιούχου/αναζήτησης, για να μην μπερδεύεται το order_count.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,7 +27,6 @@ defined( 'ABSPATH' ) || exit;
 class RS_Admin_UI {
 
 	const CAP       = 'manage_woocommerce';
-	const PARENT    = 'revenue-splitter';
 	const SLUG_DASH = 'revenue-splitter-dashboard';
 	const SLUG_SET  = 'revenue-splitter-settings';
 
@@ -50,19 +53,24 @@ class RS_Admin_UI {
 
 	public static function menu(): void {
 
+		/*
+		 * AUDIT FIX (#3): parent = dashboard. Το add_menu_page() με το ίδιο
+		 * slug κάνει το πρώτο submenu να υποκαθίσταται σωστά — το WP δείχνει
+		 * «Dashboard» ως πρώτο submenu που δείχνει στο parent. Κανένα duplicate.
+		 */
 		add_menu_page(
-			__( 'Revenue Splitter', 'revenue-splitter' ),
+			__( 'Revenue Splitter — Dashboard', 'revenue-splitter' ),
 			__( 'Revenue Splitter', 'revenue-splitter' ),
 			self::CAP,
-			self::PARENT,
+			self::SLUG_DASH,
 			array( __CLASS__, 'render_dashboard' ),
 			'dashicons-chart-pie',
 			56
 		);
 
 		add_submenu_page(
-			self::PARENT,
-			__( 'Dashboard', 'revenue-splitter' ),
+			self::SLUG_DASH,
+			__( 'Revenue Splitter — Dashboard', 'revenue-splitter' ),
 			__( 'Dashboard', 'revenue-splitter' ),
 			self::CAP,
 			self::SLUG_DASH,
@@ -70,7 +78,7 @@ class RS_Admin_UI {
 		);
 
 		add_submenu_page(
-			self::PARENT,
+			self::SLUG_DASH,
 			__( 'Ρυθμίσεις', 'revenue-splitter' ),
 			__( 'Ρυθμίσεις', 'revenue-splitter' ),
 			self::CAP,
@@ -169,6 +177,33 @@ class RS_Admin_UI {
 		}
 
 		return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
+	}
+
+	/*
+	 * AUDIT FIX (#4): Server-side υπολογισμός του preset που ταιριάζει
+	 * στην (αποθηκευμένη ή υπολογισμένη) περίοδο — 'custom' όταν δεν
+	 * ταιριάζει πουθενά. Το dropdown ανοίγει έτσι σωστά συγχρονισμένο.
+	 */
+	private static function matching_preset( array $period ): string {
+
+		$now = new DateTimeImmutable( 'now', wp_timezone() );
+
+		$preset_starts = array(
+			'7'     => $now->modify( '-6 days' )->format( 'Y-m-d' ),
+			'30'    => $now->modify( '-29 days' )->format( 'Y-m-d' ),
+			'month' => $now->format( 'Y-m-01' ),
+			'year'  => $now->format( 'Y-01-01' ),
+		);
+
+		$end = $now->format( 'Y-m-d' );
+
+		foreach ( $preset_starts as $key => $start ) {
+			if ( $period['start'] === $preset_starts[ $key ] && $period['end'] === $end ) {
+				return (string) $key;
+			}
+		}
+
+		return 'custom';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -288,6 +323,14 @@ class RS_Admin_UI {
 			$author_earnings = round( (float) $filtered_report['beneficiaries'][0]['amount'], 2 );
 		}
 
+		// (#4) Συγχρονισμός preset με την πραγματική περίοδο.
+		$active_preset = self::matching_preset( $period );
+
+		// (#12) Label παραγγελιών όταν δουλεύουν view-level φίλτρα.
+		$orders_label = ( '' !== $filter_ben || '' !== $filter_search )
+			? __( 'Παραγγελίες (περιόδου)', 'revenue-splitter' )
+			: __( 'Παραγγελίες', 'revenue-splitter' );
+
 		?>
 		<div class="wrap rs-wrap">
 
@@ -297,11 +340,11 @@ class RS_Admin_UI {
 				<?php wp_nonce_field( 'rs_dashboard', 'rs_dashboard_nonce' ); ?>
 
 				<select name="rs_period_preset" id="rs-period-preset">
-					<option value="7"><?php esc_html_e( 'Τελευταίες 7 ημέρες', 'revenue-splitter' ); ?></option>
-					<option value="30"><?php esc_html_e( 'Τελευταίες 30 ημέρες', 'revenue-splitter' ); ?></option>
-					<option value="month"><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?></option>
-					<option value="year"><?php esc_html_e( 'Τρέχον έτος', 'revenue-splitter' ); ?></option>
-					<option value="custom"><?php esc_html_e( 'Προσαρμοσμένο', 'revenue-splitter' ); ?></option>
+					<option value="7" <?php selected( $active_preset, '7' ); ?>><?php esc_html_e( 'Τελευταίες 7 ημέρες', 'revenue-splitter' ); ?></option>
+					<option value="30" <?php selected( $active_preset, '30' ); ?>><?php esc_html_e( 'Τελευταίες 30 ημέρες', 'revenue-splitter' ); ?></option>
+					<option value="month" <?php selected( $active_preset, 'month' ); ?>><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?></option>
+					<option value="year" <?php selected( $active_preset, 'year' ); ?>><?php esc_html_e( 'Τρέχον έτος', 'revenue-splitter' ); ?></option>
+					<option value="custom" <?php selected( $active_preset, 'custom' ); ?>><?php esc_html_e( 'Προσαρμοσμένο', 'revenue-splitter' ); ?></option>
 				</select>
 
 				<input type="date" name="rs_date_start" value="<?php echo esc_attr( $period['start'] ); ?>" />
@@ -364,7 +407,7 @@ class RS_Admin_UI {
 			<!-- KPIs -->
 			<div class="rs-kpis">
 				<div class="rs-kpi">
-					<span class="rs-kpi-label"><?php esc_html_e( 'Παραγγελίες', 'revenue-splitter' ); ?></span>
+					<span class="rs-kpi-label"><?php echo esc_html( $orders_label ); ?></span>
 					<strong><?php echo esc_html( number_format_i18n( $filtered_report['order_count'] ) ); ?></strong>
 				</div>
 				<div class="rs-kpi">
@@ -558,7 +601,7 @@ class RS_Admin_UI {
 
 		$notices = array();
 
-		// ---------- POST ---------- 
+		// ---------- POST ----------
 		if ( isset( $_POST['rs_settings_nonce'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			&& wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_settings_nonce'] ) ), 'rs_settings' ) ) {
 
@@ -627,11 +670,11 @@ class RS_Admin_UI {
 
 		// ---------- Τρέχουσες τιμές ----------
 		$vat_default = RS_VAT::default_rate();
-		$defaults   = RS_Beneficiaries::get_defaults();
-		$ben_rows   = is_array( $defaults ) && ! empty( $defaults )
+		$defaults    = RS_Beneficiaries::get_defaults();
+		$ben_rows    = is_array( $defaults ) && ! empty( $defaults )
 			? $defaults
 			: array( array( 'name' => '', 'percent' => '' ) );
-		$lang       = RS_Lang::get_lang();
+		$lang        = RS_Lang::get_lang();
 		?>
 		<div class="wrap rs-wrap">
 
@@ -798,7 +841,7 @@ class RS_Admin_UI {
 	 *
 	 * Το φίλτρο προϊόντος γίνεται στην engine (RS_Reports::run) — εδώ
 	 * ΦΙΛΤΡΑΡΟΥΜΕ ΕΔΩ:
-	 *  - search: продукты με τίτλο που ταιριάζει (case-insensitive, mb-safe),
+	 *  - search: προϊόντα με τίτλο που ταιριάζει (case-insensitive, mb-safe),
 	 *  - beneficiary: μόνο τα splits του συγκεκριμένου δικαιούχου
 	 *    (τα προϊόντα που δεν τον περιλαμβάνουν κρύβονται).
 	 *
@@ -886,12 +929,6 @@ class RS_Admin_UI {
 		 */
 		$report['beneficiaries'] = $beneficiaries;
 
-		/*
-		 * order_count: μένει το engine value (δεν μπορούμε view-level να
-		 * υπολογίσουμε παραγγελίες ανά δικαιούχο/τίτλο με ασφάλεια).
-		 * Τα υπόλοιπα totals όμως είναι πλήρως συνεπή με τα φίλτρα.
-		 */
-
 		return $report;
 	}
 
@@ -927,6 +964,15 @@ class RS_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 	}
 
+	/*
+	 * AUDIT FIX (#7): PHP 8.4+ κάνει deprecated τα implicit defaults του
+	 * fputcsv(). Explicit args = ίδια συμπεριφορά, χωρίς warnings σε
+	 * νεότερα PHP.
+	 */
+	private static function put_csv_row( $out, array $fields ): void {
+		fputcsv( $out, $fields, ',', '"', '\\' );
+	}
+
 	/* ---------- CSV ---------- */
 
 	private static function stream_csv( array $report ): void {
@@ -939,9 +985,9 @@ class RS_Admin_UI {
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // UTF-8 BOM για Excel + ελληνικά.
 
-		fputcsv( $out, array( __( 'Περίοδος', 'revenue-splitter' ), $report['period']['start'], $report['period']['end'] ) );
-		fputcsv( $out, array() );
-		fputcsv(
+		self::put_csv_row( $out, array( __( 'Περίοδος', 'revenue-splitter' ), $report['period']['start'], $report['period']['end'] ) );
+		self::put_csv_row( $out, array() );
+		self::put_csv_row(
 			$out,
 			array(
 				__( 'ID', 'revenue-splitter' ),
@@ -956,7 +1002,7 @@ class RS_Admin_UI {
 		);
 
 		foreach ( $report['products'] as $p ) {
-			fputcsv(
+			self::put_csv_row(
 				$out,
 				array(
 					$p['product_id'],
@@ -971,8 +1017,8 @@ class RS_Admin_UI {
 			);
 		}
 
-		fputcsv( $out, array() );
-		fputcsv(
+		self::put_csv_row( $out, array() );
+		self::put_csv_row(
 			$out,
 			array(
 				'',
@@ -1150,4 +1196,3 @@ class RS_Admin_UI {
 		exit;
 	}
 }
-

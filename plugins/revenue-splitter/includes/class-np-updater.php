@@ -1,6 +1,13 @@
 <?php
 /**
- * NP_Updater — generic self-updater για ΟΛΑ τα plugins του «no press».
+ * NP_Updater — generic self-updater για ΟΛΑ τα plugins του «noxpress».
+ *
+ * ─────────────────────────────────────────────────────────────────────
+ * SHARED DROP-IN — DO NOT EDIT PER-PLUGIN.
+ * Αυτό το αρχείο αντιγράφεται byte-for-byte σε κάθε plugin του
+ * οικοσυστήματος noxpress. Οι αλλαγές γίνονται στου κεντρικό master
+ * και διαχέονται σε όλα τα plugins μαζί με το επόμενο release.
+ * ─────────────────────────────────────────────────────────────────────
  *
  * Drop-in: ΤΟ ΙΔΙΟ αρχείο μπαίνει σε κάθε plugin του οικοσυστήματος.
  * Ρύθμιση από το bootstrapper του κάθε plugin:
@@ -9,17 +16,20 @@
  *
  * Χαρακτηριστικά:
  *  - Registry πολλαπλών plugins (slug => config) → όλα τα plugins του
- *    συστήματος μοιράζονται ένα hookup, χωρίς transient/objekt conflicts.
+ *    συστήματος μοιράζονται ένα hookup, χωρίς transient/object conflicts.
  *  - class_exists() guard: αν το ίδιο drop-in φορτώσει από δεύτερο
  *    plugin (κλασικό drop-in collision), δεν fatal — το πρώτο ορίζει.
  *  - Ξεχωριστό cache ανά plugin ('np_upd_' . md5(slug)).
  *  - Μελλοντικά plugins: μηδενική αλλαγή σε αυτό το αρχείο — μόνο init().
  *
- * Remote JSON schema (το γραφει το release Action στο Pages branch):
+ * v1.0.0 AUDIT FIX (#2): sanitize_key() στο $args->slug του
+ * plugin_info() — trivial hardening του slug comparison.
+ *
+ * Remote JSON schema (το γράφει το release Action στο Pages branch):
  * {
  *   "version":      "1.1.2",
  *   "download_url": "https://github.com/<user>/<repo>/releases/download/<tag>/<slug>.zip",
- *   "details_url":  "https://github.com/<user>/<repo>/releases",
+ *   "details_url":  "https://noxpress.tech",
  *   "changelog":    "<p>Τι άλλαξε...</p>"
  * }
  */
@@ -219,6 +229,9 @@ final class NP_Updater {
 			return $result;
 		}
 
+		// AUDIT FIX (#2): slug πάντα sanitized πριν το comparison.
+		$args->slug = sanitize_key( (string) $args->slug );
+
 		foreach ( self::$plugins as $slug => $conf ) {
 
 			if ( dirname( $slug ) !== (string) $args->slug ) {
@@ -239,7 +252,7 @@ final class NP_Updater {
 				'sections'      => array(
 					'description' => sprintf(
 						/* translators: %s: plugin name */
-						__( 'Αυτόματες ενημερώσεις μέσω του no press updates hub.', 'revenue-splitter' ),
+						__( 'Αυτόματες ενημερώσεις μέσω του noxpress updates hub.', 'revenue-splitter' ),
 						$conf['name']
 					),
 					'changelog'   => $remote['changelog'],

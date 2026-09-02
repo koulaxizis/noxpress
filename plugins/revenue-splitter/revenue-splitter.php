@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Revenue Splitter
- * Plugin URI:        https://koulaxizis.gr
+ * Plugin URI:        https://noxpress.tech
  * Description:       Προβολή πωλήσεων/εσόδων WooCommerce, αυτόματη αφαίρεση ΦΠΑ ανά προϊόν και καταμερισμός ποσοστών σε δικαιούχους.
  * Version:           1.1.2
  * Requires at least: 6.0
@@ -20,10 +20,13 @@ define( 'RS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RS_URL', plugin_dir_url( __FILE__ ) );
 
 /*
- * Updates: το no press hub (GitHub Pages) σερβίρει το JSON του plugin.
- * Κενό ('') = τα updates απενεργοποιούνται.
+ * Updates: το no press hub (GitHub Pages, custom domain) σερβίρει το JSON
+ * του plugin. Κενό ('') = τα updates απενεργοποιούνται.
+ *
+ * #9 (συνέπεια): σταθερό custom-domain URL — ίδιο GH Pages, σταθερή
+ * διεύθυνση, κανένα πρόβλημα cache σε μελλοντικές αναβαθμίσεις.
  */
-define( 'RS_UPDATE_URL', 'https://koulaxizis.github.io/noxpress/updates/revenue-splitter.json' );
+define( 'RS_UPDATE_URL', 'https://noxpress.tech/updates/revenue-splitter.json' );
 
 add_action( 'plugins_loaded', 'rs_bootstrap' );
 
@@ -86,7 +89,7 @@ final class RS_Uninstaller {
 		delete_option( 'rs_beneficiaries' );
 
 		// Destructive uninstall: καθαρίζει και τα product meta
-		// (override δικαιούχων + ΦΠΑ ανά προϊόν) — clean DB απόσταση.
+		// (override δικαιούχων + ΦΠΑ ανά προϊόν) — clean DB departure.
 		delete_post_meta_by_key( '_rs_split' );
 		delete_post_meta_by_key( '_rs_vat_rate' );
 

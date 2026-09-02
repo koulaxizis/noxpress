@@ -2,7 +2,7 @@
 /**
  * Δίγλωσσο UI (Ελληνικά / English) — ανά χρήστη.
  *
- * Μηχανισμός: το WordPress « gettext » filter. Τα ελληνικά strings είναι
+ * Μηχανισμός: το WordPress «gettext» filter. Τα ελληνικά strings είναι
  * το msgid σε όλο το plugin (μοναδική πηγή αλήθειας). Όταν ο τρέχων χρήστης
  * έχει επιλέξει «en» στα ρυθμίσεις του plugin, το φίλτρο αντικαθιστά το
  * κείμενο με την αγγλική του εκδοχή. Χωρίς αλλαγές στα υπόλοιπα classes.
@@ -10,11 +10,12 @@
  * Επιλογή γλώσσας: user meta 'rs_lang' ('el' | 'en') — αποθηκεύεται
  * από τη σελίδα Ρυθμίσεων του plugin (RS_Admin_UI::render_settings).
  *
- * AUDIT FIX v1.1.2:
+ * v1.1.2:
  *  - set_lang() μηδενίζει το request-level cache ($current) ώστε η αλλαγή
  *    γλώσσας να ισχύει ΑΜΕΣΩΣ στο ίδιο request.
- *  - Λεξικό εμπλουτισμένο με ΟΛΑ τα strings του dashboard/widget/exports
- *    (Εξαγωγή, Αναζήτηση, Top δικαιούχοι, ΣΥΝΟΛΑ κ.λπ.).
+ *  - Αφαίρεση σκουπιδιού-κλειδιού 'SΥΝΟΛΑ' (mix鹅ατίνικο S) (#5).
+ *  - Νέο string για #12: «Παραγγελίες (περιόδου)» όταν είναι ενεργό
+ *    φίλτρο δικαιούχου/αναζήτησης.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -51,7 +52,7 @@ class RS_Lang {
 		return $lang;
 	}
 
-	/** Ορίσε τη γλώσσα χρήστη (μόνο 'el'/'en' γίνονται δεκτά). */
+	/** Θέτει τη γλώσσα χρήστη (μόνο 'el'/'en' γίνονται δεκτά). */
 	public static function set_lang( int $user_id, string $lang ): bool {
 		$lang = in_array( $lang, array( 'el', 'en' ), true ) ? $lang : 'el';
 
@@ -81,8 +82,7 @@ class RS_Lang {
 
 	/**
 	 * Λεξικό Ελληνικά → English. Πρέπει να καλύπτει ΟΛΑ τα εμφανιζόμενα
-	 * strings του domain 'revenue-splitter' (κρατάμε και τα untranslated
-	 * msgids με ενιαίο στυλ για μελλοντική συντήρηση).
+	 * strings του domain 'revenue-splitter'.
 	 */
 	private static $dict = array(
 
@@ -112,6 +112,7 @@ class RS_Lang {
 
 		// --- KPIs ---
 		'Παραγγελίες'                                            => 'Orders',
+		'Παραγγελίες (περιόδου)'                                 => 'Orders (period)',
 		'Μικτό (με ΦΠΑ)'                                         => 'Gross (incl. VAT)',
 		'ΦΠΑ'                                                    => 'VAT',
 		'Καθαρό (πριν καταμερισμό)'                              => 'Net (before split)',
@@ -129,7 +130,6 @@ class RS_Lang {
 		'Ποσό'                                                   => 'Amount',
 		'Προϊόν #%d'                                             => 'Product #%d',
 		'ID'                                                     => 'ID',
-		'SΥΝΟΛΑ'                                                 => 'TOTALS',
 		'ΣΥΝΟΛΑ'                                                 => 'TOTALS',
 		'ΦΠΑ %'                                                  => 'VAT %',
 
@@ -141,14 +141,14 @@ class RS_Lang {
 
 		// --- Ρυθμίσεις ---
 		'Default ΦΠΑ (%)'                                        => 'Default VAT (%)',
-		'Iσχύει για προϊόντα χωρίς δικό τους ΦΠΑ στο General tab.' => 'Applies to products without their own VAT in the General tab.',
+		'Ισχύει για προϊόντα χωρίς δικό τους ΦΠΑ στο General tab.' => 'Applies to products without their own VAT in the General tab.',
 		'Global Δικαιούχοι'                                      => 'Global Beneficiaries',
 		'Ο προεπιλεγμένος καταμερισμός για κάθε προϊόν χωρίς δικό του override.' => 'The default split for any product without its own override.',
 		'Μη έγκυρο global default ΦΠΑ (0–100).'                  => 'Invalid global default VAT (0–100).',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                            => 'Settings saved.',
 		'Αποθήκευση ρυθμίσεων'                                   => 'Save settings',
 		'Γλώσσα οθόνης'                                          => 'Display language',
-		'Iσχύει ανά χρήστη (μόνο για εσένα).'                    => 'Per user (only affects you).',
+		'Ισχύει ανά χρήστη (μόνο για εσένα).'                    => 'Per user (only affects you).',
 
 		// --- Metabox ---
 		'Χρησιμοποιεί τα global defaults (δικαιούχοι)'           => 'Uses global defaults (beneficiaries)',
@@ -162,7 +162,7 @@ class RS_Lang {
 		'Δεν έχουν ρυθμιστεί global defaults. Πήγαινε στο WP-admin → Revenue Splitter → Ρυθμίσεις.' => 'No global defaults configured. Go to WP-admin → Revenue Splitter → Settings.',
 		'Όνομα δικαιούχου'                                        => 'Beneficiary name',
 		'Προϊόν — πλήρης δικαιούχος'                             => 'Product — sole beneficiary',
-		'Mη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
+		'Μη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
 		'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.' => 'Beneficiary percentages add up to %s%% — they must sum to 100%%.',
 		'Το Revenue Splitter απαιτεί WooCommerce για να λειτουργήσει.' => 'Revenue Splitter requires WooCommerce to function.',
 	);
