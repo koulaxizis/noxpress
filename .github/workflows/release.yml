@@ -1,0 +1,85 @@
+name: Plugin Release
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: plugin-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  ASSETS_DIR: updates
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Parse tag → plugin
+        run: |
+          # Tag format: <plugin-slug>-v<semver>, π.χ. revenue-splitter-v1.1.0
+          if [[ "${GITHUB_REF_NAME}" =~ ^(.+)-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "PLUGIN=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+            echo "VERSION=${BASH_REMATCH[2]}" >> "$GITHUB_ENV"
+          else
+            echo "::error::Το tag πρέπει να είναι <plugin-slug>-vX.Y.Z (π.χ. revenue-splitter-v1.1.0)"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Έλεγχος συνέπειας (tag ↔ plugin header)
+        run: |
+          HEADER_VERSION=$(grep -oP "Version:\s+\K[0-9]+\.[0-9]+\.[0-9]+" \
+            "plugins/${PLUGIN}/${PLUGIN}.php" | head -1)
+
+          echo "Tag: ${VERSION} | Header: ${HEADER_VERSION}"
+
+          if [ "${VERSION}" != "${HEADER_VERSION}" ]; then
+            echo "::error::Tag ${VERSION} ≠ Version ${HEADER_VERSION} στο plugins/${PLUGIN}/${PLUGIN}.php"
+            exit 1
+          fi
+
+      - name: Build zip
+        run: |
+          mkdir -p dist/"${PLUGIN}"
+          rsync -a --exclude='.git*' --exclude='.github' \
+            "plugins/${PLUGIN}/" "dist/${PLUGIN}/"
+          cd dist && zip -rq "${PLUGIN}.zip" "${PLUGIN}" && cd ..
+          unzip -l "${PLUGIN}.zip" | head -10
+
+      - name: Upload asset στο Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${GITHUB_REF_NAME}" "${PLUGIN}.zip" --clobber
+
+      - name: Updates JSON
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" --json body -q .body > notes.md
+          [ -s notes.md ] || echo "See release notes." > notes.md
+
+          mkdir -p updates
+          jq -n \
+            --arg version "${VERSION}" \
+            --arg download_url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${PLUGIN}.zip" \
+            --arg details_url "https://github.com/${GITHUB_REPOSITORY}/releases" \
+            --rawfile changelog notes.md \
+            '{version: $version, download_url: $download_url, details_url: $details_url, changelog: $changelog}' \
+            > "updates/${PLUGIN}.json"
+
+          cat "updates/${PLUGIN}.json"
+
+      - name: Commit updates JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updates/
+          git diff --cached --quiet || git commit -m "chore: ${PLUGIN} updates.json → ${GITHUB_REF_NAME}"
+          git push origin HEAD:${GITHUB_REF_NAME} || git push origin HEAD:main

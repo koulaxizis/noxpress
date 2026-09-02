@@ -1,0 +1,220 @@
+/**
+ * Revenue Splitter — scoped dark admin theme (v1.1.0).
+ * Φορτώνεται ΜΟΝΟ στις σελίδες του plugin + product edit screen.
+ * Palette: Deep space purple / accent #6d4aff.
+ * v1.1.0: Ανυψωμένα contrast ratios (≥ 4.5:1) για αναγνωσιμότητα.
+ */
+
+.rs-wrap {
+	color: #e4e2f5;
+	max-width: 1200px;
+}
+
+.rs-wrap h1,
+.rs-wrap h2 {
+	color: #f2f0fe;
+	font-weight: 600;
+}
+
+/* ---------- Period form + filters ---------- */
+
+.rs-period-form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin: 16px 0 24px;
+}
+
+.rs-period-form input[type="date"],
+.rs-period-form select {
+	background: #16181d;
+	border-color: #34384a;
+	color: #f0eefc;
+	border-radius: 4px;
+	min-height: 30px;
+}
+
+/* ---------- KPIs ---------- */
+
+.rs-kpis {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 24px 0;
+}
+
+.rs-kpi {
+	flex: 1 1 200px;
+	background: #16181d;
+	border: 1px solid #2b2e36;
+	border-left: 3px solid #6d4aff;
+	border-radius: 6px;
+	padding: 16px 20px;
+}
+
+.rs-kpi-label {
+	display: block;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: #a9a4c7; /* was #8b87a3 — brighter */
+	margin-bottom: 6px;
+}
+
+.rs-kpi strong {
+	font-size: 22px;
+	color: #f2f0fe;
+}
+
+/* ---------- Tables ---------- */
+
+.rs-table {
+	background: #12141a;
+	border: 1px solid #2b2e36;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.rs-table thead th {
+	background: #1a1d25;
+	color: #c5c0ea; /* φωτεινότερο από #a49fd0 */
+	border-bottom: 1px solid #2b2e36;
+}
+
+.rs-table td,
+.rs-table th {
+	color: #e4e2f5;
+}
+
+.rs-table .num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.rs-table .rs-neg {
+	color: #eebc6e; /* φωτεινότερο amber */
+}
+
+.rs-table small,
+.rs-table small.rs-sub {
+	color: #b0abc9; /* ήταν πολύ αμυδρό */
+	font-size: 12px;
+}
+
+.rs-badge {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 8px;
+	border: 1px solid #8f78ff;
+	border-radius: 10px;
+	font-size: 11px;
+	color: #d4c9ff;
+	background: rgba(109, 74, 255, 0.18);
+}
+
+.rs-splits .rs-split-item {
+	display: inline-block;
+	margin: 2px 10px 2px 0;
+	padding: 3px 9px;
+	background: #1e2129;
+	border: 1px solid #33374a;
+	border-radius: 4px;
+	font-size: 12.5px;
+	color: #ddd9f5; /* φωτεινότερο split text */
+}
+
+/* ---------- Beneficiary editor (settings + metabox) ---------- */
+
+.rs-split-table {
+	max-width: 640px;
+	background: #16181d;
+	border-color: #2b2e36;
+}
+
+.rs-split-table th,
+.rs-split-table td {
+	padding: 8px 12px;
+	vertical-align: middle;
+}
+
+.rs-split-table input[type="text"],
+.rs-split-table input[type="number"] {
+	background: #0f1115;
+	border-color: #2b2e36;
+	color: #f0eefa;
+	border-radius: 3px;
+	width: 100%;
+}
+
+.rs-split-table input[type="number"] {
+	max-width: 110px;
+}
+
+.rs-col-name { width: 55%; }
+.rs-col-pct  { width: 30%; }
+
+.rs-remove-row {
+	color: #a49fd0;
+	cursor: pointer;
+}
+.rs-remove-row:hover {
+	color: #ff8080;
+}
+
+.rs-total-line {
+	margin-top: 10px;
+	font-size: 14px;
+}
+
+.rs-total.ok {
+	color: #7fdd9d;
+}
+
+.rs-total.bad {
+	color: #ff8585;
+}
+
+.rs-note.warning {
+	color: #f0d38a;
+	border-left: 3px solid #e6c069;
+	padding-left: 10px;
+}
+
+.rs-hidden {
+	display: none;
+}
+
+.rs-empty {
+	color: #9b97b8;
+	font-style: italic;
+}
+
+/* ---------- Footer credits ---------- */
+
+.rs-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #262a33;
+	font-size: 12.5px;
+	color: #8f8aae;
+}
+
+.rs-footer a {
+	color: #b3a4ff;
+	text-decoration: none;
+}
+
+.rs-footer a:hover {
+	text-decoration: underline;
+}
+
+/* ---------- Scope: metabox στη σελίδα προϊόντος ---------- */
+
+#rs_split_metabox .inside {
+	background: transparent;
+}
+
+.rs-vat-input {
+	margin-right: 8px;
+}

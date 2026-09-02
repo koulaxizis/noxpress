@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>noxpress — WordPress &amp; WooCommerce plugins by Christos Koulaxizis</title>
+<meta name="description" content="noxpress is a collection of free, open-source WordPress and WooCommerce plugins by Christos Koulaxizis: revenue splitting, per-product VAT handling, and more." />
+<link rel="canonical" href="https://koulaxizis.github.io/noxpress/" />
+<style>
+:root {
+	--bg: #0d0f14;
+	--surface: #14161d;
+	--border: #262a35;
+	--text: #e4e2f5;
+	--muted: #9b97b8;
+	--accent: #6d4aff;
+	--accent-bright: #b3a4ff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+	background: var(--bg);
+	color: var(--text);
+	font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 0 24px;
+}
+
+header { padding: 72px 0 48px; text-align: left; }
+.wordmark {
+	font-size: clamp(2rem, 5vw, 3rem);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: #f2f0fe;
+}
+.wordmark .dot { color: var(--accent); }
+.tagline {
+	color: var(--muted);
+	margin-top: 12px;
+	font-size: 1.05rem;
+	max-width: 40em;
+}
+
+section.plugins { padding-bottom: 40px; }
+.section-title {
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--muted);
+	margin-bottom: 20px;
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-left: 3px solid var(--accent);
+	border-radius: 8px;
+	padding: 28px;
+	margin-bottom: 28px;
+}
+.card h2 {
+	font-size: 1.35rem;
+	font-weight: 600;
+	color: #f2f0fe;
+	margin-bottom: 4px;
+}
+.card h2 a { color: inherit; text-decoration: none; }
+.card h2 a:hover { color: var(--accent-bright); }
+.card .meta {
+	font-size: 0.85rem;
+	color: var(--muted);
+	margin-bottom: 14px;
+}
+.card .meta .badge {
+	border: 1px solid var(--accent);
+	border-radius: 10px;
+	padding: 1px 9px;
+	font-size: 0.75rem;
+	color: #d4c9ff;
+	background: rgba(109, 74, 255, 0.18);
+	margin-left: 6px;
+	white-space: nowrap;
+}
+.card p { color: var(--text); max-width: 46em; }
+.card ul {
+	margin: 14px 0 0;
+	padding-left: 1.2em;
+	color: var(--muted);
+	font-size: 0.95rem;
+}
+.card ul li { margin: 3px 0; }
+
+.actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+	display: inline-block;
+	padding: 8px 16px;
+	border-radius: 6px;
+	text-decoration: none;
+	font-size: 0.9rem;
+	font-weight: 500;
+	border: 1px solid var(--border);
+	color: var(--text);
+}
+.btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+.btn.primary {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #fff;
+}
+.btn.primary:hover { background: #8263ff; color: #fff; }
+
+.screenshot {
+	margin-top: 22px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	overflow: hidden;
+	background: #0f1115;
+}
+.screenshot img { display: block; width: 100%; height: auto; }
+
+footer {
+	margin-top: 24px;
+	padding: 24px 0 48px;
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+footer a { color: var(--accent-bright); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media (prefers-color-scheme: light) {
+	/* Πεδίο μόνο dark — το σεβόμαστε σκόπιμα, δεν προσφέρουμε light mode. */
+}
+</style>
+</head>
+<body>
+
+<header>
+	<div class="wordmark">noxpress<span class="dot">.</span></div>
+	<p class="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first. Built by Christos Koulaxizis.</p>
+</header>
+
+<section class="plugins" id="plugins">
+	<div class="section-title">Plugins</div>
+
+	<article class="card" id="revenue-splitter">
+		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
+		<div class="meta">v1.1.0 · WooCommerce · GPL-2.0-or-later<span class="badge">stable</span></div>
+		<p>Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and track every beneficiary's net earnings across all products for any period.</p>
+		<ul>
+			<li>Per-product VAT override with global default (gross × rate ÷ (100 + rate))</li>
+			<li>Beneficiary percentage splits with live Σ = 100% validation</li>
+			<li>Filter reports by product or beneficiary, CSV export (UTF-8 BOM)</li>
+			<li>Bilingual UI (Ελληνικά / English), per-user</li>
+			<li>HPOS-compatible — no legacy order tables touched</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/revenue-splitter-v1.1.0/revenue-splitter.zip" rel="nofollow noopener">Download v1.1.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener">Releases</a>
+		</div>
+		<div class="screenshot">
+			<img src="screenshots/revenue-splitter.png" alt="Revenue Splitter dashboard showing gross, VAT and net earnings split per beneficiary" loading="lazy" />
+		</div>
+	</article>
+
+</section>
+
+<footer>
+	<p><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Licensed GPL-2.0-or-later · No cookies, no tracking, no analytics.</p>
+</footer>
+
+</body>
+</html>

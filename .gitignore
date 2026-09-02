@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+.idea/
+.vscode/
+
+# Build artifacts — φτιάχνονται από το Action, δεν commit-αρούν ποτέ
+dist/
+*.zip
