@@ -9,6 +9,12 @@
  *
  * Επιλογή γλώσσας: user meta 'rs_lang' ('el' | 'en') — αποθηκεύεται
  * από τη σελίδα Ρυθμίσεων του plugin (RS_Admin_UI::render_settings).
+ *
+ * AUDIT FIX v1.1.2:
+ *  - set_lang() μηδενίζει το request-level cache ($current) ώστε η αλλαγή
+ *    γλώσσας να ισχύει ΑΜΕΣΩΣ στο ίδιο request.
+ *  - Λεξικό εμπλουτισμένο με ΟΛΑ τα strings του dashboard/widget/exports
+ *    (Εξαγωγή, Αναζήτηση, Top δικαιούχοι, ΣΥΝΟΛΑ κ.λπ.).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -48,6 +54,10 @@ class RS_Lang {
 	/** Ορίσε τη γλώσσα χρήστη (μόνο 'el'/'en' γίνονται δεκτά). */
 	public static function set_lang( int $user_id, string $lang ): bool {
 		$lang = in_array( $lang, array( 'el', 'en' ), true ) ? $lang : 'el';
+
+		// Reset request-cache ώστε η αλλαγή να ισχύσει άμεσα (ίδιο request).
+		self::$current = null;
+
 		return (bool) update_user_meta( $user_id, self::USER_META, $lang );
 	}
 
@@ -77,9 +87,13 @@ class RS_Lang {
 	private static $dict = array(
 
 		// --- Menus / σελίδες ---
-		'Ρυθμίσεις'                                             => 'Settings',
+		'Revenue Splitter'                                       => 'Revenue Splitter',
+		'Revenue Splitter — Dashboard'                           => 'Revenue Splitter — Dashboard',
 		'Revenue Splitter — Ρυθμίσεις'                           => 'Revenue Splitter — Settings',
+		'Revenue Splitter — Γρήγορη ματιά'                       => 'Revenue Splitter — Quick glance',
 		'Revenue Splitter — Δικαιούχοι'                          => 'Revenue Splitter — Beneficiaries',
+		'Dashboard'                                              => 'Dashboard',
+		'Ρυθμίσεις'                                              => 'Settings',
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'       => 'You do not have permission to access this page.',
 
 		// --- Φόρμα περιόδου / φίλτρα ---
@@ -89,7 +103,8 @@ class RS_Lang {
 		'Τρέχον έτος'                                            => 'Current year',
 		'Προσαρμοσμένο'                                          => 'Custom',
 		'Εφαρμογή'                                               => 'Apply',
-		'Εξαγωγή CSV'                                            => 'Export CSV',
+		'Εξαγωγή'                                                => 'Export',
+		'Αναζήτηση σε τίτλους…'                                  => 'Search in titles…',
 		'Όλα τα προϊόντα'                                        => 'All products',
 		'Όλοι οι δικαιούχοι'                                     => 'All beneficiaries',
 		'Προϊόν'                                                 => 'Product',
@@ -113,17 +128,27 @@ class RS_Lang {
 		'Δεν υπάρχουν δεδομένα δικαιούχων στην περίοδο.'         => 'No beneficiary data in this period.',
 		'Ποσό'                                                   => 'Amount',
 		'Προϊόν #%d'                                             => 'Product #%d',
+		'ID'                                                     => 'ID',
+		'SΥΝΟΛΑ'                                                 => 'TOTALS',
+		'ΣΥΝΟΛΑ'                                                 => 'TOTALS',
+		'ΦΠΑ %'                                                  => 'VAT %',
+
+		// --- Exports / widget ---
+		'Top δικαιούχοι'                                         => 'Top beneficiaries',
+		'Άνοιγμα Dashboard'                                      => 'Open Dashboard',
+		'Καμία πώληση τον τρέχοντα μήνα.'                        => 'No sales in the current month.',
+		'global defaults'                                        => 'global defaults',
 
 		// --- Ρυθμίσεις ---
 		'Default ΦΠΑ (%)'                                        => 'Default VAT (%)',
-		'Ισχύει για προϊόντα χωρίς δικό τους ΦΠΑ στο General tab.' => 'Applies to products without their own VAT in the General tab.',
+		'Iσχύει για προϊόντα χωρίς δικό τους ΦΠΑ στο General tab.' => 'Applies to products without their own VAT in the General tab.',
 		'Global Δικαιούχοι'                                      => 'Global Beneficiaries',
 		'Ο προεπιλεγμένος καταμερισμός για κάθε προϊόν χωρίς δικό του override.' => 'The default split for any product without its own override.',
 		'Μη έγκυρο global default ΦΠΑ (0–100).'                  => 'Invalid global default VAT (0–100).',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                            => 'Settings saved.',
-		'Αποθήκευση ρυθμίσεων'                                  => 'Save settings',
+		'Αποθήκευση ρυθμίσεων'                                   => 'Save settings',
 		'Γλώσσα οθόνης'                                          => 'Display language',
-		'Ισχύει ανά χρήστη (μόνο για εσένα).'                    => 'Per user (only affects you).',
+		'Iσχύει ανά χρήστη (μόνο για εσένα).'                    => 'Per user (only affects you).',
 
 		// --- Metabox ---
 		'Χρησιμοποιεί τα global defaults (δικαιούχοι)'           => 'Uses global defaults (beneficiaries)',
@@ -137,7 +162,8 @@ class RS_Lang {
 		'Δεν έχουν ρυθμιστεί global defaults. Πήγαινε στο WP-admin → Revenue Splitter → Ρυθμίσεις.' => 'No global defaults configured. Go to WP-admin → Revenue Splitter → Settings.',
 		'Όνομα δικαιούχου'                                        => 'Beneficiary name',
 		'Προϊόν — πλήρης δικαιούχος'                             => 'Product — sole beneficiary',
-		'Μη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
+		'Mη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
 		'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.' => 'Beneficiary percentages add up to %s%% — they must sum to 100%%.',
+		'Το Revenue Splitter απαιτεί WooCommerce για να λειτουργήσει.' => 'Revenue Splitter requires WooCommerce to function.',
 	);
 }

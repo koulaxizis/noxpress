@@ -9,10 +9,15 @@
  *    με τον τύπο «από μέσα»: vat = gross × rate / (100 + rate).
  *  - Refunds: αφαιρούνται ανά line item μέσω '_refunded_item_id'.
  *
- * v1.1.2 FIX: Το φίλτρο προϊόντος γίνεται ΠΕΡ ΙΤΕΜ (PHP-level) και όχι μέσω
+ * v1.1.2 FIX: Το φίλτρο προϊόντος γίνεται ΠΕΡΙ ITEM (PHP-level) και όχι μέσω
  * του query arg 'product' του wc_get_orders(), το οποίο αγνοείται σιωπηλά
  * σε ορισμένα HPOS setups — γι' αυτό τα φίλτρα «δεν έφταναν» ποτέ στο
  * αποτέλεσμα. Per-item filtering = datastore-agnostic, πάντα σωστό.
+ *
+ * v1.1.2 AUDIT FIX (#7): Το order_count μετράει ΠΑΝΤΑ μόνο τις παραγγελίες
+ * που συνέβαλαν τουλάχιστον μία πωλημένη γραμμή στο αποτέλεσμα
+ * ($matched_orders) — όχι όλες τις παραγγελίες περιόδου (π.χ. παραγγελίες
+ * μόνο με shipping/fees δεν πρεπεί να μετρούν).
  *
  * Αποτελέσματα cached σε transient (5 λεπτά) με hash στα args.
  */
@@ -233,6 +238,12 @@ class RS_Reports {
 			);
 		}
 
+		/*
+		 * AUDIT FIX (#7): order_count από τις παραγγελίες που πραγματικά
+		 * συνέβαλαν πωλημένες γραμμές — πάντα $matched_orders, ανεξάρτητα
+		 * από το αν υπάρχει φίλτρο προϊόντος (οι «άδειες» παραγγελίες
+		 * μόνο με shipping/fees δεν μετράνε πουθενά).
+		 */
 		return array(
 			'period'        => array(
 				'start' => $args['date_start'],
@@ -246,7 +257,7 @@ class RS_Reports {
 			),
 			'beneficiaries' => $beneficiaries,
 			'warnings'      => $warnings,
-			'order_count'   => empty( $allowed_ids ) ? count( $orders ) : count( $matched_orders ),
+			'order_count'   => count( $matched_orders ),
 		);
 	}
 

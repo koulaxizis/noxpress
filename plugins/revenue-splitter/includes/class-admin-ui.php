@@ -9,6 +9,13 @@
  *  - Εξαγωγές: CSV / XLS (SpreadsheetML, native Excel) / HTML / JSON
  *    — όλες zero-dependency, όλες σέβονται τα ενεργά φίλτρα.
  *  - File-based cache busting (filemtime) για assets.
+ *
+ * v1.1.2 AUDIT FIX: Πλήρες αρχείο — συμπληρώθηκαν οι μέθοδοι που έλειπαν
+ * (current_period, valid_date, money, collect_beneficiary_names,
+ * filter_report_for_display, render_settings, footer, render_widget),
+ * διορθώθηκε το duplicate charset header στα exports (μία φορά, από την
+ * export_headers), quoted Content-Disposition filenames, filemtime guards,
+ * και τα strings των exports περνούν από __()/gettext για EN mode.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -87,9 +94,19 @@ class RS_Admin_UI {
 			return;
 		}
 
-		// File-based cache busting: κάθε αλλαγή αρχείου → νέο ?ver=.
-		$css_ver = (string) filemtime( RS_PATH . 'assets/admin.css' );
-		$js_ver  = (string) filemtime( RS_PATH . 'assets/admin.js' );
+		/*
+		 * File-based cache busting με defensive guard: αν για οποιονδήποτε
+		 * λόγο το αρχείο δεν υπάρχει (μισό deploy, plugin file removed),
+		 * πέφτουμε στο RS_VERSION αντί για PHP warning + bad ?ver=.
+		 */
+		$css_file = RS_PATH . 'assets/admin.css';
+		$js_file  = RS_PATH . 'assets/admin.js';
+
+		$css_mtime = @filemtime( $css_file );
+		$js_mtime  = @filemtime( $js_file );
+
+		$css_ver = $css_mtime ? (string) $css_mtime : RS_VERSION;
+		$js_ver  = $js_mtime ? (string) $js_mtime : RS_VERSION;
 
 		wp_enqueue_style( 'rs-admin', RS_URL . 'assets/admin.css', array(), $css_ver );
 		wp_enqueue_script( 'rs-admin', RS_URL . 'assets/admin.js', array(), $js_ver, true );
@@ -114,6 +131,44 @@ class RS_Admin_UI {
 			delete_transient( 'rs_split_ok_' . $uid );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $ok ) . '</p></div>';
 		}
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Period helpers
+	 * ------------------------------------------------------------------- */
+
+	/** Τελευταία αποθηκευμένη περίοδος χρήστη, αλλιώς default 30 ημέρες. */
+	private static function current_period(): array {
+
+		$saved = get_user_meta( get_current_user_id(), 'rs_last_period', true );
+
+		if ( is_array( $saved )
+			&& isset( $saved['start'], $saved['end'] )
+			&& self::valid_date( (string) $saved['start'] )
+			&& self::valid_date( (string) $saved['end'] )
+			&& $saved['start'] <= $saved['end'] ) {
+			return array(
+				'start' => (string) $saved['start'],
+				'end'   => (string) $saved['end'],
+			);
+		}
+
+		$now = new DateTimeImmutable( 'now', wp_timezone() );
+
+		return array(
+			'start' => $now->modify( '-29 days' )->format( 'Y-m-d' ),
+			'end'   => $now->format( 'Y-m-d' ),
+		);
+	}
+
+	/** Έλεγχος ότι το string είναι έγκυρη ημερομηνία 'Y-m-d'. */
+	private static function valid_date( string $date ): bool {
+
+		if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m ) ) {
+			return false;
+		}
+
+		return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -197,10 +252,10 @@ class RS_Admin_UI {
 		}
 
 		// ---------- Φίλτρα από user meta ----------
-		$filters      = get_user_meta( get_current_user_id(), 'rs_last_filters', true );
-		$filter_prod  = is_array( $filters ) ? max( 0, (int) ( $filters['product'] ?? 0 ) ) : 0;
-		$filter_ben   = is_array( $filters ) ? (string) ( $filters['beneficiary'] ?? '' ) : '';
-		$filter_search = is_array( $filters ) ? trim( (string) ( $filters['search'] ?? '' ) ) : '';
+		$filters        = get_user_meta( get_current_user_id(), 'rs_last_filters', true );
+		$filter_prod    = is_array( $filters ) ? max( 0, (int) ( $filters['product'] ?? 0 ) ) : 0;
+		$filter_ben     = is_array( $filters ) ? (string) ( $filters['beneficiary'] ?? '' ) : '';
+		$filter_search  = is_array( $filters ) ? trim( (string) ( $filters['search'] ?? '' ) ) : '';
 
 		// ---------- Report ----------
 		$args = array(
@@ -361,7 +416,6 @@ class RS_Admin_UI {
 							<td class="num"><strong><?php echo esc_html( self::money( $p['net'] ) ); ?></strong></td>
 							<td class="rs-splits">
 								<?php foreach ( $p['splits'] as $s ) : ?>
-									<?php if ( '' !== $filter_ben && $s['name'] !== $filter_ben ) { continue; } ?>
 									<span class="rs-split-item">
 										<?php
 										printf(
@@ -431,13 +485,14 @@ class RS_Admin_UI {
 
 	public static function render_widget(): void {
 
-		$now   = new DateTimeImmutable( 'now', wp_timezone() );
-		$month = array(
-			'date_start' => $now->format( 'Y-m-01' ),
-			'date_end'   => $now->format( 'Y-m-d' ),
-		);
+		$now = new DateTimeImmutable( 'now', wp_timezone() );
 
-		$report = RS_Reports::run( $month );
+		$report = RS_Reports::run(
+			array(
+				'date_start' => $now->format( 'Y-m-01' ),
+				'date_end'   => $now->format( 'Y-m-d' ),
+			)
+		);
 
 		$top_ben = $report['beneficiaries'];
 		if ( ! empty( $top_ben ) ) {
@@ -447,8 +502,409 @@ class RS_Admin_UI {
 					return (float) $b['amount'] <=> (float) $a['amount'];
 				}
 			);
-			
-				/* =====================================================================
+			$top_ben = array_slice( $top_ben, 0, 3 );
+		}
+
+		$dash_url = admin_url( 'admin.php?page=' . self::SLUG_DASH );
+		?>
+		<div class="rs-widget">
+			<?php if ( empty( $report['products'] ) ) : ?>
+				<p class="rs-empty"><?php esc_html_e( 'Καμία πώληση τον τρέχοντα μήνα.', 'revenue-splitter' ); ?></p>
+			<?php else : ?>
+				<ul class="rs-widget-kpis">
+					<li>
+						<span><?php esc_html_e( 'Παραγγελίες', 'revenue-splitter' ); ?></span>
+						<strong><?php echo esc_html( number_format_i18n( $report['order_count'] ) ); ?></strong>
+					</li>
+					<li>
+						<span><?php esc_html_e( 'Μικτό', 'revenue-splitter' ); ?></span>
+						<strong><?php echo esc_html( self::money( $report['totals']['gross'] ) ); ?></strong>
+					</li>
+					<li>
+						<span><?php esc_html_e( 'Καθαρό', 'revenue-splitter' ); ?></span>
+						<strong><?php echo esc_html( self::money( $report['totals']['net'] ) ); ?></strong>
+					</li>
+				</ul>
+
+				<?php if ( ! empty( $top_ben ) ) : ?>
+					<div class="rs-widget-section"><?php esc_html_e( 'Top δικαιούχοι', 'revenue-splitter' ); ?></div>
+					<ul class="rs-widget-ben">
+						<?php foreach ( $top_ben as $b ) : ?>
+							<li>
+								<span><?php echo esc_html( $b['name'] ); ?></span>
+								<strong><?php echo esc_html( self::money( $b['amount'] ) ); ?></strong>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+			<?php endif; ?>
+
+			<p class="rs-widget-section">
+				<a href="<?php echo esc_url( $dash_url ); ?>"><?php esc_html_e( 'Άνοιγμα Dashboard', 'revenue-splitter' ); ?></a>
+			</p>
+		</div>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Ρυθμίσεις
+	 * ------------------------------------------------------------------- */
+
+	public static function render_settings(): void {
+
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
+		}
+
+		$notices = array();
+
+		// ---------- POST ---------- 
+		if ( isset( $_POST['rs_settings_nonce'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			&& wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_settings_nonce'] ) ), 'rs_settings' ) ) {
+
+			// ---- Default ΦΠΑ ----
+			if ( isset( $_POST['rs_default_vat_rate'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$vat_raw = trim( (string) wp_unslash( $_POST['rs_default_vat_rate'] ) );
+				$vat_val = wc_format_decimal( $vat_raw );
+
+				if ( '' !== $vat_val && is_numeric( $vat_val ) && (float) $vat_val >= 0 && (float) $vat_val <= 100 ) {
+					update_option( RS_VAT::OPTION_KEY, (string) $vat_val );
+					do_action( 'rs_invalidate_cache' );
+				} elseif ( '' !== $vat_raw ) {
+					$notices[] = array(
+						'type' => 'error',
+						'text' => __( 'Μη έγκυρο global default ΦΠΑ (0–100).', 'revenue-splitter' ),
+					);
+				}
+			}
+
+			// ---- Γλώσσα (ανά χρήστη) ----
+			if ( isset( $_POST['rs_lang'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$lang = sanitize_key( (string) wp_unslash( $_POST['rs_lang'] ) );
+				RS_Lang::set_lang( get_current_user_id(), $lang );
+			}
+
+			// ---- Global δικαιούχοι ----
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input.
+			$rows = array();
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( isset( $_POST['rs_ben_name'], $_POST['rs_ben_pct'] )
+				&& is_array( $_POST['rs_ben_name'] ) && is_array( $_POST['rs_ben_pct'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$names = array_values( (array) wp_unslash( $_POST['rs_ben_name'] ) );
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$percs = array_values( (array) wp_unslash( $_POST['rs_ben_pct'] ) );
+
+				foreach ( $names as $i => $n ) {
+					$rows[] = array(
+						'name'    => $n,
+						'percent' => $percs[ $i ] ?? '',
+					);
+				}
+			}
+
+			$clean = RS_Beneficiaries::sanitize_list( $rows );
+
+			if ( null === $clean ) {
+				$notices[] = array(
+					'type' => 'error',
+					'text' => RS_Beneficiaries::error_message_for( $rows ),
+				);
+			} else {
+				RS_Beneficiaries::set_defaults( $clean );
+				do_action( 'rs_invalidate_cache' );
+			}
+
+			if ( empty( $notices ) ) {
+				$notices[] = array(
+					'type' => 'success',
+					'text' => __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'revenue-splitter' ),
+				);
+			}
+		}
+
+		// ---------- Τρέχουσες τιμές ----------
+		$vat_default = RS_VAT::default_rate();
+		$defaults   = RS_Beneficiaries::get_defaults();
+		$ben_rows   = is_array( $defaults ) && ! empty( $defaults )
+			? $defaults
+			: array( array( 'name' => '', 'percent' => '' ) );
+		$lang       = RS_Lang::get_lang();
+		?>
+		<div class="wrap rs-wrap">
+
+			<h1><?php esc_html_e( 'Revenue Splitter — Ρυθμίσεις', 'revenue-splitter' ); ?></h1>
+
+			<?php foreach ( $notices as $n ) : ?>
+				<div class="notice notice-<?php echo esc_attr( $n['type'] ); ?> is-dismissible inline">
+					<p><?php echo esc_html( $n['text'] ); ?></p>
+				</div>
+			<?php endforeach; ?>
+
+			<form method="post">
+				<?php wp_nonce_field( 'rs_settings', 'rs_settings_nonce' ); ?>
+
+				<h2><?php esc_html_e( 'Default ΦΠΑ (%)', 'revenue-splitter' ); ?></h2>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">
+							<label for="rs-default-vat-rate"><?php esc_html_e( 'Default ΦΠΑ (%)', 'revenue-splitter' ); ?></label>
+						</th>
+						<td>
+							<input type="number" step="0.01" min="0" max="100" id="rs-default-vat-rate"
+								name="rs_default_vat_rate" value="<?php echo esc_attr( $vat_default ); ?>" class="small-text" />
+							<p class="description">
+								<?php esc_html_e( 'Ισχύει για προϊόντα χωρίς δικό τους ΦΠΑ στο General tab.', 'revenue-splitter' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
+
+				<h2><?php esc_html_e( 'Global Δικαιούχοι', 'revenue-splitter' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'Ο προεπιλεγμένος καταμερισμός για κάθε προϊόν χωρίς δικό του override.', 'revenue-splitter' ); ?>
+				</p>
+
+				<div class="rs-rows">
+					<table class="widefat striped rs-split-table">
+						<thead>
+							<tr>
+								<th class="rs-col-name"><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th>
+								<th class="rs-col-pct"><?php esc_html_e( 'Ποσοστό (%)', 'revenue-splitter' ); ?></th>
+								<th class="rs-col-del"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ( $ben_rows as $row ) : ?>
+							<tr class="rs-row">
+								<td><input type="text" name="rs_ben_name[]" value="<?php echo esc_attr( $row['name'] ); ?>" class="rs-ben-name" /></td>
+								<td><input type="number" step="0.01" min="0" max="100" name="rs_ben_pct[]" value="<?php echo esc_attr( $row['percent'] ); ?>" class="rs-ben-pct" /></td>
+								<td><button type="button" class="button-link rs-remove-row" aria-label="<?php esc_attr_e( 'Αφαίρεση γραμμής', 'revenue-splitter' ); ?>">×</button></td>
+							</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+
+					<button type="button" class="button rs-add-row">
+						+ <?php esc_html_e( 'Προσθήκη δικαιούχου', 'revenue-splitter' ); ?>
+					</button>
+
+					<p class="rs-total-line">
+						<?php esc_html_e( 'Σύνολο:', 'revenue-splitter' ); ?>
+						<strong class="rs-total">100</strong>%
+					</p>
+				</div>
+
+				<h2><?php esc_html_e( 'Γλώσσα οθόνης', 'revenue-splitter' ); ?></h2>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">
+							<label for="rs-lang"><?php esc_html_e( 'Γλώσσα οθόνης', 'revenue-splitter' ); ?></label>
+						</th>
+						<td>
+							<select name="rs_lang" id="rs-lang">
+								<option value="el" <?php selected( $lang, 'el' ); ?>>Ελληνικά</option>
+								<option value="en" <?php selected( $lang, 'en' ); ?>>English</option>
+							</select>
+							<p class="description">
+								<?php esc_html_e( 'Ισχύει ανά χρήστη (μόνο για εσένα).', 'revenue-splitter' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
+
+				<?php submit_button( __( 'Αποθήκευση ρυθμίσεων', 'revenue-splitter' ) ); ?>
+			</form>
+
+			<?php self::footer(); ?>
+		</div>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Helpers κοινού χρήστη
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Μορφοποίηση ποσού: αριθμός + σύμβολο νομίσματος του Woo
+	 * (plain text, HTML-entity-decoded — ασφαλές για esc_html/esc_attr).
+	 */
+	public static function money( $amount ): string {
+
+		$amount = (float) $amount;
+
+		$sym = function_exists( 'get_woocommerce_currency_symbol' )
+			? get_woocommerce_currency_symbol()
+			: '';
+
+		$sym = html_entity_decode( (string) $sym, ENT_QUOTES, 'UTF-8' );
+
+		return number_format_i18n( $amount, 2 ) . ( '' !== $sym ? ' ' . $sym : '' );
+	}
+
+	/**
+	 * Όλα τα ονόματα δικαιούχων που υπάρχουν στο σύστημα:
+	 * global defaults + όλα τα per-product overrides (αποθηκευμένα).
+	 */
+	private static function collect_beneficiary_names(): array {
+
+		$names = array();
+
+		// 1) Global defaults.
+		$defaults = RS_Beneficiaries::get_defaults();
+		if ( is_array( $defaults ) ) {
+			foreach ( $defaults as $d ) {
+				if ( is_array( $d ) && ! empty( $d['name'] ) ) {
+					$names[ (string) $d['name'] ] = true;
+				}
+			}
+		}
+
+		// 2) Per-product overrides (raw meta — δεν κάνουμε fallback ώστε
+		//    να μη διπλο-μετράμε τα global defaults).
+		$product_ids = get_posts(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => RS_Beneficiaries::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'orderby'        => 'none',
+				'no_found_rows'  => true,
+			)
+		);
+
+		foreach ( $product_ids as $pid ) {
+			$decoded = json_decode( RS_Beneficiaries::raw( (int) $pid ), true );
+			if ( is_array( $decoded ) ) {
+				foreach ( $decoded as $row ) {
+					if ( is_array( $row ) && ! empty( $row['name'] ) ) {
+						$names[ sanitize_text_field( (string) $row['name'] ) ] = true;
+					}
+				}
+			}
+		}
+
+		$flat = array_keys( $names );
+		sort( $flat );
+
+		return $flat;
+	}
+
+	/**
+	 * View-level μείωση του report για τα φίλτρα δικαιούχου + αναζήτησης.
+	 *
+	 * Το φίλτρο προϊόντος γίνεται στην engine (RS_Reports::run) — εδώ
+	 * ΦΙΛΤΡΑΡΟΥΜΕ ΕΔΩ:
+	 *  - search: продукты με τίτλο που ταιριάζει (case-insensitive, mb-safe),
+	 *  - beneficiary: μόνο τα splits του συγκεκριμένου δικαιούχου
+	 *    (τα προϊόντα που δεν τον περιλαμβάνουν κρύβονται).
+	 *
+	 * Ξαναϋπολογίζει totals + beneficiaries ώστε KPIs/πίνακες/exports
+	 * να είναι ΣΥΝΕΠΗ με τα ορατά δεδομένα.
+	 */
+	private static function filter_report_for_display( array $report, string $ben, string $search ): array {
+
+		$ben    = trim( $ben );
+		$search = trim( $search );
+
+		if ( '' === $ben && '' === $search ) {
+			return $report;
+		}
+
+		$haystack = function_exists( 'mb_stripos' ) ? 'mb_stripos' : 'stripos';
+
+		$products   = array();
+		$t_gross    = 0.0;
+		$t_vat      = 0.0;
+		$t_net      = 0.0;
+		$ben_amount = array();
+
+		foreach ( $report['products'] as $p ) {
+
+			// ---- Search filter (τίτλος) ----
+			if ( '' !== $search ) {
+				$hit = call_user_func( $haystack, (string) $p['title'], $search );
+				if ( false === $hit ) {
+					continue;
+				}
+			}
+
+			// ---- Beneficiary filter (splits) ----
+			$splits = $p['splits'];
+			if ( '' !== $ben ) {
+				$splits = array_values(
+					array_filter(
+						$splits,
+						static function ( $s ) use ( $ben ) {
+							return (string) $s['name'] === $ben;
+						}
+					)
+				);
+				if ( empty( $splits ) ) {
+					continue; // Το προϊόν δεν αφορά τον φιλτραρισμένο δικαιούχο.
+				}
+			}
+
+			$p['splits'] = $splits;
+
+			$products[] = $p;
+
+			$t_gross += (float) $p['gross'];
+			$t_vat   += (float) $p['vat'];
+			$t_net   += (float) $p['net'];
+
+			foreach ( $splits as $s ) {
+				$nm = (string) $s['name'];
+				if ( ! isset( $ben_amount[ $nm ] ) ) {
+					$ben_amount[ $nm ] = 0.0;
+				}
+				$ben_amount[ $nm ] += (float) $s['amount'];
+			}
+		}
+
+		$beneficiaries = array();
+		foreach ( $ben_amount as $name => $amount ) {
+			$beneficiaries[] = array(
+				'name'   => $name,
+				'amount' => round( $amount, 2 ),
+			);
+		}
+
+		$report['products'] = $products;
+		$report['totals']   = array(
+			'gross' => round( $t_gross, 2 ),
+			'vat'   => round( $t_vat, 2 ),
+			'net'   => round( $t_net, 2 ),
+		);
+
+		/*
+		 * Με ενεργό φίλτρο δικαιούχου ο πίνακας beneficiaries πρέπει να
+		 * περιέχει ακριβώς μία εγγραφή (το dashboard διαβάζει [0]).
+		 */
+		$report['beneficiaries'] = $beneficiaries;
+
+		/*
+		 * order_count: μένει το engine value (δεν μπορούμε view-level να
+		 * υπολογίσουμε παραγγελίες ανά δικαιούχο/τίτλο με ασφάλεια).
+		 * Τα υπόλοιπα totals όμως είναι πλήρως συνεπή με τα φίλτρα.
+		 */
+
+		return $report;
+	}
+
+	/** Footer με credits σε όλες τις σελίδες του plugin. */
+	private static function footer(): void {
+		?>
+		<p class="rs-footer">
+			Revenue Splitter v<?php echo esc_html( RS_VERSION ); ?> — Made with ♥ by Christos Koulaxizis
+		</p>
+		<?php
+	}
+
+	/* =====================================================================
 	 * EXPORT
 	 * ===================================================================== */
 
@@ -466,8 +922,9 @@ class RS_Admin_UI {
 
 	private static function export_headers( string $filename, string $mime ): void {
 		nocache_headers();
+		// Ένα (1) charset declaration συνολικά — εδώ, όχι σε κάθε caller.
 		header( 'Content-Type: ' . $mime . '; charset=UTF-8' );
-		header( 'Content-Disposition: attachment; filename=' . $filename );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 	}
 
 	/* ---------- CSV ---------- */
@@ -476,7 +933,7 @@ class RS_Admin_UI {
 
 		self::export_headers(
 			'revenue-splitter-' . $report['period']['start'] . '_' . $report['period']['end'] . '.csv',
-			'text/csv; charset=utf-8'
+			'text/csv'
 		);
 
 		$out = fopen( 'php://output', 'w' );
@@ -484,32 +941,50 @@ class RS_Admin_UI {
 
 		fputcsv( $out, array( __( 'Περίοδος', 'revenue-splitter' ), $report['period']['start'], $report['period']['end'] ) );
 		fputcsv( $out, array() );
-		fputcsv( $out, array( 'ID', 'Προϊόν', 'Τεμ.', 'Μικτό', 'ΦΠΑ %', 'ΦΠΑ', 'Καθαρό', 'Καταμερισμός' ) );
+		fputcsv(
+			$out,
+			array(
+				__( 'ID', 'revenue-splitter' ),
+				__( 'Προϊόν', 'revenue-splitter' ),
+				__( 'Τεμ.', 'revenue-splitter' ),
+				__( 'Μικτό', 'revenue-splitter' ),
+				__( 'ΦΠΑ %', 'revenue-splitter' ),
+				__( 'ΦΠΑ', 'revenue-splitter' ),
+				__( 'Καθαρό', 'revenue-splitter' ),
+				__( 'Καταμερισμός', 'revenue-splitter' ),
+			)
+		);
 
 		foreach ( $report['products'] as $p ) {
-			fputcsv( $out, array(
-				$p['product_id'],
-				$p['title'],
-				$p['qty'],
-				self::num( $p['gross'] ),
-				self::num( $p['vat_rate'] ),
-				self::num( $p['vat'] ),
-				self::num( $p['net'] ),
-				self::splits_flat( $p['splits'] ),
-			) );
+			fputcsv(
+				$out,
+				array(
+					$p['product_id'],
+					$p['title'],
+					$p['qty'],
+					self::num( $p['gross'] ),
+					self::num( $p['vat_rate'] ),
+					self::num( $p['vat'] ),
+					self::num( $p['net'] ),
+					self::splits_flat( $p['splits'] ),
+				)
+			);
 		}
 
 		fputcsv( $out, array() );
-		fputcsv( $out, array(
-			'',
-			'ΣΥΝΟΛΑ',
-			'',
-			self::num( $report['totals']['gross'] ),
-			'',
-			self::num( $report['totals']['vat'] ),
-			self::num( $report['totals']['net'] ),
-			'',
-		) );
+		fputcsv(
+			$out,
+			array(
+				'',
+				__( 'ΣΥΝΟΛΑ', 'revenue-splitter' ),
+				'',
+				self::num( $report['totals']['gross'] ),
+				'',
+				self::num( $report['totals']['vat'] ),
+				self::num( $report['totals']['net'] ),
+				'',
+			)
+		);
 
 		fclose( $out );
 		exit;
@@ -524,7 +999,7 @@ class RS_Admin_UI {
 
 		$filename = 'revenue-splitter-' . $report['period']['start'] . '_' . $report['period']['end'] . '.xls';
 
-		self::export_headers( $filename, 'application/vnd.ms-excel; charset=UTF-8' );
+		self::export_headers( $filename, 'application/vnd.ms-excel' );
 
 		echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 		?>
@@ -542,41 +1017,41 @@ class RS_Admin_UI {
  <Worksheet ss:Name="Revenue Splitter">
   <Table>
    <Row>
-    <Cell><Data ss:Type="String">Περίοδος</Data></Cell>
+    <Cell><Data ss:Type="String"><?php echo esc_html( __( 'Περίοδος', 'revenue-splitter' ) ); ?></Data></Cell>
     <Cell><Data ss:Type="String"><?php echo esc_html( $report['period']['start'] ); ?> — <?php echo esc_html( $report['period']['end'] ); ?></Data></Cell>
    </Row>
    <Row></Row>
    <Row>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">ID</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">Προϊόν</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">Τεμ.</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">Μικτό</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">ΦΠΑ %</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">ΦΠΑ</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">Καθαρό</Data></Cell>
-    <Cell ss:StyleID="hdr"><Data ss:Type="String">Καταμερισμός</Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'ID', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'Προϊόν', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'Τεμ.', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'Μικτό', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'ΦΠΑ %', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'ΦΠΑ', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'Καθαρό', 'revenue-splitter' ) ); ?></Data></Cell>
+    <Cell ss:StyleID="hdr"><Data ss:Type="String"><?php echo esc_html( __( 'Καταμερισμός', 'revenue-splitter' ) ); ?></Data></Cell>
    </Row>
 <?php foreach ( $report['products'] as $p ) : ?>
    <Row>
     <Cell><Data ss:Type="Number"><?php echo (int) $p['product_id']; ?></Data></Cell>
     <Cell><Data ss:Type="String"><?php echo esc_html( $p['title'] ); ?></Data></Cell>
     <Cell><Data ss:Type="Number"><?php echo (int) $p['qty']; ?></Data></Cell>
-    <Cell><Data ss:Type="Number"><?php echo esc_html( $p['gross'] ); ?></Data></Cell>
-    <Cell><Data ss:Type="Number"><?php echo esc_html( $p['vat_rate'] ); ?></Data></Cell>
-    <Cell><Data ss:Type="Number"><?php echo esc_html( $p['vat'] ); ?></Data></Cell>
-    <Cell><Data ss:Type="Number"><?php echo esc_html( $p['net'] ); ?></Data></Cell>
+    <Cell><Data ss:Type="Number"><?php echo esc_html( (string) (float) $p['gross'] ); ?></Data></Cell>
+    <Cell><Data ss:Type="Number"><?php echo esc_html( (string) (float) $p['vat_rate'] ); ?></Data></Cell>
+    <Cell><Data ss:Type="Number"><?php echo esc_html( (string) (float) $p['vat'] ); ?></Data></Cell>
+    <Cell><Data ss:Type="Number"><?php echo esc_html( (string) (float) $p['net'] ); ?></Data></Cell>
     <Cell><Data ss:Type="String"><?php echo esc_html( self::splits_flat( $p['splits'] ) ); ?></Data></Cell>
    </Row>
 <?php endforeach; ?>
    <Row></Row>
    <Row>
     <Cell></Cell>
-    <Cell ss:StyleID="tot"><Data ss:Type="String">ΣΥΝΟΛΑ</Data></Cell>
+    <Cell ss:StyleID="tot"><Data ss:Type="String"><?php echo esc_html( __( 'ΣΥΝΟΛΑ', 'revenue-splitter' ) ); ?></Data></Cell>
     <Cell></Cell>
-    <Cell ss:StyleID="tot"><Data ss:Type="Number"><?php echo esc_html( $report['totals']['gross'] ); ?></Data></Cell>
+    <Cell ss:StyleID="tot"><Data ss:Type="Number"><?php echo esc_html( (string) (float) $report['totals']['gross'] ); ?></Data></Cell>
     <Cell></Cell>
-    <Cell ss:StyleID="tot"><Data ss:Type="Number"><?php echo esc_html( $report['totals']['vat'] ); ?></Data></Cell>
-    <Cell ss:StyleID="tot"><Data ss:Type="Number"><?php echo esc_html( $report['totals']['net'] ); ?></Data></Cell>
+    <Cell ss:StyleID="tot"><Data ss:Type="Number"><?php echo esc_html( (string) (float) $report['totals']['vat'] ); ?></Data></Cell>
+    <Cell ss:StyleID="tot"><Data ss:Type="Number"><?php echo esc_html( (string) (float) $report['totals']['net'] ); ?></Data></Cell>
     <Cell></Cell>
    </Row>
   </Table>
@@ -594,7 +1069,7 @@ class RS_Admin_UI {
 
 		$filename = 'revenue-splitter-' . $report['period']['start'] . '_' . $report['period']['end'] . '.html';
 
-		self::export_headers( $filename, 'text/html; charset=utf-8' );
+		self::export_headers( $filename, 'text/html' );
 		?>
 <!DOCTYPE html>
 <html lang="el">
@@ -615,13 +1090,13 @@ class RS_Admin_UI {
 </head>
 <body>
 <h1>Revenue Splitter</h1>
-<p class="period">Περίοδος: <?php echo esc_html( $report['period']['start'] ); ?> → <?php echo esc_html( $report['period']['end'] ); ?></p>
+<p class="period"><?php esc_html_e( 'Περίοδος', 'revenue-splitter' ); ?>: <?php echo esc_html( $report['period']['start'] ); ?> → <?php echo esc_html( $report['period']['end'] ); ?></p>
 
-<h2>Ανά προϊόν</h2>
+<h2><?php esc_html_e( 'Ανά προϊόν', 'revenue-splitter' ); ?></h2>
 <table>
 	<thead>
 		<tr>
-			<th>Προϊόν</th><th>Τεμ.</th><th>Μικτό</th><th>ΦΠΑ</th><th>Καθαρό</th><th>Καταμερισμός</th>
+			<th><?php esc_html_e( 'Προϊόν', 'revenue-splitter' ); ?></th><th><?php esc_html_e( 'Τεμ.', 'revenue-splitter' ); ?></th><th><?php esc_html_e( 'Μικτό', 'revenue-splitter' ); ?></th><th><?php esc_html_e( 'ΦΠΑ', 'revenue-splitter' ); ?></th><th><?php esc_html_e( 'Καθαρό', 'revenue-splitter' ); ?></th><th><?php esc_html_e( 'Καταμερισμός', 'revenue-splitter' ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -638,9 +1113,9 @@ class RS_Admin_UI {
 	</tbody>
 </table>
 
-<h2>Σύνολα ανά δικαιούχο</h2>
+<h2><?php esc_html_e( 'Σύνολα ανά δικαιούχο', 'revenue-splitter' ); ?></h2>
 <table>
-	<thead><tr><th>Δικαιούχος</th><th>Ποσό</th></tr></thead>
+	<thead><tr><th><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th><th><?php esc_html_e( 'Ποσό', 'revenue-splitter' ); ?></th></tr></thead>
 	<tbody>
 <?php foreach ( $report['beneficiaries'] as $b ) : ?>
 		<tr>
@@ -666,7 +1141,7 @@ class RS_Admin_UI {
 
 		$filename = 'revenue-splitter-' . $report['period']['start'] . '_' . $report['period']['end'] . '.json';
 
-		self::export_headers( $filename, 'application/json; charset=utf-8' );
+		self::export_headers( $filename, 'application/json' );
 
 		echo wp_json_encode(
 			$report,
@@ -675,3 +1150,4 @@ class RS_Admin_UI {
 		exit;
 	}
 }
+

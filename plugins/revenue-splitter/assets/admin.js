@@ -40,9 +40,10 @@
 
 		el.textContent = String(total);
 
+		// Matches το .rs-total.ok / .rs-total.bad στο admin.css
 		var ok = Math.abs(total - 100) <= 0.05;
 		el.classList.toggle('ok', ok);
-		el.classList.toggle('bad', !ok); // ΄matches το .rs-total.bad στο CSS
+		el.classList.toggle('bad', !ok);
 
 		return { ok: ok, total: total };
 	}

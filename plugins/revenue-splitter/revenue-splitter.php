@@ -3,7 +3,7 @@
  * Plugin Name:       Revenue Splitter
  * Plugin URI:        https://koulaxizis.gr
  * Description:       Προβολή πωλήσεων/εσόδων WooCommerce, αυτόματη αφαίρεση ΦΠΑ ανά προϊόν και καταμερισμός ποσοστών σε δικαιούχους.
- * Version:           1.1.1
+ * Version:           1.1.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Christos Koulaxizis
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RS_VERSION', '1.1.1' );
+define( 'RS_VERSION', '1.1.2' );
 define( 'RS_FILE', __FILE__ );
 define( 'RS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RS_URL', plugin_dir_url( __FILE__ ) );
