@@ -1,38 +1,74 @@
 /**
- * Revenue Splitter — scoped dark admin theme (v1.1.0).
- * Φορτώνεται ΜΟΝΟ στις σελίδες του plugin + product edit screen.
- * Palette: Deep space purple / accent #6d4aff.
- * v1.1.0: Ανυψωμένα contrast ratios (≥ 4.5:1) για αναγνωσιμότητα.
+ * Revenue Splitter — scoped dark admin theme (v1.1.2).
+ * v1.1.2: Hardened! Το WP admin core + plugins (WP Rocket, Imagify…)
+ * παράγουν light-theme rules με υψηλότερη ειδικότητα πάνω στους πίνακες.
+ * Κρίσιμα table rules με !important ώστε το dark panel να ΜΕΝΕΙ αδιαπέρατο.
  */
 
+/* ---------- Το dark panel ---------- */
+
 .rs-wrap {
-	color: #e4e2f5;
-	max-width: 1200px;
+	color-scheme: dark;
+	background: #101218;
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: #eae8fa;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 .rs-wrap h1,
 .rs-wrap h2 {
-	color: #f2f0fe;
-	font-weight: 600;
+	color: #f6f4ff;
 }
 
-/* ---------- Period form + filters ---------- */
+.rs-wrap a { color: #beb1ff; }
+.rs-wrap a:hover { color: #d4c9ff; }
+
+/* ---------- Period form ---------- */
 
 .rs-period-form {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 	align-items: center;
-	margin: 16px 0 24px;
+	margin: 18px 0 26px;
 }
 
 .rs-period-form input[type="date"],
 .rs-period-form select {
-	background: #16181d;
-	border-color: #34384a;
-	color: #f0eefc;
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
 	border-radius: 4px;
-	min-height: 30px;
+	min-height: 32px;
+	padding: 2px 8px;
+	box-shadow: none;
+}
+
+.rs-period-form select option {
+	background: #1e212b;
+	color: #f0eefc;
+}
+
+.rs-period-form .button {
+	background: #1e2130 !important;
+	border: 1px solid #4a4f66 !important;
+	color: #eeeafc !important;
+	text-shadow: none;
+}
+.rs-period-form .button:hover {
+	border-color: #6d4aff !important;
+	color: #ffffff !important;
+}
+.rs-period-form .button-primary {
+	background: #6d4aff !important;
+	border-color: #6d4aff !important;
+	color: #ffffff !important;
+}
+.rs-period-form .button-primary:hover {
+	background: #8263ff !important;
 }
 
 /* ---------- KPIs ---------- */
@@ -46,8 +82,8 @@
 
 .rs-kpi {
 	flex: 1 1 200px;
-	background: #16181d;
-	border: 1px solid #2b2e36;
+	background: #17191f !important;
+	border: 1px solid #2e3240;
 	border-left: 3px solid #6d4aff;
 	border-radius: 6px;
 	padding: 16px 20px;
@@ -56,35 +92,63 @@
 .rs-kpi-label {
 	display: block;
 	font-size: 12px;
+	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	color: #a9a4c7; /* was #8b87a3 — brighter */
+	color: #b7b2d6 !important;
 	margin-bottom: 6px;
 }
 
 .rs-kpi strong {
 	font-size: 22px;
-	color: #f2f0fe;
+	font-variant-numeric: tabular-nums;
+	color: #f6f4ff !important;
 }
 
-/* ---------- Tables ---------- */
+/* ---------- Πίνακες — HARDENED (το βασικό σημείο του fix) ---------- */
 
-.rs-table {
-	background: #12141a;
-	border: 1px solid #2b2e36;
+.rs-table,
+.rs-table.wrap,
+table.widefat.rs-table {
+	background: #14161d !important;
+	border: 1px solid #2e3240;
 	border-radius: 6px;
-	overflow: hidden;
+	color: #eae8fa !important;
 }
 
-.rs-table thead th {
-	background: #1a1d25;
-	color: #c5c0ea; /* φωτεινότερο από #a49fd0 */
-	border-bottom: 1px solid #2b2e36;
+/* HEADERS — κλειδωμένα */
+.rs-table thead th,
+.rs-table thead td {
+	background: #1d2029 !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+/* BODY — κλείδωμα και των δύο stripe variations */
+.rs-table tbody td,
+.rs-table tbody th {
+	background: #14161d !important;
+	color: #eae8fa !important;
+	border-bottom: 1px solid #23262f;
+	box-shadow: none;
+}
+
+.rs-table tbody tr:nth-child(2n) td,
+.rs-table tbody tr:nth-child(2n) th {
+	background: #181b23 !important;
+}
+
+.rs-table tbody tr:hover td,
+.rs-table tbody tr:hover th {
+	background: #1e212c !important;
 }
 
 .rs-table td,
 .rs-table th {
-	color: #e4e2f5;
+	padding: 12px 14px;
+	color: #eae8fa !important;
 }
 
 .rs-table .num {
@@ -92,59 +156,81 @@
 	font-variant-numeric: tabular-nums;
 }
 
+.rs-table td strong,
+.rs-table td strong * {
+	color: #ffffff !important;
+}
+
+.rs-table td small {
+	color: #c9c4e2 !important;
+	font-size: 12.5px;
+}
+
 .rs-table .rs-neg {
-	color: #eebc6e; /* φωτεινότερο amber */
+	color: #f5c97e !important;
+	font-weight: 600;
 }
 
-.rs-table small,
-.rs-table small.rs-sub {
-	color: #b0abc9; /* ήταν πολύ αμυδρό */
-	font-size: 12px;
+/* Sticky header (v1.1.1) */
+.rs-table thead th {
+	position: sticky;
+	top: 46px;
+	z-index: 5;
 }
 
+/* Badge */
 .rs-badge {
 	display: inline-block;
 	margin-left: 6px;
-	padding: 1px 8px;
+	padding: 2px 10px;
 	border: 1px solid #8f78ff;
 	border-radius: 10px;
-	font-size: 11px;
-	color: #d4c9ff;
-	background: rgba(109, 74, 255, 0.18);
+	font-size: 12px;
+	color: #e6e0ff !important;
+	background: rgba(109, 74, 255, 0.28) !important;
+	white-space: nowrap;
 }
 
+/* Splits */
 .rs-splits .rs-split-item {
 	display: inline-block;
 	margin: 2px 10px 2px 0;
-	padding: 3px 9px;
-	background: #1e2129;
-	border: 1px solid #33374a;
+	padding: 4px 10px;
+	background: #1d2029 !important;
+	border: 1px solid #3a3f52;
 	border-radius: 4px;
-	font-size: 12.5px;
-	color: #ddd9f5; /* φωτεινότερο split text */
+	font-size: 13px;
+	color: #ece9fd !important;
 }
 
-/* ---------- Beneficiary editor (settings + metabox) ---------- */
+/* ---------- Beneficiary editor ---------- */
 
 .rs-split-table {
 	max-width: 640px;
-	background: #16181d;
-	border-color: #2b2e36;
+	background: #14161d !important;
+	border-color: #2e3240;
 }
 
-.rs-split-table th,
+.rs-split-table th {
+	background: #1d202a !important;
+	color: #dcd7f0 !important;
+	border-color: #2e3240 !important;
+}
+
 .rs-split-table td {
-	padding: 8px 12px;
-	vertical-align: middle;
+	background: #14161d !important;
+	color: #eae8fa !important;
+	border-color: #23262f;
 }
 
 .rs-split-table input[type="text"],
 .rs-split-table input[type="number"] {
-	background: #0f1115;
-	border-color: #2b2e36;
-	color: #f0eefa;
+	background: #0f1115 !important;
+	border: 1px solid #34394a;
+	color: #f2f0fe !important;
 	border-radius: 3px;
 	width: 100%;
+	box-shadow: none;
 }
 
 .rs-split-table input[type="number"] {
@@ -154,67 +240,137 @@
 .rs-col-name { width: 55%; }
 .rs-col-pct  { width: 30%; }
 
-.rs-remove-row {
-	color: #a49fd0;
-	cursor: pointer;
-}
-.rs-remove-row:hover {
-	color: #ff8080;
-}
+.rs-remove-row { color: #b7b2d6 !important; cursor: pointer; }
+.rs-remove-row:hover { color: #ff9a9a !important; }
 
-.rs-total-line {
-	margin-top: 10px;
-	font-size: 14px;
-}
-
-.rs-total.ok {
-	color: #7fdd9d;
-}
-
-.rs-total.bad {
-	color: #ff8585;
-}
+.rs-total-line { margin-top: 10px; font-size: 14px; color: #eae8fa; }
+.rs-total.ok { color: #8fe6ab; }
+.rs-total.bad { color: #ff9a9a; }
 
 .rs-note.warning {
-	color: #f0d38a;
+	color: #f5d99a;
 	border-left: 3px solid #e6c069;
 	padding-left: 10px;
 }
 
-.rs-hidden {
-	display: none;
+.rs-hidden { display: none; }
+
+.rs-empty { color: #b7b2d6; font-style: italic; }
+
+/* ---------- Metabox ---------- */
+
+#rs_split_metabox .inside { background: transparent; }
+
+.rs-vat-input {
+	margin-right: 8px;
+	background: #0f1115;
+	border: 1px solid #34384a;
+	color: #f2f0fe;
 }
 
-.rs-empty {
-	color: #9b97b8;
-	font-style: italic;
-}
-
-/* ---------- Footer credits ---------- */
+/* ---------- Footer ---------- */
 
 .rs-footer {
 	margin-top: 28px;
 	padding-top: 12px;
-	border-top: 1px solid #262a33;
-	font-size: 12.5px;
-	color: #8f8aae;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
 }
 
-.rs-footer a {
-	color: #b3a4ff;
-	text-decoration: none;
+.rs-footer a { color: #beb1ff; text-decoration: none; }
+.rs-footer a:hover { text-decoration: underline; }
+
+/* ---------- ΟΡΦΑΝΑ / FORM-TABLE (settings) ---------- */
+
+.rs-wrap .form-table th,
+.rs-wrap .form-table td {
+	color: #eae8fa;
 }
 
-.rs-footer a:hover {
-	text-decoration: underline;
+.rs-wrap .description,
+.rs-wrap p.description {
+	color: #b7b2d6;
 }
 
-/* ---------- Scope: metabox στη σελίδα προϊόντος ---------- */
+/* =====================================================================
+ * v1.1.2 ADDITIONS — search, exports, widget, form-table
+ * ===================================================================== */
 
-#rs_split_metabox .inside {
-	background: transparent;
+/* Αναζήτηση */
+.rs-search {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+	min-width: 220px;
 }
+.rs-search::placeholder { color: #8b87a3 !important; }
 
-.rs-vat-input {
-	margin-right: 8px;
+/* Form-table (Ρυθμίσεις) */
+.rs-wrap .form-table th,
+.rs-wrap .form-table th label {
+	color: #eae8fa !important;
+	font-weight: 600;
 }
+.rs-wrap .form-table td label { color: #eae8fa !important; }
+.rs-wrap .form-table select {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+}
+.rs-wrap .form-table input[type="number"] {
+	background: #0f1115 !important;
+	border: 1px solid #34394a !important;
+	color: #f2f0fe !important;
+	border-radius: 3px;
+}
+.rs-wrap .form-table td p.description,
+.rs-wrap .form-table .description { color: #b7b2d6 !important; }
+
+/* Export format dropdown */
+.rs-period-form select[name="rs_export_format"] { min-width: 130px; }
+
+/* ---------- Dashboard widget (noxs palette, hardened) ---------- */
+
+#rs_quick_glance { color-scheme: dark; }
+#rs_quick_glance .inside { background: #14161d; border-radius: 0 0 4px 4px; padding: 12px 16px; }
+#rs_quick_glance .postbox-header { border-bottom: 3px solid #6d4aff; }
+
+.rs-widget { color: #eae8fa; }
+.rs-widget .rs-widget-row .rs-widget-label {
+	display: block; font-size: 11px; text-transform: uppercase;
+	letter-spacing: .08em; color: #b7b2d6; margin-bottom: 8px;
+}
+.rs-widget ul.rs-widget-kpis {
+	display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0 0 6px; padding: 0;
+}
+.rs-widget .rs-widget-kpis li {
+	flex: 1 1 45%;
+	background: #17191f;
+	border-left: 3px solid #6d4aff;
+	border-radius: 6px;
+	padding: 10px 14px;
+}
+.rs-widget .rs-widget-kpis span {
+	display: block; font-size: 11px; text-transform: uppercase;
+	letter-spacing: .08em; color: #b7b2d6; margin-bottom: 4px;
+}
+.rs-widget .rs-widget-kpis strong {
+	font-size: 17px; color: #f6f4ff; font-variant-numeric: tabular-nums;
+}
+.rs-widget .rs-widget-section {
+	font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+	color: #b7b2d6; margin-top: 14px;
+}
+.rs-widget ul.rs-widget-ben { list-style: none; margin: 8px 0; padding: 0; }
+.rs-widget .rs-widget-ben li {
+	display: flex; justify-content: space-between; padding: 6px 0;
+	border-bottom: 1px solid #23262f; color: #eae8fa;
+}
+.rs-widget .rs-widget-ben li:last-child { border-bottom: none; }
+.rs-widget a { color: #beb1ff; text-decoration: none; }
+.rs-widget a:hover { color: #d4c9ff; text-decoration: underline; }

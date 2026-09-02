@@ -5,9 +5,14 @@
  * Στρατηγική:
  *  - Χρησιμοποιούμε το Order API του WooCommerce (HPOS-compatible).
  *  - Gross γραμμής = line total + line tax (ΦΠΑ-συμπεριληπτικό, ό,τι πλήρωσε ο πελάτης).
- *  - ΦΠΑ: αφαιρείται από εμάς με βάση τον συντελεστή του Revenue Splitter,
+ *  - ΦΠΑ: αφαιρείται με βάση τον συντελεστή του Revenue Splitter,
  *    με τον τύπο «από μέσα»: vat = gross × rate / (100 + rate).
  *  - Refunds: αφαιρούνται ανά line item μέσω '_refunded_item_id'.
+ *
+ * v1.1.2 FIX: Το φίλτρο προϊόντος γίνεται ΠΕΡ ΙΤΕΜ (PHP-level) και όχι μέσω
+ * του query arg 'product' του wc_get_orders(), το οποίο αγνοείται σιωπηλά
+ * σε ορισμένα HPOS setups — γι' αυτό τα φίλτρα «δεν έφταναν» ποτέ στο
+ * αποτέλεσμα. Per-item filtering = datastore-agnostic, πάντα σωστό.
  *
  * Αποτελέσματα cached σε transient (5 λεπτά) με hash στα args.
  */
@@ -69,6 +74,15 @@ class RS_Reports {
 
 	private static function compute( array $args ): array {
 
+		// Επιτρεπόμενα product IDs (flip σε lookup map για O(1)).
+		$allowed_ids = array();
+		if ( ! empty( $args['product_ids'] ) ) {
+			$allowed_ids = array_fill_keys(
+				array_map( 'absint', array_filter( (array) $args['product_ids'] ) ),
+				true
+			);
+		}
+
 		$query_args = array(
 			'limit'  => -1,
 			'status' => self::STATUSES,
@@ -76,22 +90,18 @@ class RS_Reports {
 			'return' => 'objects',
 
 			/*
-			 * wc_get_orders() δέχεται 'date_created' (όχι 'date_query').
-			 * Μορφή: 'START...END' →(created_after/create_before θα ήταν
-			 * επίσης έγκυρα, αλλά το range string είναι το απλούστερο).
+			 * ΟΧΙ query-level product filter εδώ (δεν είναι αξιόπιστο σε όλα
+			 * τα datastores/HPOS εκδόσεις). Το φιλτράρισμα γίνεται per-item.
 			 */
-						'date_created' => $args['date_start'] . ' 00:00:00...' . $args['date_end'] . ' 23:59:59',
+			'date_created' => $args['date_start'] . ' 00:00:00...' . $args['date_end'] . ' 23:59:59',
 		);
-
-		if ( ! empty( $args['product_ids'] ) ) {
-			$query_args['product'] = array_map( 'absint', (array) $args['product_ids'] );
-		}
 
 		$orders = wc_get_orders( $query_args );
 
-		$per_product = array();
-		$ben_totals  = array();
-		$warnings    = array();
+		$per_product    = array();
+		$ben_totals     = array();
+		$warnings       = array();
+		$matched_orders = array(); // Παραγγελίες που συνεισέφεραν στο (φιλτραρισμένο) αποτέλεσμα.
 
 		foreach ( $orders as $order ) {
 			/** @var WC_Order $order */
@@ -106,6 +116,12 @@ class RS_Reports {
 					continue;
 				}
 
+				// ---- Το φίλτρο προϊόντος ΕΔΩ (per-item, πάντα σωστό) ----
+				if ( ! empty( $allowed_ids ) && ! isset( $allowed_ids[ $pid ] ) ) {
+					continue;
+				}
+				// --------------------------------------------------------
+
 				// Gross γραμμής (ΦΠΑ-συμπεριληπτικό).
 				$gross = (float) $item->get_total() + (float) $item->get_total_tax();
 
@@ -117,6 +133,8 @@ class RS_Reports {
 				if ( $net_gross <= 0.0 ) {
 					continue; // Πλήρως refunded γραμμή.
 				}
+
+				$matched_orders[ $order->get_id() ] = true;
 
 				/*
 				 * Ο gross είναι ΦΠΑ-συμπεριληπτικός → εξάγουμε τον ΦΠΑ «από μέσα»:
@@ -228,7 +246,7 @@ class RS_Reports {
 			),
 			'beneficiaries' => $beneficiaries,
 			'warnings'      => $warnings,
-			'order_count'   => count( $orders ),
+			'order_count'   => empty( $allowed_ids ) ? count( $orders ) : count( $matched_orders ),
 		);
 	}
 
