@@ -10,12 +10,10 @@
  * Επιλογή γλώσσας: user meta 'rs_lang' ('el' | 'en') — αποθηκεύεται
  * από τη σελίδα Ρυθμίσεων του plugin (RS_Admin_UI::render_settings).
  *
- * v1.1.2:
- *  - set_lang() μηδενίζει το request-level cache ($current) ώστε η αλλαγή
- *    γλώσσας να ισχύει ΑΜΕΣΩΣ στο ίδιο request.
- *  - Αφαίρεση σκουπιδιού-κλειδιού 'SΥΝΟΛΑ' (mix鹅ατίνικο S) (#5).
- *  - Νέο string για #12: «Παραγγελίες (περιόδου)» όταν είναι ενεργό
- *    φίλτρο δικαιούχου/αναζήτησης.
+ * v1.1.3 (#8): Συμπλήρωμα λεξικού — καλύπτονται πλέον ΚΑΙ τα strings
+ * του Portal (login/dashboard/logout/messages) και τα νέα μηνύματα
+ * του rate limiter. Οι ανώνυμοι επισκέπτες του Portal ΔΕΝ επηρεάζονται:
+ * δεν έχουν user meta, άρα μένουν στα Ελληνικά.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -81,8 +79,8 @@ class RS_Lang {
 	}
 
 	/**
-	 * Λεξικό Ελληνικά → English. Πρέπει να καλύπτει ΟΛΑ τα εμφανιζόμενα
-	 * strings του domain 'revenue-splitter'.
+	 * Λεξικό Ελληνικά → English. Καλύπτει ΟΛΑ τα εμφανιζόμενα
+	 * strings του domain 'revenue-splitter' (v1.1.3: incl. Portal).
 	 */
 	private static $dict = array(
 
@@ -92,15 +90,19 @@ class RS_Lang {
 		'Revenue Splitter — Ρυθμίσεις'                           => 'Revenue Splitter — Settings',
 		'Revenue Splitter — Γρήγορη ματιά'                       => 'Revenue Splitter — Quick glance',
 		'Revenue Splitter — Δικαιούχοι'                          => 'Revenue Splitter — Beneficiaries',
+		'Revenue Splitter — Portal'                              => 'Revenue Splitter — Portal',
 		'Dashboard'                                              => 'Dashboard',
 		'Ρυθμίσεις'                                              => 'Settings',
+		'Portal'                                                 => 'Portal',
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'       => 'You do not have permission to access this page.',
 
 		// --- Φόρμα περιόδου / φίλτρα ---
 		'Τελευταίες 7 ημέρες'                                    => 'Last 7 days',
 		'Τελευταίες 30 ημέρες'                                   => 'Last 30 days',
 		'Τρέχων μήνας'                                           => 'Current month',
+		'Προηγούμενος μήνας'                                     => 'Previous month',
 		'Τρέχον έτος'                                            => 'Current year',
+		'Προηγούμενο έτος'                                       => 'Previous year',
 		'Προσαρμοσμένο'                                          => 'Custom',
 		'Εφαρμογή'                                               => 'Apply',
 		'Εξαγωγή'                                                => 'Export',
@@ -131,6 +133,7 @@ class RS_Lang {
 		'Προϊόν #%d'                                             => 'Product #%d',
 		'ID'                                                     => 'ID',
 		'ΣΥΝΟΛΑ'                                                 => 'TOTALS',
+		'Σύνολο'                                                 => 'Total',
 		'ΦΠΑ %'                                                  => 'VAT %',
 
 		// --- Exports / widget ---
@@ -165,5 +168,29 @@ class RS_Lang {
 		'Μη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
 		'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.' => 'Beneficiary percentages add up to %s%% — they must sum to 100%%.',
 		'Το Revenue Splitter απαιτεί WooCommerce για να λειτουργήσει.' => 'Revenue Splitter requires WooCommerce to function.',
+
+		// --- Portal (admin) ---
+		'Νέο κλειδί'                                              => 'New key',
+		'Access Key'                                              => 'Access Key',
+		'Ο δικαιούχος μπαίνει σε σελίδα με το shortcode [rs_portal] και βλέπει ΜΟΝΟ τα δικά του κέρδη. Κανένα IP log, κανένα tracking — μόνο ένα λειτουργικό cookie token 24h.' => 'Beneficiaries log in on a page with the [rs_portal] shortcode and see ONLY their own earnings. No IP logs, no tracking — just one functional 24h cookie token.',
+		'Δεν έχουν ρυθμιστεί δικαιούχοι ακόμη. Πήγαινε στις Ρυθμίσεις.' => 'No beneficiaries configured yet. Go to Settings.',
+		'«Νέο κλειδί» αντικαθιστά το παλιό ΑΜΕΣΩΣ (αν κλεβεί, το ανανεώνεις και τέλος). Στείλε το με ασφαλές κανάλι.' => '«New key» replaces the old one IMMEDIATELY (if leaked, just regenerate). Send it over a secure channel.',
+		'Σημείωση:'                                               => 'Note:',
+		'Νέο κλειδί για: %s — το παλιό σταματά να λειτουργεί άμεσα.' => 'New key for: %s — the old one stops working immediately.',
+
+		// --- Portal (frontend / v1.1.3 #8) ---
+		'Author Portal'                                          => 'Author Portal',
+		'Βάλε το προσωπικό σου κλειδί για να δεις τα καθαρά σου κέρδη.' => 'Enter your personal key to see your net earnings.',
+		'Access key'                                             => 'Access key',
+		'Είσοδος'                                                => 'Log in',
+		'Λάθος κλειδί — δοκίμασε ξανά.'                           => 'Wrong key — try again.',
+		'Καλωσόρισες, %s!'                                       => 'Welcome, %s!',
+		'Ποσοστό σου'                                            => 'Your percentage',
+		'Ποσό σου'                                               => 'Your amount',
+		'Καμία πώληση σε αυτή την περίοδο.'                      => 'No sales in this period.',
+		'Εξαγωγή CSV'                                            => 'Export CSV',
+		'Αποσύνδεση'                                             => 'Log out',
+		'Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε 15 λεπτά.' => 'Too many failed attempts. Try again in 15 minutes.',
+		'Η συνεδρία έληξε. Ξανασυνδέσου με το κλειδί σου.'        => 'Your session has expired. Log in again with your key.',
 	);
 }

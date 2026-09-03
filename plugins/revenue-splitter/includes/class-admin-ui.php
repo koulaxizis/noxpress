@@ -2,24 +2,17 @@
 /**
  * Admin UI: Dashboard + Ρυθμίσεις + Widget.
  *
- * v1.1.2:
- *  - Φίλτρα προϊόντος/δικαιούχου ΛΕΙΤΟΥΡΓΙΚΑ (βλ. class-reports.php fix).
- *  - Αναζήτηση σε τίτλους (view-level, mb-safe).
- *  - Dashboard widget «Γρήγορη ματιά» (μήνας έως σήμερα + top δικαιούχοι).
- *  - Εξαγωγές: CSV / XLS (SpreadsheetML, native Excel) / HTML / JSON
- *    — όλες zero-dependency, όλες σέβονται τα ενεργά φίλτρα.
- *  - File-based cache busting (filemtime) για assets.
+ * v1.1.3:
+ *  - (#3) Export μέσω admin_init (ΠΡΙΝ από οποιοδήποτε admin output) —
+ *    τα headers των downloads φτάνουν καθαρά, χωρίς admin HTML
+ *    ανακατεμένο στο αρχείο. Κοινός helper persist_dashboard_state()
+ *    μεταξύ «Εφαρμογή» και «Εξαγωγή».
+ *  - (#6) Το dropdown δικαιούχων διαβάζει από το κεντρικό
+ *    RS_Beneficiaries::collect_names() — ένα σημείο αλήθειας.
  *
- * v1.1.2 AUDIT FIX:
- *  - (#3) Καθαρό μενού: το parent slug ΕΙΝΑΙ το dashboard — δεν υπάρχει
- *    διπλή καταχώριση «Revenue Splitter» + «Dashboard» που δείχνουν στο
- *    ίδιο σημείο.
- *  - (#4) Το preset dropdown συγχρονίζεται με την αποθηκευμένη περίοδο
- *    (server-side matching, default «Προσαρμοσμένο»).
- *  - (#7) fputcsv() με explicit separator/enclosure/escape — χωρίς
- *    deprecated implicit defaults σε PHP 8.4+.
- *  - (#12) Label «Παραγγελίες (περιόδου)» όταν είναι ενεργό φίλτρο
- *    δικαιούχου/αναζήτησης, για να μην μπερδεύεται το order_count.
+ * v1.1.2: φίλτρα προϊόντος/δικαιούχου λειτουργικά, αναζήτηση σε τίτλους,
+ * dashboard widget, zero-dependency exports, filemtime cache busting,
+ * καθαρό μενού, synced preset, fputcsv explicit args, order_count label.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -33,6 +26,7 @@ class RS_Admin_UI {
 	public static function init(): void {
 
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_action( 'admin_init', array( __CLASS__, 'handle_export' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'wp_dashboard_setup', array( __CLASS__, 'register_widget' ) );
 
@@ -53,11 +47,6 @@ class RS_Admin_UI {
 
 	public static function menu(): void {
 
-		/*
-		 * AUDIT FIX (#3): parent = dashboard. Το add_menu_page() με το ίδιο
-		 * slug κάνει το πρώτο submenu να υποκαθίσταται σωστά — το WP δείχνει
-		 * «Dashboard» ως πρώτο submenu που δείχνει στο parent. Κανένα duplicate.
-		 */
 		add_menu_page(
 			__( 'Revenue Splitter — Dashboard', 'revenue-splitter' ),
 			__( 'Revenue Splitter', 'revenue-splitter' ),
@@ -102,11 +91,6 @@ class RS_Admin_UI {
 			return;
 		}
 
-		/*
-		 * File-based cache busting με defensive guard: αν για οποιονδήποτε
-		 * λόγο το αρχείο δεν υπάρχει (μισό deploy, plugin file removed),
-		 * πέφτουμε στο RS_VERSION αντί για PHP warning + bad ?ver=.
-		 */
 		$css_file = RS_PATH . 'assets/admin.css';
 		$js_file  = RS_PATH . 'assets/admin.js';
 
@@ -179,11 +163,7 @@ class RS_Admin_UI {
 		return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
 	}
 
-	/*
-	 * AUDIT FIX (#4): Server-side υπολογισμός του preset που ταιριάζει
-	 * στην (αποθηκευμένη ή υπολογισμένη) περίοδο — 'custom' όταν δεν
-	 * ταιριάζει πουθενά. Το dropdown ανοίγει έτσι σωστά συγχρονισμένο.
-	 */
+	/** Server-side υπολογισμός του preset που ταιριάζει στην περίοδο. */
 	private static function matching_preset( array $period ): string {
 
 		$now = new DateTimeImmutable( 'now', wp_timezone() );
@@ -207,6 +187,126 @@ class RS_Admin_UI {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * v1.1.3 FIX (#3): Export μέσω admin_init — ΠΡΙΝ από κάθε output.
+	 *
+	 * Το export πατάει το ΙΔΙΟ POST με το «Εφαρμογή» (nonce rs_dashboard +
+	 * flag rs_do_export). Τρέχει στο admin_init, δηλαδή πριν το WP
+	 * τυπώσει ΟΛΟΚΛΗΡΟ το admin shell — τα header() των downloads
+	 * φτάνουν καθαρά και το αρχείο δεν μπλέκεται με admin HTML.
+	 * ------------------------------------------------------------------- */
+
+	public static function handle_export(): void {
+
+		// Μόνο στη δική μας σελίδα dashboard.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'] ) || self::SLUG_DASH !== $_GET['page'] ) {
+			return;
+		}
+
+		// POST με έγκυρο nonce, αλλιώς φύγε.
+		if ( ! isset( $_POST['rs_dashboard_nonce'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_dashboard_nonce'] ) ), 'rs_dashboard' ) ) {
+			return;
+		}
+
+		// Μόνο όταν ζητήθηκε εξαγωγή.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! isset( $_POST['rs_do_export'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( self::CAP ) ) {
+			return;
+		}
+
+		// Ίδια προετοιμασία κατάστασης με το «Εφαρμογή» (persist +
+		// επιστροφή period/φίλτρων) — η εξαγωγή σέβεται ΟΛΑ τα φίλτρα.
+		$state = self::persist_dashboard_state();
+
+		$export_args = array(
+			'date_start' => $state['period']['start'],
+			'date_end'   => $state['period']['end'],
+		);
+		if ( $state['product'] > 0 ) {
+			$export_args['product_ids'] = array( $state['product'] );
+		}
+
+		$report = self::filter_report_for_display(
+			RS_Reports::run( $export_args ),
+			$state['beneficiary'],
+			$state['search']
+		);
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$fmt = isset( $_POST['rs_export_format'] ) ? sanitize_key( wp_unslash( $_POST['rs_export_format'] ) ) : 'csv';
+
+		switch ( $fmt ) {
+			case 'xls':
+				self::stream_xls( $report );
+				break;
+			case 'html':
+				self::stream_html( $report );
+				break;
+			case 'json':
+				self::stream_json( $report );
+				break;
+			default:
+				self::stream_csv( $report );
+		}
+	}
+
+	/**
+	 * Κοινός helper: διαβάζει + επικυρώνει + αποθηκεύει period/φίλτρα
+	 * από το $_POST του dashboard και τα επιστρέφει.
+	 *
+	 * Χρησιμοποιείται ΚΑΙ από το render_dashboard (φόρτος σελίδας /
+	 * «Εφαρμογή») ΚΑΙ από το handle_export (εξαγωγή) — μία λογική,
+	 * καμία απόκλιση συμπεριφοράς μεταξύ των δύο ροών.
+	 *
+	 * ΠΡΟΣΟΧΗ: καλείται ΜΟΝΟ αφού έχει επαληθευτεί το nonce
+	 * (rs_dashboard) και το capability από τον caller.
+	 *
+	 * @return array{period:array{start:string,end:string},product:int,beneficiary:string,search:string}
+	 */
+	private static function persist_dashboard_state(): array {
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$start = isset( $_POST['rs_date_start'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_date_start'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$end = isset( $_POST['rs_date_end'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_date_end'] ) ) : '';
+
+		$period = self::current_period();
+		if ( self::valid_date( $start ) && self::valid_date( $end ) && $start <= $end ) {
+			$period = array( 'start' => $start, 'end' => $end );
+			update_user_meta( get_current_user_id(), 'rs_last_period', $period );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$f_product = isset( $_POST['rs_filter_product'] ) ? absint( $_POST['rs_filter_product'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$f_ben = isset( $_POST['rs_filter_beneficiary'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_filter_beneficiary'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$f_search = isset( $_POST['rs_search'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_search'] ) ) : '';
+
+		update_user_meta(
+			get_current_user_id(),
+			'rs_last_filters',
+			array(
+				'product'     => $f_product,
+				'beneficiary' => $f_ben,
+				'search'      => $f_search,
+			)
+		);
+
+		return array(
+			'period'      => $period,
+			'product'     => $f_product,
+			'beneficiary' => $f_ben,
+			'search'      => $f_search,
+		);
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Dashboard
 	 * ------------------------------------------------------------------- */
 
@@ -218,79 +318,25 @@ class RS_Admin_UI {
 
 		$period = self::current_period();
 
-		// ---------- POST: περίοδος / φίλτρα / export ----------
+		/*
+		 * POST: «Εφαρμογή» — persist period/φίλτρων και χρήση τους.
+		 * (v1.1.3: το export ΔΕΝ χειρίζεται πλέον εδώ — δες handle_export
+		 * στο admin_init. Το export δεν φτάνει ποτέ σε αυτό το σημείο
+		 * γιατί exit() εκεί πριν το admin shell τυπωθεί.)
+		 */
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['rs_dashboard_nonce'] )
 			&& wp_verify_nonce( sanitize_key( $_POST['rs_dashboard_nonce'] ), 'rs_dashboard' ) ) {
 
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$start = isset( $_POST['rs_date_start'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_date_start'] ) ) : '';
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$end = isset( $_POST['rs_date_end'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_date_end'] ) ) : '';
-
-			if ( self::valid_date( $start ) && self::valid_date( $end ) && $start <= $end ) {
-				$period = array( 'start' => $start, 'end' => $end );
-				update_user_meta( get_current_user_id(), 'rs_last_period', $period );
-			}
-
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$f_product = isset( $_POST['rs_filter_product'] ) ? absint( $_POST['rs_filter_product'] ) : 0;
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$f_ben = isset( $_POST['rs_filter_beneficiary'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_filter_beneficiary'] ) ) : '';
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$f_search = isset( $_POST['rs_search'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_search'] ) ) : '';
-
-			update_user_meta(
-				get_current_user_id(),
-				'rs_last_filters',
-				array(
-					'product'     => $f_product,
-					'beneficiary' => $f_ben,
-					'search'      => $f_search,
-				)
-			);
-
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			if ( isset( $_POST['rs_do_export'] ) ) {
-				$export_args = array(
-					'date_start' => $period['start'],
-					'date_end'   => $period['end'],
-				);
-				if ( $f_product > 0 ) {
-					$export_args['product_ids'] = array( $f_product );
-				}
-
-				// Το export σέβεται ΟΛΑ τα φίλτρα: προϊόν (engine) + δικαιούχο + αναζήτηση (reducer).
-				$export_report = self::filter_report_for_display(
-					RS_Reports::run( $export_args ),
-					$f_ben,
-					$f_search
-				);
-
-				// phpcs:ignore WordPress.Security.NonceVerification.Missing
-				$fmt = isset( $_POST['rs_export_format'] ) ? sanitize_key( wp_unslash( $_POST['rs_export_format'] ) ) : 'csv';
-
-				switch ( $fmt ) {
-					case 'xls':
-						self::stream_xls( $export_report );
-						break;
-					case 'html':
-						self::stream_html( $export_report );
-						break;
-					case 'json':
-						self::stream_json( $export_report );
-						break;
-					default:
-						self::stream_csv( $export_report );
-				}
-			}
+			$state  = self::persist_dashboard_state();
+			$period = $state['period'];
 		}
 
 		// ---------- Φίλτρα από user meta ----------
-		$filters        = get_user_meta( get_current_user_id(), 'rs_last_filters', true );
-		$filter_prod    = is_array( $filters ) ? max( 0, (int) ( $filters['product'] ?? 0 ) ) : 0;
-		$filter_ben     = is_array( $filters ) ? (string) ( $filters['beneficiary'] ?? '' ) : '';
-		$filter_search  = is_array( $filters ) ? trim( (string) ( $filters['search'] ?? '' ) ) : '';
+		$filters       = get_user_meta( get_current_user_id(), 'rs_last_filters', true );
+		$filter_prod   = is_array( $filters ) ? max( 0, (int) ( $filters['product'] ?? 0 ) ) : 0;
+		$filter_ben    = is_array( $filters ) ? (string) ( $filters['beneficiary'] ?? '' ) : '';
+		$filter_search = is_array( $filters ) ? trim( (string) ( $filters['search'] ?? '' ) ) : '';
 
 		// ---------- Report ----------
 		$args = array(
@@ -312,7 +358,8 @@ class RS_Admin_UI {
 			)
 		);
 
-		$ben_names = self::collect_beneficiary_names();
+		// v1.1.3 (#6): κεντρικό helper — ένα σημείο αλήθειας για ονόματα.
+		$ben_names = RS_Beneficiaries::collect_names();
 
 		// ---------- View-level: αναζήτηση + δικαιούχος ----------
 		$filtered_report  = self::filter_report_for_display( $report, $filter_ben, $filter_search );
@@ -323,10 +370,8 @@ class RS_Admin_UI {
 			$author_earnings = round( (float) $filtered_report['beneficiaries'][0]['amount'], 2 );
 		}
 
-		// (#4) Συγχρονισμός preset με την πραγματική περίοδο.
 		$active_preset = self::matching_preset( $period );
 
-		// (#12) Label παραγγελιών όταν δουλεύουν view-level φίλτρα.
 		$orders_label = ( '' !== $filter_ben || '' !== $filter_search )
 			? __( 'Παραγγελίες (περιόδου)', 'revenue-splitter' )
 			: __( 'Παραγγελίες', 'revenue-splitter' );
@@ -631,14 +676,16 @@ class RS_Admin_UI {
 
 			// ---- Global δικαιούχοι ----
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input.
+			// ΟΧΙ wp_unslash εδώ: η sanitize_list() κάνει το unslash ΜΙΑ φορά
+			// (ίδιο pattern με το RS_Beneficiaries::save_meta — ένα σημείο unslash).
 			$rows = array();
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			if ( isset( $_POST['rs_ben_name'], $_POST['rs_ben_pct'] )
 				&& is_array( $_POST['rs_ben_name'] ) && is_array( $_POST['rs_ben_pct'] ) ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Missing
-				$names = array_values( (array) wp_unslash( $_POST['rs_ben_name'] ) );
+				$names = array_values( (array) $_POST['rs_ben_name'] );
 				// phpcs:ignore WordPress.Security.NonceVerification.Missing
-				$percs = array_values( (array) wp_unslash( $_POST['rs_ben_pct'] ) );
+				$percs = array_values( (array) $_POST['rs_ben_pct'] );
 
 				foreach ( $names as $i => $n ) {
 					$rows[] = array(
@@ -788,55 +835,6 @@ class RS_Admin_UI {
 	}
 
 	/**
-	 * Όλα τα ονόματα δικαιούχων που υπάρχουν στο σύστημα:
-	 * global defaults + όλα τα per-product overrides (αποθηκευμένα).
-	 */
-	private static function collect_beneficiary_names(): array {
-
-		$names = array();
-
-		// 1) Global defaults.
-		$defaults = RS_Beneficiaries::get_defaults();
-		if ( is_array( $defaults ) ) {
-			foreach ( $defaults as $d ) {
-				if ( is_array( $d ) && ! empty( $d['name'] ) ) {
-					$names[ (string) $d['name'] ] = true;
-				}
-			}
-		}
-
-		// 2) Per-product overrides (raw meta — δεν κάνουμε fallback ώστε
-		//    να μη διπλο-μετράμε τα global defaults).
-		$product_ids = get_posts(
-			array(
-				'post_type'      => 'product',
-				'post_status'    => 'any',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-				'meta_key'       => RS_Beneficiaries::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'orderby'        => 'none',
-				'no_found_rows'  => true,
-			)
-		);
-
-		foreach ( $product_ids as $pid ) {
-			$decoded = json_decode( RS_Beneficiaries::raw( (int) $pid ), true );
-			if ( is_array( $decoded ) ) {
-				foreach ( $decoded as $row ) {
-					if ( is_array( $row ) && ! empty( $row['name'] ) ) {
-						$names[ sanitize_text_field( (string) $row['name'] ) ] = true;
-					}
-				}
-			}
-		}
-
-		$flat = array_keys( $names );
-		sort( $flat );
-
-		return $flat;
-	}
-
-	/**
 	 * View-level μείωση του report για τα φίλτρα δικαιούχου + αναζήτησης.
 	 *
 	 * Το φίλτρο προϊόντος γίνεται στην engine (RS_Reports::run) — εδώ
@@ -923,10 +921,6 @@ class RS_Admin_UI {
 			'net'   => round( $t_net, 2 ),
 		);
 
-		/*
-		 * Με ενεργό φίλτρο δικαιούχου ο πίνακας beneficiaries πρέπει να
-		 * περιέχει ακριβώς μία εγγραφή (το dashboard διαβάζει [0]).
-		 */
 		$report['beneficiaries'] = $beneficiaries;
 
 		return $report;
@@ -942,7 +936,8 @@ class RS_Admin_UI {
 	}
 
 	/* =====================================================================
-	 * EXPORT
+	 * EXPORT (καλούνται ΜΟΝΟ από το handle_export() στο admin_init —
+	 * ποτέ μετά το admin header, καθαρά headers παντού)
 	 * ===================================================================== */
 
 	private static function splits_flat( array $splits ): string {
@@ -964,11 +959,6 @@ class RS_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 	}
 
-	/*
-	 * AUDIT FIX (#7): PHP 8.4+ κάνει deprecated τα implicit defaults του
-	 * fputcsv(). Explicit args = ίδια συμπεριφορά, χωρίς warnings σε
-	 * νεότερα PHP.
-	 */
 	private static function put_csv_row( $out, array $fields ): void {
 		fputcsv( $out, $fields, ',', '"', '\\' );
 	}

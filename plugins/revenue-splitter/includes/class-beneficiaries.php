@@ -15,6 +15,11 @@
  * του παλιού διπλού wp_unslash) επισκευάζονται αυτόματα:
  *  - στο ΔΙΑΒΑΣΜΑ (get_map → sanitize_list) → σωστή εμφάνιση παντού,
  *  - στην ΑΠΟΘΗΚΕΥΣΗ → μόνιμη επισκευή του meta.
+ *
+ * v1.1.3 (#6): Νέο κεντρικό helper collect_names() — το ΜΟΝΑΔΙΚΟ σημείο
+ * που συγκεντρώνει όλα τα ονόματα δικαιούχων (globals + per-product
+ * overrides). Το Admin UI dropdown και το Portal το καλούν από εδώ —
+ * τέλος στη διπλο-υλοποίηση.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -100,6 +105,78 @@ class RS_Beneficiaries {
 	/** Έχει σκόπιμο override στο προϊόν; (για warnings στο dashboard) */
 	public static function has_override( int $product_id ): bool {
 		return '' !== trim( self::raw( $product_id ) );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * v1.1.3 (#6): Κεντρικό σημείο αλήθειας για ΟΛΑ τα ονόματα.
+	 * ------------------------------------------------------------------- */
+
+		/**
+	 * Όλα τα ονόματα δικαιούχων που υπάρχουν στο σύστημα:
+	 * global defaults + όλα τα per-product overrides (αποθηκευμένα).
+	 *
+	 * Χρησιμοποιείται από: Admin UI (dropdown φίλτρου dashboard) και
+	 * Portal (lazy-key generation). Μία υλοποίηση, μηδέν drift.
+	 *
+	 * v1.1.3 (#3-fix): εφαρμόζεται και εδώ το repair_unicode_escapes()
+	 * ώστε παλιά κατεστραμμένα «uXXXX» ονόματα να εμφανίζονται διορθωμένα
+	 * στο dropdown και στα Portal keys — σύμφωνα με το report (get_map).
+	 *
+	 * @return string[] Ταξινομημένα ονόματα (unique).
+	 */
+	public static function collect_names(): array {
+
+		$names = array();
+
+		// 1) Global defaults.
+		$defaults = self::get_defaults();
+		if ( is_array( $defaults ) ) {
+			foreach ( $defaults as $d ) {
+				if ( is_array( $d ) && ! empty( $d['name'] ) ) {
+					$name = self::repair_unicode_escapes(
+						sanitize_text_field( (string) $d['name'] )
+					);
+					if ( '' !== $name ) {
+						$names[ $name ] = true;
+					}
+				}
+			}
+		}
+
+		// 2) Per-product overrides (raw meta — δεν κάνουμε fallback ώστε
+		//    να μη διπλο-μετράμε τα global defaults).
+		$product_ids = get_posts(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => self::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'orderby'        => 'none',
+				'no_found_rows'  => true,
+			)
+		);
+
+		foreach ( $product_ids as $pid ) {
+			$decoded = json_decode( self::raw( (int) $pid ), true );
+			if ( is_array( $decoded ) ) {
+				foreach ( $decoded as $row ) {
+					if ( is_array( $row ) && ! empty( $row['name'] ) ) {
+						$name = self::repair_unicode_escapes(
+							sanitize_text_field( (string) $row['name'] )
+						);
+						if ( '' !== $name ) {
+							$names[ $name ] = true;
+						}
+					}
+				}
+			}
+		}
+
+		$flat = array_keys( $names );
+		sort( $flat );
+
+		return $flat;
 	}
 
 	/* ---------------------------------------------------------------------

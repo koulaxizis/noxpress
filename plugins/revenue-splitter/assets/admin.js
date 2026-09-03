@@ -36,7 +36,7 @@
 
 		var wrap = table.closest('.rs-rows');
 		var el = wrap ? wrap.querySelector('.rs-total') : null;
-		if (!el) return { ok: true, total: total };
+		if (!el) return;
 
 		el.textContent = String(total);
 
@@ -44,8 +44,6 @@
 		var ok = Math.abs(total - 100) <= 0.05;
 		el.classList.toggle('ok', ok);
 		el.classList.toggle('bad', !ok);
-
-		return { ok: ok, total: total };
 	}
 
 	function removeRow(e, table) {
@@ -63,7 +61,7 @@
 
 		var clone = firstRow.cloneNode(true);
 
-		// Καθαρό παιχνίδι inputs στο clone.
+		// Καθαρά inputs στο clone.
 		var inputs = clone.querySelectorAll('input');
 		for (var i = 0; i < inputs.length; i++) {
 			inputs[i].value = '';
