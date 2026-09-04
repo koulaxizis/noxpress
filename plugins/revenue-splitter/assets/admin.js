@@ -1,24 +1,18 @@
 /**
- * Revenue Splitter — admin JS (vanilla, zero dependencies).
+ * Revenue Splitter — admin JS (vanilla, zero dependencies) — v1.3.1.
  *  1. Live add/remove γραμμών δικαιούχων
- *  2. Ζωντανό Σ=100% validation (χρώμα)
+ *  2. Ζωντανό Σ=100% validation (χρώμα, comma-tolerant)
  *  3. Toggle «global defaults» στο metabox
- *  4. Period presets στο dashboard
+ *
+ * v1.3.1 FIX (#4): ΑΦΑΙΡΕΘΗΚΕ η ενότητα 4 (Period presets / bindPresets)
+ * μαζί με τον helper isoLocal() — στοχεύε selectors (#rs-period-preset,
+ * [name="rs_date_start"/"rs_date_end"]) που δεν υπάρχουν σε ΚΑΝΕΝΑ
+ * v1.3.1 markup: το φίλτρο περιόδου του dashboard είναι πλέον αμιγώς
+ * server-side (select[name="rs_period"] + rs_start/rs_end σε GET submit).
+ * Ο κώδικας δεν εκτελούνταν ποτέ — καθαρό orphan.
  */
 (function () {
 	'use strict';
-
-	/* ------------------------------------------------------------------
-	 * Helpers
-	 * ------------------------------------------------------------------ */
-
-	/** Τοπική (όχι UTC) ημερομηνία σε 'YYYY-MM-DD'. */
-	function isoLocal(date) {
-		var y = date.getFullYear();
-		var m = String(date.getMonth() + 1).padStart(2, '0');
-		var d = String(date.getDate()).padStart(2, '0');
-		return y + '-' + m + '-' + d;
-	}
 
 	/* ------------------------------------------------------------------
 	 * 1 + 2: Beneficiary rows — live validation
@@ -49,6 +43,7 @@
 	function removeRow(e, table) {
 		var rows = table.querySelectorAll('tbody tr');
 		if (rows.length > 1) {
+			e.preventDefault();
 			e.target.closest('tr').remove();
 			recalcTable(table);
 		}
@@ -95,6 +90,7 @@
 				if (container) {
 					container.addEventListener('click', function (e) {
 						if (e.target.classList.contains('rs-add-row')) {
+							e.preventDefault();
 							addRow(table);
 						}
 					});
@@ -118,55 +114,11 @@
 	});
 
 	/* ------------------------------------------------------------------
-	 * 4: Period presets (dashboard)
-	 * ------------------------------------------------------------------ */
-
-	function bindPresets() {
-		var presetSel = document.getElementById('rs-period-preset');
-		if (!presetSel) return;
-
-		var form = presetSel.closest('form');
-		if (!form) return;
-
-		var start = form.querySelector('[name="rs_date_start"]');
-		var end = form.querySelector('[name="rs_date_end"]');
-		if (!start || !end) return;
-
-		presetSel.addEventListener('change', function () {
-			var today = new Date();
-
-			switch (presetSel.value) {
-				case '7': {
-					var d = new Date(today.getTime() - 6 * 864e5);
-					start.value = isoLocal(d);
-					end.value = isoLocal(today);
-					break;
-				}
-				case '30': {
-					var d30 = new Date(today.getTime() - 29 * 864e5);
-					start.value = isoLocal(d30);
-					end.value = isoLocal(today);
-					break;
-				}
-				case 'month':
-					start.value = isoLocal(new Date(today.getFullYear(), today.getMonth(), 1));
-					end.value = isoLocal(today);
-					break;
-				case 'year':
-					start.value = today.getFullYear() + '-01-01';
-					end.value = isoLocal(today);
-					break;
-				// 'custom': τα date inputs μένουν ως έχουν.
-			}
-		});
-	}
-
-	/* ------------------------------------------------------------------
 	 * Init
 	 * ------------------------------------------------------------------ */
 
 	document.addEventListener('DOMContentLoaded', function () {
 		bindRows(document);
-		bindPresets();
+		// v1.3.1 (#4): κανένα bindPresets() εδώ — δες κεφαλίδα.
 	});
 })();

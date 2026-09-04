@@ -36,6 +36,12 @@ body {
 [id] { scroll-margin-top: 24px; }
 
 header { padding: 72px 0 48px; text-align: left; }
+.header-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
 .wordmark {
 	font-size: clamp(2rem, 5vw, 3rem);
 	font-weight: 700;
@@ -49,6 +55,21 @@ header { padding: 72px 0 48px; text-align: left; }
 	font-size: 1.05rem;
 	max-width: 40em;
 }
+.lang-toggle {
+	flex-shrink: 0;
+	margin-top: 10px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	color: var(--accent-bright);
+	font: 600 0.8rem/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 9px 14px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+.lang-toggle:hover { border-color: var(--accent); color: #fff; }
 
 section.plugins { padding-bottom: 40px; }
 .section-title {
@@ -242,34 +263,44 @@ footer a:hover { text-decoration: underline; }
 <body id="top">
 
 <header>
-	<div class="wordmark">noxpress<span class="dot">.</span></div>
-	<p class="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
+	<div class="header-row">
+		<div>
+			<div class="wordmark">noxpress<span class="dot">.</span></div>
+			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
+		</div>
+		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
+	</div>
 </header>
 
 <section class="plugins" id="plugins">
-	<div class="section-title">Plugins</div>
+	<div class="section-title" data-i18n="plugins">Plugins</div>
 
-		<article class="card" id="revenue-splitter">
+	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
-		<div class="meta">v1.1.3 · WooCommerce · MIT<span class="badge">beta</span></div>
-		<p>Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal.</p>
+		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge">beta</span></div>
+		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<ul>
-			<li>Per-product VAT override with global default (gross × rate ÷ (100 + rate))</li>
-			<li>Beneficiary percentage splits with live Σ = 100% validation</li>
-			<li>Filter reports by product, beneficiary or title search</li>
-			<li>Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in</li>
-			<li>Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 64-char access key and see only their own earnings — no WP accounts, no IP logs, 5-attempts/15-min rate limit, CSV export included</li>
-			<li>Dashboard widget with current-month snapshot and top beneficiaries</li>
-			<li>Bilingual UI (Ελληνικά / English), per-user</li>
-			<li>HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind</li>
+			<li data-i18n="rs_li1">Per-product VAT override with global default (gross × rate ÷ (100 + rate))</li>
+			<li data-i18n="rs_li2">Beneficiary percentage splits with live Σ = 100% validation</li>
+			<li data-i18n="rs_li3">Sales transparency: full-price / discounted (avg %) / free copies per product, pre- and post-VAT amounts</li>
+			<li data-i18n="rs_li4">Non-sales ledger: custom income entries (positive or negative) and payouts, every entry with a mandatory reason, live remaining balance per period</li>
+			<li data-i18n="rs_li5">Live stock column per product (read directly from WooCommerce, incl. variable products)</li>
+			<li data-i18n="rs_li6">Mandatory free-copy reason at checkout, triggered only by configurable coupons — order meta visible in admin</li>
+			<li data-i18n="rs_li7">Filter reports by product, beneficiary or title search</li>
+			<li data-i18n="rs_li8">Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in</li>
+			<li data-i18n="rs_li9">Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 64-char access key and see only their own earnings, enriched with discount stats, VAT, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit</li>
+			<li data-i18n="rs_li10">Dashboard widget with current-month snapshot, top beneficiaries and ledger summary</li>
+			<li data-i18n="rs_li11">Bilingual UI (Ελληνικά / English), per-user</li>
+			<li data-i18n="rs_li12">HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/revenue-splitter-v1.1.3/revenue-splitter.zip" rel="nofollow noopener">Download v1.1.3 (.zip)</a>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener">Source</a>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener">Releases</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/revenue-splitter-v1.3.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.3.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
 	</article>
 
+	<!--
 	<article class="card" id="greeklish-permalinks">
 		<h2><a href="#greeklish-permalinks">Greeklish Permalinks</a></h2>
 		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge badge-soon">coming soon</span></div>
@@ -399,7 +430,7 @@ footer a:hover { text-decoration: underline; }
 
 	<article class="card" id="book-events">
 		<h2><a href="#book-events">Book Events</a></h2>
-		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge badge-soon">coming soon</span></div>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
 		<p>Book presentations, poetry nights and signings as a dedicated content type — with venue, city, an optional linked book and schema.org Event structured data for rich search results. Upcoming events anywhere with the <code>[nx_events]</code> shortcode.</p>
 		<ul>
 			<li>Event JSON-LD with timezone-correct ISO 8601 dates</li>
@@ -412,31 +443,136 @@ footer a:hover { text-decoration: underline; }
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/book-events" rel="noopener">Source</a>
 		</div>
 	</article>
+	-->
 
 </section>
 
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
-	<div class="subscribe-title" id="subscribe-title">Stay in the loop ✦</div>
-	<p>Get notified about new plugins, updates &amp; maintenance.</p>
-	<a class="btn-subscribe" href="https://preview.mailerlite.io/forms/642133/197598403923805558/share" rel="noopener">Subscribe</a>
-	<p class="subscribe-note">No spam — only release announcements. Your email stays with MailerLite.</p>
+	<div class="subscribe-title" id="subscribe-title" data-i18n="sub_title">Stay in the loop ✦</div>
+	<p data-i18n="sub_text">Get notified about new plugins, updates &amp; maintenance.</p>
+	<a class="btn-subscribe" href="https://preview.mailerlite.io/forms/642133/197598403923805558/share" rel="noopener" data-i18n="sub_btn">Subscribe</a>
+	<p class="subscribe-note" data-i18n="sub_note">No spam — only release announcements. Your email stays with MailerLite.</p>
 </section>
 
 <footer>
-	<p><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
+	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
 </footer>
 
 <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
 <script>
 (function () {
+	'use strict';
+
+	/* ------------------------------------------------------------------
+	 * i18n — Δίγλωσσο λεξικό. English = default.
+	 * ------------------------------------------------------------------ */
+
+	var EN = {
+		tagline: 'Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.',
+		plugins: 'Plugins',
+		rs_desc: 'Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.',
+		rs_li1: 'Per-product VAT override with global default (gross × rate ÷ (100 + rate))',
+		rs_li2: 'Beneficiary percentage splits with live Σ = 100% validation',
+		rs_li3: 'Sales transparency: full-price / discounted (avg %) / free copies per product, pre- and post-VAT amounts',
+		rs_li4: 'Non-sales ledger: custom income entries (positive or negative) and payouts, every entry with a mandatory reason, live remaining balance per period',
+		rs_li5: 'Live stock column per product (read directly from WooCommerce, incl. variable products)',
+		rs_li6: 'Mandatory free-copy reason at checkout, triggered only by configurable coupons — order meta visible in admin',
+		rs_li7: 'Filter reports by product, beneficiary or title search',
+		rs_li8: 'Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in',
+		rs_li9: 'Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 64-char access key and see only their own earnings, enriched with discount stats, VAT, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit',
+		rs_li10: 'Dashboard widget with current-month snapshot, top beneficiaries and ledger summary',
+		rs_li11: 'Bilingual UI (Ελληνικά / English), per-user',
+		rs_li12: 'HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind',
+		rs_download: 'Download v1.3.0 (.zip)',
+		rs_source: 'Source',
+		rs_releases: 'Releases',
+		sub_title: 'Stay in the loop ✦',
+		sub_text: 'Get notified about new plugins, updates &amp; maintenance.',
+		sub_btn: 'Subscribe',
+		sub_note: 'No spam — only release announcements. Your email stays with MailerLite.',
+		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.'
+	};
+
+	var EL = {
+		tagline: 'Δωρεάν, ανοιχτού κώδικα WordPress &amp; WooCommerce plugins — σκούρα αισθητική, μινιμαλιστικά, privacy-first.',
+		plugins: 'Plugins',
+		rs_desc: 'Αναφορές πωλήσεων με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν και δυναμικό καταμερισμό εσόδων σε δικαιούχους — συγγραφείς, εκδότες, συνεργάτες. Ρυθμίζεις τα global defaults μία φορά, κάνεις override ανά προϊόν, και κάθε δικαιούχος παρακολουθεί τα καθαρά του κέρδη μέσα από ένα ιδιωτικό, κλειδωμένο portal με πλήρη διαφάνεια: ανάλυση πωλήσεων, έσοδα εκτός πωλήσεων, πληρωμές και υπόλοιπα.',
+		rs_li1: 'Override ΦΠΑ ανά προϊόν με global default (gross × rate ÷ (100 + rate))',
+		rs_li2: 'Ποσοστά δικαιούχων με ζωντανή επικύρωση Σ = 100%',
+		rs_li3: 'Διαφάνεια πωλήσεων: πλήρης τιμή / με έκπτωση (μ.ο. %) / δωρεάν αντίτυπα ανά προϊόν, ποσά προ και μετά ΦΠΑ',
+		rs_li4: 'Ledger εκτός πωλήσεων: έσοδα (θετικά ή αρνητικά) και πληρωμές, κάθε εγγραφή με υποχρεωτική αιτιολογία, ζωντανό υπόλοιπο ανά περίοδο',
+		rs_li5: 'Ζωντανή στήλη Στοκ ανά προϊόν (διάβασμα απευθείας από το WooCommerce, συμπεριλαμβανομένων variable products)',
+		rs_li6: 'Υποχρεωτική αιτιολογία δωρεάν αντιτύπου στο checkout, ενεργοποιείται μόνο από ρυθμιζόμενα κουπόνια — order meta ορατό στο admin',
+		rs_li7: 'Φίλτρα αναφορών ανά προϊόν, δικαιούχο ή αναζήτηση σε τίτλους',
+		rs_li8: 'Εξαγωγές: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) και JSON — καθαρά μέσω <code>admin_init</code>, χωρίς ανάμειξη admin HTML',
+		rs_li9: 'Author Portal (<code>[rs_portal]</code>): οι δικαιούχοι συνδέονται με προσωπικό κλειδί 64 χαρακτήρων και βλέπουν ΜΟΝΟ τα δικά τους έσοδα, με στατιστικά εκπτώσεων, ΦΠΑ, στοκ, ιστορικό ledger και δικό τους CSV — χωρίς λογαριασμούς WP, χωρίς IP logs, όριο 5 προσπαθειών/15 λεπτά',
+		rs_li10: 'Dashboard widget με snapshot τρέχοντος μήνα, top δικαιούχους και σύνοψη ledger',
+		rs_li11: 'Δίγλωσσο UI (Ελληνικά / English), ανά χρήστη',
+		rs_li12: 'Συμβατό με HPOS — καμία επαφή με legacy order tables· καθαρό uninstall δεν αφήνει τίποτα πίσω',
+		rs_download: 'Λήψη v1.3.0 (.zip)',
+		rs_source: 'Πηγαίος κώδικας',
+		rs_releases: 'Εκδόσεις',
+		sub_title: 'Μείνε ενήμερος ✦',
+		sub_text: 'Ενημερώσου για νέα plugins, ενημερώσεις &amp; συντήρηση.',
+		sub_btn: 'Εγγραφή',
+		sub_note: 'Χωρίς spam — μόνο ανακοινώσεις εκδόσεων. Το email σου μένει στη MailerLite.',
+		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, φτιαγμένα με ♥ από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.'
+	};
+
+	var TITLE_EN = 'noxpress — WordPress & WooCommerce plugins by Christos Koulaxizis';
+	var TITLE_EL = 'noxpress — WordPress & WooCommerce plugins από τον Christos Koulaxizis';
+	var DESC_EN = 'noxpress is a collection of free, open-source (MIT) WordPress and WooCommerce plugins by Christos Koulaxizis: revenue splitting with per-product VAT, greeklish permalinks, GDPR consent, bibliographic book metadata and more.';
+	var DESC_EL = 'Το noxpress είναι μια συλλογή δωρεάν, ανοιχτού κώδικα (MIT) plugins WordPress και WooCommerce από τον Christos Koulaxizis: καταμερισμός εσόδων με ΦΠΑ ανά προϊόν, greeklish permalinks, συναίνεση GDPR, βιβλιογραφικά μεταδεδομένα και άλλα.';
+
+	var toggle = document.getElementById('langToggle');
+	if (!toggle) { return; }
+
+	function applyLang(lang) {
+		var dict = (lang === 'el') ? EL : EN;
+
+		document.documentElement.lang = lang;
+		document.title = (lang === 'el') ? TITLE_EL : TITLE_EN;
+
+		var m = document.querySelector('meta[name="description"]');
+		if (m) {
+			m.setAttribute('content', (lang === 'el') ? DESC_EL : DESC_EN);
+		}
+
+		toggle.textContent = (lang === 'el') ? 'EN' : 'ΕΛ';
+
+		var nodes = document.querySelectorAll('[data-i18n]');
+		for (var i = 0; i < nodes.length; i++) {
+			var key = nodes[i].getAttribute('data-i18n');
+			if (Object.prototype.hasOwnProperty.call(dict, key)) {
+				nodes[i].innerHTML = dict[key];
+			}
+		}
+
+		try { localStorage.setItem('nx_lang', lang); } catch (e) { /* private mode */ }
+	}
+
+	toggle.addEventListener('click', function () {
+		current = (current === 'en') ? 'el' : 'en';
+		applyLang(current);
+	});
+
+	var current = 'en';
+	try {
+		if ('el' === localStorage.getItem('nx_lang')) { current = 'el'; }
+	} catch (e) { /* blocked storage */ }
+
+	if ('el' === current) { applyLang('el'); }
+})();
+
+(function () {
 	var btn = document.querySelector('.back-to-top');
 	if (!btn) { return; }
-	var toggle = function () {
+	var t = function () {
 		btn.classList.toggle('visible', window.scrollY > 400);
 	};
-	window.addEventListener('scroll', toggle, { passive: true });
-	toggle();
+	window.addEventListener('scroll', t, { passive: true });
+	t();
 })();
 </script>
 

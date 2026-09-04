@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Revenue Splitter
  * Plugin URI:        https://noxpress.tech
- * Description:       Προβολή πωλήσεων/εσόδων WooCommerce, αυτόματη αφαίρεση ΦΠΑ ανά προϊόν και καταμερισμός ποσοστών σε δικαιούχους.
- * Version:           1.1.3
+ * Description:       Πωλήσεις/έσοδα WooCommerce με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν, καταμερισμός σε δικαιούχους, ledger εκτός πωλήσεων & πληρωμών, υποχρεωτική αιτιολογία δωρεάν αντιτύπων και Author Portal με προσωπικά κλειδιά.
+ * Version:           1.3.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Christos Koulaxizis
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RS_VERSION', '1.1.3' );
+define( 'RS_VERSION', '1.3.1' );
 define( 'RS_FILE', __FILE__ );
 define( 'RS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RS_URL', plugin_dir_url( __FILE__ ) );
@@ -43,6 +43,8 @@ function rs_bootstrap(): void {
 	require_once RS_PATH . 'includes/class-vat.php';
 	require_once RS_PATH . 'includes/class-beneficiaries.php';
 	require_once RS_PATH . 'includes/class-reports.php';
+	require_once RS_PATH . 'includes/class-ledger.php';
+	require_once RS_PATH . 'includes/class-checkout.php';
 	require_once RS_PATH . 'includes/class-admin-ui.php';
 	require_once RS_PATH . 'includes/class-portal.php';
 
@@ -50,8 +52,17 @@ function rs_bootstrap(): void {
 	RS_VAT::init();
 	RS_Beneficiaries::init();
 	RS_Reports::init();
+	RS_Ledger::init();
+	RS_Checkout::init();
 	RS_Admin_UI::init();
 	RS_Portal::init();
+
+	// WP-CLI (v1.3.0): wp rs report / ledger-add / ledger-list /
+	// ledger-delete / balance / backup.
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		require_once RS_PATH . 'includes/class-cli.php';
+		RS_CLI::init();
+	}
 }
 
 function rs_missing_woo_notice(): void {

@@ -1,8 +1,14 @@
 /**
- * Revenue Splitter — scoped dark admin theme (v1.1.2).
+ * Revenue Splitter — scoped dark admin theme (v1.3.1).
  * v1.1.2: Hardened! Το WP admin core + plugins (WP Rocket, Imagify…)
  * παράγουν light-theme rules με υψηλότερη ειδικότητα πάνω στους πίνακες.
  * Κρίσιμα table rules με !important ώστε το dark panel να ΜΕΝΕΙ αδιαπέρατο.
+ *
+ * v1.3.1: Συγχρονισμός με το markup των Parts 2/5/6:
+ *  - νέα: .rs-col-del / .rs-ben-name (metabox), .rs-newkey code (portal keys),
+ *    .rs-muted, dark widget (.rs-widget-table), .rs-remove-row σε πίνακες.
+ *  - αφαίρεση: ορφανά rules (#rs_quick_glance block, rs_export_format dropdown)
+ *    που δεν παράγονται πια από το v1.3.1 markup.
  */
 
 /* ---------- Το dark panel ---------- */
@@ -89,6 +95,8 @@
 	padding: 16px 20px;
 }
 
+/* v1.3.1 FIX (#5): το markup γράφει πλέον <span class="rs-kpi-label"> —
+   το rule ταιριάζει επιτέλους (πριν targeted ανύπαρκτο σκέτο <span>). */
 .rs-kpi-label {
 	display: block;
 	font-size: 12px;
@@ -203,7 +211,28 @@ table.widefat.rs-table {
 	color: #ece9fd !important;
 }
 
-/* ---------- Beneficiary editor ---------- */
+/* v1.3.1: το dashboard markup (Part 5) τυπώνει splits ως
+   name + <span class="rs-muted">pct% · amount</span>. */
+.rs-table .rs-muted,
+.rs-muted {
+	color: #b7b2d6 !important;
+}
+
+/* v1.3.1: το κουμπί διαγραφής (×) στους πίνακες ledger. */
+.rs-table .rs-remove-row {
+	color: #b7b2d6 !important;
+	cursor: pointer;
+	border: 0;
+	background: none;
+	padding: 2px 6px;
+	font-size: 15px;
+	line-height: 1;
+}
+.rs-table .rs-remove-row:hover {
+	color: #ff9a9a !important;
+}
+
+/* ---------- Beneficiary editor (metabox) ---------- */
 
 .rs-split-table {
 	max-width: 640px;
@@ -237,11 +266,24 @@ table.widefat.rs-table {
 	max-width: 110px;
 }
 
+/* v1.3.1: στήλες του metabox markup (Part 2) —
+   name / percent / delete-button. */
 .rs-col-name { width: 55%; }
 .rs-col-pct  { width: 30%; }
+.rs-col-del  { width: 36px; }
 
-.rs-remove-row { color: #b7b2d6 !important; cursor: pointer; }
-.rs-remove-row:hover { color: #ff9a9a !important; }
+.rs-split-table .rs-ben-name { width: 100%; }
+
+.rs-split-table .rs-remove-row {
+	color: #b7b2d6 !important;
+	cursor: pointer;
+	border: 0;
+	background: none;
+	padding: 2px 6px;
+	font-size: 15px;
+	line-height: 1;
+}
+.rs-split-table .rs-remove-row:hover { color: #ff9a9a !important; }
 
 .rs-total-line { margin-top: 10px; font-size: 14px; color: #eae8fa; }
 .rs-total.ok { color: #8fe6ab; }
@@ -268,6 +310,23 @@ table.widefat.rs-table {
 	color: #f2f0fe;
 }
 
+/* ---------- Portal keys (v1.3.1, Part 6) ---------- */
+
+/* Το plaintext κλειδί εμφανίζεται ΜΙΑ φορά μετά το rotate —
+   ενισχυμένη ευανάγνωστη μορφή + click-to-select. */
+.rs-newkey code {
+	display: inline-block;
+	font-size: 1.15em;
+	padding: 8px 14px;
+	margin: 8px 0;
+	background: #0f1115 !important;
+	border: 1px solid #34394a;
+	border-radius: 4px;
+	color: #f6f4ff !important;
+	user-select: all;
+	overflow-wrap: anywhere;
+}
+
 /* ---------- Footer ---------- */
 
 .rs-footer {
@@ -281,7 +340,7 @@ table.widefat.rs-table {
 .rs-footer a { color: #beb1ff; text-decoration: none; }
 .rs-footer a:hover { text-decoration: underline; }
 
-/* ---------- ΟΡΦΑΝΑ / FORM-TABLE (settings) ---------- */
+/* ---------- FORM-TABLE (settings) ---------- */
 
 .rs-wrap .form-table th,
 .rs-wrap .form-table td {
@@ -294,7 +353,7 @@ table.widefat.rs-table {
 }
 
 /* =====================================================================
- * v1.1.2 ADDITIONS — search, exports, widget, form-table
+ * v1.1.2 ADDITIONS — search, widget, form-table
  * ===================================================================== */
 
 /* Αναζήτηση */
@@ -331,46 +390,29 @@ table.widefat.rs-table {
 .rs-wrap .form-table td p.description,
 .rs-wrap .form-table .description { color: #b7b2d6 !important; }
 
-/* Export format dropdown */
-.rs-period-form select[name="rs_export_format"] { min-width: 130px; }
+/* ---------- Dashboard widget (v1.3.1 markup — Part 5 render_widget) ---------- */
 
-/* ---------- Dashboard widget (noxs palette, hardened) ---------- */
-
-#rs_quick_glance { color-scheme: dark; }
-#rs_quick_glance .inside { background: #14161d; border-radius: 0 0 4px 4px; padding: 12px 16px; }
-#rs_quick_glance .postbox-header { border-bottom: 3px solid #6d4aff; }
-
+/* Το v1.3.1 render_widget() τυπώνει id=rs_widget με απλό πίνακα
+   .rs-widget-table. Τα παλιά rules #rs_quick_glance (.rs-widget-kpis /
+   .rs-widget-ben lists) ΔΕΝ παράγονται πια από κάποιο markup — αφαιρέθηκαν
+   ώστε να μη μένει νεκρό CSS. */
 .rs-widget { color: #eae8fa; }
-.rs-widget .rs-widget-row .rs-widget-label {
-	display: block; font-size: 11px; text-transform: uppercase;
-	letter-spacing: .08em; color: #b7b2d6; margin-bottom: 8px;
+
+.rs-widget-table {
+	width: 100%;
+	margin: 8px 0;
+	border-collapse: collapse;
 }
-.rs-widget ul.rs-widget-kpis {
-	display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0 0 6px; padding: 0;
+.rs-widget-table td {
+	padding: 5px 0;
+	color: #eae8fa;
+	border-bottom: 1px solid #23262f;
 }
-.rs-widget .rs-widget-kpis li {
-	flex: 1 1 45%;
-	background: #17191f;
-	border-left: 3px solid #6d4aff;
-	border-radius: 6px;
-	padding: 10px 14px;
+.rs-widget-table tr:last-child td { border-bottom: none; }
+.rs-widget-table td.num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	color: #f6f4ff !important;
 }
-.rs-widget .rs-widget-kpis span {
-	display: block; font-size: 11px; text-transform: uppercase;
-	letter-spacing: .08em; color: #b7b2d6; margin-bottom: 4px;
-}
-.rs-widget .rs-widget-kpis strong {
-	font-size: 17px; color: #f6f4ff; font-variant-numeric: tabular-nums;
-}
-.rs-widget .rs-widget-section {
-	font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
-	color: #b7b2d6; margin-top: 14px;
-}
-.rs-widget ul.rs-widget-ben { list-style: none; margin: 8px 0; padding: 0; }
-.rs-widget .rs-widget-ben li {
-	display: flex; justify-content: space-between; padding: 6px 0;
-	border-bottom: 1px solid #23262f; color: #eae8fa;
-}
-.rs-widget .rs-widget-ben li:last-child { border-bottom: none; }
 .rs-widget a { color: #beb1ff; text-decoration: none; }
 .rs-widget a:hover { color: #d4c9ff; text-decoration: underline; }

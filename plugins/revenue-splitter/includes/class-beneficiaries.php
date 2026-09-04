@@ -20,6 +20,21 @@
  * που συγκεντρώνει όλα τα ονόματα δικαιούχων (globals + per-product
  * overrides). Το Admin UI dropdown και το Portal το καλούν από εδώ —
  * τέλος στη διπλο-υλοποίηση.
+ *
+ * v1.3.1 FIX (#2): Το validation notice του metabox (rs_split_error_*)
+ * ΔΙΑΒΑΖΕΤΑΙ πλέον και εμφανίζεται ως admin notice μετά το redirect
+ * στην επεξεργασία προϊόντος — τέλος στη σιωπηλή απώλεια του override.
+ *
+ * v1.3.1 FIX (#3): rs_invalidate_cache στο save_meta — τα cached reports
+ * παύουν να σερβίρουν stale καταμερισμό μετά από αλλαγή override σε
+ * προϊόν.
+ *
+ * v1.3.1 FIX (#10): Το wp_unslash() εφαρμόζεται ΜΟΝΟ στα raw $_POST
+ * inputs (μέσα στο save_meta) και ΟΧΙ μέσα στο sanitize_list(). Έτσι
+ * decoded JSON δεδομένα (get_map, import, set_defaults) ΔΕΝ ξανα-unslash-
+ * άρονται — η ιστορική ρίζα του bug «u03a3u03c4». Το sanitize_list()
+ * δέχεται πλέον ΚΑΘΑΡΑ (ήδη-unslashed) δεδομένα και από όλες τις
+ * εισόδους.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -34,6 +49,47 @@ class RS_Beneficiaries {
 		// Metabox στη σελίδα προϊόντος.
 		add_action( 'add_meta_boxes', array( __CLASS__, 'register_metabox' ) );
 		add_action( 'save_post_product', array( __CLASS__, 'save_meta' ), 10, 1 );
+
+		// v1.3.1 FIX (#2): Εμφάνιση του validation notice του metabox.
+		// Το save_meta() τρέχει ΚΑΤΑ τη διάρκεια του redirect POST →
+		// το notice ταξιδεύει σε transient (60") και τυπώνεται στο
+		// επόμενο page load της οθόνης επεξεργασίας προϊόντος.
+		add_action( 'admin_notices', array( __CLASS__, 'show_split_error' ) );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * v1.3.1 FIX (#2): Reader + printer του validation notice.
+	 * ------------------------------------------------------------------- */
+
+	/** Διαβάζει (και αδειάζει) το pending notice του τρέχοντος χρήστη. */
+	public static function take_split_error(): ?string {
+		$msg = get_transient( 'rs_split_error_' . get_current_user_id() );
+		if ( is_string( $msg ) && '' !== $msg ) {
+			delete_transient( 'rs_split_error_' . get_current_user_id() );
+			return $msg;
+		}
+		return null;
+	}
+
+	/** Τυπώνει το notice σαν admin banner (μόνο για admins). */
+	public static function show_split_error(): void {
+
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+
+		$msg = self::take_split_error();
+		if ( null === $msg ) {
+			return;
+		}
+
+		echo '<div class="notice notice-error is-dismissible"><p><strong>'
+			. esc_html__( 'Revenue Splitter:', 'revenue-splitter' )
+			. '</strong> '
+			. esc_html( $msg )
+			. ' <em>'
+			. esc_html__( 'Ο καταμερισμός του προϊόντος ΔΕΝ αποθηκεύτηκε — χρησιμοποιείται η προηγούμενη/κενή τιμή.', 'revenue-splitter' )
+			. '</em></p></div>';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -111,7 +167,7 @@ class RS_Beneficiaries {
 	 * v1.1.3 (#6): Κεντρικό σημείο αλήθειας για ΟΛΑ τα ονόματα.
 	 * ------------------------------------------------------------------- */
 
-		/**
+	/**
 	 * Όλα τα ονόματα δικαιούχων που υπάρχουν στο σύστημα:
 	 * global defaults + όλα τα per-product overrides (αποθηκευμένα).
 	 *
@@ -226,7 +282,12 @@ class RS_Beneficiaries {
 	/**
 	 * Καθαρίζει μία λίστα δικαιούχων.
 	 *
-	 * @param  array[] $list Σχέδιο input από POST (untrusted) ή από τη βάση.
+	 * v1.3.1 FIX (#10): ΚΑΝΕΝΑ wp_unslash() εδώ — η είσοδος θεωρείται
+	 * ήδη-καθαρή (unslashed από τον caller αν προήλθε από $_POST, ή
+	 * json_decoded αν προήλθε από βάση/import). Δεύτερο unslash πάνω
+	 * σε decoded data ήταν η ρίζα του bug «uXXXX» (v1.0.2).
+	 *
+	 * @param  array[] $list Σχέδιο input, ΚΑΘΑΡΟ (unslashed) από κάθε πηγή.
 	 * @return array[]|null null όταν η λίστα είναι άκυρη (Σ ≠ 100, κενά ονόματα, άρνητα ποσοστά).
 	 */
 	public static function sanitize_list( $list ): ?array {
@@ -242,7 +303,8 @@ class RS_Beneficiaries {
 				continue;
 			}
 
-			$name = isset( $row['name'] ) ? sanitize_text_field( wp_unslash( $row['name'] ) ) : '';
+			// Χωρίς wp_unslash — βλ. docblock (#10).
+			$name = isset( $row['name'] ) ? sanitize_text_field( (string) $row['name'] ) : '';
 			$pct  = isset( $row['percent'] ) ? wc_format_decimal( $row['percent'] ) : '';
 
 			// Self-healing: κατεστραμμένα «uXXXX» ονόματα επισκευάζονται εδώ,
@@ -418,19 +480,26 @@ class RS_Beneficiaries {
 		$use_fallback = isset( $_POST['rs_use_fallback'] ); // checkbox ticked = όχι override.
 
 		if ( $use_fallback ) {
-			delete_post_meta( $post_id, self::META_KEY );
+			$deleted = delete_post_meta( $post_id, self::META_KEY );
+
+			// v1.3.1 FIX (#3): invalidate όταν το override πραγματικά αφαιρέθηκε.
+			if ( $deleted ) {
+				do_action( 'rs_invalidate_cache' );
+			}
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input.
-		// ΟΧΙ wp_unslash εδώ: η sanitize_list() κάνει το unslash ΜΙΑ φορά.
+		/*
+		 * v1.3.1 FIX (#10): το wp_unslash γίνεται ΕΔΩ, στα raw $_POST,
+		 * ΜΙΑ φορά — το sanitize_list() δέχεται πλέον καθαρή είσοδο.
+		 */
 		$rows = array();
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input, unlash παρακάτω.
 		if ( isset( $_POST['rs_ben_name'], $_POST['rs_ben_pct'] ) && is_array( $_POST['rs_ben_name'] ) && is_array( $_POST['rs_ben_pct'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$names = array_values( (array) $_POST['rs_ben_name'] );
+			$names = array_values( (array) wp_unslash( $_POST['rs_ben_name'] ) );
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$percs = array_values( (array) $_POST['rs_ben_pct'] );
+			$percs = array_values( (array) wp_unslash( $_POST['rs_ben_pct'] ) );
 
 			foreach ( $names as $i => $n ) {
 				$rows[] = array(
@@ -443,13 +512,18 @@ class RS_Beneficiaries {
 		$clean = self::sanitize_list( $rows );
 
 		if ( null === $clean ) {
-			// Μη περνάμε λάθος δεδομένα. Notice + δεν γράφουμε override
+			// Μη περνάμε λάθος δεδομένα. Notice (v1.3.1: πλέον ΚΑΙ εμφανίζεται
+			// — δες show_split_error) + δεν γράφουμε override
 			// (το προϊόν συνεχίζει να χρησιμοποιεί defaults/προηγούμενη τιμή).
 			set_transient( 'rs_split_error_' . get_current_user_id(), self::error_message_for( $rows ), 60 );
 			return;
 		}
 
 		update_post_meta( $post_id, self::META_KEY, wp_json_encode( $clean ) );
+
+		// v1.3.1 FIX (#3): νέος/αλλαγμένος καταμερισμός → τα cached
+		// reports (dashboard, portal, CLI) πρέπει να ξαναϋπολογιστούν.
+		do_action( 'rs_invalidate_cache' );
 
 		/*
 		 * Το ΦΠΑ (_rs_vat_rate) σώζεται στο RS_VAT::save_field()

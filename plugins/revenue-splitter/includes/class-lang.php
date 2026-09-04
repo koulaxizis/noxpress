@@ -10,10 +10,20 @@
  * Επιλογή γλώσσας: user meta 'rs_lang' ('el' | 'en') — αποθηκεύεται
  * από τη σελίδα Ρυθμίσεων του plugin (RS_Admin_UI::render_settings).
  *
- * v1.1.3 (#8): Συμπλήρωμα λεξικού — καλύπτονται πλέον ΚΑΙ τα strings
- * του Portal (login/dashboard/logout/messages) και τα νέα μηνύματα
- * του rate limiter. Οι ανώνυμοι επισκέπτες του Portal ΔΕΝ επηρεάζονται:
- * δεν έχουν user meta, άρα μένουν στα Ελληνικά.
+ * v1.3.0 FIX (#3): Συμπλήρωμα λεξικού με ΟΛΑ τα strings της v1.2.0/v1.3.0.
+ * v1.3.0: Πρόσθετα strings για — hashed portal keys (UI μηνύματα),
+ * mini chart, lifetime balance, ΦΠΑ ανά συντελεστή, backup/import,
+ * λογιστική δικαιούχων. Καθαρίστηκαν οι διπλές εγγραφές του λεξικού.
+ * v1.3.1: Συμπλήρωμα με τα strings του ΝΕΟΥ portal (shortcode
+ * [author_portal], login όνομα+κλειδί, rate-limiting, key rotation
+ * μέσω transient, μερίδια ανά προϊόν) και του νέου widget/dashboard
+ * (re-audit #5 του επανελέγχου — πριν, EN χρήστες έβλεπαν mixed
+ * Ελληνικά/Αγγλικά στο portal).
+ *
+ * Σημείωση coverage: το Portal frontend δείχνει Ελληνικά στους
+ * ανώνυμους επισκέπτες (δεν έχουν WP session → get_lang() = 'el').
+ * Τα portal strings περιλαμβάνονται ωστόσο στο λεξικό ώστε να
+ * καλύπτονται αν κάποιος δικαιούχος λάβει ποτέ λογαριασμό WP.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -79,8 +89,8 @@ class RS_Lang {
 	}
 
 	/**
-	 * Λεξικό Ελληνικά → English. Καλύπτει ΟΛΑ τα εμφανιζόμενα
-	 * strings του domain 'revenue-splitter' (v1.1.3: incl. Portal).
+	 * Λεξικό Ελληνικά → English — ΟΛΑ τα εμφανιζόμενα strings του
+	 * domain 'revenue-splitter' στην v1.3.1.
 	 */
 	private static $dict = array(
 
@@ -94,7 +104,8 @@ class RS_Lang {
 		'Dashboard'                                              => 'Dashboard',
 		'Ρυθμίσεις'                                              => 'Settings',
 		'Portal'                                                 => 'Portal',
-		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'       => 'You do not have permission to access this page.',
+		'Dεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'       => 'You do not have permission to access this page.',
+		'Πλήρες dashboard →'                                     => 'Full dashboard →', // v1.3.1 (widget).
 
 		// --- Φόρμα περιόδου / φίλτρα ---
 		'Τελευταίες 7 ημέρες'                                    => 'Last 7 days',
@@ -115,10 +126,12 @@ class RS_Lang {
 		// --- KPIs ---
 		'Παραγγελίες'                                            => 'Orders',
 		'Παραγγελίες (περιόδου)'                                 => 'Orders (period)',
+		'%s παραγγελίες'                                         => '%s orders', // v1.3.1 (widget).
 		'Μικτό (με ΦΠΑ)'                                         => 'Gross (incl. VAT)',
 		'ΦΠΑ'                                                    => 'VAT',
 		'Καθαρό (πριν καταμερισμό)'                              => 'Net (before split)',
 		'Καθαρά κέρδη: %s'                                       => 'Net earnings: %s',
+		'καθαρά'                                                 => 'net', // v1.3.1 (widget).
 
 		// --- Πίνακες ---
 		'Ανά προϊόν'                                             => 'Per product',
@@ -130,6 +143,7 @@ class RS_Lang {
 		'Σύνολα ανά δικαιούχο'                                   => 'Totals per beneficiary',
 		'Δεν υπάρχουν δεδομένα δικαιούχων στην περίοδο.'         => 'No beneficiary data in this period.',
 		'Ποσό'                                                   => 'Amount',
+		'Ποσό (περιόδου)'                                        => 'Amount (period)', // v1.3.1 (dashboard/exports).
 		'Προϊόν #%d'                                             => 'Product #%d',
 		'ID'                                                     => 'ID',
 		'ΣΥΝΟΛΑ'                                                 => 'TOTALS',
@@ -169,28 +183,145 @@ class RS_Lang {
 		'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.' => 'Beneficiary percentages add up to %s%% — they must sum to 100%%.',
 		'Το Revenue Splitter απαιτεί WooCommerce για να λειτουργήσει.' => 'Revenue Splitter requires WooCommerce to function.',
 
-		// --- Portal (admin) ---
-		'Νέο κλειδί'                                              => 'New key',
-		'Access Key'                                              => 'Access Key',
-		'Ο δικαιούχος μπαίνει σε σελίδα με το shortcode [rs_portal] και βλέπει ΜΟΝΟ τα δικά του κέρδη. Κανένα IP log, κανένα tracking — μόνο ένα λειτουργικό cookie token 24h.' => 'Beneficiaries log in on a page with the [rs_portal] shortcode and see ONLY their own earnings. No IP logs, no tracking — just one functional 24h cookie token.',
-		'Δεν έχουν ρυθμιστεί δικαιούχοι ακόμη. Πήγαινε στις Ρυθμίσεις.' => 'No beneficiaries configured yet. Go to Settings.',
-		'«Νέο κλειδί» αντικαθιστά το παλιό ΑΜΕΣΩΣ (αν κλεβεί, το ανανεώνεις και τέλος). Στείλε το με ασφαλές κανάλι.' => '«New key» replaces the old one IMMEDIATELY (if leaked, just regenerate). Send it over a secure channel.',
-		'Σημείωση:'                                               => 'Note:',
-		'Νέο κλειδί για: %s — το παλιό σταματά να λειτουργεί άμεσα.' => 'New key for: %s — the old one stops working immediately.',
+		// --- Portal (admin): διαχείριση κλειδιών — v1.3.1 ---
+		'Κάθε δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) με το όνομά του και το προσωπικό του κλειδί.' => 'Each beneficiary signs in on the portal page ([author_portal]) with their name and personal key.',
+		'Δεν υπάρχουν δικαιούχοι ακόμη.'                        => 'No beneficiaries yet.',
+		'Κατάσταση κλειδιού'                                      => 'Key status',
+		'χωρίς κλειδί'                                            => 'no key',
+		'Ανανέωση'                                                => 'Rotate',
+		'Δημιουργία'                                              => 'Create',
+		'Νέο κλειδί για'                                           => 'New key for',
+		'Αντιγράψε το ΤΩΡΑ — δεν θα εμφανιστεί ξανά (αποθηκεύεται μόνο sha256).' => 'Copy it NOW — it will not be shown again (only the sha256 is stored).',
 
-		// --- Portal (frontend / v1.1.3 #8) ---
+		// --- Portal (admin): hashed keys (v1.3.0) ---
+		'Καινούρια κλειδιά — αντιγράψε τα ΤΩΡΑ:'                  => 'New keys — copy them NOW:',
+		'αποθηκεύονται κατακερματισμένα και δεν θα εμφανιστούν ξανά.' => 'they are stored hashed and will never be shown again.',
+		'Κρυφό — αποθηκεύεται κατακερματισμένα.'                  => 'Hidden — stored hashed.',
+		'Πατρωτό (plaintext) κλειδί — ανανέωσέ το για να γίνει hash.' => 'Legacy (plaintext) key — regenerate it to convert it to a hash.',
+
+		// --- Portal (frontend): login — v1.3.1 ---
 		'Author Portal'                                          => 'Author Portal',
-		'Βάλε το προσωπικό σου κλειδί για να δεις τα καθαρά σου κέρδη.' => 'Enter your personal key to see your net earnings.',
-		'Access key'                                             => 'Access key',
-		'Είσοδος'                                                => 'Log in',
-		'Λάθος κλειδί — δοκίμασε ξανά.'                           => 'Wrong key — try again.',
-		'Καλωσόρισες, %s!'                                       => 'Welcome, %s!',
+		'Όνομα'                                                   => 'Name',
+		'Κλειδί'                                                  => 'Key',
+		'Είσοδος'                                                => 'Sign in',
+		'Λάθος όνομα ή κλειδί.'                                   => 'Wrong name or key.',
+		'Πολλές αποτυχημένες προσπάθειες — δοκίμασε ξανά σε 15 λεπτά.' => 'Too many failed attempts — try again in 15 minutes.',
+		'Αποσύνδεση'                                             => 'Log out',
+
+		// --- Portal (frontend): dashboard δικαιούχου — v1.3.1 ---
+		'Αυτόν τον μήνα'                                          => 'This month',
+		'Αποπληρωτέο υπόλοιπο'                                    => 'Outstanding balance',
+		'Τελευταίοι 6 μήνες'                                     => 'Last 6 months',
+		'Αυτόν τον μήνα — ανά προϊόν'                             => 'This month — per product',
+		'Με ΦΠΑ'                                                 => 'With VAT',
+		'Χωρίς ΦΠΑ'                                               => 'Without VAT',
+		'Στοκ'                                                    => 'Stock',
+		'Το μερίδιό μου'                                          => 'My share',
+		'Καμία πώληση των προϊόντων σου αυτόν τον μήνα.'          => 'None of your products sold this month.',
+		'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.' => '"Outstanding balance" = all-time shares from sales + income outside sales − payments received.',
+		'All-time μερίδια από πωλήσεις'                           => 'All-time shares from sales',
+		'Πληρωμές που ελήφθησαν'                                  => 'Payments received',
+		'Ποσοστό'                                                => 'Percent',
+		'Μερίδιο'                                                 => 'Share',
 		'Ποσοστό σου'                                            => 'Your percentage',
 		'Ποσό σου'                                               => 'Your amount',
 		'Καμία πώληση σε αυτή την περίοδο.'                      => 'No sales in this period.',
 		'Εξαγωγή CSV'                                            => 'Export CSV',
-		'Αποσύνδεση'                                             => 'Log out',
+
+		// --- Portal: διαφάνεια πωλήσεων (v1.2.0) ---
+		'Τεμάχια (πληρωμένα)'                                    => 'Items (paid)',
+		'Σε πλήρη τιμή'                                          => 'Full price',
+		'Με έκπτωση'                                             => 'Discounted',
+		'Δωρεάν'                                                 => 'Free',
+		'Καθαρό (καταμεριζόμενο)'                                => 'Net (splittable)',
+		'Πλήρης'                                                 => 'Full',
+		'Έκπτωση'                                                => 'Discount',
+
+		// --- Dashboard: λογοδοσία περιόδου + λογιστική (v1.3.0) ---
+		'Πωλήσεις'                                               => 'Sales',
+		'Υπόλοιπο (περιόδου)'                                    => 'Remaining (period)',
+		'Υπόλοιπο'                                               => 'Remaining',
+		'Συνολικό υπόλοιπο'                                      => 'Lifetime balance',
+		'Έσοδα εκτός πωλήσεων'                                   => 'Non-sales income',
+		'Πληρωμές'                                               => 'Payments',
+		'Λογιστική δικαιούχων'                                   => 'Beneficiary accounting',
+
+		// --- Dashboard: ΦΠΑ ανά συντελεστή (v1.3.0 #8) ---
+		'ΦΠΑ ανά συντελεστή'                                     => 'VAT by rate',
+		'Συντελεστής'                                            => 'Rate',
+
+		// --- Ledger / checkout / stock (v1.3.0) ---
+		'Έσοδα εκτός πωλήσεων & Πληρωμές'                        => 'Non-sales income & Payments',
+		'Πληρωμή'                                                => 'Payment',
+		'Έσοδο'                                                  => 'Income',
+		'Έσοδο (+/−)'                                            => 'Income (+/−)',
+		'Κινήσεις εκτός πωλήσεων'                                => 'Non-sales activity',
+		'Καμία εγγραφή.'                                         => 'No entries.',
+		'Καταχώριση'                                             => 'Add entry',
+		'Η εγγραφή καταχωρήθηκε.'                                => 'Entry added.',
+		'Η εγγραφή διαγράφηκε.'                                  => 'Entry deleted.',
+		'Διαγραφή εγγραφής'                                      => 'Delete entry',
+		'Ημερομηνία'                                             => 'Date',
+		'Τύπος'                                                  => 'Type',
+		'Αιτιολογία'                                             => 'Reason',
+		'Αιτιολογία (υποχρεωτική)…'                              => 'Reason (required)…',
+		'Ποσό (π.χ. 150 ή -40)'                                  => 'Amount (e.g. 150 or -40)',
+		'Άκυρος τύπος εγγραφής.'                                 => 'Invalid entry type.',
+		'Μη έγκυρη ημερομηνία.'                                  => 'Invalid date.',
+		'Επίλεξε δικαιούχο.'                                     => 'Select a beneficiary.',
+		'Μη έγκυρο ποσό.'                                        => 'Invalid amount.',
+		'Το ποσό δεν μπορεί να είναι μηδέν.'                     => 'Amount cannot be zero.',
+		'Η αιτιολογία είναι υποχρεωτική.'                         => 'A reason is required.',
+		'Δεν υπάρχουν δικαιούχοι ακόμη — δεν μπορεί να συντηρηθεί ledger.' => 'No beneficiaries yet — the ledger cannot be maintained.',
+		'Κουπόνια δωρεάν αντιτύπων'                               => 'Free-copy coupons',
+		'Κωδικοί κουπονιών'                                      => 'Coupon codes',
+		'Αιτιολογία δωρεάν αντιτύπου'                             => 'Free copy reason',
+		'π.χ. δώρο, διαγωνισμός, κριτική βιβλίου…'               => 'e.g. gift, giveaway, book review…',
+		'Παρακαλώ συμπλήρωσε την αιτιολογία δωρεάν αντιτύπου.'    => 'Please provide the reason for your free copy.',
+		'Ledger (τρέχων μήνας)'                                   => 'Ledger (current month)',
+		'Προσαρμογές εκτός WooCommerce: bonus, υποτροφίες, διορθώσεις («Έσοδο», + ή −) και αποπληρωμές («Πληρωμή», πάντα θετικές). Κάθε εγγραφή χρειάζεται αιτιολογία.' => 'Adjustments outside WooCommerce: bonuses, grants, corrections ("Income", + or −) and payouts ("Payment", always positive). Every entry requires a reason.',
+		'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να συμπληρώσει αιτιολογία δωρεάν αντιτύπου. Διαχωρισμός με κόμμα.' => 'When any of these coupons is applied at checkout, the customer must provide a reason for the free copy. Comma-separated.',
+		'Η πληρωμή πρέπει να είναι θετικό ποσό (ποσά που αφαιρούνται καταχωρούνται ως «Έσοδο» με αρνητική τιμή).' => 'A payment must be a positive amount (deductions are entered as "Income" with a negative value).',
+		'Άγνωστος δικαιούχος — αποθηκεύεις πρώτα τους δικαιούχους στις Ρυθμίσεις;' => 'Unknown beneficiary — did you save the beneficiaries in Settings first?',
+		'Έσοδα εκτός πωλήσεων (περιόδου)'                         => 'Non-sales income (period)',
+		'Πληρωμές (περιόδου)'                                     => 'Payments (period)',
+
+		// --- Portal CSV headers (v1.2.0/v1.3.0) ---
+		'Πλήρης τιμή (τεμ.)'                                     => 'Full price (qty)',
+		'Με έκπτωση (τεμ.)'                                      => 'Discounted (items)',
+		'Μέση έκπτωση (%)'                                       => 'Average discount (%)',
+		'Δωρεάν (τεμ.)'                                          => 'Free (items)',
+		'Ποσοστό σου (%)'                                        => 'Your percentage (%)',
+
+		// --- Backup / Import (v1.3.0 #4) ---
+		'Backup & Επαναφορά'                                     => 'Backup & Restore',
+		'Εισαγωγή state (JSON)'                                  => 'Import state (JSON)',
+		'Εξαγωγή state (JSON)'                                   => 'Export state (JSON)',
+		'Συμπεριλαμβάνονται: ΦΠΑ default, δικαιούχοι, κλειδιά portal (hashed), ledger, κουπόνια. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, beneficiaries, portal keys (hashed), ledger, coupons. Importing REPLACES the corresponding data.',
+		'Μη έγκυρο αρχείο backup (λείπουν τα options).'           => 'Invalid backup file (missing options).',
+		'Μη έγκυρο blob κλειδιών portal.'                        => 'Invalid portal keys blob.',
+		'Μη έγκυρο blob ledger (JSON).'                          => 'Invalid ledger blob (JSON).',
+		'Ledger: εισήχθησαν %d εγγραφές (με πλήρη validation).'  => 'Ledger: %d entries imported (fully validated).',
+		'Η εισαγωγή ολοκληρώθηκε.'                               => 'Import completed.',
+		'Δεν επιλέχθηκε αρχείο JSON.'                            => 'No JSON file selected.',
+		'Το αρχείο δεν είναι έγκυρο JSON.'                       => 'The file is not valid JSON.',
+		'Όνομα|Ποσοστό (μία γραμμή ανά δικαιούχο)'               => 'Name|Percentage (one beneficiary per line)',
+
+		// --- LEGACY (v1.2.0 portal UI) — ασφαλείς για διαγραφή
+		// μετά την υιοθέτηση του νέου portal (Parts 3/5, v1.3.1).
+		// Διατηρούνται προς το παρόν 1:1. ---
+		'Access Key'                                              => 'Access Key',
+		'Access key'                                             => 'Access key',
+		'Βάλε το προσωπικό σου κλειδί για να δεις τα καθαρά σου κέρδη.' => 'Enter your personal key to see your net earnings.',
+		'Λάθος κλειδί — δοκίμασε ξανά.'                           => 'Wrong key — try again.',
+		'Καλωσόρισες, %s!'                                       => 'Welcome, %s!',
 		'Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε 15 λεπτά.' => 'Too many failed attempts. Try again in 15 minutes.',
 		'Η συνεδρία έληξε. Ξανασυνδέσου με το κλειδί σου.'        => 'Your session has expired. Log in again with your key.',
+		'Ο δικαιούχος μπαίνει σε σελίδα με το shortcode [rs_portal] και βλέπει ΜΟΝΟ τα δικά του κέρδη. Κανένα IP log, κανένα tracking — μόνο ένα λειτουργικό cookie token 24h.' => 'Beneficiaries log in on a page with the [rs_portal] shortcode and see ONLY their own earnings. No IP logs, no tracking — just one functional 24h cookie token.',
+		'Δεν έχουν ρυθμιστεί δικαιούχοι ακόμη. Πήγαινε στις Ρυθμίσεις.' => 'No beneficiaries configured yet. Go to Settings.',
+		'«Νέο κλειδί» αντικαθιστά το παλιό ΑΜΕΣΩΣ (αν κλεβεί, το ανανεώνεις και τέλος). Στείλε το με ασφαλές κανάλι. Το κλειδί εμφανίζεται μόνο μία φορά, κατά τη δημιουργία.' => '«New key» replaces the old one IMMEDIATELY (if leaked, just regenerate). Send it over a secure channel. The key is shown only once, at creation.',
+		'Σημείωση:'                                               => 'Note:',
+		'Νέο κλειδί'                                              => 'New key',
+		'Νέο κλειδί για: %s — το παλιό σταματά να λειτουργεί άμεσα.' => 'New key for: %s — the old one stops working immediately.',
 	);
 }

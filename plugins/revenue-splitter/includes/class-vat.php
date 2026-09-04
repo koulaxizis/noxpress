@@ -17,6 +17,10 @@
  * Αποθήκευση: το 'woocommerce_admin_process_product_object' εξακολουθεί
  * να καλείται σε ΚΑΘΕ save του προϊόντος (classic editor) και διαβάζει
  * το $_POST['_rs_vat_rate'] ανεξάρτητα από το πού το πεδίο είναι rendered.
+ *
+ * v1.3.1 FIX (#3): rs_invalidate_cache στα saves — τα cached reports
+ * (dashboard / portal / CLI) παύουν να σερβίρουν stale ΦΠΑ μετά από
+ * αλλαγή συντελεστή σε προϊόν.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -91,7 +95,12 @@ class RS_VAT {
 
 		if ( '' === $submitted ) {
 			// Κενό = «δεν ορίστηκε» → πέφτει στο global default.
-			delete_post_meta( $product->get_id(), self::META_KEY );
+			$deleted = delete_post_meta( $product->get_id(), self::META_KEY );
+
+			// Invalidate μόνο αν άλλαξε κάτι.
+			if ( $deleted ) {
+				do_action( 'rs_invalidate_cache' );
+			}
 			return;
 		}
 
@@ -99,6 +108,7 @@ class RS_VAT {
 
 		if ( '' !== $value && is_numeric( $value ) && (float) $value >= 0 && (float) $value <= 100 ) {
 			update_post_meta( $product->get_id(), self::META_KEY, (string) $value );
+			do_action( 'rs_invalidate_cache' );
 		}
 		// Άκυρη τιμή → δεν γράφουμε τίποτα, δεν σβήνουμε τίποτα.
 		// (Το number input min/max/step του browser κάνει το πρώτο επίπεδο
