@@ -1,5 +1,5 @@
 /**
- * Revenue Splitter — scoped dark admin theme (v1.3.1).
+ * Revenue Splitter — scoped dark admin theme (v1.3.3).
  * v1.1.2: Hardened! Το WP admin core + plugins (WP Rocket, Imagify…)
  * παράγουν light-theme rules με υψηλότερη ειδικότητα πάνω στους πίνακες.
  * Κρίσιμα table rules με !important ώστε το dark panel να ΜΕΝΕΙ αδιαπέρατο.
@@ -9,6 +9,11 @@
  *    .rs-muted, dark widget (.rs-widget-table), .rs-remove-row σε πίνακες.
  *  - αφαίρεση: ορφανά rules (#rs_quick_glance block, rs_export_format dropdown)
  *    που δεν παράγονται πια από το v1.3.1 markup.
+ *
+ * v1.3.2 FIX (#6): Το .rs-vat-input ευθυγραμμίζεται με τα υπόλοιπα input rules
+ * του metabox (background/border/color + !important + border-radius + shadow
+ * reset) — δεν μένει πια το μοναδικό input που μπορεί να τυπωθεί light
+ * μέσα στο dark panel από core/plugin overrides.
  */
 
 /* ---------- Το dark panel ---------- */
@@ -111,6 +116,14 @@
 	font-size: 22px;
 	font-variant-numeric: tabular-nums;
 	color: #f6f4ff !important;
+}
+
+/* v1.3.3 FIX (#2): το .rs-neg στους KPIs ΔΕΝ καλύπτονταν από το
+   .rs-table .rs-neg (scoped μόνο σε πίνακες) — το KPI «ΦΠΑ» στο
+   dashboard τυπωνόταν λευκό σαν τα υπόλοιπα. Specificity 0-2-0 vs
+   0-1-1 του .rs-kpi strong: κερδίζει και στα δύο !important. */
+.rs-kpi .rs-neg {
+	color: #f5c97e !important;
 }
 
 /* ---------- Πίνακες — HARDENED (το βασικό σημείο του fix) ---------- */
@@ -303,11 +316,15 @@ table.widefat.rs-table {
 
 #rs_split_metabox .inside { background: transparent; }
 
+/* v1.3.2 FIX (#6): ίδιο hardness με τα .rs-split-table inputs —
+   background/border/color κλειδωμένα, shadow reset. */
 .rs-vat-input {
 	margin-right: 8px;
-	background: #0f1115;
-	border: 1px solid #34384a;
-	color: #f2f0fe;
+	background: #0f1115 !important;
+	border: 1px solid #34384a !important;
+	color: #f2f0fe !important;
+	border-radius: 3px;
+	box-shadow: none;
 }
 
 /* ---------- Portal keys (v1.3.1, Part 6) ---------- */
@@ -395,7 +412,9 @@ table.widefat.rs-table {
 /* Το v1.3.1 render_widget() τυπώνει id=rs_widget με απλό πίνακα
    .rs-widget-table. Τα παλιά rules #rs_quick_glance (.rs-widget-kpis /
    .rs-widget-ben lists) ΔΕΝ παράγονται πια από κάποιο markup — αφαιρέθηκαν
-   ώστε να μη μένει νεκρό CSS. */
+   ώστε να μη μένει νεκρό CSS.
+   v1.3.2 FIX (#1): το admin.css φορτώνεται πλέον ΚΑΙ στο index.php (hook
+   του dashboard) ώστε αυτοί οι κανόνες να εφαρμόζονται πραγματικά. */
 .rs-widget { color: #eae8fa; }
 
 .rs-widget-table {

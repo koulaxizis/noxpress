@@ -1,6 +1,6 @@
 <?php
 /**
- * RS_Portal — Author Portal (frontend, v1.3.0).
+ * RS_Portal — Author Portal (frontend, v1.3.2).
  *
  * Shortcode: [author_portal]
  *
@@ -40,6 +40,24 @@
  * ποτέ σε URL/query string (browser history, access logs, analytics).
  * Ιδίως handlers, μάσκα στο όνομα του prefix, καθαρισμένο από το
  * uninstall.php v1.3.1.
+ *
+ * v1.3.2 FIX (#2): Το route_admin_keys() επικυρώνει πλέον το όνομα
+ * ($_GET['rs_regen']) έναντι του RS_Beneficiaries::collect_names()
+ * ΠΡΙΝ το rotate_key(). Παλιά: ένα typo στο query string δημιουργούσε
+ * orphan κλειδί στο option 'rs_portal_keys' — αόρατο στον πίνακα του
+ * render_admin() (δεν περιλαμβάνεται στο collect_names()), αδύνατο να
+ * διαγραφεί από το UI, και «έκαιγε» άσκοπα το one-shot transient.
+ * Τώρα: άγνωστο/κενό όνομα → silent redirect, μηδέν εγγραφή.
+ *
+ * v1.3.2 FIX (#5): client_ip() — honor CF-Connecting-IP / το πρώτο hop
+ * του X-Forwarded-For ΜΟΝΟ όταν το REMOTE_ADDR ανήκει σε private/
+ * reserved range (δηλ. request μέσω reverse proxy / load balancer).
+ * Παλιά: σκέτο REMOTE_ADDR → πίσω από Cloudflare/nginx ΟΛΟΙ οι
+ * επισκέπτες μοιράζονταν την IP του proxy → 5 αποτυχημένα logins από
+ * οποιονδήποτε κλείδωναν το portal για ΟΛΟΥΣ (self-DoS), ενώ ο
+ * πραγματικός attacker δοκίμαζε πιο προσεκτικά. Αμυντικά: σε public
+ * REMOTE_ADDR (απευθείας σύνδεση) ΚΑΝΕΝΑ forwarded header δεν
+ * εμπιστεύεται — spoofable, θα ήταν rate-limit bypass.
  *
  * Σχέδιο αποθήκευσης κλειδιών: option 'rs_portal_keys' =
  * JSON { name => 'sha256:<64 hex>' }. Legacy plaintext τιμές
@@ -89,6 +107,10 @@ final class RS_Portal {
 	 * Το plaintext κλειδί ΔΕΝ αποθηκεύεται πουθενά — ταξιδεύει σε one-shot
 	 * transient (60") και εμφανίζεται μία φορά στο page render που ακολουθεί
 	 * το redirect (re-audit #6: ποτέ σε query string).
+	 *
+	 * v1.3.2 FIX (#2): Το όνομα ΕΠΑΛΗΘΕΥΕΤΑΙ έναντι του collect_names()
+	 * πριν το rotate — typo/obsolete όνομα → silent redirect, κανένα
+	 * orphan κλειδί στο option, κανένα wasted transient.
 	 */
 	public static function route_admin_keys(): void {
 
@@ -109,6 +131,16 @@ final class RS_Portal {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$who = sanitize_text_field( wp_unslash( $_GET['rs_regen'] ) );
 
+		// v1.3.2 FIX (#2): μόνο ΓΝΩΣΤΟΙ δικαιούχοι (global defaults +
+		// αποθηκευμένα per-product overrides). Παλιά: κάθε typo έγραφε
+		// orphan κλειδί που δεν φαινόταν πουθενά.
+		if ( '' === $who
+			|| ! class_exists( 'RS_Beneficiaries' )
+			|| ! in_array( $who, RS_Beneficiaries::collect_names(), true ) ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG_ADMIN ) );
+			exit;
+		}
+
 		$plain = self::rotate_key( $who );
 
 		if ( '' !== $plain ) {
@@ -128,8 +160,8 @@ final class RS_Portal {
 			return '';
 		}
 
-		$keys        = self::all_keys();
-		$plain       = wp_generate_password( 48, false, false );
+		$keys         = self::all_keys();
+		$plain        = wp_generate_password( 48, false, false );
 		$keys[ $who ] = self::hash_key( $plain );
 
 		update_option( 'rs_portal_keys', wp_json_encode( $keys, JSON_UNESCAPED_UNICODE ) );
@@ -154,7 +186,7 @@ final class RS_Portal {
 			<h1><?php esc_html_e( 'Revenue Splitter — Portal', 'revenue-splitter' ); ?></h1>
 
 			<?php if ( '' !== $new_key && false !== strpos( $new_key, '|' ) ) : ?>
-				<?php list( $for, $secret ) = explode( '|', $new_key, 2 ); // phpcs:ignore WordPress.Security.VariableAnalysis ?>
+				<?php list( $for, $secret ) = explode( '|', $new_key, 2 ); // phpcs:ignore WordPress.PHP.DisallowShortOpenTag ?>
 				<div class="notice notice-success rs-newkey">
 					<p>
 						<strong><?php esc_html_e( 'Νέο κλειδί για', 'revenue-splitter' ); ?> <?php echo esc_html( $for ); ?>:</strong><br />
@@ -247,9 +279,9 @@ final class RS_Portal {
 	}
 
 	/**
-	 * Επαλήθευση κλειδιού. Legacy plaintext τιμές αναβαθμίζονται αυτόματα
+	 * Επαλήθευση κειδιού. Legacy plaintext τιμές αναβαθμίζονται αυτόματα
 	 * σε sha256 στο πρώτο επιτυχημένο login (silent migration — συμβατό
-	 * με τα legacy backups που δέχεται το import, βλ. Part 5 / #6).
+	 * με τα legacy backups που δέχεται το import, βλ. RS_Admin_UI / #6).
 	 */
 	private static function verify_key( string $who, string $plain ): bool {
 
@@ -420,9 +452,75 @@ final class RS_Portal {
 		delete_transient( self::rl_key( $who ) );
 	}
 
+	/**
+	 * v1.3.2 FIX (#5): πραγματική IP επισκέπτη.
+	 *
+	 * Πίσω από reverse proxy (Cloudflare/nginx/LB) το REMOTE_ADDR είναι
+	 * η IP του proxy για ΟΛΟΥΣ τους επισκέπτες: χωρίς χειρισμό, 5
+	 * αποτυχημένα logins από οποιονδήποτε = lockout όλων (self-DoS).
+	 *
+	 * Πολιτική (defensive):
+	 *  - Forwarded headers honored ΜΟΝΟ όταν το REMOTE_ADDR είναι
+	 *    private/reserved — δηλαδή η request ΕΠΙΒΕΒΑΙΩΜΕΝΑ ήρθε από
+	 *    proxy hop στο ίδιο network.
+	 *  - Public REMOTE_ADDR (άμεση σύνδεση) → καμία εμπιστοσύνη σε
+	 *    spoofable headers. Συμπεριφορά IDENTICA με v1.3.1.
+	 *  - Cloudflare (CF-Connecting-IP) priority, μετά πρώτο XFF hop.
+	 */
 	private static function client_ip(): string {
+
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- IP addresses.
-		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
+		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+
+		if ( '' === $remote ) {
+			return 'unknown';
+		}
+
+		// Public REMOTE_ADDR = άμεση σύνδεση → REMOTE_ADDR είναι ήδη η
+		// πραγματική IP. ΚΑΝΕΝΑ forwarded header δεν εμπιστεύεται.
+		if ( ! self::is_reserved( $remote ) ) {
+			return $remote;
+		}
+
+		// Reserved hop (proxy / load balancer) → η πραγματική IP έρχεται
+		// από τα forwarded headers του αξιόπιστου hop.
+
+		// Cloudflare: CF-Connecting-IP (single value, set από το edge).
+		if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
+			$cf = trim( (string) $_SERVER['HTTP_CF_CONNECTING_IP'] );
+			if ( '' !== $cf && false !== filter_var( $cf, FILTER_VALIDATE_IP ) ) {
+				return $cf;
+			}
+		}
+
+		// Generic proxy: το ΠΡΩΤΟ (αριστερό) στοιχείο του X-Forwarded-For
+		// = ο αρχικός client (set από το πρώτο trusted hop).
+		if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- IP chain.
+			$chain = array_map( 'trim', explode( ',', (string) $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+			if ( ! empty( $chain[0] ) && false !== filter_var( $chain[0], FILTER_VALIDATE_IP ) ) {
+				return $chain[0];
+			}
+		}
+
+		return $remote;
+	}
+
+	/**
+	 * TRUE όταν η IP είναι private/reserved (RFC1918, loopback,
+	 * link-local, CGNAT 100.64/10, 0.0.0.0/8…) — δηλαδή ΔΕΝ είναι
+	 * public visitor IP. Τότε (και μόνο τότε) η σύνδεση θεωρείται ότι
+	 * έρχεται από proxy/load balancer στο ίδιο network.
+	 */
+	private static function is_reserved( string $ip ): bool {
+
+		if ( '' === $ip || 'unknown' === $ip ) {
+			return false;
+		}
+
+		// Το filter_var με τα NO_PRIV_RANGE|NO_RES_RANGE επιστρέφει FALSE
+		// όταν η IP ΕΙΝΑΙ private/reserved → η άρνηση σημαίνει «reserved».
+		return false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 	}
 
 	/* =====================================================================
@@ -480,6 +578,11 @@ final class RS_Portal {
 	/* ---------- Dashboard (συνδεδεμένος δικαιούχος) ---------- */
 
 	private static function render_dashboard( string $who ): void {
+
+		// v1.3.3 FIX (#1): το dashboard του συνδεδεμένου δικαιούχου δεν
+		// τύπωνε ΠΟΤΕ το CSS (μόνο το render_login() το έκανε) —
+		// unstyled KPIs/chart/πίνακες μετά το login.
+		self::print_css();
 
 		$now   = new DateTimeImmutable( 'now', wp_timezone() );
 		$today = $now->format( 'Y-m-d' );
@@ -628,7 +731,20 @@ final class RS_Portal {
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=UTF-8' );
-		header( 'Content-Disposition: attachment; filename="portal-' . sanitize_key( $who ) . '-' . $today . '.csv"' );
+
+		// v1.3.3 FIX (#3): το sanitize_key() σβήνει ΚΑΘΕ ελληνικό
+		// χαρακτήρα — «Στέλιος» γινόταν «portal--2026-09-04.csv».
+		// Πλέον: ASCII-safe fallback filename + RFC 5987 filename*
+		// με το κανονικό όνομα (modern browsers το προτιμούν).
+		$ascii = trim( (string) preg_replace( '/[^A-Za-z0-9_-]+/', '-', $who ), '-' );
+		if ( '' === $ascii ) {
+			$ascii = 'beneficiary';
+		}
+		header(
+			'Content-Disposition: attachment; '
+			. 'filename="portal-' . $ascii . '-' . $today . '.csv"'
+			. "; filename*=UTF-8''" . rawurlencode( 'portal-' . $who . '-' . $today . '.csv' )
+		);
 
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // BOM.

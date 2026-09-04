@@ -35,6 +35,25 @@
  * άρονται — η ιστορική ρίζα του bug «u03a3u03c4». Το sanitize_list()
  * δέχεται πλέον ΚΑΘΑΡΑ (ήδη-unslashed) δεδομένα και από όλες τις
  * εισόδους.
+ *
+ * v1.3.1 FIX (#4 re-audit): ΑΠΑΓΟΡΕΥΣΗ του χαρακτήρα '|' στα ονόματα
+ * δικαιούχων (sanitize_list → null). Το '|' είναι DELIMITER σε ΤΡΕΙΣ
+ * κρίσιμα σημεία του οικοσυστήματος:
+ *  - transient rs_newkey_<uid> (rotated key: 'Όνομα|plaintext'),
+ *  - textarea global defaults ('Όνομα|Ποσοστό'),
+ *  - CSV/clipboard conventions.
+ * Ένα όνομα με '|' έσπαγε το explode('|', ..., 2) του portal key render
+ * (εμφανιζόταν ΛΑΘΟΣ plaintext split) και απορρίπτονταν μόνο αργά, στο
+ * settings textarea. Τώρα: rejected στο μόνο κεντρικό σημείο ελέγχου —
+ * πριν αποθηκευτεί ΠΟΤΕ.
+ *
+ * v1.3.1 FIX (#7 re-audit): error_message_for() formatάρει το άθροισμα
+ * με number_format_i18n(…, 2) — τέλος στα πιθανά «95.0000000001».
+ *
+ * v1.3.2 CLEANUP (#8): Αφαίρεση του ορφανού hidden input .rs-template-row
+ * από το render_metabox() — το admin.js (addRow) κλωνοποιεί πάντα την
+ * πρώτη γραμμή του tbody και δεν διαβάζει ΠΟΤΕ το template. Νεκρό markup,
+ * καθαρή αφαίρεση, μηδέν λειτουργική επίδραση.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -287,8 +306,14 @@ class RS_Beneficiaries {
 	 * json_decoded αν προήλθε από βάση/import). Δεύτερο unslash πάνω
 	 * σε decoded data ήταν η ρίζα του bug «uXXXX» (v1.0.2).
 	 *
+	 * v1.3.1 FIX (#4 re-audit): Ονόματα που περιέχουν '|' απορρίπτονται
+	 * (ολόκληρη η λίστα → null). Το '|' είναι delimiter στο key-rotation
+	 * transient ('Όνομα|plaintext') και στο textarea notation — ένα
+	 * τέτοιο όνομα έσπαγε το explode του portal και μπερδευόταν μόνο
+	 * στο settings textarea. Reject εδώ = κεντρικός, έγκαιρος έλεγχος.
+	 *
 	 * @param  array[] $list Σχέδιο input, ΚΑΘΑΡΟ (unslashed) από κάθε πηγή.
-	 * @return array[]|null null όταν η λίστα είναι άκυρη (Σ ≠ 100, κενά ονόματα, άρνητα ποσοστά).
+	 * @return array[]|null null όταν η λίστα είναι άκυρη (Σ ≠ 100, κενά ονόματα, άρνητα ποσοστά, '|' σε όνομα).
 	 */
 	public static function sanitize_list( $list ): ?array {
 
@@ -310,6 +335,13 @@ class RS_Beneficiaries {
 			// Self-healing: κατεστραμμένα «uXXXX» ονόματα επισκευάζονται εδώ,
 			// τόσο σε νέα όσο και σε αποθηκευμένα δεδομένα (μέσω get_map).
 			$name = self::repair_unicode_escapes( $name );
+
+			// v1.3.1 FIX (#4 re-audit): '|' = delimiter του οικοσυστήματος —
+			// απαγορεύεται εντός ονόματος (rip-through, όχι αγνόηση: το μήνυμα
+			// λάθους του caller εξηγεί το πρόβλημα, το όνομα ΔΕΝ σώζεται silent).
+			if ( false !== strpos( $name, '|' ) ) {
+				return null;
+			}
 
 			if ( '' === $name || '' === $pct || ! is_numeric( $pct ) ) {
 				return null;
@@ -353,8 +385,10 @@ class RS_Beneficiaries {
 				$total += (float) $row['percent'];
 			}
 		}
+		// v1.3.1 FIX (#7 re-audit): number_format_i18n αντί raw float —
+		// τέλος στα πιθανά «95.0000000001» στο notice.
 		// translators: %s: the actual sum the user submitted.
-		return sprintf( __( 'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.', 'revenue-splitter' ), $total );
+		return sprintf( __( 'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.', 'revenue-splitter' ), number_format_i18n( $total, 2 ) );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -452,9 +486,6 @@ class RS_Beneficiaries {
 					<?php esc_html_e( 'Δεν έχουν ρυθμιστεί global defaults. Πήγαινε στο WP-admin → Revenue Splitter → Ρυθμίσεις.', 'revenue-splitter' ); ?>
 				</p>
 			<?php endif; ?>
-
-			<input type="hidden" class="rs-template-row"
-				data-name-placeholder="<?php esc_attr_e( 'Όνομα δικαιούχου', 'revenue-splitter' ); ?>" />
 		</div>
 		<?php
 	}

@@ -34,6 +34,20 @@
  * (stream_csv) το καλεί εξωτερικά. Πριν: private → PHP Error στην πρώτη
  * CSV εξαγωγή από portal.
  *
+ * v1.3.2 FIX (#1): Το admin.css φορτώνεται πλέον ΚΑΙ στο dashboard
+ * (hook 'index.php') — ΜΟΝΟ CSS, χωρίς JS. Το dashboard widget
+ * (rs_widget) αποδίδεται στο wp-admin/index.php, όπου το theme CSS
+ * δεν φορτωνόταν ποτέ: το widget τυπωνόταν unstyled.
+ * v1.3.2 FIX (#3): Το import_state() εκπέμπει το τελικό success
+ * ΜΟΝΟ όταν ΔΕΝ υπάρχουν error notes. Παλιά: πάντα «Η εισαγωγή
+ * ολοκληρώθηκε.» ακόμη και δίπλα σε κόκκινα errors — παραπλανητικό.
+ * Πλέον: με errors → ρητό error notice ότι η εισαγωγή ολοκληρώθηκε
+ * ΜΕΡΙΚΩΣ και τα αντίστοιχα δεδομένα ΔΕΝ αντικαταστάθηκαν.
+ * v1.3.2 FIX (#4): Αποτυχημένο nonce στο route_settings() → wp_die()
+ * (ενιαίο με το POST branch του route_backup). Πριν: σιωπηλό return —
+ * ο χρήστης έβλεπε τη σελίδα να «ανανεώνεται» χωρίς καμία ένδειξη ότι
+ * το save αγνοήθηκε.
+ *
  * ΣΗΜΑΝΤΙΚΟ (dispatch map — ποιος κάνει τι, για αποφυγή διπλοεγγραφών):
  *  - Metabox προϊόντος + save δικαιούχων  → RS_Beneficiaries
  *  - ΦΠΑ πεδίο + save                    → RS_VAT
@@ -106,19 +120,34 @@ final class RS_Admin_UI {
 		);
 	}
 
+		/**
+	 * v1.3.2 FIX (#1): Το CSS φορτώνεται πλέον ΚΑΙ στο dashboard
+	 * (wp-admin/index.php) για το widget. Εκεί enqueue-άρει ΜΟΝΟ το
+	 * stylesheet (κανένα ανάγκη για JS — το admin.js αφορά μόνο το
+	 * metabox beneficiary editor).
+	 */
 	public static function assets( string $hook ): void {
 
-		$is_ours = false !== strpos( $hook, 'revenue-splitter' );
-		$product = 'post.php' === $hook || 'post-new.php' === $hook;
+		$is_ours   = false !== strpos( $hook, 'revenue-splitter' );
+		$product   = 'post.php' === $hook || 'post-new.php' === $hook;
+		$is_dash   = 'index.php' === $hook; // v1.3.2 (#1): dashboard widget.
 
-		if ( ! $is_ours && ! $product ) {
+		if ( ! $is_ours && ! $product && ! $is_dash ) {
 			return;
 		}
 
 		$base = plugin_dir_url( RS_FILE );
 
 		wp_enqueue_style( 'rs-admin', $base . 'assets/admin.css', array(), (string) filemtime( RS_PATH . 'assets/admin.css' ) );
-		wp_enqueue_script( 'rs-admin', $base . 'assets/admin.js', array(), (string) filemtime( RS_PATH . 'assets/admin.js' ), true );
+
+		// v1.3.3 FIX (#5): το JS δένεται ΜΟΝΟ σε .rs-split-table rows
+		// (product metabox). Το $is_ours το φόρτωνε άσκοπα σε Dashboard /
+		// Ρυθμίσεις / Portal (και στο beta-release patch ατυχώς και στο
+		// portal page). Το $is_dash δεν το θέλει (index.php = widget,
+		// καθαρό server-render markup).
+		if ( $product ) {
+			wp_enqueue_script( 'rs-admin', $base . 'assets/admin.js', array(), (string) filemtime( RS_PATH . 'assets/admin.js' ), true );
+		}
 	}
 
 	public static function widget(): void {
@@ -559,6 +588,11 @@ final class RS_Admin_UI {
 	 * Ανακυκλώνει το transient prefix rs_aui_msg_ (ίδιο με backup/import)
 	 * — ήδη καθαρισμένο στο uninstall.php, ήδη διαβασμένο από το
 	 * render_settings() μέσω take_backup_msgs(). Μηδέν νέα κλειδιά.
+	 *
+	 * v1.3.2 FIX (#4): nonce-fail ΔΕΝ είναι πια σιωπηλό — ρητό wp_die(),
+	 * ενιαίο με το POST branch του route_backup(). Παλιά: σιωπηλό return
+	 * → ο χρήστης έβλεπε τη σελίδα να «αναΝεώνεται» χωρίς να ξέρει ότι
+	 * το save του αγνοήθηκε (π.χ. ληγμένο nonce tab).
 	 */
 	public static function route_settings(): void {
 
@@ -572,7 +606,7 @@ final class RS_Admin_UI {
 		}
 
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_settings_nonce'] ) ), 'rs_settings' ) ) {
-			return;
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
 		}
 
 		if ( ! current_user_can( self::CAP ) ) {
@@ -714,6 +748,13 @@ final class RS_Admin_UI {
 	/**
 	 * Εισαγωγή state. Αντικαθιστά τα whitelisted options.
 	 *
+	 * v1.3.2 FIX (#3): το τελικό «Η εισαγωγή ολοκληρώθηκε.» τυπωνόταν
+	 * ΠΑΝΤΑ (success) — ακόμη και δίπλα σε error notices. Ο admin δεν
+	 * μπορούσε να ξέρει αν το state εφαρμόστηκε ολόκληρο. Τώρα:
+	 *  - χωρίς errors → success notice (όπως πριν),
+	 *  - με errors    → ρητό error notice «Εισήχθησαν ΚΑΠΟΙΑ δεδομένα —
+	 *    άλλα τμήματα ΑΓΝΟΗΘΗΚΑΝ λόγω σφαλμάτων».
+	 *
 	 * @return array notices.
 	 */
 	public static function import_state( array $state ): array {
@@ -832,7 +873,25 @@ final class RS_Admin_UI {
 
 		do_action( 'rs_invalidate_cache' );
 
-		$notes[] = array( 'type' => 'success', 'text' => __( 'Η εισαγωγή ολοκληρώθηκε.', 'revenue-splitter' ) );
+		// v1.3.2 FIX (#3): επιχειρησιακό τελικό notice — success ΜΟΝΟ όταν
+		// δεν υπήρξε ΚΑΝΕΝΑ error. Διαφορετικά: ρητό warning ότι έγινε
+		// ΜΕΡΙΚΗ εισαγωγή (τα αντίστοιχα options παρέμειναν άθικτα).
+		$has_errors = false;
+		foreach ( $notes as $n ) {
+			if ( isset( $n['type'] ) && 'error' === $n['type'] ) {
+				$has_errors = true;
+				break;
+			}
+		}
+
+		if ( $has_errors ) {
+			$notes[] = array(
+				'type' => 'error',
+				'text' => __( 'Η εισαγωγή ολοκληρώθηκε ΜΕΡΙΚΩΣ — τα άκυρα τμήματα ΔΕΝ αντικαταστάθηκαν (δες τα παραπάνω σφάλματα).', 'revenue-splitter' ),
+			);
+		} else {
+			$notes[] = array( 'type' => 'success', 'text' => __( 'Η εισαγωγή ολοκληρώθηκε.', 'revenue-splitter' ) );
+		}
 
 		return $notes;
 	}
@@ -926,7 +985,10 @@ final class RS_Admin_UI {
 		}
 		if ( ! isset( $_GET['_wpnonce'] )
 			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'rs_export' ) ) {
-			return;
+			// v1.3.3 FIX (#4): σιωπηλό return σε ληγμένο nonce = ο χρήστης
+			// από παλιό tab έβλεπε σκέτο refresh. Ενιαίο με route_settings()
+			// v1.3.2 (#4) και route_backup(): ρητό wp_die().
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
 		}
 		if ( ! current_user_can( self::CAP ) ) {
 			return;
@@ -1069,7 +1131,7 @@ final class RS_Admin_UI {
 
 	/**
 	 * .xls = HTML table (#14: γνωστό trade-off — το Excel δείχνει warning
-	 * «η μορφή δεν ταιριάζει». Δουλεύει 100%, δεν αλλάζει στη v1.3.1 —
+	 * «η μορφή δεν ταιριάζει». Δουλεύει 100%, δεν αλλάζει στη v1.3.2 —
 	 * σημειωμένο για μελλοντική αντικατάσταση με πραγματικό XLSX αν
 	 * ζητηθεί).
 	 */
@@ -1168,7 +1230,7 @@ final class RS_Admin_UI {
 				<td><?php echo esc_html( $p['title'] ); ?></td>
 				<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty'] ) ); ?></td>
 				<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_full'] ) ); ?></td>
-				<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_disc'] ) ); ?></td>
+								<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_disc'] ) ); ?></td>
 				<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_free'] ) ); ?></td>
 				<td class="num"><?php echo esc_html( $cur( $p['gross'] ) ); ?></td>
 				<td class="num"><?php echo esc_html( $cur( $p['vat'] ) ); ?></td>
@@ -1287,7 +1349,7 @@ final class RS_Admin_UI {
 
 		$cur = self::currency_fmt();
 		?>
-				<div class="rs-widget">
+		<div class="rs-widget">
 			<p>
 				<strong><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?>:</strong>
 				<?php
