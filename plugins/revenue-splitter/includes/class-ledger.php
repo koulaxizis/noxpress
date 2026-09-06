@@ -1,6 +1,6 @@
 <?php
 /**
- * RS_Ledger — Έσοδα εκτός πωλήσεων + Πληρωμές (v1.3.0).
+ * RS_Ledger — Έσοδα εκτός πωλήσεων + Πληρωμές (v1.3.0 → v1.3.6).
  *
  * Ενιαίο ledger ανά δικαιούχο, δύο τύποι εγγραφών:
  *  - 'income'  : custom έσοδα/προσαρμογές εκτός πωλήσεων. Επιτρέπονται
@@ -19,12 +19,23 @@
  * Οι mutations (add/delete/wipe) κρατούν το cache συγχρονισμένο.
  *
  * v1.3.1 (#12-b): Νέο public wipe() — μαζικός καθαρισμός για το
- * state import (πρώην: loop delete() ανά εγγραφή = O(n²) πλήρη
+ * state import (πρώην: loop delete() ανά εγγραφή = O(n²) πλήρεις
  * rewrites του option).
  *
  * v1.3.1 FIX (#11): Η αποτυχημένη διαγραφή στο admin δεν είναι πλέον
  * σιωπηλή — επιστρέφει ρητό error notice (η εγγραφή δεν βρέθηκε /
  * άκυρο ID).
+ *
+ * v1.3.6 (#2): «Εξόφληση όλων (περιόδου)» — mark-all-as-paid με
+ * επιλογή διαστήματος [Από, Έως] + υποχρεωτική αιτιολογία. Για κάθε
+ * δικαιούχο υπολογίζει: μερίδια πωλήσεων περιόδου (RS_Reports::run,
+ * clamp-άρει αυτόματα στο rs_sales_since — v1.3.6 #9) + έσοδα εκτός
+ * πωλήσεων περιόδου − πληρωμές περιόδου. Θετικό υπόλοιπο → Πληρωμή
+ * ακριβώς αυτού (ημερομηνία = Έως). Ό,τι αφορά ΕΚΤΟΣ διαστήματος
+ * μένει ανέπαφο — το υπόλοιπο εκτός διαστήματος ΔΕΝ εξοφλείται.
+ * Ιδιότητες: nonce + capability + PRG (ενιαίο με add/delete), οι
+ * εγγραφές περνούν από το ίδιο validated RS_Ledger::add() (ούτε μία
+ * bypass του κεντρικού validation).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -338,6 +349,172 @@ final class RS_Ledger {
 
 			self::finish_route( $notices );
 		}
+
+		// ---- v1.3.6 (#2): Mark all as paid (button name: rs_ledger_payall_submit) ----
+		if ( isset( $_POST['rs_ledger_payall_submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+			$notices = array_merge( $notices, self::handle_pay_all() );
+			self::finish_route( $notices );
+		}
+	}
+
+	/**
+	 * v1.3.6 (#2): «Εξόφληση όλων» — επεξεργασία του pay-all POST.
+	 *
+	 * Για κάθε δικαιούχο υπολογίζει, ΜΕΣΑ στο διάστημα [start, end]:
+	 *   μερίδια πωλήσεων (report περιόδου) + έσοδα εκτός πωλήσεων − πληρωμές
+	 * και αν το υπόλοιπο είναι θετικό (εύρος > 0.005), καταχωρεί Πληρωμή
+	 * ακριβώς αυτού, με ημερομηνία = $end και την αιτιολογία του χρήστη.
+	 *
+	 * Το ΣΥΝΟΛΟ υπόλοιπο του δικαιούχου εκτός διαστήματος ΔΕΝ αγγίζεται.
+	 *
+	 * @return array[] Notices.
+	 */
+	private static function handle_pay_all(): array {
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$start = isset( $_POST['rs_ledger_payall_from'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_payall_from'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$end   = isset( $_POST['rs_ledger_payall_to'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_payall_to'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$note  = isset( $_POST['rs_ledger_payall_note'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_payall_note'] ) ) : '';
+
+		$valid = static function ( string $d ): bool {
+			if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $d, $m ) ) {
+				return false;
+			}
+			return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
+		};
+
+		if ( ! $valid( $start ) || ! $valid( $end ) || $start > $end ) {
+			return array(
+				array(
+					'type' => 'error',
+					'text' => __( 'Άκυρο διάστημα εξόφλησης (η ημερομηνία Από πρέπει να προηγείται της Έως).', 'revenue-splitter' ),
+				),
+			);
+		}
+
+		if ( '' === $note ) {
+			return array(
+				array(
+					'type' => 'error',
+					'text' => __( 'Η αιτιολογία είναι υποχρεωτική.', 'revenue-splitter' ),
+				),
+			);
+		}
+
+		// Μερίδια πωλήσεων περιόδου (clamp-άρει αυτόματα στο rs_sales_since).
+		$report  = RS_Reports::run(
+			array(
+				'date_start' => $start,
+				'date_end'   => $end,
+			)
+		);
+		$sales_of = array();
+		foreach ( $report['beneficiaries'] as $b ) {
+			$sales_of[ (string) $b['name'] ] = (float) $b['amount'];
+		}
+
+		// Όλοι οι πιθανοί δικαιούχοι: αυτοί με πωλήσεις ή με κινήσεις ledger
+		// στο διάστημα (έστω μόνο πληρωμές παλιά → υπόλοιπο 0, safe skip).
+		$candidates = array();
+		foreach ( RS_Beneficiaries::collect_names() as $name ) {
+			$has_sales  = isset( $sales_of[ $name ] );
+			$has_motion = 0.0 !== RS_Ledger::sum( $name, $start, $end, 'income' )
+						|| 0.0 !== RS_Ledger::sum( $name, $start, $end, 'payment' );
+			if ( $has_sales || $has_motion ) {
+				$candidates[] = $name;
+			}
+		}
+
+		$paid_count  = 0;
+		$paid_total = 0.0;
+		$errors     = array();
+
+		foreach ( $candidates as $name ) {
+
+			$due = round(
+				( $sales_of[ $name ] ?? 0.0 )
+				+ RS_Ledger::sum( $name, $start, $end, 'income' )
+				- RS_Ledger::sum( $name, $start, $end, 'payment' ),
+				2
+			);
+
+			if ( $due <= 0.005 ) {
+				continue; // Τίποτα προς εξόφληση στο διάστημα.
+			}
+
+			$res = self::add(
+				array(
+					'type'        => 'payment',
+					'date'        => $end, // Τοποθετούμε στο τέλος του διαστήματος.
+					'beneficiary' => $name,
+					'amount'      => (string) $due,
+					'note'        => $note,
+				)
+			);
+
+			if ( true === $res ) {
+				$paid_count++;
+				$paid_total += $due;
+			} else {
+				// Δεν θα έπρεπε να συμβεί (όλα τα inputs validated) — αλλά
+				// καμία σιωπηλή απώλεια: ρητό error.
+				$errors[] = sprintf(
+					/* translators: %s: όνομα δικαιούχου */
+					__( 'Δεν καταχωρήθηκε η πληρωμή για %s.', 'revenue-splitter' ),
+					$name
+				) . ' ' . (string) $res;
+			}
+		}
+
+		if ( ! empty( $errors ) ) {
+			$err_notices = array_map(
+				static function ( $e ) {
+					return array(
+						'type' => 'error',
+						'text' => $e,
+					);
+				},
+				$errors
+			);
+
+			if ( $paid_count > 0 ) {
+				$err_notices[] = array(
+					'type' => 'success',
+					'text' => sprintf(
+						/* translators: 1: πλήθος πληρωμών, 2: συνολικό ποσό */
+						__( 'Εξοφλήθηκαν %1$d δικαιούχοι — σύνολο %2$s.', 'revenue-splitter' ),
+						$paid_count,
+						number_format_i18n( $paid_total, 2 )
+					),
+				);
+			}
+
+			return $err_notices;
+		}
+
+		if ( 0 === $paid_count ) {
+			return array(
+				array(
+					'type' => 'info',
+					'text' => __( 'Καμία εξόφληση — κανείς δεν έχει υπόλοιπο στο διάστημα.', 'revenue-splitter' ),
+				),
+			);
+		}
+
+		return array(
+			array(
+				'type' => 'success',
+				'text' => sprintf(
+					/* translators: 1: πλήθος πληρωμών, 2: συνολικό ποσό */
+					__( 'Εξοφλήθηκαν %1$d δικαιούχοι — σύνολο %2$s.', 'revenue-splitter' ),
+					$paid_count,
+					number_format_i18n( $paid_total, 2 )
+				),
+			),
+		);
 	}
 
 	/** Αποθήκευση notices + redirect + exit (κλείνει το PRG κύκλωμα). */
@@ -454,6 +631,36 @@ final class RS_Ledger {
 
 			<button type="submit" name="rs_ledger_add" value="1" class="button button-primary">
 				<?php esc_html_e( 'Καταχώριση', 'revenue-splitter' ); ?>
+			</button>
+		</form>
+
+		<!-- v1.3.6 (#2): Mark all as paid με διάστημα. -->
+		<form method="post" class="rs-period-form" style="margin-top:12px;">
+			<?php wp_nonce_field( self::NONCE_ACT, 'rs_ledger_nonce' ); ?>
+
+			<label for="rs-ledger-payall" class="rs-kpi-label">
+				<?php esc_html_e( 'Εξόφληση όλων (περιόδου)', 'revenue-splitter' ); ?>
+			</label>
+
+			<?php
+			$payall_default = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-01' );
+			?>
+
+			<span class="rs-payall-pair">
+				<label class="screen-reader-text" for="rs-ledger-payall-from"><?php esc_html_e( 'Από', 'revenue-splitter' ); ?></label>
+				<input type="date" id="rs-ledger-payall-from" name="rs_ledger_payall_from"
+					value="<?php echo esc_attr( $payall_default ); ?>" required />
+
+				<label class="screen-reader-text" for="rs-ledger-payall-to"><?php esc_html_e( 'Έως', 'revenue-splitter' ); ?></label>
+				<input type="date" id="rs-ledger-payall-to" name="rs_ledger_payall_to"
+					value="<?php echo esc_attr( ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' ) ); ?>" required />
+			</span>
+
+			<input type="text" name="rs_ledger_payall_note" class="rs-search" style="min-width:280px;"
+				placeholder="<?php esc_attr_e( 'Αιτιολογία (υποχρεωτική)…', 'revenue-splitter' ); ?>" required />
+
+			<button type="submit" name="rs_ledger_payall_submit" value="1" class="button">
+				<?php esc_html_e( 'Εξόφληση όλων', 'revenue-splitter' ); ?>
 			</button>
 		</form>
 		<?php

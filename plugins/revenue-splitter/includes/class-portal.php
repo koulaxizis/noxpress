@@ -1,68 +1,33 @@
 <?php
 /**
- * RS_Portal — Author Portal (frontend, v1.3.2).
+ * RS_Portal — Author Portal (frontend, v1.3.2 → v1.3.5).
  *
- * Shortcode: [author_portal]
+ * Shortcode: [author_portal] (+ alias [rs_portal]).
  *
  * Ροή:
  *  1. Ο admin δημιουργεί/ανανεώνει κλειδιά ανά δικαιούχο από το
- *     WP-admin → Revenue Splitter → Portal (το plaintext κλειδί εμφανίζεται
- *     ΜΙΑ φορά, τη στιγμή της δημιουργίας — αποθηκεύεται μόνο sha256).
- *  2. Ο δικαιούχος μπαίνει από τη σελίδα του shortcode (όνομα + κλειδί),
- *     παίρνει session cookie (httpOnly, 7 μέρες) και βλέπει:
- *     τους τελευταίους 6 μήνες, στατιστικά μήνα/προηγούμενου μήνα/
- *     lifetime, αναλυτικό πίνακα προϊόντων (πλήρης/έκπτωση/δωρεάν,
- *     με ΦΠΑ/χωρίς ΦΠΑ, stock, προσωπικό μερίδιο) και το υπόλοιπό του
- *     (all-time πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές).
+ *     WP-admin → Revenue Splitter → Portal (plaintext ΜΙΑ φορά, sha256-only).
+ *  2. Ο δικαιούχος μπαίνει ΜΟΝΟ με το κλειδί του (v1.3.5 #3: το πεδίο
+ *     ονόματος αφαιρέθηκε — ένας απλός, κεντραρισμένος password-τύπου
+ *     login), παίρνει session cookie (httpOnly, 7 μέρες) και βλέπει:
+ *     επιλογή περιόδου (presets + custom), φίλτρο προϊόντος (μόνο τα
+ *     δικά του), αναλυτικό πίνακα (πλήρης/έκπτωση % /δωρεάν, ΦΠΑ ανά
+ *     συντελεστή, κουπόνια, stock, προσωπικό μερίδιο), KPI σύγκριση
+ *     μήνα vs προηγούμενου, chart 6/12 μηνών, ιστορικό συναλλαγών
+ *     (ledger) και CSV export που σέβεται τα ενεργά φίλτρα.
  *
  * Security:
- *  - Login POST + logout + CSV: χειρίζονται στο 'init' (headers OK για
- *    cookies/redirects) με nonce + referer-aware PRG.
- *  - Rate limit: 5 αποτυχημένες προσπάθειες / 15' ανά (όνομα+IP)
- *    (transient rs_rl_*). v1.3.1 FIX (#19): ο μετρητής ΜΗΔΕΝΙΖΕΤΑΙ στο
- *    επιτυχές login — δεν «κληρονομείται» αριθμός από παλιές αποτυχίες
- *    μετά από επιτυχία.
- *  - Session: τυχαίο token → transient rs_tok_* (TTL 7 μέρες,
- *    ανανεώνεται σε κάθε επίσκεψη). Logout το σβήνει.
+ *  - Login POST + logout + CSV: 'init' (headers OK) με nonce + PRG.
+ *  - Rate limit: 5 αποτυχημένες / 15' ανά (key-hash + IP) (rs_rl_*),
+ *    μηδενίζεται στο επιτυχές login.
+ *  - Session: τυχαίο token → transient rs_tok_* (TTL 7 μέρες, sliding).
+ *  - Login με κλειδί ΜΟΝΟ: το κλειδί ταυτοποιεί ΜΟΝΑΔΙΚΑ τον δικαιούχο
+ *    (48-char alphanumeric) — scan όλων των hashed keys με
+ *    hash_equals (timing-safe).
  *
- * v1.3.1 FIX (#15): ΟΛΟ το frontend output (CSS inclusively) παράγεται
- * ΜΕΣΑ στο ob_start() του shortcode — το <style> δεν πέφτει ποτέ εκτός
- * του σημείου του shortcode σε widgets/filters που κάνουν defer.
- *
- * v1.3.1 FIX (#9): Το CSV export του portal περνά από csv_cell guard
- * (shared με το admin — RS_Admin_UI::csv_cell, πλέον public).
- *
- * v1.3.1 FIX (#16): Το stock εμφανίζεται μέσω
- * RS_Admin_UI::product_stock() — μία υλοποίηση για admin + portal.
- *
- * v1.3.1 (re-audit #6): Key rotation ΜΕΣΑ από one-shot transient
- * (rs_newkey_<user_id>, TTL 60") — το plaintext κλειδί ΔΕΝ ταξιδεύει
- * ποτέ σε URL/query string (browser history, access logs, analytics).
- * Ιδίως handlers, μάσκα στο όνομα του prefix, καθαρισμένο από το
- * uninstall.php v1.3.1.
- *
- * v1.3.2 FIX (#2): Το route_admin_keys() επικυρώνει πλέον το όνομα
- * ($_GET['rs_regen']) έναντι του RS_Beneficiaries::collect_names()
- * ΠΡΙΝ το rotate_key(). Παλιά: ένα typo στο query string δημιουργούσε
- * orphan κλειδί στο option 'rs_portal_keys' — αόρατο στον πίνακα του
- * render_admin() (δεν περιλαμβάνεται στο collect_names()), αδύνατο να
- * διαγραφεί από το UI, και «έκαιγε» άσκοπα το one-shot transient.
- * Τώρα: άγνωστο/κενό όνομα → silent redirect, μηδέν εγγραφή.
- *
- * v1.3.2 FIX (#5): client_ip() — honor CF-Connecting-IP / το πρώτο hop
- * του X-Forwarded-For ΜΟΝΟ όταν το REMOTE_ADDR ανήκει σε private/
- * reserved range (δηλ. request μέσω reverse proxy / load balancer).
- * Παλιά: σκέτο REMOTE_ADDR → πίσω από Cloudflare/nginx ΟΛΟΙ οι
- * επισκέπτες μοιράζονταν την IP του proxy → 5 αποτυχημένα logins από
- * οποιονδήποτε κλείδωναν το portal για ΟΛΟΥΣ (self-DoS), ενώ ο
- * πραγματικός attacker δοκίμαζε πιο προσεκτικά. Αμυντικά: σε public
- * REMOTE_ADDR (απευθείας σύνδεση) ΚΑΝΕΝΑ forwarded header δεν
- * εμπιστεύεται — spoofable, θα ήταν rate-limit bypass.
- *
- * Σχέδιο αποθήκευσης κλειδιών: option 'rs_portal_keys' =
- * JSON { name => 'sha256:<64 hex>' }. Legacy plaintext τιμές
- * (από παλιά backups) γίνονται accepted ΜΙΑ φορά και αναβαθμίζονται
- * αυτόματα σε sha256 στο πρώτο επιτυχημένο login (silent migration).
+ * v1.3.5 (#1): Περίοδος + φίλτρο προϊόντος + enriched πίνακες +
+ * ΦΠΑ/συντελεστή + KPI δ% + chart 6/12 + ιστορικό + CSV με φίλτρα.
+ * v1.3.5 (#3): Login μόνο με κλειδί, φόρμα κεντραρισμένη.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -77,8 +42,17 @@ final class RS_Portal {
 	const RL_MAX = 5;        // αποτυχημένες προσπάθειες…
 	const RL_WIN = 900;      // …ανά 15 λεπτά.
 
+	// GET keys των frontend φίλτρων (ξεχωριστά από του admin, μηδέν σύγκρουση).
+	const GP_PERIOD = 'rs_p_period';
+	const GP_START  = 'rs_p_start';
+	const GP_END    = 'rs_p_end';
+	const GP_PROD   = 'rs_p_product';
+	const GP_CHART  = 'rs_p_chart';
+
 	public static function init(): void {
 		add_shortcode( self::SHORTCODE, array( __CLASS__, 'shortcode' ) );
+		// Legacy alias: παλιές σελίδες με [rs_portal].
+		add_shortcode( 'rs_portal', array( __CLASS__, 'shortcode' ) );
 		add_action( 'init', array( __CLASS__, 'route' ) );
 
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
@@ -86,7 +60,7 @@ final class RS_Portal {
 	}
 
 	/* =====================================================================
-	 * Admin: διαχείριση κλειδιών (WP-admin → Revenue Splitter → Portal)
+	 * Admin: διαχείριση κλειδιών (χωρίς αλλαγές σε λειτουργία)
 	 * =================================================================== */
 
 	public static function admin_menu(): void {
@@ -103,14 +77,7 @@ final class RS_Portal {
 
 	/**
 	 * Δημιουργία/ανανέωση κλειδιού (GET + nonce + cap, στο admin_init).
-	 *
-	 * Το plaintext κλειδί ΔΕΝ αποθηκεύεται πουθενά — ταξιδεύει σε one-shot
-	 * transient (60") και εμφανίζεται μία φορά στο page render που ακολουθεί
-	 * το redirect (re-audit #6: ποτέ σε query string).
-	 *
-	 * v1.3.2 FIX (#2): Το όνομα ΕΠΑΛΗΘΕΥΕΤΑΙ έναντι του collect_names()
-	 * πριν το rotate — typo/obsolete όνομα → silent redirect, κανένα
-	 * orphan κλειδί στο option, κανένα wasted transient.
+	 * Το plaintext ταξιδεύει σε one-shot transient (60") — ποτέ σε URL.
 	 */
 	public static function route_admin_keys(): void {
 
@@ -131,9 +98,6 @@ final class RS_Portal {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$who = sanitize_text_field( wp_unslash( $_GET['rs_regen'] ) );
 
-		// v1.3.2 FIX (#2): μόνο ΓΝΩΣΤΟΙ δικαιούχοι (global defaults +
-		// αποθηκευμένα per-product overrides). Παλιά: κάθε typo έγραφε
-		// orphan κλειδί που δεν φαινόταν πουθενά.
 		if ( '' === $who
 			|| ! class_exists( 'RS_Beneficiaries' )
 			|| ! in_array( $who, RS_Beneficiaries::collect_names(), true ) ) {
@@ -144,8 +108,6 @@ final class RS_Portal {
 		$plain = self::rotate_key( $who );
 
 		if ( '' !== $plain ) {
-			// One-shot transient: διαβάζεται (και σβήνεται) ΜΙΑ φορά από το
-			// render_admin() του επόμενου page load. Μηδέν leak σε URL/logs.
 			set_transient( 'rs_newkey_' . get_current_user_id(), $who . '|' . $plain, 60 );
 		}
 
@@ -175,8 +137,6 @@ final class RS_Portal {
 			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
 		}
 
-		// Έκθεση plaintext ΜΙΑ φορά, μετά το rotate (route_admin_keys) —
-		// διάβασμα + αδειασμός του one-shot transient (re-audit #6).
 		$new_key = self::take_new_key();
 
 		$names = RS_Beneficiaries::collect_names();
@@ -186,7 +146,7 @@ final class RS_Portal {
 			<h1><?php esc_html_e( 'Revenue Splitter — Portal', 'revenue-splitter' ); ?></h1>
 
 			<?php if ( '' !== $new_key && false !== strpos( $new_key, '|' ) ) : ?>
-				<?php list( $for, $secret ) = explode( '|', $new_key, 2 ); // phpcs:ignore WordPress.PHP.DisallowShortOpenTag ?>
+				<?php list( $for, $secret ) = explode( '|', $new_key, 2 ); ?>
 				<div class="notice notice-success rs-newkey">
 					<p>
 						<strong><?php esc_html_e( 'Νέο κλειδί για', 'revenue-splitter' ); ?> <?php echo esc_html( $for ); ?>:</strong><br />
@@ -197,7 +157,7 @@ final class RS_Portal {
 			<?php endif; ?>
 
 			<p class="description">
-				<?php esc_html_e( 'Κάθε δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) με το όνομά του και το προσωπικό του κλειδί.', 'revenue-splitter' ); ?>
+				<?php esc_html_e( 'Ο δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.', 'revenue-splitter' ); ?>
 			</p>
 
 			<table class="widefat striped rs-table">
@@ -243,10 +203,7 @@ final class RS_Portal {
 		<?php
 	}
 
-	/**
-	 * Διαβάζει (και αδειάζει) το one-shot plaintext κλειδί του τρέχοντος
-	 * admin. Format: 'Όνομα|plaintext'. Empty string αν δεν υπάρχει.
-	 */
+	/** Διαβάζει (και αδειάζει) το one-shot plaintext κλειδί. */
 	private static function take_new_key(): string {
 		$key = 'rs_newkey_' . get_current_user_id();
 
@@ -279,38 +236,46 @@ final class RS_Portal {
 	}
 
 	/**
-	 * Επαλήθευση κειδιού. Legacy plaintext τιμές αναβαθμίζονται αυτόματα
-	 * σε sha256 στο πρώτο επιτυχημένο login (silent migration — συμβατό
-	 * με τα legacy backups που δέχεται το import, βλ. RS_Admin_UI / #6).
+	 * v1.3.5 (#3): Ταυτοποίηση ΜΟΝΟ με κλειδί.
+	 *
+	 * Scan όλων των αποθηκευμένων κλειδιών με hash_equals (timing-safe).
+	 * Legacy plaintext τιμές αναβαθμίζονται αυτόματα σε sha256 στο πρώτο
+	 * επιτυχές login (silent migration).
+	 *
+	 * @return string|null Το όνομα του δικαιούχου ή null.
 	 */
-	private static function verify_key( string $who, string $plain ): bool {
+	private static function who_for_key( string $plain ): ?string {
 
-		$keys  = self::all_keys();
 		$plain = trim( $plain );
 
 		if ( '' === $plain ) {
-			return false;
+			return null;
 		}
 
-		if ( ! isset( $keys[ $who ] ) || ! is_string( $keys[ $who ] ) ) {
-			return false;
+		$keys = self::all_keys();
+
+		foreach ( $keys as $name => $stored ) {
+			if ( ! is_string( $stored ) ) {
+				continue;
+			}
+
+			// Νέο format: sha256.
+			if ( 0 === strpos( $stored, 'sha256:' ) ) {
+				if ( hash_equals( $stored, self::hash_key( $plain ) ) ) {
+					return (string) $name;
+				}
+				continue;
+			}
+
+			// Legacy plaintext → compare + migrate.
+			if ( hash_equals( $stored, $plain ) ) {
+				$keys[ $name ] = self::hash_key( $plain );
+				update_option( 'rs_portal_keys', wp_json_encode( $keys, JSON_UNESCAPED_UNICODE ) );
+				return (string) $name;
+			}
 		}
 
-		$stored = $keys[ $who ];
-
-		// Νέο format.
-		if ( 0 === strpos( $stored, 'sha256:' ) ) {
-			return hash_equals( $stored, self::hash_key( $plain ) );
-		}
-
-		// Legacy plaintext → compare + migrate.
-		if ( hash_equals( $stored, $plain ) ) {
-			$keys[ $who ] = self::hash_key( $plain );
-			update_option( 'rs_portal_keys', wp_json_encode( $keys, JSON_UNESCAPED_UNICODE ) );
-			return true;
-		}
-
-		return false;
+		return null;
 	}
 
 	/* =====================================================================
@@ -330,8 +295,6 @@ final class RS_Portal {
 		$name = get_transient( 'rs_tok_' . $tok );
 
 		if ( ! is_string( $name ) || '' === $name ) {
-			// Νεκρό/expired cookie — καθαρό κλείσιμο για να μην κολλάει
-			// το login UI σε φάντασμα session.
 			if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
 				setcookie( self::COOKIE_NAME, '', time() - HOUR_IN_SECONDS, COOKIEPATH ?: '/', COOKIE_DOMAIN, is_ssl(), true );
 			}
@@ -363,7 +326,7 @@ final class RS_Portal {
 	}
 
 	/* =====================================================================
-	 * Routing (init — πριν από output: cookies + redirects είναι OK)
+	 * Routing (init — πριν από output)
 	 * =================================================================== */
 
 	public static function route(): void {
@@ -382,7 +345,7 @@ final class RS_Portal {
 			exit;
 		}
 
-		// ---------- CSV export ----------
+		// ---------- CSV export (σέβεται τα ενεργά φίλτρα: GET params) ----------
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce ελέγχεται παρακάτω.
 		if ( isset( $_GET['rs_portal_csv'] ) ) {
 
@@ -395,7 +358,7 @@ final class RS_Portal {
 			self::stream_csv( $who );
 		}
 
-		// ---------- Login POST ----------
+		// ---------- Login POST (ΜΟΝΟ κλειδί — v1.3.5 #3) ----------
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce ελέγχεται παρακάτω.
 		if ( isset( $_POST['rs_portal_login'] ) ) {
 
@@ -404,68 +367,54 @@ final class RS_Portal {
 				return;
 			}
 
-			$who  = isset( $_POST['rs_portal_name'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_portal_name'] ) ) : '';
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- frontline input του login form.
 			$key  = isset( $_POST['rs_portal_key'] ) ? trim( (string) wp_unslash( $_POST['rs_portal_key'] ) ) : '';
 			$back = self::portal_url();
 
-			if ( self::too_many_attempts( $who ) ) {
+			if ( self::too_many_attempts( $key ) ) {
 				wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rl', $back ) );
 				exit;
 			}
 
-			if ( '' !== $who && self::verify_key( $who, $key ) ) {
+			$who = self::who_for_key( $key );
 
-				// v1.3.1 FIX (#19): επιτυχές login → ΜΗΔΕΝΙΣΜΟΣ του rate
-				// limiter του (name+IP). Παλιά: οι αποτυχίες παρέμεναν.
-				self::clear_attempts( $who );
-
+			if ( null !== $who ) {
+				self::clear_attempts( $key );
 				self::start_session( $who );
 				wp_safe_redirect( remove_query_arg( 'rs_pt_msg', $back ) );
 				exit;
 			}
 
-			self::record_attempt( $who );
+			self::record_attempt( $key );
 			wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'bad', $back ) );
 			exit;
 		}
 	}
 
-	/* ---------- Rate limiting (rs_rl_*) ---------- */
+	/* ---------- Rate limiting (rs_rl_*) — πλέον key+IP, όχι name+IP ---------- */
 
-	private static function rl_key( string $who ): string {
-		return 'rs_rl_' . md5( strtolower( $who ) . '|' . self::client_ip() );
+	/** Hash του υποβληθέντος κλειδιού για το rate-limit key (ποτέ raw). */
+	private static function rl_key( string $attempt ): string {
+		return 'rs_rl_' . md5( 'k:' . hash( 'sha256', $attempt ) . '|' . self::client_ip() );
 	}
 
-	private static function too_many_attempts( string $who ): bool {
-		$n = (int) get_transient( self::rl_key( $who ) );
+	private static function too_many_attempts( string $attempt ): bool {
+		$n = (int) get_transient( self::rl_key( $attempt ) );
 		return $n >= self::RL_MAX;
 	}
 
-	private static function record_attempt( string $who ): void {
-		$k = self::rl_key( $who );
+	private static function record_attempt( string $attempt ): void {
+		$k = self::rl_key( $attempt );
 		$n = (int) get_transient( $k );
 		set_transient( $k, $n + 1, self::RL_WIN );
 	}
 
-	/** v1.3.1 FIX (#19). */
-	private static function clear_attempts( string $who ): void {
-		delete_transient( self::rl_key( $who ) );
+	private static function clear_attempts( string $attempt ): void {
+		delete_transient( self::rl_key( $attempt ) );
 	}
 
 	/**
-	 * v1.3.2 FIX (#5): πραγματική IP επισκέπτη.
-	 *
-	 * Πίσω από reverse proxy (Cloudflare/nginx/LB) το REMOTE_ADDR είναι
-	 * η IP του proxy για ΟΛΟΥΣ τους επισκέπτες: χωρίς χειρισμό, 5
-	 * αποτυχημένα logins από οποιονδήποτε = lockout όλων (self-DoS).
-	 *
-	 * Πολιτική (defensive):
-	 *  - Forwarded headers honored ΜΟΝΟ όταν το REMOTE_ADDR είναι
-	 *    private/reserved — δηλαδή η request ΕΠΙΒΕΒΑΙΩΜΕΝΑ ήρθε από
-	 *    proxy hop στο ίδιο network.
-	 *  - Public REMOTE_ADDR (άμεση σύνδεση) → καμία εμπιστοσύνη σε
-	 *    spoofable headers. Συμπεριφορά IDENTICA με v1.3.1.
-	 *  - Cloudflare (CF-Connecting-IP) priority, μετά πρώτο XFF hop.
+	 * Πραγματική IP επισκέπτη (behind-proxy aware — δες v1.3.2 FIX #5).
 	 */
 	private static function client_ip(): string {
 
@@ -476,16 +425,10 @@ final class RS_Portal {
 			return 'unknown';
 		}
 
-		// Public REMOTE_ADDR = άμεση σύνδεση → REMOTE_ADDR είναι ήδη η
-		// πραγματική IP. ΚΑΝΕΝΑ forwarded header δεν εμπιστεύεται.
 		if ( ! self::is_reserved( $remote ) ) {
 			return $remote;
 		}
 
-		// Reserved hop (proxy / load balancer) → η πραγματική IP έρχεται
-		// από τα forwarded headers του αξιόπιστου hop.
-
-		// Cloudflare: CF-Connecting-IP (single value, set από το edge).
 		if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
 			$cf = trim( (string) $_SERVER['HTTP_CF_CONNECTING_IP'] );
 			if ( '' !== $cf && false !== filter_var( $cf, FILTER_VALIDATE_IP ) ) {
@@ -493,8 +436,6 @@ final class RS_Portal {
 			}
 		}
 
-		// Generic proxy: το ΠΡΩΤΟ (αριστερό) στοιχείο του X-Forwarded-For
-		// = ο αρχικός client (set από το πρώτο trusted hop).
 		if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- IP chain.
 			$chain = array_map( 'trim', explode( ',', (string) $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
@@ -506,21 +447,95 @@ final class RS_Portal {
 		return $remote;
 	}
 
-	/**
-	 * TRUE όταν η IP είναι private/reserved (RFC1918, loopback,
-	 * link-local, CGNAT 100.64/10, 0.0.0.0/8…) — δηλαδή ΔΕΝ είναι
-	 * public visitor IP. Τότε (και μόνο τότε) η σύνδεση θεωρείται ότι
-	 * έρχεται από proxy/load balancer στο ίδιο network.
-	 */
 	private static function is_reserved( string $ip ): bool {
 
 		if ( '' === $ip || 'unknown' === $ip ) {
 			return false;
 		}
 
-		// Το filter_var με τα NO_PRIV_RANGE|NO_RES_RANGE επιστρέφει FALSE
-		// όταν η IP ΕΙΝΑΙ private/reserved → η άρνηση σημαίνει «reserved».
 		return false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+	}
+
+	/* =====================================================================
+	 * Period parser (frontend — δικά μας GET keys, read-only φίλτρα)
+	 * =================================================================== */
+
+	/**
+	 * v1.3.5 (#1): presets + custom range, όπως στο admin, αλλά σε
+	 * rs_p_* GET keys (κανένα collision με admin params) και χωρίς
+	 * εξάρτηση από το RS_Admin_UI.
+	 *
+	 * @return array{start:string,end:string,preset:string,label:string,chart:int}
+	 */
+	private static function current_period(): array {
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only period filter.
+		$preset = isset( $_GET[ self::GP_PERIOD ] ) ? sanitize_key( wp_unslash( $_GET[ self::GP_PERIOD ] ) ) : 'month';
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$start = isset( $_GET[ self::GP_START ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::GP_START ] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$end   = isset( $_GET[ self::GP_END ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::GP_END ] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$chart = isset( $_GET[ self::GP_CHART ] ) ? absint( $_GET[ self::GP_CHART ] ) : 12;
+
+		$now = new DateTimeImmutable( 'now', wp_timezone() );
+
+		$valid = static function ( string $d ): bool {
+			if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) {
+				return false;
+			}
+			return checkdate( (int) substr( $d, 5, 2 ), (int) substr( $d, 8, 2 ), (int) substr( $d, 0, 4 ) );
+		};
+
+		switch ( $preset ) {
+			case '7d':
+				$label = __( 'Τελευταίες 7 ημέρες', 'revenue-splitter' );
+				$s     = $now->modify( '-6 days' )->format( 'Y-m-d' );
+				$e     = $now->format( 'Y-m-d' );
+				break;
+			case '30d':
+				$label = __( 'Τελευταίες 30 ημέρες', 'revenue-splitter' );
+				$s     = $now->modify( '-29 days' )->format( 'Y-m-d' );
+				$e     = $now->format( 'Y-m-d' );
+				break;
+			case 'prev_month':
+				$label = __( 'Προηγούμενος μήνας', 'revenue-splitter' );
+				$m     = $now->modify( 'first day of previous month' );
+				$s     = $m->format( 'Y-m-01' );
+				$e     = $m->format( 'Y-m-t' );
+				break;
+			case 'year':
+				$label = __( 'Τρέχον έτος', 'revenue-splitter' );
+				$s     = $now->format( 'Y-01-01' );
+				$e     = $now->format( 'Y-m-d' );
+				break;
+			case 'custom':
+				$label = __( 'Προσαρμοσμένο', 'revenue-splitter' );
+				if ( $valid( $start ) && $valid( $end ) && $start <= $end ) {
+					$s = $start;
+					$e = $end;
+				} else {
+					$s = $now->format( 'Y-m-01' );
+					$e = $now->format( 'Y-m-d' );
+				}
+				break;
+			case 'month':
+			default:
+				$preset = 'month';
+				$label  = __( 'Τρέχων μήνας', 'revenue-splitter' );
+				$s      = $now->format( 'Y-m-01' );
+				$e      = $now->format( 'Y-m-d' );
+				break;
+		}
+
+		return array(
+			'start'  => $s,
+			'end'    => $e,
+			'preset' => $preset,
+			'label'  => $label,
+			'chart'  => in_array( $chart, array( 6, 12 ), true ) ? $chart : 12,
+		);
 	}
 
 	/* =====================================================================
@@ -529,7 +544,6 @@ final class RS_Portal {
 
 	public static function shortcode(): string {
 
-		// v1.3.1 FIX (#15): ΟΛΟ το output — CSS inclusive — μέσα στο buffer.
 		ob_start();
 
 		$who = self::current();
@@ -543,7 +557,7 @@ final class RS_Portal {
 		return ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaping εντός render*.
 	}
 
-	/* ---------- Login form ---------- */
+	/* ---------- Login form (μόνο κλειδί, κεντραρισμένο — v1.3.5 #3) ---------- */
 
 	private static function render_login(): void {
 
@@ -553,24 +567,23 @@ final class RS_Portal {
 		self::print_css();
 		?>
 		<div class="rs-portal">
+			<div class="rs-pt-login-center">
+				<form method="post" class="rs-pt-login">
+					<?php wp_nonce_field( 'rs_portal_login', 'rs_portal_nonce' ); ?>
 
-			<?php if ( 'bad' === $err ) : ?>
-				<p class="rs-pt-error"><?php esc_html_e( 'Λάθος όνομα ή κλειδί.', 'revenue-splitter' ); ?></p>
-			<?php elseif ( 'rl' === $err ) : ?>
-				<p class="rs-pt-error"><?php esc_html_e( 'Πολλές αποτυχημένες προσπάθειες — δοκίμασε ξανά σε 15 λεπτά.', 'revenue-splitter' ); ?></p>
-			<?php endif; ?>
+					<label for="rs-portal-key"><?php esc_html_e( 'Κλειδί', 'revenue-splitter' ); ?></label>
+					<input type="password" id="rs-portal-key" name="rs_portal_key" required
+						autocomplete="current-password" autofocus />
 
-			<form method="post" class="rs-pt-login">
-				<?php wp_nonce_field( 'rs_portal_login', 'rs_portal_nonce' ); ?>
+					<button type="submit" name="rs_portal_login" value="1"><?php esc_html_e( 'Είσοδος', 'revenue-splitter' ); ?></button>
 
-				<label><?php esc_html_e( 'Όνομα', 'revenue-splitter' ); ?></label>
-				<input type="text" name="rs_portal_name" required autocomplete="username" />
-
-				<label><?php esc_html_e( 'Κλειδί', 'revenue-splitter' ); ?></label>
-				<input type="password" name="rs_portal_key" required autocomplete="current-password" />
-
-				<button type="submit" name="rs_portal_login" value="1"><?php esc_html_e( 'Είσοδος', 'revenue-splitter' ); ?></button>
-			</form>
+					<?php if ( 'bad' === $err ) : ?>
+						<p class="rs-pt-error"><?php esc_html_e( 'Λάθος κλειδί.', 'revenue-splitter' ); ?></p>
+					<?php elseif ( 'rl' === $err ) : ?>
+						<p class="rs-pt-error"><?php esc_html_e( 'Πολλές αποτυχημένες προσπάθειες — δοκίμασε ξανά σε 15 λεπτά.', 'revenue-splitter' ); ?></p>
+					<?php endif; ?>
+				</form>
+			</div>
 		</div>
 		<?php
 	}
@@ -579,21 +592,56 @@ final class RS_Portal {
 
 	private static function render_dashboard( string $who ): void {
 
-		// v1.3.3 FIX (#1): το dashboard του συνδεδεμένου δικαιούχου δεν
-		// τύπωνε ΠΟΤΕ το CSS (μόνο το render_login() το έκανε) —
-		// unstyled KPIs/chart/πίνακες μετά το login.
 		self::print_css();
 
 		$now   = new DateTimeImmutable( 'now', wp_timezone() );
 		$today = $now->format( 'Y-m-d' );
 
+		// ---------- ΠΕΡΙΟΔΟΣ + ΦΙΛΤΡΟ ΠΡΟΪΟΝΤΟΣ (v1.3.5 #1) ----------
+		$per = self::current_period();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
+		$pid = isset( $_GET[ self::GP_PROD ] ) ? absint( $_GET[ self::GP_PROD ] ) : 0;
+
+		// Πλήρες report περιόδου — τροφοδοτεί το dropdown (πάντα).
+		$rep_all = RS_Reports::run(
+			array(
+				'date_start' => $per['start'],
+				'date_end'   => $per['end'],
+			)
+		);
+
+		// Τα προϊόντα ΠΟΥ ΑΦΟΡΟΥΝ τον δικαιούχο (έχει μερίδιο στα splits).
+		$my_products = array();
+		foreach ( $rep_all['products'] as $p ) {
+			foreach ( $p['splits'] as $s ) {
+				if ( $s['name'] === $who ) {
+					$my_products[] = $p;
+					break;
+				}
+			}
+		}
+
+		// Ενεργό φίλτρο →_filtered report (σωστά totals/συντελεστές).
+		if ( $pid > 0 ) {
+			$rep = RS_Reports::run(
+				array(
+					'date_start'  => $per['start'],
+					'date_end'   => $per['end'],
+					'product_ids' => array( $pid ),
+				)
+			);
+		} else {
+			$rep = $rep_all;
+		}
+
+		// ---------- KPIs: μήνας vs προηγούμενος + υπόλοιπο ----------
 		$this_m = array( 'start' => $now->format( 'Y-m-01' ), 'end' => $today );
-		$prev   = $now->modify( 'first day of previous month' );
+		$prev    = $now->modify( 'first day of previous month' );
 
 		$rep_this = RS_Reports::run( array( 'date_start' => $this_m['start'], 'date_end' => $this_m['end'] ) );
 		$rep_prev = RS_Reports::run( array( 'date_start' => $prev->format( 'Y-m-01' ), 'date_end' => $prev->format( 'Y-m-t' ) ) );
 
-		// Lifetime: πωλήσεις (cached report) + ledger.
 		$sales_l = RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0;
 		$inc_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'income' );
 		$pay_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' );
@@ -602,9 +650,46 @@ final class RS_Portal {
 		$this_share = self::share_of( $rep_this, $who );
 		$prev_share = self::share_of( $rep_prev, $who );
 
-		// Chart: τελευταίοι 6 μήνες (public cached runs — ένα/μήνα).
+		// v1.3.5: δ% έναντι προηγούμενου μήνα (▲/▼).
+		$delta_txt = '';
+		if ( $prev_share > 0 ) {
+			$delta     = ( $this_share - $prev_share ) / $prev_share * 100.0;
+			$arrow     = $delta >= 0 ? '▲' : '▼';
+			$cls       = $delta >= 0 ? 'rs-up' : 'rs-down';
+			$delta_txt = '<small class="' . esc_attr( $cls ) . '">' . $arrow . ' ' . esc_html( number_format_i18n( abs( $delta ), 1 ) ) . '%</small>';
+		}
+
+		// Το μερίδιό μου στην ΕΝΕΡΓΗ περίοδο/φίλτρο.
+		$period_share = self::share_of( $rep, $who );
+
+		// ---------- ΦΠΑ ανά συντελεστή (v1.3.5 #1 — δικά του προϊόντα) ----------
+		$by_rate = array();
+		foreach ( $rep['products'] as $p ) {
+			$has_share = false;
+			foreach ( $p['splits'] as $s ) {
+				if ( $s['name'] === $who ) {
+					$has_share = true;
+					break;
+				}
+			}
+			if ( ! $has_share ) {
+				continue; // Με φίλτρο «όλα»: προϊόντα άλλων μόνο — skip.
+			}
+
+			$rk = (string) $p['vat_rate'];
+			if ( ! isset( $by_rate[ $rk ] ) ) {
+				$by_rate[ $rk ] = array( 'qty' => 0, 'gross' => 0.0, 'vat' => 0.0, 'net' => 0.0 );
+			}
+			$by_rate[ $rk ]['qty']   += (int) $p['qty'];
+			$by_rate[ $rk ]['gross'] += (float) $p['gross'];
+			$by_rate[ $rk ]['vat']   += (float) $p['vat'];
+			$by_rate[ $rk ]['net']   += (float) $p['net'];
+		}
+		ksort( $by_rate );
+
+		// ---------- Chart: 6/12 μήνες (v1.3.5 #1) ----------
 		$months = array();
-		for ( $i = 5; $i >= 0; $i-- ) {
+		for ( $i = $per['chart'] - 1; $i >= 0; $i-- ) {
 			$m     = $now->modify( 'first day of this month' )->modify( "-{$i} months" );
 			$rep_m = RS_Reports::run( array( 'date_start' => $m->format( 'Y-m-01' ), 'date_end' => $m->format( 'Y-m-t' ) ) );
 			$months[] = array(
@@ -617,10 +702,25 @@ final class RS_Portal {
 			$max_m = max( $max_m, (float) $mm['value'] );
 		}
 
+		// ---------- Ιστορικό συναλλαγών (v1.3.5 #1) ----------
+		$history = RS_Ledger::for_beneficiary( $who );
+
 		$cur = self::currency_fmt();
 
 		$logout = wp_nonce_url( add_query_arg( 'rs_logout', '1', self::portal_url() ), 'rs_portal' );
-		$csv    = wp_nonce_url( add_query_arg( 'rs_portal_csv', '1', self::portal_url() ), 'rs_portal_csv' );
+		$csv    = wp_nonce_url(
+			add_query_arg(
+				array(
+					'rs_portal_csv' => '1',
+					self::GP_PERIOD => $per['preset'],
+					self::GP_START  => $per['start'],
+					self::GP_END    => $per['end'],
+					self::GP_PROD   => $pid > 0 ? $pid : '',
+				),
+				self::portal_url()
+			),
+			'rs_portal_csv'
+		);
 		?>
 		<div class="rs-portal">
 			<div class="rs-pt-head">
@@ -631,25 +731,74 @@ final class RS_Portal {
 				</span>
 			</div>
 
+			<form method="get" class="rs-pt-filters">
+				<select name="<?php echo esc_attr( self::GP_PERIOD ); ?>">
+					<option value="month"<?php selected( $per['preset'], 'month' ); ?>><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?></option>
+					<option value="prev_month"<?php selected( $per['preset'], 'prev_month' ); ?>><?php esc_html_e( 'Προηγούμενος μήνας', 'revenue-splitter' ); ?></option>
+					<option value="7d"<?php selected( $per['preset'], '7d' ); ?>><?php esc_html_e( 'Τελευταίες 7 ημέρες', 'revenue-splitter' ); ?></option>
+					<option value="30d"<?php selected( $per['preset'], '30d' ); ?>><?php esc_html_e( 'Τελευταίες 30 ημέρες', 'revenue-splitter' ); ?></option>
+					<option value="year"<?php selected( $per['preset'], 'year' ); ?>><?php esc_html_e( 'Τρέχον έτος', 'revenue-splitter' ); ?></option>
+					<option value="custom"<?php selected( $per['preset'], 'custom' ); ?>><?php esc_html_e( 'Προσαρμοσμένο', 'revenue-splitter' ); ?></option>
+				</select>
+
+				<input type="date" name="<?php echo esc_attr( self::GP_START ); ?>" value="<?php echo esc_attr( $per['start'] ); ?>" />
+				<input type="date" name="<?php echo esc_attr( self::GP_END ); ?>" value="<?php echo esc_attr( $per['end'] ); ?>" />
+
+				<select name="<?php echo esc_attr( self::GP_PROD ); ?>">
+					<option value="0"><?php esc_html_e( 'Όλα τα προϊόντα', 'revenue-splitter' ); ?></option>
+					<?php foreach ( $my_products as $mp ) : ?>
+						<option value="<?php echo esc_attr( (string) $mp['product_id'] ); ?>"<?php selected( $pid, (int) $mp['product_id'] ); ?>>
+							<?php echo esc_html( $mp['title'] ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+
+				<button type="submit" class="rs-pt-btn"><?php esc_html_e( 'Εφαρμογή', 'revenue-splitter' ); ?></button>
+			</form>
+
 			<div class="rs-kpis">
-				<div class="rs-kpi"><span class="rs-kpi-label"><?php esc_html_e( 'Αυτόν τον μήνα', 'revenue-splitter' ); ?></span><strong><?php echo esc_html( $cur( $this_share ) ); ?></strong></div>
-				<div class="rs-kpi"><span class="rs-kpi-label"><?php esc_html_e( 'Προηγούμενος μήνας', 'revenue-splitter' ); ?></span><strong><?php echo esc_html( $cur( $prev_share ) ); ?></strong></div>
-				<div class="rs-kpi"><span class="rs-kpi-label"><?php esc_html_e( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ); ?></span><strong><?php echo esc_html( $cur( $remain ) ); ?></strong></div>
+				<div class="rs-kpi">
+					<span class="rs-kpi-label"><?php esc_html_e( 'Αυτόν τον μήνα', 'revenue-splitter' ); ?></span>
+					<strong><?php echo esc_html( $cur( $this_share ) ); ?></strong>
+					<?php echo $delta_txt; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped εντός. ?>
+				</div>
+				<div class="rs-kpi">
+					<span class="rs-kpi-label"><?php esc_html_e( 'Μερίδιό σου (περιόδου)', 'revenue-splitter' ); ?></span>
+					<strong><?php echo esc_html( $cur( $period_share ) ); ?></strong>
+					<small class="rs-pt-kpi-sub"><?php echo esc_html( $per['label'] . ': ' . $per['start'] . ' → ' . $per['end'] ); ?></small>
+				</div>
+				<div class="rs-kpi">
+					<span class="rs-kpi-label"><?php esc_html_e( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ); ?></span>
+					<strong><?php echo esc_html( $cur( $remain ) ); ?></strong>
+				</div>
 			</div>
 
-			<h3><?php esc_html_e( 'Τελευταίοι 6 μήνες', 'revenue-splitter' ); ?></h3>
+			<div class="rs-pt-chart-head">
+				<h3><?php esc_html_e( 'Τελευταίοι μήνες', 'revenue-splitter' ); ?></h3>
+				<form method="get" class="rs-pt-chart-range">
+					<input type="hidden" name="<?php echo esc_attr( self::GP_PERIOD ); ?>" value="<?php echo esc_attr( $per['preset'] ); ?>" />
+					<input type="hidden" name="<?php echo esc_attr( self::GP_START ); ?>" value="<?php echo esc_attr( $per['start'] ); ?>" />
+					<input type="hidden" name="<?php echo esc_attr( self::GP_END ); ?>" value="<?php echo esc_attr( $per['end'] ); ?>" />
+					<input type="hidden" name="<?php echo esc_attr( self::GP_PROD ); ?>" value="<?php echo esc_attr( (string) $pid ); ?>" />
+					<select name="<?php echo esc_attr( self::GP_CHART ); ?>" onchange="this.form.submit()">
+						<option value="6"<?php selected( $per['chart'], 6 ); ?>><?php esc_html_e( '6 μήνες', 'revenue-splitter' ); ?></option>
+						<option value="12"<?php selected( $per['chart'], 12 ); ?>><?php esc_html_e( '12 μήνες', 'revenue-splitter' ); ?></option>
+					</select>
+				</form>
+			</div>
 			<div class="rs-pt-chart">
 				<?php foreach ( $months as $mm ) :
 					$h = $max_m > 0 ? max( 3, (int) round( ( (float) $mm['value'] / $max_m ) * 100 ) ) : 3;
 					?>
 					<div class="rs-pt-col" title="<?php echo esc_attr( $mm['label'] . ': ' . $cur( $mm['value'] ) ); ?>">
+						<span class="rs-pt-val"><?php echo esc_html( $cur( $mm['value'] ) ); ?></span>
 						<div class="rs-pt-bar" style="height:<?php echo esc_attr( (string) $h ); ?>%;"></div>
 						<small><?php echo esc_html( $mm['label'] ); ?></small>
 					</div>
 				<?php endforeach; ?>
 			</div>
 
-			<h3><?php esc_html_e( 'Αυτόν τον μήνα — ανά προϊόν', 'revenue-splitter' ); ?></h3>
+			<h3><?php esc_html_e( 'Ανά προϊόν', 'revenue-splitter' ); ?> — <?php echo esc_html( $per['label'] ); ?></h3>
 			<table class="rs-pt-table">
 				<thead>
 					<tr>
@@ -657,6 +806,8 @@ final class RS_Portal {
 						<th class="num"><?php esc_html_e( 'Τεμ.', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Πλήρης', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Έκπτωση', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Μέση έκπτωση (%)', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Κουπόνια', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Δωρεάν', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Με ΦΠΑ', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'ΦΠΑ', 'revenue-splitter' ); ?></th>
@@ -668,7 +819,7 @@ final class RS_Portal {
 				<tbody>
 				<?php
 				$rows = 0;
-				foreach ( $rep_this['products'] as $p ) :
+				foreach ( $rep['products'] as $p ) :
 					$mine = null;
 					foreach ( $p['splits'] as $s ) {
 						if ( $s['name'] === $who ) {
@@ -677,7 +828,7 @@ final class RS_Portal {
 						}
 					}
 					if ( null === $mine ) {
-						continue; // Το προϊόν δεν αφορά αυτόν τον δικαιούχο.
+						continue; // Δεν αφορά αυτόν τον δικαιούχο.
 					}
 					$rows++;
 					?>
@@ -685,20 +836,77 @@ final class RS_Portal {
 						<td><?php echo esc_html( $p['title'] ); ?></td>
 						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_full'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_disc'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( number_format_i18n( $p['disc_pct'], 1 ) ); ?>%</td>
 						<td class="num">
-							<?php echo esc_html( number_format_i18n( (int) $p['qty_disc'] ) ); ?>
-							<?php if ( $p['qty_disc'] > 0 ) : ?><small>(<?php echo esc_html( number_format_i18n( $p['disc_pct'], 1 ) ); ?>%)</small><?php endif; ?>
+							<?php if ( ! empty( $p['coupons'] ) ) : ?>
+								<?php echo esc_html( implode( ', ', $p['coupons'] ) ); ?>
+							<?php else : ?>
+								<span class="rs-pt-muted">—</span>
+							<?php endif; ?>
 						</td>
 						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_free'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( $cur( $p['gross'] ) ); ?></td>
 						<td class="num">−<?php echo esc_html( $cur( $p['vat'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( $cur( $p['net'] ) ); ?></td>
-						<td class="num"><?php echo esc_html( RS_Admin_UI::product_stock( (int) $p['product_id'] ) ); // #16. ?></td>
+						<td class="num"><?php echo esc_html( RS_Admin_UI::product_stock( (int) $p['product_id'] ) ); ?></td>
 						<td class="num"><strong><?php echo esc_html( $cur( $mine['amount'] ) ); ?></strong> <small><?php echo esc_html( number_format_i18n( $mine['percent'], 1 ) ); ?>%</small></td>
 					</tr>
 				<?php endforeach; ?>
 				<?php if ( 0 === $rows ) : ?>
-					<tr><td colspan="10" class="rs-empty"><?php esc_html_e( 'Καμία πώληση των προϊόντων σου αυτόν τον μήνα.', 'revenue-splitter' ); ?></td></tr>
+					<tr><td colspan="12" class="rs-empty"><?php esc_html_e( 'Καμία πώληση σε αυτή την περίοδο.', 'revenue-splitter' ); ?></td></tr>
+				<?php endif; ?>
+				</tbody>
+			</table>
+
+			<?php if ( ! empty( $by_rate ) ) : ?>
+				<h3><?php esc_html_e( 'ΦΠΑ ανά συντελεστή', 'revenue-splitter' ); ?></h3>
+				<table class="rs-pt-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Συντελεστής', 'revenue-splitter' ); ?></th>
+							<th class="num"><?php esc_html_e( 'Τεμ.', 'revenue-splitter' ); ?></th>
+							<th class="num"><?php esc_html_e( 'Μικτό', 'revenue-splitter' ); ?></th>
+							<th class="num"><?php esc_html_e( 'ΦΠΑ', 'revenue-splitter' ); ?></th>
+							<th class="num"><?php esc_html_e( 'Καθαρό', 'revenue-splitter' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $by_rate as $rate => $v ) : ?>
+						<tr>
+							<td><strong><?php echo esc_html( number_format_i18n( (float) $rate, 2 ) ); ?>%</strong></td>
+							<td class="num"><?php echo esc_html( number_format_i18n( $v['qty'] ) ); ?></td>
+							<td class="num"><?php echo esc_html( $cur( $v['gross'] ) ); ?></td>
+							<td class="num"><?php echo esc_html( $cur( $v['vat'] ) ); ?></td>
+							<td class="num"><?php echo esc_html( $cur( $v['net'] ) ); ?></td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+
+			<h3><?php esc_html_e( 'Ιστορικό συναλλαγών', 'revenue-splitter' ); ?></h3>
+			<table class="rs-pt-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Ημερομηνία', 'revenue-splitter' ); ?></th>
+						<th><?php esc_html_e( 'Τύπος', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Ποσό', 'revenue-splitter' ); ?></th>
+						<th><?php esc_html_e( 'Αιτιολογία', 'revenue-splitter' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php if ( empty( $history ) ) : ?>
+					<tr><td colspan="4" class="rs-empty"><?php esc_html_e( 'Καμία εγγραφή.', 'revenue-splitter' ); ?></td></tr>
+				<?php else : ?>
+					<?php foreach ( $history as $e ) : ?>
+					<tr>
+						<td><?php echo esc_html( $e['date'] ); ?></td>
+						<td><?php echo esc_html( 'income' === $e['type'] ? __( 'Έσοδο', 'revenue-splitter' ) : __( 'Πληρωμή', 'revenue-splitter' ) ); ?></td>
+						<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? '+' : '−' ) . $cur( abs( (float) $e['amount'] ) ) ); ?></strong></td>
+						<td><?php echo esc_html( $e['note'] ); ?></td>
+					</tr>
+					<?php endforeach; ?>
 				<?php endif; ?>
 				</tbody>
 			</table>
@@ -710,7 +918,7 @@ final class RS_Portal {
 		<?php
 	}
 
-	/** Μείγμα του δικαιούχου από ένα report (splits του μήνα). */
+	/** Μείγμα του δικαιούχου από ένα report. */
 	private static function share_of( array $report, string $who ): float {
 		foreach ( $report['beneficiaries'] as $b ) {
 			if ( $b['name'] === $who ) {
@@ -720,22 +928,29 @@ final class RS_Portal {
 		return 0.0;
 	}
 
-	/* ---------- CSV export ---------- */
+	/* ---------- CSV export (σέβεται περίοδο + προϊόν — v1.3.5 #1) ---------- */
 
 	private static function stream_csv( string $who ): void {
 
-		$now   = new DateTimeImmutable( 'now', wp_timezone() );
-		$rep   = RS_Reports::run( array( 'date_start' => '2000-01-01', 'date_end' => $now->format( 'Y-m-d' ) ) );
-		$sales = RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0;
-		$today = $now->format( 'Y-m-d' );
+		$per = self::current_period();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
+		$pid = isset( $_GET[ self::GP_PROD ] ) ? absint( $_GET[ self::GP_PROD ] ) : 0;
+
+		$run = array(
+			'date_start' => $per['start'],
+			'date_end'   => $per['end'],
+		);
+		if ( $pid > 0 ) {
+			$run['product_ids'] = array( $pid );
+		}
+
+		$rep   = RS_Reports::run( $run );
+		$today = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' );
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=UTF-8' );
 
-		// v1.3.3 FIX (#3): το sanitize_key() σβήνει ΚΑΘΕ ελληνικό
-		// χαρακτήρα — «Στέλιος» γινόταν «portal--2026-09-04.csv».
-		// Πλέον: ASCII-safe fallback filename + RFC 5987 filename*
-		// με το κανονικό όνομα (modern browsers το προτιμούν).
 		$ascii = trim( (string) preg_replace( '/[^A-Za-z0-9_-]+/', '-', $who ), '-' );
 		if ( '' === $ascii ) {
 			$ascii = 'beneficiary';
@@ -751,10 +966,27 @@ final class RS_Portal {
 
 		$cur = self::currency_fmt();
 
-		fputcsv( $out, array( $who, $today ), ',', '"', '\\' );
+		fputcsv( $out, array( $who, $per['start'], $per['end'] ), ',', '"', '\\' );
 		fputcsv( $out, array(), ',', '"', '\\' );
 
-		fputcsv( $out, array( __( 'Προϊόν', 'revenue-splitter' ), __( 'Τεμ.', 'revenue-splitter' ), __( 'Πλήρης', 'revenue-splitter' ), __( 'Έκπτωση', 'revenue-splitter' ), __( 'Δωρεάν', 'revenue-splitter' ), __( 'Καθαρό', 'revenue-splitter' ), __( 'Ποσοστό', 'revenue-splitter' ), __( 'Μερίδιο', 'revenue-splitter' ) ), ',', '"', '\\' );
+		fputcsv(
+			$out,
+			array(
+				__( 'Προϊόν', 'revenue-splitter' ),
+				__( 'Τεμ.', 'revenue-splitter' ),
+				__( 'Πλήρης', 'revenue-splitter' ),
+				__( 'Έκπτωση', 'revenue-splitter' ),
+				__( 'Μέση έκπτωση (%)', 'revenue-splitter' ),
+				__( 'Κουπόνια', 'revenue-splitter' ),
+				__( 'Δωρεάν', 'revenue-splitter' ),
+				__( 'Καθαρό', 'revenue-splitter' ),
+				__( 'Ποσοστό', 'revenue-splitter' ),
+				__( 'Μερίδιο', 'revenue-splitter' ),
+			),
+			',',
+			'"',
+			'\\'
+		);
 
 		foreach ( $rep['products'] as $p ) {
 			foreach ( $p['splits'] as $s ) {
@@ -764,10 +996,12 @@ final class RS_Portal {
 				fputcsv(
 					$out,
 					array(
-						RS_Admin_UI::csv_cell( $p['title'] ), // #9: formula-injection guard.
+						RS_Admin_UI::csv_cell( $p['title'] ),
 						(int) $p['qty'],
 						(int) $p['qty_full'],
 						(int) $p['qty_disc'],
+						$p['disc_pct'],
+						implode( ' ', $p['coupons'] ),
 						(int) $p['qty_free'],
 						$cur( $p['net'] ),
 						$s['percent'],
@@ -781,9 +1015,7 @@ final class RS_Portal {
 		}
 
 		fputcsv( $out, array(), ',', '"', '\\' );
-		fputcsv( $out, array( __( 'All-time μερίδια από πωλήσεις', 'revenue-splitter' ), $cur( $sales ) ), ',', '"', '\\' );
-		fputcsv( $out, array( __( 'Έσοδα εκτός πωλήσεων', 'revenue-splitter' ), $cur( RS_Ledger::sum( $who, '2000-01-01', $today, 'income' ) ) ), ',', '"', '\\' );
-		fputcsv( $out, array( __( 'Πληρωμές που ελήφθησαν', 'revenue-splitter' ), $cur( RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' ) ) ), ',', '"', '\\' );
+		fputcsv( $out, array( __( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ), $cur( ( RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0 ) + RS_Ledger::sum( $who, '2000-01-01', $today, 'income' ) - RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' ) ) ), ',', '"', '\\' );
 
 		fclose( $out );
 		exit;
@@ -793,38 +1025,53 @@ final class RS_Portal {
 	 * Frontend helpers
 	 * =================================================================== */
 
-	/**
-	 * v1.3.1 FIX (#15): Το CSS τυπώνεται ως ΠΡΩΤΟ πράγμα ΜΕΣΑ στο buffer
-	 * του shortcode (πρώτη κλήση σε κάθε render).
-	 */
 	private static function print_css(): void {
 		?>
 <style>
 .rs-portal { font-family: system-ui, sans-serif; margin: 1.5em 0; color: #1d2327; }
 .rs-portal *, .rs-portal *::before, .rs-portal *::after { box-sizing: border-box; }
 .rs-pt-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; }
-.rs-pt-login { max-width: 340px; display: grid; gap: 6px; }
+
+/* v1.3.5 (#3): κεντραρισμένο login ΜΟΝΟ με κλειδί. */
+.rs-pt-login-center { display: flex; justify-content: center; padding: 1.5em 0; }
+.rs-pt-login { max-width: 320px; width: 100%; display: grid; gap: 8px; }
 .rs-pt-login label { font-weight: 600; font-size: 0.85em; }
-.rs-pt-login input { padding: 8px 10px; border: 1px solid #c3c4c7; border-radius: 3px; width: 100%; }
-.rs-pt-login button, .rs-pt-head a { cursor: pointer; }
-.rs-pt-login button { padding: 8px 14px; border: 0; border-radius: 3px; background: #6d4aff; color: #fff; font-weight: 600; }
-.rs-pt-error { color: #b32d2e; font-weight: 600; }
+.rs-pt-login input { padding: 9px 11px; border: 1px solid #c3c4c7; border-radius: 3px; width: 100%; }
+.rs-pt-login button { padding: 9px 14px; border: 0; border-radius: 3px; background: #6d4aff; color: #fff; font-weight: 600; cursor: pointer; }
+
+/* v1.3.5 (#1): φίλτρα περιόδου/προϊόντος. */
+.rs-pt-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 1em; }
+.rs-pt-filters select,
+.rs-pt-filters input[type="date"] { padding: 6px 8px; border: 1px solid #c3c4c7; border-radius: 3px; background: #fff; min-height: 34px; }
+.rs-pt-btn { padding: 7px 14px; border: 0; border-radius: 3px; background: #6d4aff; color: #fff; font-weight: 600; cursor: pointer; }
+
+.rs-pt-error { color: #b32d2e; font-weight: 600; margin: 0; }
+
 .rs-pt-table { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
 .rs-pt-table th, .rs-pt-table td { border: 1px solid #e2e4e7; padding: 6px 10px; text-align: left; font-size: 0.92em; }
 .rs-pt-table th { background: #f6f7f7; }
 .rs-pt-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.rs-pt-table small { color: #787c82; }
-.rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin: 0.5em 0 1.5em; }
+.rs-pt-table small, .rs-pt-muted { color: #787c82; }
+
+.rs-pt-chart-head { display: flex; justify-content: space-between; align-items: baseline; }
+.rs-pt-chart-range select { padding: 3px 6px; border: 1px solid #c3c4c7; border-radius: 3px; background: #fff; }
+.rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin: 0.5em 0 1.5em; }
 .rs-pt-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; text-align: center; }
 .rs-pt-bar { width: 70%; background: #6d4aff; border-radius: 3px 3px 0 0; min-height: 3px; }
 .rs-pt-col small { margin-top: 4px; font-size: 0.72em; color: #787c82; }
+.rs-pt-val { font-size: 0.68em; color: #787c82; margin-bottom: 2px; white-space: nowrap; }
+
 .rs-kpis { display: flex; gap: 12px; flex-wrap: wrap; margin: 1em 0; }
-.rs-kpi { flex: 1 1 160px; border: 1px solid #e2e4e7; border-radius: 4px; padding: 10px 14px; }
+.rs-kpi { flex: 1 1 180px; border: 1px solid #e2e4e7; border-radius: 4px; padding: 10px 14px; }
 .rs-kpi strong { display: block; font-size: 1.25em; margin-top: 2px; font-variant-numeric: tabular-nums; }
 .rs-kpi-label { font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.06em; color: #787c82; }
+.rs-kpi .rs-up { color: #0a7c3a; font-weight: 600; }
+.rs-kpi .rs-down { color: #b32d2e; font-weight: 600; }
+.rs-pt-kpi-sub { display: block; margin-top: 3px; color: #787c82; }
+
+.rs-portal h3 { margin: 1.4em 0 0.4em; font-size: 1.05em; }
 .rs-pt-note { color: #787c82; font-size: 0.85em; }
 .rs-empty { text-align: center; color: #787c82; font-style: italic; }
-.rs-portal h3 { margin: 1.4em 0 0.4em; font-size: 1.05em; }
 </style>
 		<?php
 	}
@@ -847,7 +1094,6 @@ final class RS_Portal {
 		$url = $ref ? wp_validate_redirect( $ref, '' ) : '';
 
 		if ( '' === $url ) {
-			// Fallback: η τρέχουσα σελίδα (shortcode page ή home).
 			$url = is_singular() ? get_permalink() : home_url( '/' );
 		}
 

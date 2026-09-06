@@ -4,7 +4,7 @@
  *
  * Στρατηγική:
  *  - Χρησιμοποιούμε το Order API του WooCommerce (HPOS-compatible).
- *  - Gross γραμμής = line total + line tax (ΦΠΑ-συμπεριληπτικό, ό,τι πλήρωσε ο πελάτης).
+ *  - Gross γραμμής = line total + line tax (ΦΠΑ-συμπεριλημτικό, ό,τι πλήρωσε ο πελάτης).
  *  - ΦΠΑ: αφαιρείται με βάση τον συντελεστή του Revenue Splitter,
  *    με τον τύπο «από μέσα»: vat = gross × rate / (100 + rate).
  *  - Refunds: αφαιρούνται ανά line item μέσω '_refunded_item_id'.
@@ -31,11 +31,52 @@
  * wp_timezone(). Χωρίς μετατροπή, παραγγελίες κοντά στα σύνορα ημερών/
  * μηνών μετριόντουσαν σε λάθος περίοδο (π.χ. GMT+3: 00:00–03:00 τοπική
  * ώρα πήγαιναν στην προηγούμενη μέρα/μήνα στο report).
- * Τώρα: τα local-day όρια (00:00:00 → 23:59:59 site timezone)
- * μετατρέπονται σε UTC timestamps πριν το query — το returned report
- * αντιστοιχεί ΠΑΝΤΑ στην περίοδο όπως τη βλέπει ο χρήστης.
+ * Τώρα: τα local-day όρια (00:00:00 → 23:59:59 τοπική ώρα) μετατρέπονται
+ * σε UTC timestamps πριν το query — το returned report αντιστοιχεί
+ * ΠΑΝΤΑ στην περίοδο όπως τη βλέπει ο χρήστης.
+ *
+ * v1.3.5 FIX (#7): ΤΕΛΟΣ στο ψεύτικο «όλα σε έκπτωση».
+ * Το undiscounted gross της γραμμής υπολογιζόταν με τον ΣΥΝΤΕΛΕΣΤΗ ΤΟΥ
+ * PLUGIN (subtotal × (100+rate)/100). Όταν ο συντελεστής του plugin
+ * αποκλίνει από τον πραγματικό Woo tax της γραμμής (ή σε γραμμές χωρίς
+ * tax), το reg_gross φουσκώνει → disc_line > 0 → κάθε full-price γραμμή
+ * μετριόταν ως «έκπτωση». Τώρα: undiscounted gross = get_subtotal() +
+ * get_subtotal_tax() — ό,τι ΗΤΑΝ να πληρωθεί χωρίς έκπτωση, όπως το
+ * κρατάει το WooCommerce (ground truth, ανεξαρτήτως tax settings /
+ * price-incl-tax / συντελεστή plugin). Η αναλογία έκπτωσης και το
+ * σταθμισμένο % βγαίνουν από πραγματικά δεδομένα, όχι από model.
+ *
+ * v1.3.5 (#8): Ανίχνευση κουπονιών — στις γραμμές με έκπτωση
+ * συλλέγονται οι κωδικοί κουπονιών της παραγγελίας
+ * (order->get_coupon_codes()) ανά προϊόν, σε πεδίο 'coupons' του
+ * report (καταναλίσκεται στο dashboard και στο portal).
+ * Σημείωση: το Woo δεν χαρτογραφεί coupon→line item 1:1, οπότε σε
+ * επίπεδο product aggregate: όποιο κουπόνι εφαρμόστηκε στην παραγγελία
+ * που είχε γραμμή έκπτωσης του προϊόντος.
+ *
+ * v1.3.6 FIX (#1 bug του v1.3.5): Η κλήση ήταν $order->get_coupons() —
+ * αυτό επιστρέφει OBJECTS WC_Order_Item_Coupon, όχι κωδικούς. Το
+ * implode() του portal/CSV έπεφτε σε fatal με κάθε πραγματικό
+ * κουπόνι. Τώρα: get_coupon_codes() (array of strings) — όπως έλεγε
+ * εξαρχής το docblock του #8. Καθαρίστηκαν επίσης τα διαστραμμένα
+ * σχόλια του v1.3.5 (#8).
+ *
+ * v1.3.6 (#9 — rs_sales_since): Νέο option «Έναρξη καταγραφής
+ * πωλήσεων». Όταν είναι ορισμένο (έγκυρη ημερομηνία), το run()
+ * clamp-άρει ΚΑΘΕ περίοδο: ό,τι είναι πριν την ημερομηνία έναρξης αγνοείται
+ * πλήρως (πωλήσεις, μερίδια, lifetime balance). Αν ολόκληρη η
+ * περίοδος είναι πριν την ημερομηνία έναρξης → άδειο report χωρίς
+ * καν query στη βάση. Το lifetime_beneficiaries() καλύπτεται αυτόματα
+ * (περνά '2000-01-01' → clamp στο sales_since). Το admin UI (Part 3)
+ * σώζει το option + κάνει invalidate cache.
  *
  * Αποτελέσματα cached σε transient (5 λεπτά) με hash στα args.
+ *
+ * v1.3.7 FIX: Native «Τιμή προσφοράς» (Woo Sale Price, χωρίς κουπόνι)
+ * μετρούσε ως «Πλήρης» — το Woo αποθηκεύει το sale price ΩΣ subtotal.
+ * Νέο native_sale_discount(): paid-unit vs regular-unit incl tax →
+ * σωστή κατηγογοποίηση + σταθμισμένο % έκπτωσης. Τιμές με κουπόνια
+ * συνεχίζουν μέσω subtotal/total (αλλαγή βάσης % μόνο για native).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -59,7 +100,44 @@ class RS_Reports {
 	 * ------------------------------------------------------------------- */
 
 	/**
+	 * v1.3.6 (#9): Η ενεργή ημερομηνία έναρξης καταγραφής πωλήσεων.
+	 *
+	 * Διαβάζει το option 'rs_sales_since' και το VALIDATE-άρει αυστηρά:
+	 * επιστρέφει '' (χωρίς clamp) όταν δεν έχει οριστεί ή όταν η τιμή
+	 * είναι άκυρη — ένα παραμορφωμένο option ποτέ δεν κλειδώνει τα
+	 * reports.
+	 *
+	 * @return string 'Y-m-d' ή '' όταν δεν υπάρχει όριο.
+	 */
+	public static function sales_since(): string {
+
+		$v = trim( (string) get_option( 'rs_sales_since', '' ) );
+
+		if ( '' === $v ) {
+			return '';
+		}
+
+		if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $v, $m ) ) {
+			return '';
+		}
+
+		if ( ! checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ) {
+			return '';
+		}
+
+		return $v;
+	}
+
+	/**
 	 * Κύρια αναφορά.
+	 *
+	 * v1.3.6 (#9): Η περίοδος clamp-άρει στο rs_sales_since ΠΡΙΝ το
+	 * cache key — έτσι (α) όλοι οι callers (dashboard, portal, CLI,
+	 * lifetime) λαμβάνουν το ίδιο clamp χωρίς να το ξέρουν, (β) το
+	 * cache συσσωρεύει μεγαλύτερα hits (περίοδοι που clamp-άρονται στην
+	 * ίδια effective ημερομηνία μοιράζονται cache entry), (γ) το
+	 * επιστρεφόμενο 'period' στο report αντανακλά τις ΕΝΕΡΓΕΣ (clamped)
+	 * ημερομηνίες, όχι τις ζητημένες.
 	 *
 	 * @param array $args {
 	 *     @type string $date_start  ISO date 'Y-m-d' (inclusive, LOCAL site time).
@@ -76,6 +154,23 @@ class RS_Reports {
 			'product_ids' => array(),
 		);
 		$args = wp_parse_args( $args, $defaults );
+
+		// ---- v1.3.6 (#9): clamp από την ημερομηνία έναρξης ----
+		$since = self::sales_since();
+
+		if ( '' !== $since ) {
+
+			if ( $args['date_start'] < $since ) {
+				$args['date_start'] = $since;
+			}
+
+			// Ολόκληρη η περίοδος πριν την έναρξη → άδειο report,
+			// χωρίς καν query στη βάση (ταχύτητα + σαφήνεια).
+			if ( $args['date_start'] > $args['date_end'] ) {
+				return self::empty_report( $args['date_start'], $args['date_end'] );
+			}
+		}
+		// --------------------------------------------------------
 
 		$cache_key = 'rs_report_' . md5( wp_json_encode( $args ) . '|' . get_option( 'rs_cache_version', '0' ) );
 		$cached    = get_transient( $cache_key );
@@ -97,7 +192,9 @@ class RS_Reports {
 	 *
 	 * Περνά από το ίδιο caching με το run() — το wide-range report
 	 * υπολογίζεται μία φορά / 5' ανεξαρτήτως πόσοι το ζητήσουν
-	 * (dashboard, portal, CLI).
+	 * (dashboard, portal, CLI). v1.3.6 (#9): clamp-άρει αυτόματα στο
+	 * rs_sales_since — το «all-time» σημαίνει «ό,τι μετράει από την
+	 * έναρξη καταγραφής».
 	 *
 	 * @return float[] name => amount (rounded, 2 decimals).
 	 */
@@ -107,7 +204,7 @@ class RS_Reports {
 
 		$report = self::run(
 			array(
-				'date_start' => '2000-01-01', // Πρακτικά «αρχή των χρόνων».
+				'date_start' => '2000-01-01', // Πρακτικά «αρχή των χρόνων» (clamp-άρει στο sales_since αν υπάρχει).
 				'date_end'   => $now->format( 'Y-m-d' ),
 			)
 		);
@@ -123,6 +220,28 @@ class RS_Reports {
 	/* ---------------------------------------------------------------------
 	 * Υπολογισμός
 	 * ------------------------------------------------------------------- */
+
+	/**
+	 * v1.3.6 (#9): Canonical ΔΟΜΗ άδειου report — ίδιο σχήδιο με το
+	 * compute(), ώστε οι callers να μη χρειάζονται κανένα ειδικό path.
+	 */
+	private static function empty_report( string $start, string $end ): array {
+		return array(
+			'period'        => array(
+				'start' => $start,
+				'end'   => $end,
+			),
+			'products'      => array(),
+			'totals'        => array(
+				'gross' => 0.0,
+				'vat'   => 0.0,
+				'net'   => 0.0,
+			),
+			'beneficiaries' => array(),
+			'warnings'      => array(),
+			'order_count'   => 0,
+		);
+	}
 
 	private static function compute( array $args ): array {
 
@@ -185,6 +304,15 @@ class RS_Reports {
 
 			$refunded_by_item = self::collect_refunds( $order );
 
+			/*
+			 * v1.3.6 FIX (#1): get_coupon_codes() — array of STRINGS.
+			 * Η get_coupons() του v1.3.5 (#8) επέστρεφε WC_Order_Item_Coupon
+			 * objects και το implode() του portal/CSV έπεφτε σε fatal
+			 * («Object of class WC_Order_Item_Coupon could not be converted
+			 * to string») με ΚΑΘΕ πραγματικό κουπόνι.
+			 */
+			$order_coupons = $order->get_coupon_codes();
+
 			foreach ( $order->get_items() as $item ) {
 				/** @var WC_Order_Item_Product $item */
 
@@ -204,7 +332,7 @@ class RS_Reports {
 					continue; // Γραμμές refund δεν είναι πωλήσεις.
 				}
 
-				// Gross γραμμής (ΦΠΑ-συμπεριληκτικό), μετά refunds.
+				// Gross γραμμής (ΦΠΑ-συμπεριλημτικό), μετά refunds.
 				$gross = (float) $item->get_total() + (float) $item->get_total_tax();
 
 				$item_id   = $item->get_id();
@@ -224,6 +352,7 @@ class RS_Reports {
 						'qty_free' => 0,
 						'disc_w'   => 0.0, // Άθροισμα (έκπτωση% × τεμ.) → σταθμισμένος μ.ο.
 						'disc_amt' => 0.0, // Συνολική έκπτωση (μικτή, incl ΦΠΑ).
+						'coupons'  => array(), // v1.3.5 (#8): κωδικοί κουπονιών (strings).
 					);
 				}
 
@@ -236,29 +365,78 @@ class RS_Reports {
 				if ( $net_gross <= 0.005 ) {
 					if ( (float) $item->get_total() <= 0.005 ) {
 						$per_product[ $pid ]['qty_free'] += $qty;
+
+						// v1.3.5 (#8): 100%-κουπόνι = αναφορά κουπονιού & στις
+						// δωρεάν γραμμές (αλλιώς χάνεται από τα stats).
+						if ( ! empty( $order_coupons ) ) {
+							$per_product[ $pid ]['coupons'] = array_unique(
+								array_merge( $per_product[ $pid ]['coupons'], $order_coupons )
+							);
+						}
 					}
 					continue;
 				}
 
 				$matched_orders[ $order->get_id() ] = true;
 
-				// Gross γραμμής χωρίς έκπτωση (μικτό, incl ΦΠΑ): regular subtotal × συντελεστής.
-				$factor    = ( 100.0 + $rate ) / 100.0;
-				$reg_gross = ( (float) $item->get_subtotal() ) * $factor;
+				/*
+				 * v1.3.5 FIX (#7): Gross γραμμής χωρίς έκπτωση — από τα ίδια
+				 * τα WooCommerce δεδομένα (undiscounted subtotal + undiscounted
+				 * tax = undiscounted gross, ΟΠΩΣ το τιμολόγησε το shop),
+				 * ΟΧΙ από ανακατασκευή με τον συντελεστή του plugin.
+				 * Παλιά: $reg_gross = subtotal × (100+plugin_rate)/100 — κάθε
+				 * απόκλιση συντελεστή ή tax-free γραμμή έκανε τα full-price
+				 * items να εμφανίζονται ως «έκπτωση».
+				 */
+				/*
+				 * v1.3.5 FIX (#7): paid-without-coupon gross από τα ίδια τα
+				 * WooCommerce δεδομένα (undiscounted subtotal + undiscounted
+				 * tax = ό,τι ΗΤΑΝ να πληρωθεί χωρίς κουπόνι).
+				 */
+				$reg_gross = (float) $item->get_subtotal() + (float) $item->get_subtotal_tax();
+
+				// Έκπτωση ΑΠΟ ΚΟΥΠΟΝΙ: subtotal > total.
 				$disc_line = max( 0.0, $reg_gross - $gross );
+
+				// Παρονομαστής του σταθμισμένου % (κουπόνια: pre-coupon gross).
+				$disc_base = $reg_gross;
+
+				/*
+				 * v1.3.7 FIX: Native «Τιμή προσφοράς» (Woo Sale Price, χωρίς
+				 * κουπόνι). Το Woo αποθηκεύει το sale price ΩΣ subtotal —
+				 * subtotal == total → disc_line = 0 → η γραμμή μετρούσε ως
+				 * «Πλήρης». Ανίχνευση: paid-unit vs regular-price unit
+				 * (ΦΠΑ-συμπεριληπτικά).
+				 */
+				if ( $disc_line <= 0.01 ) {
+					$native = self::native_sale_discount( $item, $reg_gross, $qty );
+					if ( null !== $native ) {
+						$disc_line = $native['amount'];
+						$disc_base = $native['base'];
+					}
+				}
 
 				$per_product[ $pid ]['qty'] += $qty;
 
 				if ( $disc_line > 0.01 ) {
 					$per_product[ $pid ]['qty_disc'] += $qty;
-					$per_product[ $pid ]['disc_w']   += ( $disc_line / $reg_gross ) * 100.0 * $qty;
+					$per_product[ $pid ]['disc_w']   += ( $disc_line / $disc_base ) * 100.0 * $qty;
 					$per_product[ $pid ]['disc_amt'] += $disc_line;
+
+					// v1.3.5 (#8): κωδικοί κουπονιών της παραγγελίας —
+					// ΜΟΝΟ όταν πράγματι υπάρχουν κουπόνια (native sale
+					// χωρίς κουπόνι ΔΕΝ προσθέτει τίποτα εδώ).
+					if ( ! empty( $order_coupons ) ) {
+						$per_product[ $pid ]['coupons'] = array_unique(
+							array_merge( $per_product[ $pid ]['coupons'], $order_coupons )
+						);
+					}
 				} else {
 					$per_product[ $pid ]['qty_full'] += $qty;
 				}
 
 				/*
-				 * Ο gross είναι ΦΠΑ-συμπεριληκτικός → εξάγουμε τον ΦΠΑ «από μέσα»:
+				 * Ο gross είναι ΦΠΑ-συμπεριλημτικός → εξάγουμε τον ΦΠΑ «από μέσα»:
 				 *   vat  = gross × rate / (100 + rate)
 				 *   base = gross − vat
 				 */
@@ -316,6 +494,7 @@ class RS_Reports {
 				'qty_free'    => $acc['qty_free'],
 				'disc_pct'    => $acc['qty_disc'] > 0 ? round( $acc['disc_w'] / $acc['qty_disc'], 1 ) : 0.0,
 				'disc_amt'    => round( $acc['disc_amt'], 2 ),
+				'coupons'     => array_values( array_unique( $acc['coupons'] ) ), // v1.3.5 (#8) — strings.
 				'splits'      => $splits,
 			);
 		}
@@ -432,6 +611,64 @@ class RS_Reports {
 	/* ---------------------------------------------------------------------
 	 * Helpers
 	 * ------------------------------------------------------------------- */
+
+		/**
+	 * v1.3.7: Ανίχνευση native έκπτωσης (Τιμή προσφοράς στο General tab).
+	 *
+	 * Ιεραρχία πηγών για το regular unit price (ΦΠΑ-συμπεριλημτικό):
+	 *  1. Line item meta '_rs_reg_unit' — stamped στο checkout από το
+	 *     RS_Checkout::stamp_regular_prices(). Ground truth ΚΑΤΑ ΤΗΝ
+	 *     ΑΓΟΡΑ: ανεπηρέαστο από μελλοντικές αλλαγές τιμοκαταλόγου.
+	 *  2. Fallback: τρέχον regular price του προϊόντος — καλύπτει
+	 *     παραγγελίες πριν το v1.3.7 και χειροκίνητες παραγγελίες admin.
+	 *
+	 * Επιστρέφει null όταν δεν ανιχνεύεται έκπτωση.
+	 *
+	 * @param WC_Order_Item_Product $item                  Line item.
+	 * @param float                 $paid_pre_coupon_gross Subtotal + subtotal tax (πριν κουπόνια).
+	 * @param int                   $qty                   Τεμάχια γραμμής (> 0).
+	 * @return array|null {base: float, amount: float}|null
+	 */
+	private static function native_sale_discount( WC_Order_Item_Product $item, float $paid_pre_coupon_gross, int $qty ): ?array {
+
+		$regular_unit = null;
+
+		// ---- Πηγή 1: stamped τιμή της στιγμής της αγοράς ----
+		$stamp = $item->get_meta( '_rs_reg_unit' );
+		if ( is_scalar( $stamp ) && is_numeric( (string) $stamp ) && (float) $stamp > 0.0 ) {
+			$regular_unit = (float) $stamp;
+		}
+
+		// ---- Πηγή 2: τρέχον regular price (fallback) ----
+		if ( null === $regular_unit ) {
+			$product = $item->get_product();
+			if ( $product instanceof WC_Product ) {
+				$regular = (float) $product->get_regular_price();
+				if ( $regular > 0.0 ) {
+					$unit = (float) wc_get_price_including_tax( $product, array( 'price' => $regular ) );
+					if ( $unit > 0.0 ) {
+						$regular_unit = $unit;
+					}
+				}
+			}
+		}
+
+		if ( null === $regular_unit ) {
+			return null; // Διαγραμμένο/άγνωστο προϊόν ή άγνωστη τιμή.
+		}
+
+		$full_gross = $regular_unit * $qty;
+		$amount     = $full_gross - $paid_pre_coupon_gross;
+
+		if ( $amount <= 0.01 ) {
+			return null; // Πλήρης τιμή (ή αμελητέα rounding).
+		}
+
+		return array(
+			'base'   => $full_gross,
+			'amount' => $amount,
+		);
+	}
 
 	/**
 	 * «Λογιστικό» product_id ενός line item — variations fall-back στον parent.

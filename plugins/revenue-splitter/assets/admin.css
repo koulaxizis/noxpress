@@ -6,7 +6,7 @@
  *
  * v1.3.1: Συγχρονισμός με το markup των Parts 2/5/6:
  *  - νέα: .rs-col-del / .rs-ben-name (metabox), .rs-newkey code (portal keys),
- *    .rs-muted, dark widget (.rs-widget-table), .rs-remove-row σε πίνακες.
+ *    .rs-muted, .rs-remove-row σε πίνακες.
  *  - αφαίρεση: ορφανά rules (#rs_quick_glance block, rs_export_format dropdown)
  *    που δεν παράγονται πια από το v1.3.1 markup.
  *
@@ -409,29 +409,85 @@ table.widefat.rs-table {
 
 /* ---------- Dashboard widget (v1.3.1 markup — Part 5 render_widget) ---------- */
 
-/* Το v1.3.1 render_widget() τυπώνει id=rs_widget με απλό πίνακα
-   .rs-widget-table. Τα παλιά rules #rs_quick_glance (.rs-widget-kpis /
-   .rs-widget-ben lists) ΔΕΝ παράγονται πια από κάποιο markup — αφαιρέθηκαν
-   ώστε να μη μένει νεκρό CSS.
-   v1.3.2 FIX (#1): το admin.css φορτώνεται πλέον ΚΑΙ στο index.php (hook
-   του dashboard) ώστε αυτοί οι κανόνες να εφαρμόζονται πραγματικά. */
+
 .rs-widget { color: #eae8fa; }
 
-.rs-widget-table {
-	width: 100%;
-	margin: 8px 0;
-	border-collapse: collapse;
-}
-.rs-widget-table td {
-	padding: 5px 0;
-	color: #eae8fa;
-	border-bottom: 1px solid #23262f;
-}
-.rs-widget-table tr:last-child td { border-bottom: none; }
-.rs-widget-table td.num {
-	text-align: right;
-	font-variant-numeric: tabular-nums;
-	color: #f6f4ff !important;
-}
 .rs-widget a { color: #beb1ff; text-decoration: none; }
 .rs-widget a:hover { color: #d4c9ff; text-decoration: underline; }
+
+/* ==========================================================================
+   v1.3.6 additions
+   ========================================================================== */
+
+/* ---- #6: Chips «Καταμερισμός» -------------------------------------------
+   Αντικαθιστούν το muted γκρι κείμενο της στήλης «Καταμερισμός» στον
+   πίνακα «Ανά προϊόν». Δομή (από class-admin-ui.php):
+   <span class="rs-chip">
+     <span class="rs-chip-name">Όνομα</span>
+     <span class="rs-chip-data">50,0% · 122,83</span>
+   </span>
+   ------------------------------------------------------------------------ */
+
+.rs-chip {
+	display: inline-block;
+	padding: 2px 8px;
+	margin: 1px 4px 1px 0;
+	border-radius: 999px;
+	background: #3c1361;          /* βαθύ μωβ — συμφωνεί με το rs-theme */
+	color: #fff;
+	font-size: 12px;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+
+.rs-chip-name {
+	font-weight: 600;
+}
+
+.rs-chip-data {
+	font-variant-numeric: tabular-nums;
+	opacity: 0.92;
+	margin-left: 5px;
+}
+
+/* Στο dashboard widget (φωτεινότερο πλαίσιο) κρατάμε την ίδια απόδοση —
+   κληρονομείται χωρίς επιπλέον κανόνα. */
+
+/* ---- #2: Φόρμα «Εξόφληση όλων (περιόδου)» -------------------------------- */
+
+.rs-payall-pair {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 6px 0 0;
+}
+
+.rs-payall-pair input[type="date"] {
+	width: 140px;
+}
+
+/* Το label «Εξόφληση όλων (περιόδου)» δίπλα στα πεδία — όχι oversized h2,
+   μοιάζει με inline label της φόρμας καταχώρισης. */
+label.rs-kpi-label {
+	font-weight: 600;
+}
+
+/* ---- #9: Πεδίο «Έναρξη καταγραφής πωλήσεων» — dark styling -------------- */
+input[name="rs_sales_since"] {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+	box-shadow: none;
+}
+
+.rs-wrap select,
+.rs-wrap p input[type="number"] {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+	box-shadow: none;
+}

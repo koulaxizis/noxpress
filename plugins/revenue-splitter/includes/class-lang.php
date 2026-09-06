@@ -54,18 +54,36 @@ class RS_Lang {
 		add_filter( 'gettext', array( __CLASS__, 'filter_gettext' ), 10, 3 );
 	}
 
-	/** Η γλώσσα του τρέχοντος χρήστη ('el' default). */
+		/** Η ρητή επιλογή του χρήστη: 'el' | 'en' | 'auto' (default). */
+	public static function get_choice( ?int $user_id = null ): string {
+
+		$uid  = $user_id ?? get_current_user_id();
+		$lang = $uid ? (string) get_user_meta( $uid, self::USER_META, true ) : '';
+
+		return in_array( $lang, array( 'el', 'en' ), true ) ? $lang : 'auto';
+	}
+
+	/**
+	 * Η ΕΝΕΡΓΗ γλώσσα ('el' | 'en') — για rendering.
+	 *
+	 * v1.3.6 (#5): 'auto' (μηδενική επιλογή) ακολουθεί πλέον το
+	 * WordPress locale (get_user_locale / get_locale) αντί για
+	 * hardcoded 'el': el* → Ελληνικά, οτιδήποτε άλλο → English.
+	 */
 	public static function get_lang( ?int $user_id = null ): string {
 
 		if ( null !== self::$current && null === $user_id ) {
 			return self::$current;
 		}
 
-		$uid  = $user_id ?? get_current_user_id();
-		$lang = $uid ? (string) get_user_meta( $uid, self::USER_META, true ) : '';
+		$lang = self::get_choice( $user_id );
 
-		if ( ! in_array( $lang, array( 'el', 'en' ), true ) ) {
-			$lang = 'el';
+		if ( 'auto' === $lang ) {
+			$locale = function_exists( 'get_user_locale' )
+				? get_user_locale( $user_id ?? get_current_user_id() )
+				: get_locale();
+
+			$lang = ( 0 === strpos( strtolower( (string) $locale ), 'el' ) ) ? 'el' : 'en';
 		}
 
 		if ( null === $user_id ) {
@@ -75,12 +93,20 @@ class RS_Lang {
 		return $lang;
 	}
 
-	/** Θέτει τη γλώσσα χρήστη (μόνο 'el'/'en' γίνονται δεκτά). */
+		/**
+	 * Θέτει τη γλώσσα: 'el' | 'en' | 'auto'.
+	 * v1.3.6 (#5): 'auto' = σβήνει το user meta → Follow-WP mode.
+	 */
 	public static function set_lang( int $user_id, string $lang ): bool {
-		$lang = in_array( $lang, array( 'el', 'en' ), true ) ? $lang : 'el';
 
-		// Reset request-cache ώστε η αλλαγή να ισχύσει άμεσα (ίδιο request).
+		// Reset request-cache ώστε η αλλαγή να ισχύσει άμεσα.
 		self::$current = null;
+
+		if ( 'auto' === $lang ) {
+			return (bool) delete_user_meta( $user_id, self::USER_META );
+		}
+
+		$lang = in_array( $lang, array( 'el', 'en' ), true ) ? $lang : 'el';
 
 		return (bool) update_user_meta( $user_id, self::USER_META, $lang );
 	}
@@ -108,6 +134,14 @@ class RS_Lang {
 	 * domain 'revenue-splitter' στην v1.3.2.
 	 */
 	private static $dict = array(
+	
+			// --- v1.3.6: Υπερ-πλήρες backup/import ---
+		'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, global beneficiaries, portal keys (hashed), ledger (payments & extra income), coupons, start date, per-product splits/VAT, free-copy reasons and user languages. Importing REPLACES the corresponding data.',
+		'Μη έγκυρο τμήμα post meta στο backup.'               => 'Invalid post meta section in the backup.',
+		'Προϊοντικά overrides: εφαρμόστηκαν %d εγγραφές.'     => 'Product overrides: %d entries applied.',
+		'ΔΕΝ βρέθηκαν τα προϊόντα με IDs %s — τα overrides τους παραλείφθηκαν (τα product IDs του backup δεν ταιριάζουν με τα τρέχοντα).' => 'Products with IDs %s were NOT found — their overrides were skipped (the backup product IDs do not match the current ones).',
+		'Αιτιολογίες δωρεάν αντιτύπων (HPOS): εφαρμόστηκαν %d εγγραφές.' => 'Free-copy reasons (HPOS): %d entries applied.',
+		'Γλώσσα οθόνης: εφαρμόστηκε σε %d χρήστες.'          => 'Display language: applied to %d users.',
 
 		// --- Menus / σελίδες ---
 		'Revenue Splitter'                                       => 'Revenue Splitter',
@@ -138,11 +172,12 @@ class RS_Lang {
 		'Εξαγωγή'                                                => 'Export',
 		'Προϊόν'                                                 => 'Product',
 		'Περίοδος'                                               => 'Period',
+		// v1.3.4: επαναφορά φίλτρου προϊόντος στο dashboard.
+		'Όλα τα προϊόντα'                                        => 'All products',
 
 		// --- KPIs ---
 		'Παραγγελίες'                                            => 'Orders',
 		'Παραγγελίες (περιόδου)'                                 => 'Orders (period)',
-		'%s παραγγελίες'                                         => '%s orders',
 		'Μικτό (με ΦΠΑ)'                                         => 'Gross (incl. VAT)',
 		'ΦΠΑ'                                                    => 'VAT',
 		'Καθαρό (πριν καταμερισμό)'                              => 'Net (before split)',
@@ -198,7 +233,6 @@ class RS_Lang {
 		'Ο καταμερισμός του προϊόντος ΔΕΝ αποθηκεύτηκε — χρησιμοποιείται η προηγούμενη/κενή τιμή.' => 'The product split was NOT saved — the previous/empty value is in effect.',
 
 		// --- Portal (admin): διαχείριση κλειδιών ---
-		'Κάθε δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) με το όνομά του και το προσωπικό του κλειδί.' => 'Each beneficiary signs in on the portal page ([author_portal]) with their name and personal key.',
 		'Δεν υπάρχουν δικαιούχοι ακόμη.'                        => 'No beneficiaries yet.',
 		'Κατάσταση κλειδιού'                                      => 'Key status',
 		'χωρίς κλειδί'                                            => 'no key',
@@ -216,17 +250,14 @@ class RS_Lang {
 
 		// --- Portal (frontend): login ---
 		'Author Portal'                                          => 'Author Portal',
-		'Όνομα'                                                   => 'Name',
 		'Κλειδί'                                                  => 'Key',
 		'Είσοδος'                                                => 'Sign in',
-		'Λάθος όνομα ή κλειδί.'                                   => 'Wrong name or key.',
 		'Πολλές αποτυχημένες προσπάθειες — δοκίμασε ξανά σε 15 λεπτά.' => 'Too many failed attempts — try again in 15 minutes.',
 		'Αποσύνδεση'                                             => 'Log out',
 
 		// --- Portal (frontend): dashboard δικαιούχου ---
 		'Αυτόν τον μήνα'                                          => 'This month',
 		'Αποπληρωτέο υπόλοιπο'                                    => 'Outstanding balance',
-		'Τελευταίοι 6 μήνες'                                     => 'Last 6 months',
 		'Αυτόν τον μήνα — ανά προϊόν'                             => 'This month — per product',
 		'Με ΦΠΑ'                                                 => 'With VAT',
 		'Χωρίς ΦΠΑ'                                               => 'Without VAT',
@@ -313,7 +344,6 @@ class RS_Lang {
 		'Backup & Επαναφορά'                                     => 'Backup & Restore',
 		'Εισαγωγή state (JSON)'                                  => 'Import state (JSON)',
 		'Εξαγωγή state (JSON)'                                   => 'Export state (JSON)',
-		'Συμπεριλαμβάνονται: ΦΠΑ default, δικαιούχοι, κλειδιά portal (hashed), ledger, κουπόνια. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, beneficiaries, portal keys (hashed), ledger, coupons. Importing REPLACES the corresponding data.',
 		'Μη έγκυρο αρχείο backup (λείπουν τα options).'           => 'Invalid backup file (missing options).',
 		'Μη έγκυρο blob κλειδιών portal.'                        => 'Invalid portal keys blob.',
 		'Μη έγκυρο blob ledger (JSON).'                          => 'Invalid ledger blob (JSON).',
@@ -324,5 +354,42 @@ class RS_Lang {
 		'Δεν επιλέχθηκε αρχείο JSON.'                            => 'No JSON file selected.',
 		'Το αρχείο δεν είναι έγκυρο JSON.'                       => 'The file is not valid JSON.',
 		'Όνομα|Ποσοστό (μία γραμμή ανά δικαιούχο)'               => 'Name|Percentage (one beneficiary per line)',
+		
+				// --- RS_Portal v1.3.5 ---
+		'Λάθος κλειδί.'                                          => 'Wrong key.',
+		'Μερίδιό σου (περιόδου)'                                 => 'Your share (period)',
+		'Κουπόνια'                                               => 'Coupons',
+		'Τελευταίοι μήνες'                                        => 'Recent months',
+		
+				// --- v1.3.6 (#2): Εξόφληση όλων (περιόδου) --- 
+		'Εξόφληση όλων (περιόδου)'                              => 'Settle all (period)',
+		'Από'                                                    => 'From',
+		'Έως'                                                    => 'To',
+		'Εξόφληση όλων'                                          => 'Settle all',
+		'Άκυρο διάστημα εξόφλησης (η ημερομηνία Από πρέπει να προηγείται της Έως).' => 'Invalid settlement range (the From date must precede the To date).',
+		'Εξοφλήθηκαν %1$d δικαιούχοι — σύνολο %2$s.'            => 'Settled %1$d beneficiaries — total %2$s.',
+		'Καμία εξόφληση — κανείς δεν έχει υπόλοιπο στο διάστημα.' => 'Nothing settled — nobody has a balance in this range.',
+		'Δεν καταχωρήθηκε η πληρωμή για %s.'                    => 'The payment for %s was not recorded.',
+
+		// --- v1.3.6 (#9): Έναρξη καταγραφής πωλήσεων ---
+		'Έναρξη καταγραφής πωλήσεων'                             => 'Sales recording start date',
+		'Το plugin μετράει πωλήσεις ΚΑΙ ποσοστά ΜΟΝΟ από αυτή την ημερομηνία και μετά. Κενό = χωρίς όριο (καταγράφεται όλο το ιστορικό). Χρήσιμο για καθαρή εκκίνηση χωρίς να διαγραφούν παλιές παραγγελίες.' => 'The plugin counts sales and shares ONLY from this date onwards. Empty = no limit (the whole history is recorded). Useful for a clean start without deleting past orders.',
+		'Μη έγκυρη ημερομηνία έναρξης καταγραφής (απαιτείται Y-m-d ή κενό).' => 'Invalid sales-recording start date (Y-m-d or empty required).',
+
+		// --- v1.3.6 (#5): γλώσσα — 'auto' option ---
+		'Αυτόματη (WordPress)'                                   => 'Automatic (WordPress)',
+		'Ισχύει ανά χρήστη (μόνο για εσένα). Εάν δεν έχεις διαλέξει, ακολουθείται η γλώσσα του WordPress.' => 'Per user (only affects you). If you have not picked one, the WordPress language is followed.',
+
+		// --- v1.3.6: diversified strings (backup desc, footer, export header) ---
+		'Made with <3 by %s'                                     => 'Made with <3 by %s',
+		'More plugins at'                                        => 'More plugins at',
+		'Revenue Splitter — %1$s έως %2$s'                       => 'Revenue Splitter — %1$s to %2$s',
+		
+				// --- v1.3.6-fix (#5): λείποντα strings EN mode ---
+		'Ιστορικό συναλλαγών'                                    => 'Transaction history',
+		'6 μήνες'                                                => '6 months',
+		'12 μήνες'                                               => '12 months',
+		'Ο δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.' => 'The beneficiary signs in on the portal page ([author_portal]) ONLY with their personal key — the key uniquely identifies its holder.',
+		'Κανείς δεν έχει μερίδιο στην περίοδο.' => 'Nobody has a share in this period.',
 	);
 }
