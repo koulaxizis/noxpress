@@ -966,7 +966,7 @@ final class RS_Portal {
 
 		$cur = self::currency_fmt();
 
-		fputcsv( $out, array( $who, $per['start'], $per['end'] ), ',', '"', '\\' );
+		fputcsv( $out, array( RS_Admin_UI::csv_cell( $who ), $per['start'], $per['end'] ), ',', '"', '\\' );
 		fputcsv( $out, array(), ',', '"', '\\' );
 
 		fputcsv(

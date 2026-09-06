@@ -124,8 +124,8 @@ final class RS_Checkout {
 				. '</strong> ' . esc_html( $reason ) . '</p>';
 		}
 	}
-	
-		/**
+
+	/**
 	 * v1.3.7: Σφραγίζει το regular unit price (incl. tax) σε κάθε line item.
 	 *
 	 * Τρέχει στο woocommerce_checkout_create_order — το Woo αποθηκεύει τα

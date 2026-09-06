@@ -148,9 +148,11 @@ class RS_Reports {
 	 */
 	public static function run( array $args = array() ): array {
 
+		$now = new DateTimeImmutable( 'now', wp_timezone() );
+
 		$defaults = array(
-			'date_start'  => gmdate( 'Y-m-d', strtotime( '-30 days' ) ),
-			'date_end'    => gmdate( 'Y-m-d' ),
+			'date_start'  => $now->modify( '-29 days' )->format( 'Y-m-d' ),
+			'date_end'    => $now->format( 'Y-m-d' ),
 			'product_ids' => array(),
 		);
 		$args = wp_parse_args( $args, $defaults );
@@ -380,18 +382,13 @@ class RS_Reports {
 				$matched_orders[ $order->get_id() ] = true;
 
 				/*
-				 * v1.3.5 FIX (#7): Gross γραμμής χωρίς έκπτωση — από τα ίδια
-				 * τα WooCommerce δεδομένα (undiscounted subtotal + undiscounted
-				 * tax = undiscounted gross, ΟΠΩΣ το τιμολόγησε το shop),
-				 * ΟΧΙ από ανακατασκευή με τον συντελεστή του plugin.
-				 * Παλιά: $reg_gross = subtotal × (100+plugin_rate)/100 — κάθε
+				 * v1.3.5 FIX (#7): undiscounted gross της γραμμής — από τα
+				 * ίδια τα WooCommerce δεδομένα (subtotal + subtotal tax =
+				 * ό,τι ΗΤΑΝ να πληρωθεί χωρίς κουπόνι, όπως το τιμολόγησε
+				 * το shop), ΟΧΙ από ανακατασκευή με τον συντελεστή του
+				 * plugin. Παλιά: subtotal × (100+plugin_rate)/100 — κάθε
 				 * απόκλιση συντελεστή ή tax-free γραμμή έκανε τα full-price
 				 * items να εμφανίζονται ως «έκπτωση».
-				 */
-				/*
-				 * v1.3.5 FIX (#7): paid-without-coupon gross από τα ίδια τα
-				 * WooCommerce δεδομένα (undiscounted subtotal + undiscounted
-				 * tax = ό,τι ΗΤΑΝ να πληρωθεί χωρίς κουπόνι).
 				 */
 				$reg_gross = (float) $item->get_subtotal() + (float) $item->get_subtotal_tax();
 

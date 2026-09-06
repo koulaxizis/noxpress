@@ -213,7 +213,6 @@ class RS_Lang {
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                            => 'Settings saved.',
 		'Αποθήκευση ρυθμίσεων'                                   => 'Save settings',
 		'Γλώσσα οθόνης'                                          => 'Display language',
-		'Ισχύει ανά χρήστη (μόνο για εσένα).'                    => 'Per user (only affects you).',
 
 		// --- Metabox ---
 		'Χρησιμοποιεί τα global defaults (δικαιούχοι)'           => 'Uses global defaults (beneficiaries)',

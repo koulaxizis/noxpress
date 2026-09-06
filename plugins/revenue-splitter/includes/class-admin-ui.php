@@ -346,7 +346,7 @@ final class RS_Admin_UI {
 					<option value="month"<?php selected( $per['preset'], 'month' ); ?>><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?></option>
 					<option value="prev_month"<?php selected( $per['preset'], 'prev_month' ); ?>><?php esc_html_e( 'Προηγούμενος μήνας', 'revenue-splitter' ); ?></option>
 					<option value="year"<?php selected( $per['preset'], 'year' ); ?>><?php esc_html_e( 'Τρέχον έτος', 'revenue-splitter' ); ?></option>
-					<option value="prev_year"<?php selected( $per['preset'], 'prev_year' ); ?>><?php esc_html_e( 'Προηγούμενο έτος', 'revenue-splitter' ); ?></option>
+					<option value="prev_year"<?php selected( $per['preset'], 'prev_year' ); ?>><?php esc_html_e( 'Προηγούμενος έτος', 'revenue-splitter' ); ?></option>
 					<option value="custom"<?php selected( $per['preset'], 'custom' ); ?>><?php esc_html_e( 'Προσαρμοσμένο', 'revenue-splitter' ); ?></option>
 				</select>
 
@@ -564,10 +564,10 @@ final class RS_Admin_UI {
 			<h2 class="rs-h2"><?php esc_html_e( 'Γλώσσα οθόνης', 'revenue-splitter' ); ?></h2>
 			<p>
 				<select name="rs_lang">
-						<option value="auto"<?php selected( $lang, 'auto' ); ?>><?php esc_html_e( 'Αυτόματη (WordPress)', 'revenue-splitter' ); ?></option>
-						<option value="el"<?php selected( $lang, 'el' ); ?>>Ελληνικά</option>
-						<option value="en"<?php selected( $lang, 'en' ); ?>>English</option>
-					</select>
+					<option value="auto"<?php selected( $lang, 'auto' ); ?>><?php esc_html_e( 'Αυτόματη (WordPress)', 'revenue-splitter' ); ?></option>
+					<option value="el"<?php selected( $lang, 'el' ); ?>>Ελληνικά</option>
+					<option value="en"<?php selected( $lang, 'en' ); ?>>English</option>
+				</select>
 					<span class="description"><?php esc_html_e( 'Ισχύει ανά χρήστη (μόνο για εσένα). Εάν δεν έχεις διαλέξει, ακολουθείται η γλώσσα του WordPress.', 'revenue-splitter' ); ?></span>
 				</p>
 
@@ -784,7 +784,7 @@ final class RS_Admin_UI {
 		return $notices;
 	}
 
-		/**
+	/**
 	 * Το πλήρες state ως array — v1.3.6: υπερ-πλήρες.
 	 *
 	 *  - options:  whitelisted plugin options (ΦΠΑ default, global
@@ -1011,8 +1011,8 @@ final class RS_Admin_UI {
 				);
 			}
 		}
-		
-				// ---- v1.3.6: Post meta — καταμερισμοί/ΦΠΑ ανά προϊόν + free reasons ----
+
+		// ---- v1.3.6: Post meta — καταμερισμοί/ΦΠΑ ανά προϊόν + free reasons ----
 		if ( array_key_exists( 'postmeta', $state ) ) {
 
 			if ( ! is_array( $state['postmeta'] ) ) {
@@ -1024,6 +1024,14 @@ final class RS_Admin_UI {
 				$applied      = 0;
 				$skipped      = array();
 
+				// v1.3.7 (#5): HPOS-aware graft των _rs_free_reason. Αν το
+				// site τρέχει το custom order datastore, οι αιτιολογίες των
+				// ΠΑΡΑΓΓΕΛΙΩΝ γράφονται στο wc_orders_meta (όπου τις διαβάζει
+				// το Woo) — ΟΧΙ στο postmeta που ένα HPOS order δεν αγγίζει
+				// ποτέ. Ένα SHOW TABLES για όλο το import, όχι ανά γραμμή.
+				$hpos_table  = $wpdb->prefix . 'wc_orders_meta';
+				$hpos_active = ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $hpos_table ) ) === $hpos_table ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
 				foreach ( $state['postmeta'] as $row ) {
 					if ( ! is_array( $row )
 						|| empty( $row['post_id'] )
@@ -1034,6 +1042,55 @@ final class RS_Admin_UI {
 					}
 
 					$pid = (int) $row['post_id'];
+					$key = (string) $row['key'];
+
+					// ---- Free reasons ΠΡΙΝ από το get_post gate ----
+					// Σε full-HPOS site η παραγγελία ΔΕΝ είναι post — το
+					// get_post() πιο κάτω θα την μαρκάραdε άδικα ως
+					// «προϊόν δεν βρέθηκε». Χειριζόμαστε εδώ, ξεχωριστά:
+					if ( '_rs_free_reason' === $key ) {
+
+						// HPOS site + η παραγγελία υπάρχει στο wc_orders →
+						// γράψ' το εκεί (DELETE-first — το table δεν έχει
+						// unique constraint στο order+key).
+						if ( $hpos_active
+							&& null !== $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $pid ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+							$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+								$wpdb->prepare(
+									"DELETE FROM {$hpos_table} WHERE order_id = %d AND meta_key = %s",
+									$pid,
+									'_rs_free_reason'
+								)
+							);
+
+							$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+								$hpos_table,
+								array(
+									'order_id'   => $pid,
+									'meta_key'   => '_rs_free_reason',
+									'meta_value' => (string) $row['value'],
+								)
+							);
+
+							$applied++;
+							continue;
+						}
+
+						// Classic datastore: η παραγγελία είναι post → postmeta.
+						// Διαγραμμένη παραγγελία → σιωπηλό skip (ίδια συμπεριφορά
+						// με το ordermeta section), ΟΧΙ μήνυμα «προϊόν δεν
+						// βρέθηκε» — εδώ μιλάμε για παραγγελία, όχι προϊόν.
+						if ( null === get_post( $pid ) ) {
+							continue;
+						}
+
+						update_post_meta( $pid, $key, (string) $row['value'] );
+						$applied++;
+						continue;
+					}
+
+					// ---- Προϊοντικά keys: gate + skip notice ----
 					if ( null === get_post( $pid ) ) {
 						// Δεν υπάρχει το post με αυτό το ID — πιθανώς άλλαξαν
 						// IDs μετά από μεταφορά/επαναφορά του site.
@@ -1041,7 +1098,7 @@ final class RS_Admin_UI {
 						continue;
 					}
 
-					update_post_meta( $pid, (string) $row['key'], (string) $row['value'] );
+					update_post_meta( $pid, $key, (string) $row['value'] );
 					$applied++;
 				}
 

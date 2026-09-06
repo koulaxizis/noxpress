@@ -291,6 +291,25 @@ if ( $rs_table_exists === $rs_hpos_meta_table ) {
 }
 
 // ------------------------------------------------------------------------
+// Order ITEM meta (_rs_reg_unit — v1.3.7: stamped regular unit price
+// των line items από το RS_Checkout::stamp_regular_prices). Ζει στον
+// wp_woocommerce_order_itemmeta — ΚΟΙΝΟΣ πίνακας και για classic και
+// για HPOS setups (τα line items δεν μετακομίζουν στο HPOS), άρα ΕΝΑ
+// DELETE τα καλύπτει όλα. Existence check — ποτέ abort.
+// ------------------------------------------------------------------------
+
+$rs_itemmeta_table = $wpdb->prefix . 'woocommerce_order_itemmeta';
+
+if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $rs_itemmeta_table ) ) === $rs_itemmeta_table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->prepare(
+			"DELETE FROM {$rs_itemmeta_table} WHERE meta_key = %s",
+			'_rs_reg_unit'
+		)
+	);
+}
+
+// ------------------------------------------------------------------------
 // Done. Καμία σιωπηλή αποτυχία — αν κάτι πήγε στραβά, θα το δεις στα
 // υπολειπόμενα δεδομένα (option inspector / DB browser).
 // ------------------------------------------------------------------------

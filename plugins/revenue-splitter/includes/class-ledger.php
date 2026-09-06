@@ -285,7 +285,7 @@ final class RS_Ledger {
 		}
 
 		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
-			return;
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
 		}
 
 		$notices = array();
