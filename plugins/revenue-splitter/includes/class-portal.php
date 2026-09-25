@@ -28,6 +28,8 @@
  * v1.3.5 (#1): Περίοδος + φίλτρο προϊόντος + enriched πίνακες +
  * ΦΠΑ/συντελεστή + KPI δ% + chart 6/12 + ιστορικό + CSV με φίλτρα.
  * v1.3.5 (#3): Login μόνο με κλειδί, φόρμα κεντραρισμένη.
+ *
+ * v1.3.8 (#1–#5): default Τρέχον έτος, multi-select προϊόντων με αναζήτηση, d/m/Y στα el (ήδη μέσω fmt_date), custom χρώμα ονόματος στο head.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -310,7 +312,15 @@ final class RS_Portal {
 	private static function start_session( string $who ): void {
 		$tok = wp_generate_password( 40, false, false );
 		set_transient( 'rs_tok_' . $tok, $who, self::TOK_TTL );
-		setcookie( self::COOKIE_NAME, $tok, time() + self::TOK_TTL, COOKIEPATH ?: '/', COOKIE_DOMAIN, is_ssl(), true );
+		// php 7.3+ syntax: [name, value, expire, path, domain, secure, httponly, samesite]
+		setcookie( self::COOKIE_NAME, $tok, [
+			'expires'  => time() + self::TOK_TTL,
+			'path'     => COOKIEPATH ?: '/',
+			'domain'   => COOKIE_DOMAIN,
+			'secure'   => is_ssl(),
+			'httponly' => true, // Audit fix: blocking JS access.
+			'samesite' => 'Lax',
+		] );
 	}
 
 	private static function end_session(): void {
@@ -322,7 +332,14 @@ final class RS_Portal {
 			delete_transient( 'rs_tok_' . $tok );
 		}
 
-		setcookie( self::COOKIE_NAME, '', time() - HOUR_IN_SECONDS, COOKIEPATH ?: '/', COOKIE_DOMAIN, is_ssl(), true );
+		setcookie( self::COOKIE_NAME, '', [
+			'expires'  => time() - HOUR_IN_SECONDS,
+			'path'     => COOKIEPATH ?: '/',
+			'domain'   => COOKIE_DOMAIN,
+			'secure'   => is_ssl(),
+			'httponly' => true,
+			'samesite' => 'Lax',
+		] );
 	}
 
 	/* =====================================================================
@@ -470,7 +487,8 @@ final class RS_Portal {
 	private static function current_period(): array {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only period filter.
-		$preset = isset( $_GET[ self::GP_PERIOD ] ) ? sanitize_key( wp_unslash( $_GET[ self::GP_PERIOD ] ) ) : 'month';
+		// v1.3.8 (#4): default = «Τρέχον έτος» — ευθυγραμμισμένο με το admin.
+		$preset = isset( $_GET[ self::GP_PERIOD ] ) ? sanitize_key( wp_unslash( $_GET[ self::GP_PERIOD ] ) ) : 'year';
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$start = isset( $_GET[ self::GP_START ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::GP_START ] ) ) : '';
@@ -516,15 +534,23 @@ final class RS_Portal {
 					$s = $start;
 					$e = $end;
 				} else {
-					$s = $now->format( 'Y-m-01' );
+					// Audit fix: ίδιο fallback με το admin (v1.3.8 #4) — έτος,
+					// όχι μήνας (ασυμφωνία με το admin προκαλεί confusion).
+					$s = $now->format( 'Y-01-01' );
 					$e = $now->format( 'Y-m-d' );
 				}
 				break;
 			case 'month':
-			default:
 				$preset = 'month';
 				$label  = __( 'Τρέχων μήνας', 'revenue-splitter' );
 				$s      = $now->format( 'Y-m-01' );
+				$e      = $now->format( 'Y-m-d' );
+				break;
+			default:
+				// v1.3.8 (#4): άκυρο/άγνωστο preset → fail-safe στο «Τρέχον έτος».
+				$preset = 'year';
+				$label  = __( 'Τρέχον έτος', 'revenue-splitter' );
+				$s      = $now->format( 'Y-01-01' );
 				$e      = $now->format( 'Y-m-d' );
 				break;
 		}
@@ -536,6 +562,43 @@ final class RS_Portal {
 			'label'  => $label,
 			'chart'  => in_array( $chart, array( 6, 12 ), true ) ? $chart : 12,
 		);
+	}
+	
+	
+	/**
+	 * v1.3.8 (#2): Επιλεγμένα IDs προϊόντων από το GET (rs_p_product[]),
+	 * με legacy scalar fallback. Sorted unique — κανένα ID = όλα τα
+	 * ΔΙΚΑ του προϊόντα. Το sort() κανονικοποιεί το cache key.
+	 */
+	private static function current_products(): array {
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter, absint παρακάτω.
+		if ( ! isset( $_GET[ self::GP_PROD ] ) ) {
+			return array();
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- array validated/sanitized below.
+		$raw = wp_unslash( $_GET[ self::GP_PROD ] );
+
+		$ids = array();
+		if ( is_array( $raw ) ) {
+			foreach ( $raw as $v ) {
+				$v = absint( $v );
+				if ( $v > 0 ) {
+					$ids[] = $v;
+				}
+			}
+		} else {
+			$v = absint( $raw ); // Legacy single-value link.
+			if ( $v > 0 ) {
+				$ids[] = $v;
+			}
+		}
+
+		$ids = array_values( array_unique( $ids ) );
+		sort( $ids );
+
+		return $ids;
 	}
 
 	/* =====================================================================
@@ -600,8 +663,8 @@ final class RS_Portal {
 		// ---------- ΠΕΡΙΟΔΟΣ + ΦΙΛΤΡΟ ΠΡΟΪΟΝΤΟΣ (v1.3.5 #1) ----------
 		$per = self::current_period();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
-		$pid = isset( $_GET[ self::GP_PROD ] ) ? absint( $_GET[ self::GP_PROD ] ) : 0;
+		// v1.3.8 (#2): multi-select IDs (sorted unique).
+		$pids = self::current_products();
 
 		// Πλήρες report περιόδου — τροφοδοτεί το dropdown (πάντα).
 		$rep_all = RS_Reports::run(
@@ -622,13 +685,20 @@ final class RS_Portal {
 			}
 		}
 
-		// Ενεργό φίλτρο →_filtered report (σωστά totals/συντελεστές).
-		if ( $pid > 0 ) {
+		// v1.3.9 (#1): Audit fix — φιλτράρισμα στο `pids` στα `my_products`
+		// ΠΡΙΝ το call στο Reports. Αλλιώς το cache-key collision-άρει
+		// entre benef (Α φιλτράρει το Β, αλλά το cached report περιέχει
+		// και τα δύο) → potential data leak ή λάθος totals.
+		$allowed_pids = array_intersect( $pids, array_column( $my_products, 'product_id' ) );
+		sort( $allowed_pids );
+
+		// Ενεργό φίλτρο (πολλαπλά IDs) → filtered report (σωστά totals).
+		if ( ! empty( $allowed_pids ) ) {
 			$rep = RS_Reports::run(
 				array(
 					'date_start'  => $per['start'],
-					'date_end'   => $per['end'],
-					'product_ids' => array( $pid ),
+					'date_end'    => $per['end'],
+					'product_ids' => $allowed_pids,
 				)
 			);
 		} else {
@@ -708,23 +778,26 @@ final class RS_Portal {
 		$cur = self::currency_fmt();
 
 		$logout = wp_nonce_url( add_query_arg( 'rs_logout', '1', self::portal_url() ), 'rs_portal' );
-		$csv    = wp_nonce_url(
-			add_query_arg(
-				array(
-					'rs_portal_csv' => '1',
-					self::GP_PERIOD => $per['preset'],
-					self::GP_START  => $per['start'],
-					self::GP_END    => $per['end'],
-					self::GP_PROD   => $pid > 0 ? $pid : '',
-				),
-				self::portal_url()
+
+		$csv_base = add_query_arg(
+			array(
+				'rs_portal_csv' => '1',
+				self::GP_PERIOD  => $per['preset'],
+				self::GP_START   => $per['start'],
+				self::GP_END     => $per['end'],
 			),
-			'rs_portal_csv'
+			self::portal_url()
 		);
+		// Multi-value: τα rs_p_product[] ΓΡΑΦΟΝΤΑΙ ως ξεχωριστά params
+		// (array key θα overwrite-άρει το προηγούμενο — bug admin pattern).
+		foreach ( $pids as $cp ) {
+			$csv_base .= '&' . rawurlencode( self::GP_PROD . '[]' ) . '=' . rawurlencode( (string) $cp );
+		}
+		$csv = wp_nonce_url( $csv_base, 'rs_portal_csv' );
 		?>
 		<div class="rs-portal">
 			<div class="rs-pt-head">
-				<strong><?php echo esc_html( $who ); ?></strong>
+				<strong style="display:inline-block;background:<?php echo esc_attr( RS_Admin_UI::ben_color( $who ) ); ?>;color:<?php echo esc_attr( RS_Admin_UI::chip_fg( RS_Admin_UI::ben_color( $who ) ) ); ?>;padding:2px 12px;border-radius:12px;"><?php echo esc_html( $who ); ?></strong>
 				<span>
 					<a href="<?php echo esc_url( $csv ); ?>"><?php esc_html_e( 'CSV', 'revenue-splitter' ); ?></a> ·
 					<a href="<?php echo esc_url( $logout ); ?>"><?php esc_html_e( 'Αποσύνδεση', 'revenue-splitter' ); ?></a>
@@ -744,14 +817,19 @@ final class RS_Portal {
 				<input type="date" name="<?php echo esc_attr( self::GP_START ); ?>" value="<?php echo esc_attr( $per['start'] ); ?>" />
 				<input type="date" name="<?php echo esc_attr( self::GP_END ); ?>" value="<?php echo esc_attr( $per['end'] ); ?>" />
 
-				<select name="<?php echo esc_attr( self::GP_PROD ); ?>">
-					<option value="0"><?php esc_html_e( 'Όλα τα προϊόντα', 'revenue-splitter' ); ?></option>
-					<?php foreach ( $my_products as $mp ) : ?>
-						<option value="<?php echo esc_attr( (string) $mp['product_id'] ); ?>"<?php selected( $pid, (int) $mp['product_id'] ); ?>>
-							<?php echo esc_html( $mp['title'] ); ?>
-						</option>
-					<?php endforeach; ?>
-				</select>
+				<span class="rs-prod-picker">
+					<input type="search" id="rs-prod-search" class="rs-pt-prod-search"
+						placeholder="<?php esc_attr_e( 'Αναζήτηση προϊόντος…', 'revenue-splitter' ); ?>" />
+										<select id="rs-prod-multi" class="rs-pt-multi" name="<?php echo esc_attr( self::GP_PROD ); ?>[]" multiple size="5">
+						<?php foreach ( $my_products as $mp ) : ?>
+							<option value="<?php echo esc_attr( (string) $mp['product_id'] ); ?>"
+								<?php selected( in_array( (int) $mp['product_id'], $pids, true ) ); ?>>
+								<?php echo esc_html( (string) $mp['product_id'] . ' — ' . $mp['title'] ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					<span class="rs-prod-hint"><?php esc_html_e( 'Ctrl/Cmd + click για πολλαπλή επιλογή. Καμία επιλογή = όλα.', 'revenue-splitter' ); ?></span>
+				</span>
 
 				<button type="submit" class="rs-pt-btn"><?php esc_html_e( 'Εφαρμογή', 'revenue-splitter' ); ?></button>
 			</form>
@@ -765,7 +843,7 @@ final class RS_Portal {
 				<div class="rs-kpi">
 					<span class="rs-kpi-label"><?php esc_html_e( 'Μερίδιό σου (περιόδου)', 'revenue-splitter' ); ?></span>
 					<strong><?php echo esc_html( $cur( $period_share ) ); ?></strong>
-					<small class="rs-pt-kpi-sub"><?php echo esc_html( $per['label'] . ': ' . $per['start'] . ' → ' . $per['end'] ); ?></small>
+					<small class="rs-pt-kpi-sub"><?php echo esc_html( $per['label'] . ': ' . RS_Lang::fmt_date( $per['start'] ) . ' → ' . RS_Lang::fmt_date( $per['end'] ) ); ?></small>
 				</div>
 				<div class="rs-kpi">
 					<span class="rs-kpi-label"><?php esc_html_e( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ); ?></span>
@@ -779,7 +857,9 @@ final class RS_Portal {
 					<input type="hidden" name="<?php echo esc_attr( self::GP_PERIOD ); ?>" value="<?php echo esc_attr( $per['preset'] ); ?>" />
 					<input type="hidden" name="<?php echo esc_attr( self::GP_START ); ?>" value="<?php echo esc_attr( $per['start'] ); ?>" />
 					<input type="hidden" name="<?php echo esc_attr( self::GP_END ); ?>" value="<?php echo esc_attr( $per['end'] ); ?>" />
-					<input type="hidden" name="<?php echo esc_attr( self::GP_PROD ); ?>" value="<?php echo esc_attr( (string) $pid ); ?>" />
+					<?php foreach ( $pids as $cp ) : ?>
+						<input type="hidden" name="<?php echo esc_attr( self::GP_PROD ); ?>[]" value="<?php echo esc_attr( (string) $cp ); ?>" />
+					<?php endforeach; ?>
 					<select name="<?php echo esc_attr( self::GP_CHART ); ?>" onchange="this.form.submit()">
 						<option value="6"<?php selected( $per['chart'], 6 ); ?>><?php esc_html_e( '6 μήνες', 'revenue-splitter' ); ?></option>
 						<option value="12"<?php selected( $per['chart'], 12 ); ?>><?php esc_html_e( '12 μήνες', 'revenue-splitter' ); ?></option>
@@ -901,9 +981,9 @@ final class RS_Portal {
 				<?php else : ?>
 					<?php foreach ( $history as $e ) : ?>
 					<tr>
-						<td><?php echo esc_html( $e['date'] ); ?></td>
+							<td><?php echo esc_html( RS_Lang::fmt_date( $e['date'] ) ); ?></td>
 						<td><?php echo esc_html( 'income' === $e['type'] ? __( 'Έσοδο', 'revenue-splitter' ) : __( 'Πληρωμή', 'revenue-splitter' ) ); ?></td>
-						<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? '+' : '−' ) . $cur( abs( (float) $e['amount'] ) ) ); ?></strong></td>
+						<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? ( $e['amount'] < 0 ? '−' : '+' ) : '−' ) . $cur( abs( (float) $e['amount'] ) ) ); ?></strong></td>
 						<td><?php echo esc_html( $e['note'] ); ?></td>
 					</tr>
 					<?php endforeach; ?>
@@ -913,6 +993,12 @@ final class RS_Portal {
 
 			<p class="rs-pt-note">
 				<?php esc_html_e( 'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.', 'revenue-splitter' ); ?>
+			</p>
+
+			<p class="rs-pt-kofi">
+				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
+					☕ <?php esc_html_e( 'Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
+				</a>
 			</p>
 		</div>
 		<?php
@@ -934,18 +1020,44 @@ final class RS_Portal {
 
 		$per = self::current_period();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
-		$pid = isset( $_GET[ self::GP_PROD ] ) ? absint( $_GET[ self::GP_PROD ] ) : 0;
+		// v1.3.8 (#2): ίδιο φίλτρο με το dashboard του portal.
+		$pids = self::current_products();
 
 		$run = array(
 			'date_start' => $per['start'],
 			'date_end'   => $per['end'],
 		);
-		if ( $pid > 0 ) {
-			$run['product_ids'] = array( $pid );
+
+		// Πλήρες report περιόδου πρώτα — για τα δικά του προϊόντα.
+		$rep_all = RS_Reports::run( $run );
+
+		$my_ids = array();
+		foreach ( $rep_all['products'] as $p ) {
+			foreach ( $p['splits'] as $s ) {
+				if ( $s['name'] === $who ) {
+					$my_ids[] = (int) $p['product_id'];
+					break;
+				}
+			}
 		}
 
-		$rep   = RS_Reports::run( $run );
+		// v1.5.0 polish (#3): ομοιομορφία με το render_dashboard() (v1.3.9 #1) —
+		// το φίλτρο περιορίζεται στα δικά του προϊόντα ΠΡΙΝ το δεύτερο call,
+		// κανένα crafted rs_p_product[] δεν περνάει στο Reports.
+		$allowed_pids = array_intersect( $pids, $my_ids );
+		sort( $allowed_pids );
+
+		if ( ! empty( $allowed_pids ) ) {
+			$rep = RS_Reports::run(
+				array(
+					'date_start'  => $per['start'],
+					'date_end'    => $per['end'],
+					'product_ids' => $allowed_pids,
+				)
+			);
+		} else {
+			$rep = $rep_all;
+		}
 		$today = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' );
 
 		nocache_headers();
@@ -1001,7 +1113,7 @@ final class RS_Portal {
 						(int) $p['qty_full'],
 						(int) $p['qty_disc'],
 						$p['disc_pct'],
-						implode( ' ', $p['coupons'] ),
+						RS_Admin_UI::csv_cell( implode( ' ', $p['coupons'] ) ),
 						(int) $p['qty_free'],
 						$cur( $p['net'] ),
 						$s['percent'],
@@ -1071,8 +1183,30 @@ final class RS_Portal {
 
 .rs-portal h3 { margin: 1.4em 0 0.4em; font-size: 1.05em; }
 .rs-pt-note { color: #787c82; font-size: 0.85em; }
+.rs-pt-kofi { margin: 0.8em 0 0; font-size: 0.85em; }
+.rs-pt-kofi a { display: inline-block; background: #6d4aff; color: #fff; padding: 6px 16px; border-radius: 999px; text-decoration: none; font-weight: 600; }
 .rs-empty { text-align: center; color: #787c82; font-style: italic; }
+
+/* v1.3.8 (#2): multi-select προϊόντων + αναζήτηση (portal). */
+.rs-prod-picker { display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
+.rs-pt-prod-search { min-width: 0; width: 100%; padding: 6px 8px; border: 1px solid #c3c4c7; border-radius: 3px; }
+select.rs-pt-multi { min-height: 32px; padding: 2px 6px; border: 1px solid #c3c4c7; border-radius: 3px; background: #fff; }
+.rs-prod-hint { font-size: 11px; color: #787c82; }
 </style>
+<script>
+/* v1.3.8 (#2): delegated φίλτρο αναζήτησης του multi-select (portal inline —
+ * το admin.js ΔΕΝ φορτώνεται στο frontend). */
+document.addEventListener('input', function (e) {
+	if (!e.target.matches('#rs-prod-search')) return;
+	var sel = document.getElementById('rs-prod-multi');
+	if (!sel) return;
+	var q = String(e.target.value || '').trim().toLowerCase();
+	for (var i = 0; i < sel.options.length; i++) {
+		var t = sel.options[i].textContent.toLowerCase();
+		sel.options[i].hidden = (q !== '' && t.indexOf(q) === -1);
+	}
+});
+</script>
 		<?php
 	}
 
@@ -1100,6 +1234,10 @@ final class RS_Portal {
 		return $url;
 	}
 
+	/**
+	 * Footer με clickable cross-links + Ko-fi support CTA
+	 * (ενιαίο pattern με το RS_Admin_UI::footer()).
+	 */
 	private static function footer(): void {
 		?>
 		<p class="rs-footer">
@@ -1107,6 +1245,12 @@ final class RS_Portal {
 			<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a> ·
 			<a href="https://glarolykoi.net" target="_blank" rel="noopener noreferrer">glarolykoi.net</a> ·
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
+		</p>
+		<p class="rs-footer" style="margin-top:10px;">
+			<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
+				style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
+				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
+			</a>
 		</p>
 		<?php
 	}

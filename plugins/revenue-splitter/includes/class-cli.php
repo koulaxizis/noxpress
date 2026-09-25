@@ -89,6 +89,10 @@ final class RS_CLI {
 	 */
 	public static function report( array $args, array $assoc ): void {
 
+		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
+			WP_CLI::error( 'Insufficient permissions.' );
+		}
+
 		$now = new DateTimeImmutable( 'now', wp_timezone() );
 
 		$start = isset( $assoc['start'] ) ? (string) $assoc['start'] : $now->modify( '-29 days' )->format( 'Y-m-d' );
@@ -113,6 +117,12 @@ final class RS_CLI {
 		$report = RS_Reports::run( $run );
 
 		$ben = isset( $assoc['ben'] ) ? trim( (string) $assoc['ben'] ) : '';
+
+		// Ίδιο semantics με το dashboard: φίλτρο δικαιούχου →
+		// επανυπολογισμός totals/beneficiaries (μία υλοποίηση).
+		if ( '' !== $ben ) {
+			$report = RS_Admin_UI::apply_ben_filter( $report, $ben );
+		}
 
 		$items = array();
 		foreach ( $report['products'] as $p ) {
@@ -200,6 +210,9 @@ final class RS_CLI {
 	 * [--date=<date>]
 	 * : Entry date (Y-m-d). Default: today.
 	 *
+	 * [--channel=<channel>]
+	 * : Optional sales channel (must exist in the Settings channel list).
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp rs ledger-add --type=income --ben="Maria Papadopoulou" --amount=-40 --note="correction: double entry June"
@@ -207,10 +220,14 @@ final class RS_CLI {
 	 */
 	public static function ledger_add( array $args, array $assoc ): void {
 
-		// v1.3.1 (#19): isset() + ''!== — ΟΧΙ empty(). Έτσι το --amount="0"
-		// φτάνει στο RS_Ledger::add() και παίρνει το επιχειρησιακό μήνυμα
-		// («Το ποσό δεν μπορεί να είναι μηδέν») αντί για σαφώς λάθος
-		// «Missing required --amount».
+		// Audit fix: capability check — WP-CLI τρέχει ως WP user,
+		// άρα χρειάζεται ρητό cap για defense-in-depth (CI pipelines,
+		// scheduled tasks, non-root contexts).
+		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
+			WP_CLI::error( 'Insufficient permissions.' );
+		}
+
+		// v1.3.1 (#19): isset() + ''!== — ΟΧΙ empty().
 		$required = array( 'type', 'ben', 'amount', 'note' );
 		foreach ( $required as $r ) {
 			if ( ! isset( $assoc[ $r ] ) || '' === (string) $assoc[ $r ] ) {
@@ -226,11 +243,13 @@ final class RS_CLI {
 			'beneficiary' => (string) $assoc['ben'],
 			'amount'      => (string) $assoc['amount'],
 			'note'        => (string) $assoc['note'],
+			'channel'     => isset( $assoc['channel'] ) ? (string) $assoc['channel'] : '',
 		);
 
 		$res = RS_Ledger::add( $entry );
 
 		if ( true === $res ) {
+			do_action( 'rs_invalidate_cache' ); // Invalidate reports/portal caches.
 			WP_CLI::success( 'Ledger entry added: ' . $entry['type'] . ' ' . $entry['amount'] . ' → ' . $entry['beneficiary'] . ' (' . $entry['date'] . ')' );
 		} else {
 			WP_CLI::error( 'Rejected by RS_Ledger::add(): ' . (string) $res );
@@ -261,6 +280,10 @@ final class RS_CLI {
 	 *     wp rs ledger-list --ben="Maria Papadopoulou" --type=payment
 	 */
 	public static function ledger_list( array $args, array $assoc ): void {
+
+		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
+			WP_CLI::error( 'Insufficient permissions.' );
+		}
 
 		$ben  = isset( $assoc['ben'] ) ? (string) $assoc['ben'] : null;
 		$type = isset( $assoc['type'] ) ? (string) $assoc['type'] : null;
@@ -331,12 +354,18 @@ final class RS_CLI {
 	 */
 	public static function ledger_delete( array $args, array $assoc ): void {
 
+		// Audit fix: capability check — same as ledger_add.
+		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
+			WP_CLI::error( 'Insufficient permissions.' );
+		}
+
 		$id = isset( $assoc['id'] ) ? absint( $assoc['id'] ) : 0;
 		if ( $id <= 0 ) {
 			WP_CLI::error( 'Missing or invalid --id.' );
 		}
 
 		if ( RS_Ledger::delete( $id ) ) {
+			do_action( 'rs_invalidate_cache' ); // Invalidate reports/portal caches.
 			WP_CLI::success( 'Ledger entry #' . $id . ' deleted.' );
 		} else {
 			WP_CLI::error( 'Entry #' . $id . ' not found.' );
@@ -362,6 +391,10 @@ final class RS_CLI {
 	 */
 	public static function balance( array $args, array $assoc ): void {
 
+		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
+			WP_CLI::error( 'Insufficient permissions.' );
+		}
+
 		$ben = isset( $assoc['ben'] ) ? trim( (string) $assoc['ben'] ) : '';
 		if ( '' === $ben ) {
 			WP_CLI::error( 'Missing --ben.' );
@@ -373,6 +406,9 @@ final class RS_CLI {
 		$income = RS_Ledger::sum( $ben, '2000-01-01', $now->format( 'Y-m-d' ), 'income' );
 		$paid   = RS_Ledger::sum( $ben, '2000-01-01', $now->format( 'Y-m-d' ), 'payment' );
 
+		// Audit fix: lifetime_beneficiaries() κάνει caching 5' —
+		// ο χρήστης πρέπει να ξέρει ότι το balance μπορεί να είναι
+		// stale μετά από ledger changes μέχρι το cache να expire.
 		WP_CLI::line( 'Lifetime balance for "' . $ben . '"' );
 		WP_CLI::line( '  All-time sales:      ' . self::fmt( $sales ) );
 		WP_CLI::line( '  Non-sales income:    ' . self::fmt( $income ) );
@@ -392,6 +428,12 @@ final class RS_CLI {
 	 *     wp rs backup > rs-backup-2026-09-04.json
 	 */
 	public static function backup( array $args, array $assoc ): void {
+		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
+			WP_CLI::error( 'Insufficient permissions.' );
+		}
+
+		WP_CLI::warning( 'Backup includes hashed portal keys, ledger, product overrides. Handle securely.' );
+
 		WP_CLI::line(
 			wp_json_encode(
 				RS_Admin_UI::export_state(),

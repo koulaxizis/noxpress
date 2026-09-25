@@ -262,6 +262,8 @@ table.widefat.rs-table {
 
 .rs-split-table .rs-ben-name { width: 100%; }
 
+/* v1.3.1: το κουμπί διαγραφής (×) στους πίνακες ledger ΚΑΙ metabox. */
+.rs-table .rs-remove-row,
 .rs-split-table .rs-remove-row {
 	color: #b7b2d6 !important;
 	cursor: pointer;
@@ -271,7 +273,10 @@ table.widefat.rs-table {
 	font-size: 15px;
 	line-height: 1;
 }
-.rs-split-table .rs-remove-row:hover { color: #ff9a9a !important; }
+.rs-table .rs-remove-row:hover,
+.rs-split-table .rs-remove-row:hover {
+	color: #ff9a9a !important;
+}
 
 .rs-total-line { margin-top: 10px; font-size: 14px; color: #eae8fa; }
 .rs-total.ok { color: #8fe6ab; }
@@ -465,4 +470,127 @@ input[name="rs_sales_since"] {
 	border-radius: 4px;
 	min-height: 32px;
 	box-shadow: none;
+}
+
+
+/* ==========================================================================
+   v1.3.8 additions — multi-select προϊόντων, χρώματα δικαιούχων
+   ========================================================================== */
+
+/* ---- #2: Multi-select προϊόντων + αναζήτηση ---- */
+
+.rs-prod-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 260px;
+}
+
+.rs-prod-picker .rs-search {
+	min-width: 0;
+	width: 100%;
+}
+
+select.rs-prod-multi {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+	padding: 2px 8px;
+	box-shadow: none;
+}
+
+select.rs-prod-multi option {
+	background: #1e212b;
+	color: #f0eefc;
+}
+
+select.rs-prod-multi option:checked {
+	background: #6d4aff;
+	color: #ffffff;
+}
+
+.rs-prod-hint {
+	font-size: 11.5px;
+	color: #8b87a3;
+}
+
+/* ---- #1: Color pickers δικαιούχων (Ρυθμίσεις) ---- */
+
+.rs-color-table { max-width: 420px; }
+.rs-color-table td { padding: 6px 10px; }
+
+.rs-color-table input[type="color"] {
+	width: 46px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid #3a3f52;
+	border-radius: 4px;
+	background: transparent;
+	cursor: pointer;
+}
+
+
+/* ==========================================================================
+   v1.3.9 additions — mini chart τάσης (Πρόταση 1)
+   ========================================================================== */
+
+.rs-trend-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.rs-trend {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	height: 150px;
+	padding: 10px 8px 0;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.02);
+	overflow-x: auto;
+}
+
+.rs-trend-col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	flex: 1 1 0;
+	min-width: 38px;
+}
+
+.rs-trend-col small {
+	color: #8b87a3;
+	font-size: 10.5px;
+	white-space: nowrap;
+}
+
+.rs-trend-pair {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 110px;
+}
+
+.rs-trend-pair > div {
+	flex: 1 1 0;
+	border-radius: 3px 3px 0 0;
+	min-height: 2px;
+}
+
+.rs-bar-net { background: #6d4aff; }
+.rs-bar-sh  { background: #a78bfa; opacity: 0.8; }
+
+.rs-dot {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 3px;
+	vertical-align: -1px;
 }

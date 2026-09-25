@@ -177,6 +177,10 @@ $rs_uninstall_options = array(
 	'rs_ledger',
 	'rs_reason_coupons',
 	'rs_sales_since',
+	'rs_beneficiary_colors', // v1.3.8 (#1): χρώματα δικαιούχων.
+	'rs_channels',           // v1.3.8 (#7): λίστα καναλιών πώλησης.
+	'rs_default_channel',    // v1.3.8 (#7 στάδιο 3): default κανάλι.
+	'rs_version',            // v1.4.0: recorded version από το rs_maybe_upgrade().
 	'rs_cache_version',
 );
 
@@ -213,6 +217,7 @@ $rs_transient_masks = array(
 	'_transient_rs_aui_msg_%',          // PRG notices (backup/import/settings).
 	'_transient_rs_split_error_%',      // Validation notices (metabox).
 	'_transient_rs_newkey_%',           // v1.3.1: one-shot plaintext portal keys.
+	'_transient_rs_block_checkout_warned_%', // v1.4.0: blocks-checkout warning suppression flags.
 	'_transient_timeout_rs_tok_%',
 	'_transient_timeout_rs_rl_%',
 	'_transient_timeout_rs_report_%',
@@ -220,6 +225,7 @@ $rs_transient_masks = array(
 	'_transient_timeout_rs_aui_msg_%',
 	'_transient_timeout_rs_split_error_%',
 	'_transient_timeout_rs_newkey_%',
+	'_transient_timeout_rs_block_checkout_warned_%',
 );
 
 foreach ( $rs_transient_masks as $rs_mask ) {
@@ -268,8 +274,9 @@ delete_post_meta_by_key( '_rs_vat_rate' );
 // Κλασικό postmeta (legacy datastore ή reverted HPOS).
 $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$wpdb->prepare(
-		"DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s",
-		'_rs_free_reason'
+		"DELETE FROM {$wpdb->postmeta} WHERE meta_key IN (%s, %s)",
+		'_rs_free_reason',
+		'_rs_channel'
 	)
 );
 
@@ -284,8 +291,9 @@ $rs_table_exists = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQu
 if ( $rs_table_exists === $rs_hpos_meta_table ) {
 	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
-			"DELETE FROM {$rs_hpos_meta_table} WHERE meta_key = %s",
-			'_rs_free_reason'
+			"DELETE FROM {$rs_hpos_meta_table} WHERE meta_key IN (%s, %s)",
+			'_rs_free_reason',
+			'_rs_channel'
 		)
 	);
 }

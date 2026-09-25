@@ -92,6 +92,20 @@ class RS_Reports {
 	}
 
 	public static function flush_cache(): void {
+		global $wpdb;
+
+		/*
+		 * Διαγραφή όλων των report transients. FIX #2: το pattern έλειπε
+		 * το αρχικό '_' — τα transients αποθηκεύονται ως option names
+		 * '_transient_rs_report_…' / '_transient_timeout_rs_report_…',
+		 * οπότε τα παλιά LIKE 'transient_…' (χωρίς underscore) δεν
+		 * ταίριαζαν με ΚΑΜΙΑ γραμμή. Τα underscores του pattern είναι
+		 * single-char wildcards στο MySQL LIKE, οπότε ταιριάζουν και
+		 * τον εαυτό τους. Με external object cache τα transients δεν
+		 * ζουν στο options table — καλύπτεται από το version bump.
+		 */
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_rs_report_%'" );
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_rs_report_%'" );
 		update_option( 'rs_cache_version', (string) time() );
 	}
 
@@ -240,6 +254,7 @@ class RS_Reports {
 				'net'   => 0.0,
 			),
 			'beneficiaries' => array(),
+			'channels'      => array(), // v1.3.8 (#7 στάδιο 3).
 			'warnings'      => array(),
 			'order_count'   => 0,
 		);
@@ -300,6 +315,7 @@ class RS_Reports {
 		$ben_totals     = array();
 		$warnings       = array();
 		$matched_orders = array(); // Παραγγελίες που συνεισέφεραν τουλάχιστον μία πληρωμένη γραμμή.
+		$per_channel    = array(); // v1.3.8 (#7 στάδιο 3): κανάλι => {qty, free, gross, vat, net}.
 
 		foreach ( $orders as $order ) {
 			/** @var WC_Order $order */
@@ -314,6 +330,22 @@ class RS_Reports {
 			 * to string») με ΚΑΘΕ πραγματικό κουπόνι.
 			 */
 			$order_coupons = $order->get_coupon_codes();
+
+			/*
+			 * v1.3.8 (#7 στάδιο 3): κανάλι της παραγγελίας — order meta
+			 * '_rs_channel' (από το checkout με κουπόνι), διαφορετικά το
+			 * default pseudo-κανάλι «Κατάστημα/Online» (Ρυθμίσεις).
+			 * Read-time ΔΕΝ γίνεται whitelist validation — η λίστα μπορεί
+			 * να έχει αλλάξει από την αγορά· εμφανίζεται ό,τι αποθηκεύτηκε.
+			 */
+			$order_channel = $order->get_meta( RS_Checkout::CHANNEL_META );
+			if ( ! is_string( $order_channel ) || '' === $order_channel ) {
+				$order_channel = RS_Admin_UI::default_channel();
+			}
+			$order_channel = sanitize_text_field( $order_channel );
+			if ( '' === $order_channel ) {
+				$order_channel = RS_Admin_UI::default_channel(); // Αμυντικά (ποτέ κενό key).
+			}
 
 			foreach ( $order->get_items() as $item ) {
 				/** @var WC_Order_Item_Product $item */
@@ -355,7 +387,8 @@ class RS_Reports {
 						'disc_w'   => 0.0, // Άθροισμα (έκπτωση% × τεμ.) → σταθμισμένος μ.ο.
 						'disc_amt' => 0.0, // Συνολική έκπτωση (μικτή, incl ΦΠΑ).
 						'coupons'  => array(), // v1.3.5 (#8): κωδικοί κουπονιών (strings).
-					);
+						'sale_est' => false, // Audit (#2): η έκπτωση εκτιμήθηκε από τρέχοντα τιμοκατάλογο (χωρίς stamp).
+				);
 				}
 
 				/*
@@ -367,6 +400,13 @@ class RS_Reports {
 				if ( $net_gross <= 0.005 ) {
 					if ( (float) $item->get_total() <= 0.005 ) {
 						$per_product[ $pid ]['qty_free'] += $qty;
+
+						// v1.3.8 (#7 στάδιο 3): δωρεάν αντίτυπα μετριούνται
+						// στο κανάλι της παραγγελίας (τεμάχια, χωρίς έσοδα).
+						if ( ! isset( $per_channel[ $order_channel ] ) ) {
+							$per_channel[ $order_channel ] = array( 'qty' => 0, 'free' => 0, 'gross' => 0.0, 'vat' => 0.0, 'net' => 0.0 );
+						}
+						$per_channel[ $order_channel ]['free'] += $qty;
 
 						// v1.3.5 (#8): 100%-κουπόνι = αναφορά κουπονιού & στις
 						// δωρεάν γραμμές (αλλιώς χάνεται από τα stats).
@@ -410,6 +450,13 @@ class RS_Reports {
 					if ( null !== $native ) {
 						$disc_line = $native['amount'];
 						$disc_base = $native['base'];
+
+						// Audit (#2): εκτίμηση από τρέχοντα τιμοκατάλογο — αν η
+						// τιμή έχει αλλάξει από την παραγγελία, το % δεν είναι
+						// ground truth. Μαρκάρεται και εμφανίζεται στο dashboard.
+						if ( empty( $native['stamped'] ) ) {
+							$per_product[ $pid ]['sale_est'] = true;
+						}
 					}
 				}
 
@@ -443,6 +490,16 @@ class RS_Reports {
 				$per_product[ $pid ]['gross'] += $net_gross;
 				$per_product[ $pid ]['vat']   += $vat;
 				$per_product[ $pid ]['net']   += $base;
+
+				// v1.3.8 (#7 στάδιο 3): συσσώρευση ανά κανάλι — ίδιο φίλτρο
+				// περιόδου/προϊόντων με τον πίνακα «Ανά προϊόν» (consistency).
+				if ( ! isset( $per_channel[ $order_channel ] ) ) {
+					$per_channel[ $order_channel ] = array( 'qty' => 0, 'free' => 0, 'gross' => 0.0, 'vat' => 0.0, 'net' => 0.0 );
+				}
+				$per_channel[ $order_channel ]['qty']   += $qty;
+				$per_channel[ $order_channel ]['gross'] += $net_gross;
+				$per_channel[ $order_channel ]['vat']   += $vat;
+				$per_channel[ $order_channel ]['net']   += $base;
 
 				$map = RS_Beneficiaries::get_map( $pid );
 
@@ -486,11 +543,11 @@ class RS_Reports {
 				'net'         => round( $acc['net'], 2 ),
 				'vat_rate'    => RS_VAT::get_rate( $pid ),
 				'ben_default' => ! RS_Beneficiaries::has_override( $pid ),
+				'sale_est'    => (bool) $acc['sale_est'], // FIX #1: emit — παλιά χανόταν στο accumulator (dead flag).
 				'qty_full'    => $acc['qty_full'],
 				'qty_disc'    => $acc['qty_disc'],
 				'qty_free'    => $acc['qty_free'],
 				'disc_pct'    => $acc['qty_disc'] > 0 ? round( $acc['disc_w'] / $acc['qty_disc'], 1 ) : 0.0,
-				'disc_amt'    => round( $acc['disc_amt'], 2 ),
 				'coupons'     => array_values( array_unique( $acc['coupons'] ) ), // v1.3.5 (#8) — strings.
 				'splits'      => $splits,
 			);
@@ -511,6 +568,25 @@ class RS_Reports {
 			$t_vat   += $p['vat'];
 			$t_net   += $p['net'];
 		}
+
+		// v1.3.8 (#7 στάδιο 3): τελικός πίνακας ανά κανάλι (Μικτό ↓).
+		$channels_out = array();
+		foreach ( $per_channel as $ch_name => $ch_acc ) {
+			$channels_out[] = array(
+				'channel' => (string) $ch_name,
+				'qty'     => (int) $ch_acc['qty'],
+				'free'    => (int) $ch_acc['free'],
+				'gross'   => round( (float) $ch_acc['gross'], 2 ),
+				'vat'     => round( (float) $ch_acc['vat'], 2 ),
+				'net'     => round( (float) $ch_acc['net'], 2 ),
+			);
+		}
+		usort(
+			$channels_out,
+			static function ( $a, $b ) {
+				return $b['gross'] <=> $a['gross'];
+			}
+		);
 
 		arsort( $ben_totals );
 		$beneficiaries = array();
@@ -533,6 +609,7 @@ class RS_Reports {
 				'net'   => round( $t_net, 2 ),
 			),
 			'beneficiaries' => $beneficiaries,
+			'channels'      => $channels_out, // v1.3.8 (#7 στάδιο 3).
 			'warnings'      => $warnings,
 			'order_count'   => count( $matched_orders ),
 		);
@@ -579,18 +656,33 @@ class RS_Reports {
 
 		$diff = $target - $sum;
 
-		if ( $diff > 0 ) {
-			// Λείπουν cents → δώσε στα μεγαλύτερα υπολειπόμενα κλάσματα.
+		/*
+		 * Audit fix: η παλιά μοίρασμα (array_slice 0..diff) κάλυπτε μόνο
+		 * |diff| ≤ n — δηλαδή ONLY το «καθαρό» flooring remainder. Όταν τα
+		 * ποσοστά δεν αθροίζουν ακριβώς 100 (sanitize_list ανοχή ±0.05%)
+		 * ή σε μεγάλα ποσά με float drift, το |diff| ξεπερνά τους n
+		 * δικαιούχους και τα υπόλοιπα cents ΧΑΘΟΝΤΑΝ (Σ splits ≠ net).
+		 *
+		 * Νέο σχήμα: 1 cent ανά γύρο, με επανεκλογή του μεγαλύτερου/
+		 * μικρότερου υπολειπόμενου ΚΑΘΕ φορά — σωστό για κάθε |diff|,
+		 * με max απόκλιση 1 cent ανά δικαιούχο από το «δίκαιο» ποσό.
+		 */
+		while ( $diff > 0 ) {
 			arsort( $frac );
-			foreach ( array_slice( array_keys( $frac ), 0, $diff, true ) as $i ) {
-				$cents[ $i ]++;
-			}
-		} elseif ( $diff < 0 ) {
-			// Περισσεύουν cents → πάρε από τα μικρότερα κλάσματα.
+			$top = array_key_first( $frac );
+
+			$cents[ $top ]++;
+			$frac[ $top ] -= 1.0; // Το κλάσμα ξοδεύτηκε — ο επόμενος γύρος διαλέγει τον επόμενο.
+			$diff--;
+		}
+
+		while ( $diff < 0 ) {
 			asort( $frac );
-			foreach ( array_slice( array_keys( $frac ), 0, - $diff, true ) as $i ) {
-				$cents[ $i ]--;
-			}
+			$low = array_key_first( $frac );
+
+			$cents[ $low ]--;
+			$frac[ $low ] += 1.0;
+			$diff++;
 		}
 
 		$out = array();
@@ -609,7 +701,7 @@ class RS_Reports {
 	 * Helpers
 	 * ------------------------------------------------------------------- */
 
-		/**
+	/**
 	 * v1.3.7: Ανίχνευση native έκπτωσης (Τιμή προσφοράς στο General tab).
 	 *
 	 * Ιεραρχία πηγών για το regular unit price (ΦΠΑ-συμπεριλημτικό):
@@ -629,11 +721,13 @@ class RS_Reports {
 	private static function native_sale_discount( WC_Order_Item_Product $item, float $paid_pre_coupon_gross, int $qty ): ?array {
 
 		$regular_unit = null;
+		$stamped      = false;
 
 		// ---- Πηγή 1: stamped τιμή της στιγμής της αγοράς ----
 		$stamp = $item->get_meta( '_rs_reg_unit' );
 		if ( is_scalar( $stamp ) && is_numeric( (string) $stamp ) && (float) $stamp > 0.0 ) {
 			$regular_unit = (float) $stamp;
+			$stamped      = true;
 		}
 
 		// ---- Πηγή 2: τρέχον regular price (fallback) ----
@@ -662,8 +756,9 @@ class RS_Reports {
 		}
 
 		return array(
-			'base'   => $full_gross,
-			'amount' => $amount,
+			'base'    => $full_gross,
+			'amount'  => $amount,
+			'stamped' => $stamped,
 		);
 	}
 

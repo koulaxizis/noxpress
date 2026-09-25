@@ -96,6 +96,11 @@ final class RS_Ledger {
 					'beneficiary' => (string) $e['beneficiary'],
 					'amount'      => (float) $e['amount'],
 					'note'        => (string) $e['note'],
+					// v1.3.8 (#7): προαιρετικό κανάλι πώλησης ('' = χωρίς).
+					// Read-time: περνά ως έχει (sanitized string) — παλιές
+					// εγγραφές χωρίς κανάλι ≠ error, απλώς κενό. Η λίστα
+					// καναλιών μπορεί να έχει αλλάξει μετά την εγγραφή.
+					'channel'     => isset( $e['channel'] ) && is_string( $e['channel'] ) ? sanitize_text_field( $e['channel'] ) : '',
 				);
 			}
 		}
@@ -145,58 +150,133 @@ final class RS_Ledger {
 
 		return round( $total, 2 );
 	}
+	
+	
+	/**
+	 * v1.3.8 (#7 στάδιο 3): Άθροισμα income/payment ανά κανάλι σε
+	 * περίοδο. Εγγραφές χωρίς κανάλι ('') γυρίζουν υπό το κλειδί ''
+	 * — ο CALLER αποφασίζει πώς θα τις εμφανίσει (ΔΕΝ μπαίνουν αυτόματα
+	 * στο «Κατάστημα/Online»: ένα bonus εκτός καναλιού δεν είναι πώληση
+	 * καταστήματος).
+	 *
+	 * @return array[] channel => {income: float, payment: float}
+	 */
+	public static function channel_sums( string $start, string $end ): array {
+
+		$out = array();
+
+		foreach ( self::all() as $e ) {
+			if ( $e['date'] < $start || $e['date'] > $end ) {
+				continue;
+			}
+
+			$ch = (string) ( $e['channel'] ?? '' );
+
+			if ( ! isset( $out[ $ch ] ) ) {
+				$out[ $ch ] = array( 'income' => 0.0, 'payment' => 0.0 );
+			}
+
+			if ( isset( $out[ $ch ][ $e['type'] ] ) ) {
+				$out[ $ch ][ $e['type'] ] += (float) $e['amount'];
+			}
+		}
+
+		foreach ( $out as $ch => $sums ) {
+			foreach ( $sums as $k => $v ) {
+				$out[ $ch ][ $k ] = round( (float) $v, 2 );
+			}
+		}
+
+		return $out;
+	}
 
 	/* -----------------------------------------------------------------
 	 * Mutations
 	 * ----------------------------------------------------------------- */
 
 	/**
-	 * Καταχώριση νέας εγγραφής.
+	 * Κοινό validation + κανονικοποίηση εγγραφής (audit: κοινό για
+	 * add() και import_bulk() — μία πηγή αλήθειας για τους κανόνες).
 	 *
-	 * @param array $entry {type, date, beneficiary, amount, note}
-	 * @return true|string true σε επιτυχία, αλλιώς μήνυμα λάθους.
+	 * @param array $entry {type, date, beneficiary, amount, note, channel?}
+	 * @return array ['ok'=>true,'entry'=>normalized] ή ['ok'=>false,'error'=>string]
 	 */
-	public static function add( array $entry ) {
+	private static function validate_entry( array $entry ): array {
 
 		$type = isset( $entry['type'] ) ? sanitize_key( (string) $entry['type'] ) : '';
 		if ( ! in_array( $type, array( 'income', 'payment' ), true ) ) {
-			return __( 'Άκυρος τύπος εγγραφής.', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Άκυρος τύπος εγγραφής.', 'revenue-splitter' ) );
 		}
 
 		$date = isset( $entry['date'] ) ? trim( (string) $entry['date'] ) : '';
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date )
 			|| ! checkdate( (int) substr( $date, 5, 2 ), (int) substr( $date, 8, 2 ), (int) substr( $date, 0, 4 ) ) ) {
-			return __( 'Μη έγκυρη ημερομηνία.', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Μη έγκυρη ημερομηνία.', 'revenue-splitter' ) );
 		}
 
 		$who = sanitize_text_field( (string) ( $entry['beneficiary'] ?? '' ) );
 		if ( '' === $who ) {
-			return __( 'Επίλεξε δικαιούχο.', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Επίλεξε δικαιούχο.', 'revenue-splitter' ) );
 		}
 
 		if ( class_exists( 'RS_Beneficiaries' ) && ! in_array( $who, RS_Beneficiaries::collect_names(), true ) ) {
-			return __( 'Άγνωστος δικαιούχος — αποθηκεύεις πρώτα τους δικαιούχους στις Ρυθμίσεις;', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Άγνωστος δικαιούχος — αποθηκεύεις πρώτα τους δικαιούχους στις Ρυθμίσεις;', 'revenue-splitter' ) );
 		}
 
 		$amount_raw = isset( $entry['amount'] ) ? wc_format_decimal( $entry['amount'] ) : '';
 		if ( '' === $amount_raw || ! is_numeric( $amount_raw ) ) {
-			return __( 'Μη έγκυρο ποσό.', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Μη έγκυρο ποσό.', 'revenue-splitter' ) );
 		}
 		$amount_f = round( (float) $amount_raw, 2 );
 
 		if ( 'payment' === $type && $amount_f <= 0 ) {
-			return __( 'Η πληρωμή πρέπει να είναι θετικό ποσό (ποσά που αφαιρούνται καταχωρούνται ως «Έσοδο» με αρνητική τιμή).', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Η πληρωμή πρέπει να είναι θετικό ποσό (ποσά που αφαιρούνται καταχωρούνται ως «Έσοδο» με αρνητική τιμή).', 'revenue-splitter' ) );
 		}
 		if ( 'income' === $type && 0.0 === $amount_f ) {
-			return __( 'Το ποσό δεν μπορεί να είναι μηδέν.', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Το ποσό δεν μπορεί να είναι μηδέν.', 'revenue-splitter' ) );
 		}
 
 		$note = trim( sanitize_text_field( (string) ( $entry['note'] ?? '' ) ) );
 		if ( '' === $note ) {
-			return __( 'Η αιτιολογία είναι υποχρεωτική.', 'revenue-splitter' );
+			return array( 'ok' => false, 'error' => __( 'Η αιτιολογία είναι υποχρεωτική.', 'revenue-splitter' ) );
 		}
 
-		// v1.3.1 (#12): $all έρχεται πλέον από το per-request cache —
+		// v1.3.8 (#7): Κανάλι (προαιρετικό, whitelist από Ρυθμίσεις —
+		// server-side, ώστε και το state import να περνά από το ίδιο φίλτρο).
+		$channel = trim( sanitize_text_field( (string) ( $entry['channel'] ?? '' ) ) );
+
+		if ( '' !== $channel && ! in_array( $channel, RS_Admin_UI::get_channels(), true ) ) {
+			return array( 'ok' => false, 'error' => __( 'Μη έγκυρο κανάλι πώλησης (δεν είναι στη λίστα των Ρυθμίσεων).', 'revenue-splitter' ) );
+		}
+
+		return array(
+			'ok'    => true,
+			'entry' => array(
+				'type'        => $type,
+				'date'        => $date,
+				'beneficiary' => $who,
+				'amount'      => $amount_f,
+				'note'        => $note,
+				'channel'     => $channel,
+			),
+		);
+	}
+
+	/**
+	 * Καταχώριση νέας εγγραφής (validation → validate_entry()).
+	 *
+	 * @param array $entry {type, date, beneficiary, amount, note, channel?}
+	 * @return true|string true σε επιτυχία, αλλιώς μήνυμα λάθους.
+	 */
+	public static function add( array $entry ) {
+
+		$v = self::validate_entry( $entry );
+		if ( ! $v['ok'] ) {
+			return $v['error'];
+		}
+		$clean = $v['entry'];
+
+		// v1.3.1 (#12): $all έρχεται από το per-request cache —
 		// γράφεται πίσω (option + cache συγχρονισμένα).
 		$all    = self::all();
 		$new_id = 0;
@@ -205,14 +285,7 @@ final class RS_Ledger {
 		}
 		$new_id++;
 
-		$all[] = array(
-			'id'          => $new_id,
-			'date'        => $date,
-			'type'        => $type,
-			'beneficiary' => $who,
-			'amount'      => $amount_f,
-			'note'        => $note,
-		);
+		$all[] = array( 'id' => $new_id ) + $clean;
 
 		update_option( self::OPT_LEDGER, wp_json_encode( $all ) );
 		self::$all_cache = $all;
@@ -254,6 +327,71 @@ final class RS_Ledger {
 		delete_option( self::OPT_LEDGER );
 		self::$all_cache = array();
 	}
+	
+		/**
+	 * Atomic bulk import (audit finding #1): ΟΛΕΣ οι εγγραφές
+	 * validated ΠΡΙΝ από οποιοδήποτε write. Αν έστω μία αποτύχει
+	 * → ΚΑΜΙΑ αλλαγή στο υπάρχον ledger (all-or-nothing) — δεν
+	 * υπάρχει πια σενάριο «σβήστηκαν 12, μπήκαν 3».
+	 *
+	 * Οι νέες εγγραφές αριθμούνται 1..n (ίδια συμπεριφορά με το
+	 * παλιό wipe+add loop). Κανάλια/δικαιούχοι ελέγχονται απέναντι
+	 * στα ΤΡΕΧΟΝΤΑ site data (states όπως beneficiaries/channels
+	 * έχουν ήδη import-αριστεί πριν το ledger στο import_state()).
+	 *
+	 * @return true|string[] true σε επιτυχία, αλλιώς λίστα μηνυμάτων λάθους.
+	 */
+	public static function import_bulk( array $entries ) {
+
+		$clean  = array();
+		$errors = array();
+
+		foreach ( $entries as $i => $e ) {
+
+			if ( ! is_array( $e ) ) {
+				$errors[] = sprintf(
+					/* translators: %d: θέση εγγραφής στο backup */
+					__( 'Ledger: η εγγραφή στη θέση %d δεν είναι έγκυρη.', 'revenue-splitter' ),
+					$i + 1
+				);
+				continue;
+			}
+
+			$v = self::validate_entry( $e );
+			if ( ! $v['ok'] ) {
+				$errors[] = sprintf(
+					/* translators: 1: θέση στο backup, 2: αιτία */
+					__( 'Ledger: η εγγραφή στη θέση %1$d απέτυχε — %2$s', 'revenue-splitter' ),
+					$i + 1,
+					$v['error']
+				);
+				continue;
+			}
+
+			$clean[] = $v['entry'];
+		}
+
+		if ( ! empty( $errors ) ) {
+			return $errors; // Καμία μετάλλαξη — το υπάρχον ledger μένει άθικτο.
+		}
+
+		$out = array();
+		$id  = 0;
+		foreach ( $clean as $c ) {
+			$id++;
+			$c['id'] = $id;
+			$out[]   = $c;
+		}
+
+		if ( empty( $out ) ) {
+			self::wipe(); // Κενό backup = σκόπιμο σβήσιμο (ίδια παλιά συμπεριφορά).
+		} else {
+			update_option( self::OPT_LEDGER, wp_json_encode( $out ) );
+			self::$all_cache = $out;
+		}
+
+		return true;
+	}
 
 	/* -----------------------------------------------------------------
 	 * Routing (v1.3.0 FIX #5 + v1.3.1 FIX #11) — POST στο admin_init + PRG
@@ -279,9 +417,15 @@ final class RS_Ledger {
 			return;
 		}
 
-		if ( ! isset( $_POST['rs_ledger_nonce'] )
-			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_ledger_nonce'] ) ), self::NONCE_ACT ) ) {
+		// Δεν είναι δική μας φόρμα (settings/backup POST) — αθόρυβο pass-through.
+		if ( ! isset( $_POST['rs_ledger_nonce'] ) ) {
 			return;
+		}
+
+		// Δική μας φόρμα με άκυρο/ληγμένο nonce → ΟΧΙ σιωπηλή απώλεια του POST
+		// (ενιαίο με το v1.3.2 FIX #4 pattern του RS_Admin_UI).
+		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_ledger_nonce'] ) ), self::NONCE_ACT ) ) {
+			wp_die( esc_html__( 'Η φόρμα έληξε (nonce) — δοκίμασε ξανά.', 'revenue-splitter' ) );
 		}
 
 		if ( ! current_user_can( RS_Admin_UI::CAP ) ) {
@@ -294,7 +438,8 @@ final class RS_Ledger {
 		if ( isset( $_POST['rs_ledger_del_submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$gid = absint( wp_unslash( $_POST['rs_ledger_del_id'] ?? 0 ) );
+			$raw_del = wp_unslash( $_POST['rs_ledger_del_id'] ?? 0 );
+			$gid     = is_scalar( $raw_del ) ? absint( $raw_del ) : 0;
 
 			// v1.3.1 FIX (#11): καμία σιωπηλή αποτυχία — ρητά μηνύματα.
 			if ( $gid <= 0 ) {
@@ -331,6 +476,10 @@ final class RS_Ledger {
 				'amount'      => isset( $_POST['rs_ledger_amount'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_amount'] ) ) : '',
 				// phpcs:ignore WordPress.Security.NonceVerification.Missing
 				'note'        => isset( $_POST['rs_ledger_note'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_note'] ) ) : '',
+				// v1.3.8 (#7): κανάλι από το dropdown της φόρμας (whitelist
+				// ελέγχεται μέσα στο add()).
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'channel'     => isset( $_POST['rs_ledger_channel'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_channel'] ) ) : '',
 			);
 
 			$res = self::add( $entry );
@@ -577,20 +726,22 @@ final class RS_Ledger {
 					<th><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th>
 					<th class="num"><?php esc_html_e( 'Ποσό', 'revenue-splitter' ); ?></th>
 					<th><?php esc_html_e( 'Αιτιολογία', 'revenue-splitter' ); ?></th>
+					<th><?php esc_html_e( 'Κανάλι', 'revenue-splitter' ); ?></th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 			<?php if ( empty( $entries ) ) : ?>
-				<tr><td colspan="6" class="rs-empty"><?php esc_html_e( 'Καμία εγγραφή.', 'revenue-splitter' ); ?></td></tr>
+				<tr><td colspan="7" class="rs-empty"><?php esc_html_e( 'Καμία εγγραφή.', 'revenue-splitter' ); ?></td></tr>
 			<?php else : ?>
 				<?php foreach ( $entries as $e ) : ?>
 				<tr>
-					<td><?php echo esc_html( $e['date'] ); ?></td>
+					<td><?php echo esc_html( RS_Lang::fmt_date( $e['date'] ) ); ?></td>
 					<td><?php echo esc_html( 'income' === $e['type'] ? __( 'Έσοδο', 'revenue-splitter' ) : __( 'Πληρωμή', 'revenue-splitter' ) ); ?></td>
 					<td><strong><?php echo esc_html( $e['beneficiary'] ); ?></strong></td>
-					<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? '+' : '−' ) . number_format_i18n( abs( (float) $e['amount'] ), 2 ) ); ?></strong></td>
+					<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? ( $e['amount'] < 0 ? '−' : '+' ) : '−' ) . number_format_i18n( abs( (float) $e['amount'] ), 2 ) ); ?></strong></td>
 					<td><?php echo esc_html( $e['note'] ); ?></td>
+					<td><?php echo esc_html( '' !== ( $e['channel'] ?? '' ) ? $e['channel'] : '—' ); ?></td>
 					<td>
 						<form method="post" style="display:inline; margin:0;">
 							<?php wp_nonce_field( self::NONCE_ACT, 'rs_ledger_nonce' ); ?>
@@ -620,6 +771,17 @@ final class RS_Ledger {
 				<?php endforeach; ?>
 			</select>
 
+			<?php // v1.3.8 (#7): dropdown καναλιού — ίδια λίστα με checkout. ?>
+			<?php $ch_list = RS_Admin_UI::get_channels(); ?>
+			<?php if ( ! empty( $ch_list ) ) : ?>
+				<select name="rs_ledger_channel">
+					<option value=""><?php esc_html_e( '— χωρίς κανάλι —', 'revenue-splitter' ); ?></option>
+					<?php foreach ( $ch_list as $ch ) : ?>
+						<option value="<?php echo esc_attr( $ch ); ?>"><?php echo esc_html( $ch ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			<?php endif; ?>
+
 			<input type="date" name="rs_ledger_date"
 				value="<?php echo esc_attr( ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' ) ); ?>" />
 
@@ -638,7 +800,7 @@ final class RS_Ledger {
 		<form method="post" class="rs-period-form" style="margin-top:12px;">
 			<?php wp_nonce_field( self::NONCE_ACT, 'rs_ledger_nonce' ); ?>
 
-			<label for="rs-ledger-payall" class="rs-kpi-label">
+			<label for="rs-ledger-payall-from" class="rs-kpi-label">
 				<?php esc_html_e( 'Εξόφληση όλων (περιόδου)', 'revenue-splitter' ); ?>
 			</label>
 

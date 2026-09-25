@@ -128,6 +128,29 @@ class RS_Lang {
 		}
 		return $translation;
 	}
+	
+		/**
+	 * v1.3.8 (#5): Ημερομηνία σε εμφανιζόμενη μορφή.
+	 *
+	 * 'el' → ηη/μμ/εεεε, κάθε άλλη γλώσσα → ανέπαφο 'Y-m-d'.
+	 * DISPLAY-ONLY: οι εσωτερικές τιμές (GET params, SQL, options,
+	 * filenames) παραμένουν ΠΑΝΤΑ 'Y-m-d' — καμία μετάλλαξη δεδομένων.
+	 */
+	public static function fmt_date( ?string $ymd ): string {
+
+		if ( null === $ymd || '' === $ymd ) {
+			return (string) $ymd;
+		}
+
+		if ( 'el' !== self::get_lang() ) {
+			return $ymd;
+		}
+
+		$d = DateTimeImmutable::createFromFormat( '!Y-m-d', $ymd );
+
+		return ( $d instanceof DateTimeImmutable ) ? $d->format( 'd/m/Y' ) : $ymd;
+	}
+
 
 	/**
 	 * Λεξικό Ελληνικά → English — ΟΛΑ τα εμφανιζόμενα strings του
@@ -136,7 +159,7 @@ class RS_Lang {
 	private static $dict = array(
 	
 			// --- v1.3.6: Υπερ-πλήρες backup/import ---
-		'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, global beneficiaries, portal keys (hashed), ledger (payments & extra income), coupons, start date, per-product splits/VAT, free-copy reasons and user languages. Importing REPLACES the corresponding data.',
+		'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, χρώματα δικαιούχων, κανάλια πώλησης, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, global beneficiaries, beneficiary colors, sales channels, portal keys (hashed), ledger (payments & extra income), coupons, start date, per-product splits/VAT, free-copy reasons and user languages. Importing REPLACES the corresponding data.',
 		'Μη έγκυρο τμήμα post meta στο backup.'               => 'Invalid post meta section in the backup.',
 		'Προϊοντικά overrides: εφαρμόστηκαν %d εγγραφές.'     => 'Product overrides: %d entries applied.',
 		'ΔΕΝ βρέθηκαν τα προϊόντα με IDs %s — τα overrides τους παραλείφθηκαν (τα product IDs του backup δεν ταιριάζουν με τα τρέχοντα).' => 'Products with IDs %s were NOT found — their overrides were skipped (the backup product IDs do not match the current ones).',
@@ -227,6 +250,9 @@ class RS_Lang {
 		'Όνομα δικαιούχου'                                        => 'Beneficiary name',
 		'Προϊόν — πλήρης δικαιούχος'                             => 'Product — sole beneficiary',
 		'Μη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
+		'Το όνομα δικαιούχου δεν επιτρέπεται να περιέχει τον χαρακτήρα «|».' => 'A beneficiary name cannot contain the "|" character.',
+		'Κάθε γραμμή χρειάζεται όνομα δικαιούχου.'              => 'Every row needs a beneficiary name.',
+		'Τα ποσοστά δικαιούχων πρέπει να είναι μεταξύ 0 και 100 (εκτός 0).' => 'Beneficiary percentages must be between 0 and 100 (excluding 0).',
 		'Τα ποσοστά δικαιούχων αθροίζουν %s%% — πρέπει να αθροίζουν 100%%.' => 'Beneficiary percentages add up to %s%% — they must sum to 100%%.',
 		'Το Revenue Splitter απαιτεί WooCommerce για να λειτουργήσει.' => 'Revenue Splitter requires WooCommerce to function.',
 		'Ο καταμερισμός του προϊόντος ΔΕΝ αποθηκεύτηκε — χρησιμοποιείται η προηγούμενη/κενή τιμή.' => 'The product split was NOT saved — the previous/empty value is in effect.',
@@ -245,7 +271,7 @@ class RS_Lang {
 		'Καινούρια κλειδιά — αντιγράψε τα ΤΩΡΑ:'                  => 'New keys — copy them NOW:',
 		'αποθηκεύονται κατακερματισμένα και δεν θα εμφανιστούν ξανά.' => 'they are stored hashed and will never be shown again.',
 		'Κρυφό — αποθηκεύεται κατακερματισμένα.'                  => 'Hidden — stored hashed.',
-		'Πατρωτό (plaintext) κλειδί — ανανέωσέ το για να γίνει hash.' => 'Legacy (plaintext) key — regenerate it to convert it to a hash.',
+		'Παλιό (plaintext) κλειδί — ανανέωσέ το για να γίνει hash.' => 'Legacy (plaintext) key — regenerate it to convert it to a hash.',
 
 		// --- Portal (frontend): login ---
 		'Author Portal'                                          => 'Author Portal',
@@ -318,7 +344,7 @@ class RS_Lang {
 		'Η αιτιολογία είναι υποχρεωτική.'                         => 'A reason is required.',
 		'Άκυρο ID εγγραφής.'                                     => 'Invalid entry ID.',
 		'Η εγγραφή δεν βρέθηκε — ίσως έχει ήδη διαγραφεί.'       => 'Entry not found — it may have already been deleted.',
-		'Δεν υπάρχουν δικαιούχοι ακόμη — δεν μπορεί να συντηρηθεί ledger.' => 'No beneficiaries yet — the ledger cannot be maintained.',
+		'Δεν υπάρχουν δικαιούχοι ακόμη — δεν μπορεί να διατηρηθεί ledger.' => 'No beneficiaries yet — the ledger cannot be maintained.',
 		'Κουπόνια δωρεάν αντιτύπων'                               => 'Free-copy coupons',
 		'Κωδικοί κουπονιών'                                      => 'Coupon codes',
 		'Αιτιολογία δωρεάν αντιτύπου'                             => 'Free copy reason',
@@ -390,5 +416,62 @@ class RS_Lang {
 		'12 μήνες'                                               => '12 months',
 		'Ο δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.' => 'The beneficiary signs in on the portal page ([author_portal]) ONLY with their personal key — the key uniquely identifies its holder.',
 		'Κανείς δεν έχει μερίδιο στην περίοδο.' => 'Nobody has a share in this period.',
+
+		// --- v1.3.8: multi-select προϊόντων, φίλτρο δικαιούχου, χρώματα ---
+		'Αναζήτηση προϊόντος…'                                    => 'Search products…',
+		'Ctrl/Cmd + click για πολλαπλή επιλογή. Καμία επιλογή = όλα.' => 'Ctrl/Cmd + click to select multiple. No selection = all.',
+		'Όλοι οι δικαιούχοι'                                      => 'All beneficiaries',
+		'Χρώματα δικαιούχων'                                     => 'Beneficiary colors',
+		'Προσαρμοσμένο χρώμα ανά δικαιούχο — εμφανίζεται στα chips του καταμερισμού και στα ονόματα των πινάκων. Default: μωβ #6d4aff.' => 'Custom color per beneficiary — shown in the split chips and table names. Default: purple #6d4aff.',
+
+		// --- v1.3.8 (#7): κανάλια πώλησης ---
+		'Κανάλια πώλησης'                                          => 'Sales channels',
+		'Προεπιλεγμένη λίστα καναλιών για το checkout (όταν εφαρμόζεται κουπόνι δωρεάν αντιτύπου) και για τη χειροκίνητη εισαγωγή εσόδων στο ledger. Μία γραμμή ανά κανάλι.' => 'Default channel list for checkout (when a free-copy coupon is applied) and for manual ledger income entries. One channel per line.',
+		'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να επιλέξει κανάλι πώλησης από τη λίστα των καναλιών.' => 'When any of these coupons is applied at checkout, the customer must pick a sales channel from the channel list.',
+		'Κανάλι πώλησης'                                           => 'Sales channel',
+		'— Επιλογή καναλιού —'                                     => '— Select channel —',
+		'Παρακαλώ επίλεξε κανάλι πώλησης.'                         => 'Please select a sales channel.',
+		'Μη έγκυρο κανάλι πώλησης.'                                => 'Invalid sales channel.',
+		'Κανάλι πώλησης:'                                          => 'Sales channel:',
+		'Αιτιολογία δωρεάν αντιτύπου:'                             => 'Free copy reason:',
+		'Κανάλι'                                                   => 'Channel',
+		'— χωρίς κανάλι —'                                        => '— no channel —',
+		'Μη έγκυρο κανάλι πώλησης (δεν είναι στη λίστα των Ρυθμίσεων).' => 'Invalid sales channel (not in the Settings list).',
+
+		// --- v1.3.8 (#7 στάδιο 3): αναφορά ανά κανάλι ---
+		'Ανά κανάλι'                                               => 'By channel',
+		'Καμία κίνηση ανά κανάλι στην περίοδο.'                    => 'No channel activity in this period.',
+		'Default κανάλι (παραγγελίες χωρίς μαρκάρισμα)'             => 'Default channel (unmarked orders)',
+		'Σε αυτό το κανάλι καταμετρώνται όλες οι κανονικές παραγγελίες του καταστήματος που δεν έχουν μαρκαριστεί με κανάλι (π.χ. από κουπόνι στο checkout). Κενό = «Κατάστημα/Online».' => 'All regular store orders without a channel mark (e.g. via a checkout coupon) are counted here. Empty = “Store/Online”.',
+				'Μη έγκυρο default κανάλι.'                               => 'Invalid default channel.',
+
+		// --- v1.4.0 audit: λείποντα strings (χρώματα/κανάλια + audit patches) ---
+		'Μη έγκυρο χρώμα δικαιούχου (απαιτείται #RRGGBB).'                  => 'Invalid beneficiary color (#RRGGBB required).',
+		'Μη έγκυρο blob χρωμάτων δικαιούχων (απαιτούνται #RRGGBB τιμές).'  => 'Invalid beneficiary colors blob (#RRGGBB values required).',
+		'Μη έγκυρο blob καναλιών πώλησης.'                                  => 'Invalid sales channels blob.',
+		'Το αρχείο υπερβαίνει το όριο μεταφόρτωσης του server — δες το upload_max_filesize της PHP.' => 'The file exceeds the server upload limit — see the PHP upload_max_filesize.',
+		'Σφάλμα κατά τη μεταφόρτωση του αρχείου — δοκίμασε ξανά.'           => 'Error while uploading the file — please try again.',
+		'Μη αποδεκτό μέγεθος αρχείου (όριο 64 MB).'                         => 'Unacceptable file size (64 MB limit).',
+		'Μη έγκυρη λίστα δικαιούχων (εσωτερικό σφάλμα μορφοποίησης).'      => 'Invalid beneficiaries list (internal formatting error).',
+
+				// --- Πρόταση 1: mini chart τάσης --- 
+		'Τάση (μήνα με μήνα)'                => 'Trend (month by month)',
+		'Μερίδιο δικαιούχου'                 => 'Beneficiary share',
+		'Σύνολο μεριδίων'                    => 'Total shares',
+
+		// --- Audit: strings των audit patches (ledger atomic import,
+		//     nonce-fail, block checkout warning, sale estimate label) ---
+		'Η φόρμα έληξε (nonce) — δοκίμασε ξανά.'                 => 'The form expired (nonce) — please try again.',
+		'Ledger: η εγγραφή στη θέση %d δεν είναι έγκυρη.'        => 'Ledger: the entry at position %d is invalid.',
+		'Ledger: η εγγραφή στη θέση %1$d απέτυχε — %2$s'         => 'Ledger: the entry at position %1$d failed — %2$s',
+		'Ledger: ΚΑΜΙΑ αλλαγή δεν έγινε — το υπάρχον ledger παρέμεινε άθικτο.' => 'Ledger: NO changes were made — the existing ledger remained intact.',
+		'Η σελίδα checkout χρησιμοποιεί το WooCommerce Blocks. Το πεδίο «Κανάλι πώλησης» θα εμφανίζεται ΜΟΝΟ σε classic checkout. %1$sΔιάβασε το επίσημο άρθρο%2$s για συμβατότητα ή επιστρέψε στο classic checkout.' => 'The checkout page uses WooCommerce Blocks. The "Sales channel" field will appear ONLY in the classic checkout. %1$sRead the official article%2$s for compatibility, or switch back to the classic checkout.',
+		'εκτίμηση έκπτωσης (τιμοκατάλογος)'                       => 'discount estimate (current price list)',
+
+		// --- v1.4.1 (#2): Backup χωρίς ledger section ----
+		'Tο backup δεν περιέχει ledger — το υπάρχον ledger παρέμεινε άθικτο.' => 'The backup does not contain a ledger — the existing ledger was left unchanged.',
+
+		// --- v1.5.0 polish (#1): bilingual placeholder καναλιών (Ρυθμίσεις) ---
+		"Βιβλιοπωλείο\nΕκδηλώσεις\nOnline\nΧονδρική" => "Bookstore\nEvents\nOnline\nWholesale",
 	);
 }

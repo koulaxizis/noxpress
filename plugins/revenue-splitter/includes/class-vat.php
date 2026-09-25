@@ -69,7 +69,13 @@ class RS_VAT {
 	 */
 	public static function get_rate( int $product_id ): float {
 		$raw = trim( self::raw_rate( $product_id ) );
-		return ( '' !== $raw ) ? (float) $raw : self::default_rate();
+
+		if ( '' === $raw || ! is_numeric( $raw ) ) {
+			return self::default_rate();
+		}
+
+		$rate = (float) $raw;
+		return ( $rate >= 0 && $rate <= 100 ) ? $rate : self::default_rate();
 	}
 
 	/** Έχει οριστεί ρητά ΦΠΑ στο προϊόν; (για warnings στο dashboard) */
@@ -107,8 +113,10 @@ class RS_VAT {
 		$value = wc_format_decimal( $submitted );
 
 		if ( '' !== $value && is_numeric( $value ) && (float) $value >= 0 && (float) $value <= 100 ) {
-			update_post_meta( $product->get_id(), self::META_KEY, (string) $value );
-			do_action( 'rs_invalidate_cache' );
+			$updated = update_post_meta( $product->get_id(), self::META_KEY, (string) $value );
+			if ( $updated ) {
+				do_action( 'rs_invalidate_cache' );
+			}
 		}
 		// Άκυρη τιμή → δεν γράφουμε τίποτα, δεν σβήνουμε τίποτα.
 		// (Το number input min/max/step του browser κάνει το πρώτο επίπεδο

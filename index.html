@@ -71,6 +71,36 @@ header { padding: 72px 0 48px; text-align: left; }
 }
 .lang-toggle:hover { border-color: var(--accent); color: #fff; }
 
+.support-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-top: 18px;
+}
+.support-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 10px 22px;
+	border-radius: 999px;
+	background: var(--accent);
+	border: 1px solid var(--accent);
+	color: #fff;
+	font-size: 0.92rem;
+	font-weight: 600;
+	text-decoration: none;
+	box-shadow: 0 0 20px rgba(109, 74, 255, 0.28);
+	transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.support-cta:hover {
+	background: #8263ff;
+	box-shadow: 0 0 30px rgba(109, 74, 255, 0.5);
+	transform: translateY(-1px);
+}
+.support-cta-icon {
+	flex-shrink: 0;
+}
+
 section.plugins { padding-bottom: 40px; }
 .section-title {
 	font-size: 0.8rem;
@@ -267,6 +297,14 @@ footer a:hover { text-decoration: underline; }
 		<div>
 			<div class="wordmark">noxpress<span class="dot">.</span></div>
 			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
+			<div class="support-row">
+				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" aria-label="Support noxpress on Ko-fi">
+					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
+						<path fill="currentColor" d="M4 9h12v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9zm13 .5h1a2.5 2.5 0 0 1 0 5h-1.1a6.5 6.5 0 0 0 .1-1v-4zM6.5 2.8a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7zm4.5 0a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7zm4.5 0a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7z"/>
+					</svg>
+					<span data-i18n="sup_cta">Buy me a coffee ☕</span>
+				</a>
+			</div>
 		</div>
 		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
 	</div>
@@ -277,24 +315,31 @@ footer a:hover { text-decoration: underline; }
 
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
-		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge">beta</span></div>
+		<div class="meta">v1.5.0 · WooCommerce · MIT<span class="badge">stable</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<ul>
-			<li data-i18n="rs_li1">Per-product VAT override with global default (gross × rate ÷ (100 + rate))</li>
+			<li data-i18n="rs_li1">Per-product VAT override with global default (gross × rate ÷ (100 + rate)), aggregated per VAT rate</li>
 			<li data-i18n="rs_li2">Beneficiary percentage splits with live Σ = 100% validation</li>
 			<li data-i18n="rs_li3">Sales transparency: full-price / discounted (avg %) / free copies per product, pre- and post-VAT amounts</li>
 			<li data-i18n="rs_li4">Non-sales ledger: custom income entries (positive or negative) and payouts, every entry with a mandatory reason, live remaining balance per period</li>
 			<li data-i18n="rs_li5">Live stock column per product (read directly from WooCommerce, incl. variable products)</li>
 			<li data-i18n="rs_li6">Mandatory free-copy reason at checkout, triggered only by configurable coupons — order meta visible in admin</li>
-			<li data-i18n="rs_li7">Filter reports by product, beneficiary or title search</li>
-			<li data-i18n="rs_li8">Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in</li>
-			<li data-i18n="rs_li9">Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 64-char access key and see only their own earnings, enriched with discount stats, VAT, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit</li>
-			<li data-i18n="rs_li10">Dashboard widget with current-month snapshot, top beneficiaries and ledger summary</li>
-			<li data-i18n="rs_li11">Bilingual UI (Ελληνικά / English), per-user</li>
-			<li data-i18n="rs_li12">HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind</li>
+			<li data-i18n="rs_li7">Configurable sales channels — the reason coupon at checkout turns into a channel picker (store, events, wholesale…) feeding channel-based reports</li>
+			<li data-i18n="rs_li8">Discount &amp; refund transparency: undiscounted catalogue revenue (incl. native WooCommerce sale prices) and partial/full refunds netted out of every figure</li>
+			<li data-i18n="rs_li9">Filter reports by product, beneficiary or title search</li>
+			<li data-i18n="rs_li10">Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in</li>
+			<li data-i18n="rs_li11">Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 48-char access key (stored sha256-only) and see only their own earnings — enriched with discount stats, VAT per rate, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit</li>
+			<li data-i18n="rs_li12">Portal analytics: period presets &amp; custom ranges, per-product filtering, month-over-month KPI deltas, 6/12-month trend chart</li>
+			<li data-i18n="rs_li13">One-click «settle all» per period: payments recorded with reason for every beneficiary, idempotent on re-run</li>
+			<li data-i18n="rs_li14">Reporting start date: reports and balances start from a clean slate</li>
+			<li data-i18n="rs_li15">Full state backup &amp; restore (JSON): atomic import with strict validation, HPOS-aware</li>
+			<li data-i18n="rs_li16">WP-CLI automation: 6 commands (report, ledger-add, ledger-list, ledger-delete, balance, backup)</li>
+			<li data-i18n="rs_li17">Dashboard widget with current-month snapshot, top beneficiaries, ledger summary and a monthly trend mini-chart</li>
+			<li data-i18n="rs_li18">Admin polish: per-beneficiary colour coding, dark admin theme, bilingual UI (Ελληνικά / English) per user</li>
+			<li data-i18n="rs_li19">HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/revenue-splitter-v1.3.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.3.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/revenue-splitter-v1.5.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.5.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -470,21 +515,29 @@ footer a:hover { text-decoration: underline; }
 
 	var EN = {
 		tagline: 'Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.',
+		sup_cta: 'Buy me a coffee ☕',
 		plugins: 'Plugins',
 		rs_desc: 'Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.',
-		rs_li1: 'Per-product VAT override with global default (gross × rate ÷ (100 + rate))',
+		rs_li1: 'Per-product VAT override with global default (gross × rate ÷ (100 + rate)), aggregated per VAT rate',
 		rs_li2: 'Beneficiary percentage splits with live Σ = 100% validation',
 		rs_li3: 'Sales transparency: full-price / discounted (avg %) / free copies per product, pre- and post-VAT amounts',
 		rs_li4: 'Non-sales ledger: custom income entries (positive or negative) and payouts, every entry with a mandatory reason, live remaining balance per period',
 		rs_li5: 'Live stock column per product (read directly from WooCommerce, incl. variable products)',
 		rs_li6: 'Mandatory free-copy reason at checkout, triggered only by configurable coupons — order meta visible in admin',
-		rs_li7: 'Filter reports by product, beneficiary or title search',
-		rs_li8: 'Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in',
-		rs_li9: 'Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 64-char access key and see only their own earnings, enriched with discount stats, VAT, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit',
-		rs_li10: 'Dashboard widget with current-month snapshot, top beneficiaries and ledger summary',
-		rs_li11: 'Bilingual UI (Ελληνικά / English), per-user',
-		rs_li12: 'HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind',
-		rs_download: 'Download v1.3.0 (.zip)',
+		rs_li7: 'Configurable sales channels — the reason coupon at checkout turns into a channel picker (store, events, wholesale…) feeding channel-based reports',
+		rs_li8: 'Discount &amp; refund transparency: undiscounted catalogue revenue (incl. native WooCommerce sale prices) and partial/full refunds netted out of every figure',
+		rs_li9: 'Filter reports by product, beneficiary or title search',
+		rs_li10: 'Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in',
+		rs_li11: 'Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 48-char access key (stored sha256-only) and see only their own earnings — enriched with discount stats, VAT per rate, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit',
+		rs_li12: 'Portal analytics: period presets &amp; custom ranges, per-product filtering, month-over-month KPI deltas, 6/12-month trend chart',
+		rs_li13: 'One-click «settle all» per period: payments recorded with reason for every beneficiary, idempotent on re-run',
+		rs_li14: 'Reporting start date: reports and balances start from a clean slate',
+		rs_li15: 'Full state backup &amp; restore (JSON): atomic import with strict validation, HPOS-aware',
+		rs_li16: 'WP-CLI automation: 6 commands (report, ledger-add, ledger-list, ledger-delete, balance, backup)',
+		rs_li17: 'Dashboard widget with current-month snapshot, top beneficiaries, ledger summary and a monthly trend mini-chart',
+		rs_li18: 'Admin polish: per-beneficiary colour coding, dark admin theme, bilingual UI (Ελληνικά / English) per user',
+		rs_li19: 'HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind',
+		rs_download: 'Download v1.5.0 (.zip)',
 		rs_source: 'Source',
 		rs_releases: 'Releases',
 		sub_title: 'Stay in the loop ✦',
@@ -496,21 +549,29 @@ footer a:hover { text-decoration: underline; }
 
 	var EL = {
 		tagline: 'Δωρεάν, ανοιχτού κώδικα WordPress &amp; WooCommerce plugins — σκούρα αισθητική, μινιμαλιστικά, privacy-first.',
+		sup_cta: 'Κέρασέ μου έναν καφέ ☕',
 		plugins: 'Plugins',
 		rs_desc: 'Αναφορές πωλήσεων με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν και δυναμικό καταμερισμό εσόδων σε δικαιούχους — συγγραφείς, εκδότες, συνεργάτες. Ρυθμίζεις τα global defaults μία φορά, κάνεις override ανά προϊόν, και κάθε δικαιούχος παρακολουθεί τα καθαρά του κέρδη μέσα από ένα ιδιωτικό, κλειδωμένο portal με πλήρη διαφάνεια: ανάλυση πωλήσεων, έσοδα εκτός πωλήσεων, πληρωμές και υπόλοιπα.',
-		rs_li1: 'Override ΦΠΑ ανά προϊόν με global default (gross × rate ÷ (100 + rate))',
+		rs_li1: 'Override ΦΠΑ ανά προϊόν με global default (gross × rate ÷ (100 + rate)), συγκεντρωτικά ανά συντελεστή ΦΠΑ',
 		rs_li2: 'Ποσοστά δικαιούχων με ζωντανή επικύρωση Σ = 100%',
 		rs_li3: 'Διαφάνεια πωλήσεων: πλήρης τιμή / με έκπτωση (μ.ο. %) / δωρεάν αντίτυπα ανά προϊόν, ποσά προ και μετά ΦΠΑ',
 		rs_li4: 'Ledger εκτός πωλήσεων: έσοδα (θετικά ή αρνητικά) και πληρωμές, κάθε εγγραφή με υποχρεωτική αιτιολογία, ζωντανό υπόλοιπο ανά περίοδο',
 		rs_li5: 'Ζωντανή στήλη Στοκ ανά προϊόν (διάβασμα απευθείας από το WooCommerce, συμπεριλαμβανομένων variable products)',
 		rs_li6: 'Υποχρεωτική αιτιολογία δωρεάν αντιτύπου στο checkout, ενεργοποιείται μόνο από ρυθμιζόμενα κουπόνια — order meta ορατό στο admin',
-		rs_li7: 'Φίλτρα αναφορών ανά προϊόν, δικαιούχο ή αναζήτηση σε τίτλους',
-		rs_li8: 'Εξαγωγές: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) και JSON — καθαρά μέσω <code>admin_init</code>, χωρίς ανάμειξη admin HTML',
-		rs_li9: 'Author Portal (<code>[rs_portal]</code>): οι δικαιούχοι συνδέονται με προσωπικό κλειδί 64 χαρακτήρων και βλέπουν ΜΟΝΟ τα δικά τους έσοδα, με στατιστικά εκπτώσεων, ΦΠΑ, στοκ, ιστορικό ledger και δικό τους CSV — χωρίς λογαριασμούς WP, χωρίς IP logs, όριο 5 προσπαθειών/15 λεπτά',
-		rs_li10: 'Dashboard widget με snapshot τρέχοντος μήνα, top δικαιούχους και σύνοψη ledger',
-		rs_li11: 'Δίγλωσσο UI (Ελληνικά / English), ανά χρήστη',
-		rs_li12: 'Συμβατό με HPOS — καμία επαφή με legacy order tables· καθαρό uninstall δεν αφήνει τίποτα πίσω',
-		rs_download: 'Λήψη v1.3.0 (.zip)',
+		rs_li7: 'Ρυθμιζόμενα κανάλια πώλησης — το κουπόνι αιτιολογίας στο checkout γίνεται επιλογή καναλιού (κατάστημα, εκδηλώσεις, χονδρική…) που τροφοδοτεί αναφορές ανά κανάλι',
+		rs_li8: 'Διαφάνεια εκπτώσεων &amp; επιστροφών: καθαρό κατά προϊόν έσοδο χωρίς εκπτώσεις (και native τιμές προσφοράς του WooCommerce), με μερικές/πλήρεις επιστροφές να αφαιρούνται από όλα τα ποσά',
+		rs_li9: 'Φίλτρα αναφορών ανά προϊόν, δικαιούχο ή αναζήτηση σε τίτλους',
+		rs_li10: 'Εξαγωγές: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) και JSON — καθαρά μέσω <code>admin_init</code>, χωρίς ανάμειξη admin HTML',
+		rs_li11: 'Author Portal (<code>[rs_portal]</code>): οι δικαιούχοι συνδέονται με προσωπικό κλειδί 48 χαρακτήρων (αποθηκεύεται μόνο sha256) και βλέπουν ΜΟΝΟ τα δικά τους έσοδα — με στατιστικά εκπτώσεων, ΦΠΑ ανά συντελεστή, στοκ, ιστορικό ledger και δικό τους CSV — χωρίς λογαριασμούς WP, χωρίς IP logs, όριο 5 προσπαθειών/15 λεπτά',
+		rs_li12: 'Analytics portal: period presets &amp; custom εύρη, φιλτράρισμα ανά προϊόν, μεταβολή KPI μήνα-προς-μήνα, trend chart 6/12 μηνών',
+		rs_li13: '«Εξόφληση όλων» περιόδου με ένα κλικ: πληρωμές με αιτιολογία για κάθε δικαιούχο, idempotent σε επανάληψη',
+		rs_li14: 'Ημερομηνία έναρξης αναφορών: τα reports και τα υπόλοιπα ξεκινούν από καθαρή βάση',
+		rs_li15: 'Πλήρες backup &amp; restore state (JSON): atomic import με αυστηρό validation, HPOS-aware',
+		rs_li16: 'WP-CLI αυτοματοποίηση: 6 εντολές (report, ledger-add, ledger-list, ledger-delete, balance, backup)',
+		rs_li17: 'Dashboard widget με snapshot τρέχοντος μήνα, top δικαιούχους, σύνοψη ledger και mini-chart μηνιαίας τάσης',
+		rs_li18: 'Admin polish: χρώμα ανά δικαιούχο, dark admin theme, δίγλωσσο UI (Ελληνικά / English) ανά χρήστη',
+		rs_li19: 'Συμβατό με HPOS — καμία επαφή με legacy order tables· καθαρό uninstall δεν αφήνει τίποτα πίσω',
+		rs_download: 'Λήψη v1.5.0 (.zip)',
 		rs_source: 'Πηγαίος κώδικας',
 		rs_releases: 'Εκδόσεις',
 		sub_title: 'Μείνε ενήμερος ✦',

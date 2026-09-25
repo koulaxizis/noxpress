@@ -63,10 +63,24 @@ class RS_Beneficiaries {
 	const META_KEY   = '_rs_split';
 	const OPTION_KEY = 'rs_beneficiaries';
 
+	/**
+	 * Cache του collect_names() — καλείται 4–6 φορές ανά render.
+	 * Καθαρίζεται κεντρικά μέσω rs_invalidate_cache
+	 * (clear_names_cache), ώστε CLI/import/long-running paths
+	 * να μη σερβίρουν stale ονόματα.
+	 *
+	 * @var string[]|null
+	 */
+	private static $names_cache = null;
+
 	public static function init(): void {
 
 		// Metabox στη σελίδα προϊόντος.
 		add_action( 'add_meta_boxes', array( __CLASS__, 'register_metabox' ) );
+
+		// Οποιαδήποτε mutation των δεδομένων καθαρίζει το static cache
+		// του collect_names() (v1.3.1 FIX #3 chain).
+		add_action( 'rs_invalidate_cache', array( __CLASS__, 'clear_names_cache' ) );
 		add_action( 'save_post_product', array( __CLASS__, 'save_meta' ), 10, 1 );
 
 		// v1.3.1 FIX (#2): Εμφάνιση του validation notice του metabox.
@@ -133,7 +147,17 @@ class RS_Beneficiaries {
 		if ( null === $clean ) {
 			return false;
 		}
-		return update_option( self::OPTION_KEY, wp_json_encode( $clean ) );
+		$updated = update_option( self::OPTION_KEY, wp_json_encode( $clean ) );
+
+		// Consistency: ΚΑΘΕ mutation πυροδοτεί rs_invalidate_cache —
+		// όπως το save_meta() (v1.3.1 FIX #3). Καθαρίζει το static
+		// $names_cache και τα cached reports μέσα στην ίδια request.
+		// Idempotent/αβλαβές ακόμα κι αν το πυροδοτεί κι ο caller.
+		if ( $updated ) {
+			do_action( 'rs_invalidate_cache' );
+		}
+
+		return $updated;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -166,7 +190,10 @@ class RS_Beneficiaries {
 
 		$defaults = self::get_defaults();
 		if ( is_array( $defaults ) && ! empty( $defaults ) ) {
-			return $defaults;
+			$clean = self::sanitize_list( $defaults );
+			if ( null !== $clean ) {
+				return $clean;
+			}
 		}
 
 		return array(
@@ -200,6 +227,14 @@ class RS_Beneficiaries {
 	 * @return string[] Ταξινομημένα ονόματα (unique).
 	 */
 	public static function collect_names(): array {
+
+		// Audit (#2): per-request cache — οι 4–6 κλήσεις ανά render
+		// δεν ξανατρέχουν το meta-query σε όλα τα προϊόντα.
+		// v1.4.0: ανέβηκε σε class property ώστε να καθαρίζεται
+		// κεντρικά από το rs_invalidate_cache (clear_names_cache).
+		if ( null !== self::$names_cache ) {
+			return self::$names_cache;
+		}
 
 		$names = array();
 
@@ -251,7 +286,14 @@ class RS_Beneficiaries {
 		$flat = array_keys( $names );
 		sort( $flat );
 
+		self::$names_cache = $flat;
+
 		return $flat;
+	}
+
+	/** Καθαρισμός του static cache του collect_names() (rs_invalidate_cache). */
+	public static function clear_names_cache(): void {
+		self::$names_cache = null;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -272,6 +314,13 @@ class RS_Beneficiaries {
 			return $name;
 		}
 
+		// Fast-path: το regex απαιτεί το string να ΞΕΚΙΝΑ με 'u' — κάθε
+		// φυσιολογικό όνομα που δεν ξεκινά με 'u' επιστρέφεται αυτούσιο,
+		// χωρίς κανένα preg_match.
+		if ( 'u' !== $name[0] ) {
+			return $name;
+		}
+
 		// Ολόκληρο το string: sequences uXXXX (κενά επιτρέπονται μόνο μεταξύ ομάδων).
 		if ( ! preg_match( '/^(?:u[0-9a-fA-F]{4})+(?:\s+(?:u[0-9a-fA-F]{4})+)*$/u', $name ) ) {
 			return $name;
@@ -283,7 +332,11 @@ class RS_Beneficiaries {
 				$cp = (int) hexdec( $m[1] );
 
 				// Έλεγχος έγκυρου Unicode code point.
-				if ( $cp < 0x20 || $cp > 0x10FFFF ) {
+				// Surrogates (0xD800–0xDFFF) αποκλείονται: το mb_chr() πάνω
+				// σε surrogate half επιστρέφει false → ο χαρακτήρας χάνεται
+				// (κενό όνομα → reject της λίστας). Εδώ κρατάμε το raw token,
+				// όπως για κάθε άλλο άκυρο code point.
+				if ( $cp < 0x20 || $cp > 0x10FFFF || ( $cp >= 0xD800 && $cp <= 0xDFFF ) ) {
 					return $m[0];
 				}
 
@@ -329,8 +382,15 @@ class RS_Beneficiaries {
 			}
 
 			// Χωρίς wp_unslash — βλ. docblock (#10).
-			$name = isset( $row['name'] ) ? sanitize_text_field( (string) $row['name'] ) : '';
-			$pct  = isset( $row['percent'] ) ? wc_format_decimal( $row['percent'] ) : '';
+			// Δευτερεύουσες άμυνες nested-array inputs (crafted POST / malformed import):
+			// το (string) array δίνει "Array" + warning, το wc_format_decimal(array)
+			// μπορεί να κάνει TypeError σε PHP 8 — καθαριζόμαστε εδώ κεντρικά.
+			$name = ( isset( $row['name'] ) && is_scalar( $row['name'] ) )
+				? sanitize_text_field( (string) $row['name'] )
+				: '';
+			$pct  = ( isset( $row['percent'] ) && is_scalar( $row['percent'] ) )
+				? wc_format_decimal( $row['percent'] )
+				: '';
 
 			// Self-healing: κατεστραμμένα «uXXXX» ονόματα επισκευάζονται εδώ,
 			// τόσο σε νέα όσο και σε αποθηκευμένα δεδομένα (μέσω get_map).
@@ -379,6 +439,28 @@ class RS_Beneficiaries {
 		if ( ! is_array( $list ) || empty( $list ) ) {
 			return __( 'Μη έγκυρη λίστα δικαιούχων.', 'revenue-splitter' );
 		}
+
+		// Ειδικές αιτίες πριν το generic μήνυμα αθροίσματος.
+		foreach ( $list as $row ) {
+			if ( ! is_array( $row ) || ! isset( $row['name'] ) || ! is_scalar( $row['name'] ) ) {
+				return __( 'Μη έγκυρη λίστα δικαιούχων.', 'revenue-splitter' );
+			}
+			$row_name = trim( (string) $row['name'] );
+			if ( false !== strpos( $row_name, '|' ) ) {
+				return __( 'Το όνομα δικαιούχου δεν επιτρέπεται να περιέχει τον χαρακτήρα «|».', 'revenue-splitter' );
+			}
+			if ( '' === $row_name ) {
+				return __( 'Κάθε γραμμή χρειάζεται όνομα δικαιούχου.', 'revenue-splitter' );
+			}
+			if ( ! isset( $row['percent'] ) || ! is_numeric( $row['percent'] ) ) {
+				return __( 'Μη έγκυρη λίστα δικαιούχων.', 'revenue-splitter' );
+			}
+			$pct_f = (float) $row['percent'];
+			if ( $pct_f <= 0 || $pct_f > 100 ) {
+				return __( 'Τα ποσοστά δικαιούχων πρέπει να είναι μεταξύ 0 και 100 (εκτός 0).', 'revenue-splitter' );
+			}
+		}
+
 		$total = 0.0;
 		foreach ( $list as $row ) {
 			if ( is_array( $row ) && isset( $row['percent'] ) && is_numeric( $row['percent'] ) ) {
@@ -525,12 +607,20 @@ class RS_Beneficiaries {
 		 * ΜΙΑ φορά — το sanitize_list() δέχεται πλέον καθαρή είσοδο.
 		 */
 		$rows = array();
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input, unlash παρακάτω.
-		if ( isset( $_POST['rs_ben_name'], $_POST['rs_ben_pct'] ) && is_array( $_POST['rs_ben_name'] ) && is_array( $_POST['rs_ben_pct'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input, unslash παρακάτω.
+		if ( isset( $_POST['rs_ben_name'], $_POST['rs_ben_pct'] )
+			&& is_array( $_POST['rs_ben_name'] )
+			&& is_array( $_POST['rs_ben_pct'] ) ) {
+
 			$names = array_values( (array) wp_unslash( $_POST['rs_ben_name'] ) );
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$percs = array_values( (array) wp_unslash( $_POST['rs_ben_pct'] ) );
+
+			// Guard: διαφορετικό μήκος = άκυρο POST (UI bug ή crafted request).
+			if ( count( $names ) !== count( $percs ) || empty( $names ) ) {
+				set_transient( 'rs_split_error_' . get_current_user_id(), __( 'Μη έγκυρη λίστα δικαιούχων (εσωτερικό σφάλμα μορφοποίησης).', 'revenue-splitter' ), 60 );
+				return;
+			}
 
 			foreach ( $names as $i => $n ) {
 				$rows[] = array(
@@ -538,6 +628,10 @@ class RS_Beneficiaries {
 					'percent' => $percs[ $i ] ?? '',
 				);
 			}
+		} elseif ( ! empty( $_POST['rs_ben_name'] ) || ! empty( $_POST['rs_ben_pct'] ) ) {
+			// Υπάρχουν μερικά πεδία αλλά όχι όλα — partial submission.
+			set_transient( 'rs_split_error_' . get_current_user_id(), __( 'Μη έγκυρη λίστα δικαιούχων (εσωτερικό σφάλμα μορφοποίησης).', 'revenue-splitter' ), 60 );
+			return;
 		}
 
 		$clean = self::sanitize_list( $rows );

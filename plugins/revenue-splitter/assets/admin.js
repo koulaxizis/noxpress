@@ -80,11 +80,12 @@
 					}
 				});
 
-				table.addEventListener('click', function (e) {
-					if (e.target.classList.contains('rs-remove-row')) {
-						removeRow(e, table);
-					}
-				});
+							table.addEventListener('click', function (e) {
+				// closest(): ανοσία σε μελλοντικό wrap (icon/span μέσα στο button).
+				if (e.target.closest('.rs-remove-row')) {
+					removeRow(e, table);
+				}
+			});
 
 				var container = table.closest('.rs-rows');
 				if (container) {
@@ -112,6 +113,27 @@
 			rows.classList.toggle('rs-hidden', e.target.checked);
 		}
 	});
+	
+		/* ------------------------------------------------------------------
+	 * v1.3.8 (#2): Φίλτρο αναζήτησης στο multi-select προϊόντων του
+	 * Dashboard (#rs-prod-search → #rs-prod-multi). Delegated — δεν
+	 * χρειάζεται init hook, τρέχει όπου υπάρχει το markup.
+	 * ------------------------------------------------------------------ */
+
+	document.addEventListener('input', function (e) {
+		if (!e.target.matches('#rs-prod-search')) return;
+
+		var sel = document.getElementById('rs-prod-multi');
+		if (!sel) return;
+
+		var q = String(e.target.value || '').trim().toLowerCase();
+
+		for (var i = 0; i < sel.options.length; i++) {
+			var t = sel.options[i].textContent.toLowerCase();
+			sel.options[i].hidden = (q !== '' && t.indexOf(q) === -1);
+		}
+	});
+
 
 	/* ------------------------------------------------------------------
 	 * Init

@@ -1,4 +1,4 @@
-<?php
+			<?php
 /**
  * RS_Admin_UI — Admin pages: Dashboard, Ρυθμίσεις, widget, exports,
  * backup/import.
@@ -34,6 +34,30 @@
  * στο save, συμμετοχή στο STATE_OPTS/backup/import. Το clamping των
  * reports γίνεται στο RS_Reports::run().
  *
+ * v1.3.8 (#1): Custom χρώμα ανά δικαιούχο (option
+ * rs_beneficiary_colors, JSON όνομα → #RRGGBB, default #6d4aff) —
+ * εφαρμόζεται στα chips του καταμερισμού, στα ονόματα του πίνακα
+ * «Λογιστική δικαιούχων» και (Part 4) στο widget. Το χρώμα κειμένου
+ * υπολογίζεται με luminance (chip_fg) για πάντα αναγνώσιμη αντίθεση.
+ * v1.3.8 (#2): Multi-select προϊόντων (rs_product[]) με πεδίο
+ * αναζήτησης (admin.js, delegated #rs-prod-search) + λίστα από ΟΛΑ
+ * τα δημοσιευμένα προϊόντα (όχι μόνο όσα έχουν πωλήσεις στην περίοδο).
+ * v1.3.8 (#3): Φίλτρο δικαιούχου (rs_ben, whitelist από
+ * RS_Beneficiaries::collect_names()) — φιλτράρει «Ανά προϊόν»,
+ * totals, ΦΠΑ/συντελεστή, «Λογιστική» και όλα τα exports. Semantics:
+ * ορατά είναι ΜΟΝΟ τα προϊόντα που συμμετέχει ο δικαιούχος (chips
+ * μόνο του), τα totals είναι των ορατών προϊόντων, το order_count
+ * παραμένει της περιόδου (δεν ανάγεται από aggregated δεδομένα).
+ * v1.3.8 (#4): Default preset του Dashboard (και fallback σε άκυρο
+ * preset) = «Τρέχον έτος». Ισχύει και στο widget (ίδιο parser).
+ * v1.3.8 (#5): Εμφανιζόμενες ημερομηνίες d/m/Y όταν el — μέσω
+ * RS_Lang::fmt_date(). DISPLAY-ONLY: GET params, SQL, options,
+ * filenames παραμένουν ΠΑΝΤΑ ISO Y-m-d.
+ * v1.3.8 (#7 στάδιο 1): option rs_channels — λίστα καναλιών πώλησης
+ * (Ρυθμίσεις). Το wiring στο checkout (κουπόνι → επιλογή καναλιού
+ * αντί για αιτιολογία) και στο ledger (dropdown καναλιού στη
+ * χειροκίνητη είσοδο εσόδου) γίνεται στα αντίστοιχα classes.
+ *
  * ΣΗΜΑΝΤΙΚΟ (dispatch map — ποιος κάνει τι, για αποφυγή διπλοεγγραφών):
  *  - Metabox προϊόντος + save δικαιούχων  → RS_Beneficiaries
  *  - ΦΠΑ πεδίο + save                    → RS_VAT
@@ -55,7 +79,26 @@ final class RS_Admin_UI {
 	/** v1.3.6 (#9): mirror του option «έναρξη καταγραφής πωλήσεων». */
 	const OPT_SALES_SINCE = 'rs_sales_since';
 
-	/** Whitelist options για backup/import (#4) — v1.3.6 (#9): + rs_sales_since. */
+	/** v1.3.8 (#1): custom χρώματα δικαιούχων (JSON: όνομα => #rrggbb). */
+	const OPT_COLORS = 'rs_beneficiary_colors';
+
+	/** v1.3.8 (#7): λίστα καναλιών πώλησης (comma/ newline separated). */
+	const OPT_CHANNELS = 'rs_channels';
+
+	/** v1.3.8 (#7 στάδιο 3): default κανάλι για παραγγελίες χωρίς μαρκάρισμα. */
+	const OPT_DEFAULT_CHANNEL = 'rs_default_channel';
+
+	/** v1.3.8 (#7 στάδιο 3): fallback ετικέτα του default pseudo-καναλιού. */
+	const FALLBACK_CHANNEL = 'Κατάστημα/Online';
+
+	/** v1.3.8 (πρόταση 1): GET key του mini chart (6/12 μήνες). */
+	const OPT_TREND_GET = 'rs_chart';
+
+	/**
+	 * Whitelist options για backup/import (#4) — v1.3.6 (#9): +
+	 * rs_sales_since. v1.3.8 (#1/#7): + rs_beneficiary_colors,
+	 * rs_channels.
+	 */
 	const STATE_OPTS = array(
 		'rs_default_vat_rate',
 		'rs_beneficiaries',
@@ -63,6 +106,9 @@ final class RS_Admin_UI {
 		'rs_ledger',
 		'rs_reason_coupons',
 		'rs_sales_since',
+		'rs_beneficiary_colors',
+		'rs_channels',
+		'rs_default_channel', // v1.3.8 (#7 στάδιο 3).
 	);
 
 	public static function init(): void {
@@ -112,8 +158,12 @@ final class RS_Admin_UI {
 
 	/**
 	 * v1.3.2 FIX (#1): το CSS φορτώνεται ΚΑΙ στο dashboard (wp-admin/
-	 * index.php) για το widget. Εκεί enqueue-άρει ΜΟΝΟ το stylesheet
-	 * (κανένα JS — το admin.js αφορά μόνο το metabox beneficiary editor).
+	 * index.php) για το widget. Εκεί enqueue-άρει ΜΟΝΟ το stylesheet.
+	 *
+	 * v1.3.8 FIX (#2): το admin.js φορτώνει ΚΑΙ στις δικές μας admin
+	 * pages (dashboard) — το delegated #rs-prod-search filter
+	 * χρειάζεται εκεί (το metabox JS παραμένει δεμένο ΜΟΝΟ σε
+	 * .rs-split-table rows, δεν επηρεάζεται).
 	 */
 	public static function assets( string $hook ): void {
 
@@ -125,14 +175,18 @@ final class RS_Admin_UI {
 			return;
 		}
 
-		$base = plugin_dir_url( RS_FILE );
+		$base  = plugin_dir_url( RS_FILE );
+		$css_v = file_exists( RS_PATH . 'assets/admin.css' ) ? (string) filemtime( RS_PATH . 'assets/admin.css' ) : RS_VERSION;
 
-		wp_enqueue_style( 'rs-admin', $base . 'assets/admin.css', array(), (string) filemtime( RS_PATH . 'assets/admin.css' ) );
+		wp_enqueue_style( 'rs-admin', $base . 'assets/admin.css', array(), $css_v );
 
-		// v1.3.3 FIX (#5): το JS δένεται ΜΟΝΟ σε .rs-split-table rows
-		// (product metabox).
-		if ( $product ) {
-			wp_enqueue_script( 'rs-admin', $base . 'assets/admin.js', array(), (string) filemtime( RS_PATH . 'assets/admin.js' ), true );
+		// v1.3.8 (#2): δικές μας σελίδες = χρειάζονται και το admin.js
+		// (v1.3.3 FIX #5: metabox bindings παραμένουν scoped σε
+		// .rs-split-table — το πρόσθετο delegated listener του
+		// #rs-prod-search είναι passive, δεν αγγίζει τίποτα άλλο).
+		if ( $product || $is_ours ) {
+			$js_v = file_exists( RS_PATH . 'assets/admin.js' ) ? (string) filemtime( RS_PATH . 'assets/admin.js' ) : RS_VERSION;
+			wp_enqueue_script( 'rs-admin', $base . 'assets/admin.js', array(), $js_v, true );
 		}
 	}
 
@@ -156,8 +210,9 @@ final class RS_Admin_UI {
 	/** Presets + custom range από GET. Επιστρέφει [start, end, preset, label]. */
 	private static function current_period(): array {
 
+		// v1.3.8 (#4): default = «Τρέχον έτος» (και fallback παρακάτω).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only period filter.
-		$preset = isset( $_GET['rs_period'] ) ? sanitize_key( wp_unslash( $_GET['rs_period'] ) ) : 'month';
+		$preset = isset( $_GET['rs_period'] ) ? sanitize_key( wp_unslash( $_GET['rs_period'] ) ) : 'year';
 
 		$now = new DateTimeImmutable( 'now', wp_timezone() );
 
@@ -207,15 +262,26 @@ final class RS_Admin_UI {
 					$s = $start;
 					$e = $end;
 				} else {
-					$s = $now->format( 'Y-m-01' );
-					$e = $now->format( 'Y-m-d' );
+					// Άκυρο custom range → το dropdown πρέπει να ταιριάζει
+					// με ό,τι πραγματικά βλέπει ο χρήστης (δες observation #5).
+					$preset = 'year';
+					$label  = __( 'Τρέχον έτος', 'revenue-splitter' );
+					$s      = $now->format( 'Y-01-01' );
+					$e      = $now->format( 'Y-m-d' );
 				}
 				break;
 			case 'month':
-			default:
 				$preset = 'month';
 				$label  = __( 'Τρέχων μήνας', 'revenue-splitter' );
 				$s      = $now->format( 'Y-m-01' );
+				$e      = $now->format( 'Y-m-d' );
+				break;
+			default:
+				// v1.3.8 (#4): άκυρο/άγνωστο preset → fail-safe στο
+				// «Τρέχον έτος» (νέο default), όχι στον μήνα.
+				$preset = 'year';
+				$label  = __( 'Τρέχον έτος', 'revenue-splitter' );
+				$s      = $now->format( 'Y-01-01' );
 				$e      = $now->format( 'Y-m-d' );
 				break;
 		}
@@ -226,6 +292,162 @@ final class RS_Admin_UI {
 			'preset' => $preset,
 			'label'  => $label,
 		);
+	}
+
+	/* =====================================================================
+	 * v1.3.8: Φίλτρα (multi-product + δικαιούχος) + color helpers
+	 * =================================================================== */
+
+	/**
+	 * #2: Επιλεγμένα IDs προϊόντων από το GET. Δέχεται τόσο array
+	 * (rs_product[]=1&rs_product[]=2, νέο multi-select) όσο και legacy
+	 * scalar (rs_product=1). Επιστρέφει sorted unique array — κανένα
+	 * ID = όλα τα προϊόντα.
+	 *
+	 * Το canonical sort() είναι ΚΑΙ cache-key canonicalization
+	 * (audit #3): ίδιο σύνολο επιλογών = ίδιο cache entry του
+	 * RS_Reports::run() ανεξαρτήτως σειράς κλικ.
+	 */
+	private static function current_products(): array {
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter, absint παρακάτω.
+		if ( ! isset( $_GET['rs_product'] ) ) {
+			return array();
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- array validated/sanitized below.
+		$raw = wp_unslash( $_GET['rs_product'] );
+
+		$ids = array();
+		if ( is_array( $raw ) ) {
+			foreach ( $raw as $v ) {
+				if ( ! is_scalar( $v ) ) {
+					continue; // Nested-array smuggling (π.χ. rs_product[0][x]=1) — αγνοείται.
+				}
+				$v = absint( $v );
+				if ( $v > 0 ) {
+					$ids[] = $v;
+				}
+			}
+		} else {
+			$v = absint( $raw ); // Legacy single-value link.
+			if ( $v > 0 ) {
+				$ids[] = $v;
+			}
+		}
+
+		$ids = array_values( array_unique( $ids ) );
+		sort( $ids );
+
+		return $ids;
+	}
+
+	/**
+	 * #3: Επιλεγμένος δικαιούχος από το GET — STRICT whitelist
+	 * (RS_Beneficiaries::collect_names()). Οτιδήποτε άλλο → '' (= όλοι).
+	 */
+	private static function current_beneficiary(): string {
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
+		$ben = isset( $_GET['rs_ben'] ) ? sanitize_text_field( wp_unslash( $_GET['rs_ben'] ) ) : '';
+
+		if ( '' === $ben ) {
+			return '';
+		}
+
+		return in_array( $ben, RS_Beneficiaries::collect_names(), true ) ? $ben : '';
+	}
+
+	/**
+	 * #3: Φιλτράρει το report κατά δικαιούχο (in-place semantics, νέο
+	 * array). Το product filter ΔΕΝ γίνεται εδώ — περνάει upstream στο
+	 * RS_Reports::run() ως product_ids (single source of truth + cache).
+	 */
+	private static function apply_ben_filter( array $report, string $ben ): array {
+
+		if ( '' === $ben ) {
+			return $report;
+		}
+
+		// 1) Splits → μόνο του δικαιούχου. Προϊόντα χωρίς συμμετοχή → εκτός.
+		foreach ( $report['products'] as $i => $p ) {
+			$report['products'][ $i ]['splits'] = array_values(
+				array_filter(
+					$p['splits'],
+					static function ( $s ) use ( $ben ) {
+						return ( $s['name'] ?? '' ) === $ben;
+					}
+				)
+			);
+		}
+
+		$report['products'] = array_values(
+			array_filter(
+				$report['products'],
+				static function ( $p ) {
+					return ! empty( $p['splits'] );
+				}
+			)
+		);
+
+		// 2) Beneficiaries → μόνο ο ίδιος.
+		$report['beneficiaries'] = array_values(
+			array_filter(
+				$report['beneficiaries'],
+				static function ( $b ) use ( $ben ) {
+					return ( $b['name'] ?? '' ) === $ben;
+				}
+			)
+		);
+
+		// 3) Totals → επανυπολογισμός από τα ΟΡΑΤΑ προϊόντα (πλήρεις
+		// ποσότητες αυτών — gross/vat/net είναι μετρικά προϊόντος, δεν
+		// αναλύονται ανά δικαιούχο). order_count: ΑΜΕΤΑΒΛΗΤΟ — μέτρημα
+		// παραγγελιών περιόδου, δεν ανάγεται από aggregated δεδομένα.
+		$gross = 0.0;
+		$vat   = 0.0;
+		$net   = 0.0;
+		foreach ( $report['products'] as $p ) {
+			$gross += (float) $p['gross'];
+			$vat   += (float) $p['vat'];
+			$net   += (float) $p['net'];
+		}
+		$report['totals']['gross'] = round( $gross, 2 );
+		$report['totals']['vat']   = round( $vat, 2 );
+		$report['totals']['net']   = round( $net, 2 );
+
+		return $report;
+	}
+
+	/**
+	 * #1: Custom χρώμα δικαιούχου από το option rs_beneficiary_colors
+	 * (JSON όνομα → #RRGGBB). Οτιδήποτε άκυρο/άγνωστο → default μωβ.
+	 *
+	 * Public + static-cache ανά request — το RS_Portal το ξαναχρησιμοποιεί
+	 * (ίδια ουρά αναφοράς).
+	 */
+	public static function ben_color( string $name ): string {
+		// Single source of truth: get_color_map() — πανομοιότυπο parsing
+		// (regex + strtolower + static cache), καμία διπλή υλοποίηση.
+		return self::get_color_map()[ $name ] ?? '#6d4aff';
+	}
+
+	/**
+	 * #1: Χρώμα κειμένου πάνω σε chip — luminance contrast (WCAG-ish,
+	 * βασικός). Ανοιχτό background → σκούρο κείμενο, αλλιώς λευκό.
+	 */
+	public static function chip_fg( string $hex ): string {
+
+		if ( 1 !== preg_match( '/^#[0-9a-fA-F]{6}$/', $hex ) ) {
+			return '#ffffff';
+		}
+
+		$r   = (float) hexdec( substr( $hex, 1, 2 ) );
+		$g   = (float) hexdec( substr( $hex, 3, 2 ) );
+		$b   = (float) hexdec( substr( $hex, 5, 2 ) );
+		$lum = ( 0.299 * $r + 0.587 * $g + 0.114 * $b ) / 255.0;
+
+		return ( $lum > 0.62 ) ? '#1d2327' : '#ffffff';
 	}
 
 	/* =====================================================================
@@ -240,28 +462,50 @@ final class RS_Admin_UI {
 
 		$per = self::current_period();
 
-		// v1.3.4-a: φίλτρο ανά προϊόν (read-only GET). ΜΙΑ μεταβλητή παντού.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
-		$pid = isset( $_GET['rs_product'] ) ? absint( $_GET['rs_product'] ) : 0;
+		// v1.3.8 (#2): multi-select IDs (sorted unique) — περνούν
+		// upstream στο RS_Reports::run (single source of truth + cache).
+		$pids = self::current_products();
 
-		// Πλήρες report περιόδου — τροφοδοτεί το dropdown (πάντα).
-		$report_all = RS_Reports::run(
+		// v1.3.8 (#3): φίλτρο δικαιούχου (whitelist-validated).
+		$ben = self::current_beneficiary();
+
+		$run = array(
+			'date_start' => $per['start'],
+			'date_end'   => $per['end'],
+		);
+		if ( ! empty( $pids ) ) {
+			$run['product_ids'] = $pids;
+		}
+
+		$report = RS_Reports::run( $run );
+		$report = self::apply_ben_filter( $report, $ben );
+
+		// ---------- v1.3.8 (#2): λίστα ΟΛΩΝ των δημοσιευμένων προϊόντων ----------
+		// Το dropdown ΔΕΝ εξαρτάται πλέον από το ρεπόρτ περιόδου: μπορείς
+		// να φιλτράρεις και σε προϊόν χωρίς πωλήσεις (audit finding #2).
+		$prod_map = array();
+		$products = wc_get_products(
 			array(
-				'date_start' => $per['start'],
-				'date_end'   => $per['end'],
+				'status'  => 'publish',
+				'limit'   => -1,
+				'orderby' => 'title',
+				'order'   => 'ASC',
 			)
 		);
-
-		if ( $pid > 0 ) {
-			$report = RS_Reports::run(
-				array(
-					'date_start'  => $per['start'],
-					'date_end'    => $per['end'],
-					'product_ids' => array( $pid ),
-				)
-			);
-		} else {
-			$report = $report_all;
+		if ( is_array( $products ) ) {
+			foreach ( $products as $prod ) {
+				if ( $prod instanceof WC_Product ) {
+					$prod_map[ (int) $prod->get_id() ] = (string) $prod->get_name();
+				}
+			}
+		}
+		// Συμπλήρωση: προϊόντα του report που λείπουν από τη λίστα
+		// (π.χ. non-public status αλλά με πωλήσεις ιστορικά).
+		foreach ( $report['products'] as $dp ) {
+			$k = (int) $dp['product_id'];
+			if ( ! isset( $prod_map[ $k ] ) ) {
+				$prod_map[ $k ] = (string) $dp['title'];
+			}
 		}
 
 		// ---------- v1.3.0 (#8): ΦΠΑ ανά συντελεστή ----------
@@ -278,17 +522,36 @@ final class RS_Admin_UI {
 		}
 		ksort( $by_rate );
 
-		// ---------- v1.3.0 (#1): λογιστική δικαιούχων + lifetime ----------
+		// ---------- v1.3.8 (#7 στάδιο 3): «Ανά κανάλι» (ΠΑΝΤΑ σφαιρικός) ----------
+		// Το key 'channels' του report ΔΕΝ φιλτράρεται από το apply_ben_filter
+		// (απόφαση χρήστη: ο πίνακας είναι σφαιρικός) — σέβεται όμως
+		// περίοδο + φίλτρο προϊόντων (upstream στο RS_Reports::run()).
+		$channel_rows = self::channel_rows( $report, $per );
+
+		// ---------- Πρόταση 1: mini chart τάσης (6/12 μήνες) ----------
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only selector.
+		$trend_n  = ( isset( $_GET[ self::OPT_TREND_GET ] ) && in_array( (int) $_GET[ self::OPT_TREND_GET ], array( 6, 12 ), true ) )
+			? absint( $_GET[ self::OPT_TREND_GET ] ) : 12;
+		$trend    = self::monthly_trend( $trend_n, $ben );
+		$max_net  = 0.0;
+		foreach ( $trend as $t ) {
+			$max_net = max( $max_net, (float) $t['net'] );
+		}
+
+		$today    = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' );
 		$lifetime = RS_Reports::lifetime_beneficiaries();
 
-		$today = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' );
-
 		$people = array();
-		foreach ( RS_Beneficiaries::collect_names() as $name ) {
-			$people[ $name ] = true;
-		}
-		foreach ( $report['beneficiaries'] as $b ) {
-			$people[ $b['name'] ] = true;
+		if ( '' !== $ben ) {
+			// v1.3.8 (#3): φίλτρο → μόνο ο επιλεγμένος δικαιούχος.
+			$people[ $ben ] = true;
+		} else {
+			foreach ( RS_Beneficiaries::collect_names() as $name ) {
+				$people[ $name ] = true;
+			}
+			foreach ( $report['beneficiaries'] as $b ) {
+				$people[ $b['name'] ] = true;
+			}
 		}
 
 		$accounts = array();
@@ -331,11 +594,27 @@ final class RS_Admin_UI {
 			<form method="get" class="rs-period-form">
 				<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG_DASH ); ?>" />
 
-				<select name="rs_product">
-					<option value="0"<?php selected( $pid, 0 ); ?>><?php esc_html_e( 'Όλα τα προϊόντα', 'revenue-splitter' ); ?></option>
-					<?php foreach ( $report_all['products'] as $dp ) : ?>
-						<option value="<?php echo esc_attr( (string) $dp['product_id'] ); ?>"<?php selected( $pid, (int) $dp['product_id'] ); ?>>
-							<?php echo esc_html( $dp['title'] ); ?>
+				<?php // v1.3.8 (#2): picker προϊόντων — αναζήτηση + multi-select. ?>
+				<span class="rs-prod-picker">
+					<input type="search" id="rs-prod-search" class="rs-search regular-text"
+						placeholder="<?php esc_attr_e( 'Αναζήτηση προϊόντος…', 'revenue-splitter' ); ?>" />
+					<select id="rs-prod-multi" class="rs-prod-multi" name="rs_product[]" multiple size="6">
+											<?php foreach ( $prod_map as $dpid => $title ) : ?>
+						<option value="<?php echo esc_attr( (string) $dpid ); ?>"
+							<?php selected( in_array( (int) $dpid, $pids, true ), true ); ?>>
+							<?php echo esc_html( (string) $dpid . ' — ' . $title ); ?>
+						</option>
+					<?php endforeach; ?>
+					</select>
+					<span class="rs-prod-hint"><?php esc_html_e( 'Ctrl/Cmd + click για πολλαπλή επιλογή. Καμία επιλογή = όλα.', 'revenue-splitter' ); ?></span>
+				</span>
+
+				<?php // v1.3.8 (#3): φίλτρο δικαιούχου (strict whitelist). ?>
+				<select name="rs_ben">
+					<option value=""<?php selected( $ben, '' ); ?>><?php esc_html_e( 'Όλοι οι δικαιούχοι', 'revenue-splitter' ); ?></option>
+					<?php foreach ( RS_Beneficiaries::collect_names() as $bname ) : ?>
+						<option value="<?php echo esc_attr( $bname ); ?>"<?php selected( $ben, $bname ); ?>>
+							<?php echo esc_html( $bname ); ?>
 						</option>
 					<?php endforeach; ?>
 				</select>
@@ -346,7 +625,7 @@ final class RS_Admin_UI {
 					<option value="month"<?php selected( $per['preset'], 'month' ); ?>><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?></option>
 					<option value="prev_month"<?php selected( $per['preset'], 'prev_month' ); ?>><?php esc_html_e( 'Προηγούμενος μήνας', 'revenue-splitter' ); ?></option>
 					<option value="year"<?php selected( $per['preset'], 'year' ); ?>><?php esc_html_e( 'Τρέχον έτος', 'revenue-splitter' ); ?></option>
-					<option value="prev_year"<?php selected( $per['preset'], 'prev_year' ); ?>><?php esc_html_e( 'Προηγούμενος έτος', 'revenue-splitter' ); ?></option>
+					<option value="prev_year"<?php selected( $per['preset'], 'prev_year' ); ?>><?php esc_html_e( 'Προηγούμενο έτος', 'revenue-splitter' ); ?></option>
 					<option value="custom"<?php selected( $per['preset'], 'custom' ); ?>><?php esc_html_e( 'Προσαρμοσμένο', 'revenue-splitter' ); ?></option>
 				</select>
 
@@ -356,13 +635,14 @@ final class RS_Admin_UI {
 				<button type="submit" class="button"><?php esc_html_e( 'Εφαρμογή', 'revenue-splitter' ); ?></button>
 
 				<?php foreach ( array( 'csv', 'xls', 'html', 'json' ) as $fmt ) : ?>
-					<a class="button" href="<?php echo esc_url( self::export_url( $fmt, $per, $pid ) ); ?>">
+					<a class="button" href="<?php echo esc_url( self::export_url( $fmt, $per, $pids, $ben ) ); ?>">
 						<?php esc_html_e( 'Εξαγωγή', 'revenue-splitter' ); ?> <?php echo esc_html( strtoupper( $fmt ) ); ?>
 					</a>
 				<?php endforeach; ?>
 			</form>
 
-			<h2 class="rs-h2"><?php echo esc_html( $per['label'] ); ?> — <?php echo esc_html( $per['start'] ); ?> → <?php echo esc_html( $per['end'] ); ?></h2>
+			<?php // v1.3.8 (#5): εμφανιζόμενες ημερομηνίες d/m/Y στα el (DISPLAY-ONLY). ?>
+			<h2 class="rs-h2"><?php echo esc_html( $per['label'] ); ?> — <?php echo esc_html( RS_Lang::fmt_date( $per['start'] ) ); ?> → <?php echo esc_html( RS_Lang::fmt_date( $per['end'] ) ); ?></h2>
 
 			<div class="rs-kpis">
 				<div class="rs-kpi"><span class="rs-kpi-label"><?php esc_html_e( 'Παραγγελίες (περιόδου)', 'revenue-splitter' ); ?></span><strong><?php echo esc_html( number_format_i18n( (int) $report['order_count'] ) ); ?></strong></div>
@@ -443,17 +723,21 @@ final class RS_Admin_UI {
 						<td class="num"><?php echo esc_html( self::product_stock( (int) $p['product_id'] ) ); ?></td>
 						<td>
 							<?php
-							// v1.3.6 (#6): chips — φανερός καταμερισμός με μια ματιά.
+							// v1.3.8 (#1): chips με custom χρώμα δικαιούχου —
+							// bg από ben_color(), fg από chip_fg() (contrast).
+							// v1.3.8 (#3): με φίλτρο → μόνο ο επιλεγμένος.
 							$chips = array();
 							foreach ( $p['splits'] as $s ) {
-								$chips[] = '<span class="rs-chip"><span class="rs-chip-name">'
-									. esc_html( $s['name'] )
-									. '</span><span class="rs-chip-data">'
+								$bg = self::ben_color( (string) $s['name'] );
+								$fg = self::chip_fg( $bg );
+								$chips[] = '<span class="rs-chip" style="background:' . esc_attr( $bg ) . ';color:' . esc_attr( $fg ) . ';">'
+									. '<span class="rs-chip-name">' . esc_html( $s['name'] ) . '</span>'
+									. '<span class="rs-chip-data">'
 									. esc_html( number_format_i18n( (float) $s['percent'], 1 ) ) . '% · '
 									. esc_html( number_format_i18n( (float) $s['amount'], 2 ) )
 									. '</span></span>';
 							}
-							echo implode( '<br />', $chips ); // phpcs:ignore WordPress.Security.EscapeOutput -- esc_html εντός του loop.
+							echo implode( '<br />', $chips ); // phpcs:ignore WordPress.Security.EscapeOutput -- esc_html/esc_attr εντός του loop.
 							?>
 						</td>
 					</tr>
@@ -471,6 +755,47 @@ final class RS_Admin_UI {
 					</tr>
 				</tfoot>
 			</table>
+			
+						<?php // ---------- v1.3.8 (#7 στάδιο 3): Πίνακας «Ανά κανάλι» ---------- ?>
+			<h2 class="rs-h2"><?php esc_html_e( 'Ανά κανάλι', 'revenue-splitter' ); ?></h2>
+			<table class="widefat striped rs-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Κανάλι', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Τεμ.', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Δωρεάν', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Μικτό', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'ΦΠΑ', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Καθαρό', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Έσοδα εκτός πωλήσεων', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Πληρωμές', 'revenue-splitter' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php if ( empty( $channel_rows ) ) : ?>
+					<tr><td colspan="8" class="rs-empty"><?php esc_html_e( 'Καμία κίνηση ανά κανάλι στην περίοδο.', 'revenue-splitter' ); ?></td></tr>
+				<?php else : ?>
+					<?php foreach ( $channel_rows as $cr ) : ?>
+					<tr>
+						<td>
+							<strong><?php echo esc_html( $cr['channel'] ); ?></strong>
+							<?php if ( $cr['channel'] === self::default_channel() ) : ?>
+								<small class="rs-muted"> · <?php esc_html_e( 'default', 'revenue-splitter' ); ?></small>
+							<?php endif; ?>
+						</td>
+						<td class="num"><?php echo esc_html( number_format_i18n( (int) $cr['qty'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( number_format_i18n( (int) $cr['free'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( $cur( $cr['gross'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( $cur( $cr['vat'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( $cur( $cr['net'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( $cur( $cr['income'] ) ); ?></td>
+						<td class="num">−<?php echo esc_html( $cur( $cr['payment'] ) ); ?></td>
+					</tr>
+					<?php endforeach; ?>
+				<?php endif; ?>
+				</tbody>
+			</table>
+
 
 			<h2 class="rs-h2"><?php esc_html_e( 'Λογιστική δικαιούχων', 'revenue-splitter' ); ?></h2>
 			<table class="widefat striped rs-table">
@@ -490,7 +815,12 @@ final class RS_Admin_UI {
 				<?php else : ?>
 					<?php foreach ( $accounts as $a ) : ?>
 					<tr>
-						<td><strong><?php echo esc_html( $a['name'] ); ?></strong></td>
+						<?php // v1.3.8 (#1): custom χρώμα και στο όνομα του πίνακα. ?>
+						<td>
+							<strong class="rs-chip-name" style="display:inline-block;background:<?php echo esc_attr( self::ben_color( $a['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $a['name'] ) ) ); ?>;padding:1px 8px;border-radius:10px;">
+								<?php echo esc_html( $a['name'] ); ?>
+							</strong>
+						</td>
 						<td class="num"><?php echo esc_html( $cur( $a['sales'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( $cur( $a['inc'] ) ); ?></td>
 						<td class="num">−<?php echo esc_html( $cur( $a['pay'] ) ); ?></td>
@@ -501,6 +831,45 @@ final class RS_Admin_UI {
 				<?php endif; ?>
 				</tbody>
 			</table>
+
+						<?php // ---------- Πρόταση 1: mini chart τάσης ---------- ?>
+			<div class="rs-trend-head">
+				<h2 class="rs-h2"><?php esc_html_e( 'Τάση (μήνα με μήνα)', 'revenue-splitter' ); ?></h2>
+				<form method="get" class="rs-trend-range">
+					<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG_DASH ); ?>" />
+					<input type="hidden" name="rs_period" value="<?php echo esc_attr( $per['preset'] ); ?>" />
+					<input type="hidden" name="rs_start" value="<?php echo esc_attr( $per['start'] ); ?>" />
+					<input type="hidden" name="rs_end" value="<?php echo esc_attr( $per['end'] ); ?>" />
+					<input type="hidden" name="rs_ben" value="<?php echo esc_attr( $ben ); ?>" />
+					<?php foreach ( $pids as $tpid ) : ?>
+						<input type="hidden" name="rs_product[]" value="<?php echo esc_attr( (string) $tpid ); ?>" />
+					<?php endforeach; ?>
+					<select name="rs_chart" onchange="this.form.submit()">
+						<option value="6"<?php selected( $trend_n, 6 ); ?>><?php esc_html_e( '6 μήνες', 'revenue-splitter' ); ?></option>
+						<option value="12"<?php selected( $trend_n, 12 ); ?>><?php esc_html_e( '12 μήνες', 'revenue-splitter' ); ?></option>
+					</select>
+				</form>
+			</div>
+			<div class="rs-trend">
+				<?php foreach ( $trend as $t ) :
+					$hn = ( $max_net > 0 ) ? max( 2, (int) round( ( (float) $t['net'] / $max_net ) * 100 ) ) : 2;
+					$hs = ( $max_net > 0 ) ? max( 2, (int) round( ( (float) $t['shares'] / $max_net ) * 100 ) ) : 2;
+					?>
+					<div class="rs-trend-col" title="<?php echo esc_attr( $t['label'] . ' — ' . $cur( (float) $t['net'] ) . ' / ' . $cur( (float) $t['shares'] ) ); ?>">
+						<div class="rs-trend-pair">
+							<div class="rs-bar-net" style="height:<?php echo esc_attr( (string) $hn ); ?>%;"></div>
+							<div class="rs-bar-sh" style="height:<?php echo esc_attr( (string) $hs ); ?>%;"></div>
+						</div>
+						<small><?php echo esc_html( $t['label'] ); ?></small>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<p class="rs-prod-hint">
+				<span class="rs-dot" style="background:#6d4aff;"></span>
+				<?php esc_html_e( 'Καθαρό', 'revenue-splitter' ); ?>
+				&nbsp;&nbsp;<span class="rs-dot" style="background:#a78bfa;"></span>
+				<?php echo esc_html( '' !== $ben ? __( 'Μερίδιο δικαιούχου', 'revenue-splitter' ) : __( 'Σύνολο μεριδίων', 'revenue-splitter' ) ); ?>
+			</p>
 
 			<?php self::footer(); ?>
 		</div>
@@ -528,6 +897,21 @@ final class RS_Admin_UI {
 
 		// v1.3.6 (#9): ημερομηνία έναρξης καταγραφής πωλήσεων ('' = χωρίς όριο).
 		$sales_since = RS_Reports::sales_since();
+
+		// v1.3.8 (#7): λίστα καναλιών πώλησης ('' = κανένα ορισμένο).
+		$channels = self::get_channels();
+
+		// v1.3.8 (#1): διαφορετικός έλεγχος στο select του checked-styling
+		// (= selected attrs). Οι δικαιούχοι: collect_names() ∪ όσοι έχουν
+		// ήδη custom χρώμα (γράφτηκε παλαιότερα και έχει παραμείνει).
+		$color_people = array();
+		foreach ( RS_Beneficiaries::collect_names() as $n ) {
+			$color_people[ $n ] = true;
+		}
+		foreach ( array_keys( self::get_color_map() ) as $n ) {
+			$color_people[ $n ] = true;
+		}
+		$color_people = array_keys( $color_people );
 
 		// Global defaults σε μορφή «Όνομα|Ποσοστό» για το textarea
 		// (το option ΜΕΝΕΙ JSON — το textarea είναι μόνο UI notation).
@@ -576,6 +960,31 @@ final class RS_Admin_UI {
 				<textarea name="rs_beneficiaries" rows="5" class="large-text code"
 					placeholder="<?php esc_attr_e( 'Όνομα|Ποσοστό (μία γραμμή ανά δικαιούχο)', 'revenue-splitter' ); ?>"><?php echo esc_textarea( $global_lines ); ?></textarea>
 
+				<?php // ---------- v1.3.8 (#1): Χρώματα δικαιούχων ---------- ?>
+				<h2 class="rs-h2"><?php esc_html_e( 'Χρώματα δικαιούχων', 'revenue-splitter' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Προσαρμοσμένο χρώμα ανά δικαιούχο — εμφανίζεται στα chips του καταμερισμού και στα ονόματα των πινάκων. Default: μωβ #6d4aff.', 'revenue-splitter' ); ?></p>
+				<table class="rs-color-table">
+					<tbody>
+						<?php if ( empty( $color_people ) ) : ?>
+							<tr><td class="rs-empty"><?php esc_html_e( 'Κανείς δεν έχει μερίδιο στην περίοδο.', 'revenue-splitter' ); ?></td></tr>
+						<?php else : ?>
+							<?php foreach ( $color_people as $cp ) : ?>
+							<tr>
+								<td><strong><?php echo esc_html( $cp ); ?></strong></td>
+								<td>
+									<input type="color" name="rs_ben_color[<?php echo esc_attr( md5( $cp ) ); ?>]"
+										value="<?php echo esc_attr( self::ben_color( $cp ) ); ?>" />
+								</td>
+							</tr>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</tbody>
+				</table>
+				<?php // Hidden mirror: όνομα ανά hash — ώστε το POST να έχει ακριβή name→color ζεύγη χωρίς attribute-injection επιφάνεια. ?>
+				<?php foreach ( $color_people as $cp ) : ?>
+					<input type="hidden" name="rs_ben_color_name[<?php echo esc_attr( md5( $cp ) ); ?>]" value="<?php echo esc_attr( $cp ); ?>" />
+				<?php endforeach; ?>
+
 				<h2 class="rs-h2"><?php esc_html_e( 'Έναρξη καταγραφής πωλήσεων', 'revenue-splitter' ); ?></h2>
 				<p>
 					<input type="date" name="rs_sales_since" value="<?php echo esc_attr( $sales_since ); ?>" />
@@ -584,8 +993,24 @@ final class RS_Admin_UI {
 					</span>
 				</p>
 
+				<?php // ---------- v1.3.8 (#7): Κανάλια πώλησης ---------- ?>
+				<h2 class="rs-h2"><?php esc_html_e( 'Κανάλια πώλησης', 'revenue-splitter' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Προεπιλεγμένη λίστα καναλιών για το checkout (όταν εφαρμόζεται κουπόνι δωρεάν αντιτύπου) και για τη χειροκίνητη εισαγωγή εσόδων στο ledger. Μία γραμμή ανά κανάλι.', 'revenue-splitter' ); ?></p>
+							<textarea name="rs_channels" rows="4" class="large-text code"
+				placeholder="<?php echo esc_attr( __( "Βιβλιοπωλείο\nΕκδηλώσεις\nOnline\nΧονδρική", 'revenue-splitter' ) ); ?>"><?php echo esc_textarea( implode( "\n", $channels ) ); ?></textarea>
+
+			<?php // ---------- v1.3.8 (#7 στάδιο 3): Default κανάλι ---------- ?>
+			<p style="margin-top:12px;">
+				<label for="rs-default-channel"><strong><?php esc_html_e( 'Default κανάλι (παραγγελίες χωρίς μαρκάρισμα)', 'revenue-splitter' ); ?></strong></label><br />
+				<input type="text" id="rs-default-channel" name="rs_default_channel" class="regular-text"
+					maxlength="100"
+					placeholder="<?php echo esc_attr( self::FALLBACK_CHANNEL ); ?>"
+					value="<?php echo esc_attr( self::default_channel() ); ?>" />
+				<span class="description"><?php esc_html_e( 'Σε αυτό το κανάλι καταμετρώνται όλες οι κανονικές παραγγελίες του καταστήματος που δεν έχουν μαρκαριστεί με κανάλι (π.χ. από κουπόνι στο checkout). Κενό = «Κατάστημα/Online».', 'revenue-splitter' ); ?></span>
+			</p>
+
 				<h2 class="rs-h2"><?php esc_html_e( 'Κουπόνια δωρεάν αντιτύπων', 'revenue-splitter' ); ?></h2>
-				<p class="description"><?php esc_html_e( 'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να συμπληρώσει αιτιολογία δωρεάν αντιτύπου. Διαχωρισμός με κόμμα.', 'revenue-splitter' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να επιλέξει κανάλι πώλησης από τη λίστα των καναλιών. Διαχωρισμός με κόμμα.', 'revenue-splitter' ); ?></p>
 				<input type="text" name="rs_reason_coupons" class="large-text"
 					placeholder="<?php esc_attr_e( 'FREEBOOK, REVIEWCOPY', 'revenue-splitter' ); ?>"
 					value="<?php echo esc_attr( $coupons ); ?>" />
@@ -607,7 +1032,7 @@ final class RS_Admin_UI {
 				<?php esc_html_e( 'Εξαγωγή state (JSON)', 'revenue-splitter' ); ?>
 			</a>
 			<p class="description" style="margin-top:8px;">
-				<?php esc_html_e( 'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.', 'revenue-splitter' ); ?>
+				<?php esc_html_e( 'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, χρώματα δικαιούχων, κανάλια πώλησης, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.', 'revenue-splitter' ); ?>
 			</p>
 
 			<?php RS_Ledger::render_admin(); ?>
@@ -681,6 +1106,93 @@ final class RS_Admin_UI {
 		} elseif ( 'auto' === $lang ) {
 			RS_Lang::set_lang( get_current_user_id(), 'auto' );
 		}
+
+		// ---------- v1.3.8 (#1): Χρώματα δικαιούχων ----------
+		// POST σχήμα: rs_ben_color[md5(όνομα)] => '#rrggbb' (από <input type=color>)
+		//             rs_ben_color_name[md5(όνομα)] => όνομα (hidden mirror)
+		// Η σύζευξη γίνεται ΜΟΝΑΔΑΔΙΚΑ μέσω του md5 key — ουδέποτε
+		// εμπιστευόμαστε το όνομα απευθείας από το name attribute.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- arrays validated παρακάτω.
+		$colors_in  = isset( $_POST['rs_ben_color'] ) && is_array( $_POST['rs_ben_color'] ) ? wp_unslash( $_POST['rs_ben_color'] ) : array();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- arrays validated παρακάτω.
+		$names_in   = isset( $_POST['rs_ben_color_name'] ) && is_array( $_POST['rs_ben_color_name'] ) ? wp_unslash( $_POST['rs_ben_color_name'] ) : array();
+
+		$color_map = array();
+		$bad_hex   = false;
+
+		foreach ( $names_in as $hash => $name ) {
+			$name = sanitize_text_field( (string) $name );
+			$hex  = isset( $colors_in[ $hash ] ) ? (string) $colors_in[ $hash ] : '';
+
+			if ( '' === $name ) {
+				continue; // Κενό όνομα (διαγραμμένη γραμμή) — παραλείπεται.
+			}
+
+			// STRICT: #RRGGBB μόνο — οτιδήποτε άλλο ΔΕΝ γράφεται ποτέ.
+			if ( 1 !== preg_match( '/^#[0-9a-fA-F]{6}$/', $hex ) ) {
+				$bad_hex = true;
+				continue;
+			}
+
+			// Αγνοούμε όσα είναι ΊΣΑ με το default (#6d4aff) — καθαρό
+			// option χωρίς περιττές εγγραφές.
+			if ( '#6d4aff' === strtolower( $hex ) ) {
+				continue;
+			}
+
+			$color_map[ $name ] = strtolower( $hex );
+		}
+
+		if ( $bad_hex ) {
+			$notices[] = array(
+				'type' => 'error',
+				'text' => __( 'Μη έγκυρο χρώμα δικαιούχου (απαιτείται #RRGGBB).', 'revenue-splitter' ),
+			);
+		}
+
+		if ( empty( $color_map ) ) {
+			delete_option( self::OPT_COLORS );
+		} else {
+			update_option( self::OPT_COLORS, wp_json_encode( $color_map, JSON_UNESCAPED_UNICODE ) );
+		}
+
+		// ---------- v1.3.8 (#7): Κανάλια πώλησης ----------
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- custom cleaning παρακάτω.
+		$channels_raw = isset( $_POST['rs_channels'] ) ? (string) wp_unslash( $_POST['rs_channels'] ) : '';
+
+				$channels = array();
+		foreach ( preg_split( '/\r\n|\r|\n/', $channels_raw ) as $ch_line ) {
+			$ch_line = trim( sanitize_text_field( (string) $ch_line ) );
+			if ( mb_strlen( $ch_line ) > 100 ) {
+				$ch_line = mb_substr( $ch_line, 0, 100 ); // Χαράμι 100 chars/κανάλι.
+			}
+			if ( '' !== $ch_line ) {
+				$channels[] = $ch_line;
+			}
+		}
+		$channels = array_values( array_unique( $channels ) );
+
+		if ( empty( $channels ) ) {
+			delete_option( self::OPT_CHANNELS );
+		} else {
+			update_option( self::OPT_CHANNELS, wp_json_encode( $channels, JSON_UNESCAPED_UNICODE ) );
+		}
+
+		// ---------- v1.3.8 (#7 στάδιο 3): Default κανάλι ----------
+		// Κενό = το fallback constant («Κατάστημα/Online»).
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized παρακάτω.
+		$def_ch = isset( $_POST['rs_default_channel'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['rs_default_channel'] ) ) ) : '';
+
+		if ( '' !== $def_ch ) {
+			$def_ch = mb_substr( $def_ch, 0, 100 );
+			update_option( self::OPT_DEFAULT_CHANNEL, $def_ch );
+		} else {
+			delete_option( self::OPT_DEFAULT_CHANNEL );
+		}
+
+		// Το default κανάλι επηρεάζει την ομαδοποίηση «Ανά κανάλι» στα
+		// cached reports (RS_Reports::run) — απαιτείται invalidate.
+		do_action( 'rs_invalidate_cache' );
 
 		// ---------- v1.3.6 (#9): Έναρξη καταγραφής πωλήσεων ----------
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- validated παρακάτω.
@@ -785,10 +1297,227 @@ final class RS_Admin_UI {
 	}
 
 	/**
+	 * v1.3.8 (#1): Το χάρτη χρωμάτων raw (όνομα => #rrggbb) — για render
+	 * και για cross-reference με collect_names(). Public: το χρειάζεται
+	 * και το RS_Portal (ίδια UI συνθήκη) + το Ledgers admin form σε
+	 * μελλοντικό στάδιο. ΠΟΤΕ δεν επιστρέφει άκυρα hex (parsed+filtered).
+	 */
+	public static function get_color_map(): array {
+
+		static $map = null;
+
+		if ( null === $map ) {
+			$map = array();
+			$raw = get_option( self::OPT_COLORS, '' );
+			if ( is_string( $raw ) && '' !== $raw ) {
+				$decoded = json_decode( $raw, true );
+				if ( is_array( $decoded ) ) {
+					foreach ( $decoded as $k => $hex ) {
+						if ( is_string( $k ) && is_string( $hex )
+							&& 1 === preg_match( '/^#[0-9a-fA-F]{6}$/', $hex ) ) {
+							$map[ $k ] = strtolower( $hex );
+						}
+					}
+				}
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * v1.3.8 (#7): Λίστα καναλιών πώλησης (array strings, [] = κανένα).
+	 * Public — το χρησιμοποιούν το RS_Checkout (dropdown στο checkout
+	 * όταν εφαρμόζεται κουπόνι), το RS_Ledger (dropdown στη χειροκίνητη
+	 * είσοδο εσόδου) και το RS_Portal (σε επόμενο στάδιο).
+	 */
+	public static function get_channels(): array {
+
+		static $channels = null;
+
+		if ( null === $channels ) {
+			$channels = array();
+			$raw      = get_option( self::OPT_CHANNELS, '' );
+			if ( is_string( $raw ) && '' !== $raw ) {
+				$decoded = json_decode( $raw, true );
+				if ( is_array( $decoded ) ) {
+					foreach ( $decoded as $ch ) {
+						if ( is_string( $ch ) && '' !== trim( $ch ) ) {
+							$channels[] = trim( $ch );
+						}
+					}
+				}
+			}
+		}
+
+		return $channels;
+	}
+	
+	
+	/**
+	 * v1.3.8 (#7 στάδιο 3): Το default κανάλι (pseudo «Κατάστημα/Online»)
+	 * — ρυθμίσιμο στις Ρυθμίσεις, fallback στην constant. ΠΟΤΕ κενό.
+	 */
+	public static function default_channel(): string {
+
+		static $ch = null;
+
+		if ( null === $ch ) {
+			$raw = trim( (string) get_option( self::OPT_DEFAULT_CHANNEL, '' ) );
+			$ch  = ( '' !== $raw ) ? mb_substr( $raw, 0, 100 ) : self::FALLBACK_CHANNEL;
+		}
+
+		return $ch;
+	}
+
+	/**
+	 * v1.3.8 (#7 στάδιο 3): Γραμμές του πίνακα «Ανά κανάλι» —
+	 * WooCommerce (report['channels']) + ledger (income/payment).
+	 *
+	 * ΠΑΝΤΑ σφαιρικός (απόφαση χρήστη): ΔΕΝ φιλτράρεται από το
+	 * rs_ben — μόνο από περίοδο και φίλτρο προϊόντων.
+	 *
+	 * Σειρά: default κανάλι πρώτα, υπόλοιπα κατά (Καθαρό + Έσοδα) ↓.
+	 * Ledger εγγραφές χωρίς κανάλι → γραμμή «— χωρίς κανάλι —»,
+	 * ΜΟΝΟ όταν έχουν κίνηση στην περίοδο.
+	 *
+	 * @return array[] {channel,qty,free,gross,vat,net,income,payment}
+	 */
+	private static function channel_rows( array $report, array $per ): array {
+
+		$default = self::default_channel();
+		$rows     = array();
+
+		$touch = static function ( string $name ) use ( &$rows ): void {
+			if ( ! isset( $rows[ $name ] ) ) {
+				$rows[ $name ] = array( 'qty' => 0, 'free' => 0, 'gross' => 0.0, 'vat' => 0.0, 'net' => 0.0, 'income' => 0.0, 'payment' => 0.0 );
+			}
+		};
+
+		// 1) Πάντα παρόντα: default + κανάλια Ρυθμίσεων (και τα μηδενικά).
+		$touch( $default );
+		foreach ( self::get_channels() as $ch ) {
+			$touch( $ch );
+		}
+
+		// 2) WooCommerce ανά κανάλι (και κανάλια που ΔΕΝ υπάρχουν πια
+		//    στη λίστα — δεδομένα πάνω από ονομασίες).
+		foreach ( ( $report['channels'] ?? array() ) as $c ) {
+			$name = (string) ( $c['channel'] ?? '' );
+			if ( '' === $name ) {
+				continue;
+			}
+			$touch( $name );
+			$rows[ $name ]['qty']   += (int) $c['qty'];
+			$rows[ $name ]['free']  += (int) $c['free'];
+			$rows[ $name ]['gross'] += (float) $c['gross'];
+			$rows[ $name ]['vat']   += (float) $c['vat'];
+			$rows[ $name ]['net']   += (float) $c['net'];
+		}
+
+		// 3) Ledger ανά κανάλι ('' → «— χωρίς κανάλι —», μόνο με κίνηση).
+		foreach ( RS_Ledger::channel_sums( $per['start'], $per['end'] ) as $ch => $sums ) {
+
+			$has_motion = ( 0.0 !== (float) ( $sums['income'] ?? 0.0 ) )
+						|| ( 0.0 !== (float) ( $sums['payment'] ?? 0.0 ) );
+			if ( ! $has_motion ) {
+				continue; // Κενό κλειδί χωρίς κίνηση → καμία γραμμή.
+			}
+
+			$name = ( '' === $ch ) ? __( '— χωρίς κανάλι —', 'revenue-splitter' ) : (string) $ch;
+			$touch( $name );
+			$rows[ $name ]['income']  += (float) ( $sums['income'] ?? 0.0 );
+			$rows[ $name ]['payment'] += (float) ( $sums['payment'] ?? 0.0 );
+		}
+
+		// 4) Λίστα + ταξινόμηση: default πρώτα, υπόλοιπα κατά όγκο ↓.
+		$list = array();
+		foreach ( $rows as $name => $r ) {
+			$r['channel'] = $name;
+			$list[]       = $r;
+		}
+
+		usort(
+			$list,
+			static function ( $a, $b ) use ( $default ) {
+				if ( $a['channel'] === $default ) {
+					return -1;
+				}
+								if ( $b['channel'] === $default ) {
+					return 1;
+				}
+
+				$ka = $a['net'] + $a['income'];
+				$kb = $b['net'] + $b['income'];
+
+				if ( $ka === $kb ) {
+					return strcmp( $a['channel'], $b['channel'] );
+				}
+
+				return $kb <=> $ka;
+			}
+		);
+
+		return $list;
+	}
+	
+	
+	
+	/**
+	 * Πρόταση 1: μηνιαία τάση (6|12 μήνες) — Καθαρό + μερίδια.
+	 *
+	 * SEMANTICS (ρήτο):
+	 *  - «net» = καθαρό του ΜΗΝΑ, πάντα σύνολο καταστήματος (ΔΕΝ επηρεάζεται
+	 *    από φίλτρο δικαιούχου ούτε από φίλτρο προϊόντων — η τάση είναι
+	 *    store-wide μετρικό· εξοικονομεί και 12× queries ανά φίλτρο).
+	 *  - «shares»: χωρίς φίλτρο δικαιούχου = σύνολο μεριδίων (≈ net).
+	 *    Με φίλτρο = ΜΟΝΟ ο επιλεγμένος δικαιούχος (μετρικά διαχωρισμένα
+	 *    στατικά — οτίποτα σε αναφορά #3, μεγαλύτερη ακρίβεια).
+	 *  - Το φίλτρο προϊόντων ΔΕΝ εφαρμόζεται στο trend (ΣΚΟΠΙΜΟ — lower
+	 *    cost, ενιαία εικόνα).
+	 *  - Clamp στο rs_sales_since + caching 5'/μήνα: μέσα στο run().
+	 *
+	 * @return array[] {label:string, net:float, shares:float}
+	 */
+	private static function monthly_trend( int $months, string $ben = '' ): array {
+
+		$now = new DateTimeImmutable( 'now', wp_timezone() );
+		$out = array();
+
+		for ( $i = $months - 1; $i >= 0; $i-- ) {
+
+			$m = $now->modify( 'first day of this month' )->modify( "-{$i} months" );
+
+			$rep = RS_Reports::run(
+				array(
+					'date_start' => $m->format( 'Y-m-01' ),
+					'date_end'   => $m->format( 'Y-m-t' ),
+				)
+			);
+
+			$shares = 0.0;
+			foreach ( $rep['beneficiaries'] as $b ) {
+				if ( '' === $ben || $b['name'] === $ben ) {
+					$shares += (float) $b['amount'];
+				}
+			}
+
+			$out[] = array(
+				'label'  => wp_date( 'M Y', $m->getTimestamp(), wp_timezone() ),
+				'net'    => round( (float) $rep['totals']['net'], 2 ),
+				'shares' => round( $shares, 2 ),
+			);
+		}
+
+		return $out;
+	}
+	
+		/**
 	 * Το πλήρες state ως array — v1.3.6: υπερ-πλήρες.
 	 *
 	 *  - options:  whitelisted plugin options (ΦΠΑ default, global
-	 *              δικαιούχοι, portal keys, ledger, κουπόνια, έναρξη).
+	 *              δικαιούχοι, χρώματα δικαιούχων [v1.3.8], κανάλια
+	 *              [v1.3.8], portal keys, ledger, κουπόνια, έναρξη).
 	 *  - postmeta: _rs_split / _rs_vat_rate / _rs_beneficiaries (legacy)
 	 *              ανά προϊόν + _rs_free_reason (classic datastore).
 	 *              Το 'value' αντιγράφεται RAW (serialized strings από
@@ -882,6 +1611,13 @@ final class RS_Admin_UI {
 	 * το όριο, έγκυρη Y-m-d = γράφεται, οτιδήποτε άλλο = ρητό error
 	 * (το υπάρχον option παραμένει άθικτο — καμία σιωπηλή παραμόρφωση).
 	 *
+	 * v1.3.8 (#1): STRICT validation του rs_beneficiary_colors — JSON
+	 * array όνομα => #RRGGBB (regex-checked ΜΟΝΟ). Άκυρο → error,
+	 * το υπάρχον option παραμένει άθικτο.
+	 * v1.3.8 (#7): STRICT validation του rs_channels — JSON array από
+	 * strings ≤100 chars (sanitize_text_field καθαρισμός). Άκυρο →
+	 * error, το υπάρχον option παραμένει άθικτο.
+	 *
 	 * @return array notices.
 	 */
 	public static function import_state( array $state ): array {
@@ -921,6 +1657,114 @@ final class RS_Admin_UI {
 			}
 		}
 
+		// ---- v1.3.8 (#1): Χρώματα δικαιούχων (STRICT) ----
+		if ( isset( $opts['rs_beneficiary_colors'] ) ) {
+
+			$raw_c = $opts['rs_beneficiary_colors'];
+
+			// Κενό = σκόπιμο σβήσιμο.
+			if ( '' === $raw_c ) {
+				delete_option( self::OPT_COLORS );
+			} elseif ( is_string( $raw_c ) ) {
+				$decoded = json_decode( $raw_c, true );
+
+				$valid = is_array( $decoded );
+				if ( $valid ) {
+					foreach ( $decoded as $name => $hex ) {
+						if ( ! is_string( $name ) || '' === $name
+							|| ! is_string( $hex )
+							|| 1 !== preg_match( '/^#[0-9a-fA-F]{6}$/', $hex ) ) {
+							$valid = false;
+							break;
+						}
+					}
+				}
+
+				if ( $valid ) {
+					// Ίδιο normalization με το save_settings(): lowercase +
+					// παράλειψη όσων ισούνται με το default (#6d4aff).
+					$norm = array();
+					foreach ( $decoded as $cname => $chex ) {
+						$chex = strtolower( $chex );
+						if ( '#6d4aff' === $chex ) {
+							continue;
+						}
+						$norm[ $cname ] = $chex;
+					}
+					if ( empty( $norm ) ) {
+						delete_option( self::OPT_COLORS );
+					} else {
+						update_option( self::OPT_COLORS, wp_json_encode( $norm, JSON_UNESCAPED_UNICODE ) );
+					}
+				} else {
+					$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob χρωμάτων δικαιούχων (απαιτούνται #RRGGBB τιμές).', 'revenue-splitter' ) );
+				}
+			} else {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob χρωμάτων δικαιούχων (απαιτούνται #RRGGBB τιμές).', 'revenue-splitter' ) );
+			}
+		}
+
+		// ---- v1.3.8 (#7): Κανάλια πώλησης (STRICT) ----
+		if ( isset( $opts['rs_channels'] ) ) {
+
+			$raw_ch = $opts['rs_channels'];
+
+			// Κενό = σκόπιμο σβήσιμο.
+			if ( '' === $raw_ch ) {
+				delete_option( self::OPT_CHANNELS );
+			} elseif ( is_string( $raw_ch ) ) {
+				$decoded = json_decode( $raw_ch, true );
+
+				$valid = is_array( $decoded );
+				if ( $valid ) {
+					foreach ( $decoded as $ch ) {
+						if ( ! is_string( $ch ) || '' === trim( $ch ) ) {
+							$valid = false;
+							break;
+						}
+					}
+				}
+
+				if ( $valid ) {
+					$clean_channels = array();
+					foreach ( $decoded as $ch ) {
+						$ch = mb_substr( trim( sanitize_text_field( $ch ) ), 0, 100 );
+						if ( '' !== $ch ) {
+							$clean_channels[] = $ch;
+						}
+					}
+					$clean_channels = array_values( array_unique( $clean_channels ) );
+
+					if ( empty( $clean_channels ) ) {
+						delete_option( self::OPT_CHANNELS );
+					} else {
+						update_option( self::OPT_CHANNELS, wp_json_encode( $clean_channels, JSON_UNESCAPED_UNICODE ) );
+					}
+				} else {
+					$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob καναλιών πώλησης.', 'revenue-splitter' ) );
+				}
+			} else {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob καναλιών πώλησης.', 'revenue-splitter' ) );
+			}
+		}
+		
+		
+		// ---- v1.3.8 (#7 στάδιο 3): Default κανάλι (STRICT) ----
+		if ( isset( $opts['rs_default_channel'] ) ) {
+
+			if ( ! is_string( $opts['rs_default_channel'] ) ) {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο default κανάλι.', 'revenue-splitter' ) );
+			} else {
+				$v = trim( sanitize_text_field( $opts['rs_default_channel'] ) );
+
+				if ( '' === $v ) {
+					delete_option( self::OPT_DEFAULT_CHANNEL ); // Σκόπιμο reset στο fallback.
+				} else {
+					update_option( self::OPT_DEFAULT_CHANNEL, mb_substr( $v, 0, 100 ) );
+				}
+			}
+		}
+
 		// ---- Portal keys — v1.3.1 FIX (#6): STRICT per-value validation ----
 		if ( isset( $opts['rs_portal_keys'] ) && is_string( $opts['rs_portal_keys'] ) ) {
 			$decoded = json_decode( $opts['rs_portal_keys'], true );
@@ -954,33 +1798,50 @@ final class RS_Admin_UI {
 			}
 		}
 
-		// ---- Ledger: WIPE + re-insert μέσω RS_Ledger::add (πλήρης validation) ----
+		// ---- Ledger: ATOMIC import (all-or-nothing, audit finding #1) ----
+		// Audit FIX: non-string rs_ledger (π.χ. tampered JSON) δεν αγνοείται
+		// πια σιωπηλά — ρητό error, ενιαία με channels/colors/portal-keys.
+		if ( isset( $opts['rs_ledger'] ) && ! is_string( $opts['rs_ledger'] ) ) {
+			$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ledger (JSON).', 'revenue-splitter' ) );
+		}
 		if ( isset( $opts['rs_ledger'] ) && is_string( $opts['rs_ledger'] ) ) {
-			$decoded = json_decode( $opts['rs_ledger'], true );
+			$decoded  = json_decode( $opts['rs_ledger'], true );
+			$entries_ = is_array( $decoded ) ? $decoded : array();
 
 			if ( null === $decoded && '' !== trim( $opts['rs_ledger'] ) ) {
 				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ledger (JSON).', 'revenue-splitter' ) );
 			} else {
-				RS_Ledger::wipe();
+				$result = RS_Ledger::import_bulk( $entries_ );
 
-				$added = 0;
-				foreach ( ( is_array( $decoded ) ? $decoded : array() ) as $e ) {
-					if ( ! is_array( $e ) ) {
-						continue;
+				if ( true === $result ) {
+					$notes[] = array(
+						'type' => 'success',
+						'text' => sprintf(
+							/* translators: %d: πλήθος εγγραφών */
+							__( 'Ledger: εισήχθησαν %d εγγραφές (με πλήρη validation).', 'revenue-splitter' ),
+							count( $entries_ )
+						),
+					);
+				} else {
+					foreach ( $result as $err ) {
+						$notes[] = array( 'type' => 'error', 'text' => $err );
 					}
-					if ( true === RS_Ledger::add( $e ) ) {
-						$added++;
-					}
+					$notes[] = array( 'type' => 'error', 'text' => __( 'Ledger: ΚΑΜΙΑ αλλαγή δεν έγινε — το υπάρχον ledger παρέμεινε άθικτο.', 'revenue-splitter' ) );
 				}
-				$notes[] = array(
-					'type' => 'success',
-					'text' => sprintf(
-						/* translators: %d: πλήθος εγγραφών */
-						__( 'Ledger: εισήχθησαν %d εγγραφές (με πλήρη validation).', 'revenue-splitter' ),
-						$added
-					),
-				);
 			}
+		}
+
+		// ---- v1.4.1 (#2): Backup χωρίς ledger section — ρητό info ----
+		// Όταν απουσιάζει ΠΛΗΡΩΣ το rs_ledger key (π.χ. backup από
+		// παλαιότερη έκδοση ή hand-made JSON), το υπάρχον ledger ΔΕΝ
+		// αγγίζεται. Η απουσία πρέπει να είναι ορατή στο αποτέλεσμα
+		// (replace-semantics διαφάνεια), όχι σιωπηλό skip — ενιαία
+		// λογική με το notice «ΔΕΝ βρέθηκαν τα προϊόντα με IDs %s».
+		if ( ! isset( $opts['rs_ledger'] ) ) {
+			$notes[] = array(
+				'type' => 'info',
+				'text' => __( 'Το backup δεν περιέχει ledger — το υπάρχον ledger παρέμεινε άθικτο.', 'revenue-splitter' ),
+			);
 		}
 
 		// ---- Reason coupons ----
@@ -1046,7 +1907,7 @@ final class RS_Admin_UI {
 
 					// ---- Free reasons ΠΡΙΝ από το get_post gate ----
 					// Σε full-HPOS site η παραγγελία ΔΕΝ είναι post — το
-					// get_post() πιο κάτω θα την μαρκάραdε άδικα ως
+					// get_post() πιο κάτω θα την μάρκαρε άδικα ως
 					// «προϊόν δεν βρέθηκε». Χειριζόμαστε εδώ, ξεχωριστά:
 					if ( '_rs_free_reason' === $key ) {
 
@@ -1102,14 +1963,16 @@ final class RS_Admin_UI {
 					$applied++;
 				}
 
-				$notes[] = array(
-					'type' => 'success',
-					'text' => sprintf(
-						/* translators: %d: πλήθος εγγραφών */
-						__( 'Προϊοντικά overrides: εφαρμόστηκαν %d εγγραφές.', 'revenue-splitter' ),
-						$applied
-					),
-				);
+				if ( $applied > 0 ) {
+					$notes[] = array(
+						'type' => 'success',
+						'text' => sprintf(
+							/* translators: %d: πλήθος εγγραφών */
+							__( 'Προϊοντικά overrides: εφαρμόστηκαν %d εγγραφές.', 'revenue-splitter' ),
+							$applied
+						),
+					);
+				}
 
 				if ( ! empty( $skipped ) ) {
 					$notes[] = array(
@@ -1265,8 +2128,23 @@ final class RS_Admin_UI {
 
 			$notices = array( array( 'type' => 'error', 'text' => __( 'Δεν επιλέχθηκε αρχείο JSON.', 'revenue-splitter' ) ) );
 
+			// Upload health check: ρητό μήνυμα ανά περίπτωση — δεν
+			// λένε όλα «δεν επιλέχθηκε αρχείο».
+			$up_err  = isset( $_FILES['rs_import_file']['error'] ) ? (int) $_FILES['rs_import_file']['error'] : UPLOAD_ERR_NO_FILE;
+			$up_size = isset( $_FILES['rs_import_file']['size'] ) ? (int) $_FILES['rs_import_file']['size'] : 0;
+
+			if ( UPLOAD_ERR_INI_SIZE === $up_err || UPLOAD_ERR_FORM_SIZE === $up_err ) {
+				$notices = array( array( 'type' => 'error', 'text' => __( 'Το αρχείο υπερβαίνει το όριο μεταφόρτωσης του server — δες το upload_max_filesize της PHP.', 'revenue-splitter' ) ) );
+			} elseif ( UPLOAD_ERR_OK !== $up_err ) {
+				$notices = array( array( 'type' => 'error', 'text' => __( 'Σφάλμα κατά τη μεταφόρτωση του αρχείου — δοκίμασε ξανά.', 'revenue-splitter' ) ) );
+			} elseif ( $up_size <= 0 || $up_size > 67108864 ) { // 64 MB.
+				$notices = array( array( 'type' => 'error', 'text' => __( 'Μη αποδεκτό μέγεθος αρχείου (όριο 64 MB).', 'revenue-splitter' ) ) );
+			}
+
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- JSON payload, json_decoded ως array.
-			if ( ! empty( $_FILES['rs_import_file']['tmp_name'] )
+			if ( UPLOAD_ERR_OK === $up_err
+				&& $up_size > 0 && $up_size <= 67108864
+				&& ! empty( $_FILES['rs_import_file']['tmp_name'] )
 				&& is_uploaded_file( $_FILES['rs_import_file']['tmp_name'] ) ) {
 
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.readfile_read_file_get_contents -- uploaded tmp file.
@@ -1297,9 +2175,16 @@ final class RS_Admin_UI {
 	}
 
 	/* =====================================================================
-	 * Exports (admin_init + triple gating)  ← Part 3-B ξεκινά ΑΚΡΙΒΩΣ εδώ
+	 * Exports (admin_init + triple gating)
+	 *
+	 * v1.3.8 (#2/#3): exports λαμβάνουν ΟΛΑ τα ενεργά φίλτρα:
+	 *  - rs_product[] (multi) ή legacy rs_product (scalar)
+	 *  - rs_ben (φίλτρο δικαιούχου, whitelist-validated)
+	 * Εμφανιζόμενες ημερομηνίες στα el → d/m/Y (#5). Filenames και
+	 * εσωτερικά params παραμένουν ISO Y-m-d.
 	 * =================================================================== */
-	private static function export_url( string $fmt, array $per, int $product_id = 0 ): string {
+
+	private static function export_url( string $fmt, array $per, array $pids = array(), string $ben = '' ): string {
 
 		$url = admin_url( 'admin.php?page=' . self::SLUG_DASH
 			. '&rs_export=' . rawurlencode( $fmt )
@@ -1307,8 +2192,17 @@ final class RS_Admin_UI {
 			. '&rs_start=' . rawurlencode( $per['start'] )
 			. '&rs_end=' . rawurlencode( $per['end'] ) );
 
-		if ( $product_id > 0 ) {
-			$url .= '&rs_product=' . rawurlencode( (string) $product_id );
+		// v1.3.8 (#2): πολλά rs_product[] params — canonical sorted order
+		// (ίδιο pattern με current_products()).
+		$sorted = $pids;
+		sort( $sorted );
+		foreach ( $sorted as $pid ) {
+			$url .= '&rs_product[]=' . rawurlencode( (string) $pid );
+		}
+
+		// v1.3.8 (#3): φίλτρο δικαιούχου.
+		if ( '' !== $ben ) {
+			$url .= '&rs_ben=' . rawurlencode( $ben );
 		}
 
 		return wp_nonce_url( $url, 'rs_export' );
@@ -1334,34 +2228,45 @@ final class RS_Admin_UI {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- validated στο current_period().
 		$fmt = sanitize_key( (string) wp_unslash( $_GET['rs_export'] ) );
+
+		// Strict whitelist: άγνωστο format ΔΕΝ πέφτει σιωπηλά στο JSON.
+		if ( ! in_array( $fmt, array( 'csv', 'xls', 'html', 'json' ), true ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
+		}
+
 		$per = self::current_period();
+
+		// v1.3.8 (#2/#3): ίδια φίλτρα με το dashboard — ΜΙΑ υλοποίηση
+		// ερμηνείας (current_products/current_beneficiary), ώστε export
+		// = ακριβώς ό,τι βλέπεις στην οθόνη.
+		$pids = self::current_products();
+		$ben  = self::current_beneficiary();
 
 		$run = array(
 			'date_start' => $per['start'],
 			'date_end'   => $per['end'],
 		);
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter, absint παρακάτω.
-		if ( isset( $_GET['rs_product'] ) ) {
-			$pid = absint( $_GET['rs_product'] );
-			if ( $pid > 0 ) {
-				$run['product_ids'] = array( $pid );
-			}
+		if ( ! empty( $pids ) ) {
+			$run['product_ids'] = $pids;
 		}
 
 		$report = RS_Reports::run( $run );
+		$report = self::apply_ben_filter( $report, $ben );
 
 		$fname = 'revenue-splitter-' . $per['start'] . '_' . $per['end'];
 
+		// v1.3.8 (#7 στάδιο 3): exports παίρνουν ΚΑΙ το block «Ανά κανάλι».
+				$channel_rows = self::channel_rows( $report, $per );
+
 		switch ( $fmt ) {
 			case 'csv':
-				self::stream_csv( $report, $per, $fname );
+				self::stream_csv( $report, $fname, $channel_rows );
 				exit;
 			case 'xls':
-				self::stream_xls( $report, $per );
+				self::stream_xls( $report, $per, $fname, $channel_rows );
 				exit;
 			case 'html':
-				self::stream_html( $report, $per );
+				self::stream_html( $report, $per, $fname, $channel_rows );
 				exit;
 			case 'json':
 			default:
@@ -1450,8 +2355,36 @@ final class RS_Admin_UI {
 			implode( ' | ', $splits ),
 		);
 	}
+	
+		/** Header του block «Ανά κανάλι» (exports). */
+	private static function channel_csv_header(): array {
+		return array(
+			__( 'Κανάλι', 'revenue-splitter' ),
+			__( 'Τεμ.', 'revenue-splitter' ),
+			__( 'Δωρεάν', 'revenue-splitter' ),
+			__( 'Μικτό', 'revenue-splitter' ),
+			__( 'ΦΠΑ', 'revenue-splitter' ),
+			__( 'Καθαρό', 'revenue-splitter' ),
+			__( 'Έσοδα εκτός πωλήσεων', 'revenue-splitter' ),
+			__( 'Πληρωμές', 'revenue-splitter' ),
+		);
+	}
 
-	private static function stream_csv( array $report, array $per, string $fname ): void {
+	/** Cells μίας γραμμής καναλιού (exports). */
+	private static function channel_cells( array $cr ): array {
+		return array(
+			(string) $cr['channel'],
+			(string) $cr['qty'],
+			(string) $cr['free'],
+			number_format( (float) $cr['gross'], 2, ',', '.' ),
+			number_format( (float) $cr['vat'], 2, ',', '.' ),
+			number_format( (float) $cr['net'], 2, ',', '.' ),
+			number_format( (float) $cr['income'], 2, ',', '.' ),
+			number_format( (float) $cr['payment'], 2, ',', '.' ),
+		);
+	}
+
+	private static function stream_csv( array $report, string $fname, array $channel_rows = array() ): void {
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=UTF-8' );
@@ -1482,19 +2415,36 @@ final class RS_Admin_UI {
 			)
 		);
 
+				// ---- v1.3.8: δεύτερο block «Ανά κανάλι» ----
+		fputcsv( $fh, array() );
+		fputcsv( $fh, array( __( 'Ανά κανάλι', 'revenue-splitter' ) ) );
+		fputcsv( $fh, self::channel_csv_header() );
+
+		foreach ( $channel_rows as $cr ) {
+			fputcsv( $fh, array_map( array( __CLASS__, 'csv_cell' ), self::channel_cells( $cr ) ) );
+		}
+
 		fclose( $fh );
 		exit;
 	}
 
-	private static function stream_xls( array $report, array $per ): void {
+	private static function stream_xls( array $report, array $per, string $fname, array $channel_rows = array() ): void {
 
 		nocache_headers();
 		header( 'Content-Type: application/vnd.ms-excel; charset=UTF-8' );
-		header( 'Content-Disposition: attachment; filename="revenue-splitter-' . $per['start'] . '_' . $per['end'] . '.xls"' );
+		header( 'Content-Disposition: attachment; filename="' . $fname . '.xls"' );
+
+		// v1.3.8 (#5): εμφανιζόμενες ημερομηνίες d/m/Y στα el (DISPLAY-ONLY).
+		$range = sprintf(
+			/* translators: 1: από, 2: έως */
+			__( 'Revenue Splitter — %1$s έως %2$s', 'revenue-splitter' ),
+			RS_Lang::fmt_date( $per['start'] ),
+			RS_Lang::fmt_date( $per['end'] )
+		);
 
 		echo '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>';
 		echo '<table border="1">';
-		echo '<tr><th colspan="12">' . esc_html( sprintf( /* translators: 1: από, 2: έως */ __( 'Revenue Splitter — %1$s έως %2$s', 'revenue-splitter' ), $per['start'], $per['end'] ) ) . '</th></tr>';
+		echo '<tr><th colspan="12">' . esc_html( $range ) . '</th></tr>';
 
 		echo '<tr>';
 		foreach ( self::csv_header() as $h ) {
@@ -1510,25 +2460,52 @@ final class RS_Admin_UI {
 			echo '</tr>';
 		}
 
+		echo '<tr><th>' . esc_html__( 'ΣΥΝΟΛΑ', 'revenue-splitter' ) . '</th><th colspan="6"></th><th>' . esc_html( number_format_i18n( (float) $report['totals']['gross'], 2 ) ) . '</th><th>' . esc_html( number_format_i18n( (float) $report['totals']['vat'], 2 ) ) . '</th><th>' . esc_html( number_format_i18n( (float) $report['totals']['net'], 2 ) ) . '</th><th colspan="2"></th></tr>';
+
+		echo '</table>';
+
+		// v1.3.8: δεύτερο block — «Ανά κανάλι».
+		echo '<h2>' . esc_html__( 'Ανά κανάλι', 'revenue-splitter' ) . '</h2>';
+		echo '<table border="1">';
+		echo '<tr>';
+		foreach ( self::channel_csv_header() as $h ) {
+			echo '<th>' . esc_html( $h ) . '</th>';
+		}
+		echo '</tr>';
+		foreach ( $channel_rows as $cr ) {
+			echo '<tr>';
+			foreach ( self::channel_cells( $cr ) as $cell ) {
+				echo '<td>' . esc_html( $cell ) . '</td>';
+			}
+			echo '</tr>';
+		}
 		echo '</table></body></html>';
 		exit;
 	}
 
-	private static function stream_html( array $report, array $per ): void {
+	private static function stream_html( array $report, array $per, string $fname, array $channel_rows = array() ): void {
 
 		nocache_headers();
 		header( 'Content-Type: text/html; charset=UTF-8' );
-		header( 'Content-Disposition: attachment; filename="revenue-splitter-' . $per['start'] . '_' . $per['end'] . '.html"' );
+		header( 'Content-Disposition: attachment; filename="' . $fname . '.html"' );
 
 		// v1.3.1 FIX (#18): lang attribute βάσει γλώσσας χρήστη.
 		$lang = RS_Lang::get_lang();
 
+		// v1.3.8 (#5): εμφανιζόμενες ημερομηνίες d/m/Y στα el (DISPLAY-ONLY).
+		$range = sprintf(
+			/* translators: 1: από, 2: έως */
+			__( 'Revenue Splitter — %1$s έως %2$s', 'revenue-splitter' ),
+			RS_Lang::fmt_date( $per['start'] ),
+			RS_Lang::fmt_date( $per['end'] )
+		);
+
 		echo '<!DOCTYPE html><html lang="' . esc_attr( $lang ) . '"><head><meta charset="UTF-8">';
-		echo '<title>' . esc_html( sprintf( /* translators: 1: από, 2: έως */ __( 'Revenue Splitter — %1$s έως %2$s', 'revenue-splitter' ), $per['start'], $per['end'] ) ) . '</title>';
+		echo '<title>' . esc_html( $range ) . '</title>';
 		echo '<style>body{font-family:system-ui,sans-serif;margin:24px;color:#1d2327}table{border-collapse:collapse;width:100%}th,td{border:1px solid #c3c4c7;padding:6px 10px;text-align:left}th{background:#f0f0f1}td.num{text-align:right}</style>';
 		echo '</head><body>';
 
-		echo '<h1>' . esc_html( sprintf( /* translators: 1: από, 2: έως */ __( 'Revenue Splitter — %1$s έως %2$s', 'revenue-splitter' ), $per['start'], $per['end'] ) ) . '</h1>';
+		echo '<h1>' . esc_html( $range ) . '</h1>';
 
 		echo '<table><thead><tr>';
 		foreach ( self::csv_header() as $h ) {
@@ -1545,6 +2522,24 @@ final class RS_Admin_UI {
 		}
 
 		echo '<tr><th>' . esc_html__( 'ΣΥΝΟΛΑ', 'revenue-splitter' ) . '</th><th colspan="6"></th><th>' . esc_html( number_format_i18n( (float) $report['totals']['gross'], 2 ) ) . '</th><th>' . esc_html( number_format_i18n( (float) $report['totals']['vat'], 2 ) ) . '</th><th>' . esc_html( number_format_i18n( (float) $report['totals']['net'], 2 ) ) . '</th><th colspan="2"></th></tr>';
+
+		echo '</tbody></table>';
+
+		// v1.3.8: δεύτερο block — «Ανά κανάλι».
+		echo '<h2>' . esc_html__( 'Ανά κανάλι', 'revenue-splitter' ) . '</h2>';
+		echo '<table><thead><tr>';
+		foreach ( self::channel_csv_header() as $h ) {
+			echo '<th>' . esc_html( $h ) . '</th>';
+		}
+		echo '</tr></thead><tbody>';
+
+		foreach ( $channel_rows as $cr ) {
+			echo '<tr>';
+			foreach ( self::channel_cells( $cr ) as $ci => $cell ) {
+				echo '<td' . ( $ci > 0 ? ' class="num"' : '' ) . '>' . esc_html( $cell ) . '</td>';
+			}
+			echo '</tr>';
+		}
 
 		echo '</tbody></table></body></html>';
 		exit;
@@ -1580,7 +2575,7 @@ final class RS_Admin_UI {
 
 			<p style="margin:10px 0 4px;">
 				<strong><?php echo esc_html( $per['label'] ); ?></strong>
-				<span class="rs-muted"> · <?php echo esc_html( $per['start'] ); ?> → <?php echo esc_html( $per['end'] ); ?></span>
+				<span class="rs-muted"> · <?php echo esc_html( RS_Lang::fmt_date( $per['start'] ) ); ?> → <?php echo esc_html( RS_Lang::fmt_date( $per['end'] ) ); ?></span>
 			</p>
 
 			<table class="widefat striped rs-table">
@@ -1597,9 +2592,19 @@ final class RS_Admin_UI {
 				<?php else : ?>
 					<?php foreach ( array_slice( $report['beneficiaries'], 0, 5 ) as $b ) : ?>
 					<tr>
-						<td><strong><?php echo esc_html( $b['name'] ); ?></strong></td>
+						<?php // v1.3.8 (#1): custom χρώμα και στο widget. ?>
+						<td><strong class="rs-chip-name" style="display:inline-block;background:<?php echo esc_attr( self::ben_color( $b['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $b['name'] ) ) ); ?>;padding:1px 8px;border-radius:10px;"><?php echo esc_html( $b['name'] ); ?></strong></td>
 						<td class="num"><?php echo esc_html( $cur( (float) $b['amount'] ) ); ?></td>
-						<td class="num"><?php echo esc_html( $cur( round( (float) $b['amount'] - RS_Ledger::sum( $b['name'], $per['start'], $per['end'], 'payment' ), 2 ) ) ); ?></td>
+						<?php
+						// v1.4.1 FIX: ενιαία σημασιολογία με το dashboard (sales + income − payments).
+						$widget_remain = round(
+							(float) $b['amount']
+							+ RS_Ledger::sum( $b['name'], $per['start'], $per['end'], 'income' )
+							- RS_Ledger::sum( $b['name'], $per['start'], $per['end'], 'payment' ),
+							2
+						);
+						?>
+						<td class="num"><?php echo esc_html( $cur( $widget_remain ) ); ?></td>
 					</tr>
 					<?php endforeach; ?>
 				<?php endif; ?>
@@ -1609,6 +2614,10 @@ final class RS_Admin_UI {
 			<p style="margin:8px 0 0;">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SLUG_DASH ) ); ?>">
 					<?php esc_html_e( 'Πλήρες dashboard →', 'revenue-splitter' ); ?>
+				</a>
+				<span class="rs-muted"> · </span>
+				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer" style="font-weight:600;">
+					<?php esc_html_e( '☕ Ko-fi', 'revenue-splitter' ); ?>
 				</a>
 			</p>
 		</div>
@@ -1653,7 +2662,12 @@ final class RS_Admin_UI {
 		return (string) $product->get_stock_quantity();
 	}
 
-	/** Footer με clickable cross-links (v1.3.0). */
+	/**
+	 * Footer με clickable cross-links (v1.3.0) + Ko-fi support CTA.
+	 *
+	 * Ko-fi: μωβ pill (inline styled — δεν εξαρτάται από admin.css),
+	 * ορατό σε κάθε admin του site που εγκαθιστά το plugin.
+	 */
 	private static function footer(): void {
 		?>
 		<hr style="margin-top:24px;" />
@@ -1670,6 +2684,12 @@ final class RS_Admin_UI {
 			<span class="rs-muted"> · </span>
 			<?php esc_html_e( 'More plugins at', 'revenue-splitter' ); ?>
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
+		</p>
+		<p class="rs-footer" style="margin-top:10px;">
+			<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
+				style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
+				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
+			</a>
 		</p>
 		<?php
 	}

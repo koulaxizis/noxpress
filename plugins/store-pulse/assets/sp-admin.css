@@ -1,0 +1,179 @@
+/**
+ * Store Pulse — scoped admin styles (.sp-wrap).
+ * Ίδια παλέτα με το Revenue Splitter: #6d4aff primary, #101218 bg.
+ * Καμία επικάλυψη με WordPress ή άλλα plugins — όλα με πρόθεμα sp-.
+ */
+
+.sp-wrap { max-width: 1200px; }
+
+/* ---------- Header ---------- */
+
+.sp-wrap .sp-h1 { margin-bottom: 16px; }
+.sp-wrap .sp-h2 {
+	margin: 28px 0 10px;
+	padding-bottom: 6px;
+	border-bottom: 1px solid #23233a;
+	font-size: 15px;
+}
+
+/* ---------- Grids & cards ---------- */
+
+.sp-wrap .sp-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 14px;
+	margin: 14px 0;
+}
+.sp-wrap .sp-grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.sp-wrap .sp-grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+.sp-wrap .sp-card {
+	background: #14141f;
+	border: 1px solid #262640;
+	border-left: 4px solid #6d4aff;
+	border-radius: 8px;
+	padding: 14px 16px;
+	box-sizing: border-box;
+}
+
+.sp-wrap .sp-card.sp-warn { border-left-color: #f0b849; }
+.sp-wrap .sp-card.sp-alert { border-left-color: #d63638; }
+.sp-wrap .sp-card.sp-info { border-left-color: #72aee6; }
+
+.sp-wrap .sp-card-label {
+	color: #a0a0c0;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin-bottom: 6px;
+}
+
+.sp-wrap .sp-card-value {
+	color: #ffffff;
+	font-size: 26px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.sp-wrap .sp-card-sub {
+	color: #78789a;
+	font-size: 12px;
+	margin-top: 8px;
+}
+
+/* ---------- Money placeholder ---------- */
+
+.sp-wrap .sp-money-placeholder {
+	background: #14141f;
+	border: 1px dashed #3a3a5c;
+	border-radius: 8px;
+	padding: 22px 24px;
+	margin: 18px 0;
+	text-align: center;
+	color: #a0a0c0;
+}
+.sp-wrap .sp-money-placeholder .sp-money-title {
+	color: #6d4aff;
+	font-weight: 600;
+	font-size: 14px;
+	margin: 0 0 6px;
+}
+
+.sp-wrap .sp-note {
+	color: #78789a;
+	font-size: 12px;
+	margin: 6px 0 0;
+}
+
+.sp-wrap .sp-empty {
+	color: #78789a;
+	font-style: italic;
+	margin: 8px 0 16px;
+}
+
+/* ---------- Tables ---------- */
+
+.sp-wrap .sp-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 10px 0 20px;
+	background: #14141f;
+	border: 1px solid #262640;
+	border-radius: 8px;
+	overflow: hidden;
+}
+.sp-wrap .sp-table th,
+.sp-wrap .sp-table td {
+	padding: 10px 14px;
+	text-align: left;
+	border-bottom: 1px solid #22223a;
+	color: #dcdcf0;
+	font-size: 13px;
+}
+.sp-wrap .sp-table thead th {
+	background: #1b1b2e;
+	color: #a0a0c0;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.sp-wrap .sp-table tbody tr:hover { background: #1b1b2e; }
+.sp-wrap .sp-table tfoot th {
+	background: #1b1b2e;
+	border-top: 1px solid #3a3a5c;
+	color: #ffffff;
+}
+.sp-wrap .sp-num { text-align: right; font-variant-numeric: tabular-nums; }
+.sp-wrap .sp-table a { color: #8f78ff; text-decoration: none; }
+.sp-wrap .sp-table a:hover { text-decoration: underline; }
+
+.sp-wrap .sp-stock-low { color: #f0b849; font-weight: 600; }
+.sp-wrap .sp-stock-out { color: #ff6b6b; font-weight: 600; }
+
+/* ---------- Widget (WordPress dashboard) ---------- */
+
+.sp-widget ul.sp-widget-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sp-widget .sp-wrow {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 12px;
+	padding: 7px 0;
+	border-bottom: 1px solid #23233a;
+}
+.sp-widget .sp-wrow:last-child { border-bottom: none; }
+.sp-widget .sp-wl { color: #a0a0c0; font-size: 13px; }
+.sp-widget .sp-wv {
+	color: #ffffff;
+	font-size: 17px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+.sp-widget .sp-accent .sp-wv { color: #f0b849; }
+.sp-widget .sp-widget-footer {
+	margin: 12px 0 0;
+	padding-top: 10px;
+	border-top: 1px solid #23233a;
+	font-size: 12px;
+}
+
+/* ---------- Footer ---------- */
+
+.sp-wrap .sp-hr {
+	border: 0;
+	border-top: 1px solid #23233a;
+	margin: 32px 0 14px;
+}
+.sp-wrap .sp-footer {
+	color: #78789a;
+	font-size: 12px;
+	text-align: center;
+	line-height: 1.8;
+	margin-bottom: 8px;
+}
+.sp-wrap .sp-footer a { color: #8f78ff; text-decoration: none; }
+.sp-wrap .sp-footer a:hover { text-decoration: underline; }
