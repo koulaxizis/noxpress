@@ -70,6 +70,7 @@ defined( 'ABSPATH' ) || exit;
 final class RS_Admin_UI {
 
 	const CAP       = 'manage_woocommerce';
+	const SLUG_MENU = 'noxpress';            // Top-level parent (κοινό με το Store Pulse)
 	const SLUG_DASH = 'revenue-splitter-dashboard';
 	const SLUG_SET  = 'revenue-splitter-settings';
 
@@ -109,6 +110,8 @@ final class RS_Admin_UI {
 		'rs_beneficiary_colors',
 		'rs_channels',
 		'rs_default_channel', // v1.3.8 (#7 στάδιο 3).
+		'rs_beneficiary_emails', // vNext (#2): emails δικαιούχων.
+		'rs_email_reports',     // vNext (#1): opt-in μηνιαίας αναφοράς.
 	);
 
 	public static function init(): void {
@@ -129,31 +132,113 @@ final class RS_Admin_UI {
 	public static function admin_menu(): void {
 
 		add_menu_page(
-			__( 'Revenue Splitter — Dashboard', 'revenue-splitter' ),
-			__( 'Revenue Splitter', 'revenue-splitter' ),
+			__( 'Noxpress', 'revenue-splitter' ),         // Title του top-level
+			__( 'Noxpress', 'revenue-splitter' ),         // Menu label
 			self::CAP,
-			self::SLUG_DASH,
-			array( __CLASS__, 'render_dashboard' ),
+			self::SLUG_MENU,                             // Parent slug = 'noxpress'
+			array( __CLASS__, 'render_noxpress_home' ),
 			'dashicons-chart-pie'
 		);
 
 		add_submenu_page(
-			self::SLUG_DASH,
+			self::SLUG_MENU,
 			__( 'Revenue Splitter — Γρήγορη ματιά', 'revenue-splitter' ),
-			__( 'Dashboard', 'revenue-splitter' ),
+			__( 'Revenue Splitter', 'revenue-splitter' ),
 			self::CAP,
 			self::SLUG_DASH,
 			array( __CLASS__, 'render_dashboard' )
 		);
 
 		add_submenu_page(
-			self::SLUG_DASH,
+			self::SLUG_MENU,
 			__( 'Revenue Splitter — Ρυθμίσεις', 'revenue-splitter' ),
-			__( 'Ρυθμίσεις', 'revenue-splitter' ),
+			__( 'RS Ρυθμίσεις', 'revenue-splitter' ),
 			self::CAP,
 			self::SLUG_SET,
 			array( __CLASS__, 'render_settings' )
 		);
+
+		// Portal Settings (frontend作者 portal)
+		if ( function_exists( 'RS_Portal' ) ) {
+			add_submenu_page(
+				self::SLUG_MENU,
+				__( 'Noxpress — Portal', 'revenue-splitter' ),
+				__( 'Portal', 'revenue-splitter' ),
+				self::CAP,
+				'noxpress-portal',
+				array( 'RS_Portal', 'render_index' )
+			);
+		}
+	}
+	
+		/**
+	 * Landing page του κοινού top-level «Noxpress» menu.
+	 *
+	 * ΔΕΝ είναι το RS dashboard — είναι ο κεντρικός πίνακας του brand,
+	 * με shortcuts σε όλα τα Noxpress plugins που είναι ενεργά.
+	 */
+	public static function render_noxpress_home(): void {
+
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
+		}
+
+		$cards = array(
+			array(
+				'title' => __( 'Revenue Splitter', 'revenue-splitter' ),
+				'desc'  => __( 'Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal.', 'revenue-splitter' ),
+				'url'   => admin_url( 'admin.php?page=' . self::SLUG_DASH ),
+			),
+			array(
+				'title' => __( 'RS Ρυθμίσεις', 'revenue-splitter' ),
+				'desc'  => __( 'Ρυθμίσεις του Revenue Splitter.', 'revenue-splitter' ),
+				'url'   => admin_url( 'admin.php?page=' . self::SLUG_SET ),
+			),
+		);
+
+		// Portal — διαχείριση κλειδιών δικαιούχων (μόνο αν το module φορτώνει).
+		if ( class_exists( 'RS_Portal' ) ) {
+			$cards[] = array(
+				'title' => __( 'Portal', 'revenue-splitter' ),
+				'desc'  => __( 'Διαχείριση κλειδιών πρόσβασης των δικαιούχων στο portal.', 'revenue-splitter' ),
+				'url'   => admin_url( 'admin.php?page=' . RS_Portal::SLUG_ADMIN ),
+			);
+		}
+
+		// Store Pulse — μόνο αν είναι ενεργό (η κλάση φορτώνει μαζί του).
+		if ( class_exists( 'SP_Admin' ) ) {
+			$cards[] = array(
+				'title' => __( 'Store Pulse', 'revenue-splitter' ),
+				'desc'  => __( 'Σύντομη εικόνα καταστήματος: παραγγελίες, στοκ, έσοδα.', 'revenue-splitter' ),
+				'url'   => admin_url( 'admin.php?page=sp-dashboard' ),
+			);
+			$cards[] = array(
+				'title' => __( 'SP Ρυθμίσεις', 'revenue-splitter' ),
+				'desc'  => __( 'Ρυθμίσεις του Store Pulse.', 'revenue-splitter' ),
+				'url'   => admin_url( 'admin.php?page=sp-settings' ),
+			);
+		}
+
+		?>
+		<div class="wrap rs-wrap">
+
+			<h1><?php esc_html_e( 'Noxpress', 'revenue-splitter' ); ?></h1>
+			<p class="description"><?php esc_html_e( 'Το οικοσύστημα των plugins του καταστήματός σου. Διάλεξε πού θα πας:', 'revenue-splitter' ); ?></p>
+
+			<div class="rs-kpis">
+				<?php foreach ( $cards as $c ) : ?>
+					<div class="rs-kpi">
+						<a href="<?php echo esc_url( $c['url'] ); ?>" style="text-decoration:none;">
+							<strong><?php echo esc_html( $c['title'] ); ?></strong>
+						</a>
+						<span class="rs-kpi-label"><?php echo esc_html( $c['desc'] ); ?></span>
+					</div>
+				<?php endforeach; ?>
+			</div>
+
+			<?php self::footer(); ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -167,7 +252,13 @@ final class RS_Admin_UI {
 	 */
 	public static function assets( string $hook ): void {
 
-		$is_ours = ( false !== strpos( $hook, 'revenue-splitter' ) );
+		// Το top-level «Noxpress» landing (hook: toplevel_page_noxpress)
+		// δεν περιέχει το 'revenue-splitter' — χωρίς αυτόν τον έλεγχο
+		// η σελίδα φόρτωνε χωρίς CSS/JS (unstyled). Χρησιμοποιούμε
+		// ακριβές match ώστε να ΜΗΝ ταιριάζουν και οι σελίδες του
+		// Store Pulse (noxpress_page_sp-*) που έχουν δικό τους CSS.
+		$is_ours = ( false !== strpos( $hook, 'revenue-splitter' ) )
+			|| ( 'toplevel_page_noxpress' === $hook );
 		$product = ( 'post.php' === $hook || 'post-new.php' === $hook );
 		$is_dash = ( 'index.php' === $hook ); // v1.3.2 (#1): dashboard widget.
 
@@ -913,6 +1004,17 @@ final class RS_Admin_UI {
 		}
 		$color_people = array_keys( $color_people );
 
+		// vNext (#2): emails δικαιούχων — ίδιο σύνολο ονομάτων με τα
+		// χρώματα (collect_names ∪ όσοι έχουν ήδη αποθηκευμένο email).
+		$email_people = array();
+		foreach ( RS_Beneficiaries::collect_names() as $n ) {
+			$email_people[ $n ] = true;
+		}
+		foreach ( array_keys( RS_Emails::get_email_map() ) as $n ) {
+			$email_people[ $n ] = true;
+		}
+		$email_people = array_keys( $email_people );
+
 		// Global defaults σε μορφή «Όνομα|Ποσοστό» για το textarea
 		// (το option ΜΕΝΕΙ JSON — το textarea είναι μόνο UI notation).
 		$defaults     = RS_Beneficiaries::get_defaults();
@@ -985,6 +1087,38 @@ final class RS_Admin_UI {
 					<input type="hidden" name="rs_ben_color_name[<?php echo esc_attr( md5( $cp ) ); ?>]" value="<?php echo esc_attr( $cp ); ?>" />
 				<?php endforeach; ?>
 
+				<?php // ---------- vNext (#1/#2): Emails δικαιούχων & μηνιαία αναφορά ---------- ?>
+				<h2 class="rs-h2"><?php esc_html_e( 'Emails δικαιούχων & μηνιαία αναφορά', 'revenue-splitter' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Το email χρησιμοποιείται για την αποστολή νέου κλειδιού portal (ροή «Ξέχασα το κλειδί») και για τη μηνιαία αναφορά πωλήσεων (στέλνεται τις πρώτες μέρες κάθε μήνα για τον προηγούμενο). Ο συγγραφέας μπορεί να ενεργοποιήσει/απενεργοποιήσει την αναφορά και μόνος του από το portal του.', 'revenue-splitter' ); ?></p>
+				<table class="rs-color-table">
+					<tbody>
+						<?php if ( empty( $email_people ) ) : ?>
+							<tr><td class="rs-empty"><?php esc_html_e( 'Κανείς δεν έχει μερίδιο στην περίοδο.', 'revenue-splitter' ); ?></td></tr>
+						<?php else : ?>
+							<?php foreach ( $email_people as $ep ) : ?>
+							<tr>
+								<td><strong><?php echo esc_html( $ep ); ?></strong></td>
+								<td>
+									<input type="email" name="rs_ben_email[<?php echo esc_attr( md5( $ep ) ); ?>]"
+										value="<?php echo esc_attr( RS_Emails::get_email( $ep ) ); ?>"
+										placeholder="name@example.com" class="regular-text" />
+								</td>
+								<td>
+									<label>
+										<input type="checkbox" name="rs_ben_report[<?php echo esc_attr( md5( $ep ) ); ?>]" value="1" <?php checked( RS_Emails::is_opted_in( $ep ) ); ?> />
+										<?php esc_html_e( 'Μηνιαία αναφορά', 'revenue-splitter' ); ?>
+									</label>
+								</td>
+							</tr>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</tbody>
+				</table>
+				<?php // Hidden mirror: ίδιο anti-attribute-injection pattern με τα χρώματα. ?>
+				<?php foreach ( $email_people as $ep ) : ?>
+					<input type="hidden" name="rs_ben_email_name[<?php echo esc_attr( md5( $ep ) ); ?>]" value="<?php echo esc_attr( $ep ); ?>" />
+				<?php endforeach; ?>
+
 				<h2 class="rs-h2"><?php esc_html_e( 'Έναρξη καταγραφής πωλήσεων', 'revenue-splitter' ); ?></h2>
 				<p>
 					<input type="date" name="rs_sales_since" value="<?php echo esc_attr( $sales_since ); ?>" />
@@ -1020,6 +1154,27 @@ final class RS_Admin_UI {
 				</p>
 			</form>
 
+			<?php // ---------- vNext (#4): Δοκιμαστικό email ---------- ?>
+			<h2 class="rs-h2"><?php esc_html_e( 'Δοκιμή αποστολής email', 'revenue-splitter' ); ?></h2>
+			<form method="post" style="display:inline;">
+				<?php wp_nonce_field( 'rs_test_email', 'rs_test_email_nonce' ); ?>
+				<input type="email" name="rs_test_to" class="regular-text" list="rs-test-emails"
+					placeholder="name@example.com"
+					value="<?php echo esc_attr( wp_get_current_user()->user_email ); ?>" />
+				<?php // Quick-select: τα αποθηκευμένα emails δικαιούχων ως datalist προτάσεις. ?>
+				<datalist id="rs-test-emails">
+					<?php foreach ( RS_Emails::get_email_map() as $test_mail ) : ?>
+						<option value="<?php echo esc_attr( $test_mail ); ?>"></option>
+					<?php endforeach; ?>
+				</datalist>
+				<button type="submit" name="rs_test_email_send" value="1" class="button">
+					<?php esc_html_e( 'Αποστολή δοκιμαστικού email', 'revenue-splitter' ); ?>
+				</button>
+				<p class="description" style="margin-top:6px;">
+					<?php esc_html_e( 'Στέλνει ένα απλό δοκιμαστικό email για να επιβεβαιώσεις ότι η αποστολή (και άρα η μηνιαία αναφορά) φτάνει σε παραλήπτη.', 'revenue-splitter' ); ?>
+				</p>
+			</form>
+
 			<h2 class="rs-h2"><?php esc_html_e( 'Backup & Επαναφορά', 'revenue-splitter' ); ?></h2>
 			<form method="post" enctype="multipart/form-data" style="display:inline; margin-right:10px;">
 				<?php wp_nonce_field( 'rs_backup', 'rs_backup_nonce' ); ?>
@@ -1032,7 +1187,7 @@ final class RS_Admin_UI {
 				<?php esc_html_e( 'Εξαγωγή state (JSON)', 'revenue-splitter' ); ?>
 			</a>
 			<p class="description" style="margin-top:8px;">
-				<?php esc_html_e( 'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, χρώματα δικαιούχων, κανάλια πώλησης, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.', 'revenue-splitter' ); ?>
+				<?php esc_html_e( 'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, χρώματα δικαιούχων, emails δικαιούχων, opt-in μηνιαίας αναφοράς, κανάλια πώλησης, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.', 'revenue-splitter' ); ?>
 			</p>
 
 			<?php RS_Ledger::render_admin(); ?>
@@ -1057,6 +1212,24 @@ final class RS_Admin_UI {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only slug check.
 		if ( ! isset( $_GET['page'] ) || self::SLUG_SET !== $_GET['page'] ) {
 			return;
+		}
+
+		// ---------- vNext (#4): Δοκιμαστικό email (ξεχωριστό POST + PRG) ----------
+		if ( isset( $_POST['rs_test_email_send'] ) ) {
+
+			if ( ! isset( $_POST['rs_test_email_nonce'] )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_test_email_nonce'] ) ), 'rs_test_email' )
+				|| ! current_user_can( self::CAP ) ) {
+				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
+			}
+
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- is_email validation παρακάτω.
+			$to   = isset( $_POST['rs_test_to'] ) ? sanitize_email( wp_unslash( $_POST['rs_test_to'] ) ) : '';
+			$note = self::send_test_email( $to );
+
+			set_transient( 'rs_aui_msg_' . get_current_user_id(), array( $note ), 60 );
+			wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG_SET ) );
+			exit;
 		}
 
 		if ( ! isset( $_POST['rs_settings_nonce'] ) ) {
@@ -1154,6 +1327,71 @@ final class RS_Admin_UI {
 			delete_option( self::OPT_COLORS );
 		} else {
 			update_option( self::OPT_COLORS, wp_json_encode( $color_map, JSON_UNESCAPED_UNICODE ) );
+		}
+
+		// ---------- vNext (#1/#2): Emails δικαιούχων + opt-in μηνιαίας ---------- //
+		// POST σχήμα: rs_ben_email[md5(όνομα)] => email
+		//             rs_ben_email_name[md5(όνομα)] => όνομα (hidden mirror)
+		//             rs_ben_report[md5(όνομα)] => '1' (checkbox opt-in)
+		// Ίδιο md5-key coupling με τα χρώματα — το όνομα ΔΕΝ εμπιστεύεται
+		// ποτέ από name attribute, μόνο από το hidden mirror.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- arrays validated παρακάτω.
+		$emails_in  = isset( $_POST['rs_ben_email'] ) && is_array( $_POST['rs_ben_email'] ) ? wp_unslash( $_POST['rs_ben_email'] ) : array();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- arrays validated παρακάτω.
+		$email_names_in = isset( $_POST['rs_ben_email_name'] ) && is_array( $_POST['rs_ben_email_name'] ) ? wp_unslash( $_POST['rs_ben_email_name'] ) : array();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- arrays validated παρακάτω.
+		$reports_in  = isset( $_POST['rs_ben_report'] ) && is_array( $_POST['rs_ben_report'] ) ? wp_unslash( $_POST['rs_ben_report'] ) : array();
+
+		$email_map = array();
+		$bad_email = false;
+
+		foreach ( $email_names_in as $hash => $name ) {
+			$name = sanitize_text_field( (string) $name );
+			$mail = isset( $emails_in[ $hash ] ) ? strtolower( trim( (string) $emails_in[ $hash ] ) ) : '';
+
+			if ( '' === $name || '' === $mail ) {
+				continue; // Κενό όνομα/email — παραλείπεται.
+			}
+
+			// STRICT: is_email μόνο — άκυρο => notice, οι υπόλοιποι σώζονται.
+			if ( false === is_email( $mail ) ) {
+				$bad_email = true;
+				continue;
+			}
+
+			$email_map[ $name ] = $mail;
+		}
+
+		if ( $bad_email ) {
+			$notices[] = array(
+				'type' => 'error',
+				'text' => __( 'Μη έγκυρο email δικαιούχου (τα υπόλοιπα αποθηκεύτηκαν κανονικά).', 'revenue-splitter' ),
+			);
+		}
+
+		if ( empty( $email_map ) ) {
+			delete_option( RS_Emails::OPT_EMAILS );
+		} else {
+			update_option( RS_Emails::OPT_EMAILS, wp_json_encode( $email_map, JSON_UNESCAPED_UNICODE ) );
+		}
+
+		// Opt-in: ΜΟΝΟ ονόματα ΜΕ έγκυρο email στο (νέο) map — ενιαία
+		// άμυνα με το RS_Emails::set_optin του portal.
+		$report_map = array();
+		foreach ( $email_names_in as $hash => $name ) {
+			$name = sanitize_text_field( (string) $name );
+			if ( '' === $name ) {
+				continue;
+			}
+			if ( isset( $reports_in[ $hash ] ) && isset( $email_map[ $name ] ) ) {
+				$report_map[ $name ] = 1;
+			}
+		}
+
+		if ( empty( $report_map ) ) {
+			delete_option( RS_Emails::OPT_REPORTS );
+		} else {
+			update_option( RS_Emails::OPT_REPORTS, wp_json_encode( $report_map, JSON_UNESCAPED_UNICODE ) );
 		}
 
 		// ---------- v1.3.8 (#7): Κανάλια πώλησης ----------
@@ -1294,6 +1532,43 @@ final class RS_Admin_UI {
 		}
 
 		return $notices;
+	}
+
+	/**
+	 * vNext (#4): Δοκιμαστικό email (PRG handler → RS_Emails::send_test()).
+	 *
+	 * Thin delegator: ΜΟΝΟ validation του παραλήπτη + formatting του
+	 * notice. Το ίδιο το email (σύνολο branding, headers, dispatch)
+	 * ζει στο RS_Emails — ενιαία οδός με monthly/key-reset emails.
+	 *
+	 * @return array notice {type, text}
+	 */
+	private static function send_test_email( string $to ): array {
+
+		if ( '' === $to || false === is_email( $to ) ) {
+			return array(
+				'type' => 'error',
+				'text' => __( 'Μη έγκυρη διεύθυνση παραλήπτη για το δοκιμαστικό email.', 'revenue-splitter' ),
+			);
+		}
+
+		$sent = RS_Emails::send_test( $to );
+
+		if ( $sent ) {
+			return array(
+				'type' => 'success',
+				'text' => sprintf(
+					/* translators: %s: παραλήπτης */
+					__( 'Το δοκιμαστικό email στάλθηκε στο %s.', 'revenue-splitter' ),
+					$to
+				),
+			);
+		}
+
+		return array(
+			'type' => 'error',
+			'text' => __( 'Η αποστολή απέτυχε — έλεγξε τις ρυθμίσεις email του WordPress (π.χ. SMTP plugin ή PHP mail).', 'revenue-splitter' ),
+		);
 	}
 
 	/**
@@ -1701,6 +1976,78 @@ final class RS_Admin_UI {
 				}
 			} else {
 				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob χρωμάτων δικαιούχων (απαιτούνται #RRGGBB τιμές).', 'revenue-splitter' ) );
+			}
+		}
+
+		// ---- vNext (#2): Emails δικαιούχων (STRICT) ----
+		if ( isset( $opts['rs_beneficiary_emails'] ) ) {
+
+			$raw_e = $opts['rs_beneficiary_emails'];
+
+			// Κενό = σκόπιμο σβήσιμο.
+			if ( '' === $raw_e ) {
+				delete_option( RS_Emails::OPT_EMAILS );
+			} elseif ( is_string( $raw_e ) ) {
+				$decoded = json_decode( $raw_e, true );
+
+				$valid = is_array( $decoded );
+				if ( $valid ) {
+					foreach ( $decoded as $ename => $email ) {
+						if ( ! is_string( $ename ) || '' === $ename
+							|| ! is_string( $email ) || false === is_email( $email ) ) {
+							$valid = false;
+							break;
+						}
+					}
+				}
+
+				if ( $valid ) {
+					// Ίδιο normalization με το save_settings(): lowercase.
+					$norm = array();
+					foreach ( $decoded as $ename => $email ) {
+						$norm[ $ename ] = strtolower( $email );
+					}
+					update_option( RS_Emails::OPT_EMAILS, wp_json_encode( $norm, JSON_UNESCAPED_UNICODE ) );
+				} else {
+					$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob emails δικαιούχων.', 'revenue-splitter' ) );
+				}
+			} else {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob emails δικαιούχων.', 'revenue-splitter' ) );
+			}
+		}
+
+		// ---- vNext (#1): Opt-in μηνιαίας αναφοράς (STRICT) ----
+		if ( isset( $opts['rs_email_reports'] ) ) {
+
+			$raw_r = $opts['rs_email_reports'];
+
+			// Κενό = σκόπιμο σβήσιμο.
+			if ( '' === $raw_r ) {
+				delete_option( RS_Emails::OPT_REPORTS );
+			} elseif ( is_string( $raw_r ) ) {
+				$decoded = json_decode( $raw_r, true );
+
+				$valid = is_array( $decoded );
+				if ( $valid ) {
+					foreach ( $decoded as $rname => $on ) {
+						if ( ! is_string( $rname ) || '' === $rname || 1 !== (int) $on ) {
+							$valid = false;
+							break;
+						}
+					}
+				}
+
+				if ( $valid ) {
+					$norm = array();
+					foreach ( $decoded as $rname => $on ) {
+						$norm[ $rname ] = 1;
+					}
+					update_option( RS_Emails::OPT_REPORTS, wp_json_encode( $norm, JSON_UNESCAPED_UNICODE ) );
+				} else {
+					$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob opt-in μηνιαίας αναφοράς.', 'revenue-splitter' ) );
+				}
+			} else {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob opt-in μηνιαίας αναφοράς.', 'revenue-splitter' ) );
 			}
 		}
 
@@ -2613,7 +2960,7 @@ final class RS_Admin_UI {
 
 			<p style="margin:8px 0 0;">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SLUG_DASH ) ); ?>">
-					<?php esc_html_e( 'Πλήρες dashboard →', 'revenue-splitter' ); ?>
+					<?php esc_html_e( '🤓 Dashboard', 'revenue-splitter' ); ?>
 				</a>
 				<span class="rs-muted"> · </span>
 				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer" style="font-weight:600;">

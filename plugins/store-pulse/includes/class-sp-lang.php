@@ -132,9 +132,9 @@ final class SP_Lang {
 		'Store Pulse — Dashboard'                          => 'Store Pulse — Dashboard',
 		'Store Pulse — Ρυθμίσεις'                          => 'Store Pulse — Settings',
 		'Store Pulse — Γρήγορη ματιά'                      => 'Store Pulse — Quick glance',
-		'Store Pulse:'                                     => 'Store Pulse:',
 		'Dashboard'                                        => 'Dashboard',
 		'Ρυθμίσεις'                                        => 'Settings',
+		'SP Ρυθμίσεις'                                     => 'SP Settings',
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.' => 'You do not have permission to access this page.',
 		'Πλήρες dashboard →'                               => 'Full dashboard →',
 		'Το Store Pulse απαιτεί WooCommerce για να λειτουργήσει.' => 'Store Pulse requires WooCommerce to function.',
@@ -145,11 +145,11 @@ final class SP_Lang {
 		'Τελευταίες 7 ημέρες'                              => 'Last 7 days',
 		'Τελευταίες 15 ημέρες'                             => 'Last 15 days',
 		'Τον τελευταίο μήνα'                               => 'Last month',
-		'Εφαρμογή'                                         => 'Apply',
 
 		// --- Κάρτες (dashboards + widget) ---
 		'Εκκρεμείς παραγγελίες'                            => 'Pending orders',
 		'Εξυπηρετημένες παραγγελίες'                       => 'Completed orders',
+		'Εξυπηρετημένες παραγγελίες (%s)'                  => 'Completed orders (%s)',
 		'Επιστροφές'                                       => 'Refunds',
 		'Ακυρωμένες'                                       => 'Cancelled',
 		'Χαμηλό στοκ'                                      => 'Low stock',
@@ -159,61 +159,47 @@ final class SP_Lang {
 		'Παλιές εκκρεμείς (>7 ημέρες)'                     => 'Old pending (>7 days)',
 		'Πελάτες (περίοδος)'                               => 'Customers (period)',
 		'Μέση αξία παραγγελίας'                            => 'Average order value',
+		'Καλύτερες πωλήσεις (%s)'                          => 'Best sellers (%s)',
 		'Καλύτερες πωλήσεις (περίοδος)'                    => 'Best sellers (period)',
-		'Παραγγελίες'                                      => 'Orders',
-		'Πελάτες'                                          => 'Customers',
-
+ 
 		// --- Money cards (με Revenue Splitter) ---
 		'Κέρδος εκδότη (περίοδος)'                         => 'Publisher profit (period)',
-		'Καθαρό (μετά κρατήσεων)'                          => 'Net (after deductions)',
-		'Οφειλές προς άλλους'                              => 'Owed to others',
-		'Οφειλές ανά δικαιούχο'                            => 'Owed per beneficiary',
+		'Καθαρό'                                           => 'Net',
+		'Σύνολο'                                           => 'Total',
+		'ΣΥΝΟΛΑ'                                           => 'TOTALS',
+		'Ποσότητα'                                         => 'Quantity',
 		'Δικαιούχος'                                       => 'Beneficiary',
 		'Ποσό'                                             => 'Amount',
 		'Το μεταφορικό ΔΕΝ υπολογίζεται στα ποσά.'         => 'Shipping is NOT included in the amounts.',
 		'Καμία οφειλή στην περίοδο.'                       => 'Nothing owed in this period.',
-		'Καμία οικονομική κίνηση στην περίοδο.'            => 'No money movement in this period.',
 		'Δεν έχεις επιλέξει εκδότη — πήγαινε στις Ρυθμίσεις.' => 'You have not picked a publisher — go to Settings.',
 		'Ο εκδότης δεν είναι γνωστός δικαιούχος του Revenue Splitter.' => 'The publisher is not a known Revenue Splitter beneficiary.',
 
 		// --- Placeholder χωρίς Revenue Splitter ---
 		'Χρειάζεται το Revenue Splitter'                   => 'Requires Revenue Splitter',
-		'Τα χρηματικά μεγέθη χρειάζονται το Revenue Splitter. Κάντε ενεργό και τα δύο plugins για εδώ.' => 'The money figures require Revenue Splitter. Activate both plugins to see this section.',
-		'Άνοιγμα Revenue Splitter →'                       => 'Open Revenue Splitter →',
+		'Τα χρηματικά μεγέθη χρειάζονται το Revenue Splitter. Κάνε ενεργό και τα δύο plugins για εδώ.' => 'The money figures require Revenue Splitter. Activate both plugins to see this section.',
 
 		// --- Πίνακες / κενά μεγέθη ---
 		'Προϊόν'                                           => 'Product',
 		'Τεμ.'                                             => 'Qty',
-		'Καθαρό'                                           => 'Net',
-		'Ποσό'                                             => 'Amount',
-		'Σύνολο'                                           => 'Total',
-		'ΣΥΝΟΛΑ'                                           => 'TOTALS',
-		'Σύνολο'                                           => 'Total',
-		'Ποσότητα'                                         => 'Quantity',
 		'Στοκ'                                             => 'Stock',
 		'Καμία πώληση στην περίοδο.'                       => 'No sales in this period.',
-		'Καμία εκκρεμότητα.'                               => 'Nothing pending.',
 		'Όλα τα προϊόντα έχουν επαρκές απόθεμα.'           => 'All products have sufficient stock.',
 		'Κανένα προϊόν χωρίς απόθεμα.'                     => 'No out-of-stock products.',
 		'Καμία επιστροφή στην περίοδο.'                    => 'No refunds in this period.',
 		'Καμία ακύρωση στην περίοδο.'                      => 'No cancellations in this period.',
-		'∞'                                                => '∞',
 
 		// --- Πίνακας top sellers ---
 		'Καλύτερες πωλήσεις'                               => 'Best sellers',
-		'Προϊόν'                                           => 'Product',
 		'Μικτό'                                            => 'Gross',
 		'Καθαρό (πριν καταμερισμό)'                        => 'Net (before split)',
 
 		// --- Πίνακας κερδών ---
-		'Καθαρό (πριν καταμερισμό)'                        => 'Net (before split)',
-		'Δικαιούχος'                                       => 'Beneficiary',
 		'Ποσοστό'                                          => 'Percent',
 		'Μερίδιο'                                          => 'Share',
 		'Περίοδος'                                         => 'Period',
 
 		// --- Ρυθμίσεις ---
-		'Ρυθμίσεις'                                        => 'Settings',
 		'Χρονικό διάστημα εξυπηρετημένων παραγγελιών'      => 'Completed-orders period',
 		'Χρονικό διάστημα κερδών & οφειλών'                => 'Profit & owed period',
 		'Χρονικό διάστημα επιστροφών'                      => 'Refunds period',
@@ -238,30 +224,11 @@ final class SP_Lang {
 		'Μη έγκυρο όριο στοκ (0+).'                        => 'Invalid stock threshold (0+).',
 		'Επίλεξε τουλάχιστον μία κάρτα για το Quick View.' => 'Pick at least one card for the Quick View.',
 
-		// --- Quick View widget ---
-		'Quick View'                                       => 'Quick View',
-		'Σήμερα'                                           => 'Today',
-		'Προβολή Quick View στις Ρυθμίσεις του Store Pulse.' => 'Configure Quick View in Store Pulse Settings.',
-		'Πηγαίνετε στις Ρυθμίσεις'                         => 'Go to Settings',
-
 		// --- Footer / branding ---
-		'Made with <3 by %s'                               => 'Made with <3 by %s',
 		'Part of glarolykoi.net'                           => 'Part of glarolykoi.net',
 		'More plugins at'                                  => 'More plugins at',
+		'Στήριξε την ανάπτυξη στο Ko-Fi'                   => 'Support development on Ko-Fi',
 
-		// --- Misc labels ---
-		'Περίοδος'                                         => 'Period',
-		'Εξαγωγή CSV'                                      => 'Export CSV',
-		'Ημ/νία: %1$s → %2$s'                              => 'Period: %1$s → %2$s',
-		'Τεμάχια'                                          => 'Units',
-		'Στο όριο τεμαχίων: %s'                            => 'Threshold units: %s',
-		'Σύγκριση με προηγούμενο διάστημα'                 => 'Compared to the previous period',
-		'Κέρδος (περίοδος)'                                => 'Profit (period)',
-		'Οφειλόμενο (περίοδος)'                            => 'Owed (period)',
 	);
 
-	/** Λεξικό Ελληνικά → English — consuming στη δομή 'msgid' => 'english'. */
-	private static $dict = array(
-		/* ...ίδιο περιεχόμενο με παραπάνω... */
-	);
 }

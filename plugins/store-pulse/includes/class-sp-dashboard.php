@@ -12,7 +12,7 @@
  *    + πίνακας ανά δικαιούχο | placeholder χωρίς Revenue Splitter]
  *   [Στοκ: πίνακες χαμηλού/εξαντλημένου]
  *   [Top sellers: πίνακας 10 καλύτερων]
- *   [Footer: Made with <3 / glarolykoi.net / noxpress.tech]
+ *   [Footer: Made with ❤ / glarolykoi.net / noxpress.tech]
  *
  * Render helpers: οι κάρτες είναι €-agnostic — η ίδια sp-card()
  * δεν ξέρει αν δείχνει κομμάτια ή ευρώ. Το formatting γίνεται από
@@ -114,7 +114,7 @@ final class SP_Dashboard {
 					'completed',
 					sprintf(
 						/* translators: %s: period label */
-						__( 'Εξυπηρετημένες παραγγελίες', 'store-pulse' ),
+						__( 'Εξυπηρετημένες παραγγελίες (%s)', 'store-pulse' ),
 						__( SP_Admin::PRESET_LABELS[ $p_orders ], 'store-pulse' )
 					),
 					number_format_i18n( $done['count'] ),
@@ -142,6 +142,7 @@ final class SP_Dashboard {
 					esc_html( SP_Lang::fmt_date( $r_cancel[0] ) ) . ' → '
 						. esc_html( SP_Lang::fmt_date( $r_cancel[1] ) )
 				);
+				?>
 			</div>
 
 			<!-- ================= Money section ================= -->
@@ -299,8 +300,8 @@ final class SP_Dashboard {
 				<?php
 				printf(
 					/* translators: %s: period label */
-					esc_html__( 'Καλύτερες πωλήσεις (%s)', 'store-pulse' ),
-					esc_html__( SP_Admin::PRESET_LABELS[ $p_orders ], 'store-pulse' )
+					__( 'Καλύτερες πωλήσεις (%s)', 'store-pulse' ),
+					__( SP_Admin::PRESET_LABELS[ $p_orders ], 'store-pulse' )
 				);
 				?>
 			</h2>
@@ -444,7 +445,13 @@ final class SP_Dashboard {
 		printf(
 			'<a href="%s">%s</a>',
 			esc_url( SP_Admin::dash_url() ),
-			esc_html__( 'Πλήρες dashboard →', 'store-pulse' )
+			esc_html__( '🤓 Dashboard', 'store-pulse' )
+		);
+		echo ' <span class="sp-muted"> · </span> ';
+		printf(
+			'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+			'https://ko-fi.com/koulaxizis',
+			esc_html__( '☕ Ko-fi', 'store-pulse' )
 		);
 		echo '</p>';
 
@@ -462,7 +469,7 @@ final class SP_Dashboard {
 			<?php
 			printf(
 				/* translators: %s: author name */
-				esc_html__( 'Made with <3 by %s', 'store-pulse' ),
+				'Made with <span aria-label="heart">❤</span> by %s',
 				'Christos Koulaxizis'
 			);
 			?>
@@ -481,6 +488,11 @@ final class SP_Dashboard {
 				)
 			);
 			?>
+		</p>
+		<p class="sp-footer">
+			<a class="sp-footer-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( 'Στήριξε την ανάπτυξη στο Ko-Fi', 'store-pulse' ); ?>
+			</a>
 		</p>
 		<?php
 	}

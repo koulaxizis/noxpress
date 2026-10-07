@@ -241,7 +241,8 @@ table.widefat.rs-table {
 }
 
 .rs-split-table input[type="text"],
-.rs-split-table input[type="number"] {
+.rs-split-table input[type="number"],
+.rs-split-table input[type="email"] {
 	background: #0f1115 !important;
 	border: 1px solid #34394a;
 	color: #f2f0fe !important;
@@ -256,9 +257,12 @@ table.widefat.rs-table {
 
 /* v1.3.1: στήλες του metabox markup (Part 2) —
    name / percent / delete-button. */
-.rs-col-name { width: 55%; }
-.rs-col-pct  { width: 30%; }
-.rs-col-del  { width: 36px; }
+/* vNext (#2): 4 στήλες πλέον — name / email / pct / delete.
+   Πίνακας max-width 640px: 30% + 45% + 20% + 36px. */
+.rs-col-name  { width: 30%; }
+.rs-col-email { width: 45%; }
+.rs-col-pct   { width: 20%; }
+.rs-col-del   { width: 36px; }
 
 .rs-split-table .rs-ben-name { width: 100%; }
 
@@ -390,7 +394,18 @@ table.widefat.rs-table {
 /* ---------- Dashboard widget (v1.3.1 markup — Part 5 render_widget) ---------- */
 
 
-.rs-widget { color: #eae8fa; }
+.rs-widget {
+	color: #eae8fa;
+	color-scheme: dark;
+	background: #101218;
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 16px 18px 14px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.rs-widget .rs-kpis { margin: 4px 0 10px; }
+.rs-widget .rs-table { margin: 10px 0 6px; }
 
 .rs-widget a { color: #beb1ff; text-decoration: none; }
 .rs-widget a:hover { color: #d4c9ff; text-decoration: underline; }
@@ -518,7 +533,9 @@ select.rs-prod-multi option:checked {
 
 /* ---- #1: Color pickers δικαιούχων (Ρυθμίσεις) ---- */
 
-.rs-color-table { max-width: 420px; }
+/* vNext (#2): 640px — χωράει το emails table (3 στήλες). Το colors
+   table απλά γίνεται λίγο πιο φαρδύ (αδιάφορο οπτικά). */
+.rs-color-table { max-width: 640px; }
 .rs-color-table td { padding: 6px 10px; }
 
 .rs-color-table input[type="color"] {
@@ -529,6 +546,24 @@ select.rs-prod-multi option:checked {
 	border-radius: 4px;
 	background: transparent;
 	cursor: pointer;
+}
+
+/* vNext (#2): το email input των Ρυθμίσεων — ίδιο dark hardness με
+   τα .rs-split-table inputs, γιατί το .regular-text του core τυπώνεται
+   light σε plugins overrides. */
+.rs-color-table input[type="email"] {
+	background: #0f1115 !important;
+	border: 1px solid #34394a !important;
+	color: #f2f0fe !important;
+	border-radius: 3px;
+	box-shadow: none;
+}
+
+.rs-color-table input[type="email"]::placeholder { color: #8b87a3 !important; }
+
+/* vNext (#1): checkbox «Μηνιαία αναφορά» — label inherit χρώμα. */
+.rs-color-table label {
+	color: #eae8fa;
 }
 
 

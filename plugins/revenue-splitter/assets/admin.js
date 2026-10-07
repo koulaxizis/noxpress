@@ -10,6 +10,9 @@
  * v1.3.1 markup: το φίλτρο περιόδου του dashboard είναι πλέον αμιγώς
  * server-side (select[name="rs_period"] + rs_start/rs_end σε GET submit).
  * Ο κώδικας δεν εκτελούνταν ποτέ — καθαρό orphan.
+ *
+ * vNext (#2): Το addRow() σβήνει ρητά το email field στο clone —
+ * οι νέες γραμμές δεν κληρονομούν το email άλλου δικαιούχου.
  */
 (function () {
 	'use strict';
@@ -56,11 +59,15 @@
 
 		var clone = firstRow.cloneNode(true);
 
-		// Καθαρά inputs στο clone.
+		// Καθαρά inputs στο clone — το email ΔΕΝ κληρονομείται.
 		var inputs = clone.querySelectorAll('input');
 		for (var i = 0; i < inputs.length; i++) {
 			inputs[i].value = '';
 		}
+
+		// Extra guard: σβήσιμο email field ειδικά (για περικοπή cases).
+		var emailField = clone.querySelector('input[type="email"][name="rs_ben_email[]"]');
+		if (emailField) emailField.value = '';
 
 		tbody.appendChild(clone);
 		recalcTable(table);

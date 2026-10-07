@@ -37,9 +37,9 @@ final class SP_Data {
 	const CACHE_TTL = 300; // 5 λεπτά — ίδιο ρυθμό με το RS.
 
 	/** Statuses που θεωρούμε «σε εκκρεμότητα». */
-	const PENDING_STATUSES = array( 'wc-processing', 'wc-on-hold' );
+	const PENDING_STATUSES = array( 'wc-pending', 'wc-processing', 'wc-on-hold' );
 
-	/** Εκκρεμείς > 7 ημέρες (π desde creation). */
+	/** Εκκρεμείς > 7 ημέρες (από τη δημιουργία τους). */
 	const PENDING_OLD_DAYS = 7;
 
 	/** Lookup lookback: πόσες ημέρες πριν το start του range ψάχνουμε */
@@ -56,7 +56,7 @@ final class SP_Data {
 		/*
 		 * Οποιαδήποτε αλλαγή στο Revenue Splitter (καταμερισμός, ΦΠΑ,
 		 * ledger, έναρξη καταγραφής) invalidates ΚΑΙ τα money cards
-		 * εδώ: το rs_invalidate_cache σήμ已成τoday bump το δικό μας
+		 * εδώ: το rs_invalidate_cache κάνει bump το δικό μας
 		 * sp_cache_version. Ακόμα κι αν ξεχάσουμε κάτι, το TTL (5')
 		 * είναι το fail-safe.
 		 */
@@ -79,7 +79,7 @@ final class SP_Data {
 	 *  - 'yesterday': μόνο χθες.
 	 *  - '7d'       : σήμερα + 6 προηγούμενες.
 	 *  - '15d'      : σήμερα + 14 προηγούμενες.
-	 *  - 'month'    :滚动 rolling 30 ημέρες (σήμερα + 29).
+	 *  - 'month'    : rolling 30 ημέρες (σήμερα + 29).
 	 *
 	 * @return array{0:string,1:string}|null null σε άγνωστο preset.
 	 */
@@ -125,7 +125,7 @@ final class SP_Data {
 
 	/**
 	 * Cached producer. Transient key = section + args + generation
-	 * markers. Τιμή siempre array (canonical, για το transient).
+	 * markers. Η τιμή είναι πάντα array (canonical, για το transient).
 	 *
 	 * @param string   $key      Σταθερό, ήδη-sanitized section key.
 	 * @param callable $producer () => array.
@@ -171,7 +171,12 @@ final class SP_Data {
 
 			return $from->format( 'Y-m-d H:i:s' ) . '...' . $to->format( 'Y-m-d H:i:s' );
 		} catch ( Exception $e ) {
-			// Defensive fallback — ποτέ fatal από άκυρα date inputs.
+			/*
+			 * Defensive fallback — ποτέ fatal από άκυρα date inputs.
+			 * (Το input έχει περάσει ήδη από validated 'Y-m-d', οπότε
+			 * σε πρακτική χρήση είναι unreachable — ο last resort
+			 * μας είναι τα plain local timestamps.)
+			 */
 			return $start . ' 00:00:00...' . $end . ' 23:59:59';
 		}
 	}
@@ -250,7 +255,7 @@ final class SP_Data {
 						->format( 'Y-m-d' );
 				} catch ( Exception $e ) {
 					// Δεν θα φτάσουμε ποτέ εδώ με validated dates —
-					// defensive: δεν γίνεται fatal, απλώς wides.
+					// defensive: δεν γίνεται fatal, απλώς κενό dataset.
 					return array(
 						'count'     => 0,
 						'gross'     => 0.0,
@@ -296,9 +301,34 @@ final class SP_Data {
 
 					$count++;
 
-					$paid   = (float) $order->get_total() + (float) $order->get_total_tax();
-					$paid  -= (float) $order->get_total_refunded();
-					$gross += $paid;
+					/*
+					 * Gross παραγγελίας = line items ΜΟΝΟ (item total +
+					 * item tax) — μεταφορικά/fees ΔΕΝ μετρώνται, ίδια βάση
+					 * με το Revenue Splitter και με το per-product gross
+					 * παρακάτω. Από το αποτέλεσμα αφαιρείται το refunded.
+					 */
+					$order_items_gross = 0.0;
+					foreach ( $order->get_items() as $item ) {
+						/** @var WC_Order_Item_Product $item */
+						if ( $item instanceof WC_Order_Item_Product ) {
+							$order_items_gross += (float) $item->get_total() + (float) $item->get_total_tax();
+						}
+					}
+
+					$refunded = (float) $order->get_total_refunded();
+					$paid     = $order_items_gross - $refunded;
+					$gross   += $paid;
+
+					/*
+					 * Refund ratio ανά παραγγελία: μοιράζουμε το refunded
+					 * ποσό αναλογικά στα line items, ώστε το per-product
+					 * gross να συμφωνεί με το order-level gross. Clamp στο
+					 * 1.0 — το refunded μπορεί να περιλαμβάνει και return
+					 * μεταφορικών από το Woo.
+					 */
+					$ratio = ( $order_items_gross > 0 && $refunded > 0 )
+						? min( 1.0, $refunded / $order_items_gross )
+						: 0.0;
 
 					$cid = (int) $order->get_customer_id();
 					if ( $cid > 0 ) {
@@ -324,7 +354,7 @@ final class SP_Data {
 							continue;
 						}
 
-						$line = (float) $item->get_total() + (float) $item->get_total_tax();
+						$line = ( (float) $item->get_total() + (float) $item->get_total_tax() ) * ( 1.0 - $ratio );
 
 						if ( ! isset( $per_prod[ $pid ] ) ) {
 							$per_prod[ $pid ] = array(
@@ -533,7 +563,7 @@ final class SP_Data {
 					}
 				}
 
-				// Τα.HttpStatus items sorted: low κατά stock ASC, out όπως έχει.
+				// Sorting: low κατά stock ASC, out όπως έχει.
 				usort(
 					$low['items'],
 					static function ( $a, $b ) {
@@ -544,6 +574,10 @@ final class SP_Data {
 				// Cap 50 — το panel δεν χρειάζεται τεράστιες λίστες.
 				$low['items'] = array_slice( $low['items'], 0, 50, true );
 				$out['items'] = array_slice( $out['items'], 0, 50, true );
+
+				// Το count να συμφωνεί πάντα με τον ορατό πίνακα (cap 50).
+				$low['count'] = count( $low['items'] );
+				$out['count'] = count( $out['items'] );
 
 				return array(
 					'low' => $low,
@@ -648,8 +682,8 @@ final class SP_Data {
 						'vat'   => (float) $report['totals']['vat'],
 						'net'   => (float) $report['totals']['net'],
 					),
-					'others'      => $others,
-					'others_sum'  => round( $others_sum, 2 ),
+					'others'          => $others,
+					'others_sum'      => round( $others_sum, 2 ),
 				);
 			}
 		);
@@ -701,7 +735,10 @@ final class SP_Data {
 
 		$v = get_option( 'sp_quick_cards', $allowed );
 
-		if ( ! is_array( $v ) || empty( $v ) ) {
+		// Λάθος τύπος (corrupted option) → default. Κενό array =
+		// συνειδητή επιλογή «καμία κάρτα» → μένει κενό (το widget
+		// κρύβεται από το SP_Admin::register_widget()).
+		if ( ! is_array( $v ) ) {
 			return $allowed;
 		}
 

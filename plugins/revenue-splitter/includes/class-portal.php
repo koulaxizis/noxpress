@@ -67,10 +67,13 @@ final class RS_Portal {
 
 	public static function admin_menu(): void {
 
+		// Parent = το κοινό top-level «Noxpress» menu (RS_Admin_UI::SLUG_MENU)
+		// και ΟΧΙ hardcoded 'revenue-splitter-dashboard' — μετά το restructure
+		// δεν υπάρχει πια top-level με αυτόν τον slug (το Portal έμεινε ορφανό).
 		add_submenu_page(
-			'revenue-splitter-dashboard',
+			RS_Admin_UI::SLUG_MENU,
 			__( 'Revenue Splitter — Portal', 'revenue-splitter' ),
-			__( 'Portal', 'revenue-splitter' ),
+			__( 'RS Portal', 'revenue-splitter' ),
 			RS_Admin_UI::CAP,
 			self::SLUG_ADMIN,
 			array( __CLASS__, 'render_admin' )
@@ -375,6 +378,68 @@ final class RS_Portal {
 			self::stream_csv( $who );
 		}
 
+		// ---------- vNext (#3): Forgot-key reset (email → νέο κλειδί) ----------
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce ελέγχεται αμέσως παρακάτω.
+		if ( isset( $_POST['rs_portal_reset'] ) ) {
+
+			if ( ! isset( $_POST['rs_portal_reset_nonce'] )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_portal_reset_nonce'] ) ), 'rs_portal_reset' ) ) {
+				return;
+			}
+
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- frontline input του reset form.
+			$email = isset( $_POST['rs_reset_email'] ) ? trim( (string) wp_unslash( $_POST['rs_reset_email'] ) ) : '';
+			$back  = self::portal_url();
+
+			// Rate limit ΠΡΙΝ από κάθε lookup/dispatch (email+IP —
+			// ίδιο 5/15' pattern με το login, πάνω στο email string).
+			if ( self::too_many_attempts( $email ) ) {
+				wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rl', $back ) );
+				exit;
+			}
+
+			// Reverse lookup: ΜΟΝΟ εδώ αποκαλύπτεται το όνομα. Το
+			// outcome προς τον χρήστη είναι ΠΑΝΤΑ generic (no email
+			// enumeration) — βλ. PATCH 2.2 μήνυμα 'rq'.
+			$who = RS_Emails::name_for_email( $email );
+
+			if ( '' !== $who ) {
+				$plain = self::rotate_key( $who );
+
+				if ( '' !== $plain ) {
+					RS_Emails::send_key( $who, $plain, $email );
+					RS_Emails::notify_admin_rotation( $who );
+				}
+				self::clear_attempts( $email );
+			} else {
+				self::record_attempt( $email );
+			}
+
+			wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rq', $back ) );
+			exit;
+		}
+
+		// ---------- vNext (#1): Toggle μηνιαίας αναφοράς (συνδεδεμένος δικαιούχος) ----------
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce ελέγχεται αμέσως παρακάτω.
+		if ( isset( $_POST['rs_portal_report_toggle'] ) ) {
+
+			if ( ! isset( $_POST['rs_portal_report_nonce'] )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_portal_report_nonce'] ) ), 'rs_portal_report' ) ) {
+				return;
+			}
+
+			$who = self::current();
+			if ( null === $who ) {
+				wp_safe_redirect( self::portal_url() );
+				exit;
+			}
+
+			RS_Emails::set_optin( $who, ! RS_Emails::is_opted_in( $who ) );
+
+			wp_safe_redirect( remove_query_arg( 'rs_pt_msg', self::portal_url() ) );
+			exit;
+		}
+
 		// ---------- Login POST (ΜΟΝΟ κλειδί — v1.3.5 #3) ----------
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce ελέγχεται παρακάτω.
 		if ( isset( $_POST['rs_portal_login'] ) ) {
@@ -646,6 +711,23 @@ final class RS_Portal {
 						<p class="rs-pt-error"><?php esc_html_e( 'Πολλές αποτυχημένες προσπάθειες — δοκίμασε ξανά σε 15 λεπτά.', 'revenue-splitter' ); ?></p>
 					<?php endif; ?>
 				</form>
+
+				<?php if ( 'rq' === $err ) : ?>
+					<p class="rs-pt-msg-ok"><?php esc_html_e( 'Αν το email υπάρχει στα αρχεία μας, θα λάβεις νέο κλειδί σε λίγα λεπτά.', 'revenue-splitter' ); ?></p>
+				<?php endif; ?>
+
+				<details class="rs-pt-forgot">
+					<summary><?php esc_html_e( 'Ξέχασες το κλειδί;', 'revenue-splitter' ); ?></summary>
+					<form method="post" class="rs-pt-reset">
+						<?php wp_nonce_field( 'rs_portal_reset', 'rs_portal_reset_nonce' ); ?>
+
+						<label for="rs-reset-email"><?php esc_html_e( 'Email', 'revenue-splitter' ); ?></label>
+						<input type="email" id="rs-reset-email" name="rs_reset_email" required
+							autocomplete="email" />
+
+						<button type="submit" name="rs_portal_reset" value="1"><?php esc_html_e( 'Στείλε νέο κλειδί', 'revenue-splitter' ); ?></button>
+					</form>
+				</details>
 			</div>
 		</div>
 		<?php
@@ -995,8 +1077,40 @@ final class RS_Portal {
 				<?php esc_html_e( 'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.', 'revenue-splitter' ); ?>
 			</p>
 
-			<p class="rs-pt-kofi">
-				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
+			<hr class="rs-pt-sep" />
+
+			<h3><?php esc_html_e( 'Μηνιαία αναφορά email', 'revenue-splitter' ); ?></h3>
+			<?php $my_email = RS_Emails::get_email( $who ); ?>
+			<?php if ( '' === $my_email ) : ?>
+				<p class="rs-pt-note">
+					<?php esc_html_e( 'Δεν έχει οριστεί email για το όνομά σου — ενημέρωσε τον εκδότη για να μπορείς να ενεργοποιήσεις τη μηνιαία αναφορά.', 'revenue-splitter' ); ?>
+				</p>
+			<?php else : ?>
+				<p class="rs-pt-note">
+					<?php echo esc_html( sprintf( __( 'Η αναφορά θα στέλνεται στο %s.', 'revenue-splitter' ), $my_email ) ); ?>
+				</p>
+				<form method="post" class="rs-pt-inline">
+					<?php wp_nonce_field( 'rs_portal_report', 'rs_portal_report_nonce' ); ?>
+					<input type="hidden" name="rs_portal_report_toggle" value="1" />
+					<button type="submit" class="<?php echo esc_attr( RS_Emails::is_opted_in( $who ) ? 'rs-pt-btn-on' : 'rs-pt-btn' ); ?>">
+						<?php echo RS_Emails::is_opted_in( $who ) ? esc_html__( 'Απενεργοποίηση αναφοράς', 'revenue-splitter' ) : esc_html__( 'Ενεργοποίηση αναφοράς', 'revenue-splitter' ); ?>
+					</button>
+				</form>
+				<?php if ( RS_Emails::is_opted_in( $who ) ) : ?>
+					<p class="rs-pt-note"><?php esc_html_e( 'Η αναφορά είναι ενεργή — στέλνεται τις πρώτες μέρες κάθε μήνα και καλύπτει τον προηγούμενο.', 'revenue-splitter' ); ?></p>
+				<?php endif; ?>
+			<?php endif; ?>
+
+			<!-- Cross-links footer (same pattern as RS_Admin_UI::footer()) -->
+			<p class="rs-footer">
+				Made with &lt;3 by
+				<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a> ·
+				<a href="https://glarolykoi.net" target="_blank" rel="noopener noreferrer">glarolykoi.net</a> ·
+				<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
+			</p>
+			<p class="rs-footer" style="margin-top:10px;">
+				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
+					style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
 					☕ <?php esc_html_e( 'Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
 				</a>
 			</p>
@@ -1140,58 +1254,92 @@ final class RS_Portal {
 	private static function print_css(): void {
 		?>
 <style>
-.rs-portal { font-family: system-ui, sans-serif; margin: 1.5em 0; color: #1d2327; }
+.rs-portal { font-family: system-ui, sans-serif; margin: 1.5em 0; color: #eae8fa;
+	background: #101218; border: 1px solid #2b2e36; border-radius: 8px; padding: 24px 28px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
 .rs-portal *, .rs-portal *::before, .rs-portal *::after { box-sizing: border-box; }
 .rs-pt-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; }
+.rs-portal h3 { color: #f6f4ff; }
 
 /* v1.3.5 (#3): κεντραρισμένο login ΜΟΝΟ με κλειδί. */
-.rs-pt-login-center { display: flex; justify-content: center; padding: 1.5em 0; }
+.rs-pt-login-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5em 0; }
 .rs-pt-login { max-width: 320px; width: 100%; display: grid; gap: 8px; }
-.rs-pt-login label { font-weight: 600; font-size: 0.85em; }
-.rs-pt-login input { padding: 9px 11px; border: 1px solid #c3c4c7; border-radius: 3px; width: 100%; }
+.rs-pt-login label { font-weight: 600; font-size: 0.85em; color: #eae8fa; }
+.rs-pt-login input { padding: 9px 11px; border: 1px solid #3a3f52; border-radius: 3px; width: 100%;
+	background: #1a1d26; color: #f0eefc; }
 .rs-pt-login button { padding: 9px 14px; border: 0; border-radius: 3px; background: #6d4aff; color: #fff; font-weight: 600; cursor: pointer; }
+.rs-pt-login button:hover { background: #8263ff; }
 
 /* v1.3.5 (#1): φίλτρα περιόδου/προϊόντος. */
 .rs-pt-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 1em; }
 .rs-pt-filters select,
-.rs-pt-filters input[type="date"] { padding: 6px 8px; border: 1px solid #c3c4c7; border-radius: 3px; background: #fff; min-height: 34px; }
+.rs-pt-filters input[type="date"] { padding: 6px 8px; border: 1px solid #3a3f52; border-radius: 3px; background: #1a1d26; color: #f0eefc; min-height: 34px; }
 .rs-pt-btn { padding: 7px 14px; border: 0; border-radius: 3px; background: #6d4aff; color: #fff; font-weight: 600; cursor: pointer; }
+.rs-pt-btn:hover { background: #8263ff; }
 
-.rs-pt-error { color: #b32d2e; font-weight: 600; margin: 0; }
+.rs-pt-error { color: #ff9a9a; font-weight: 600; margin: 0; }
 
 .rs-pt-table { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
-.rs-pt-table th, .rs-pt-table td { border: 1px solid #e2e4e7; padding: 6px 10px; text-align: left; font-size: 0.92em; }
-.rs-pt-table th { background: #f6f7f7; }
+.rs-pt-table th, .rs-pt-table td { border: 1px solid #2e3240; padding: 6px 10px; text-align: left; font-size: 0.92em; }
+.rs-pt-table th { background: #1d2029; color: #e6e1fd; }
+.rs-pt-table tbody tr:nth-child(2n) td { background: #181b23; }
+.rs-pt-table tbody tr:hover td { background: #1e212c; }
 .rs-pt-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.rs-pt-table small, .rs-pt-muted { color: #787c82; }
+.rs-pt-table small, .rs-pt-muted { color: #b7b2d6; }
 
 .rs-pt-chart-head { display: flex; justify-content: space-between; align-items: baseline; }
-.rs-pt-chart-range select { padding: 3px 6px; border: 1px solid #c3c4c7; border-radius: 3px; background: #fff; }
+.rs-pt-chart-range select { padding: 3px 6px; border: 1px solid #3a3f52; border-radius: 3px; background: #1a1d26; color: #f0eefc; }
 .rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin: 0.5em 0 1.5em; }
 .rs-pt-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; text-align: center; }
 .rs-pt-bar { width: 70%; background: #6d4aff; border-radius: 3px 3px 0 0; min-height: 3px; }
-.rs-pt-col small { margin-top: 4px; font-size: 0.72em; color: #787c82; }
-.rs-pt-val { font-size: 0.68em; color: #787c82; margin-bottom: 2px; white-space: nowrap; }
+.rs-pt-col small { margin-top: 4px; font-size: 0.72em; color: #b7b2d6; }
+.rs-pt-val { font-size: 0.68em; color: #b7b2d6; margin-bottom: 2px; white-space: nowrap; }
 
 .rs-kpis { display: flex; gap: 12px; flex-wrap: wrap; margin: 1em 0; }
-.rs-kpi { flex: 1 1 180px; border: 1px solid #e2e4e7; border-radius: 4px; padding: 10px 14px; }
-.rs-kpi strong { display: block; font-size: 1.25em; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.rs-kpi-label { font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.06em; color: #787c82; }
-.rs-kpi .rs-up { color: #0a7c3a; font-weight: 600; }
-.rs-kpi .rs-down { color: #b32d2e; font-weight: 600; }
-.rs-pt-kpi-sub { display: block; margin-top: 3px; color: #787c82; }
+.rs-kpi { flex: 1 1 180px; background: #17191f; border: 1px solid #2e3240; border-left: 3px solid #6d4aff; border-radius: 6px; padding: 10px 14px; }
+.rs-kpi strong { display: block; font-size: 1.25em; margin-top: 2px; font-variant-numeric: tabular-nums; color: #f6f4ff; }
+.rs-kpi-label { font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.06em; color: #b7b2d6; }
+.rs-kpi .rs-up { color: #8fe6ab; font-weight: 600; }
+.rs-kpi .rs-down { color: #ff9a9a; font-weight: 600; }
+.rs-pt-kpi-sub { display: block; margin-top: 3px; color: #b7b2d6; }
 
 .rs-portal h3 { margin: 1.4em 0 0.4em; font-size: 1.05em; }
-.rs-pt-note { color: #787c82; font-size: 0.85em; }
-.rs-pt-kofi { margin: 0.8em 0 0; font-size: 0.85em; }
-.rs-pt-kofi a { display: inline-block; background: #6d4aff; color: #fff; padding: 6px 16px; border-radius: 999px; text-decoration: none; font-weight: 600; }
-.rs-empty { text-align: center; color: #787c82; font-style: italic; }
+.rs-pt-note { color: #b7b2d6; font-size: 0.85em; }
+.rs-empty { text-align: center; color: #b7b2d6; font-style: italic; }
 
 /* v1.3.8 (#2): multi-select προϊόντων + αναζήτηση (portal). */
 .rs-prod-picker { display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-.rs-pt-prod-search { min-width: 0; width: 100%; padding: 6px 8px; border: 1px solid #c3c4c7; border-radius: 3px; }
-select.rs-pt-multi { min-height: 32px; padding: 2px 6px; border: 1px solid #c3c4c7; border-radius: 3px; background: #fff; }
-.rs-prod-hint { font-size: 11px; color: #787c82; }
+.rs-pt-prod-search { min-width: 0; width: 100%; padding: 6px 8px; border: 1px solid #3a3f52; border-radius: 3px; background: #1a1d26; color: #f0eefc; }
+select.rs-pt-multi { min-height: 32px; padding: 2px 6px; border: 1px solid #3a3f52; border-radius: 3px; background: #1a1d26; color: #f0eefc; }
+select.rs-pt-multi option { background: #1e212b; color: #f0eefc; }
+select.rs-pt-multi option:checked { background: #6d4aff; color: #fff; }
+.rs-prod-hint { font-size: 11px; color: #8b87a3; }
+
+/* vNext (#1/#3): forgot-key form + toggle μηνιαίας αναφοράς. */
+.rs-pt-msg-ok { color: #8fe6ab; font-weight: 600; margin: 0; text-align: center; }
+.rs-pt-forgot { margin-top: 1em; border-top: 1px solid #2b2e36; padding-top: 0.8em; }
+.rs-pt-forgot summary { cursor: pointer; font-size: 0.85em; color: #b7b2d6; }
+.rs-pt-reset { max-width: 320px; margin: 0 auto; display: grid; gap: 8px; padding-top: 0.8em; }
+.rs-pt-reset label { font-weight: 600; font-size: 0.85em; color: #eae8fa; }
+.rs-pt-reset input { padding: 9px 11px; border: 1px solid #3a3f52; border-radius: 3px; width: 100%; background: #1a1d26; color: #f0eefc; }
+.rs-pt-reset button { padding: 9px 14px; border: 0; border-radius: 3px; background: #6d4aff; color: #fff; font-weight: 600; cursor: pointer; }
+.rs-pt-sep { border: 0; border-top: 1px solid #2b2e36; margin: 1.5em 0; }
+.rs-pt-inline { margin: 0.4em 0 0; }
+.rs-pt-btn-on { padding: 7px 14px; border: 0; border-radius: 3px; background: #3a3f52; color: #fff; font-weight: 600; cursor: pointer; }
+.rs-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+.rs-footer a { color: #beb1ff; text-decoration: none; }
+.rs-footer a:hover { text-decoration: underline; }
+
+/* Dark theme helpers */
+.rs-portal input[type="date"] { color-scheme: dark; }
+.rs-portal a { color: #beb1ff; }
+.rs-portal a:hover { color: #d4c9ff; }
 </style>
 <script>
 /* v1.3.8 (#2): delegated φίλτρο αναζήτησης του multi-select (portal inline —

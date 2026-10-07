@@ -327,8 +327,8 @@ final class RS_Ledger {
 		delete_option( self::OPT_LEDGER );
 		self::$all_cache = array();
 	}
-	
-		/**
+
+	/**
 	 * Atomic bulk import (audit finding #1): ΟΛΕΣ οι εγγραφές
 	 * validated ΠΡΙΝ από οποιοδήποτε write. Αν έστω μία αποτύχει
 	 * → ΚΑΜΙΑ αλλαγή στο υπάρχον ledger (all-or-nothing) — δεν

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Noxpress Migrator
+ * Plugin Name:       Data Migrator
  * Plugin URI:        https://noxpress.tech
  * Description:       Πλήρης μετανάστευση WordPress + WooCommerce σε άλλον server: streaming εξαγωγή βάσης (χωρίς mysqldump), αρχείων σε chunked ZIP με multi-volume, SHA-256 manifest, checkpoints για resume και self-contained restore.php. Μηδέν εξαρτήσεις από shell.
  * Version:           1.0.0
@@ -8,7 +8,7 @@
  * Requires PHP:      7.4
  * Author:            Christos Koulaxizis
  * License:           MIT
- * Text Domain:       noxpress-migrator
+ * Text Domain:       data-migrator
  * Domain Path:       /languages
  */
 

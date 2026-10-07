@@ -69,22 +69,17 @@ final class SP_Admin {
 
 	public static function dash_url(): string {
 
-		$slug = sp_rs_active() ? self::SLUG_DASH : self::SLUG_MENU;
-
-		$url = function_exists( 'menu_page_url' )
-			? menu_page_url( $slug, false )
-			: '';
-
-		return $url ? (string) $url : admin_url( 'admin.php?page=' . rawurlencode( $slug ) );
+		// Σημείωση: το SLUG_DASH = 'sp-dashboard' είναι το submenu slug.
+		// Το SLUG_MENU = 'noxpress' είναι το parent slug.
+		// Δεν χρησιμοποιούμε menu_page_url() εδώ — επιστρέφουμε
+		// άμεσα το admin.php?page=sp-dashboard που πάντα δουλεύει.
+		return admin_url( 'admin.php?page=' . self::SLUG_DASH );
 	}
 
 	public static function settings_url(): string {
 
-		$url = function_exists( 'menu_page_url' )
-			? menu_page_url( self::SLUG_SETTINGS, false )
-			: '';
-
-		return $url ? (string) $url : admin_url( 'admin.php?page=' . rawurlencode( self::SLUG_SETTINGS ) );
+		// Άμεση επιστροφή του admin.php?page=sp-settings.
+		return admin_url( 'admin.php?page=' . self::SLUG_SETTINGS );
 	}
 
 	/* =====================================================================
@@ -112,7 +107,7 @@ final class SP_Admin {
 			add_submenu_page(
 				self::SLUG_MENU,
 				__( 'Store Pulse — Ρυθμίσεις', 'store-pulse' ),
-				__( 'Ρυθμίσεις', 'store-pulse' ),
+				__( 'SP Ρυθμίσεις', 'store-pulse' ),
 				self::CAP,
 				self::SLUG_SETTINGS,
 				array( __CLASS__, 'render_settings' )
@@ -141,7 +136,7 @@ final class SP_Admin {
 		add_submenu_page(
 			self::SLUG_MENU,
 			__( 'Store Pulse — Ρυθμίσεις', 'store-pulse' ),
-			__( 'Ρυθμίσεις', 'store-pulse' ),
+			__( 'SP Ρυθμίσεις', 'store-pulse' ),
 			self::CAP,
 			self::SLUG_SETTINGS,
 			array( __CLASS__, 'render_settings' )
@@ -200,10 +195,6 @@ final class SP_Admin {
 		SP_Dashboard::render_page();
 	}
 
-	public static function render_widget(): void {
-		SP_Dashboard::render_widget();
-	}
-
 	/* =====================================================================
 	 * Quick View widget (WordPress dashboard)
 	 * =================================================================== */
@@ -221,8 +212,8 @@ final class SP_Admin {
 
 		wp_add_dashboard_widget(
 			self::WIDGET_ID,
-			__( 'Store Pulse — Γρήγορη ματιά', 'store-pulse' ),
-			array( __CLASS__, 'render_widget' )
+			__( 'Store Pulse', 'store-pulse' ),
+			array( 'SP_Dashboard', 'render_widget' )
 		);
 	}
 
@@ -239,7 +230,11 @@ final class SP_Admin {
 		$errors = array();
 
 		// ---- POST: validate + save + redirect (PRG) ----
-		if ( isset( $_POST['sp_form'] ) && 'settings' === $_POST['sp_form'] ) {
+		$sp_form_action = isset( $_POST['sp_form'] )
+			? sanitize_text_field( wp_unslash( $_POST['sp_form'] ) )
+			: '';
+
+		if ( 'settings' === $sp_form_action ) {
 
 			check_admin_referer( self::NONCE_ACTION, self::NONCE_NAME );
 
@@ -257,7 +252,8 @@ final class SP_Admin {
 			}
 		}
 
-		$saved = isset( $_GET['sp-updated'] ) && '1' === $_GET['sp-updated'];
+		$saved = isset( $_GET['sp-updated'] )
+			&& '1' === sanitize_text_field( wp_unslash( $_GET['sp-updated'] ) );
 
 		$period_orders   = SP_Data::safe_preset( 'sp_default_period_orders', '7d' );
 		$period_money    = SP_Data::safe_preset( 'sp_default_period_money', 'month' );
@@ -473,38 +469,30 @@ final class SP_Admin {
 		$errors = array();
 
 		// ---- Presets (whitelist SP_Data::PRESETS) ----
-		$preset_fields = array(
-			'sp_period_orders'   => 'sp_default_period_orders',
-			'sp_period_money'   => 'sp_default_period_money',
-			'sp_period_refunds' => 'sp_default_period_refunds',
-		);
-
-		// Το cancelled φέρνε διαφορετικό (τυπογραφικό; όχι — ευθεία λίστα).
 		$post_periods = array(
-			'sp_period_orders'   => isset( $_POST['sp_period_orders'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_orders'] ) ) : '',
-			'sp_period_money'    => isset( $_POST['sp_period_money'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_money'] ) ) : '',
-			'sp_period_refunds' => isset( $_POST['sp_period_refunds'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_refunds'] ) ) : '',
+			'sp_period_orders'    => isset( $_POST['sp_period_orders'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_orders'] ) ) : '',
+			'sp_period_money'     => isset( $_POST['sp_period_money'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_money'] ) ) : '',
+			'sp_period_refunds'   => isset( $_POST['sp_period_refunds'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_refunds'] ) ) : '',
 			'sp_period_cancelled' => isset( $_POST['sp_period_cancelled'] ) ? sanitize_text_field( wp_unslash( $_POST['sp_period_cancelled'] ) ) : '',
 		);
 
 		$preset_targets = array(
 			'sp_period_orders'    => 'sp_default_period_orders',
-			'sp_period_money'    => 'sp_default_period_money',
-			'sp_period_refunds'  => 'sp_default_period_refunds',
+			'sp_period_money'     => 'sp_default_period_money',
+			'sp_period_refunds'   => 'sp_default_period_refunds',
 			'sp_period_cancelled' => 'sp_default_period_cancelled',
 		);
 
-		$presets_ok = true;
+		$valid_periods = array();
 
 		foreach ( $post_periods as $field => $value ) {
 
 			if ( ! in_array( $value, SP_Data::PRESETS, true ) ) {
 				$errors[] = __( 'Μη έγκυρο χρονικό διάστημα.', 'store-pulse' );
-				$presets_ok = false;
 				continue;
 			}
 
-			update_option( $preset_targets[ $field ], $value );
+			$valid_periods[ $preset_targets[ $field ] ] = $value;
 		}
 
 		// ---- Low-stock threshold ----
@@ -512,10 +500,12 @@ final class SP_Admin {
 			? sanitize_text_field( wp_unslash( $_POST['sp_threshold'] ) )
 			: '';
 
+		$valid_threshold = null;
+
 		if ( ! is_numeric( $raw_threshold ) || (float) $raw_threshold < 0 ) {
 			$errors[] = __( 'Μη έγκυρο όριο στοκ (0+).', 'store-pulse' );
 		} else {
-			update_option( 'sp_low_stock_threshold', (string) (int) round( (float) $raw_threshold ) );
+			$valid_threshold = (string) (int) round( (float) $raw_threshold );
 		}
 
 		// ---- Publisher ----
@@ -530,11 +520,9 @@ final class SP_Admin {
 
 		if ( '' !== $raw_publisher
 			&& ! in_array( $raw_publisher, RS_Beneficiaries::collect_names(), true ) ) {
-			// Άγνωσος δικαιούχος — δεν γράφουμε τιμή, warning όχι fatal.
+			// Άγνωστος δικαιούχος — δεν γράφουμε τιμή, warning όχι fatal.
 			$raw_publisher = '';
 		}
-
-		update_option( 'sp_publisher', $raw_publisher );
 
 		// ---- Quick View cards ----
 		$raw_cards = isset( $_POST['sp_quick_cards'] )
@@ -550,7 +538,20 @@ final class SP_Admin {
 
 		if ( array() === $cards ) {
 			$errors[] = __( 'Επίλεξε τουλάχιστον μία κάρτα για το Quick View.', 'store-pulse' );
-		} else {
+		}
+
+		// ---- Write phase: όλα ή τίποτα (no partial writes) ----
+		if ( array() === $errors ) {
+
+			foreach ( $valid_periods as $target => $value ) {
+				update_option( $target, $value );
+			}
+
+			if ( null !== $valid_threshold ) {
+				update_option( 'sp_low_stock_threshold', $valid_threshold );
+			}
+
+			update_option( 'sp_publisher', $raw_publisher );
 			update_option( 'sp_quick_cards', $cards );
 		}
 

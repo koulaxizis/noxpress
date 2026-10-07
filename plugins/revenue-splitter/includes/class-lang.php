@@ -177,6 +177,8 @@ class RS_Lang {
 		'Dashboard'                                              => 'Dashboard',
 		'Ρυθμίσεις'                                              => 'Settings',
 		'Portal'                                                 => 'Portal',
+		'RS Ρυθμίσεις'                                           => 'RS Settings',
+		'RS Portal'                                              => 'RS Portal',
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'       => 'You do not have permission to access this page.',
 		'Πλήρες dashboard →'                                     => 'Full dashboard →',
 
@@ -418,14 +420,19 @@ class RS_Lang {
 		'Κανείς δεν έχει μερίδιο στην περίοδο.' => 'Nobody has a share in this period.',
 
 		// --- v1.3.8: multi-select προϊόντων, φίλτρο δικαιούχου, χρώματα ---
-		'Αναζήτηση προϊόντος…'                                    => 'Search products…',
+		'Αναζήτηση προϊόντος…' => 'Search products…',
+		'Ctrl/Cmd + click για πολλαπλή επιλογή. Καμία επιλογή = όλα.' => 'Ctrl/Cmd + click to select multiple. No selection = all.',
+		'Όλοι οι δικαιούχοι' => 'All beneficiaries',
+		'Χρώματα δικαιούχων' => 'Beneficiary colors',
+		'Προσαρμοσμένο χρώμα ανά δικαιούχο — εμφανίζεται στα chips του καταμερισμού και στα ονόματα των πινάκων. Default: μωβ #6d4aff.' => 'Custom color per beneficiary — shown in the split chips and table names. Default: purple #6d4aff.',
 		'Ctrl/Cmd + click για πολλαπλή επιλογή. Καμία επιλογή = όλα.' => 'Ctrl/Cmd + click to select multiple. No selection = all.',
 		'Όλοι οι δικαιούχοι'                                      => 'All beneficiaries',
 		'Χρώματα δικαιούχων'                                     => 'Beneficiary colors',
 		'Προσαρμοσμένο χρώμα ανά δικαιούχο — εμφανίζεται στα chips του καταμερισμού και στα ονόματα των πινάκων. Default: μωβ #6d4aff.' => 'Custom color per beneficiary — shown in the split chips and table names. Default: purple #6d4aff.',
 
 		// --- v1.3.8 (#7): κανάλια πώλησης ---
-		'Κανάλια πώλησης'                                          => 'Sales channels',
+		'Κανάλια πώλησης' => 'Sales channels',
+		'Προεπιλεγμένη λίστα καναλιών για το checkout...' => 'Default channel list for checkout...',
 		'Προεπιλεγμένη λίστα καναλιών για το checkout (όταν εφαρμόζεται κουπόνι δωρεάν αντιτύπου) και για τη χειροκίνητη εισαγωγή εσόδων στο ledger. Μία γραμμή ανά κανάλι.' => 'Default channel list for checkout (when a free-copy coupon is applied) and for manual ledger income entries. One channel per line.',
 		'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να επιλέξει κανάλι πώλησης από τη λίστα των καναλιών.' => 'When any of these coupons is applied at checkout, the customer must pick a sales channel from the channel list.',
 		'Κανάλι πώλησης'                                           => 'Sales channel',

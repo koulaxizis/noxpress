@@ -1,10 +1,32 @@
 /**
- * Store Pulse — scoped admin styles (.sp-wrap).
- * Ίδια παλέτα με το Revenue Splitter: #6d4aff primary, #101218 bg.
- * Καμία επικάλυψη με WordPress ή άλλα plugins — όλα με πρόθεμα sp-.
+ * Store Pulse — scoped dark admin theme (.sp-wrap).
+ * Noxpress Bible v1.0 compliance (RS admin.css v1.3.3 = leading design).
+ * Πλήρης συμμόρφωση με: §2 (palette), §3 (panel), §4 (hardening),
+ * §5 (recipes), §6 (widget), §7 (footer).
+ * Όλα τα tokens αντιγράφονται από το rs-admin.css — καμία παρέκκλιση.
  */
 
-.sp-wrap { max-width: 1200px; }
+/* ---------- Το dark panel (Bible §3) ---------- */
+
+.sp-wrap {
+	color-scheme: dark;
+	background: #101218;
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: #eae8fa;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+	box-sizing: border-box;
+}
+
+.sp-wrap h1,
+.sp-wrap h2 {
+	color: #f6f4ff;
+}
+
+.sp-wrap a { color: #beb1ff; }
+.sp-wrap a:hover { color: #d4c9ff; }
 
 /* ---------- Header ---------- */
 
@@ -12,51 +34,54 @@
 .sp-wrap .sp-h2 {
 	margin: 28px 0 10px;
 	padding-bottom: 6px;
-	border-bottom: 1px solid #23233a;
+	border-bottom: 1px solid #23262f;
 	font-size: 15px;
+	color: #f6f4ff;
 }
 
-/* ---------- Grids & cards ---------- */
+/* ---------- Grids & cards (Bible §5 — KPI recipe) ---------- */
 
 .sp-wrap .sp-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-	gap: 14px;
-	margin: 14px 0;
+	gap: 16px;
+	margin: 16px 0 24px;
 }
 .sp-wrap .sp-grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .sp-wrap .sp-grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 
 .sp-wrap .sp-card {
-	background: #14141f;
-	border: 1px solid #262640;
-	border-left: 4px solid #6d4aff;
-	border-radius: 8px;
-	padding: 14px 16px;
+	background: #17191f !important;
+	border: 1px solid #2e3240;
+	border-left: 3px solid #6d4aff;
+	border-radius: 6px;
+	padding: 16px 20px;
 	box-sizing: border-box;
 }
 
-.sp-wrap .sp-card.sp-warn { border-left-color: #f0b849; }
-.sp-wrap .sp-card.sp-alert { border-left-color: #d63638; }
-.sp-wrap .sp-card.sp-info { border-left-color: #72aee6; }
+.sp-wrap .sp-card.sp-warn  { border-left-color: #e6c069; }
+.sp-wrap .sp-card.sp-alert { border-left-color: #ff9a9a; }
+.sp-wrap .sp-card.sp-info  { border-left-color: #a78bfa; }
 
 .sp-wrap .sp-card-label {
-	color: #a0a0c0;
+	color: #b7b2d6 !important;
 	font-size: 12px;
+	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.08em;
 	margin-bottom: 6px;
 }
 
 .sp-wrap .sp-card-value {
-	color: #ffffff;
-	font-size: 26px;
-	font-weight: 600;
-	line-height: 1.2;
+	color: #f6f4ff !important;
+	font-size: 22px;
+	font-weight: 400;
+	line-height: 1.25;
+	font-variant-numeric: tabular-nums;
 }
 
 .sp-wrap .sp-card-sub {
-	color: #78789a;
+	color: #b7b2d6;
 	font-size: 12px;
 	margin-top: 8px;
 }
@@ -64,116 +89,282 @@
 /* ---------- Money placeholder ---------- */
 
 .sp-wrap .sp-money-placeholder {
-	background: #14141f;
-	border: 1px dashed #3a3a5c;
-	border-radius: 8px;
+	background: #17191f !important;
+	border: 1px dashed #3a3f52;
+	border-radius: 6px;
 	padding: 22px 24px;
 	margin: 18px 0;
 	text-align: center;
-	color: #a0a0c0;
+	color: #b7b2d6;
 }
 .sp-wrap .sp-money-placeholder .sp-money-title {
-	color: #6d4aff;
+	color: #beb1ff;
 	font-weight: 600;
 	font-size: 14px;
 	margin: 0 0 6px;
 }
 
 .sp-wrap .sp-note {
-	color: #78789a;
+	color: #b7b2d6;
 	font-size: 12px;
 	margin: 6px 0 0;
 }
 
 .sp-wrap .sp-empty {
-	color: #78789a;
+	color: #b7b2d6;
 	font-style: italic;
 	margin: 8px 0 16px;
 }
 
-/* ---------- Tables ---------- */
-
-.sp-wrap .sp-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin: 10px 0 20px;
-	background: #14141f;
-	border: 1px solid #262640;
-	border-radius: 8px;
-	overflow: hidden;
-}
-.sp-wrap .sp-table th,
-.sp-wrap .sp-table td {
-	padding: 10px 14px;
-	text-align: left;
-	border-bottom: 1px solid #22223a;
-	color: #dcdcf0;
+.sp-wrap .sp-lang-current {
+	color: #eae8fa;
 	font-size: 13px;
 }
+
+/* ---------- Tables — HARDENED (Bible §4) ---------- */
+
+.sp-wrap .sp-table,
+.sp-wrap table.widefat.sp-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 10px 0 24px;
+	background: #14161d !important;
+	border: 1px solid #2e3240;
+	border-radius: 6px;
+	overflow: hidden;
+	color: #eae8fa !important;
+}
+
 .sp-wrap .sp-table thead th {
-	background: #1b1b2e;
-	color: #a0a0c0;
+	background: #1d2029 !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
 	font-size: 12px;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
+	text-shadow: none !important;
+	padding: 12px 14px;
+	text-align: left;
 }
-.sp-wrap .sp-table tbody tr:hover { background: #1b1b2e; }
+
+.sp-wrap .sp-table th,
+.sp-wrap .sp-table td {
+	padding: 12px 14px;
+	text-align: left;
+	border-bottom: 1px solid #23262f;
+	color: #eae8fa !important;
+	font-size: 13px;
+	background: #14161d !important;
+	box-shadow: none;
+}
+
+.sp-wrap .sp-table tbody tr:nth-child(2n) td,
+.sp-wrap .sp-table tbody tr:nth-child(2n) th {
+	background: #181b23 !important;
+}
+
+.sp-wrap .sp-table tbody tr:hover td,
+.sp-wrap .sp-table tbody tr:hover th {
+	background: #1e212c !important;
+}
+
 .sp-wrap .sp-table tfoot th {
-	background: #1b1b2e;
-	border-top: 1px solid #3a3a5c;
-	color: #ffffff;
+	background: #1d2029 !important;
+	border-top: 1px solid #2e3242 !important;
+	color: #ffffff !important;
 }
+
 .sp-wrap .sp-num { text-align: right; font-variant-numeric: tabular-nums; }
-.sp-wrap .sp-table a { color: #8f78ff; text-decoration: none; }
-.sp-wrap .sp-table a:hover { text-decoration: underline; }
 
-.sp-wrap .sp-stock-low { color: #f0b849; font-weight: 600; }
-.sp-wrap .sp-stock-out { color: #ff6b6b; font-weight: 600; }
+.sp-wrap .sp-table td strong,
+.sp-wrap .sp-table td strong * {
+	color: #ffffff !important;
+}
 
-/* ---------- Widget (WordPress dashboard) ---------- */
+.sp-wrap .sp-table td small {
+	color: #c9c4e2 !important;
+	font-size: 12.5px;
+}
 
-.sp-widget ul.sp-widget-list {
+.sp-wrap .sp-table a { color: #beb1ff; text-decoration: none; }
+.sp-wrap .sp-table a:hover { color: #d4c9ff; text-decoration: underline; }
+
+/* Sticky header — ίδιο με RS */
+.sp-wrap .sp-table thead th {
+	position: sticky;
+	top: 46px;
+	z-index: 5;
+}
+
+.sp-wrap .sp-stock-low { color: #f5c97e !important; font-weight: 600; }
+.sp-wrap .sp-stock-out { color: #ff9a9a !important; font-weight: 600; }
+
+/* ---------- FORM-TABLE — Ρυθμίσεις (Bible §5 — δανείο από RS) ---------- */
+
+.sp-wrap .form-table th,
+.sp-wrap .form-table td {
+	color: #eae8fa;
+}
+
+.sp-wrap .form-table th,
+.sp-wrap .form-table th label {
+	color: #eae8fa !important;
+	font-weight: 600;
+}
+.sp-wrap .form-table td label { color: #eae8fa !important; }
+
+.sp-wrap .form-table select,
+.sp-wrap select {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+	box-shadow: none;
+}
+
+.sp-wrap .form-table select option {
+	background: #1e212b;
+	color: #f0eefc;
+}
+
+.sp-wrap .form-table input[type="number"],
+.sp-wrap .form-table input[type="text"],
+.sp-wrap .form-table input[type="email"],
+.sp-wrap input[type="number"] {
+	background: #0f1115 !important;
+	border: 1px solid #34394a !important;
+	color: #f2f0fe !important;
+	border-radius: 3px;
+	box-shadow: none;
+}
+
+.sp-wrap input[type="date"] {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	border-radius: 4px;
+	min-height: 32px;
+	box-shadow: none;
+	color-scheme: dark;
+}
+
+.sp-wrap .form-table td p.description,
+.sp-wrap .form-table .description,
+.sp-wrap .description { color: #b7b2d6 !important; }
+
+/* Buttons (Bible §5 — period-form recipe) */
+
+.sp-wrap .button {
+	background: #1e2130 !important;
+	border: 1px solid #4a4f66 !important;
+	color: #eeeafc !important;
+	text-shadow: none;
+}
+.sp-wrap .button:hover {
+	border-color: #6d4aff !important;
+	color: #ffffff !important;
+}
+.sp-wrap .button-primary {
+	background: #6d4aff !important;
+	border-color: #6d4aff !important;
+	color: #ffffff !important;
+	text-shadow: none;
+}
+.sp-wrap .button-primary:hover {
+	background: #8263ff !important;
+}
+
+/* WP core notices μέσα στο panel — διατήρηση dark mood */
+.sp-wrap .notice {
+	background: #14161d;
+	border-color: #2e3240;
+	color: #eae8fa;
+}
+
+/* ---------- Widget (Bible §6 — WP dashboard, compound scope) ---------- */
+/* Το sp-wrap και sp-widget είναι στο ΙΔΙΟ element — compound selector. */
+
+.sp-wrap.sp-widget {
+	padding: 16px 20px 14px;
+	margin: 0;
+}
+
+.sp-wrap.sp-widget ul.sp-widget-list {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
-.sp-widget .sp-wrow {
+.sp-wrap.sp-widget .sp-wrow {
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
 	gap: 12px;
 	padding: 7px 0;
-	border-bottom: 1px solid #23233a;
+	border-bottom: 1px solid #23262f;
 }
-.sp-widget .sp-wrow:last-child { border-bottom: none; }
-.sp-widget .sp-wl { color: #a0a0c0; font-size: 13px; }
-.sp-widget .sp-wv {
-	color: #ffffff;
-	font-size: 17px;
+.sp-wrap.sp-widget .sp-wrow:last-child { border-bottom: none; }
+.sp-wrap.sp-widget .sp-wl {
+	color: #b7b2d6;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
 	font-weight: 600;
+}
+.sp-wrap.sp-widget .sp-wv {
+	color: #f6f4ff;
+	font-size: 17px;
+	font-weight: 400;
 	font-variant-numeric: tabular-nums;
 }
-.sp-widget .sp-accent .sp-wv { color: #f0b849; }
-.sp-widget .sp-widget-footer {
+.sp-wrap.sp-widget .sp-accent .sp-wv { color: #f5c97e; }
+.sp-wrap.sp-widget a { color: #beb1ff; }
+.sp-wrap.sp-widget a:hover { color: #d4c9ff; }
+
+.sp-wrap.sp-widget .sp-widget-footer {
 	margin: 12px 0 0;
 	padding-top: 10px;
-	border-top: 1px solid #23233a;
-	font-size: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
 }
+.sp-wrap.sp-widget .sp-widget-footer a {
+	color: #beb1ff;
+	text-decoration: none;
+}
+.sp-wrap.sp-widget .sp-widget-footer a:hover { text-decoration: underline; }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer (Bible §7 — RS-identical) ---------- */
 
 .sp-wrap .sp-hr {
 	border: 0;
-	border-top: 1px solid #23233a;
+	border-top: 1px solid #23262f;
 	margin: 32px 0 14px;
 }
+
 .sp-wrap .sp-footer {
-	color: #78789a;
-	font-size: 12px;
-	text-align: center;
+	color: #a29dc0;
+	font-size: 13px;
 	line-height: 1.8;
-	margin-bottom: 8px;
+	margin: 0 0 8px;
 }
-.sp-wrap .sp-footer a { color: #8f78ff; text-decoration: none; }
-.sp-wrap .sp-footer a:hover { text-decoration: underline; }
+.sp-wrap .sp-footer a { color: #beb1ff; text-decoration: none; }
+.sp-wrap .sp-footer a:hover { color: #d4c9ff; text-decoration: underline; }
+
+/* Ko-fi pill CTA — ίδιο inline style με το RS footer.
+ * Το markup το παράγει το SP_Dashboard (επόμενο αρχείο). */
+.sp-wrap .sp-footer-cta {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+.sp-wrap .sp-footer-cta:hover {
+	background: #8263ff;
+	color: #ffffff;
+	text-decoration: none;
+}

@@ -1,0 +1,296 @@
+/**
+ * Smart Formatter — admin.css
+ *
+ * Noxpress Bible standards:
+ *  - Locked palette (§2) — ΜΟΝΟ αυτές οι τιμές, καμία παρέκκλιση.
+ *  - Prefixed selectors sf-* (§3) — καμία σύγκρουση με WP core ή RS.
+ *  - Hardening !important σε table/inputs (§4) — τα widefat-driven
+ *    forms του WP core δεν σπάζουν το theme.
+ *  - Component recipes (§5): zones, checks, progress, pills.
+ *  - Dark theme default, ανάλογη αναγνωσιμότητα με το RS.
+ */
+
+/* ===== Locked palette tokens (§2) ===== */
+.sf-wrap {
+	--sf-bg: #14151a;
+	--sf-panel: #1c1e26;
+	--sf-panel-2: #23252f;
+	--sf-border: #2e3140;
+	--sf-text: #e8e9ee;
+	--sf-muted: #9aa0ae;
+	--sf-accent: #6d4aff;
+	--sf-accent-hover: #7d5cff;
+	--sf-ok: #3fb68b;
+	--sf-warn: #e0a83c;
+	--sf-danger: #e05c5c;
+}
+
+/* ===== Page shell ===== */
+.sf-wrap {
+	max-width: 1180px;
+}
+
+.sf-wrap h1,
+.sf-wrap .sf-h2 {
+	color: var(--sf-text);
+}
+
+.sf-wrap .sf-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--sf-muted);
+	border-bottom: 1px solid var(--sf-border);
+	padding-bottom: 6px;
+}
+
+.sf-wrap .description,
+.sf-wrap .sf-hint {
+	color: var(--sf-muted) !important;
+}
+
+.sf-wrap code.sf-run-id {
+	background: var(--sf-panel-2);
+	color: var(--sf-muted);
+	border: 1px solid var(--sf-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+/* ===== Zones (panels §5) ===== */
+.sf-zone {
+	background: var(--sf-panel);
+	border: 1px solid var(--sf-border);
+	border-radius: 10px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+.sf-picker {
+	margin-top: 12px;
+}
+
+.sf-hidden {
+	display: none !important;
+}
+
+.sf-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+/* ===== Form controls (hardening §4) ===== */
+.sf-wrap input[type="text"],
+.sf-wrap input[type="search"],
+.sf-wrap textarea,
+.sf-wrap select,
+.sf-wrap .sf-multi {
+	background-color: var(--sf-panel-2) !important;
+	color: var(--sf-text) !important;
+	border: 1px solid var(--sf-border) !important;
+	border-radius: 6px !important;
+	box-shadow: none !important;
+	min-height: 34px;
+	padding: 4px 10px;
+}
+
+.sf-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.sf-wrap select.sf-multi {
+	width: 100%;
+	max-width: 520px;
+	margin-top: 8px;
+}
+
+.sf-wrap select.sf-multi option,
+.sf-wrap select#sf-profile-load option {
+	background: var(--sf-panel-2);
+	color: var(--sf-text);
+}
+
+/* File input στο settings (unstyled browser button → themed) */
+.sf-wrap input[type="file"] {
+	color: var(--sf-muted);
+}
+
+/* ===== Radio / checkbox rows (§5 recipe) ===== */
+.sf-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.sf-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.sf-wrap input[type="checkbox"],
+.sf-wrap input[type="radio"] {
+	accent-color: var(--sf-accent);
+}
+
+/* ===== Buttons (§5) ===== */
+.sf-wrap .button,
+.sf-wrap .button-primary {
+	background: var(--sf-panel-2) !important;
+	color: var(--sf-text) !important;
+	border: 1px solid var(--sf-border) !important;
+	border-radius: 6px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 34px;
+	line-height: 30px;
+}
+
+.sf-wrap .button:hover:not(:disabled) {
+	background: var(--sf-border) !important;
+	border-color: var(--sf-accent) !important;
+}
+
+.sf-wrap .button-primary {
+	background: var(--sf-accent) !important;
+	border-color: var(--sf-accent) !important;
+	color: #fff !important;
+}
+
+.sf-wrap .button-primary:hover:not(:disabled) {
+	background: var(--sf-accent-hover) !important;
+}
+
+.sf-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* ===== Tables (hardening §4) ===== */
+.sf-table {
+	background: var(--sf-panel) !important;
+	border: 1px solid var(--sf-border) !important;
+	border-radius: 10px !important;
+	overflow: hidden;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
+	margin-top: 14px !important;
+}
+
+.sf-table th,
+.sf-table td {
+	color: var(--sf-text) !important;
+	background: var(--sf-panel) !important;
+	border-color: var(--sf-border) !important;
+	border-bottom: 1px solid var(--sf-border) !important;
+	padding: 10px 12px !important;
+	vertical-align: top;
+}
+
+.sf-table thead th {
+	background: var(--sf-panel-2) !important;
+	font-weight: 600;
+}
+
+.sf-table td code {
+	background: transparent !important;
+	color: var(--sf-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.sf-table .sf-empty {
+	color: var(--sf-muted);
+	text-align: center;
+}
+
+/* ===== Progress bar (§5) ===== */
+.sf-progress {
+	height: 14px;
+	background: var(--sf-panel-2);
+	border: 1px solid var(--sf-border);
+	border-radius: 999px;
+	overflow: hidden;
+	margin: 10px 0 6px;
+	max-width: 560px;
+}
+
+.sf-progress-bar {
+	height: 100%;
+	width: 0%;
+	background: var(--sf-accent);
+	border-radius: 999px;
+	transition: width .25s ease;
+}
+
+/* ===== Summary / units panel ===== */
+.sf-summary {
+	color: var(--sf-text);
+	font-weight: 600;
+	margin: 10px 0;
+}
+
+.sf-units-list {
+	list-style: none;
+	margin: 12px 0 0;
+	padding: 0;
+	max-height: 320px;
+	overflow-y: auto;
+	background: var(--sf-panel);
+	border: 1px solid var(--sf-border);
+	border-radius: 10px;
+}
+
+.sf-units-list li {
+	padding: 7px 12px;
+	border-bottom: 1px solid var(--sf-border);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--sf-text);
+	font-size: 13px;
+}
+
+.sf-units-list li:last-child {
+	border-bottom: 0;
+}
+
+#sf-units-panel {
+	margin-top: 10px;
+}
+
+/* ===== Footer (§7) ===== */
+.sf-footer {
+	color: var(--sf-muted);
+	font-size: 13px;
+	margin: 14px 0 0;
+}
+
+.sf-footer a {
+	color: var(--sf-accent);
+	text-decoration: none;
+}
+
+.sf-footer a:hover {
+	color: var(--sf-accent-hover);
+	text-decoration: underline;
+}
+
+.sf-muted { color: var(--sf-muted); }
+.sf-warn { color: var(--sf-warn); font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.sf-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}

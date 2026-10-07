@@ -516,6 +516,7 @@ class RS_Beneficiaries {
 					<thead>
 						<tr>
 							<th class="rs-col-name"><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th>
+							<th class="rs-col-email"><?php esc_html_e( 'Email', 'revenue-splitter' ); ?></th>
 							<th class="rs-col-pct"><?php esc_html_e( 'Ποσοστό (%)', 'revenue-splitter' ); ?></th>
 							<th class="rs-col-del"></th>
 						</tr>
@@ -524,6 +525,7 @@ class RS_Beneficiaries {
 						<?php foreach ( $map as $row ) : ?>
 						<tr class="rs-row">
 							<td><input type="text" name="rs_ben_name[]" value="<?php echo esc_attr( $row['name'] ); ?>" class="rs-ben-name" /></td>
+							<td><input type="email" name="rs_ben_email[]" value="<?php echo esc_attr( RS_Emails::get_email( $row['name'] ) ); ?>" class="rs-ben-email" placeholder="<?php esc_attr_e( 'Email', 'revenue-splitter' ); ?>" /></td>
 							<td><input type="number" step="0.01" min="0" max="100" name="rs_ben_pct[]" value="<?php echo esc_attr( $row['percent'] ); ?>" class="rs-ben-pct" /></td>
 							<td><button type="button" class="button-link rs-remove-row" aria-label="<?php esc_attr_e( 'Αφαίρεση γραμμής', 'revenue-splitter' ); ?>">×</button></td>
 						</tr>
@@ -615,11 +617,69 @@ class RS_Beneficiaries {
 
 			$names = array_values( (array) wp_unslash( $_POST['rs_ben_name'] ) );
 			$percs = array_values( (array) wp_unslash( $_POST['rs_ben_pct'] ) );
+			$emails_raw = isset( $_POST['rs_ben_email'] ) ? array_values( (array) wp_unslash( $_POST['rs_ben_email'] ) ) : array_fill( 0, count( $names ), '' );
 
 			// Guard: διαφορετικό μήκος = άκυρο POST (UI bug ή crafted request).
 			if ( count( $names ) !== count( $percs ) || empty( $names ) ) {
 				set_transient( 'rs_split_error_' . get_current_user_id(), __( 'Μη έγκυρη λίστα δικαιούχων (εσωτερικό σφάλμα μορφοποίησης).', 'revenue-splitter' ), 60 );
 				return;
+			}
+
+			// Συλλογή emails (name => email) — MERGE semantics: το save
+			// του προϊόντος ΔΕΝ σβήνει emails δικαιούχων που δεν υπά-
+			// γονται σε αυτό (ρυθμίσεις / άλλα προϊόντα).
+			$emails_map = array();
+			foreach ( $names as $i => $n ) {
+				$email = trim( (string) ( $emails_raw[ $i ] ?? '' ) );
+
+				if ( '' === $email ) {
+					$emails_map[ $n ] = ''; // Κενό πεδίο = σκόπιμη διαγραφή.
+				} elseif ( false !== is_email( $email ) ) {
+					$emails_map[ $n ] = strtolower( $email );
+				} else {
+					// Άκυρο email: δεν μπαίνει στο map, θα αναφερθεί
+					// στο notice παρακάτω.
+					$bad = trim( (string) $n );
+					if ( '' !== $bad ) {
+						$emails_map[ $bad ] = '§INVALID§';
+					}
+				}
+			}
+
+			$invalid_names = RS_Emails::merge_email_map(
+				array_filter(
+					$emails_map,
+					static function ( $v ) {
+						return '§INVALID§' !== $v;
+					}
+				)
+			);
+
+			// Notice για ό,τι δεν μπήκε — ΧΩΡΙΣ να μπλοκάρει το save
+			// του καταμερισμού (ο καταμερισμός είναι έγκυρος αυτόνομα).
+			if ( ! empty( $invalid_names ) || in_array( '§INVALID§', $emails_map, true ) ) {
+				$bad_names = array_unique(
+					array_merge(
+						$invalid_names,
+						array_keys(
+							array_filter(
+								$emails_map,
+								static function ( $v ) {
+									return '§INVALID§' === $v;
+								}
+							)
+						)
+					)
+				);
+				set_transient(
+					'rs_split_error_' . get_current_user_id(),
+					sprintf(
+						/* translators: %s: λίστα ονομάτων δικαιούχων */
+						__( 'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s. Ο καταμερισμός αποθηκεύτηκε κανονικά.', 'revenue-splitter' ),
+						implode( ', ', $bad_names )
+					),
+					60
+				);
 			}
 
 			foreach ( $names as $i => $n ) {
