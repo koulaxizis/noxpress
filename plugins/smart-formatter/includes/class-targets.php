@@ -1,6 +1,6 @@
 <?php
 /**
- * SF_Targets — Επίλυση στόχων + πεδία + run plan (Wave 1).
+ * SF_Targets — Επίλυση στόχων + πεδία + run plan (v1.1.0).
  *
  * Responsibilities (dispatch map):
  *  - Selection modes: all / specific products / categories / tags
@@ -16,9 +16,9 @@
  *  - 'all' = ΟΛΑ τα δημοσιευμένα προϊόντα (status publish — ενιαία
  *    πολιτική με το product picker του RS). Variations ΔΕΝ αγγίζονται
  *    (parent products μόνο) — οι περιγραφές variation είναι ξεχωριστό
- *    surface, εκτός Wave 1.
+ *    surface, εκτός scope.
  *  - Categories/tags modes: untrusted IDs (absint, dedupe, sort) →
- *    wc_get_products(). Ένα προϊόν σε 2 επιλεγμένες κατηγορίες
+ *    slugs → wc_get_products(). Ένα προϊόν σε 2 επιλεγμένες κατηγορίες
  *    εμφανίζεται ΜΙΑ φορά.
  *  - 'sf_term_description': πεδίο που ισχύει ΜΟΝΟ σε category/tag
  *    modes — μορφοποιεί τις DESCRIPTIONS των ίδιων των όρων που
@@ -216,10 +216,24 @@ final class SF_Targets {
 			'order'   => 'ASC',
 		);
 
+		// wc_get_products(): τα 'category'/'tag' δέχονται SLUGS, όχι term IDs
+		// → μετατροπή ID → slug (άγνωστα IDs αγνοούνται).
+		$taxonomy = ( self::MODE_CATEGORIES === $mode ) ? 'product_cat' : 'product_tag';
+		$slugs    = array();
+		foreach ( $term_ids as $tid ) {
+			$term = get_term( (int) $tid, $taxonomy );
+			if ( $term instanceof WP_Term ) {
+				$slugs[] = (string) $term->slug;
+			}
+		}
+		if ( empty( $slugs ) ) {
+			return array();
+		}
+
 		if ( self::MODE_CATEGORIES === $mode ) {
-			$args['category'] = $term_ids;
+			$args['category'] = $slugs;
 		} else {
-			$args['tag'] = $term_ids;
+			$args['tag'] = $slugs;
 		}
 
 		$products = wc_get_products( $args );
@@ -338,7 +352,8 @@ final class SF_Targets {
 	 * @param array $rules    Validated rule IDs (SF_Admin_UI validates πριν καλέσει).
 	 * @param array $excluded Φράσεις exclusion list.
 	 * @param array $args     {offset:int, limit:int|null, apply:bool}
-	 *                        limit null = ΟΛΑ τα units (dry run totals).
+	 *                        limit null = ΟΛΑ τα units (το UI δεν το χρησιμοποιεί —
+	 *                        preview/dry run/apply τρέχουν πάντα σε slices).
 	 *
 	 * @return array {
 	 *   total_units: int,          // πλήθος όλων των units (progress bar)
@@ -409,7 +424,7 @@ final class SF_Targets {
 
 		$product = wc_get_product( (int) $unit['id'] );
 		if ( ! $product instanceof WC_Product ) {
-			$entry['error'] = 'Το προϊόν δεν βρέθηκε.';
+			$entry['error'] = __( 'Το προϊόν δεν βρέθηκε.', 'smart-formatter' );
 			return $entry;
 		}
 
@@ -526,7 +541,7 @@ final class SF_Targets {
 
 		$term = get_term( (int) $unit['id'], (string) $unit['taxonomy'] );
 		if ( ! $term instanceof WP_Term || is_wp_error( $term ) ) {
-			$entry['error'] = 'Ο όρος δεν βρέθηκε.';
+			$entry['error'] = __( 'Ο όρος δεν βρέθηκε.', 'smart-formatter' );
 			return $entry;
 		}
 
@@ -544,7 +559,11 @@ final class SF_Targets {
 				array( 'description' => $new )
 			);
 			if ( is_wp_error( $res ) ) {
-				$entry['error'] = 'Αποτυχία ενημέρωσης όρου: ' . $res->get_error_message();
+				$entry['error'] = sprintf(
+					/* translators: %s: μήνυμα σφάλματος */
+					__( 'Αποτυχία ενημέρωσης όρου: %s', 'smart-formatter' ),
+					$res->get_error_message()
+				);
 				return $entry;
 			}
 		}

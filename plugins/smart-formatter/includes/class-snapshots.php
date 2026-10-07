@@ -16,8 +16,10 @@
  *    cap = self::HISTORY (default 10). Παλιά runs εκπίπτουν FIFO.
  *  - Payload cap: αν ένα run άλλαξε ΟΛΑ τα πεδία εκατοντάδων
  *    προϊόντων το option μεγαλώνει. Guard: self::MAX_BYTES — αν το
- *    encoded snapshot υπερβαίνει το cap, γράφεται ρητά entry με
- *    truncated=true (ο χρήστης το βλέπει και αποφασίζει).
+ *    encoded snapshot υπερβαίνει το cap, πετιούνται τα ΠΑΛΑΙΟΤΕΡΑ units
+ *    μέχρι να χωρέσει και σημειώνεται truncated=true. Τα units που
+ *    κρατήθηκαν ΕΠΑΝΑΦΕΡΟΝΤΑΙ κανονικά (μερική επαναφορά, ρητά
+ *    σημειωμένη στο UI και στο αποτέλεσμα του restore).
  *
  * Concurrency: τα snapshots γράφονται μόνο από το
  * SF_Admin_UI AJAX endpoint (capability + nonce gated). Το batching
@@ -102,13 +104,21 @@ final class SF_Snapshots {
 					}
 				}
 
-				// Byte-cap guard: αν ξεπεράστηκε, truncate σημασία —
-				// περικόπτει τα ΠΑΛΙΑ units του ίδιου run (τα πρόσφατα
-				// μένουν — πιο χρήσιμα για targeted restore).
+				// Byte-cap guard: αν ξεπεράστηκε, πετιούνται τα ΠΑΛΑΙΟΤΕΡΑ
+				// units του ίδιου run μέχρι να χωρέσει (κρατάμε όσα περισσότερα
+				// γίνεται — όλα παραμένουν επαναφέρσιμα).
 				$encoded = wp_json_encode( $snap, JSON_UNESCAPED_UNICODE );
-				if ( is_string( $encoded ) && strlen( $encoded ) > self::MAX_BYTES ) {
+				$size    = is_string( $encoded ) ? strlen( $encoded ) : 0;
+				if ( $size > self::MAX_BYTES ) {
 					$snap['truncated'] = true;
-					$snap['units']     = array_slice( $snap['units'], -50 ); // κράτα τα 50 τελευταία.
+					$drop              = 0;
+					$count             = count( $snap['units'] );
+					while ( $drop < $count && $size > self::MAX_BYTES ) {
+						$u_json = wp_json_encode( $snap['units'][ $drop ], JSON_UNESCAPED_UNICODE );
+						$size  -= ( is_string( $u_json ) ? strlen( $u_json ) : 0 ) + 1;
+						$drop++;
+					}
+					$snap['units'] = array_slice( $snap['units'], $drop );
 				}
 
 				return self::store( $history );
@@ -175,7 +185,7 @@ final class SF_Snapshots {
 		return $out;
 	}
 
-	/** Τα sanitized units ενός snapshot (για restore UI). */
+	/** Τα sanitized units ενός snapshot (για restore UI — χωρίς τα before payloads). */
 	public static function units_of( string $run_id ): array {
 
 		foreach ( self::load() as $snap ) {
@@ -186,8 +196,9 @@ final class SF_Snapshots {
 					if ( null === $c ) {
 						continue;
 					}
+					unset( $c['before'] ); // Το UI δεν το χρειάζεται — μπορεί να είναι MB.
 					$c['idx']         = $i;
-					$c['field_label'] = self::field_label( $c['field'] );
+					$c['field_label'] = __( self::field_label( $c['field'] ), 'smart-formatter' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid από το fields registry.
 					$out[]            = $c;
 				}
 				return $out;
@@ -225,26 +236,32 @@ final class SF_Snapshots {
 
 	/**
 	 * Restore snapshot — κάνει το UNDO:
-	 *   ΟΛΑ τα units (null $unit_indexes) ή SELECTIVE (array offsets
+	 *   ΟΛΑ τα units (κενό $unit_indexes) ή SELECTIVE (array offsets
 	 *   στα units του snapshot, όπως τα δίνει το restore UI).
 	 *
 	 * Το restore ΔΕΝ περνά από το SF_Engine — γράφει ΠΑΝΤΑ το
 	 * 'before' value πίσω AS-IS (οπότε ακόμα και με ένα παλιό snapshot μετά
-	 * από αλλαγές του rules registry στο μέλλον, το restore μένει
-	 * πιστό).
+	 * από αλλαγές του rules registry στο μέλλον, το restore μένει πιστό).
+	 *
+	 * Truncated snapshot: επαναφέρονται τα units που ΚΡΑΤΗΘΗΚΑΝ και το
+	 * αποτέλεσμα φέρει partial=true (το UI το δηλώνει ρητά).
 	 *
 	 * Terms: wp_update_term(). Products: WC CRUD setters + save()
 	 * (ίδια channels με το SF_Targets — τα Woo hooks τρέχουν, cache
 	 * invalidation κ.λπ.).
 	 *
-	 * @return array notices {restored:int, skipped:int, errors:string[]}
+	 * @return array {restored:int (units), skipped:int, errors:string[],
+	 *                partial:bool, found:bool, product_ids:int[]}
 	 */
 	public static function restore( string $run_id, array $unit_indexes = array() ): array {
 
 		$result = array(
-			'restored' => 0,
-			'skipped'  => 0,
-			'errors'   => array(),
+			'restored'    => 0,
+			'skipped'     => 0,
+			'errors'      => array(),
+			'partial'     => false,
+			'found'       => false,
+			'product_ids' => array(),
 		);
 
 		$snap = null;
@@ -256,37 +273,25 @@ final class SF_Snapshots {
 		}
 
 		if ( null === $snap ) {
-			$result['errors'][] = 'Το snapshot δεν βρέθηκε.';
+			$result['errors'][] = __( 'Το snapshot δεν βρέθηκε.', 'smart-formatter' );
 			return $result;
 		}
 
-		// BLOCK: truncated snapshot — μερικό restore = ρίσκο δεδομένων.
-		if ( ! empty( $snap['truncated'] ) ) {
-			$result['errors'][] = __(
-				'Το snapshot είναι ελλιπές (truncated) — η επαναφορά μπλοκαρίστηκε για ασφάλεια.',
-				'smart-formatter'
-			);
-			return $result;
-		}
+		$result['found']   = true;
+		$result['partial'] = ! empty( $snap['truncated'] );
 
-		$units   = ( $snap['units'] ?? array() );
-		$select  = empty( $unit_indexes ) ? array_keys( $units ) : $unit_indexes;
+		$units  = ( $snap['units'] ?? array() );
+		$select = empty( $unit_indexes ) ? array_keys( $units ) : array_values( array_unique( array_map( 'intval', $unit_indexes ) ) );
 
-		// Group by product id — ώστε ένα προϊόν που έχουν πολλά units
-		// να γράφεται ΜΙΑ φορά (product->save() πολλά-φορές = αργό,
+		// Group by product id — ώστε ένα προϊόν με πολλά units να
+		// γράφεται ΜΙΑ φορά (product->save() πολλές φορές = αργό,
 		// duplicate webhooks/notifications).
 		$by_product = array();
 		$terms      = array();
 
 		foreach ( $select as $idx ) {
 
-			$idx = (int) $idx;
-			if ( ! isset( $units[ $idx ] ) ) {
-				$result['skipped']++;
-				continue;
-			}
-
-			$u = self::clean_unit( $units[ $idx ] );
+			$u = isset( $units[ $idx ] ) ? self::clean_unit( $units[ $idx ] ) : null;
 
 			if ( null === $u ) {
 				$result['skipped']++;
@@ -294,12 +299,8 @@ final class SF_Snapshots {
 			}
 
 			if ( 'product' === $u['kind'] ) {
-				$pid = (int) $u['id'];
-				if ( ! isset( $by_product[ $pid ] ) ) {
-					$by_product[ $pid ] = array();
-				}
-				$by_product[ $pid ][ $u['field'] ] = $u['before'];
-			} elseif ( 'term' === $u['kind'] ) {
+				$by_product[ $u['id'] ][ $u['field'] ] = $u['before'];
+			} else {
 				$terms[] = $u;
 			}
 		}
@@ -314,46 +315,65 @@ final class SF_Snapshots {
 					__( 'Το προϊόν #%d δεν βρέθηκε — δεν επαναφέρθηκε.', 'smart-formatter' ),
 					$pid
 				);
+				$result['skipped'] += count( $fieldmap );
 				continue;
 			}
 
-			$did = false;
+			$did = 0;
 
-			if ( isset( $fieldmap[ SF_Targets::F_SHORT_DESC ] ) ) {
-				$product->set_short_description( (string) $fieldmap[ SF_Targets::F_SHORT_DESC ] );
-				$did = true;
-			}
-			if ( isset( $fieldmap[ SF_Targets::F_LONG_DESC ] ) ) {
-				$product->set_description( (string) $fieldmap[ SF_Targets::F_LONG_DESC ] );
-				$did = true;
-			}
-			if ( isset( $fieldmap[ SF_Targets::F_PURCHASE ] ) ) {
-				$product->set_purchase_note( (string) $fieldmap[ SF_Targets::F_PURCHASE ] );
-				$did = true;
-			}
-			if ( isset( $fieldmap[ SF_Targets::F_ATTRIBUTES ] ) ) {
-				$before_blob = json_decode( (string) $fieldmap[ SF_Targets::F_ATTRIBUTES ], true );
-				if ( is_array( $before_blob ) ) {
-					$attrs = $product->get_attributes();
-					foreach ( $before_blob as $akey => $opts ) {
-						if ( isset( $attrs[ $akey ] ) && $attrs[ $akey ] instanceof WC_Product_Attribute
-							&& is_array( $opts ) ) {
-							$attrs[ $akey ]->set_options( $opts );
+			foreach ( $fieldmap as $field => $before ) {
+				switch ( $field ) {
+					case SF_Targets::F_SHORT_DESC:
+						$product->set_short_description( $before );
+						$did++;
+						break;
+					case SF_Targets::F_LONG_DESC:
+						$product->set_description( $before );
+						$did++;
+						break;
+					case SF_Targets::F_PURCHASE:
+						$product->set_purchase_note( $before );
+						$did++;
+						break;
+					case SF_Targets::F_ATTRIBUTES:
+						$before_blob = json_decode( $before, true );
+						if ( ! is_array( $before_blob ) ) {
+							$result['skipped']++;
+							break;
 						}
-					}
-					$product->set_attributes( $attrs );
-					$did = true;
+						$attrs = $product->get_attributes();
+						foreach ( $before_blob as $akey => $opts ) {
+							if ( isset( $attrs[ $akey ] ) && $attrs[ $akey ] instanceof WC_Product_Attribute
+								&& is_array( $opts ) ) {
+								$attrs[ $akey ]->set_options( $opts );
+							}
+						}
+						$product->set_attributes( $attrs );
+						$did++;
+						break;
 				}
 			}
 
-			if ( $did ) {
+			if ( $did > 0 ) {
 				$product->save();
-				$result['restored']++;
+				$result['restored']     += $did;
+				$result['product_ids'][] = (int) $pid;
 			}
 		}
 
 		// ---- Terms ----
 		foreach ( $terms as $t ) {
+
+			$term = get_term( (int) $t['id'], (string) $t['taxonomy'] );
+			if ( ! $term instanceof WP_Term ) {
+				$result['errors'][] = sprintf(
+					/* translators: %d: ID όρου */
+					__( 'Ο όρος #%d δεν βρέθηκε — δεν επαναφέρθηκε.', 'smart-formatter' ),
+					(int) $t['id']
+				);
+				$result['skipped']++;
+				continue;
+			}
 
 			$res = wp_update_term(
 				(int) $t['id'],
@@ -367,6 +387,7 @@ final class SF_Snapshots {
 					__( 'Αποτυχία επαναφοράς όρου: %s', 'smart-formatter' ),
 					$res->get_error_message()
 				);
+				$result['skipped']++;
 			} else {
 				$result['restored']++;
 			}
@@ -424,9 +445,8 @@ final class SF_Snapshots {
 	/** Store — persist το history (JSON-encoded, autoload off). */
 	private static function store( array $history ): bool {
 
-		// Re-encode: το internal format κρατά 'units' στου εαυτού
-		// του· αλλαγή ονόματος σε 'units_raw' δίνει και future-proof
-		// schema marker στο persisted blob.
+		// Re-encode: εσωτερικά το κλειδί είναι 'units'· στο persisted blob
+		// γράφεται ως 'units_raw' (schema marker — το load() τα ξανακαθαρίζει).
 		$persist = array();
 		foreach ( $history as $snap ) {
 			$copy = $snap;
@@ -462,7 +482,10 @@ final class SF_Snapshots {
 	/**
 	 * Strict unit cleaner — array ή null (null = discard).
 	 * Το schema είναι αυστηρό, χωρίς εξαιρέσεις — εφαρμόζεται before-write
-	 * ΚΑΙ after-read (double defence).
+	 * ΚΑΙ after-read (double defence):
+	 *  - kind 'product': id > 0, field ∈ product fields.
+	 *  - kind 'term':    id > 0, field = term description, taxonomy ∈ {product_cat, product_tag}.
+	 *  - before: string.
 	 */
 	private static function clean_unit( $u ): ?array {
 
@@ -470,26 +493,145 @@ final class SF_Snapshots {
 			return null;
 		}
 
-		if ( ! in_array( (string) ( $u['kind'] ?? '' ), array( 'product', 'term' ), true ) ) {
+		$kind  = (string) ( $u['kind'] ?? '' );
+		$id    = isset( $u['id'] ) && is_numeric( $u['id'] ) ? absint( $u['id'] ) : 0;
+		$field = is_string( $u['field'] ?? null ) ? $u['field'] : '';
+		$tax   = is_string( $u['taxonomy'] ?? null ) ? $u['taxonomy'] : '';
+		$defs  = SF_Targets::fields();
+
+		if ( $id <= 0 || ! isset( $defs[ $field ] ) || ! is_string( $u['before'] ?? null ) ) {
+			return null;
+		}
+
+		if ( 'product' === $kind ) {
+			if ( 'product' !== $defs[ $field ]['kind'] ) {
+				return null;
+			}
+			$tax = '';
+		} elseif ( 'term' === $kind ) {
+			if ( 'term' !== $defs[ $field ]['kind'] || ! in_array( $tax, array( 'product_cat', 'product_tag' ), true ) ) {
+				return null;
+			}
+		} else {
 			return null;
 		}
 
 		return array(
-			'kind'     => (string) $u['kind'],
-			'id'       => absint( $u['id'] ?? 0 ),
-			'taxonomy' => in_array( (string) ( $u['taxonomy'] ?? '' ), array( 'product_cat', 'product_tag' ), true ) ? (string) $u['taxonomy'] : '',
-			'field'    => isset( self::field_whitelist()[ (string) ( $u['field'] ?? '' ) ] ) ? (string) $u['field'] : '',
-			'before'   => is_string( $u['before'] ?? null ) ? $u['before'] : '',
+			'kind'     => $kind,
+			'id'       => $id,
+			'taxonomy' => $tax,
+			'field'    => $field,
+			'before'   => $u['before'],
 		);
 	}
 
-	/** Field whitelist (ΚΑΙ reference για το clean_unit). */
-	private static function field_whitelist(): array {
-		$map = array();
-		foreach ( SF_Targets::fields() as $fid => $def ) {
-			$map[ $fid ] = true;
+	/**
+	 * Import validation (Backup & Επαναφορά) — το blob ιστορικού από
+	 * αρχείο είναι UNTRUSTED: θα γραφτεί σε προϊόντα με ένα Restore.
+	 *  - Δομή: JSON array από snapshots· κάθε snapshot με run_id (40 hex),
+	 *    created (Y-m-d H:i:s), state (running|done), units_raw array.
+	 *  - Units: strict clean_unit() + το προϊόν/ο όρος ΠΡΕΠΕΙ να υπάρχει.
+	 *  - before: wp_kses_post() (attributes: κάθε option value ξεχωριστά).
+	 *  - sel/fields/rules: whitelists.
+	 * Δομικά άκυρο blob → null (απορρίπτεται ολόκληρο). Units που δείχνουν
+	 * σε ανύπαρκτα προϊόντα/όρους ή άκυρα units παραλείπονται (μετρώνται).
+	 *
+	 * @return array|null {json:string, dropped:int} ή null.
+	 */
+	public static function sanitize_import( string $raw ): ?array {
+
+		$decoded = json_decode( $raw, true );
+		if ( ! is_array( $decoded ) || ( ! empty( $decoded ) && array_keys( $decoded ) !== range( 0, count( $decoded ) - 1 ) ) ) {
+			return null;
 		}
-		return $map;
+
+		$rules_reg = SF_Rules::registry();
+		$fields    = SF_Targets::fields();
+		$out       = array();
+		$dropped   = 0;
+
+		foreach ( $decoded as $snap ) {
+
+			if ( ! is_array( $snap )
+				|| ! is_string( $snap['run_id'] ?? null ) || 1 !== preg_match( '/^[a-f0-9]{40}$/', $snap['run_id'] )
+				|| ! is_string( $snap['created'] ?? null ) || 1 !== preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $snap['created'] )
+				|| ! in_array( $snap['state'] ?? null, array( self::STATE_RUNNING, self::STATE_DONE ), true )
+				|| ! is_array( $snap['units_raw'] ?? null ) ) {
+				return null;
+			}
+
+			$units = array();
+			foreach ( $snap['units_raw'] as $u ) {
+				$c = self::clean_unit( $u );
+				if ( null === $c || ! self::target_exists( $c ) ) {
+					$dropped++;
+					continue;
+				}
+				if ( SF_Targets::F_ATTRIBUTES === $c['field'] ) {
+					$blob = json_decode( $c['before'], true );
+					if ( ! is_array( $blob ) ) {
+						$dropped++;
+						continue;
+					}
+					$clean_blob = array();
+					foreach ( $blob as $akey => $opts ) {
+						if ( null === $opts ) {
+							$clean_blob[ sanitize_title( (string) $akey ) ] = null;
+						} elseif ( is_array( $opts ) ) {
+							$clean_blob[ sanitize_title( (string) $akey ) ] = array_map(
+								static function ( $v ) {
+									return wp_kses_post( is_scalar( $v ) ? (string) $v : '' );
+								},
+								array_values( $opts )
+							);
+						}
+					}
+					$c['before'] = (string) wp_json_encode( $clean_blob, JSON_UNESCAPED_UNICODE );
+				} else {
+					$c['before'] = wp_kses_post( $c['before'] );
+				}
+				$units[] = $c;
+			}
+
+			$sel  = is_array( $snap['sel'] ?? null ) ? $snap['sel'] : array();
+			$mode = in_array( $sel['mode'] ?? null, SF_Targets::MODES, true ) ? $sel['mode'] : SF_Targets::MODE_ALL;
+			$csel = array( 'mode' => $mode );
+			foreach ( array( 'products', 'terms' ) as $k ) {
+				if ( is_array( $sel[ $k ] ?? null ) ) {
+					$csel[ $k ] = array_values( array_filter( array_map( 'absint', $sel[ $k ] ) ) );
+				}
+			}
+
+			$out[] = array(
+				'run_id'        => $snap['run_id'],
+				'created'       => $snap['created'],
+				'state'         => $snap['state'],
+				'sel'           => $csel,
+				'fields'        => array_values( array_intersect( is_array( $snap['fields'] ?? null ) ? array_map( 'strval', $snap['fields'] ) : array(), array_keys( $fields ) ) ),
+				'rules'         => array_values( array_intersect( is_array( $snap['rules'] ?? null ) ? array_map( 'strval', $snap['rules'] ) : array(), array_keys( $rules_reg ) ) ),
+				'units_raw'     => $units,
+				'truncated'     => ! empty( $snap['truncated'] ),
+				'changed_total' => isset( $snap['changed_total'] ) ? absint( $snap['changed_total'] ) : 0,
+			);
+
+			if ( count( $out ) >= self::HISTORY ) {
+				break;
+			}
+		}
+
+		return array(
+			'json'    => (string) wp_json_encode( $out, JSON_UNESCAPED_UNICODE ),
+			'dropped' => $dropped,
+		);
+	}
+
+	/** Υπάρχει ακόμη το προϊόν / ο όρος ενός unit; */
+	private static function target_exists( array $u ): bool {
+		if ( 'term' === $u['kind'] ) {
+			return get_term( $u['id'], $u['taxonomy'] ) instanceof WP_Term;
+		}
+		$post = get_post( $u['id'] );
+		return $post instanceof WP_Post && 'product' === $post->post_type;
 	}
 
 	/** Label πεδίου για το restore UI. */

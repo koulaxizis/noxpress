@@ -54,7 +54,7 @@ class RS_Lang {
 		add_filter( 'gettext', array( __CLASS__, 'filter_gettext' ), 10, 3 );
 	}
 
-		/** Η ρητή επιλογή του χρήστη: 'el' | 'en' | 'auto' (default). */
+	/** Η ρητή επιλογή του χρήστη: 'el' | 'en' | 'auto' (default). */
 	public static function get_choice( ?int $user_id = null ): string {
 
 		$uid  = $user_id ?? get_current_user_id();
@@ -93,7 +93,7 @@ class RS_Lang {
 		return $lang;
 	}
 
-		/**
+	/**
 	 * Θέτει τη γλώσσα: 'el' | 'en' | 'auto'.
 	 * v1.3.6 (#5): 'auto' = σβήνει το user meta → Follow-WP mode.
 	 */
@@ -128,8 +128,8 @@ class RS_Lang {
 		}
 		return $translation;
 	}
-	
-		/**
+
+	/**
 	 * v1.3.8 (#5): Ημερομηνία σε εμφανιζόμενη μορφή.
 	 *
 	 * 'el' → ηη/μμ/εεεε, κάθε άλλη γλώσσα → ανέπαφο 'Y-m-d'.
@@ -154,12 +154,13 @@ class RS_Lang {
 
 	/**
 	 * Λεξικό Ελληνικά → English — ΟΛΑ τα εμφανιζόμενα strings του
-	 * domain 'revenue-splitter' στην v1.3.2.
+	 * domain 'revenue-splitter' (v1.7.0: επαληθευμένο με εξαγωγή όλων των
+	 * __()/esc_html__()/… κλήσεων — κάθε ελληνικό msgid έχει byte-identical
+	 * κλειδί εδώ, χωρίς διπλότυπα).
 	 */
 	private static $dict = array(
-	
-			// --- v1.3.6: Υπερ-πλήρες backup/import ---
-		'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, χρώματα δικαιούχων, κανάλια πώλησης, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, global beneficiaries, beneficiary colors, sales channels, portal keys (hashed), ledger (payments & extra income), coupons, start date, per-product splits/VAT, free-copy reasons and user languages. Importing REPLACES the corresponding data.',
+
+		// --- v1.3.6: Υπερ-πλήρες backup/import ---
 		'Μη έγκυρο τμήμα post meta στο backup.'               => 'Invalid post meta section in the backup.',
 		'Προϊοντικά overrides: εφαρμόστηκαν %d εγγραφές.'     => 'Product overrides: %d entries applied.',
 		'ΔΕΝ βρέθηκαν τα προϊόντα με IDs %s — τα overrides τους παραλείφθηκαν (τα product IDs του backup δεν ταιριάζουν με τα τρέχοντα).' => 'Products with IDs %s were NOT found — their overrides were skipped (the backup product IDs do not match the current ones).',
@@ -174,13 +175,9 @@ class RS_Lang {
 		'Revenue Splitter — Δικαιούχοι'                          => 'Revenue Splitter — Beneficiaries',
 		'Revenue Splitter — Portal'                              => 'Revenue Splitter — Portal',
 		'Revenue Splitter:'                                      => 'Revenue Splitter:',
-		'Dashboard'                                              => 'Dashboard',
-		'Ρυθμίσεις'                                              => 'Settings',
-		'Portal'                                                 => 'Portal',
 		'RS Ρυθμίσεις'                                           => 'RS Settings',
 		'RS Portal'                                              => 'RS Portal',
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'       => 'You do not have permission to access this page.',
-		'Πλήρες dashboard →'                                     => 'Full dashboard →',
 
 		// --- Φόρμα περιόδου / φίλτρα ---
 		// v1.3.2 (#7): αφαίρεσαν τα νεκρά 'Αναζήτηση σε τίτλους…',
@@ -198,7 +195,6 @@ class RS_Lang {
 		'Προϊόν'                                                 => 'Product',
 		'Περίοδος'                                               => 'Period',
 		// v1.3.4: επαναφορά φίλτρου προϊόντος στο dashboard.
-		'Όλα τα προϊόντα'                                        => 'All products',
 
 		// --- KPIs ---
 		'Παραγγελίες'                                            => 'Orders',
@@ -206,7 +202,6 @@ class RS_Lang {
 		'Μικτό (με ΦΠΑ)'                                         => 'Gross (incl. VAT)',
 		'ΦΠΑ'                                                    => 'VAT',
 		'Καθαρό (πριν καταμερισμό)'                              => 'Net (before split)',
-		'καθαρά'                                                 => 'net',
 
 		// --- Πίνακες ---
 		'Ανά προϊόν'                                             => 'Per product',
@@ -215,16 +210,10 @@ class RS_Lang {
 		'Μικτό'                                                  => 'Gross',
 		'Καθαρό'                                                 => 'Net',
 		'Καταμερισμός'                                           => 'Split',
-		'Σύνολα ανά δικαιούχο'                                   => 'Totals per beneficiary',
 		'Δεν υπάρχουν δεδομένα δικαιούχων στην περίοδο.'         => 'No beneficiary data in this period.',
-		'Δικαιούχοι'                                             => 'Beneficiaries',
 		'Ποσό'                                                   => 'Amount',
-		'Ποσό (περιόδου)'                                        => 'Amount (period)',
 		'Προϊόν #%d'                                             => 'Product #%d',
-		'ID'                                                     => 'ID',
 		'ΣΥΝΟΛΑ'                                                 => 'TOTALS',
-		'Σύνολο'                                                 => 'Total',
-		'ΦΠΑ %'                                                  => 'VAT %',
 
 		// --- Widget / dashboard ---
 		'global defaults'                                        => 'global defaults',
@@ -249,7 +238,6 @@ class RS_Lang {
 		'ΦΠΑ (%)'                                                => 'VAT (%)',
 		'Κενό = global default (%s%%).'                          => 'Empty = global default (%s%%).',
 		'Δεν έχουν ρυθμιστεί global defaults. Πήγαινε στο WP-admin → Revenue Splitter → Ρυθμίσεις.' => 'No global defaults configured. Go to WP-admin → Revenue Splitter → Settings.',
-		'Όνομα δικαιούχου'                                        => 'Beneficiary name',
 		'Προϊόν — πλήρης δικαιούχος'                             => 'Product — sole beneficiary',
 		'Μη έγκυρη λίστα δικαιούχων.'                            => 'Invalid beneficiaries list.',
 		'Το όνομα δικαιούχου δεν επιτρέπεται να περιέχει τον χαρακτήρα «|».' => 'A beneficiary name cannot contain the "|" character.',
@@ -270,13 +258,8 @@ class RS_Lang {
 
 		// --- Portal (admin): hashed keys (v1.3.0) — διατηρούνται,
 		//     δεν επιβεβαιώθηκε ότι είναι πλήρως νεκρές. ---
-		'Καινούρια κλειδιά — αντιγράψε τα ΤΩΡΑ:'                  => 'New keys — copy them NOW:',
-		'αποθηκεύονται κατακερματισμένα και δεν θα εμφανιστούν ξανά.' => 'they are stored hashed and will never be shown again.',
-		'Κρυφό — αποθηκεύεται κατακερματισμένα.'                  => 'Hidden — stored hashed.',
-		'Παλιό (plaintext) κλειδί — ανανέωσέ το για να γίνει hash.' => 'Legacy (plaintext) key — regenerate it to convert it to a hash.',
 
 		// --- Portal (frontend): login ---
-		'Author Portal'                                          => 'Author Portal',
 		'Κλειδί'                                                  => 'Key',
 		'Είσοδος'                                                => 'Sign in',
 		'Πολλές αποτυχημένες προσπάθειες — δοκίμασε ξανά σε 15 λεπτά.' => 'Too many failed attempts — try again in 15 minutes.',
@@ -285,27 +268,17 @@ class RS_Lang {
 		// --- Portal (frontend): dashboard δικαιούχου ---
 		'Αυτόν τον μήνα'                                          => 'This month',
 		'Αποπληρωτέο υπόλοιπο'                                    => 'Outstanding balance',
-		'Αυτόν τον μήνα — ανά προϊόν'                             => 'This month — per product',
 		'Με ΦΠΑ'                                                 => 'With VAT',
 		'Χωρίς ΦΠΑ'                                               => 'Without VAT',
 		'Στοκ'                                                    => 'Stock',
 		'Το μερίδιό μου'                                          => 'My share',
-		'Καμία πώληση των προϊόντων σου αυτόν τον μήνα.'          => 'None of your products sold this month.',
 		'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.' => '"Outstanding balance" = all-time shares from sales + income outside sales − payments received.',
-		'All-time μερίδια από πωλήσεις'                           => 'All-time shares from sales',
-		'Πληρωμές που ελήφθησαν'                                  => 'Payments received',
 		'Ποσοστό'                                                => 'Percent',
 		'Μερίδιο'                                                 => 'Share',
-		'Ποσοστό σου'                                            => 'Your percentage',
-		'Ποσό σου'                                               => 'Your amount',
 		'Καμία πώληση σε αυτή την περίοδο.'                      => 'No sales in this period.',
 
 		// --- Portal: διαφάνεια πωλήσεων (v1.2.0) ---
-		'Τεμάχια (πληρωμένα)'                                    => 'Items (paid)',
-		'Σε πλήρη τιμή'                                          => 'Full price',
-		'Με έκπτωση'                                             => 'Discounted',
 		'Δωρεάν'                                                 => 'Free',
-		'Καθαρό (καταμεριζόμενο)'                                => 'Net (splittable)',
 		'Πλήρης'                                                 => 'Full',
 		'Έκπτωση'                                                => 'Discount',
 
@@ -327,7 +300,6 @@ class RS_Lang {
 		'Πληρωμή'                                                => 'Payment',
 		'Έσοδο'                                                  => 'Income',
 		'Έσοδο (+/−)'                                            => 'Income (+/−)',
-		'Κινήσεις εκτός πωλήσεων'                                => 'Non-sales activity',
 		'Καμία εγγραφή.'                                         => 'No entries.',
 		'Καταχώριση'                                             => 'Add entry',
 		'Η εγγραφή καταχωρήθηκε.'                                => 'Entry added.',
@@ -339,7 +311,7 @@ class RS_Lang {
 		'Αιτιολογία (υποχρεωτική)…'                              => 'Reason (required)…',
 		'Ποσό (π.χ. 150 ή -40)'                                  => 'Amount (e.g. 150 or -40)',
 		'Άκυρος τύπος εγγραφής.'                                 => 'Invalid entry type.',
-		'Mη έγκυρη ημερομηνία.'                                  => 'Invalid date.',
+		'Μη έγκυρη ημερομηνία.'                                  => 'Invalid date.',
 		'Επίλεξε δικαιούχο.'                                     => 'Select a beneficiary.',
 		'Μη έγκυρο ποσό.'                                        => 'Invalid amount.',
 		'Το ποσό δεν μπορεί να είναι μηδέν.'                     => 'Amount cannot be zero.',
@@ -348,24 +320,15 @@ class RS_Lang {
 		'Η εγγραφή δεν βρέθηκε — ίσως έχει ήδη διαγραφεί.'       => 'Entry not found — it may have already been deleted.',
 		'Δεν υπάρχουν δικαιούχοι ακόμη — δεν μπορεί να διατηρηθεί ledger.' => 'No beneficiaries yet — the ledger cannot be maintained.',
 		'Κουπόνια δωρεάν αντιτύπων'                               => 'Free-copy coupons',
-		'Κωδικοί κουπονιών'                                      => 'Coupon codes',
 		'Αιτιολογία δωρεάν αντιτύπου'                             => 'Free copy reason',
 		'π.χ. δώρο, διαγωνισμός, κριτική βιβλίου…'               => 'e.g. gift, giveaway, book review…',
 		'Παρακαλώ συμπλήρωσε την αιτιολογία δωρεάν αντιτύπου.'    => 'Please provide the reason for your free copy.',
-		'Ledger (τρέχων μήνας)'                                   => 'Ledger (current month)',
 		'Προσαρμογές εκτός WooCommerce: bonus, υποτροφίες, διορθώσεις («Έσοδο», + ή −) και αποπληρωμές («Πληρωμή», πάντα θετικές). Κάθε εγγραφή χρειάζεται αιτιολογία.' => 'Adjustments outside WooCommerce: bonuses, grants, corrections ("Income", + or −) and payouts ("Payment", always positive). Every entry requires a reason.',
-		'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να συμπληρώσει αιτιολογία δωρεάν αντιτύπου. Διαχωρισμός με κόμμα.' => 'When any of these coupons is applied at checkout, the customer must provide a reason for the free copy. Comma-separated.',
 		'Η πληρωμή πρέπει να είναι θετικό ποσό (ποσά που αφαιρούνται καταχωρούνται ως «Έσοδο» με αρνητική τιμή).' => 'A payment must be a positive amount (deductions are entered as "Income" with a negative value).',
 		'Άγνωστος δικαιούχος — αποθηκεύεις πρώτα τους δικαιούχους στις Ρυθμίσεις;' => 'Unknown beneficiary — did you save the beneficiaries in Settings first?',
-		'Έσοδα εκτός πωλήσεων (περιόδου)'                         => 'Non-sales income (period)',
-		'Πληρωμές (περιόδου)'                                     => 'Payments (period)',
 
 		// --- Portal CSV headers ---
-		'Πλήρης τιμή (τεμ.)'                                     => 'Full price (qty)',
-		'Με έκπτωση (τεμ.)'                                      => 'Discounted (items)',
 		'Μέση έκπτωση (%)'                                       => 'Average discount (%)',
-		'Δωρεάν (τεμ.)'                                          => 'Free (items)',
-		'Ποσοστό σου (%)'                                        => 'Your percentage (%)',
 
 		// --- Backup / Import ---
 		'Backup & Επαναφορά'                                     => 'Backup & Restore',
@@ -381,14 +344,14 @@ class RS_Lang {
 		'Δεν επιλέχθηκε αρχείο JSON.'                            => 'No JSON file selected.',
 		'Το αρχείο δεν είναι έγκυρο JSON.'                       => 'The file is not valid JSON.',
 		'Όνομα|Ποσοστό (μία γραμμή ανά δικαιούχο)'               => 'Name|Percentage (one beneficiary per line)',
-		
-				// --- RS_Portal v1.3.5 ---
+
+		// --- RS_Portal v1.3.5 ---
 		'Λάθος κλειδί.'                                          => 'Wrong key.',
 		'Μερίδιό σου (περιόδου)'                                 => 'Your share (period)',
 		'Κουπόνια'                                               => 'Coupons',
 		'Τελευταίοι μήνες'                                        => 'Recent months',
-		
-				// --- v1.3.6 (#2): Εξόφληση όλων (περιόδου) --- 
+
+		// --- v1.3.6 (#2): Εξόφληση όλων (περιόδου) ---
 		'Εξόφληση όλων (περιόδου)'                              => 'Settle all (period)',
 		'Από'                                                    => 'From',
 		'Έως'                                                    => 'To',
@@ -408,15 +371,13 @@ class RS_Lang {
 		'Ισχύει ανά χρήστη (μόνο για εσένα). Εάν δεν έχεις διαλέξει, ακολουθείται η γλώσσα του WordPress.' => 'Per user (only affects you). If you have not picked one, the WordPress language is followed.',
 
 		// --- v1.3.6: diversified strings (backup desc, footer, export header) ---
-		'Made with <3 by %s'                                     => 'Made with <3 by %s',
 		'More plugins at'                                        => 'More plugins at',
 		'Revenue Splitter — %1$s έως %2$s'                       => 'Revenue Splitter — %1$s to %2$s',
-		
-				// --- v1.3.6-fix (#5): λείποντα strings EN mode ---
+
+		// --- v1.3.6-fix (#5): λείποντα strings EN mode ---
 		'Ιστορικό συναλλαγών'                                    => 'Transaction history',
 		'6 μήνες'                                                => '6 months',
 		'12 μήνες'                                               => '12 months',
-		'Ο δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.' => 'The beneficiary signs in on the portal page ([author_portal]) ONLY with their personal key — the key uniquely identifies its holder.',
 		'Κανείς δεν έχει μερίδιο στην περίοδο.' => 'Nobody has a share in this period.',
 
 		// --- v1.3.8: multi-select προϊόντων, φίλτρο δικαιούχου, χρώματα ---
@@ -425,16 +386,10 @@ class RS_Lang {
 		'Όλοι οι δικαιούχοι' => 'All beneficiaries',
 		'Χρώματα δικαιούχων' => 'Beneficiary colors',
 		'Προσαρμοσμένο χρώμα ανά δικαιούχο — εμφανίζεται στα chips του καταμερισμού και στα ονόματα των πινάκων. Default: μωβ #6d4aff.' => 'Custom color per beneficiary — shown in the split chips and table names. Default: purple #6d4aff.',
-		'Ctrl/Cmd + click για πολλαπλή επιλογή. Καμία επιλογή = όλα.' => 'Ctrl/Cmd + click to select multiple. No selection = all.',
-		'Όλοι οι δικαιούχοι'                                      => 'All beneficiaries',
-		'Χρώματα δικαιούχων'                                     => 'Beneficiary colors',
-		'Προσαρμοσμένο χρώμα ανά δικαιούχο — εμφανίζεται στα chips του καταμερισμού και στα ονόματα των πινάκων. Default: μωβ #6d4aff.' => 'Custom color per beneficiary — shown in the split chips and table names. Default: purple #6d4aff.',
 
 		// --- v1.3.8 (#7): κανάλια πώλησης ---
 		'Κανάλια πώλησης' => 'Sales channels',
-		'Προεπιλεγμένη λίστα καναλιών για το checkout...' => 'Default channel list for checkout...',
 		'Προεπιλεγμένη λίστα καναλιών για το checkout (όταν εφαρμόζεται κουπόνι δωρεάν αντιτύπου) και για τη χειροκίνητη εισαγωγή εσόδων στο ledger. Μία γραμμή ανά κανάλι.' => 'Default channel list for checkout (when a free-copy coupon is applied) and for manual ledger income entries. One channel per line.',
-		'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να επιλέξει κανάλι πώλησης από τη λίστα των καναλιών.' => 'When any of these coupons is applied at checkout, the customer must pick a sales channel from the channel list.',
 		'Κανάλι πώλησης'                                           => 'Sales channel',
 		'— Επιλογή καναλιού —'                                     => '— Select channel —',
 		'Παρακαλώ επίλεξε κανάλι πώλησης.'                         => 'Please select a sales channel.',
@@ -450,7 +405,7 @@ class RS_Lang {
 		'Καμία κίνηση ανά κανάλι στην περίοδο.'                    => 'No channel activity in this period.',
 		'Default κανάλι (παραγγελίες χωρίς μαρκάρισμα)'             => 'Default channel (unmarked orders)',
 		'Σε αυτό το κανάλι καταμετρώνται όλες οι κανονικές παραγγελίες του καταστήματος που δεν έχουν μαρκαριστεί με κανάλι (π.χ. από κουπόνι στο checkout). Κενό = «Κατάστημα/Online».' => 'All regular store orders without a channel mark (e.g. via a checkout coupon) are counted here. Empty = “Store/Online”.',
-				'Μη έγκυρο default κανάλι.'                               => 'Invalid default channel.',
+		'Μη έγκυρο default κανάλι.'                               => 'Invalid default channel.',
 
 		// --- v1.4.0 audit: λείποντα strings (χρώματα/κανάλια + audit patches) ---
 		'Μη έγκυρο χρώμα δικαιούχου (απαιτείται #RRGGBB).'                  => 'Invalid beneficiary color (#RRGGBB required).',
@@ -461,7 +416,7 @@ class RS_Lang {
 		'Μη αποδεκτό μέγεθος αρχείου (όριο 64 MB).'                         => 'Unacceptable file size (64 MB limit).',
 		'Μη έγκυρη λίστα δικαιούχων (εσωτερικό σφάλμα μορφοποίησης).'      => 'Invalid beneficiaries list (internal formatting error).',
 
-				// --- Πρόταση 1: mini chart τάσης --- 
+		// --- Πρόταση 1: mini chart τάσης ---
 		'Τάση (μήνα με μήνα)'                => 'Trend (month by month)',
 		'Μερίδιο δικαιούχου'                 => 'Beneficiary share',
 		'Σύνολο μεριδίων'                    => 'Total shares',
@@ -472,13 +427,74 @@ class RS_Lang {
 		'Ledger: η εγγραφή στη θέση %d δεν είναι έγκυρη.'        => 'Ledger: the entry at position %d is invalid.',
 		'Ledger: η εγγραφή στη θέση %1$d απέτυχε — %2$s'         => 'Ledger: the entry at position %1$d failed — %2$s',
 		'Ledger: ΚΑΜΙΑ αλλαγή δεν έγινε — το υπάρχον ledger παρέμεινε άθικτο.' => 'Ledger: NO changes were made — the existing ledger remained intact.',
-		'Η σελίδα checkout χρησιμοποιεί το WooCommerce Blocks. Το πεδίο «Κανάλι πώλησης» θα εμφανίζεται ΜΟΝΟ σε classic checkout. %1$sΔιάβασε το επίσημο άρθρο%2$s για συμβατότητα ή επιστρέψε στο classic checkout.' => 'The checkout page uses WooCommerce Blocks. The "Sales channel" field will appear ONLY in the classic checkout. %1$sRead the official article%2$s for compatibility, or switch back to the classic checkout.',
 		'εκτίμηση έκπτωσης (τιμοκατάλογος)'                       => 'discount estimate (current price list)',
 
 		// --- v1.4.1 (#2): Backup χωρίς ledger section ----
-		'Tο backup δεν περιέχει ledger — το υπάρχον ledger παρέμεινε άθικτο.' => 'The backup does not contain a ledger — the existing ledger was left unchanged.',
+		'Το backup δεν περιέχει ledger — το υπάρχον ledger παρέμεινε άθικτο.' => 'The backup does not contain a ledger — the existing ledger was left unchanged.',
 
 		// --- v1.5.0 polish (#1): bilingual placeholder καναλιών (Ρυθμίσεις) ---
 		"Βιβλιοπωλείο\nΕκδηλώσεις\nOnline\nΧονδρική" => "Bookstore\nEvents\nOnline\nWholesale",
+
+		// --- v1.7.0: συμπλήρωση λεξικού (emails, portal reset, Noxpress home, notices) ---
+		'Συμπεριλαμβάνονται: ΦΠΑ default, global δικαιούχοι, χρώματα δικαιούχων, emails δικαιούχων, opt-in μηνιαίας αναφοράς, κανάλια πώλησης, κλειδιά portal (hashed), ledger (πληρωμές & έξτρα έσοδα), κουπόνια, ημερομηνία έναρξης, καταμερισμός/ΦΠΑ ανά προϊόν, αιτιολογίες δωρεάν αντιτύπων και γλώσσες χρηστών. Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα.' => 'Includes: default VAT, global beneficiaries, beneficiary colors, beneficiary emails, monthly report opt-ins, sales channels, portal keys (hashed), ledger (payments & extra income), coupons, start date, per-product splits/VAT, free-copy reasons and user languages. Importing REPLACES the corresponding data.',
+		'Ο δικαιούχος μπαίνει στη σελίδα του portal ([rs_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.' => 'The beneficiary signs in on the portal page ([rs_portal]) ONLY with their personal key — the key uniquely identifies its holder.',
+		'Όταν στο checkout εφαρμόζεται οποιοδήποτε από αυτά τα κουπόνια, ο πελάτης υποχρεούται να επιλέξει κανάλι πώλησης από τη λίστα των καναλιών. Διαχωρισμός με κόμμα.' => 'When any of these coupons is applied at checkout, the customer must pick a sales channel from the channel list. Comma-separated.',
+		'Η σελίδα checkout χρησιμοποιεί το Checkout block του WooCommerce. Το πεδίο «Κανάλι πώλησης» / «Αιτιολογία δωρεάν αντιτύπου» εμφανίζεται ΜΟΝΟ στο classic checkout (shortcode [woocommerce_checkout]) — με το block τα κουπόνια δωρεάν αντιτύπων ΔΕΝ ζητούν κανάλι/αιτιολογία. %1$sΔιάβασε το επίσημο άρθρο%2$s ή επέστρεψε στο classic checkout.' => 'The checkout page uses the WooCommerce Checkout block. The "Sales channel" / "Free copy reason" field appears ONLY in the classic checkout (shortcode [woocommerce_checkout]) — with the block, free-copy coupons do NOT ask for a channel/reason. %1$sRead the official article%2$s or switch back to the classic checkout.',
+		'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s.' => 'The following emails were NOT saved (invalid address): %s.',
+		'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s. Ο καταμερισμός αποθηκεύτηκε κανονικά.' => 'The following emails were NOT saved (invalid address): %s. The split was saved normally.',
+
+		'Επισκόπηση' => 'Overview',
+		'Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal.' => 'Revenue split per beneficiary, VAT, ledger and portal.',
+		'Ρυθμίσεις του Revenue Splitter.' => 'Revenue Splitter settings.',
+		'Διαχείριση κλειδιών πρόσβασης των δικαιούχων στο portal.' => 'Manage the beneficiaries\' portal access keys.',
+		'Το οικοσύστημα των plugins του καταστήματός σου. Διάλεξε πού θα πας:' => 'Your store\'s plugin ecosystem. Choose where to go:',
+		'Κατάσταση' => 'Status',
+		'Έκδοση' => 'Version',
+		'Ενεργό' => 'Active',
+		'Μη εγκατεστημένο / ανενεργό' => 'Not installed / inactive',
+		'Άνοιγμα' => 'Open',
+
+		'Emails δικαιούχων & μηνιαία αναφορά' => 'Beneficiary emails & monthly report',
+		'Το email χρησιμοποιείται για την αποστολή νέου κλειδιού portal (ροή «Ξέχασα το κλειδί») και για τη μηνιαία αναφορά πωλήσεων (στέλνεται τις πρώτες μέρες κάθε μήνα για τον προηγούμενο). Ο συγγραφέας μπορεί να ενεργοποιήσει/απενεργοποιήσει την αναφορά και μόνος του από το portal του.' => 'The email is used to send a new portal key ("Forgot my key" flow) and for the monthly sales report (sent in the first days of each month for the previous one). The author can also enable/disable the report from their own portal.',
+		'Μηνιαία αναφορά' => 'Monthly report',
+		'Μη έγκυρο email δικαιούχου (τα υπόλοιπα αποθηκεύτηκαν κανονικά).' => 'Invalid beneficiary email (the rest were saved normally).',
+		'Μη έγκυρο blob emails δικαιούχων.' => 'Invalid beneficiary emails blob.',
+		'Μη έγκυρο blob opt-in μηνιαίας αναφοράς.' => 'Invalid monthly report opt-in blob.',
+		'Δοκιμή αποστολής email' => 'Email delivery test',
+		'Αποστολή δοκιμαστικού email' => 'Send test email',
+		'Στέλνει ένα απλό δοκιμαστικό email για να επιβεβαιώσεις ότι η αποστολή (και άρα η μηνιαία αναφορά) φτάνει σε παραλήπτη.' => 'Sends a simple test email so you can confirm that delivery (and therefore the monthly report) reaches a recipient.',
+		'Μη έγκυρη διεύθυνση παραλήπτη για το δοκιμαστικό email.' => 'Invalid recipient address for the test email.',
+		'Το δοκιμαστικό email στάλθηκε στο %s.' => 'The test email was sent to %s.',
+		'Η αποστολή απέτυχε — έλεγξε τις ρυθμίσεις email του WordPress (π.χ. SMTP plugin ή PHP mail).' => 'Sending failed — check the WordPress email settings (e.g. SMTP plugin or PHP mail).',
+
+		'Αν το email υπάρχει στα αρχεία μας, θα λάβεις νέο κλειδί σε λίγα λεπτά.' => 'If the email is in our records, you will receive a new key in a few minutes.',
+		'Ξέχασες το κλειδί;' => 'Forgot your key?',
+		'Στείλε νέο κλειδί' => 'Send a new key',
+		'Μηνιαία αναφορά email' => 'Monthly email report',
+		'Δεν έχει οριστεί email για το όνομά σου — ενημέρωσε τον εκδότη για να μπορείς να ενεργοποιήσεις τη μηνιαία αναφορά.' => 'No email is set for your name — ask the publisher so you can enable the monthly report.',
+		'Η αναφορά θα στέλνεται στο %s.' => 'The report will be sent to %s.',
+		'Απενεργοποίηση αναφοράς' => 'Disable report',
+		'Ενεργοποίηση αναφοράς' => 'Enable report',
+		'Η αναφορά είναι ενεργή — στέλνεται τις πρώτες μέρες κάθε μήνα και καλύπτει τον προηγούμενο.' => 'The report is active — it is sent in the first days of each month and covers the previous one.',
+		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+
+		'Μηνιαία αναφορά πωλήσεων — %s' => 'Monthly sales report — %s',
+		'Μηνιαία αναφορά πωλήσεων' => 'Monthly sales report',
+		'Γεια σου' => 'Hello',
+		'Το μερίδιό σου τον μήνα' => 'Your share this month',
+		'Τα προϊόντα σου' => 'Your products',
+		'Καμία πώληση αυτόν τον μήνα.' => 'No sales this month.',
+		'Η αναφορά στέλνεται επειδή έχεις ενεργοποιήσει τη μηνιαία αναφορά στο portal σου. Μπορείς να την απενεργοποιήσεις εκεί ανά πάσα στιγμή.' => 'You receive this report because you enabled the monthly report in your portal. You can disable it there at any time.',
+		'Νέο κλειδί portal' => 'New portal key',
+		'Ζητήθηκε επαναφορά του κλειδιού σου για το Author Portal. Το νέο σου κλειδί είναι:' => 'A reset of your Author Portal key was requested. Your new key is:',
+		'Το παλιό σου κλειδί ακυρώθηκε. Αν ΔΕΝ ζήτησες εσύ την επαναφορά, ενημέρωσε τον εκδότη.' => 'Your old key has been revoked. If you did NOT request this reset, notify the publisher.',
+		'Νέο κλειδί portal — %s' => 'New portal key — %s',
+		'Ζητήθηκε επαναφορά κλειδιού portal μέσω του frontend (forgot-key flow).' => 'A portal key reset was requested via the frontend (forgot-key flow).',
+		'Δικαιούχος: %s' => 'Beneficiary: %s',
+		'[Revenue Splitter] Επαναφορά κλειδιού portal — %s' => '[Revenue Splitter] Portal key reset — %s',
+		'Αυτό είναι ένα δοκιμαστικό email από το plugin Revenue Splitter.' => 'This is a test email from the Revenue Splitter plugin.',
+		'Αν το διαβάζεις, η αποστολή email λειτουργεί σωστά — η μηνιαία αναφορά θα φτάνει κανονικά.' => 'If you are reading this, email delivery works — the monthly report will arrive normally.',
+		'Στάλθηκε: %s' => 'Sent: %s',
+		'[Revenue Splitter] Δοκιμαστικό email — %s' => '[Revenue Splitter] Test email — %s',
 	);
 }

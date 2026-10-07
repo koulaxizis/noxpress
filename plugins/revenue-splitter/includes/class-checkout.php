@@ -44,6 +44,12 @@ final class RS_Checkout {
 			return;
 		}
 
+		// Χωρίς κουπόνια δωρεάν αντιτύπων το πεδίο δεν εμφανίζεται ποτέ —
+		// καμία προειδοποίηση χωρίς λόγο.
+		if ( '' === trim( (string) get_option( 'rs_reason_coupons', '' ) ) ) {
+			return;
+		}
+
 		// static cache per-request.
 		static $checked_today = false;
 		if ( $checked_today ) {
@@ -90,8 +96,8 @@ final class RS_Checkout {
 					<?php
 					printf(
 						/* translators: 1: opening <a>, 2: closing </a> */
-						esc_html__( 'Η σελίδα checkout χρησιμοποιεί το WooCommerce Blocks. Το πεδίο «Κανάλι πώλησης» θα εμφανίζεται ΜΟΝΟ σε classic checkout. %1$sΔιάβασε το επίσημο άρθρο%2$s για συμβατότητα ή επιστρέψε στο classic checkout.', 'revenue-splitter' ),
-						'<a href="https://docs.woocommerce.com/document/woocommerce-blocks/" target="_blank" rel="noopener noreferrer">',
+						esc_html__( 'Η σελίδα checkout χρησιμοποιεί το Checkout block του WooCommerce. Το πεδίο «Κανάλι πώλησης» / «Αιτιολογία δωρεάν αντιτύπου» εμφανίζεται ΜΟΝΟ στο classic checkout (shortcode [woocommerce_checkout]) — με το block τα κουπόνια δωρεάν αντιτύπων ΔΕΝ ζητούν κανάλι/αιτιολογία. %1$sΔιάβασε το επίσημο άρθρο%2$s ή επέστρεψε στο classic checkout.', 'revenue-splitter' ),
+						'<a href="https://woocommerce.com/document/cart-checkout-blocks-status/" target="_blank" rel="noopener noreferrer">',
 						'</a>'
 					);
 					?>
@@ -103,7 +109,9 @@ final class RS_Checkout {
 
 	/**
 	 * Έχει εφαρμοστεί κάποιο από τα reason-coupons στο καλάθι;
-	 * Σύγκριση case-insensitive (Woo κρατά τους κωδικούς όπως είναι).
+	 * v1.7.0: σύγκριση με την ΙΔΙΑ κανονικοποίηση που κάνει το WooCommerce
+	 * (wc_format_coupon_code + wc_strtolower, multibyte-safe) — κωδικοί με
+	 * κενά ή ελληνικούς χαρακτήρες ταιριάζουν σωστά.
 	 */
 	private static function triggered(): bool {
 
@@ -116,14 +124,21 @@ final class RS_Checkout {
 			return false;
 		}
 
-		$wanted = array_filter( array_map( 'trim', explode( ',', strtolower( $config ) ) ) );
+		$wanted = array_filter(
+			array_map(
+				static function ( $code ) {
+					return RS_Admin_UI::normalize_coupon_code( (string) $code );
+				},
+				explode( ',', $config )
+			)
+		);
 		if ( empty( $wanted ) ) {
 			return false;
 		}
 
 		$applied = array_map(
 			static function ( $code ) {
-				return strtolower( (string) $code );
+				return RS_Admin_UI::normalize_coupon_code( (string) $code );
 			},
 			WC()->cart->get_applied_coupons()
 		);
@@ -143,7 +158,7 @@ final class RS_Checkout {
 	 * v1.3.8 (#7): αν υπάρχουν ορισμένα κανάλια (Ρυθμίσεις → Κανάλια
 	 * πώλησης), το πεδίο γίνεται dropdown επιλογής καναλιού από τη λίστα
 	 * — αντί ελεύθερης αιτιολογίας. Διαφορετικά (κενή λίστα): legacy
-	 * textarea ως قبل — καμία κλείδωμα της φόρμας.
+	 * textarea όπως πριν — κανένα κλείδωμα της φόρμας.
 	 */
 	public static function add_field( array $fields ): array {
 

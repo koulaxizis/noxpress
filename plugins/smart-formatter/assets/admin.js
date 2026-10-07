@@ -1,7 +1,8 @@
 /**
- * Smart Formatter — admin.js (vanilla, delegated events, ES5+safe).
+ * Smart Formatter — admin.js v1.1.0 (vanilla, delegated events, ES5+safe).
  *
  * Dependencies: SF_CFG (wp_localize_script) — ajaxUrl, nonce, i18n.
+ * Φορτώνεται μόνο στη σελίδα του εργαλείου· κάθε binding είναι null-safe.
  * Καμία βιβλιοθήκη. Καμία inline εκτύπωση innerHTML από data —
  * ΠΑΝΤΑ DOM APIs / textContent (XSS-safe by construction).
  */
@@ -13,6 +14,17 @@
 
 	function $(sel, root) { return (root || document).querySelector(sel); }
 	function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+	/* Null-safe binding: αν το στοιχείο δεν υπάρχει, απλώς δεν δένεται. */
+	function on(sel, evt, fn) { var el = $(sel); if (el) { el.addEventListener(evt, fn); } return el; }
+	/* Μικρό sprintf για τα localized %1$s / %2$s / %s. */
+	function fmt(str) {
+		var args = Array.prototype.slice.call(arguments, 1), seq = 0;
+		return String(str || '').replace(/%(?:(\d+)\$)?[sd]/g, function (m, n) {
+			var v = n ? args[parseInt(n, 10) - 1] : args[seq++];
+			return v === undefined ? m : String(v);
+		});
+	}
+	function errMsg(res) { return (res && res.data && res.data.message) || T.fail; }
 
 	/* ---------- AJAX helper (POST, form-encoded) ---------- */
 	function post(action, data) {
@@ -57,13 +69,18 @@
 	/* ---------- Mode pickers ---------- */
 	function onModeChange() {
 		var mode = payload().sf_mode;
-		$('#sf-pick-products').classList.toggle('sf-hidden', mode !== 'products');
-		$('#sf-pick-terms').classList.toggle('sf-hidden', !(mode === 'categories' || mode === 'tags'));
+		var pp = $('#sf-pick-products'), pt = $('#sf-pick-terms'), termsSel = $('#sf-terms');
+		if (pp) { pp.classList.toggle('sf-hidden', mode !== 'products'); }
+		if (pt) { pt.classList.toggle('sf-hidden', !(mode === 'categories' || mode === 'tags')); }
+		if (!termsSel) { return; }
 
-		var termsSel = $('#sf-terms');
-		if ((mode === 'categories' || mode === 'tags') && !termsSel.dataset.loaded) {
+		// Κατηγορίες ↔ ετικέτες: άλλη λίστα όρων → επαναφόρτωση (και
+		// καθάρισμα, ώστε IDs κατηγοριών να μη σταλούν ως ετικέτες).
+		if ((mode === 'categories' || mode === 'tags') && termsSel.dataset.loaded !== mode) {
+			termsSel.textContent = '';
+			termsSel.dataset.loaded = '';
 			post('sf_search', { type: mode }).then(function (res) {
-				if (!res || !res.success) { return; }
+				if (!res || !res.success || payload().sf_mode !== mode) { return; }
 				termsSel.textContent = '';
 				(res.data.items || []).forEach(function (t) {
 					var opt = document.createElement('option');
@@ -71,14 +88,14 @@
 					opt.textContent = t.title;
 					termsSel.appendChild(opt);
 				});
-				termsSel.dataset.loaded = '1';
+				termsSel.dataset.loaded = mode;
 			});
 		}
 	}
 
 	/* ---------- Product search (από τον 3ο χαρακτήρα, debounced) ---------- */
 	var searchTimer = null;
-	$('#sf-prod-search').addEventListener('input', function () {
+	on('#sf-prod-search', 'input', function () {
 		var q = this.value.trim();
 		clearTimeout(searchTimer);
 		if (q.length < 3) { return; }
@@ -86,6 +103,7 @@
 			post('sf_search', { type: 'products', q: q }).then(function (res) {
 				if (!res || !res.success) { return; }
 				var sel = $('#sf-products');
+				if (!sel) { return; }
 				var keep = {};
 				$$('#sf-products option:checked').forEach(function (o) { keep[o.value] = o.textContent; });
 				sel.textContent = '';
@@ -110,6 +128,7 @@
 	/* ---------- Results rendering (XSS-safe: textContent μόνο) ---------- */
 	function renderEntries(entries) {
 		var tb = $('#sf-entries');
+		if (!tb) { return; }
 		tb.textContent = '';
 		(entries || []).forEach(function (e) {
 			var tr = document.createElement('tr');
@@ -147,68 +166,92 @@
 		});
 	}
 
-	function showResults() { $('#sf-results').classList.remove('sf-hidden'); }
-	function setSummary(text) { $('#sf-summary').textContent = text || ''; }
-	function busy(btn, on) { if (btn) { btn.disabled = !!on; } }
+	function showResults() { var r = $('#sf-results'); if (r) { r.classList.remove('sf-hidden'); } }
+	function hideProgress() { var w = $('#sf-progress-wrap'); if (w) { w.classList.add('sf-hidden'); } }
+	function setSummary(text) { var s = $('#sf-summary'); if (s) { s.textContent = text || ''; } }
+	function busy(btn, state) { if (btn) { btn.disabled = !!state; } }
 
 	/* ---------- Preview ---------- */
-	$('#sf-btn-preview').addEventListener('click', function () {
-		busy(this, true);
+	on('#sf-btn-preview', 'click', function () {
+		var btn = this;
+		busy(btn, true);
 		post('sf_preview', payload()).then(function (res) {
-			busy($('#sf-btn-preview'), false);
+			busy(btn, false);
 			showResults();
-			$('#sf-progress-wrap').classList.add('sf-hidden');
-			if (!res || !res.success) { setSummary((res && res.data && res.data.message) || T.fail); return; }
+			hideProgress();
+			if (!res || !res.success) { setSummary(errMsg(res)); return; }
 			renderEntries(res.data.entries);
-			setSummary(res.data.changed + ' / ' + res.data.applied_units + ' (sample 5)');
-		}).catch(function () { busy($('#sf-btn-preview'), false); setSummary(T.fail); });
+			setSummary(fmt(T.previewSummary, res.data.changed, res.data.applied_units));
+		}).catch(function () { busy(btn, false); setSummary(T.fail); });
 	});
 
-	/* ---------- Dry run ---------- */
-	$('#sf-btn-dryrun').addEventListener('click', function () {
-		busy(this, true);
+	/* ---------- Dry run (batched: counts + μικρό δείγμα) ---------- */
+	on('#sf-btn-dryrun', 'click', function () {
+		var btn = this;
+		var base = payload();
+		var changed = 0;
+		var sample = [];
+		busy(btn, true);
 		setSummary(T.working);
 		showResults();
-		$('#sf-progress-wrap').classList.add('sf-hidden');
-		post('sf_dryrun', payload()).then(function (res) {
-			busy($('#sf-btn-dryrun'), false);
-			if (!res || !res.success) { setSummary((res && res.data && res.data.message) || T.fail); return; }
-			if (res.data.changed === 0) { setSummary(T.nothing); renderEntries([]); return; }
-			setSummary(res.data.changed + ' / ' + res.data.total_units);
-			renderEntries([]);
-		}).catch(function () { busy($('#sf-btn-dryrun'), false); setSummary(T.fail); });
+		hideProgress();
+		renderEntries([]);
+
+		function step(offset) {
+			return post('sf_dryrun', Object.assign({ offset: offset }, base)).then(function (res) {
+				if (!res || !res.success) { throw new Error(errMsg(res)); }
+				changed += res.data.changed || 0;
+				(res.data.entries || []).forEach(function (e) { if (sample.length < 10) { sample.push(e); } });
+				setSummary(T.working + ' ' + res.data.next_offset + ' / ' + res.data.total_units);
+				if (res.data.has_more && res.data.applied_units > 0) { return step(res.data.next_offset); }
+				return res.data.total_units;
+			});
+		}
+
+		step(0).then(function (total) {
+			busy(btn, false);
+			if (changed === 0) { setSummary(T.nothing); return; }
+			setSummary(fmt(T.dryrunSummary, changed, total));
+			renderEntries(sample);
+		}).catch(function (err) {
+			busy(btn, false);
+			setSummary(err && err.message ? err.message : T.fail);
+		});
 	});
 
 	/* ---------- Apply (batched, με progress) ---------- */
-	$('#sf-btn-apply').addEventListener('click', function () {
-		if (!window.confirm(T.confirmApply)) { return; }
-		busy(this, true);
-		showResults();
-		var base = payload();
+	on('#sf-btn-apply', 'click', function () {
 		var barWrap = $('#sf-progress-wrap');
 		var bar = $('#sf-progress-bar');
 		var label = $('#sf-progress-label');
+		if (!barWrap || !bar || !label) { return; }
+		if (!window.confirm(T.confirmApply)) { return; }
+		var btn = this;
+		busy(btn, true);
+		showResults();
+		var base = payload();
 		barWrap.classList.remove('sf-hidden');
 		bar.style.width = '0%';
 		label.textContent = T.working;
 
 		var totalChanged = 0;
+		var sample = [];
 
 		post('sf_apply', Object.assign({ phase: 'start' }, base)).then(function (res) {
-			if (!res || !res.success) { throw new Error((res && res.data && res.data.message) || T.fail); }
+			if (!res || !res.success) { throw new Error(errMsg(res)); }
 			var runId = res.data.run_id;
-			var batch = res.data.batch || 20;
 
 			function runBatch(offset) {
 				return post('sf_apply', Object.assign({ phase: 'batch', run_id: runId, offset: offset }, base))
 					.then(function (r) {
-						if (!r || !r.success) { throw new Error((r && r.data && r.data.message) || T.fail); }
+						if (!r || !r.success) { throw new Error(errMsg(r)); }
 						totalChanged += r.data.changed || 0;
-						renderEntries(r.data.entries.slice(0, 10));
+						(r.data.entries || []).forEach(function (e) { if (sample.length < 10) { sample.push(e); } });
+						renderEntries(sample);
 						var pct = r.data.total_units ? Math.round((r.data.next_offset / r.data.total_units) * 100) : 100;
 						bar.style.width = pct + '%';
 						label.textContent = r.data.next_offset + ' / ' + r.data.total_units;
-						if (r.data.has_more) {
+						if (r.data.has_more && r.data.applied_units > 0) {
 							return runBatch(r.data.next_offset);
 						}
 						return post('sf_apply', Object.assign({ phase: 'finish', run_id: runId, total_changed: totalChanged }, base));
@@ -216,55 +259,56 @@
 			}
 
 			return runBatch(0);
-		}).then(function () {
-			busy($('#sf-btn-apply'), false);
+		}).then(function (fin) {
+			if (!fin || !fin.success) { throw new Error(errMsg(fin)); }
+			busy(btn, false);
 			bar.style.width = '100%';
 			label.textContent = T.done;
-			setSummary(totalChanged + '');
-			window.setTimeout(function () { window.location.reload(); }, 1200);
+			setSummary(fmt(T.applySummary, totalChanged));
+			window.setTimeout(function () { window.location.reload(); }, 1500);
 		}).catch(function (err) {
-			busy($('#sf-btn-apply'), false);
+			busy(btn, false);
 			label.textContent = err && err.message ? err.message : T.fail;
 		});
 	});
 
 	/* ---------- Profiles ---------- */
-	$('#sf-profile-save').addEventListener('click', function () {
-		var name = ($('#sf-profile-name').value || '').trim();
+	function profileMsg(text) { var m = $('#sf-profile-msg'); if (m) { m.textContent = text; } }
+
+	on('#sf-profile-save', 'click', function () {
+		var nameEl = $('#sf-profile-name');
+		var name = ((nameEl && nameEl.value) || '').trim();
 		var p = payload();
 		var self = this;
 		busy(self, true);
 		post('sf_profile_save', { name: name, rules: p.sf_rules, fields: p.sf_fields }).then(function (res) {
 			busy(self, false);
-			var msg = $('#sf-profile-msg');
 			if (res && res.success) {
-				msg.textContent = '✓';
+				profileMsg(T.saved);
 				window.setTimeout(function () { window.location.reload(); }, 700);
 			} else {
-				msg.textContent = (res && res.data && res.data.message) || T.fail;
+				profileMsg(errMsg(res));
 			}
-		});
+		}).catch(function () { busy(self, false); profileMsg(T.fail); });
 	});
 
-	$('#sf-profile-delete').addEventListener('click', function () {
+	on('#sf-profile-delete', 'click', function () {
 		var sel = $('#sf-profile-load');
-		var name = sel.value;
+		var name = sel ? sel.value : '';
 		var self = this;
-		if (!name) { $('#sf-profile-msg').textContent = '—'; return; }
+		if (!name) { profileMsg(T.pickProfile); return; }
 		busy(self, true);
 		post('sf_profile_delete', { name: name }).then(function (res) {
 			busy(self, false);
 			if (res && res.success) { window.location.reload(); }
-			else { $('#sf-profile-msg').textContent = (res && res.data && res.data.message) || T.fail; }
-		});
+			else { profileMsg(errMsg(res)); }
+		}).catch(function () { busy(self, false); profileMsg(T.fail); });
 	});
 
-	$('#sf-profile-load').addEventListener('change', function () {
+	on('#sf-profile-load', 'change', function () {
 		var name = this.value;
 		if (!name) { return; }
-		// Φόρτωση: ζητάμε τα saved rules/fields από το DOM της σελίδας
-		// (rendered στα data-attributes του option από το PHP; απλούστερα:
-		// ένα επιπλέον fetch δεν χρειάζεται — χρησιμοποιούμε data attrs).
+		// Τα saved rules/fields έρχονται από τα data-attributes του option.
 		var opt = this.options[this.selectedIndex];
 		if (!opt || !opt.dataset.rules) { return; }
 		var rules = JSON.parse(opt.dataset.rules || '[]');
@@ -273,8 +317,22 @@
 		$$('input[name="sf_fields[]"]').forEach(function (c) { c.checked = fields.indexOf(c.value) !== -1; });
 	});
 
+	/* ---------- Restore result → πραγματικό μήνυμα ---------- */
+	function restoreReport(res) {
+		var d = (res && res.data) || {};
+		var lines = [];
+		if (res && res.success) {
+			lines.push(fmt(T.restoredMsg, d.restored || 0, d.skipped || 0));
+		} else {
+			lines.push(errMsg(res));
+		}
+		if (d.partial) { lines.push(T.partialMsg); }
+		if (res && res.success && d.errors && d.errors.length) { lines = lines.concat(d.errors); }
+		window.alert(lines.join('\n'));
+	}
+
 	/* ---------- History: units / restore / delete (delegated) ---------- */
-	$('#sf-history').addEventListener('click', function (ev) {
+	on('#sf-history', 'click', function (ev) {
 		var btn = ev.target.closest('button');
 		if (!btn) { return; }
 		var tr = btn.closest('tr[data-run]');
@@ -285,8 +343,9 @@
 			busy(btn, true);
 			post('sf_units', { run_id: runId }).then(function (res) {
 				busy(btn, false);
-				if (!res || !res.success) { return; }
 				var panel = $('#sf-units-panel');
+				if (!panel) { return; }
+				if (!res || !res.success) { window.alert(errMsg(res)); return; }
 				panel.classList.remove('sf-hidden');
 				panel.textContent = '';
 
@@ -300,7 +359,7 @@
 					cb.value = String(u.idx !== undefined ? u.idx : '');
 					li.appendChild(cb);
 					var span = document.createElement('span');
-					span.textContent = u.kind + ' #' + u.id + ' — ' + (u.field_label || u.field || '');
+					span.textContent = (u.kind === 'term' ? T.kindTerm : T.kindProduct) + ' #' + u.id + ' — ' + (u.field_label || u.field || '');
 					li.appendChild(span);
 					ul.appendChild(li);
 				});
@@ -313,40 +372,41 @@
 					rb.type = 'button';
 					rb.className = 'button';
 					rb.id = 'sf-btn-restore-sel';
-					rb.textContent = '↩';
+					rb.textContent = T.restoreSel;
 					rb.addEventListener('click', function () { restoreUnits(runId); });
 					act.appendChild(rb);
 					panel.appendChild(act);
 				}
-			});
+			}).catch(function () { busy(btn, false); window.alert(T.fail); });
 		}
 
 		if (btn.classList.contains('sf-btn-restore')) {
-			if (!window.confirm('↩ ?')) { return; }
+			var partial = tr.getAttribute('data-partial') === '1';
+			if (!window.confirm(partial ? T.confirmRestoreP : T.confirmRestore)) { return; }
 			busy(btn, true);
 			post('sf_restore', { run_id: runId, indexes: [] }).then(function (res) {
 				busy(btn, false);
-				window.alert(res && res.success
-					? (res.data.restored + ' ✓ / ' + res.data.skipped + ' —')
-					: T.fail);
-			});
+				restoreReport(res);
+			}).catch(function () { busy(btn, false); window.alert(T.fail); });
 		}
 
 		if (btn.classList.contains('sf-btn-delete')) {
 			if (!window.confirm(T.confirmDel)) { return; }
 			busy(btn, true);
-			post('sf_snapshot_delete', { run_id: runId }).then(function () { window.location.reload(); });
+			post('sf_snapshot_delete', { run_id: runId }).then(function (res) {
+				if (res && res.success) { window.location.reload(); return; }
+				busy(btn, false);
+				window.alert(errMsg(res));
+			}).catch(function () { busy(btn, false); window.alert(T.fail); });
 		}
 	});
 
 	function restoreUnits(runId) {
 		var idxs = $$('.sf-unit-cb').filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
 		if (!idxs.length) { return; }
-		post('sf_restore', { run_id: runId, indexes: idxs }).then(function (res) {
-			window.alert(res && res.success
-				? (res.data.restored + ' ✓')
-				: T.fail);
-		});
+		if (!window.confirm(T.confirmRestoreS)) { return; }
+		post('sf_restore', { run_id: runId, indexes: idxs }).then(restoreReport)
+			.catch(function () { window.alert(T.fail); });
 	}
 
 	/* ---------- Init ---------- */

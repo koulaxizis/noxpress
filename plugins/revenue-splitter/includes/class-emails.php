@@ -13,7 +13,9 @@
  *
  * Cron: ΔΕΝ υπάρχει native 'monthly' schedule στο WP — τρέχει ΔΗΜΕΡΗΝΟΣ
  * έλεγχος 'είμαστε σε νέο μήνα και δεν έχει σταλεί ο προηγούμενος;'
- * (dedup μέσω rs_last_report_run). Το cron είναι self-scheduled στο init().
+ * (dedup μέσω rs_last_report_run). Το cron είναι self-scheduled στο init()
+ * και αφαιρείται στην απενεργοποίηση (register_deactivation_hook στο
+ * κύριο αρχείο, v1.7.0) και στο uninstall.
  *
  * Σημείωση: το WP-Cron εξαρτάται από επισκέψεις/motion του site — σε
  * χαμηλή κίνηση συνιστάται system cron με wp-cron disabled ή
@@ -285,7 +287,7 @@ final class RS_Emails {
 		$html .= $inner;
 		$html .= '</div></div>';
 		$html .= '<p style="max-width:560px;margin:12px auto 0;color:#8b87a3;font-size:11px;">';
-		$html .= 'Made with &lt;3 by Christos Koulaxizis · <a href="https://glarolykoi.net" style="color:#8b87a3;text-decoration:none;">glarolykoi.net</a> · <a href="https://noxpress.tech" style="color:#8b87a3;text-decoration:none;">noxpress.tech</a>';
+		$html .= esc_html( sprintf( __( 'Made with ❤ by %s', 'revenue-splitter' ), 'Christos Koulaxizis' ) ) . ' · <a href="https://glarolykoi.net" style="color:#8b87a3;text-decoration:none;">glarolykoi.net</a> · <a href="https://noxpress.tech" style="color:#8b87a3;text-decoration:none;">noxpress.tech</a>';
 		$html .= '</p></body></html>';
 
 		return $html;
@@ -477,6 +479,7 @@ final class RS_Emails {
 		}
 
 		$inner = '<p style="margin:0 0 10px;">' . esc_html__( 'Ζητήθηκε επαναφορά κλειδιού portal μέσω του frontend (forgot-key flow).', 'revenue-splitter' ) . '</p>'
+			/* translators: %s: όνομα δικαιούχου */
 			. '<p style="margin:0;">' . esc_html( sprintf( __( 'Δικαιούχος: %s', 'revenue-splitter' ), $who ) ) . '</p>';
 
 		self::send(
@@ -533,8 +536,9 @@ final class RS_Emails {
 
 	private static function currency_fmt(): callable {
 
+		// HTML entity (π.χ. &euro;) → χαρακτήρας· το esc_html το ξανα-κωδικοποιεί.
 		$symbol = function_exists( 'get_woocommerce_currency_symbol' )
-			? get_woocommerce_currency_symbol()
+			? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES | ENT_HTML5, 'UTF-8' )
 			: '€';
 
 		return static function ( $amount ) use ( $symbol ) {

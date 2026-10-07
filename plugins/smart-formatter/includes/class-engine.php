@@ -1,35 +1,32 @@
 <?php
 /**
- * SF_Engine — Tokenizer + Rule pipeline (safe rendering).
+ * SF_Engine — Tokenizer + Rule pipeline (safe rendering), v1.1.0.
  *
  * Architecture:
- *  1) Document-level protection: shortcodes & code/pre → placeholders (\x02…/\x04…),
- *     entities → inline letter-coded markers (\x03…) ΜΕΣΑ στα text segments.
- *     Τα HTML tags ΔΕΝ γίνονται placeholders — τα ξεχωρίζει native το segment().
- *  2) Document rules (strip formatting) εκτελούνται ΠΡΙΝ την tokenization
- *     (μοναδικός κανόνας που επιτρέπεται να αγγίζει markup).
- *  3) Text-level rules εκτελούνται ΜΕΤΑ την tokenization — μόνο σε
- *     segments που είναι καθαρό κείμενο (κανένα tag/attribute/entity μέσα).
- *  4) Restore placeholders → αρχικό HTML, intact.
+ *  1) Protection ΠΡΙΝ από ΟΠΟΙΟΔΗΠΟΤΕ κανόνα: HTML comments, <script>,
+ *     <style>, <textarea>, <pre>, <code> και shortcodes → placeholders
+ *     (\x02P…\x01X). Κανένας κανόνας (ούτε το strip) δεν τα βλέπει.
+ *  2) Document rules (strip formatting) — ο μόνος κανόνας που αγγίζει
+ *     markup, με ακριβή ονόματα tags.
+ *  3) Entities → inline letter-coded markers (\x03E…\x01X) ΜΕΣΑ στα
+ *     text segments (ατομικά — κανένα range δεν σπάει μέσα τους).
+ *  4) Segmentation σε html / text / protected. Κάθε text segment ξέρει
+ *     αν βρίσκεται ήδη μέσα σε <strong>/<b> ή <em>/<i> (open-tag stack).
+ *  5) Text rules: 'edit' (κενά) αλλάζουν το κείμενο· 'mark' (bold/italic)
+ *     δίνουν byte ranges. Το render_marks() χτίζει ΕΝΑ well-formed markup
+ *     από όλα τα ranges (επικαλύψεις → σωστό nesting, ποτέ crossing),
+ *     χωρίς να περνά ποτέ όριο tag ή αλλαγή παραγράφου (\n\n — ώστε και
+ *     μετά το wpautop το HTML να μένει έγκυρο).
+ *  6) Restore entities + protected blocks → αρχικό HTML, intact.
  *
- * Security guarantees:
- *  - Κανένας κανόνας scope 'text' δεν βλέπει ποτέ:
- *    * <tag attributes>
- *    * shortcodes [shortcode]
- *    * &entity;
- *    * <code>...</code> / <pre>...</pre> περιεχόμενο
- *  - Protected segments κρατιούνται ως placeholders και επαναφέρονται στο τέλος
- *  - excluded phrases (από το SF_Targets/Settings) προστατεύονται με \x00N\x00 markers
- *    που τρέχουν MΕΣΑ σε κάθε text rule (with_exclusions στο SF_Rules).
- *
- * Performance:
- *  - Regex-passes ανά segment ≈ 5-7 (όχι nested loops)
- *  - Παράγουμε 1 output array με segments: {type: 'html'|'text'|'protected', content}
- *    — το render τα ενώνει σε ένα string
- *
- * Wave 2 extensions:
- *  - Απλώς προσθέτουμε περισσότερους callback rules στο SF_Rules registry
- *  - Το engine δεν αλλάζει ποτέ — είναι neutral pipeline
+ * Εγγυήσεις:
+ *  - Κανένας κανόνας scope 'text' δεν βλέπει tags, attributes, shortcodes,
+ *    entities, ή περιεχόμενο code/pre/script/style/comments.
+ *  - Idempotent: transform( transform( x ) ) === transform( x ) — ένα
+ *    'mark' δεν εφαρμόζεται σε κείμενο που είναι ήδη μέσα στο tag του.
+ *  - Αν το input είναι well-formed, το output είναι well-formed.
+ *  - Excluded phrases δεν αλλάζουν ποτέ και κανένα regex δεν ταιριάζει
+ *    μέσα τους (μπορούν να περικλειστούν από ευρύτερο wrap).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -37,246 +34,466 @@ defined( 'ABSPATH' ) || exit;
 final class SF_Engine {
 
 	/** Control-char placeholders για tokens. */
-	const PH_SHORT    = "\x02S";
-	const PH_ENTITY   = "\x03E";
-	const PH_CODEPRE  = "\x04C";
-	const PH_END      = "\x01X"; // closing marker — κοινός terminator όλων των placeholder families.
+	const PH_BLOCK  = "\x02P";
+	const PH_ENTITY = "\x03E";
+	const PH_EXCL   = "\x00SF";
+	const PH_END    = "\x01X"; // closing marker — κοινός terminator των block/entity placeholders.
 
-	/** Letters-only encoding (a, b … z, aa …) — markers χωρίς ψηφία. */
-	private static function num_alpha( int $n ): string {
-		$s = '';
-		$n = max( 0, $n );
-		do {
-			$s = chr( 97 + ( $n % 26 ) ) . $s;
-			$n = intdiv( $n, 26 ) - 1;
-		} while ( $n >= 0 );
-		return $s;
-	}
+	/** Bit flags για τα 'mark' tags. */
+	const F_STRONG = 1;
+	const F_EM     = 2;
+
+	/** Void elements (δεν μπαίνουν στο open-tag stack). */
+	const VOID_TAGS = array( 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' );
 
 	/**
 	 * Κύρια entry point — SF_Engine::transform( HTML, enabled_rules, excluded_phrases ).
 	 *
-	 * @param string $html       Input (full product field HTML).
-	 * @param array  $enabled    Array rule IDs από το SF_Rules (π.χ. sf_normalize_whitespace).
-	 * @param array  $excluded   Φράσεις που δεν αγγίζονται ποτέ.
-	 * @return string            Output (μορφοποιημένο, safe HTML).
+	 * @param string $html     Input (full product field HTML).
+	 * @param array  $enabled  Rule IDs από το SF_Rules.
+	 * @param array  $excluded Φράσεις που δεν αγγίζονται ποτέ.
+	 * @return string          Output (μορφοποιημένο, well-formed HTML).
 	 */
 	public static function transform( string $html, array $enabled, array $excluded = array() ): string {
 
-		// 1) Document-level rules (μόνο strip formatting) — Τρέχει ΠΡΙΝ protection.
-		$docs = SF_Rules::document_rules( $enabled );
-		foreach ( $docs as $rule ) {
-			$html = call_user_func( $rule['callback'], $html );
+		if ( '' === $html || empty( $enabled ) ) {
+			return $html;
 		}
 
-		// 2) Protection: protected blocks (<code>, <pre>, shortcodes) → placeholders.
-		list( $html, $tokens ) = self::protect_blocks( $html );
+		// Fail-safe: τα control chars \x00-\x04 είναι δικά μας markers.
+		// Αν υπάρχουν ήδη στο input, δεν ρισκάρουμε σύγχυση — no-op.
+		if ( 1 === preg_match( '~[\x00-\x04]~', $html ) ) {
+			return $html;
+		}
 
-		// 3) HTML entity protection → inline letter-encoded markers
-		//    (μένουν ΜΕΣΑ στα text segments — βλ. segment()).
-		list( $html, $ent_tokens ) = self::protect_html_entities( $html );
+		// 1) Protection ΠΡΩΤΑ — πριν από κάθε κανόνα.
+		list( $work, $blocks ) = self::protect_blocks( $html );
 
-		// 4) Segmentation — split σε text vs HTML tokens.
-		$segments = self::segment( $html );
+		// 2) Document-level rules (strip formatting).
+		foreach ( SF_Rules::document_rules( $enabled ) as $rule ) {
+			$work = (string) call_user_func( $rule['callback'], $work );
+		}
 
-		// 5) Text rules εκτελούνται ΜΕΤΑ την tokenization — μόνο σε text segments.
+		// 3) Entities → inline markers.
+		list( $work, $entities ) = self::protect_html_entities( $work );
+
+		// 4) Segmentation (+ formatting context ανά text segment).
+		$segments = self::segment( $work );
+
+		// 5) Text rules μόνο στα text segments.
 		$segments = self::apply_text_rules( $segments, $enabled, $excluded );
 
-		// 6) Join segments — map {type, content} → content strings.
-		$html = implode( '', array_column( $segments, 'content' ) );
+		// 6) Join + restore.
+		$work = implode( '', array_column( $segments, 'content' ) );
+		$work = self::restore( $work, $entities );
+		$work = self::restore( $work, $blocks );
 
-		// 7) Restore HTML entities.
-		$html = self::restore_entities( $html, $ent_tokens );
-
-		// 8) Restore protected blocks.
-		$html = self::restore_blocks( $html, $tokens );
-
-		return $html;
+		return $work;
 	}
 
 	/**
-	 * Protected blocks: <code>...</code>, <pre>...</pre>,
-	 * [shortcode ...] (με όποια attributes έχουν).
-	 * Return: array (modified_html, tokens_array).
+	 * Protected blocks → placeholders. Σειρά: comments πρώτα (μπορεί να
+	 * περιέχουν «<pre>»), μετά raw-text elements, μετά pre (μπορεί να
+	 * περιέχει <code>), code, shortcodes.
 	 */
 	private static function protect_blocks( string $html ): array {
 
 		$tokens = array();
 		$count  = 0;
 
-		// <code>...</code> — greedy μη nested.
-		$html = preg_replace_callback(
-			'~<(code)\b([^>]*)>(.*?)</\1>~is',
-			function ( $m ) use ( &$tokens, &$count ) {
-				$id       = $count++;
-				$placeholder = self::PH_CODEPRE . $id . self::PH_END;
-				$tokens[ $placeholder ] = $m[0]; // full tag+content
-				return $placeholder;
-			},
-			$html
+		$stash = static function ( $m ) use ( &$tokens, &$count ) {
+			$ph            = self::PH_BLOCK . SF_Rules::num_alpha( $count++ ) . self::PH_END;
+			$tokens[ $ph ] = $m[0];
+			return $ph;
+		};
+
+		$patterns = array(
+			'~<!--.*?(?:-->|$)~s',
+			'~<(script|style|textarea)\b[^>]*>.*?(?:</\1\s*>|$)~is',
+			'~<(pre)\b[^>]*>.*?</pre\s*>~is',
+			'~<(code)\b[^>]*>.*?</code\s*>~is',
+			// Shortcodes: [name attrs]content[/name] ή [name attrs] / [name /].
+			'~\[([a-zA-Z_][\w-]*)(?=[\s\]/])[^\]]*\].*?\[/\1\]|\[[a-zA-Z_][\w-]*(?=[\s\]/])[^\]]*\]~s',
 		);
 
-		// <pre>...</pre> — ίδιος λογική.
-		$html = preg_replace_callback(
-			'~<(pre)\b([^>]*)>(.*?)</\1>~is',
-			function ( $m ) use ( &$tokens, &$count ) {
-				$id       = $count++;
-				$placeholder = self::PH_CODEPRE . $id . self::PH_END;
-				$tokens[ $placeholder ] = $m[0];
-				return $placeholder;
-			},
-			$html
-		);
-
-		// Shortcodes: [shortcode att="val" attr='val' ]content[/shortcode]
-		//              ή [shortcode att="val"] (self-closing).
-		$html = preg_replace_callback(
-			'~\[([a-zA-Z_][a-zA-Z0-9_]*)(?:[^\]]*)?\].*?\[\/\1\]|\[[a-zA-Z_][a-zA-Z0-9_]*(?:[^\]])*\]~s',
-			function ( $m ) use ( &$tokens, &$count ) {
-				$id       = $count++;
-				$placeholder = self::PH_SHORT . $id . self::PH_END;
-				$tokens[ $placeholder ] = $m[0];
-				return $placeholder;
-			},
-			$html
-		);
+		foreach ( $patterns as $re ) {
+			$res = preg_replace_callback( $re, $stash, $html );
+			if ( is_string( $res ) ) {
+				$html = $res;
+			}
+		}
 
 		return array( $html, $tokens );
 	}
 
-	/**
-	 * HTML entities (&nbsp;, &#123;, &alpha;) → placeholders.
-	 * Έτσι κανένα rule text δεν μπορεί να τα χαλάσει ή να τα διπλοεπεξεργαστεί.
-	 */
+	/** HTML entities (&nbsp;, &#123;, &alpha;) → letter-coded markers. */
 	private static function protect_html_entities( string $html ): array {
 
 		$tokens = array();
 		$count  = 0;
 
-		$html = preg_replace_callback(
-			'~&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);~',
-			function ( $m ) use ( &$tokens, &$count ) {
-				$id          = $count++;
-				$placeholder = self::PH_ENTITY . self::num_alpha( $id ) . self::PH_END;
-				$tokens[ $placeholder ] = $m[0];
-				return $placeholder;
+		$res = preg_replace_callback(
+			'~&(?:[a-zA-Z][a-zA-Z0-9]*|#\d+|#[xX][0-9a-fA-F]+);~',
+			static function ( $m ) use ( &$tokens, &$count ) {
+				$ph            = self::PH_ENTITY . SF_Rules::num_alpha( $count++ ) . self::PH_END;
+				$tokens[ $ph ] = $m[0];
+				return $ph;
 			},
 			$html
 		);
 
-		return array( $html, $tokens );
+		return array( is_string( $res ) ? $res : $html, $tokens );
 	}
 
 	/**
-	 * Segmentation — split σε segments με type.
-	 * Input: string με placeholders.
-	 * Output: array {type: 'html'|'text'|'protected', content}.
+	 * Segmentation — array of {type: 'html'|'text'|'protected', content,
+	 * bold, italic, skip}. Τα bold/italic/skip ισχύουν για text segments:
+	 * αν το segment είναι ήδη μέσα σε <strong>/<b>, <em>/<i> ή σε element
+	 * όπου δεν επιτρέπεται inline markup (<option>, <title>).
+	 *
+	 * Tag = '<' + γράμμα | '/' | '!' | '?'. Ένα σκέτο '<' (π.χ. «a < b»)
+	 * μένει κείμενο. Το '>' μέσα σε quoted attribute value δεν κλείνει το tag.
 	 */
 	private static function segment( string $text ): array {
 
 		$segments = array();
-		$current_type = null;
-		$current_buffer = '';
+		$stack    = array();
+		$buf      = '';
+		$len      = strlen( $text );
+		$i        = 0;
 
-		$len = strlen( $text );
-		for ( $i = 0; $i < $len; $i++ ) {
+		$flush = static function () use ( &$segments, &$buf, &$stack ) {
+			if ( '' === $buf ) {
+				return;
+			}
+			$segments[] = array(
+				'type'    => 'text',
+				'content' => $buf,
+				'bold'    => (bool) array_intersect( $stack, array( 'strong', 'b' ) ),
+				'italic'  => (bool) array_intersect( $stack, array( 'em', 'i' ) ),
+				'skip'    => (bool) array_intersect( $stack, array( 'option', 'title' ) ),
+			);
+			$buf = '';
+		};
+
+		while ( $i < $len ) {
 			$c = $text[ $i ];
 
-			// Start of placeholder (control char markers). Τα entities (\x03)
-			// μένουν INLINE στο text — letter-encoded markers που κανένα rule
-			// regex δεν αγγίζει (λείπουν ψηφία, quotes, παρενθέσεις).
-			// Το \x01 ΔΕΝ είναι start marker (είναι ο terminator) — dead check.
-			if ( "\x02" === $c || "\x04" === $c ) {
-				// Flush current text buffer.
-				if ( '' !== $current_buffer && null !== $current_type ) {
-					$segments[] = array( 'type' => $current_type, 'content' => $current_buffer );
-					$current_buffer = '';
-				}
-
-				// Read full placeholder (until \x01X).
-				$j = $i;
-				while ( $j < $len && "\x01X" !== substr( $text, $j, 2 ) ) {
-					$j++;
-				}
-				$placeholder = substr( $text, $i, $j - $i + 2 ); // include \x01X
-
-				// Determine placeholder type.
-				$p_type = 'html'; // default fallback for HTML tags
-				if ( self::PH_SHORT === substr( $placeholder, 0, 2 ) ) {
-					$p_type = 'protected';
-				} elseif ( self::PH_CODEPRE === substr( $placeholder, 0, 2 ) ) {
-					$p_type = 'protected';
-				}
-
-				// Add placeholder as segment.
-				$segments[] = array( 'type' => $p_type, 'content' => $placeholder );
-				$i = $j + 1; // skip past the placeholder
-
+			// Protected block placeholder (\x02P…\x01X).
+			if ( "\x02" === $c ) {
+				$flush();
+				$end = strpos( $text, self::PH_END, $i );
+				$end = ( false === $end ) ? $len : $end + 2;
+				$segments[] = array( 'type' => 'protected', 'content' => substr( $text, $i, $end - $i ) );
+				$i = $end;
 				continue;
 			}
 
-			// Normal character — accumulate.
-			if ( '<' === $c ) {
-				// Start of HTML tag.
-				if ( '' !== $current_buffer && null !== $current_type ) {
-					$segments[] = array( 'type' => $current_type, 'content' => $current_buffer );
-					$current_buffer = '';
-				}
-
-				// Read full tag.
-				$j = $i + 1;
-				while ( $j < $len && '>' !== $text[ $j ] ) {
-					$j++;
-				}
-				$tag = substr( $text, $i, $j - $i + 1 );
-
+			if ( '<' === $c && $i + 1 < $len && 1 === preg_match( '~[a-zA-Z/!?]~', $text[ $i + 1 ] ) ) {
+				$flush();
+				$end = self::tag_end( $text, $i );
+				$tag = substr( $text, $i, $end - $i );
 				$segments[] = array( 'type' => 'html', 'content' => $tag );
-				$i = $j;
-
-				$current_type = 'html';
+				self::track_tag( $tag, $stack );
+				$i = $end;
 				continue;
 			}
 
-			// Regular text character.
-			if ( 'html' === $current_type && '' !== $current_buffer ) {
-				$segments[] = array( 'type' => 'html', 'content' => $current_buffer );
-				$current_buffer = '';
+			$buf .= $c;
+			$i++;
+		}
+		$flush();
+
+		return $segments;
+	}
+
+	/** Θέση ΜΕΤΑ το '>' ενός tag που ξεκινά στο $i (quote-aware). */
+	private static function tag_end( string $text, int $i ): int {
+		$len   = strlen( $text );
+		$quote = '';
+		for ( $j = $i + 1; $j < $len; $j++ ) {
+			$c = $text[ $j ];
+			if ( '' !== $quote ) {
+				if ( $c === $quote ) {
+					$quote = '';
+				}
+				continue;
 			}
-			$current_type = 'text';
-			$current_buffer .= $c;
+			if ( '"' === $c || "'" === $c ) {
+				// Quote μετρά μόνο ως attribute value (μετά από '=').
+				$k = $j - 1;
+				while ( $k > $i && ( ' ' === $text[ $k ] || "\t" === $text[ $k ] || "\n" === $text[ $k ] ) ) {
+					$k--;
+				}
+				if ( '=' === $text[ $k ] ) {
+					$quote = $c;
+				}
+				continue;
+			}
+			if ( '>' === $c ) {
+				return $j + 1;
+			}
+		}
+		// Μη κλειστό quote: fallback στο πρώτο '>' (ή τέλος κειμένου).
+		$gt = strpos( $text, '>', $i );
+		return ( false === $gt ) ? $len : $gt + 1;
+	}
+
+	/** Ενημέρωση του open-tag stack με ένα tag. */
+	private static function track_tag( string $tag, array &$stack ): void {
+		if ( 1 !== preg_match( '~^<(/?)([a-zA-Z][a-zA-Z0-9-]*)~', $tag, $m ) ) {
+			return; // <!doctype>, processing instructions κ.λπ.
+		}
+		$name = strtolower( $m[2] );
+		if ( '/' === $m[1] ) {
+			$pos = array_search( $name, array_reverse( $stack, true ), true );
+			if ( false !== $pos ) {
+				$stack = array_slice( $stack, 0, $pos );
+			}
+			return;
+		}
+		if ( in_array( $name, self::VOID_TAGS, true ) || '/>' === substr( rtrim( $tag ), -2 ) ) {
+			return;
+		}
+		$stack[] = $name;
+	}
+
+	/** Apply text rules ONLY σε 'text' segments. */
+	private static function apply_text_rules( array $segments, array $enabled, array $excluded ): array {
+
+		$rules = SF_Rules::text_rules( $enabled );
+		if ( empty( $rules ) ) {
+			return $segments;
 		}
 
-		// Flush final buffer.
-		if ( '' !== $current_buffer && null !== $current_type ) {
-			$segments[] = array( 'type' => $current_type, 'content' => $current_buffer );
+		$excluded = self::prepare_exclusions( $excluded );
+		$last     = count( $segments ) - 1;
+
+		foreach ( $segments as $k => $seg ) {
+			if ( 'text' !== $seg['type'] || ! empty( $seg['skip'] ) ) {
+				continue;
+			}
+			$segments[ $k ]['content'] = self::apply_to_segment(
+				$seg['content'],
+				$rules,
+				$excluded,
+				array(
+					'bold'    => $seg['bold'],
+					'italic'  => $seg['italic'],
+					'is_last' => ( $k === $last ),
+				)
+			);
 		}
 
 		return $segments;
+	}
+
+	/** Exclusions: strings, unique, μεγαλύτερες πρώτα. */
+	private static function prepare_exclusions( array $excluded ): array {
+		$excluded = array_values( array_unique( array_filter( array_map( 'strval', $excluded ), 'strlen' ) ) );
+		usort(
+			$excluded,
+			static function ( $a, $b ) {
+				return strlen( $b ) <=> strlen( $a );
+			}
+		);
+		return $excluded;
+	}
+
+	/** Όλοι οι κανόνες σε ένα text segment. */
+	private static function apply_to_segment( string $text, array $rules, array $excluded, array $ctx ): string {
+
+		// Exclusions → placeholders (\x00SF{letters}\x00).
+		$ph_map = array();
+		foreach ( $excluded as $n => $phrase ) {
+			if ( false !== strpos( $text, $phrase ) ) {
+				$ph            = self::PH_EXCL . SF_Rules::num_alpha( $n ) . "\x00";
+				$text          = str_replace( $phrase, $ph, $text );
+				$ph_map[ $ph ] = $phrase;
+			}
+		}
+
+		// 'edit' rules πρώτα (αλλάζουν το κείμενο).
+		foreach ( $rules as $rule ) {
+			if ( 'edit' === $rule['type'] ) {
+				$text = (string) call_user_func( $rule['callback'], $text, $ctx );
+			}
+		}
+
+		// 'mark' rules → flags ανά byte.
+		if ( '' !== trim( $text ) ) {
+			$len   = strlen( $text );
+			$flags = array_fill( 0, $len, 0 );
+			$any   = false;
+
+			foreach ( $rules as $rule ) {
+				if ( 'mark' !== $rule['type'] ) {
+					continue;
+				}
+				$bit = ( 'strong' === $rule['tag'] ) ? self::F_STRONG : self::F_EM;
+				// Idempotency: το segment είναι ήδη μέσα στο tag → skip.
+				if ( ( self::F_STRONG === $bit && $ctx['bold'] ) || ( self::F_EM === $bit && $ctx['italic'] ) ) {
+					continue;
+				}
+				foreach ( (array) call_user_func( $rule['callback'], $text ) as $r ) {
+					$s = max( 0, (int) $r[0] );
+					$e = min( $len, (int) $r[1] );
+					for ( $p = $s; $p < $e; $p++ ) {
+						$flags[ $p ] |= $bit;
+						$any          = true;
+					}
+				}
+			}
+
+			if ( $any ) {
+				$flags = self::normalize_flags( $text, $flags );
+				$text  = self::render_marks( $text, $flags );
+			}
+		}
+
+		return empty( $ph_map ) ? $text : str_replace( array_keys( $ph_map ), array_values( $ph_map ), $text );
 	}
 
 	/**
-	 * Apply text rules ONLY on 'text' segments.
-	 * Protected/html segments pass through untouched.
+	 * Καθαρισμός flags πριν το render:
+	 *  - Ατομικά tokens (entity markers, exclusion placeholders): ενιαίο
+	 *    flag σε όλο το token (AND) — κανένα tag δεν μπαίνει μέσα τους.
+	 *  - Αλλαγές παραγράφου (\n + κενή γραμμή): χωρίς flags — κανένα tag
+	 *    δεν διασχίζει παράγραφο (έγκυρο HTML και μετά το wpautop).
+	 *  - Leading/trailing whitespace κάθε range μένει έξω από τα tags.
 	 */
-	private static function apply_text_rules( array $segments, array $enabled, array $excluded ): array {
+	private static function normalize_flags( string $text, array $flags ): array {
 
-		foreach ( $segments as &$seg ) {
-			if ( 'text' === $seg['type'] && '' !== trim( $seg['content'] ) ) {
-				$seg['content'] = SF_Rules::apply_text( $seg['content'], $enabled, array( 'excluded' => $excluded ) );
+		$re = '~' . preg_quote( self::PH_ENTITY, '~' ) . '[a-z]+' . preg_quote( self::PH_END, '~' )
+			. '|' . preg_quote( self::PH_EXCL, '~' ) . '[a-z]+\x00~';
+		if ( preg_match_all( $re, $text, $m, PREG_OFFSET_CAPTURE ) ) {
+			foreach ( $m[0] as $hit ) {
+				$s   = (int) $hit[1];
+				$e   = $s + strlen( $hit[0] );
+				$and = self::F_STRONG | self::F_EM;
+				for ( $p = $s; $p < $e; $p++ ) {
+					$and &= $flags[ $p ];
+				}
+				for ( $p = $s; $p < $e; $p++ ) {
+					$flags[ $p ] = $and;
+				}
 			}
 		}
 
-		return $segments;
+		if ( preg_match_all( '~[ \t]*\n[ \t]*\n\s*~', $text, $m, PREG_OFFSET_CAPTURE ) ) {
+			foreach ( $m[0] as $hit ) {
+				$s = (int) $hit[1];
+				$e = $s + strlen( $hit[0] );
+				for ( $p = $s; $p < $e; $p++ ) {
+					$flags[ $p ] = 0;
+				}
+			}
+		}
+
+		// Whitespace στα άκρα κάθε run ενός bit → εκτός tag.
+		foreach ( array( self::F_STRONG, self::F_EM ) as $bit ) {
+			$len = count( $flags );
+			$p   = 0;
+			while ( $p < $len ) {
+				if ( ! ( $flags[ $p ] & $bit ) ) {
+					$p++;
+					continue;
+				}
+				$s = $p;
+				while ( $p < $len && ( $flags[ $p ] & $bit ) ) {
+					$p++;
+				}
+				$e = $p;
+				for ( $q = $s; $q < $e && self::is_space( $text[ $q ] ); $q++ ) {
+					$flags[ $q ] &= ~$bit;
+				}
+				for ( $q = $e - 1; $q >= $s && self::is_space( $text[ $q ] ); $q-- ) {
+					$flags[ $q ] &= ~$bit;
+				}
+			}
+		}
+
+		return $flags;
 	}
 
-	/** Restore HTML entities from placeholders. */
-	private static function restore_entities( string $html, array $entities ): string {
-		return str_replace( array_keys( $entities ), array_values( $entities ), $html );
+	/**
+	 * Well-formed render: σε κάθε αλλαγή flags κλείνουν (από την κορυφή του
+	 * stack) όσα tags χρειάζεται, ξανανοίγουν όσα συνεχίζουν, και τα νέα
+	 * ανοίγουν με το μακρύτερο εξωτερικά (λιγότερα re-open). Το stack
+	 * κλείνει πάντα με αντίστροφη σειρά → ποτέ crossing tags.
+	 */
+	private static function render_marks( string $text, array $flags ): string {
+
+		$tags  = array( self::F_STRONG => 'strong', self::F_EM => 'em' );
+		$len   = strlen( $text );
+		$out   = '';
+		$stack = array();
+		$i     = 0;
+
+		while ( $i < $len ) {
+			$f = $flags[ $i ];
+			$j = $i + 1;
+			while ( $j < $len && $flags[ $j ] === $f ) {
+				$j++;
+			}
+
+			// Κλείσιμο: από το βαθύτερο tag που ΔΕΝ πρέπει να μείνει και πάνω.
+			$cut = null;
+			foreach ( $stack as $k => $bit ) {
+				if ( ! ( $f & $bit ) ) {
+					$cut = $k;
+					break;
+				}
+			}
+			if ( null !== $cut ) {
+				for ( $k = count( $stack ) - 1; $k >= $cut; $k-- ) {
+					$out .= '</' . $tags[ $stack[ $k ] ] . '>';
+				}
+				$stack = array_slice( $stack, 0, $cut );
+			}
+
+			// Άνοιγμα: όσα λείπουν, με το μακρύτερο πρώτο (εξωτερικό).
+			$open = array();
+			foreach ( $tags as $bit => $name ) {
+				if ( ( $f & $bit ) && ! in_array( $bit, $stack, true ) ) {
+					$ext = $i;
+					while ( $ext < $len && ( $flags[ $ext ] & $bit ) ) {
+						$ext++;
+					}
+					$open[ $bit ] = $ext;
+				}
+			}
+			// Μακρύτερο εξωτερικά· σε ισοπαλία strong έξω (ντετερμινιστικό σε κάθε PHP).
+			$order = array_keys( $open );
+			usort(
+				$order,
+				static function ( $a, $b ) use ( $open ) {
+					return ( $open[ $b ] <=> $open[ $a ] ) ?: ( $a <=> $b );
+				}
+			);
+			foreach ( $order as $bit ) {
+				$out    .= '<' . $tags[ $bit ] . '>';
+				$stack[] = $bit;
+			}
+
+			$out .= substr( $text, $i, $j - $i );
+			$i    = $j;
+		}
+
+		for ( $k = count( $stack ) - 1; $k >= 0; $k-- ) {
+			$out .= '</' . $tags[ $stack[ $k ] ] . '>';
+		}
+
+		return $out;
 	}
 
-	/** Restore protected blocks from placeholders. */
-	private static function restore_blocks( string $html, array $blocks ): string {
-		return str_replace( array_keys( $blocks ), array_values( $blocks ), $html );
+	/** ASCII whitespace byte (χωρίς εξάρτηση από το ctype extension). */
+	private static function is_space( string $c ): bool {
+		return ' ' === $c || "\t" === $c || "\n" === $c || "\r" === $c || "\f" === $c || "\v" === $c;
 	}
 
+	/** Restore placeholders → αρχικό περιεχόμενο. */
+	private static function restore( string $html, array $map ): string {
+		return empty( $map ) ? $html : strtr( $html, $map );
+	}
 }

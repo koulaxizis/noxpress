@@ -4,12 +4,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>noxpress — WordPress &amp; WooCommerce plugins by Christos Koulaxizis</title>
-<meta name="description" content="noxpress is a collection of free, open-source (MIT) WordPress and WooCommerce plugins by Christos Koulaxizis: revenue splitting with per-product VAT, greeklish permalinks, GDPR consent, bibliographic book metadata and more." />
+<meta name="description" content="noxpress is a collection of free, open-source (MIT) WordPress and WooCommerce plugins by Christos Koulaxizis: revenue splitting with per-product VAT, store dashboards and bulk product text formatting." />
 <link rel="canonical" href="https://noxpress.tech/" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="noxpress — WordPress &amp; WooCommerce plugins" />
-<meta property="og:description" content="Free, open-source WordPress &amp; WooCommerce plugins for publishers: revenue splitting, greeklish permalinks, GDPR consent, book metadata, pre-orders and more." />
+<meta property="og:description" content="Free, open-source WordPress &amp; WooCommerce plugins for publishers: revenue splitting, store dashboards and bulk product text formatting." />
 <meta property="og:url" content="https://noxpress.tech/" />
 <meta property="og:site_name" content="noxpress" />
 <style>
@@ -315,7 +315,7 @@ footer a:hover { text-decoration: underline; }
 
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
-		<div class="meta">v1.5.0 · WooCommerce · MIT<span class="badge">stable</span></div>
+		<div class="meta">v1.7.0 · WooCommerce · MIT<span class="badge">stable</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<ul>
 			<li data-i18n="rs_li1">Per-product VAT override with global default (gross × rate ÷ (100 + rate)), aggregated per VAT rate</li>
@@ -339,156 +339,11 @@ footer a:hover { text-decoration: underline; }
 			<li data-i18n="rs_li19">HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.5.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.5.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.7.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.7.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
 	</article>
-
-	<!--
-	<article class="card" id="greeklish-permalinks">
-		<h2><a href="#greeklish-permalinks">Greeklish Permalinks</a></h2>
-		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Automatically converts Greek characters to Latin in every permalink and uploaded filename — posts, pages, categories, tags, users. Full monotonic and polytonic coverage, one minimal settings page, zero bloat.</p>
-		<ul>
-			<li>Complete transliteration map: monotonic, polytonic and combining diacritics</li>
-			<li>Separate toggle for uploaded filenames (images, PDFs)</li>
-			<li>Live test field with instant preview</li>
-			<li>Clean uninstall — nothing left behind in the database</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/greeklish-permalinks" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="head-footer-code">
-		<h2><a href="#head-footer-code">Head &amp; Footer Code</a></h2>
-		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Injects raw code into the <code>&lt;head&gt;</code> and just before <code>&lt;/body&gt;</code>. Two textareas, nothing else — meta tags, verification codes, scripts. Secured behind the <code>unfiltered_html</code> capability with full nonce protection.</p>
-		<ul>
-			<li>Early <code>wp_head</code> hook (priority 1) and late <code>wp_footer</code> hook (priority 99)</li>
-			<li>Stored raw, rendered raw — never mangles your snippets</li>
-			<li>Zero output when both fields are empty</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/head-footer-code" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="hide-catalog">
-		<h2><a href="#hide-catalog">Hide Catalog</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Hides selected product categories from the shop page and/or search results while keeping each category's own archive fully accessible — perfect for back-catalogue titles you sell but don't want on the storefront.</p>
-		<ul>
-			<li>Independent shop-page and search-result toggles</li>
-			<li>Respects existing tax queries — plays nicely with filters</li>
-			<li>HPOS-compatible, main-query only, admin untouched</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/hide-catalog" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="checkout-extras">
-		<h2><a href="#checkout-extras">Checkout Extras</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Four checkout plugins replaced by one: gift wrapping with a configurable fee, a handwritten dedication field for gift cards, EU withdrawal information and a custom thank-you message. Built for bookstores and independent publishers.</p>
-		<ul>
-			<li>Gift wrap fee with AJAX order-review refresh and session persistence</li>
-			<li>Dedication field with client- and server-side length validation</li>
-			<li>EU right-of-withdrawal notice block on checkout and thank-you pages</li>
-			<li>Order metabox with wrap status and the dedication text</li>
-			<li>HPOS-compatible — CRUD meta only, no legacy order tables</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/checkout-extras" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="consent">
-		<h2><a href="#consent">Consent</a></h2>
-		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>A minimalist GDPR consent banner that actually blocks third-party scripts until consent is given. One cookie, no IP addresses, no user agents, no external calls — a consent-proof log capped at 500 entries, written in vanilla JS.</p>
-		<ul>
-			<li>Prior-consent script blocking via inert placeholders (preferences / analytics categories)</li>
-			<li>Accept-all, necessary-only and granular per-category consent</li>
-			<li>Re-open preferences anytime with the <code>[nx_consent_settings]</code> shortcode</li>
-			<li>Inline CSS/JS — zero extra HTTP requests, no CDN, no fingerprinting</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/consent" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="books">
-		<h2><a href="#books">Books</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Bibliographic metadata for WooCommerce products, made for publishers — ISBN, author, translator, pages, series and publication year, plus a free online chapter preview and an optional PDF sample button. Any product with an ISBN automatically gets schema.org Book structured data.</p>
-		<ul>
-			<li>Bibliographic details rendered on the product page, only when filled in</li>
-			<li>Free chapter preview with a native <code>&lt;details&gt;</code> block — zero JavaScript</li>
-			<li>JSON-LD Book schema: ISBN, author, translator, offers, availability</li>
-			<li>Coexists with your SEO plugin's Product schema</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/books" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="pre-orders">
-		<h2><a href="#pre-orders">Pre-Orders</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Per-product pre-orders with a release date — a storefront badge, a dedicated «Pre-order» button and an automatic note on every order line. Release dates expire themselves: once the date passes, all pre-order treatment disappears without any cron jobs.</p>
-		<ul>
-			<li>Native fields in the WooCommerce General tab — no extra metaboxes</li>
-			<li>Date validation (strict YYYY-MM-DD + calendar check)</li>
-			<li>Order line item note visible in admin, emails and thank-you page</li>
-			<li>Built for publishers shipping upcoming titles</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/pre-orders" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="back-in-stock">
-		<h2><a href="#back-in-stock">Back-in-Stock</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>A «notify me when it's back» form on out-of-stock products, with an automatic plain-text email the moment stock returns. One subscription per product, no IP addresses, no user agents, no newsletter opt-in — purely transactional.</p>
-		<ul>
-			<li>AJAX signup with nonce + honeypot spam protection</li>
-			<li>Instant restock emails via WooCommerce stock-status hooks</li>
-			<li>Individual emails — subscriber addresses never shared</li>
-			<li>Subscriber list auto-clears after notifications are sent</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/back-in-stock" rel="noopener">Source</a>
-		</div>
-	</article>
-
-	<article class="card" id="book-events">
-		<h2><a href="#book-events">Book Events</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge badge-soon">coming soon</span></div>
-		<p>Book presentations, poetry nights and signings as a dedicated content type — with venue, city, an optional linked book and schema.org Event structured data for rich search results. Upcoming events anywhere with the <code>[nx_events]</code> shortcode.</p>
-		<ul>
-			<li>Event JSON-LD with timezone-correct ISO 8601 dates</li>
-			<li>Location, related book and RSVP link — all optional</li>
-			<li>Past events stay archived; shortcode shows only upcoming ones</li>
-			<li>Zero JavaScript — native datetime pickers in the admin</li>
-		</ul>
-		<div class="actions">
-			<span class="btn disabled" aria-disabled="true">Download v1.0.0 (.zip)</span>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/book-events" rel="noopener">Source</a>
-		</div>
-	</article>
-	-->
 
 </section>
 
@@ -537,7 +392,7 @@ footer a:hover { text-decoration: underline; }
 		rs_li17: 'Dashboard widget with current-month snapshot, top beneficiaries, ledger summary and a monthly trend mini-chart',
 		rs_li18: 'Admin polish: per-beneficiary colour coding, dark admin theme, bilingual UI (Ελληνικά / English) per user',
 		rs_li19: 'HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind',
-		rs_download: 'Download v1.5.0 (.zip)',
+		rs_download: 'Download v1.7.0 (.zip)',
 		rs_source: 'Source',
 		rs_releases: 'Releases',
 		sub_title: 'Stay in the loop ✦',
@@ -571,7 +426,7 @@ footer a:hover { text-decoration: underline; }
 		rs_li17: 'Dashboard widget με snapshot τρέχοντος μήνα, top δικαιούχους, σύνοψη ledger και mini-chart μηνιαίας τάσης',
 		rs_li18: 'Admin polish: χρώμα ανά δικαιούχο, dark admin theme, δίγλωσσο UI (Ελληνικά / English) ανά χρήστη',
 		rs_li19: 'Συμβατό με HPOS — καμία επαφή με legacy order tables· καθαρό uninstall δεν αφήνει τίποτα πίσω',
-		rs_download: 'Λήψη v1.5.0 (.zip)',
+		rs_download: 'Λήψη v1.7.0 (.zip)',
 		rs_source: 'Πηγαίος κώδικας',
 		rs_releases: 'Εκδόσεις',
 		sub_title: 'Μείνε ενήμερος ✦',
@@ -583,8 +438,8 @@ footer a:hover { text-decoration: underline; }
 
 	var TITLE_EN = 'noxpress — WordPress & WooCommerce plugins by Christos Koulaxizis';
 	var TITLE_EL = 'noxpress — WordPress & WooCommerce plugins από τον Christos Koulaxizis';
-	var DESC_EN = 'noxpress is a collection of free, open-source (MIT) WordPress and WooCommerce plugins by Christos Koulaxizis: revenue splitting with per-product VAT, greeklish permalinks, GDPR consent, bibliographic book metadata and more.';
-	var DESC_EL = 'Το noxpress είναι μια συλλογή δωρεάν, ανοιχτού κώδικα (MIT) plugins WordPress και WooCommerce από τον Christos Koulaxizis: καταμερισμός εσόδων με ΦΠΑ ανά προϊόν, greeklish permalinks, συναίνεση GDPR, βιβλιογραφικά μεταδεδομένα και άλλα.';
+	var DESC_EN = 'noxpress is a collection of free, open-source (MIT) WordPress and WooCommerce plugins by Christos Koulaxizis: revenue splitting with per-product VAT, store dashboards and bulk product text formatting.';
+	var DESC_EL = 'Το noxpress είναι μια συλλογή δωρεάν, ανοιχτού κώδικα (MIT) plugins WordPress και WooCommerce από τον Christos Koulaxizis: καταμερισμός εσόδων με ΦΠΑ ανά προϊόν, dashboards καταστήματος και μαζική μορφοποίηση κειμένων προϊόντων.';
 
 	var toggle = document.getElementById('langToggle');
 	if (!toggle) { return; }

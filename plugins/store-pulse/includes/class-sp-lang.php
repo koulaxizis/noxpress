@@ -7,7 +7,7 @@
  * Όταν ο τρέχων χρήστης είναι σε EN mode, το φίλτρο επιστρέφει την
  * αγγλική εκδοχή από το λεξικό.
  *
- * ΚΟΙΝΗ γλώσσα οθόνη με το Revenue Splitter: διαβάζουμε το ίδιο
+ * ΚΟΙΝΗ γλώσσα οθόνης με το Revenue Splitter: διαβάζουμε το ίδιο
  * user meta 'rs_lang'. Έτσι όποιος διάλεξε γλώσσα στο RS τη βλέπει
  * και στο Store Pulse — μία επιλογή, όλο το οικοσύστημα.
  *
@@ -71,7 +71,9 @@ final class SP_Lang {
 			$lang = ( 0 === strpos( strtolower( (string) $locale ), 'el' ) ) ? 'el' : 'en';
 		}
 
-		if ( null === $user_id ) {
+		// Cache μόνο αφού οριστεί ο τρέχων χρήστης — αλλιώς μια πρώιμη
+		// κλήση θα «κλείδωνε» τη γλώσσα του anonymous χρήστη.
+		if ( null === $user_id && did_action( 'set_current_user' ) ) {
 			self::$current = $lang;
 		}
 
@@ -131,12 +133,10 @@ final class SP_Lang {
 		'Store Pulse'                                      => 'Store Pulse',
 		'Store Pulse — Dashboard'                          => 'Store Pulse — Dashboard',
 		'Store Pulse — Ρυθμίσεις'                          => 'Store Pulse — Settings',
-		'Store Pulse — Γρήγορη ματιά'                      => 'Store Pulse — Quick glance',
 		'Dashboard'                                        => 'Dashboard',
 		'Ρυθμίσεις'                                        => 'Settings',
 		'SP Ρυθμίσεις'                                     => 'SP Settings',
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.' => 'You do not have permission to access this page.',
-		'Πλήρες dashboard →'                               => 'Full dashboard →',
 		'Το Store Pulse απαιτεί WooCommerce για να λειτουργήσει.' => 'Store Pulse requires WooCommerce to function.',
 
 		// --- Χρονικά διαστήματα (presets) ---
@@ -160,20 +160,18 @@ final class SP_Lang {
 		'Πελάτες (περίοδος)'                               => 'Customers (period)',
 		'Μέση αξία παραγγελίας'                            => 'Average order value',
 		'Καλύτερες πωλήσεις (%s)'                          => 'Best sellers (%s)',
-		'Καλύτερες πωλήσεις (περίοδος)'                    => 'Best sellers (period)',
- 
+
 		// --- Money cards (με Revenue Splitter) ---
 		'Κέρδος εκδότη (περίοδος)'                         => 'Publisher profit (period)',
-		'Καθαρό'                                           => 'Net',
-		'Σύνολο'                                           => 'Total',
+		'Καθαρό (μετά κρατήσεων)'                          => 'Net (after deductions)',
 		'ΣΥΝΟΛΑ'                                           => 'TOTALS',
-		'Ποσότητα'                                         => 'Quantity',
 		'Δικαιούχος'                                       => 'Beneficiary',
-		'Ποσό'                                             => 'Amount',
 		'Το μεταφορικό ΔΕΝ υπολογίζεται στα ποσά.'         => 'Shipping is NOT included in the amounts.',
 		'Καμία οφειλή στην περίοδο.'                       => 'Nothing owed in this period.',
 		'Δεν έχεις επιλέξει εκδότη — πήγαινε στις Ρυθμίσεις.' => 'You have not picked a publisher — go to Settings.',
 		'Ο εκδότης δεν είναι γνωστός δικαιούχος του Revenue Splitter.' => 'The publisher is not a known Revenue Splitter beneficiary.',
+		'Δεν έχει επιλεγεί εκδότης'                        => 'No publisher selected',
+		'Άγνωστος εκδότης'                                 => 'Unknown publisher',
 
 		// --- Placeholder χωρίς Revenue Splitter ---
 		'Χρειάζεται το Revenue Splitter'                   => 'Requires Revenue Splitter',
@@ -186,18 +184,13 @@ final class SP_Lang {
 		'Καμία πώληση στην περίοδο.'                       => 'No sales in this period.',
 		'Όλα τα προϊόντα έχουν επαρκές απόθεμα.'           => 'All products have sufficient stock.',
 		'Κανένα προϊόν χωρίς απόθεμα.'                     => 'No out-of-stock products.',
-		'Καμία επιστροφή στην περίοδο.'                    => 'No refunds in this period.',
-		'Καμία ακύρωση στην περίοδο.'                      => 'No cancellations in this period.',
 
 		// --- Πίνακας top sellers ---
-		'Καλύτερες πωλήσεις'                               => 'Best sellers',
 		'Μικτό'                                            => 'Gross',
-		'Καθαρό (πριν καταμερισμό)'                        => 'Net (before split)',
 
-		// --- Πίνακας κερδών ---
-		'Ποσοστό'                                          => 'Percent',
+		// --- Πίνακας οφειλών ---
+		'Οφειλές ανά δικαιούχο'                            => 'Owed per beneficiary',
 		'Μερίδιο'                                          => 'Share',
-		'Περίοδος'                                         => 'Period',
 
 		// --- Ρυθμίσεις ---
 		'Χρονικό διάστημα εξυπηρετημένων παραγγελιών'      => 'Completed-orders period',
@@ -208,7 +201,6 @@ final class SP_Lang {
 		'Ισχύει για τις κάρτες «Κέρδος εκδότη» και «Οφειλές προς άλλους».' => 'Applies to the publisher-profit and owed-to-others cards.',
 		'Ισχύει για την κάρτα «Επιστροφές» σε dashboards και widget.'  => 'Applies to the refunds card in dashboards and the widget.',
 		'Χρονικό διάστημα προβολής των ακυρωμένων παραγγελιών.'        => 'Display period for cancelled orders.',
-		'Χρονικό διάστημα συνολικού κέρδους εκδότη και εκκρεμών οφειλών προς άλλους δικαιούχους.' => 'Profit and owed-to-others display period.',
 		'Όριο χαμηλού στοκ (τεμάχια)'                      => 'Low-stock threshold (units)',
 		'Ένα προϊόν θεωρείται σε χαμηλό στοκ όταν το απόθεμά του είναι ≤ αυτό το νούμερο. Το «0» θεωρείται εξαντλημένο (ξεχωριστή κάρτα).' => 'A product counts as low-stock when its stock is at or below this number. "0" counts as out of stock (separate card).',
 		'Δικαιούχος — εκδότης'                             => 'Beneficiary — publisher',
@@ -219,15 +211,19 @@ final class SP_Lang {
 		'Αποθήκευση ρυθμίσεων'                             => 'Save settings',
 		'Γλώσσα οθόνης'                                    => 'Display language',
 		'Αυτόματη (WordPress)'                             => 'Automatic (WordPress)',
-		'Ισχύει ανά χρήστη (μόνο για εσένα). Διαβάζεται η ίδια ρύθμιση με του Revenue Splitter — η αλλαγή εδώ ισχύει και εκεί.' => 'Per user (only affects you). The same setting is read by Revenue Splitter — a change here applies there too.',
-		'Mη έγκυρο χρονικό διάστημα.'                      => 'Invalid time period.',
+		'Επιλογή χρήστη'                                   => 'User choice',
+		'Η γλώσσα οθόνης επιλέγεται ανά χρήστη στις Ρυθμίσεις του Revenue Splitter και ισχύει για όλα τα Noxpress plugins. Χωρίς το Revenue Splitter ακολουθείται η γλώσσα του προφίλ σου στο WordPress.' => 'The display language is chosen per user in the Revenue Splitter settings and applies to all Noxpress plugins. Without Revenue Splitter, your WordPress profile language is used.',
+		'Μη έγκυρο χρονικό διάστημα.'                      => 'Invalid time period.',
 		'Μη έγκυρο όριο στοκ (0+).'                        => 'Invalid stock threshold (0+).',
 		'Επίλεξε τουλάχιστον μία κάρτα για το Quick View.' => 'Pick at least one card for the Quick View.',
 
-		// --- Footer / branding ---
-		'Part of glarolykoi.net'                           => 'Part of glarolykoi.net',
+		// --- Footer / widget / branding ---
+		'Made with ❤ by %s'                                => 'Made with ❤ by %s',
 		'More plugins at'                                  => 'More plugins at',
-		'Στήριξε την ανάπτυξη στο Ko-Fi'                   => 'Support development on Ko-Fi',
+		'☕ Στήριξε το project στο Ko-fi'                   => '☕ Support the project on Ko-fi',
+		'🤓 Dashboard'                                     => '🤓 Dashboard',
+		'Noxpress Dashboard'                               => 'Noxpress Dashboard',
+		'☕ Ko-fi'                                          => '☕ Ko-fi',
 
 	);
 

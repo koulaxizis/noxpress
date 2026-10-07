@@ -1,21 +1,25 @@
 <?php
 /**
- * Plugin Name:       Revenue Splitter
- * Plugin URI:        https://noxpress.tech
- * Description:       Πωλήσεις/έσοδα WooCommerce με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν, καταμερισμός σε δικαιούχους, ledger εκτός πωλήσεων & πληρωμών, υποχρεωτική αιτιολογία δωρεάν αντιτύπων, μηνιαία email αναφοράς και Author Portal με προσωπικά κλειδιά.
- * Version:           1.6.3
- * Requires at least: 6.0
- * Requires PHP:      7.4
- * Author:            Christos Koulaxizis
- * License:           MIT
- * Donate URI:        https://ko-fi.com/koulaxizis
- * Text Domain:       revenue-splitter
- * Domain Path:       /languages
+ * Plugin Name:          Revenue Splitter
+ * Plugin URI:           https://noxpress.tech
+ * Description:          Πωλήσεις/έσοδα WooCommerce με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν, καταμερισμός σε δικαιούχους, ledger εκτός πωλήσεων & πληρωμών, υποχρεωτική αιτιολογία δωρεάν αντιτύπων, μηνιαία email αναφοράς και Author Portal με προσωπικά κλειδιά.
+ * Version:              1.7.0
+ * Requires at least:    6.0
+ * Requires PHP:         7.4
+ * Requires Plugins:     woocommerce
+ * WC requires at least: 7.1
+ * Author:               Christos Koulaxizis
+ * Author URI:           https://koulaxizis.gr
+ * License:              MIT
+ * License URI:          https://opensource.org/licenses/MIT
+ * Donate URI:           https://ko-fi.com/koulaxizis
+ * Text Domain:          revenue-splitter
+ * Domain Path:          /languages
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RS_VERSION', '1.6.3' );
+define( 'RS_VERSION', '1.7.0' );
 define( 'RS_FILE', __FILE__ );
 define( 'RS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RS_URL', plugin_dir_url( __FILE__ ) );
@@ -82,13 +86,23 @@ function rs_bootstrap(): void {
 // Migration / upgrade routine (runs on every admin init, applies defaults safely).
 add_action( 'admin_init', 'rs_maybe_upgrade' );
 
+/**
+ * Upgrade routine: συγκρίνει την αποθηκευμένη έκδοση με το RS_VERSION
+ * και εκτελεί ΜΟΝΟ τα βήματα που λείπουν (version_compare), ώστε ένα
+ * store που αναβαθμίζει από οποιαδήποτε παλαιότερη έκδοση να περνά από
+ * όλα τα ενδιάμεσα migrations με τη σωστή σειρά.
+ *
+ * Ιστορικό: μέχρι το 1.4.0 υπήρχε μόνο η καταγραφή της έκδοσης
+ * (option rs_version) — κανένα data migration δεν απαιτήθηκε ως το 1.7.0.
+ */
 function rs_maybe_upgrade(): void {
 	$installed = (string) get_option( 'rs_version', '0' );
 	if ( RS_VERSION === $installed ) {
 		return; // Already on latest version.
 	}
 
-	// Future migrations go here. In 1.4.0 we just record the version.
+	// Μελλοντικά migrations: if ( version_compare( $installed, 'X.Y.Z', '<' ) ) { … }
+
 	update_option( 'rs_version', RS_VERSION );
 }
 
@@ -104,5 +118,15 @@ register_activation_hook(
 		if ( false === get_option( 'rs_default_vat_rate', false ) ) {
 			add_option( 'rs_default_vat_rate', '24' );
 		}
+	}
+);
+
+// v1.7.0: στην απενεργοποίηση αφαιρείται το cron της μηνιαίας αναφοράς
+// (RS_Emails::CRON_HOOK — literal, γιατί χωρίς WooCommerce η κλάση δεν
+// φορτώνεται). Στην επανενεργοποίηση το RS_Emails::init() το ξαναβάζει.
+register_deactivation_hook(
+	__FILE__,
+	function (): void {
+		wp_clear_scheduled_hook( 'rs_email_monthly_check' );
 	}
 );

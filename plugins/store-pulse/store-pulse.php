@@ -1,15 +1,20 @@
 <?php
 /**
- * Plugin Name:       Store Pulse
- * Plugin URI:        https://noxpress.tech
- * Description:       Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
- * Version:           1.2.5
- * Requires at least: 6.0
- * Requires PHP:      7.4
- * Author:            Christos Koulaxizis
- * License:           MIT
- * Text Domain:       store-pulse
- * Domain Path:       /languages
+ * Plugin Name:          Store Pulse
+ * Plugin URI:           https://noxpress.tech
+ * Description:          Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
+ * Version:              1.3.0
+ * Requires at least:    6.0
+ * Requires PHP:         7.4
+ * Requires Plugins:     woocommerce
+ * WC requires at least: 7.1
+ * Author:               Christos Koulaxizis
+ * Author URI:           https://koulaxizis.gr
+ * License:              MIT
+ * License URI:          https://opensource.org/licenses/MIT
+ * Donate URI:           https://ko-fi.com/koulaxizis
+ * Text Domain:          store-pulse
+ * Domain Path:          /languages
  *
  * Noxpress ecosystem — sister plugin του Revenue Splitter:
  *  - Χωρίς Revenue Splitter: όλες οι κάρτες λειτουργούν, εκτός από
@@ -18,12 +23,14 @@
  *  - Με Revenue Splitter: διαβάζει ΜΟΝΟ τα public APIs του
  *    (RS_Reports::run, RS_Beneficiaries::collect_names,
  *    RS_Ledger::sum) — μηδενικός διπλός υπολογισμός, κοινό
- *    invalidation μέσω rs_cache_version.
+ *    invalidation μέσω rs_cache_version / rs_invalidate_cache.
+ *  - Με Smart Formatter: ακούμε το noxpress_products_changed ώστε
+ *    οι αλλαγές προϊόντων να ανανεώνουν άμεσα το cache.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SP_VERSION', '1.2.5' );
+define( 'SP_VERSION', '1.3.0' );
 define( 'SP_FILE', __FILE__ );
 define( 'SP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SP_URL', plugin_dir_url( __FILE__ ) );
@@ -50,6 +57,11 @@ add_action( 'plugins_loaded', 'sp_bootstrap' );
  */
 function sp_bootstrap(): void {
 
+	// Το λεξικό φορτώνει πάντα — ώστε και το notice «απαιτεί
+	// WooCommerce» να εμφανίζεται στη γλώσσα του χρήστη.
+	require_once SP_PATH . 'includes/class-sp-lang.php';
+	SP_Lang::init();
+
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', 'sp_missing_woo_notice' );
 		return;
@@ -66,14 +78,12 @@ function sp_bootstrap(): void {
 		}
 	);
 
-	require_once SP_PATH . 'includes/class-sp-lang.php';
 	require_once SP_PATH . 'includes/class-sp-data.php';
 	require_once SP_PATH . 'includes/class-sp-admin.php';
 	require_once SP_PATH . 'includes/class-sp-dashboard.php';
 
-	SP_Lang::init();
+	SP_Data::init();
 	SP_Admin::init();
-	SP_Dashboard::init();
 }
 
 /** Είναι ενεργό το Revenue Splitter (με όλα τα APIs που χρειαζόμαστε); */
@@ -84,6 +94,9 @@ function sp_rs_active(): bool {
 }
 
 function sp_missing_woo_notice(): void {
+	if ( ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
 	echo '<div class="notice notice-error"><p>';
 	echo esc_html__( 'Το Store Pulse απαιτεί WooCommerce για να λειτουργήσει.', 'store-pulse' );
 	echo '</p></div>';

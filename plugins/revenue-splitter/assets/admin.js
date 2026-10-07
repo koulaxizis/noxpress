@@ -1,5 +1,5 @@
 /**
- * Revenue Splitter — admin JS (vanilla, zero dependencies) — v1.3.1.
+ * Revenue Splitter — admin JS (vanilla, zero dependencies) — v1.7.0.
  *  1. Live add/remove γραμμών δικαιούχων
  *  2. Ζωντανό Σ=100% validation (χρώμα, comma-tolerant)
  *  3. Toggle «global defaults» στο metabox
