@@ -290,6 +290,10 @@ final class RS_Ledger {
 		update_option( self::OPT_LEDGER, wp_json_encode( $all ) );
 		self::$all_cache = $all;
 
+		// v1.7.0: κάθε mutation του ledger ειδοποιεί το οικοσύστημα
+		// (cached reports, Store Pulse κ.λπ.).
+		do_action( 'rs_invalidate_cache' );
+
 		return true;
 	}
 
@@ -314,6 +318,8 @@ final class RS_Ledger {
 		update_option( self::OPT_LEDGER, wp_json_encode( array_values( $keep ) ) );
 		self::$all_cache = array_values( $keep );
 
+		do_action( 'rs_invalidate_cache' );
+
 		return true;
 	}
 
@@ -326,6 +332,8 @@ final class RS_Ledger {
 	public static function wipe(): void {
 		delete_option( self::OPT_LEDGER );
 		self::$all_cache = array();
+
+		do_action( 'rs_invalidate_cache' );
 	}
 
 	/**
@@ -388,6 +396,8 @@ final class RS_Ledger {
 		} else {
 			update_option( self::OPT_LEDGER, wp_json_encode( $out ) );
 			self::$all_cache = $out;
+
+			do_action( 'rs_invalidate_cache' );
 		}
 
 		return true;
@@ -708,7 +718,7 @@ final class RS_Ledger {
 		$names   = RS_Beneficiaries::collect_names();
 
 		if ( empty( $names ) ) {
-			echo '<hr /><p class="rs-empty">' . esc_html__( 'Δεν υπάρχουν δικαιούχοι ακόμη — δεν μπορεί να συντηρηθεί ledger.', 'revenue-splitter' ) . '</p>';
+			echo '<hr /><p class="rs-empty">' . esc_html__( 'Δεν υπάρχουν δικαιούχοι ακόμη — δεν μπορεί να διατηρηθεί ledger.', 'revenue-splitter' ) . '</p>';
 			return;
 		}
 		?>

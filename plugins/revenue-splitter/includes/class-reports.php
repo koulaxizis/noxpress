@@ -7,7 +7,8 @@
  *  - Gross γραμμής = line total + line tax (ΦΠΑ-συμπεριλημτικό, ό,τι πλήρωσε ο πελάτης).
  *  - ΦΠΑ: αφαιρείται με βάση τον συντελεστή του Revenue Splitter,
  *    με τον τύπο «από μέσα»: vat = gross × rate / (100 + rate).
- *  - Refunds: αφαιρούνται ανά line item μέσω '_refunded_item_id'.
+ *  - Refunds: αφαιρούνται ανά line item μέσω '_refunded_item_id'· τα
+ *    amount-only refunds κατανέμονται αναλογικά (v1.7.0, collect_refunds).
  *
  * v1.1.2 FIX: Το φίλτρο προϊόντος γίνεται ΠΕΡΙ ITEM (PHP-level) και όχι μέσω
  * του query arg 'product' του wc_get_orders(), το οποίο αγνοείται σιωπηλά
@@ -49,7 +50,7 @@
  * v1.3.5 (#8): Ανίχνευση κουπονιών — στις γραμμές με έκπτωση
  * συλλέγονται οι κωδικοί κουπονιών της παραγγελίας
  * (order->get_coupon_codes()) ανά προϊόν, σε πεδίο 'coupons' του
- * report (καταναλίσκεται στο dashboard και στο portal).
+ * report (χρησιμοποιείται στο dashboard και στο portal).
  * Σημείωση: το Woo δεν χαρτογραφεί coupon→line item 1:1, οπότε σε
  * επίπεδο product aggregate: όποιο κουπόνι εφαρμόστηκε στην παραγγελία
  * που είχε γραμμή έκπτωσης του προϊόντος.
@@ -75,7 +76,7 @@
  * v1.3.7 FIX: Native «Τιμή προσφοράς» (Woo Sale Price, χωρίς κουπόνι)
  * μετρούσε ως «Πλήρης» — το Woo αποθηκεύει το sale price ΩΣ subtotal.
  * Νέο native_sale_discount(): paid-unit vs regular-unit incl tax →
- * σωστή κατηγογοποίηση + σταθμισμένο % έκπτωσης. Τιμές με κουπόνια
+ * σωστή κατηγοριοποίηση + σταθμισμένο % έκπτωσης. Τιμές με κουπόνια
  * συνεχίζουν μέσω subtotal/total (αλλαγή βάσης % μόνο για native).
  */
 
@@ -89,6 +90,21 @@ class RS_Reports {
 
 	public static function init(): void {
 		add_action( 'rs_invalidate_cache', array( __CLASS__, 'flush_cache' ) );
+
+		/*
+		 * v1.7.0: αλλαγή κατάστασης παραγγελίας ή επιστροφή χρημάτων →
+		 * invalidate, ώστε reports/portal/Store Pulse να μη δείχνουν
+		 * παλιά νούμερα για έως 5 λεπτά. Μέσω του κοινού action, ώστε
+		 * να ενημερώνονται και όσοι ακούνε (π.χ. Store Pulse).
+		 */
+		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'on_order_change' ) );
+		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'on_order_change' ) );
+		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'on_order_change' ) );
+	}
+
+	/** v1.7.0: hook callback για αλλαγές παραγγελιών (βλ. init). */
+	public static function on_order_change(): void {
+		do_action( 'rs_invalidate_cache' );
 	}
 
 	public static function flush_cache(): void {
@@ -104,8 +120,15 @@ class RS_Reports {
 		 * τον εαυτό τους. Με external object cache τα transients δεν
 		 * ζουν στο options table — καλύπτεται από το version bump.
 		 */
-		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_rs_report_%'" );
-		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_rs_report_%'" );
+		// v1.7.0: LIKE escaped (esc_like) — τα '_' είναι literal.
+		foreach ( array( '_transient_rs_report_', '_transient_timeout_rs_report_' ) as $prefix ) {
+			$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+					$wpdb->esc_like( $prefix ) . '%'
+				)
+			);
+		}
 		update_option( 'rs_cache_version', (string) time() );
 	}
 
@@ -238,7 +261,7 @@ class RS_Reports {
 	 * ------------------------------------------------------------------- */
 
 	/**
-	 * v1.3.6 (#9): Canonical ΔΟΜΗ άδειου report — ίδιο σχήδιο με το
+	 * v1.3.6 (#9): Canonical ΔΟΜΗ άδειου report — ίδιο σχήμα με το
 	 * compute(), ώστε οι callers να μη χρειάζονται κανένα ειδικό path.
 	 */
 	private static function empty_report( string $start, string $end ): array {
@@ -788,26 +811,82 @@ class RS_Reports {
 	 * Τα refund items έχουν αρνητικά totals στο Woo — το abs() είναι υποχρεωτικό,
 	 * αλλιώς τα refunds αγνοούνται σιωπηλά.
 	 *
+	 * v1.7.0: Refunds ΧΩΡΙΣ line items (ποσό μόνο — π.χ. «Refund 20€»
+	 * χωρίς ποσότητες, ή αυτόματο refund μέσω gateway) αγνοούνταν
+	 * πλήρως → τα έσοδα/μερίδια έμεναν φουσκωμένα. Προσέγγιση:
+	 *  1. Το itemized μέρος κάθε refund (line items + shipping + fees)
+	 *     αφαιρείται όπως πριν, ανά line item (_refunded_item_id).
+	 *  2. Το ΥΠΟΛΟΙΠΟ (refund amount − itemized) θεωρείται refund του
+	 *     ΑΚΟΜΗ μη επιστραμμένου μέρους της παραγγελίας και κατανέμεται
+	 *     ΑΝΑΛΟΓΙΚΑ: ratio = υπόλοιπο / (order total − ήδη itemized), και
+	 *     κάθε product line χάνει ratio × (gross της − ό,τι έχει ήδη
+	 *     επιστραφεί). Έτσι το κομμάτι που αναλογεί σε μεταφορικά/fees ΔΕΝ
+	 *     χρεώνεται στα προϊόντα, και ένα amount-only refund όλου του
+	 *     υπολοίπου μηδενίζει ακριβώς τις γραμμές.
+	 *  3. Cap: ratio ≤ 1 — καμία γραμμή δεν «επιστρέφει» περισσότερα από το gross της.
+	 *
 	 * @return float[] original_item_id => refunded amount (θετικό).
 	 */
 	private static function collect_refunds( WC_Order $order ): array {
 
-		$refunded = array();
+		$refunded       = array();
+		$unassigned     = 0.0; // Amount-only υπόλοιπα όλων των refunds.
+		$itemized_total = 0.0; // Itemized ποσά όλων των refunds.
 
 		foreach ( $order->get_refunds() as $refund ) {
 			/** @var WC_Order_Refund $refund */
 
-			foreach ( $refund->get_items() as $ref_item ) {
+			$itemized = 0.0;
+
+			foreach ( $refund->get_items( array( 'line_item', 'shipping', 'fee' ) ) as $ref_item ) {
 				/** @var WC_Order_Item $ref_item */
+
+				$amount = abs( (float) $ref_item->get_total() + (float) $ref_item->get_total_tax() );
+				$itemized += $amount;
+
+				if ( ! $ref_item instanceof WC_Order_Item_Product ) {
+					continue; // Shipping/fee: μετράει στο itemized, όχι σε προϊόν.
+				}
 
 				$orig = (int) $ref_item->get_meta( '_refunded_item_id' );
 				if ( $orig <= 0 ) {
 					continue;
 				}
 
-				$amount = abs( (float) $ref_item->get_total() + (float) $ref_item->get_total_tax() );
 				if ( $amount > 0 ) {
 					$refunded[ $orig ] = ( $refunded[ $orig ] ?? 0.0 ) + $amount;
+				}
+			}
+
+			$itemized_total += $itemized;
+
+			$rest = abs( (float) $refund->get_amount() ) - $itemized;
+			if ( $rest > 0.005 ) {
+				$unassigned += $rest;
+			}
+		}
+
+		if ( $unassigned > 0.005 ) {
+
+			$remaining = (float) $order->get_total() - $itemized_total;
+
+			if ( $remaining > 0.005 ) {
+				$ratio = min( 1.0, $unassigned / $remaining );
+
+				foreach ( $order->get_items() as $item_id => $item ) {
+					if ( ! $item instanceof WC_Order_Item_Product ) {
+						continue;
+					}
+
+					$gross   = (float) $item->get_total() + (float) $item->get_total_tax();
+					$already = $refunded[ $item_id ] ?? 0.0;
+					$left    = max( 0.0, $gross - $already );
+
+					if ( $left <= 0.0 ) {
+						continue;
+					}
+
+					$refunded[ $item_id ] = $already + $left * $ratio;
 				}
 			}
 		}

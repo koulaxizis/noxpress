@@ -111,6 +111,19 @@ class RS_Beneficiaries {
 			return;
 		}
 
+		// v1.7.0: προειδοποίηση emails (ο καταμερισμός ΜΠΟΡΕΙ να έχει
+		// αποθηκευτεί) — ξεχωριστό transient από το σφάλμα καταμερισμού,
+		// ώστε να μην εμφανίζονται ποτέ αντιφατικά μηνύματα.
+		$warn = get_transient( 'rs_split_warn_' . get_current_user_id() );
+		if ( is_string( $warn ) && '' !== $warn ) {
+			delete_transient( 'rs_split_warn_' . get_current_user_id() );
+			echo '<div class="notice notice-warning is-dismissible"><p><strong>'
+				. esc_html__( 'Revenue Splitter:', 'revenue-splitter' )
+				. '</strong> '
+				. esc_html( $warn )
+				. '</p></div>';
+		}
+
 		$msg = self::take_split_error();
 		if ( null === $msg ) {
 			return;
@@ -366,7 +379,7 @@ class RS_Beneficiaries {
 	 * στο settings textarea. Reject εδώ = κεντρικός, έγκαιρος έλεγχος.
 	 *
 	 * @param  array[] $list Σχέδιο input, ΚΑΘΑΡΟ (unslashed) από κάθε πηγή.
-	 * @return array[]|null null όταν η λίστα είναι άκυρη (Σ ≠ 100, κενά ονόματα, άρνητα ποσοστά, '|' σε όνομα).
+	 * @return array[]|null null όταν η λίστα είναι άκυρη (Σ ≠ 100, κενά ονόματα, αρνητικά ποσοστά, '|' σε όνομα).
 	 */
 	public static function sanitize_list( $list ): ?array {
 
@@ -608,7 +621,8 @@ class RS_Beneficiaries {
 		 * v1.3.1 FIX (#10): το wp_unslash γίνεται ΕΔΩ, στα raw $_POST,
 		 * ΜΙΑ φορά — το sanitize_list() δέχεται πλέον καθαρή είσοδο.
 		 */
-		$rows = array();
+		$rows            = array();
+		$bad_email_names = array();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- πολυδιάστατο input, unslash παρακάτω.
 		if ( isset( $_POST['rs_ben_name'], $_POST['rs_ben_pct'] )
@@ -656,9 +670,10 @@ class RS_Beneficiaries {
 			);
 
 			// Notice για ό,τι δεν μπήκε — ΧΩΡΙΣ να μπλοκάρει το save
-			// του καταμερισμού (ο καταμερισμός είναι έγκυρος αυτόνομα).
+			// του καταμερισμού. Το κείμενο οριστικοποιείται ΜΕΤΑ το
+			// validation του καταμερισμού (v1.7.0: όχι αντιφατικά notices).
 			if ( ! empty( $invalid_names ) || in_array( '§INVALID§', $emails_map, true ) ) {
-				$bad_names = array_unique(
+				$bad_email_names = array_unique(
 					array_merge(
 						$invalid_names,
 						array_keys(
@@ -670,15 +685,6 @@ class RS_Beneficiaries {
 							)
 						)
 					)
-				);
-				set_transient(
-					'rs_split_error_' . get_current_user_id(),
-					sprintf(
-						/* translators: %s: λίστα ονομάτων δικαιούχων */
-						__( 'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s. Ο καταμερισμός αποθηκεύτηκε κανονικά.', 'revenue-splitter' ),
-						implode( ', ', $bad_names )
-					),
-					60
 				);
 			}
 
@@ -695,6 +701,24 @@ class RS_Beneficiaries {
 		}
 
 		$clean = self::sanitize_list( $rows );
+
+		if ( ! empty( $bad_email_names ) ) {
+			set_transient(
+				'rs_split_warn_' . get_current_user_id(),
+				null === $clean
+					? sprintf(
+						/* translators: %s: λίστα ονομάτων δικαιούχων */
+						__( 'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s.', 'revenue-splitter' ),
+						implode( ', ', $bad_email_names )
+					)
+					: sprintf(
+						/* translators: %s: λίστα ονομάτων δικαιούχων */
+						__( 'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s. Ο καταμερισμός αποθηκεύτηκε κανονικά.', 'revenue-splitter' ),
+						implode( ', ', $bad_email_names )
+					),
+				60
+			);
+		}
 
 		if ( null === $clean ) {
 			// Μη περνάμε λάθος δεδομένα. Notice (v1.3.1: πλέον ΚΑΙ εμφανίζεται

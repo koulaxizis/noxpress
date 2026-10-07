@@ -28,6 +28,12 @@
  * rs_cache_version + sp_cache_version. Το rs_cache_version μπαίνει
  * στο key ώστε οι αλλαγές του Revenue Splitter (splits/ΦΠΑ/ledger)
  * να μην σερβίρουν stale money cards — μηδενικά ghost νούμερα.
+ * Το sp_cache_version γίνεται bump στο rs_invalidate_cache (RS) και
+ * στο noxpress_products_changed (Smart Formatter).
+ *
+ * Κλιμάκωση: όπου χρειάζεται μόνο πλήθος, το query ζητά μόνο το
+ * σύνολο (paginate + limit 1)· όπου χρειάζονται δεδομένα ανά
+ * εγγραφή, διαβάζουμε σε σελίδες (BATCH) — ποτέ limit -1.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -52,6 +58,12 @@ final class SP_Data {
 	/** Έγκυρα presets ρυθμίσεων (labels στο SP_Admin/SP_Lang). */
 	const PRESETS = array( 'today', 'yesterday', '7d', '15d', 'month' );
 
+	/** Μέγεθος σελίδας για τα paginated queries (orders/products). */
+	const BATCH = 200;
+
+	/** Μέγιστο πλήθος γραμμών στις λίστες στοκ (τα counts είναι πλήρη). */
+	const STOCK_LIST_CAP = 50;
+
 	public static function init(): void {
 		/*
 		 * Οποιαδήποτε αλλαγή στο Revenue Splitter (καταμερισμός, ΦΠΑ,
@@ -61,11 +73,67 @@ final class SP_Data {
 		 * είναι το fail-safe.
 		 */
 		add_action( 'rs_invalidate_cache', array( __CLASS__, 'flush' ) );
+
+		/*
+		 * Smart Formatter: μετά από apply/restore που αλλάζει προϊόντα
+		 * στέλνει noxpress_products_changed( array $product_ids ).
+		 * Τα ids δεν χρειάζονται — το cache μας είναι ανά section.
+		 */
+		add_action( 'noxpress_products_changed', array( __CLASS__, 'flush' ), 10, 0 );
 	}
 
-	/** Bump του δικού μας cache generation. */
+	/**
+	 * Bump του δικού μας cache generation. uniqid (more entropy) ώστε
+	 * δύο invalidations μέσα στο ίδιο δευτερόλεπτο να μην «συμπέσουν»
+	 * (με time() η δεύτερη αλλαγή δεν άλλαζε το key → stale για 5').
+	 */
 	public static function flush(): void {
-		update_option( 'sp_cache_version', (string) time() );
+		update_option( 'sp_cache_version', uniqid( '', true ) );
+	}
+
+	/**
+	 * Πλήθος παραγγελιών που ταιριάζουν στα $args — μόνο το σύνολο,
+	 * χωρίς φόρτωση των objects (paginate → ->total).
+	 */
+	private static function count_orders( array $args ): int {
+
+		$args['limit']    = 1;
+		$args['paginate'] = true;
+		$args['return']   = 'ids';
+
+		$res = wc_get_orders( $args );
+
+		return ( is_object( $res ) && isset( $res->total ) ) ? (int) $res->total : 0;
+	}
+
+	/**
+	 * Διάσχιση παραγγελιών σε σελίδες των BATCH — το $callback
+	 * καλείται ανά object. Σταθερή σειρά (ID ASC) ώστε η σελιδοποίηση
+	 * να μη χάνει/διπλομετρά εγγραφές.
+	 */
+	private static function each_order( array $args, callable $callback ): void {
+
+		$args['limit']    = self::BATCH;
+		$args['paginate'] = false;
+		$args['orderby']  = 'ID';
+		$args['order']    = 'ASC';
+
+		$page = 1;
+
+		do {
+			$args['page'] = $page;
+			$batch        = wc_get_orders( $args );
+
+			if ( ! is_array( $batch ) ) {
+				break;
+			}
+
+			foreach ( $batch as $order ) {
+				$callback( $order );
+			}
+
+			$page++;
+		} while ( count( $batch ) === self::BATCH );
 	}
 
 	/* =====================================================================
@@ -196,29 +264,18 @@ final class SP_Data {
 			'pending',
 			static function (): array {
 
-				$orders = wc_get_orders(
-					array(
-						'limit'  => -1,
-						'status' => self::PENDING_STATUSES,
-						'type'   => 'shop_order',
-					)
+				$base = array(
+					'status' => self::PENDING_STATUSES,
+					'type'   => 'shop_order',
 				);
 
 				$cut = ( new DateTimeImmutable( 'now', wp_timezone() ) )
 					->modify( '-' . self::PENDING_OLD_DAYS . ' days' );
 
-				$count = 0;
-				$old   = 0;
-
-				foreach ( $orders as $order ) {
-					/** @var WC_Order $order */
-					$count++;
-
-					$dc = $order->get_date_created();
-					if ( $dc instanceof WC_DateTime && $dc->getTimestamp() <= $cut->getTimestamp() ) {
-						$old++;
-					}
-				}
+				$count = self::count_orders( $base );
+				$old   = ( $count > 0 )
+					? self::count_orders( $base + array( 'date_created' => '<=' . $cut->getTimestamp() ) )
+					: 0;
 
 				return array(
 					'count' => $count,
@@ -265,22 +322,19 @@ final class SP_Data {
 					);
 				}
 
-				$orders = wc_get_orders(
-					array(
-						'limit'         => -1,
-						'status'        => array( 'wc-completed' ),
-						'type'          => 'shop_order',
-						'date_created'  => self::utc_created_range( $created_from, $end ),
-					)
-				);
-
 				$count     = 0;
 				$gross     = 0.0;
 				$customers = array();
 				$per_prod  = array();
 
-				foreach ( $orders as $order ) {
-					/** @var WC_Order $order */
+				$from_ts = $local_from->getTimestamp();
+				$to_ts   = $local_to->getTimestamp();
+
+				$visit = static function ( $order ) use ( $from_ts, $to_ts, &$count, &$gross, &$customers, &$per_prod ): void {
+
+					if ( ! $order instanceof WC_Order ) {
+						return;
+					}
 
 					$dc = $order->get_date_completed();
 
@@ -291,12 +345,12 @@ final class SP_Data {
 					 * filtering του RS_Reports v1.1.2).
 					 */
 					if ( ! $dc instanceof WC_DateTime ) {
-						continue;
+						return;
 					}
 
 					$ts = $dc->getTimestamp();
-					if ( $ts < $local_from->getTimestamp() || $ts > $local_to->getTimestamp() ) {
-						continue;
+					if ( $ts < $from_ts || $ts > $to_ts ) {
+						return;
 					}
 
 					$count++;
@@ -368,7 +422,16 @@ final class SP_Data {
 						$per_prod[ $pid ]['qty']   += $qty;
 						$per_prod[ $pid ]['gross'] += $line;
 					}
-				}
+				};
+
+				self::each_order(
+					array(
+						'status'       => array( 'wc-completed' ),
+						'type'         => 'shop_order',
+						'date_created' => self::utc_created_range( $created_from, $end ),
+					),
+					$visit
+				);
 
 				// Top sellers (by qty, gross tiebreaker) — capped 10.
 				usort(
@@ -411,24 +474,21 @@ final class SP_Data {
 			'refunds|' . $start . '|' . $end,
 			static function () use ( $start, $end ): array {
 
-				$refunds = wc_get_orders(
-					array(
-						'limit'        => -1,
-						'type'         => 'shop_order_refund',
-						'status'       => 'any',
-						'date_created' => self::utc_created_range( $start, $end ),
-					)
-				);
-
 				$count  = 0;
 				$amount = 0.0;
 
-				foreach ( $refunds as $refund ) {
-					/** @var WC_Order_Refund $refund */
-
-					$count++;
-					$amount += abs( (float) $refund->get_total() );
-				}
+				self::each_order(
+					array(
+						'type'         => 'shop_order_refund',
+						'status'       => 'any',
+						'date_created' => self::utc_created_range( $start, $end ),
+					),
+					static function ( $refund ) use ( &$count, &$amount ): void {
+						/** @var WC_Order_Refund $refund */
+						$count++;
+						$amount += abs( (float) $refund->get_total() );
+					}
+				);
 
 				return array(
 					'count'  => $count,
@@ -463,33 +523,20 @@ final class SP_Data {
 					return array( 'count' => 0 );
 				}
 
-				$orders = wc_get_orders(
+				/*
+				 * Μόνο πλήθος: το date_modified φιλτράρεται στο ίδιο το
+				 * query (timestamps = UTC, χωρίς ασάφεια ζώνης) — ίδιο
+				 * αποτέλεσμα με το παλιό PHP-level φιλτράρισμα, χωρίς
+				 * φόρτωση objects.
+				 */
+				$count = self::count_orders(
 					array(
-						'limit'        => -1,
-						'status'       => array( 'wc-cancelled' ),
-						'type'         => 'shop_order',
-						'date_created' => self::utc_created_range( $created_from, $end ),
+						'status'        => array( 'wc-cancelled' ),
+						'type'          => 'shop_order',
+						'date_created'  => self::utc_created_range( $created_from, $end ),
+						'date_modified' => $local_from->getTimestamp() . '...' . $local_to->getTimestamp(),
 					)
 				);
-
-				$count = 0;
-
-				foreach ( $orders as $order ) {
-					/** @var WC_Order $order */
-
-					$dm = $order->get_date_modified();
-
-					if ( ! $dm instanceof WC_DateTime ) {
-						continue;
-					}
-
-					$ts = $dm->getTimestamp();
-					if ( $ts < $local_from->getTimestamp() || $ts > $local_to->getTimestamp() ) {
-						continue;
-					}
-
-					$count++;
-				}
 
 				return array( 'count' => $count );
 			}
@@ -499,6 +546,18 @@ final class SP_Data {
 	/**
 	 * Στοκ: low (0 < qty <= threshold) + out (qty <= 0 ή stock_status
 	 * 'outofstock' χωρίς manage_stock).
+	 *
+	 * Μονάδα μέτρησης = ό,τι κρατά πραγματικά απόθεμα:
+	 *  - simple/external/grouped κ.λπ.: το ίδιο το προϊόν.
+	 *  - variable με manage_stock στο parent: το parent (οι variations
+	 *    του με manage_stock = 'parent' ΔΕΝ ξαναμετρώνται).
+	 *  - variable χωρίς manage_stock στο parent: ΜΟΝΟ οι variations του
+	 *    (με δικό τους στοκ ή δικό τους stock_status) — το parent δεν
+	 *    μετρά, ώστε να μην υπάρχει διπλομέτρηση.
+	 * Variations με μη δημοσιευμένο parent αγνοούνται.
+	 *
+	 * Τα counts είναι ΠΛΗΡΗ σύνολα· μόνο οι λίστες κόβονται στα
+	 * STOCK_LIST_CAP. Τα products διαβάζονται σε σελίδες των BATCH.
 	 *
 	 * @return array{low:array{count:int,items:array<int,array{id:int,title:string,stock:int}>},out:array{count:int,items:array<int,array{id:int,title:string,stock:int}>}}
 	 */
@@ -511,57 +570,105 @@ final class SP_Data {
 				$low = array( 'count' => 0, 'items' => array() );
 				$out = array( 'count' => 0, 'items' => array() );
 
-				$products = wc_get_products(
-					array(
-						'limit'  => -1,
-						'status' => 'publish',
-					)
-				);
+				// Όλοι οι τύποι προϊόντων + variations (wc_get_products
+				// χωρίς 'type' επιστρέφει μόνο post_type product).
+				$types = array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) );
 
-				foreach ( $products as $product ) {
-					/** @var WC_Product $product */
+				$parent_published = array();
+				$page             = 1;
 
-					if ( ! $product instanceof WC_Product ) {
-						continue;
+				do {
+					$products = wc_get_products(
+						array(
+							'type'     => $types,
+							'status'   => 'publish',
+							'limit'    => self::BATCH,
+							'page'     => $page,
+							'orderby'  => 'ID',
+							'order'    => 'ASC',
+							'paginate' => false,
+						)
+					);
+
+					if ( ! is_array( $products ) ) {
+						break;
 					}
 
-					$pid  = (int) $product->get_id();
+					foreach ( $products as $product ) {
 
-					// Variations: δείχνουμε τον τίτλο του parent + suffix.
-					if ( $product instanceof WC_Product_Variation ) {
-						$parent_id = (int) $product->get_parent_id();
-						$title = (string) get_the_title( $parent_id );
-						$attr  = $product->get_attribute_summary(); // π.χ. "Χρώμα: κόκκινο"
-						if ( '' !== $attr ) {
-							$title .= ' — ' . $attr;
+						if ( ! $product instanceof WC_Product ) {
+							continue;
 						}
-					} else {
-						$title = (string) get_the_title( $pid );
-					}
 
-					if ( '' === trim( $title ) ) {
-						$title = '#' . $pid;
-					}
+						$pid     = (int) $product->get_id();
+						$link_id = $pid;
+						$manage  = $product->get_manage_stock();
 
-					if ( $product->get_manage_stock() ) {
-						$qty = (int) $product->get_stock_quantity();
+						if ( $product instanceof WC_Product_Variation ) {
 
-						if ( $qty <= 0 ) {
+							// Το στοκ ανήκει στο parent → μετριέται εκεί.
+							if ( 'parent' === $manage ) {
+								continue;
+							}
+
+							$parent_id = (int) $product->get_parent_id();
+
+							if ( ! isset( $parent_published[ $parent_id ] ) ) {
+								$parent_published[ $parent_id ] = ( 'publish' === get_post_status( $parent_id ) );
+							}
+							if ( ! $parent_published[ $parent_id ] ) {
+								continue;
+							}
+
+							// Τίτλος parent + attributes· link στο parent
+							// (οι variations δεν έχουν δική τους σελίδα επεξεργασίας).
+							$link_id = $parent_id;
+							$title   = (string) get_the_title( $parent_id );
+							$attr    = (string) $product->get_attribute_summary(); // π.χ. "Χρώμα: κόκκινο"
+							if ( '' !== $attr ) {
+								$title .= ' — ' . $attr;
+							}
+						} else {
+
+							// Variable χωρίς δικό του στοκ: μετρούν οι variations.
+							if ( $product->is_type( 'variable' ) && true !== $manage ) {
+								continue;
+							}
+
+							$title = (string) get_the_title( $pid );
+						}
+
+						if ( '' === trim( $title ) ) {
+							$title = '#' . $pid;
+						}
+
+						if ( true === $manage ) {
+							$qty = (int) $product->get_stock_quantity();
+
+							if ( $qty <= 0 ) {
+								$out['count']++;
+								if ( count( $out['items'] ) < self::STOCK_LIST_CAP ) {
+									$out['items'][] = array( 'id' => $link_id, 'title' => $title, 'stock' => $qty );
+								}
+							} elseif ( $qty <= $threshold ) {
+								// Όλα τα low κρατιούνται για σωστό sort πριν το cap.
+								$low['count']++;
+								$low['items'][] = array( 'id' => $link_id, 'title' => $title, 'stock' => $qty );
+							}
+							continue;
+						}
+
+						// Χωρίς manage_stock: μόνο το stock_status έχει νόημα.
+						if ( 'outofstock' === $product->get_stock_status() ) {
 							$out['count']++;
-							$out['items'][] = array( 'id' => $pid, 'title' => $title, 'stock' => $qty );
-						} elseif ( $qty <= $threshold ) {
-							$low['count']++;
-							$low['items'][] = array( 'id' => $pid, 'title' => $title, 'stock' => $qty );
+							if ( count( $out['items'] ) < self::STOCK_LIST_CAP ) {
+								$out['items'][] = array( 'id' => $link_id, 'title' => $title, 'stock' => 0 );
+							}
 						}
-						continue;
 					}
 
-					// Χωρίς manage_stock: μόνο το stock_status έχει νόημα.
-					if ( 'outofstock' === $product->get_stock_status() ) {
-						$out['count']++;
-						$out['items'][] = array( 'id' => $pid, 'title' => $title, 'stock' => 0 );
-					}
-				}
+					$page++;
+				} while ( count( $products ) === self::BATCH );
 
 				// Sorting: low κατά stock ASC, out όπως έχει.
 				usort(
@@ -571,13 +678,9 @@ final class SP_Data {
 					}
 				);
 
-				// Cap 50 — το panel δεν χρειάζεται τεράστιες λίστες.
-				$low['items'] = array_slice( $low['items'], 0, 50, true );
-				$out['items'] = array_slice( $out['items'], 0, 50, true );
-
-				// Το count να συμφωνεί πάντα με τον ορατό πίνακα (cap 50).
-				$low['count'] = count( $low['items'] );
-				$out['count'] = count( $out['items'] );
+				// Cap λίστας — το panel δεν χρειάζεται τεράστιες λίστες.
+				// Τα counts ΜΕΝΟΥΝ τα πραγματικά σύνολα.
+				$low['items'] = array_slice( $low['items'], 0, self::STOCK_LIST_CAP );
 
 				return array(
 					'low' => $low,
@@ -596,8 +699,6 @@ final class SP_Data {
 	 *    γνωστός δικαιούχος (κενό όνομα = δεν έχει επιλεγεί).
 	 *  - share: το μερίδιο του εκδότη από πωλήσεις περιόδου.
 	 *  - net: share + ledger income − payments του εκδότη (περίοδος).
-	 *  - totals: gross/vat/net της περιόδου (line items ΜΟΝΟ — τα
-	 *    μεταφορικά ΔΕΝ υπολογίζονται ποτέ).
 	 *  - others: κάθε μη-εκδότης δικαιούχος → share + owed (= share
 	 *    + ledger income − payments περιόδου).
 	 *
@@ -623,7 +724,10 @@ final class SP_Data {
 				);
 
 				$shares = array();
-				foreach ( $report['beneficiaries'] as $b ) {
+				$rows   = ( is_array( $report ) && isset( $report['beneficiaries'] ) && is_array( $report['beneficiaries'] ) )
+					? $report['beneficiaries']
+					: array();
+				foreach ( $rows as $b ) {
 					$shares[ (string) $b['name'] ] = (float) $b['amount'];
 				}
 
@@ -642,7 +746,7 @@ final class SP_Data {
 					: 0.0;
 
 				// ---- Οι υπόλοιποι ----
-				$others      = array();
+				$others     = array();
 				$others_sum = 0.0;
 
 				foreach ( $shares as $name => $share ) {
@@ -677,11 +781,6 @@ final class SP_Data {
 					'publisher_known' => $known,
 					'share'           => round( $pub_share, 2 ),
 					'net'             => $pub_net,
-					'totals'          => array(
-						'gross' => (float) $report['totals']['gross'],
-						'vat'   => (float) $report['totals']['vat'],
-						'net'   => (float) $report['totals']['net'],
-					),
 					'others'          => $others,
 					'others_sum'      => round( $others_sum, 2 ),
 				);

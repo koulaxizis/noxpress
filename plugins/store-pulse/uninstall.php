@@ -5,7 +5,7 @@
  * Διαγράφει από τη βάση:
  *  - Options: sp_low_stock_threshold, sp_default_period_*,
  *    sp_publisher, sp_quick_cards, sp_cache_version.
- *  - Transients: sp_* (cached pulse datasets).
+ *  - Transients: sp_<md5> (cached pulse datasets) + τα timeout τους.
  *
  * ΔΕΝ αγγίζει ΤΙΠΟΤΑ του Revenue Splitter (rs_* options/meta,
  * user meta rs_lang) — αν και τα δύο plugins είναι εγκατεστημένα,
@@ -19,9 +19,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-if ( ! current_user_can( 'activate_plugins' ) ) {
-	return;
-}
+// Σημ.: χωρίς έλεγχο current_user_can — το WP_UNINSTALL_PLUGIN το
+// ορίζει μόνο το core, και στο `wp plugin uninstall` (WP-CLI) δεν
+// υπάρχει τρέχων χρήστης, οπότε ο έλεγχος θα ακύρωνε το cleanup.
 
 // ---------------------------------------------------------------------
 // Options (multisite-aware: μόνο στο site του uninstall).
@@ -43,37 +43,30 @@ foreach ( $sp_uninstall_options as $sp_opt ) {
 }
 
 // ---------------------------------------------------------------------
-// Transients με πρόθεμα sp_ (cached datasets). Same approach με το RS:
-// SELECT των option_names → στοχευμένο delete_option() ανά όνομα,
-// ώστε να invalidated και το object cache χωρίς blanket flush.
-//
-// ΠΡΟΣΟΧΗ: τα masks είναι «sp_» — ΠΟΤΕ «rs_». Το Revenue Splitter
-// κρατά τα δικά του δεδομένα (rs_tok_, rs_report_ κ.λπ.).
+// Transients του SP_Data::cached(): ΑΚΡΙΒΩΣ 'sp_' + md5 (32 hex).
+// Το LIKE περνά από $wpdb->esc_like (το '_' είναι wildcard στη SQL)
+// και κάθε όνομα επιβεβαιώνεται με regex πριν σβηστεί — ώστε να μην
+// αγγίξουμε ποτέ transients άλλων plugins που τυχαίνει να αρχίζουν
+// από «sp_». Το delete_transient() σβήνει και το _transient_timeout_
+// ζεύγος (και το object cache, αν υπάρχει).
 // ---------------------------------------------------------------------
 
 global $wpdb;
 
-$sp_transient_masks = array(
-	'_transient_sp_%',
-	'_transient_timeout_sp_%',
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- εφάπαξ cleanup.
+$sp_names = $wpdb->get_col(
+	$wpdb->prepare(
+		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+		$wpdb->esc_like( '_transient_sp_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_sp_' ) . '%'
+	)
 );
 
-foreach ( $sp_transient_masks as $sp_mask ) {
-
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- εφάπαξ cleanup.
-	$sp_names = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-			$sp_mask
-		)
-	);
-
-	if ( ! is_array( $sp_names ) ) {
-		continue;
-	}
-
+if ( is_array( $sp_names ) ) {
 	foreach ( $sp_names as $sp_name ) {
-		delete_option( $sp_name );
+		if ( preg_match( '/^_transient_(?:timeout_)?(sp_[0-9a-f]{32})$/', (string) $sp_name, $sp_m ) ) {
+			delete_transient( $sp_m[1] );
+		}
 	}
 }
 

@@ -1,62 +1,56 @@
 <?php
 /**
- * Smart Formatter — uninstall.php
+ * Smart Formatter — uninstall.php (v1.1.0)
  *
- * Cleanup (πλήρες — κανένα υπολείμμα μετά το deactivate + delete):
+ * Cleanup (πλήρες — κανένα υπόλειμμα μετά το deactivate + delete):
  *  - Options: sf_profiles, sf_exclusions,
  *    sf_snapshots (OPT_HISTORY — περιλαμβάνει τα undo payloads).
  *  - Transients: sf_aui_msg_{user_id} (PRG notices — μπορεί να
  *    έχουν μείνει εκπνευσμένα στη βάση, διαγράφονται τώρα).
  *  - Καμία δομή σε server filesystem δεν δημιουργείται από το SF
  *    (uploads/folders): δεν χρειάζεται filesystem cleanup εδώ.
+ *  - Multisite: κάθε site ΜΙΑ φορά (και το main site μέσα στο loop).
  *
  * Notes:
- *  - Το uninstall.php τρέχει ΠΑΝΤΑ από το WP core (check-upgrade /
- *    delete_plugin) με ABSPATH ήδη defined — το exit guard είναι
- *    defence in depth για web-access αιτήματα.
  *  - ΠΡΟΣΟΧΗ (σκόπιμο semantic): διαγράφεται ΜΟΝΟ το SF state.
  *    Τα ΠΡΟΪΟΝΤΑ (περιγραφές κτλ.) ΔΕΝ αγγίζονται — ό,τι έχει ήδη
  *    εφαρμοστεί με Apply παραμένει στο κατάστημα. Αν κάποιος θέλει
- *    rollback πριν το uninstall, πρέπει πρώτα Restore από το
- *    history — το έχουμε ήδη ρητά στην ροή του UI.
+ *    rollback πριν το uninstall, πρέπει πρώτα Restore από το history.
+ *  - Το rs_lang user meta ανήκει στο Revenue Splitter — δεν αγγίζεται.
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-/* Options — hardcoded list (intentional duplication of the const values:
-   constants classes δεν φορτώνουν εδώ — το plugin είναι ήδη unloaded). */
-$sf_options = array(
-	'sf_profiles',
-	'sf_exclusions',
-	'sf_snapshots',
-);
+/**
+ * Καθαρισμός ενός site (options + transients του SF μόνο).
+ * Options: hardcoded λίστα (οι classes του plugin δεν φορτώνονται εδώ).
+ */
+function sf_uninstall_site(): void {
+	global $wpdb;
 
-foreach ( $sf_options as $sf_opt ) {
-	delete_option( $sf_opt );
+	foreach ( array( 'sf_profiles', 'sf_exclusions', 'sf_snapshots' ) as $sf_opt ) {
+		delete_option( $sf_opt );
+	}
+
+	// Transients sf_aui_msg_% — LIKE με escaped '_' (αλλιώς wildcard).
+	$sf_like_val = $wpdb->esc_like( '_transient_sf_aui_msg_' ) . '%';
+	$sf_like_to  = $wpdb->esc_like( '_transient_timeout_sf_aui_msg_' ) . '%';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+			$sf_like_val,
+			$sf_like_to
+		)
+	);
 }
 
-/* Multisite-aware; single site: γρήγορο no-op. */
 if ( is_multisite() ) {
-	$sf_site_ids = get_sites( array( 'fields' => 'ids' ) );
-	foreach ( $sf_site_ids as $sf_site_id ) {
-		switch_to_blog( $sf_site_id );
-		foreach ( $sf_options as $sf_opt ) {
-			delete_option( $sf_opt );
-		}
+	foreach ( get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $sf_site_id ) {
+		switch_to_blog( (int) $sf_site_id );
+		sf_uninstall_site();
 		restore_current_blog();
 	}
+} else {
+	sf_uninstall_site();
 }
-
-/* Transients: sf_aui_msg_% — γρήγορο targeted sweep (μικρός αριθμός
-   users). ΔΕΝ full-options-table scan. */
-global $wpdb;
-$sf_transients = $wpdb->query(
-	"DELETE FROM {$wpdb->options}
-	 WHERE option_name LIKE '_transient_sf_aui_msg_%'
-	    OR option_name LIKE '_transient_timeout_sf_aui_msg_%'"
-);
-
-/* NOTE: multisite — το transient sweep εκτελείται ΜΟΝΟ στο τρέχον
-   site, σκόπιμα: το Noxpress ecosystem είναι single-site και δεν
-   προσθέτουμε speculative code. Τα options παραπάνω καλύπτονται
-   από το switch_to_blog loop. */

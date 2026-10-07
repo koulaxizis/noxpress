@@ -1,18 +1,25 @@
 <?php
 /**
- * Clean uninstall για το Revenue Splitter.
+ * Clean uninstall για το Revenue Splitter (v1.7.0).
  *
- * Διαγράφει ΟΛΟΚΛΗΡΩΣ κάθε ίχνος του plugin από τη βάση:
- *  - Όλα τα options: rs_default_vat_rate, rs_beneficiaries,
- *    rs_portal_keys, rs_ledger, rs_reason_coupons, rs_sales_since, rs_cache_version.
- *  - User meta: rs_lang (ανά χρήστη).
+ * Διαγράφει ΜΟΝΟ τα δεδομένα αυτού του plugin από τη βάση:
+ *  - Όλα τα options του plugin (λίστα παρακάτω — επαληθευμένη με grep
+ *    σε κάθε get/update/add_option του κώδικα).
+ *  - User meta: rs_lang — ΜΟΝΟ αν δεν είναι εγκατεστημένα το Store Pulse
+ *    ή το Smart Formatter (το διαβάζουν ως κοινή επιλογή γλώσσας Noxpress).
  *  - Transients: rs_tok_* (portal sessions), rs_rl_* (rate limit),
- *    rs_report_* (cached reports), rs_ledger_msg_* (PRG notices),
- *    rs_aui_msg_* (backup/import/settings notices), rs_split_error_*
- *    (validation notices metabox), rs_newkey_* (one-shot plaintext
- *    κλειδιά portal — v1.3.1).
- *  - Order meta: _rs_free_reason (αιτιολογία δωρεάν αντιτύπου).
+ *    rs_report_* (cached reports), rs_ledger_msg_* / rs_aui_msg_* (PRG
+ *    notices), rs_split_error_* / rs_split_warn_* (metabox notices),
+ *    rs_newkey_* (one-shot κλειδιά portal), rs_block_checkout_warned_*.
+ *  - WP-Cron: rs_email_monthly_check.
+ *  - Order meta: _rs_free_reason, _rs_channel (classic + HPOS).
+ *  - Order item meta: _rs_reg_unit.
  *  - Post meta προϊόντων: _rs_split, _rs_beneficiaries, _rs_vat_rate.
+ *
+ * v1.7.0: ΑΦΑΙΡΕΘΗΚΕ το παλιό «sweep» που διέγραφε αναδρομικά ΑΛΛΟΥΣ
+ * φακέλους plugins/revenue-splitter* (και το log/email του). Ένα
+ * uninstall δεν αγγίζει ποτέ αρχεία άλλων plugins — τα αρχεία του ίδιου
+ * του plugin τα σβήνει το WordPress.
  *
  * ΣΗΜΑΝΤΙΚΟ: το script αυτό τρέχει ΕΞΩ από plugins_loaded —
  * καμία κλήση σε functions του plugin (classes, constants).
@@ -32,139 +39,6 @@ if ( ! current_user_can( 'activate_plugins' ) ) {
 	return;
 }
 
-/**
- * v1.3.4-b: Sweep leftover plugin folders (revenue-splitter*) +
- * εγγραφή log στο /wp-content/uploads/ για επαλήθευση χωρίς FTP.
- *
- * Safeguards: ΜΟΝΟ dirs με prefix "revenue-splitter*", πάντα εκτός
- * του εαυτού μας, symlink candidates SKIP, realpath containment
- * μέσα στο WP_PLUGIN_DIR. Το log επιβιώνει στο uploads.
- */
-
-if ( ! function_exists( 'rs_uninstall_rrmdir' ) ) {
-	/**
-	 * Recursive directory deletion. Συγκεντρώνει γεγονότα + πλήθος αρχείων.
-	 *
-	 * @param string $dir   Realpath του directory.
-	 * @param array  $log   Collector (by reference).
-	 * @param int    $files Counter αρχείων (by reference).
-	 * @return void
-	 */
-	function rs_uninstall_rrmdir( string $dir, array &$log, int &$files ): void {
-		$entries = scandir( $dir );
-		if ( false === $entries ) {
-			$log[] = '[FAIL] scandir: ' . $dir;
-			return;
-		}
-		foreach ( $entries as $entry ) {
-			if ( '.' === $entry || '..' === $entry ) {
-				continue;
-			}
-			$path = $dir . '/' . $entry;
-			if ( is_link( $path ) ) {
-				@unlink( $path ); // symlink-κόμβος: unlink, ποτέ recursion.
-				$files++;
-				continue;
-			}
-			if ( is_dir( $path ) ) {
-				rs_uninstall_rrmdir( $path, $log, $files );
-			} else {
-				@unlink( $path );
-				$files++;
-			}
-		}
-		$log[] = ( @rmdir( $dir ) ? '[DELETED DIR] ' : '[FAILED DIR] ' ) . $dir;
-	}
-}
-
-$log          = array();
-$files        = 0;
-$sweeps       = 0;
-$plugins_dir = rtrim( (string) realpath( WP_PLUGIN_DIR ), '/' );
-if ( '' === $plugins_dir ) {
-	$plugins_dir = '/nonexistent-guard';
-}
-$targets      = glob( trailingslashit( WP_PLUGIN_DIR ) . 'revenue-splitter*', GLOB_ONLYDIR );
-$self_dir     = basename( __DIR__ );
-
-foreach ( (array) $targets as $target ) {
-	$target = (string) $target;
-	$slug   = basename( $target );
-
-	// 1. Ποτέ ο εαυτός μας.
-	if ( $slug === $self_dir ) {
-		continue;
-	}
-	// 2. Symlink candidates: skip με trace στο log.
-	if ( is_link( $target ) ) {
-		$log[] = '[SKIPPED SYMLINK] ' . $target;
-		continue;
-	}
-	// 3. Realpath containment — ποτέ εκτός WP_PLUGIN_DIR.
-	$real = (string) realpath( $target );
-	if ( '' === $real || 0 !== strpos( $real . '/', $plugins_dir . '/' ) ) {
-		$log[] = '[SKIPPED ESCAPE] ' . $target;
-		continue;
-	}
-
-	$log[] = '[SWEEP START] ' . $real;
-	rs_uninstall_rrmdir( $real, $log, $files );
-	$log[] = '[SWEEP DONE] ' . $real;
-	$sweeps++;
-}
-
-// ---- v1.3.4-c: Log σε ΜΥΣΤΙΚΟ random filename + email στον admin ----
-//
-// Privacy-first: κανένα predictable, δημόσια προσβάσιμο log URL.
-// Ροή: γράφουμε σε random-named file στο uploads (fallback), στέλνουμε
-// το περιεχόμενο με wp_mail() στον admin_email του site, και αν το mail
-// φύγει ΣΒΗΝΟΥΜΕ το file — μηδέν ίχνη στο disk. Αν το mail αποτύχει,
-// το file παραμένει και το debug.log παίρνει το random path.
-$upload_dir = wp_upload_dir();
-$logfile    = '';
-$lines      = array_merge(
-	array(
-		'=== Revenue Splitter — uninstall sweep ===',
-		'Date: ' . gmdate( 'c' ),
-		'',
-	),
-	( empty( $log ) ? array( '[INFO] Δεν βρέθηκαν leftover φάκελοι revenue-splitter*.' ) : $log ),
-	array(
-		'',
-		'Leftover folders swept: ' . $sweeps,
-		'Total files removed: ' . $files,
-		'',
-	)
-);
-$body = implode( "\n", $lines );
-
-if ( ! empty( $upload_dir['basedir'] ) ) {
-	$random  = wp_generate_password( 24, false, false ); // alphanumeric, 24 chars.
-	$logfile = trailingslashit( $upload_dir['basedir'] ) . 'rs-uninstall-' . $random . '.log';
-	@file_put_contents( $logfile, $body, LOCK_EX );
-}
-
-$mail_sent = false;
-if ( function_exists( 'wp_mail' ) ) {
-	$mail_sent = wp_mail(
-		(string) get_option( 'admin_email' ),
-		'Revenue Splitter — uninstall sweep report',
-		$body
-	);
-}
-
-if ( $mail_sent ) {
-	if ( '' !== $logfile && @unlink( $logfile ) ) {
-		$logfile = ''; // Σβήστηκε — κανένα ίχνος στο disk.
-	}
-	if ( function_exists( 'error_log' ) ) {
-		error_log( 'Revenue Splitter uninstall sweep: ' . $sweeps . ' folder(s), ' . $files . ' file(s). Report emailed to admin (file removed).' );
-	}
-} elseif ( function_exists( 'error_log' ) ) {
-	error_log( 'Revenue Splitter uninstall sweep: ' . $sweeps . ' folder(s), ' . $files . ' file(s). Mail FAILED — log kept at: ' . $logfile );
-}
-
-
 // ------------------------------------------------------------------------
 // Options (multisite-aware: σβήνουμε ΜΟΝΟ στο site που γίνεται το
 // uninstall — δεν αγγίζουμε άλλα sites του network).
@@ -182,6 +56,9 @@ $rs_uninstall_options = array(
 	'rs_default_channel',    // v1.3.8 (#7 στάδιο 3): default κανάλι.
 	'rs_version',            // v1.4.0: recorded version από το rs_maybe_upgrade().
 	'rs_cache_version',
+	'rs_beneficiary_emails', // Emails δικαιούχων.
+	'rs_email_reports',      // Opt-in μηνιαίας αναφοράς.
+	'rs_last_report_run',    // Dedup του cron μηνιαίας αναφοράς.
 );
 
 foreach ( $rs_uninstall_options as $rs_opt ) {
@@ -189,10 +66,35 @@ foreach ( $rs_uninstall_options as $rs_opt ) {
 }
 
 // ------------------------------------------------------------------------
-// User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
+// WP-Cron της μηνιαίας αναφοράς.
 // ------------------------------------------------------------------------
 
-delete_metadata( 'user', 0, 'rs_lang', '', true );
+wp_clear_scheduled_hook( 'rs_email_monthly_check' );
+
+// ------------------------------------------------------------------------
+// User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
+//
+// Το rs_lang είναι η ΚΟΙΝΗ επιλογή γλώσσας του οικοσυστήματος Noxpress:
+// το Store Pulse και το Smart Formatter τη διαβάζουν. Σβήνεται ΜΟΝΟ αν
+// κανένα από τα δύο δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
+// ------------------------------------------------------------------------
+
+$rs_lang_readers = array(
+	'store-pulse/store-pulse.php',
+	'smart-formatter/smart-formatter.php',
+);
+
+$rs_lang_in_use = false;
+foreach ( $rs_lang_readers as $rs_reader ) {
+	if ( file_exists( trailingslashit( WP_PLUGIN_DIR ) . $rs_reader ) ) {
+		$rs_lang_in_use = true;
+		break;
+	}
+}
+
+if ( ! $rs_lang_in_use ) {
+	delete_metadata( 'user', 0, 'rs_lang', '', true );
+}
 
 // ------------------------------------------------------------------------
 // Transients (πρόθεμα του plugin).
@@ -209,42 +111,41 @@ delete_metadata( 'user', 0, 'rs_lang', '', true );
 
 global $wpdb;
 
-$rs_transient_masks = array(
-	'_transient_rs_tok_%',              // Portal session tokens.
-	'_transient_rs_rl_%',               // Rate limit counters.
-	'_transient_rs_report_%',           // Cached reports.
-	'_transient_rs_ledger_msg_%',       // PRG notices (ledger).
-	'_transient_rs_aui_msg_%',          // PRG notices (backup/import/settings).
-	'_transient_rs_split_error_%',      // Validation notices (metabox).
-	'_transient_rs_newkey_%',           // v1.3.1: one-shot plaintext portal keys.
-	'_transient_rs_block_checkout_warned_%', // v1.4.0: blocks-checkout warning suppression flags.
-	'_transient_timeout_rs_tok_%',
-	'_transient_timeout_rs_rl_%',
-	'_transient_timeout_rs_report_%',
-	'_transient_timeout_rs_ledger_msg_%',
-	'_transient_timeout_rs_aui_msg_%',
-	'_transient_timeout_rs_split_error_%',
-	'_transient_timeout_rs_newkey_%',
-	'_transient_timeout_rs_block_checkout_warned_%',
+$rs_transient_prefixes = array(
+	'rs_tok_',                   // Portal session tokens.
+	'rs_rl_',                    // Rate limit counters (login/reset/ανά δικαιούχο).
+	'rs_report_',                // Cached reports.
+	'rs_ledger_msg_',            // PRG notices (ledger).
+	'rs_aui_msg_',               // PRG notices (backup/import/settings).
+	'rs_split_error_',           // Validation notices (metabox).
+	'rs_split_warn_',            // v1.7.0: email warnings (metabox).
+	'rs_newkey_',                // One-shot plaintext portal keys.
+	'rs_block_checkout_warned_', // Blocks-checkout warning suppression flags.
 );
 
-foreach ( $rs_transient_masks as $rs_mask ) {
+foreach ( $rs_transient_prefixes as $rs_prefix ) {
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- μαζικό cleanup, εφάπαξ.
-	$rs_names = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-			$rs_mask
-		)
-	);
+	foreach ( array( '_transient_', '_transient_timeout_' ) as $rs_kind ) {
 
-	if ( ! is_array( $rs_names ) ) {
-		continue;
-	}
+		// LIKE escaped: τα '_' του prefix είναι literal, όχι wildcards.
+		$rs_mask = $wpdb->esc_like( $rs_kind . $rs_prefix ) . '%';
 
-	foreach ( $rs_names as $rs_name ) {
-		// delete_option() σβήνει το row + σβήνει το object cache entry.
-		delete_option( $rs_name );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- μαζικό cleanup, εφάπαξ.
+		$rs_names = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$rs_mask
+			)
+		);
+
+		if ( ! is_array( $rs_names ) ) {
+			continue;
+		}
+
+		foreach ( $rs_names as $rs_name ) {
+			// delete_option() σβήνει το row + σβήνει το object cache entry.
+			delete_option( $rs_name );
+		}
 	}
 }
 

@@ -2,7 +2,7 @@
 /**
  * RS_Portal — Author Portal (frontend, v1.3.2 → v1.3.5).
  *
- * Shortcode: [author_portal] (+ alias [rs_portal]).
+ * Shortcode: [rs_portal] (+ [author_portal] — και τα δύο καταχωρούνται).
  *
  * Ροή:
  *  1. Ο admin δημιουργεί/ανανεώνει κλειδιά ανά δικαιούχο από το
@@ -18,8 +18,10 @@
  *
  * Security:
  *  - Login POST + logout + CSV: 'init' (headers OK) με nonce + PRG.
- *  - Rate limit: 5 αποτυχημένες / 15' ανά (key-hash + IP) (rs_rl_*),
- *    μηδενίζεται στο επιτυχές login.
+ *  - Rate limit (v1.7.0): 5 αποτυχημένες / 15' ανά IP (hashed, rs_rl_l_*)
+ *    — ανεξάρτητα από το κλειδί που μαντεύεται. Το reset έχει δικό του
+ *    όριο ανά IP (rs_rl_r_*) ΚΑΙ ανά δικαιούχο (3/ώρα, rs_rl_b_*) που
+ *    ΔΕΝ μηδενίζεται από επιτυχή reset/login.
  *  - Session: τυχαίο token → transient rs_tok_* (TTL 7 μέρες, sliding).
  *  - Login με κλειδί ΜΟΝΟ: το κλειδί ταυτοποιεί ΜΟΝΑΔΙΚΑ τον δικαιούχο
  *    (48-char alphanumeric) — scan όλων των hashed keys με
@@ -44,6 +46,15 @@ final class RS_Portal {
 	const RL_MAX = 5;        // αποτυχημένες προσπάθειες…
 	const RL_WIN = 900;      // …ανά 15 λεπτά.
 
+	const RESET_MAX = 3;                 // v1.7.0: resets ανά δικαιούχο…
+	const RESET_WIN = HOUR_IN_SECONDS;   // …ανά ώρα.
+
+	/** @var bool Έχει επιλυθεί η session σε αυτό το request; */
+	private static $session_resolved = false;
+
+	/** @var string|null Cached όνομα συνδεδεμένου δικαιούχου. */
+	private static $session_who = null;
+
 	// GET keys των frontend φίλτρων (ξεχωριστά από του admin, μηδέν σύγκρουση).
 	const GP_PERIOD = 'rs_p_period';
 	const GP_START  = 'rs_p_start';
@@ -57,7 +68,9 @@ final class RS_Portal {
 		add_shortcode( 'rs_portal', array( __CLASS__, 'shortcode' ) );
 		add_action( 'init', array( __CLASS__, 'route' ) );
 
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
+		// Ίδια προτεραιότητα με το RS_Admin_UI (9) — μετά από αυτό στη
+		// σειρά init, άρα το top-level «Noxpress» υπάρχει ήδη.
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 9 );
 		add_action( 'admin_init', array( __CLASS__, 'route_admin_keys' ) );
 	}
 
@@ -162,7 +175,7 @@ final class RS_Portal {
 			<?php endif; ?>
 
 			<p class="description">
-				<?php esc_html_e( 'Ο δικαιούχος μπαίνει στη σελίδα του portal ([author_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.', 'revenue-splitter' ); ?>
+				<?php esc_html_e( 'Ο δικαιούχος μπαίνει στη σελίδα του portal ([rs_portal]) ΜΟΝΟ με το κλειδί του — το κλειδί ταυτοποιεί μοναδικά τον κάτοχό του.', 'revenue-splitter' ); ?>
 			</p>
 
 			<table class="widefat striped rs-table">
@@ -203,7 +216,7 @@ final class RS_Portal {
 				</tbody>
 			</table>
 
-			<?php self::footer(); ?>
+			<?php RS_Admin_UI::footer(); ?>
 		</div>
 		<?php
 	}
@@ -287,8 +300,20 @@ final class RS_Portal {
 	 * Sessions
 	 * =================================================================== */
 
-	/** Το όνομα του συνδεδεμένου δικαιούχου ή null. */
+	/**
+	 * Το όνομα του συνδεδεμένου δικαιούχου ή null.
+	 *
+	 * v1.7.0: επιλύεται ΜΙΑ φορά ανά request, νωρίς στο init (route()),
+	 * όπου επιτρέπονται ακόμη headers — το shortcode (render, μετά το
+	 * output) διαβάζει μόνο το cached αποτέλεσμα και δεν στέλνει ποτέ
+	 * cookie. Το σβήσιμο ληγμένου cookie γίνεται μόνο αν !headers_sent().
+	 */
 	public static function current(): ?string {
+
+		if ( self::$session_resolved ) {
+			return self::$session_who;
+		}
+		self::$session_resolved = true;
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only token.
 		$tok = isset( $_COOKIE[ self::COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) : '';
@@ -300,8 +325,8 @@ final class RS_Portal {
 		$name = get_transient( 'rs_tok_' . $tok );
 
 		if ( ! is_string( $name ) || '' === $name ) {
-			if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
-				setcookie( self::COOKIE_NAME, '', time() - HOUR_IN_SECONDS, COOKIEPATH ?: '/', COOKIE_DOMAIN, is_ssl(), true );
+			if ( ! headers_sent() ) {
+				self::clear_cookie();
 			}
 			return null;
 		}
@@ -309,21 +334,45 @@ final class RS_Portal {
 		// Sliding TTL.
 		set_transient( 'rs_tok_' . $tok, $name, self::TOK_TTL );
 
+		self::$session_who = $name;
+
 		return $name;
+	}
+
+	/** Σβήσιμο του session cookie (ΜΟΝΟ πριν από output). */
+	private static function clear_cookie(): void {
+		setcookie(
+			self::COOKIE_NAME,
+			'',
+			array(
+				'expires'  => time() - HOUR_IN_SECONDS,
+				'path'     => COOKIEPATH ? COOKIEPATH : '/',
+				'domain'   => COOKIE_DOMAIN,
+				'secure'   => is_ssl(),
+				'httponly' => true,
+				'samesite' => 'Lax',
+			)
+		);
 	}
 
 	private static function start_session( string $who ): void {
 		$tok = wp_generate_password( 40, false, false );
 		set_transient( 'rs_tok_' . $tok, $who, self::TOK_TTL );
 		// php 7.3+ syntax: [name, value, expire, path, domain, secure, httponly, samesite]
-		setcookie( self::COOKIE_NAME, $tok, [
-			'expires'  => time() + self::TOK_TTL,
-			'path'     => COOKIEPATH ?: '/',
-			'domain'   => COOKIE_DOMAIN,
-			'secure'   => is_ssl(),
-			'httponly' => true, // Audit fix: blocking JS access.
-			'samesite' => 'Lax',
-		] );
+		setcookie(
+			self::COOKIE_NAME,
+			$tok,
+			array(
+				'expires'  => time() + self::TOK_TTL,
+				'path'     => COOKIEPATH ? COOKIEPATH : '/',
+				'domain'   => COOKIE_DOMAIN,
+				'secure'   => is_ssl(),
+				'httponly' => true, // Audit fix: blocking JS access.
+				'samesite' => 'Lax',
+			)
+		);
+		self::$session_resolved = true;
+		self::$session_who      = $who;
 	}
 
 	private static function end_session(): void {
@@ -335,14 +384,9 @@ final class RS_Portal {
 			delete_transient( 'rs_tok_' . $tok );
 		}
 
-		setcookie( self::COOKIE_NAME, '', [
-			'expires'  => time() - HOUR_IN_SECONDS,
-			'path'     => COOKIEPATH ?: '/',
-			'domain'   => COOKIE_DOMAIN,
-			'secure'   => is_ssl(),
-			'httponly' => true,
-			'samesite' => 'Lax',
-		] );
+		self::clear_cookie();
+		self::$session_resolved = true;
+		self::$session_who      = null;
 	}
 
 	/* =====================================================================
@@ -350,6 +394,12 @@ final class RS_Portal {
 	 * =================================================================== */
 
 	public static function route(): void {
+
+		// v1.7.0: επίλυση session ΕΔΩ (init, πριν από output) — sliding
+		// TTL / σβήσιμο ληγμένου cookie ποτέ μέσα στο shortcode render.
+		if ( ! is_admin() && isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+			self::current();
+		}
 
 		// ---------- Logout ----------
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce ελέγχεται παρακάτω.
@@ -391,28 +441,31 @@ final class RS_Portal {
 			$email = isset( $_POST['rs_reset_email'] ) ? trim( (string) wp_unslash( $_POST['rs_reset_email'] ) ) : '';
 			$back  = self::portal_url();
 
-			// Rate limit ΠΡΙΝ από κάθε lookup/dispatch (email+IP —
-			// ίδιο 5/15' pattern με το login, πάνω στο email string).
-			if ( self::too_many_attempts( $email ) ) {
+			// v1.7.0: Rate limit ανά IP ΠΡΙΝ από κάθε lookup/dispatch.
+			// ΚΑΘΕ αίτημα μετράει (βρεθεί ή όχι το email) — ίδια
+			// συμπεριφορά και για τις δύο περιπτώσεις (no enumeration).
+			if ( self::too_many_attempts( 'reset' ) ) {
 				wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rl', $back ) );
 				exit;
 			}
+			self::record_attempt( 'reset' );
 
 			// Reverse lookup: ΜΟΝΟ εδώ αποκαλύπτεται το όνομα. Το
 			// outcome προς τον χρήστη είναι ΠΑΝΤΑ generic (no email
-			// enumeration) — βλ. PATCH 2.2 μήνυμα 'rq'.
+			// enumeration) — μήνυμα 'rq'.
 			$who = RS_Emails::name_for_email( $email );
 
-			if ( '' !== $who ) {
+			// Throttle ανά δικαιούχο (3/ώρα), ανεξάρτητο από login/IP και
+			// ΠΟΤΕ δεν μηδενίζεται από επιτυχία — κανένα mail-bombing ή
+			// συνεχές rotation του κλειδιού κάποιου τρίτου. Πάνω από το
+			// όριο: σιωπηλό skip, ίδιο generic μήνυμα.
+			if ( '' !== $who && self::reset_allowed( $who ) ) {
 				$plain = self::rotate_key( $who );
 
 				if ( '' !== $plain ) {
 					RS_Emails::send_key( $who, $plain, $email );
 					RS_Emails::notify_admin_rotation( $who );
 				}
-				self::clear_attempts( $email );
-			} else {
-				self::record_attempt( $email );
 			}
 
 			wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rq', $back ) );
@@ -453,7 +506,9 @@ final class RS_Portal {
 			$key  = isset( $_POST['rs_portal_key'] ) ? trim( (string) wp_unslash( $_POST['rs_portal_key'] ) ) : '';
 			$back = self::portal_url();
 
-			if ( self::too_many_attempts( $key ) ) {
+			// v1.7.0: όριο ανά IP (ΟΧΙ ανά μαντεψιά) — πολλές διαφορετικές
+			// μαντεψιές από την ίδια IP μετράνε όλες μαζί.
+			if ( self::too_many_attempts( 'login' ) ) {
 				wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rl', $back ) );
 				exit;
 			}
@@ -461,38 +516,54 @@ final class RS_Portal {
 			$who = self::who_for_key( $key );
 
 			if ( null !== $who ) {
-				self::clear_attempts( $key );
+				// Ο μετρητής αποτυχιών ΔΕΝ μηδενίζεται στην επιτυχία: ένας
+				// κάτοχος έγκυρου κλειδιού δεν μπορεί να «ξεπλένει» το όριο
+				// για να δοκιμάζει κλειδιά τρίτων. Λήγει μόνος (15').
 				self::start_session( $who );
 				wp_safe_redirect( remove_query_arg( 'rs_pt_msg', $back ) );
 				exit;
 			}
 
-			self::record_attempt( $key );
+			self::record_attempt( 'login' );
 			wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'bad', $back ) );
 			exit;
 		}
 	}
 
-	/* ---------- Rate limiting (rs_rl_*) — πλέον key+IP, όχι name+IP ---------- */
+	/* ---------- Rate limiting (rs_rl_*) — v1.7.0: ανά IP (hashed) ---------- */
 
-	/** Hash του υποβληθέντος κλειδιού για το rate-limit key (ποτέ raw). */
-	private static function rl_key( string $attempt ): string {
-		return 'rs_rl_' . md5( 'k:' . hash( 'sha256', $attempt ) . '|' . self::client_ip() );
+	/**
+	 * Transient key ανά ενέργεια ('login' | 'reset') + hashed IP.
+	 * Η IP δεν αποθηκεύεται ποτέ raw (salted hash).
+	 */
+	private static function rl_key( string $action ): string {
+		$prefix = ( 'reset' === $action ) ? 'rs_rl_r_' : 'rs_rl_l_';
+		return $prefix . substr( hash( 'sha256', wp_salt( 'nonce' ) . '|' . self::client_ip() ), 0, 40 );
 	}
 
-	private static function too_many_attempts( string $attempt ): bool {
-		$n = (int) get_transient( self::rl_key( $attempt ) );
+	private static function too_many_attempts( string $action ): bool {
+		$n = (int) get_transient( self::rl_key( $action ) );
 		return $n >= self::RL_MAX;
 	}
 
-	private static function record_attempt( string $attempt ): void {
-		$k = self::rl_key( $attempt );
+	private static function record_attempt( string $action ): void {
+		$k = self::rl_key( $action );
 		$n = (int) get_transient( $k );
 		set_transient( $k, $n + 1, self::RL_WIN );
 	}
 
-	private static function clear_attempts( string $attempt ): void {
-		delete_transient( self::rl_key( $attempt ) );
+	/**
+	 * v1.7.0: Throttle επαναφορών ανά δικαιούχο (RESET_MAX / RESET_WIN).
+	 * Επιστρέφει true και καταγράφει την επαναφορά αν επιτρέπεται.
+	 */
+	private static function reset_allowed( string $who ): bool {
+		$k = 'rs_rl_b_' . md5( $who );
+		$n = (int) get_transient( $k );
+		if ( $n >= self::RESET_MAX ) {
+			return false;
+		}
+		set_transient( $k, $n + 1, self::RESET_WIN );
+		return true;
 	}
 
 	/**
@@ -769,7 +840,7 @@ final class RS_Portal {
 
 		// v1.3.9 (#1): Audit fix — φιλτράρισμα στο `pids` στα `my_products`
 		// ΠΡΙΝ το call στο Reports. Αλλιώς το cache-key collision-άρει
-		// entre benef (Α φιλτράρει το Β, αλλά το cached report περιέχει
+		// μεταξύ δικαιούχων (ο Α φιλτράρει το Β, αλλά το cached report περιέχει
 		// και τα δύο) → potential data leak ή λάθος totals.
 		$allowed_pids = array_intersect( $pids, array_column( $my_products, 'product_id' ) );
 		sort( $allowed_pids );
@@ -879,7 +950,7 @@ final class RS_Portal {
 		?>
 		<div class="rs-portal">
 			<div class="rs-pt-head">
-				<strong style="display:inline-block;background:<?php echo esc_attr( RS_Admin_UI::ben_color( $who ) ); ?>;color:<?php echo esc_attr( RS_Admin_UI::chip_fg( RS_Admin_UI::ben_color( $who ) ) ); ?>;padding:2px 12px;border-radius:12px;"><?php echo esc_html( $who ); ?></strong>
+				<strong class="rs-name-pill" style="background:<?php echo esc_attr( RS_Admin_UI::ben_color( $who ) ); ?>;color:<?php echo esc_attr( RS_Admin_UI::chip_fg( RS_Admin_UI::ben_color( $who ) ) ); ?>;"><?php echo esc_html( $who ); ?></strong>
 				<span>
 					<a href="<?php echo esc_url( $csv ); ?>"><?php esc_html_e( 'CSV', 'revenue-splitter' ); ?></a> ·
 					<a href="<?php echo esc_url( $logout ); ?>"><?php esc_html_e( 'Αποσύνδεση', 'revenue-splitter' ); ?></a>
@@ -1101,24 +1172,12 @@ final class RS_Portal {
 				<?php endif; ?>
 			<?php endif; ?>
 
-			<!-- Cross-links footer (same pattern as RS_Admin_UI::footer()) -->
-			<p class="rs-footer">
-				Made with &lt;3 by
-				<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a> ·
-				<a href="https://glarolykoi.net" target="_blank" rel="noopener noreferrer">glarolykoi.net</a> ·
-				<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
-			</p>
-			<p class="rs-footer" style="margin-top:10px;">
-				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
-					style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
-					☕ <?php esc_html_e( 'Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
-				</a>
-			</p>
+			<?php self::footer(); ?>
 		</div>
 		<?php
 	}
 
-	/** Μείγμα του δικαιούχου από ένα report. */
+	/** Μερίδιο του δικαιούχου από ένα report. */
 	private static function share_of( array $report, string $who ): float {
 		foreach ( $report['beneficiaries'] as $b ) {
 			if ( $b['name'] === $who ) {
@@ -1335,6 +1394,10 @@ select.rs-pt-multi option:checked { background: #6d4aff; color: #fff; }
 }
 .rs-footer a { color: #beb1ff; text-decoration: none; }
 .rs-footer a:hover { text-decoration: underline; }
+.rs-footer-cta { margin: 10px 0 0; }
+.rs-portal a.rs-kofi { display: inline-block; background: #6d4aff; color: #fff; padding: 6px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; }
+.rs-portal a.rs-kofi:hover { background: #8263ff; color: #fff; }
+.rs-name-pill { display: inline-block; padding: 2px 12px; border-radius: 12px; }
 
 /* Dark theme helpers */
 .rs-portal input[type="date"] { color-scheme: dark; }
@@ -1360,8 +1423,11 @@ document.addEventListener('input', function (e) {
 
 	private static function currency_fmt(): callable {
 
+		// v1.7.0: το WooCommerce επιστρέφει HTML entity (π.χ. &euro;) —
+		// decode σε πραγματικό χαρακτήρα, ώστε το CSV να μην περιέχει
+		// raw entities (στο HTML το esc_html το ξανα-κωδικοποιεί σωστά).
 		$symbol = function_exists( 'get_woocommerce_currency_symbol' )
-			? get_woocommerce_currency_symbol()
+			? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES | ENT_HTML5, 'UTF-8' )
 			: '€';
 
 		return static function ( $amount ) use ( $symbol ) {
@@ -1383,20 +1449,26 @@ document.addEventListener('input', function (e) {
 	}
 
 	/**
-	 * Footer με clickable cross-links + Ko-fi support CTA
-	 * (ενιαίο pattern με το RS_Admin_UI::footer()).
+	 * Footer του FRONTEND portal (ίδιο pattern με το RS_Admin_UI::footer(),
+	 * χωρίς admin links — ο δικαιούχος δεν έχει πρόσβαση στο wp-admin).
+	 * Styles στο inline CSS του portal (.rs-footer, .rs-kofi).
 	 */
 	private static function footer(): void {
 		?>
 		<p class="rs-footer">
-			Made with &lt;3 by
-			<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a> ·
+			<?php
+			printf(
+				/* translators: %s: όνομα δημιουργού */
+				esc_html__( 'Made with ❤ by %s', 'revenue-splitter' ),
+				'<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a>'
+			);
+			?>
+			·
 			<a href="https://glarolykoi.net" target="_blank" rel="noopener noreferrer">glarolykoi.net</a> ·
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
-		<p class="rs-footer" style="margin-top:10px;">
-			<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
-				style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
+		<p class="rs-footer-cta">
+			<a class="rs-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
 				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
 			</a>
 		</p>

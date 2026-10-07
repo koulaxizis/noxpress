@@ -1,5 +1,7 @@
 /**
- * Revenue Splitter — scoped dark admin theme (v1.3.3).
+ * Revenue Splitter — scoped dark admin theme (v1.7.0).
+ * Reference design του οικοσυστήματος Noxpress (palette, panel, πίνακες,
+ * κουμπιά, footer) — Store Pulse / Smart Formatter ευθυγραμμίζονται εδώ.
  * v1.1.2: Hardened! Το WP admin core + plugins (WP Rocket, Imagify…)
  * παράγουν light-theme rules με υψηλότερη ειδικότητα πάνω στους πίνακες.
  * Κρίσιμα table rules με !important ώστε το dark panel να ΜΕΝΕΙ αδιαπέρατο.
@@ -32,6 +34,22 @@
 .rs-wrap h1,
 .rs-wrap h2 {
 	color: #f6f4ff;
+}
+
+.rs-h2 {
+	margin: 28px 0 10px;
+	font-size: 1.25em;
+}
+
+/* v1.7.0: Noxpress home — κάρτες + κατάσταση plugins. */
+.rs-card-link { display: block; margin-bottom: 6px; text-decoration: none; }
+.rs-status-on { color: #8fe6ab; font-weight: 600; }
+
+/* Όνομα δικαιούχου ως pill (bg/fg ανά δικαιούχο έρχονται inline). */
+.rs-name-pill {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 10px;
 }
 
 .rs-wrap a { color: #beb1ff; }
@@ -264,7 +282,13 @@ table.widefat.rs-table {
 .rs-col-pct   { width: 20%; }
 .rs-col-del   { width: 36px; }
 
-.rs-split-table .rs-ben-name { width: 100%; }
+.rs-split-table .rs-ben-name,
+.rs-split-table .rs-ben-email { width: 100%; }
+.rs-split-table .rs-ben-pct { max-width: 110px; }
+.rs-split-table .rs-row td { vertical-align: middle; }
+
+.rs-fallback-toggle { font-weight: 600; }
+.rs-split-wrap .rs-add-row { margin-top: 8px; }
 
 /* v1.3.1: το κουμπί διαγραφής (×) στους πίνακες ledger ΚΑΙ metabox. */
 .rs-table .rs-remove-row,
@@ -341,6 +365,33 @@ table.widefat.rs-table {
 .rs-footer a { color: #beb1ff; text-decoration: none; }
 .rs-footer a:hover { text-decoration: underline; }
 
+/* v1.7.0: Ko-fi pill + Dashboard link (πρώην inline styles). */
+.rs-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+.rs-wrap a.rs-kofi,
+a.rs-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+.rs-wrap a.rs-kofi:hover,
+a.rs-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.rs-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
 /* ---------- FORM-TABLE (settings) ---------- */
 
 .rs-wrap .form-table th,
@@ -404,7 +455,11 @@ table.widefat.rs-table {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-.rs-widget .rs-kpis { margin: 4px 0 10px; }
+.rs-widget .rs-kpis,
+.rs-widget-kpis { margin: 4px 0 10px; }
+.rs-widget-period { margin: 10px 0 4px; }
+.rs-widget-links { margin: 8px 0 0; }
+.rs-strong-link { font-weight: 600; }
 .rs-widget .rs-table { margin: 10px 0 6px; }
 
 .rs-widget a { color: #beb1ff; text-decoration: none; }
@@ -611,7 +666,11 @@ select.rs-prod-multi option:checked {
 	align-items: flex-end;
 	gap: 3px;
 	height: 110px;
+	width: 100%;       /* v1.7.0: χωρίς πλάτος οι μπάρες (flex-basis 0) είχαν 0px. */
+	max-width: 34px;
 }
+
+.rs-trend-range { margin: 0; }
 
 .rs-trend-pair > div {
 	flex: 1 1 0;

@@ -1,39 +1,58 @@
 /**
- * Smart Formatter — admin.css
+ * Smart Formatter — admin.css (v1.1.0)
  *
- * Noxpress Bible standards:
- *  - Locked palette (§2) — ΜΟΝΟ αυτές οι τιμές, καμία παρέκκλιση.
- *  - Prefixed selectors sf-* (§3) — καμία σύγκρουση με WP core ή RS.
- *  - Hardening !important σε table/inputs (§4) — τα widefat-driven
- *    forms του WP core δεν σπάζουν το theme.
- *  - Component recipes (§5): zones, checks, progress, pills.
- *  - Dark theme default, ανάλογη αναγνωσιμότητα με το RS.
+ * Noxpress standards — RS (Revenue Splitter admin.css) = leading design:
+ *  - Ίδια palette με το RS (dark panel #101218, accent #6d4aff, κείμενο
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors sf-* — καμία σύγκρουση με WP core ή RS.
+ *  - Hardening !important σε tables/inputs — τα light-theme rules του
+ *    WP core / άλλων plugins δεν σπάνε το dark panel.
+ *  - v1.1.0: το .sf-wrap γίνεται dark panel όπως το .rs-wrap (πριν οι
+ *    τίτλοι/περιγραφές τυπώνονταν ανοιχτόχρωμα πάνω στο ανοιχτό WP admin).
  */
 
-/* ===== Locked palette tokens (§2) ===== */
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
 .sf-wrap {
-	--sf-bg: #14151a;
-	--sf-panel: #1c1e26;
-	--sf-panel-2: #23252f;
-	--sf-border: #2e3140;
-	--sf-text: #e8e9ee;
-	--sf-muted: #9aa0ae;
+	--sf-bg: #101218;
+	--sf-panel: #14161d;
+	--sf-panel-2: #1d2029;
+	--sf-input: #1a1d26;
+	--sf-border: #2e3240;
+	--sf-border-input: #3a3f52;
+	--sf-row-border: #23262f;
+	--sf-stripe: #181b23;
+	--sf-hover: #1e212c;
+	--sf-text: #eae8fa;
+	--sf-heading: #f6f4ff;
+	--sf-muted: #b7b2d6;
+	--sf-link: #beb1ff;
+	--sf-link-hover: #d4c9ff;
 	--sf-accent: #6d4aff;
-	--sf-accent-hover: #7d5cff;
-	--sf-ok: #3fb68b;
-	--sf-warn: #e0a83c;
-	--sf-danger: #e05c5c;
+	--sf-accent-hover: #8263ff;
+	--sf-warn: #f5c97e;
+	--sf-danger: #ff9a9a;
 }
 
-/* ===== Page shell ===== */
+/* ===== Page shell (= .rs-wrap) ===== */
 .sf-wrap {
+	color-scheme: dark;
+	background: var(--sf-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--sf-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 	max-width: 1180px;
 }
 
 .sf-wrap h1,
-.sf-wrap .sf-h2 {
-	color: var(--sf-text);
+.sf-wrap h2 {
+	color: var(--sf-heading);
 }
+
+.sf-wrap a { color: var(--sf-link); }
+.sf-wrap a:hover { color: var(--sf-link-hover); }
 
 .sf-wrap .sf-h2 {
 	margin: 22px 0 10px;
@@ -46,6 +65,7 @@
 }
 
 .sf-wrap .description,
+.sf-wrap p.description,
 .sf-wrap .sf-hint {
 	color: var(--sf-muted) !important;
 }
@@ -59,11 +79,11 @@
 	font-size: 12px;
 }
 
-/* ===== Zones (panels §5) ===== */
+/* ===== Zones (panels) ===== */
 .sf-zone {
 	background: var(--sf-panel);
 	border: 1px solid var(--sf-border);
-	border-radius: 10px;
+	border-radius: 6px;
 	padding: 16px 18px;
 	margin-bottom: 6px;
 }
@@ -83,19 +103,32 @@
 	gap: 10px;
 }
 
-/* ===== Form controls (hardening §4) ===== */
+.sf-results {
+	margin-top: 8px;
+}
+
+/* ===== Form controls (hardening) ===== */
 .sf-wrap input[type="text"],
 .sf-wrap input[type="search"],
 .sf-wrap textarea,
 .sf-wrap select,
 .sf-wrap .sf-multi {
-	background-color: var(--sf-panel-2) !important;
-	color: var(--sf-text) !important;
-	border: 1px solid var(--sf-border) !important;
-	border-radius: 6px !important;
+	background-color: var(--sf-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--sf-border-input) !important;
+	border-radius: 4px !important;
 	box-shadow: none !important;
-	min-height: 34px;
-	padding: 4px 10px;
+	min-height: 32px;
+	padding: 2px 8px;
+}
+
+.sf-wrap .sf-search {
+	min-width: 220px;
+}
+
+.sf-wrap input::placeholder,
+.sf-wrap textarea::placeholder {
+	color: #8b87a3 !important;
 }
 
 .sf-wrap textarea.code {
@@ -112,8 +145,13 @@
 
 .sf-wrap select.sf-multi option,
 .sf-wrap select#sf-profile-load option {
-	background: var(--sf-panel-2);
-	color: var(--sf-text);
+	background: #1e212b;
+	color: #f0eefc;
+}
+
+.sf-wrap select.sf-multi option:checked {
+	background: var(--sf-accent);
+	color: #ffffff;
 }
 
 /* File input στο settings (unstyled browser button → themed) */
@@ -121,7 +159,7 @@
 	color: var(--sf-muted);
 }
 
-/* ===== Radio / checkbox rows (§5 recipe) ===== */
+/* ===== Radio / checkbox rows ===== */
 .sf-inline {
 	display: inline-flex;
 	align-items: center;
@@ -142,28 +180,26 @@
 	accent-color: var(--sf-accent);
 }
 
-/* ===== Buttons (§5) ===== */
-.sf-wrap .button,
-.sf-wrap .button-primary {
-	background: var(--sf-panel-2) !important;
-	color: var(--sf-text) !important;
-	border: 1px solid var(--sf-border) !important;
-	border-radius: 6px !important;
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.sf-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
 	box-shadow: none !important;
 	text-shadow: none !important;
-	min-height: 34px;
-	line-height: 30px;
+	min-height: 32px;
 }
 
 .sf-wrap .button:hover:not(:disabled) {
-	background: var(--sf-border) !important;
 	border-color: var(--sf-accent) !important;
+	color: #ffffff !important;
 }
 
 .sf-wrap .button-primary {
 	background: var(--sf-accent) !important;
 	border-color: var(--sf-accent) !important;
-	color: #fff !important;
+	color: #ffffff !important;
 }
 
 .sf-wrap .button-primary:hover:not(:disabled) {
@@ -175,30 +211,59 @@
 	cursor: not-allowed;
 }
 
-/* ===== Tables (hardening §4) ===== */
-.sf-table {
+/* Κουμπιά ενεργειών του ιστορικού (και JS hooks). */
+.sf-table .sf-btn-units,
+.sf-table .sf-btn-restore,
+.sf-table .sf-btn-delete {
+	margin: 0 4px 4px 0;
+}
+
+/* Settings layout helpers (αντί για inline styles). */
+.sf-submit { margin-top: 20px; }
+.sf-inline-form { display: inline; margin-right: 10px; }
+.sf-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.sf-table,
+table.widefat.sf-table {
 	background: var(--sf-panel) !important;
 	border: 1px solid var(--sf-border) !important;
-	border-radius: 10px !important;
-	overflow: hidden;
-	border-collapse: separate !important;
-	border-spacing: 0 !important;
+	border-radius: 6px;
+	color: var(--sf-text) !important;
 	margin-top: 14px !important;
 }
 
-.sf-table th,
-.sf-table td {
-	color: var(--sf-text) !important;
+.sf-table thead th,
+.sf-table thead td {
+	background: var(--sf-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.sf-table tbody td,
+.sf-table tbody th {
 	background: var(--sf-panel) !important;
-	border-color: var(--sf-border) !important;
-	border-bottom: 1px solid var(--sf-border) !important;
-	padding: 10px 12px !important;
+	color: var(--sf-text) !important;
+	border-bottom: 1px solid var(--sf-row-border);
+	box-shadow: none;
 	vertical-align: top;
 }
 
-.sf-table thead th {
-	background: var(--sf-panel-2) !important;
-	font-weight: 600;
+.sf-table tbody tr:nth-child(2n) td,
+.sf-table tbody tr:nth-child(2n) th {
+	background: var(--sf-stripe) !important;
+}
+
+.sf-table tbody tr:hover td,
+.sf-table tbody tr:hover th {
+	background: var(--sf-hover) !important;
+}
+
+.sf-table td,
+.sf-table th {
+	padding: 12px 14px;
 }
 
 .sf-table td code {
@@ -211,11 +276,12 @@
 }
 
 .sf-table .sf-empty {
-	color: var(--sf-muted);
+	color: var(--sf-muted) !important;
+	font-style: italic;
 	text-align: center;
 }
 
-/* ===== Progress bar (§5) ===== */
+/* ===== Progress bar ===== */
 .sf-progress {
 	height: 14px;
 	background: var(--sf-panel-2);
@@ -249,12 +315,12 @@
 	overflow-y: auto;
 	background: var(--sf-panel);
 	border: 1px solid var(--sf-border);
-	border-radius: 10px;
+	border-radius: 6px;
 }
 
 .sf-units-list li {
 	padding: 7px 12px;
-	border-bottom: 1px solid var(--sf-border);
+	border-bottom: 1px solid var(--sf-row-border);
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -266,29 +332,53 @@
 	border-bottom: 0;
 }
 
+.sf-units-list .sf-unit-cb {
+	margin: 0;
+}
+
 #sf-units-panel {
 	margin-top: 10px;
 }
 
-/* ===== Footer (§7) ===== */
+/* ===== Footer (= .rs-footer + Ko-fi pill + Dashboard link) ===== */
 .sf-footer {
-	color: var(--sf-muted);
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
 	font-size: 13px;
-	margin: 14px 0 0;
+	color: #a29dc0;
 }
 
-.sf-footer a {
-	color: var(--sf-accent);
+.sf-footer a { color: #beb1ff; text-decoration: none; }
+.sf-footer a:hover { text-decoration: underline; }
+
+.sf-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.sf-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
 	text-decoration: none;
+	font-weight: 600;
 }
 
-.sf-footer a:hover {
-	color: var(--sf-accent-hover);
-	text-decoration: underline;
+a.sf-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
 }
 
-.sf-muted { color: var(--sf-muted); }
-.sf-warn { color: var(--sf-warn); font-weight: 600; }
+.sf-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.sf-muted { color: var(--sf-muted) !important; }
+.sf-warn { color: var(--sf-warn) !important; font-weight: 600; }
 
 /* ===== Notices inline ===== */
 .sf-wrap .notice.inline {

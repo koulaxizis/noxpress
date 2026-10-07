@@ -2,23 +2,25 @@
 /**
  * SP_Admin — Μενού, Ρυθμίσεις, Widget, Assets.
  *
- * Μενού «Noxpress»:
- *  - Χωρίς Revenue Splitter: το Store Pulse δημιουργεί το top-level
- *    Noxpress menu (slug 'noxpress') με το δικό του dashboard ως
- *    πρώτη σελίδα + Ρυθμίσεις.
- *  - Με Revenue Splitter: το RS έχει ήδη δημιουργήσει το top-level
- *    Noxpress menu — δένουμε ως submenus (δύο ακόμα εγγραφές,
- *    μηδενική διπλή κεφαλίδα menu).
+ * Κοινό μενού «Noxpress» (admin_menu, priority 20 — RS = 9, SF = 30):
+ *  - Αν το top-level 'noxpress' υπάρχει ήδη (το δημιούργησε το
+ *    Revenue Splitter), δένουμε ως submenus.
+ *  - Αλλιώς το δημιουργούμε εμείς, με το SP dashboard ως landing.
+ *  - Σε ΚΑΘΕ συνδυασμό υπάρχουν οι δικές μας σελίδες 'sp-dashboard'
+ *    και 'sp-settings' — το admin.php?page=sp-dashboard δουλεύει πάντα.
  *
  * Ρυθμίσεις: PRG pattern (POST → validate → redirect) με nonce
- * 'sp-save-settings'. Καμία επιλογή γράφεται χωρίς validation.
+ * 'sp-save-settings', στο admin_init (πριν σταλεί οποιοδήποτε output,
+ * ώστε το redirect να λειτουργεί). Καμία επιλογή δεν γράφεται χωρίς
+ * validation.
  *
  * Quick View widget: wp_add_dashboard_widget με capability
  * manage_woocommerce — το markup κάνει delegate στο SP_Dashboard
- * (Part 5) ώστε όλο το rendering να μένει σε ένα σημείο.
+ * ώστε όλο το rendering να μένει σε ένα σημείο.
  *
  * Assets: μοναδικό CSS (assets/sp-admin.css), scoped σε .sp-wrap,
- * φορτώνεται μόνο στις δικές μας σελίδες + index.php (widget).
+ * φορτώνεται μόνο στις δικές μας σελίδες (match στο ?page=) +
+ * index.php (widget).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -53,8 +55,15 @@ final class SP_Admin {
 		'others'      => 'Οφειλές προς άλλους',
 	);
 
+	/** true όταν το Store Pulse δημιούργησε το top-level 'noxpress'. */
+	private static $owns_top = false;
+
+	/** Μηνύματα λάθους του τελευταίου POST (ίδιο request με το render). */
+	private static $errors = array();
+
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ), 20 );
+		add_action( 'admin_init', array( __CLASS__, 'handle_settings_post' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'wp_dashboard_setup', array( __CLASS__, 'register_widget' ) );
 		add_filter(
@@ -69,10 +78,8 @@ final class SP_Admin {
 
 	public static function dash_url(): string {
 
-		// Σημείωση: το SLUG_DASH = 'sp-dashboard' είναι το submenu slug.
-		// Το SLUG_MENU = 'noxpress' είναι το parent slug.
-		// Δεν χρησιμοποιούμε menu_page_url() εδώ — επιστρέφουμε
-		// άμεσα το admin.php?page=sp-dashboard που πάντα δουλεύει.
+		// Το 'sp-dashboard' είναι καταχωρημένο σε κάθε συνδυασμό
+		// plugins (βλ. register_menu) — άρα αυτό το URL δουλεύει πάντα.
 		return admin_url( 'admin.php?page=' . self::SLUG_DASH );
 	}
 
@@ -88,49 +95,31 @@ final class SP_Admin {
 
 	public static function register_menu(): void {
 
-		if ( sp_rs_active() ) {
+		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
 			/*
-			 * Το Revenue Splitter έχει ήδη δημιουργήσει το top-level
-			 * 'noxpress' menu — προσθέτουμε μόνο τα δικά μας submenus,
-			 * ώστε να υπάρχει ΜΙΑ κεφαλίδα Noxpress για όλο το
-			 * οικοσύστημα. (Αν το RS χρησιμοποιεί άλλο parent slug
-			 * από 'noxpress', ρύθμισε το SLUG_MENU αντίστοιχα.)
+			 * Κανείς δεν έχει δημιουργήσει το κοινό «Noxpress» menu
+			 * (το Revenue Splitter δεν είναι ενεργό) — το δημιουργούμε
+			 * εμείς, με το dashboard μας ως landing.
 			 */
-			add_submenu_page(
-				self::SLUG_MENU,
-				__( 'Store Pulse — Dashboard', 'store-pulse' ),
-				__( 'Store Pulse', 'store-pulse' ),
+			self::$owns_top = true;
+
+			add_menu_page(
+				__( 'Noxpress', 'store-pulse' ),
+				__( 'Noxpress', 'store-pulse' ),
 				self::CAP,
-				self::SLUG_DASH,
-				array( __CLASS__, 'render_dashboard' )
-			);
-			add_submenu_page(
 				self::SLUG_MENU,
-				__( 'Store Pulse — Ρυθμίσεις', 'store-pulse' ),
-				__( 'SP Ρυθμίσεις', 'store-pulse' ),
-				self::CAP,
-				self::SLUG_SETTINGS,
-				array( __CLASS__, 'render_settings' )
+				array( __CLASS__, 'render_dashboard' ),
+				'dashicons-chart-pie',
+				57
 			);
-			return;
 		}
 
-		// Standalone mode — εμείς είμαστε το Noxpress menu.
-		add_menu_page(
-			'Noxpress',
-			'Noxpress',
-			self::CAP,
-			self::SLUG_MENU,
-			array( __CLASS__, 'render_dashboard' ),
-			'dashicons-chart-bar',
-			57
-		);
 		add_submenu_page(
 			self::SLUG_MENU,
 			__( 'Store Pulse — Dashboard', 'store-pulse' ),
 			__( 'Store Pulse', 'store-pulse' ),
 			self::CAP,
-			self::SLUG_MENU,
+			self::SLUG_DASH,
 			array( __CLASS__, 'render_dashboard' )
 		);
 		add_submenu_page(
@@ -141,6 +130,15 @@ final class SP_Admin {
 			self::SLUG_SETTINGS,
 			array( __CLASS__, 'render_settings' )
 		);
+
+		if ( self::$owns_top ) {
+			// Το WP επαναλαμβάνει το top-level ως πρώτο submenu
+			// («Noxpress» → page=noxpress). Το αφαιρούμε: το top-level
+			// link οδηγεί πλέον στο πρώτο submenu (sp-dashboard), ενώ
+			// το admin.php?page=noxpress εξακολουθεί να αποδίδει την
+			// ίδια σελίδα.
+			remove_submenu_page( self::SLUG_MENU, self::SLUG_MENU );
+		}
 	}
 
 	/* =====================================================================
@@ -149,9 +147,12 @@ final class SP_Admin {
 
 	public static function enqueue_assets( string $hook ): void {
 
-		$load = ( false !== strpos( $hook, self::SLUG_DASH ) )
-			|| ( false !== strpos( $hook, self::SLUG_SETTINGS ) )
-			|| ( 'toplevel_' . self::SLUG_MENU === $hook )
+		$page = isset( $_GET['page'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			? sanitize_key( wp_unslash( $_GET['page'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			: '';
+
+		$load = in_array( $page, array( self::SLUG_DASH, self::SLUG_SETTINGS ), true )
+			|| ( self::$owns_top && self::SLUG_MENU === $page )
 			|| ( 'index.php' === $hook ); // Quick View widget.
 
 		if ( ! $load ) {
@@ -227,30 +228,7 @@ final class SP_Admin {
 			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'store-pulse' ) );
 		}
 
-		$errors = array();
-
-		// ---- POST: validate + save + redirect (PRG) ----
-		$sp_form_action = isset( $_POST['sp_form'] )
-			? sanitize_text_field( wp_unslash( $_POST['sp_form'] ) )
-			: '';
-
-		if ( 'settings' === $sp_form_action ) {
-
-			check_admin_referer( self::NONCE_ACTION, self::NONCE_NAME );
-
-			$errors = self::save_settings();
-
-			if ( array() === $errors ) {
-				SP_Data::flush();
-				wp_safe_redirect(
-					add_query_arg(
-						array( 'page' => self::SLUG_SETTINGS, 'sp-updated' => '1' ),
-						admin_url( 'admin.php' )
-					)
-				);
-				exit;
-			}
-		}
+		$errors = self::$errors;
 
 		$saved = isset( $_GET['sp-updated'] )
 			&& '1' === sanitize_text_field( wp_unslash( $_GET['sp-updated'] ) );
@@ -373,7 +351,7 @@ final class SP_Admin {
 						<td>
 							<?php if ( sp_rs_active() ) : ?>
 								<select id="sp_publisher" name="sp_publisher">
-									<option value=""><?php esc_html_e( '—', 'store-pulse' ); ?></option>
+									<option value="">—</option>
 									<?php foreach ( $rs_names as $name ) : ?>
 										<option value="<?php echo esc_attr( $name ); ?>"
 											<?php selected( $publisher, $name ); ?>>
@@ -403,7 +381,7 @@ final class SP_Admin {
 									<?php esc_html_e( 'Κάρτες Quick View (widget)', 'store-pulse' ); ?>
 								</legend>
 								<?php foreach ( self::CARD_LABELS as $card_key => $card_label ) : ?>
-									<label style="display:block;margin-bottom:6px;">
+									<label class="sp-check">
 										<input type="checkbox"
 											name="sp_quick_cards[]"
 											value="<?php echo esc_attr( $card_key ); ?>"
@@ -425,10 +403,18 @@ final class SP_Admin {
 						<td>
 							<p class="description">
 								<span class="sp-lang-current">
-									<?php echo esc_html( 'el' === SP_Lang::get_lang() ? 'Ελληνικά' : 'English' ); ?> —
-									<?php echo esc_html( 'auto' === SP_Lang::get_choice() ? __( 'Αυτόματη (WordPress)', 'store-pulse' ) : ucfirst( SP_Lang::get_choice() ) ); ?>
+									<?php
+									// Ονόματα γλωσσών: endonyms — ίδια σε κάθε γλώσσα UI.
+									echo esc_html( 'el' === SP_Lang::get_lang() ? 'Ελληνικά' : 'English' );
+									echo ' — ';
+									echo esc_html(
+										'auto' === SP_Lang::get_choice()
+											? __( 'Αυτόματη (WordPress)', 'store-pulse' )
+											: __( 'Επιλογή χρήστη', 'store-pulse' )
+									);
+									?>
 								</span><br />
-								<?php esc_html_e( 'Ισχύει ανά χρήστη (μόνο για εσένα). Διαβάζεται η ίδια ρύθμιση με του Revenue Splitter — η αλλαγή εδώ ισχύει και εκεί.', 'store-pulse' ); ?>
+								<?php esc_html_e( 'Η γλώσσα οθόνης επιλέγεται ανά χρήστη στις Ρυθμίσεις του Revenue Splitter και ισχύει για όλα τα Noxpress plugins. Χωρίς το Revenue Splitter ακολουθείται η γλώσσα του προφίλ σου στο WordPress.', 'store-pulse' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -438,6 +424,52 @@ final class SP_Admin {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * POST των Ρυθμίσεων: validate + save + redirect (PRG). Τρέχει στο
+	 * admin_init — πριν από κάθε output — ώστε το wp_safe_redirect να
+	 * στέλνει πραγματικά header. Σε λάθη, τα μηνύματα μένουν στο
+	 * self::$errors και τα δείχνει το render_settings (ίδιο request).
+	 */
+	public static function handle_settings_post(): void {
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended -- ο nonce ελέγχεται παρακάτω.
+		$sp_form_action = isset( $_POST['sp_form'] )
+			? sanitize_text_field( wp_unslash( $_POST['sp_form'] ) )
+			: '';
+		$page = isset( $_GET['page'] )
+			? sanitize_key( wp_unslash( $_GET['page'] ) )
+			: '';
+		// phpcs:enable
+
+		if ( 'settings' !== $sp_form_action || self::SLUG_SETTINGS !== $page ) {
+			return;
+		}
+
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'store-pulse' ) );
+		}
+
+		check_admin_referer( self::NONCE_ACTION, self::NONCE_NAME );
+
+		self::$errors = self::save_settings();
+
+		if ( array() !== self::$errors ) {
+			return;
+		}
+
+		SP_Data::flush();
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'       => self::SLUG_SETTINGS,
+					'sp-updated' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**
@@ -483,16 +515,22 @@ final class SP_Admin {
 			'sp_period_cancelled' => 'sp_default_period_cancelled',
 		);
 
-		$valid_periods = array();
+		$valid_periods  = array();
+		$invalid_period = false;
 
 		foreach ( $post_periods as $field => $value ) {
 
 			if ( ! in_array( $value, SP_Data::PRESETS, true ) ) {
-				$errors[] = __( 'Μη έγκυρο χρονικό διάστημα.', 'store-pulse' );
+				$invalid_period = true;
 				continue;
 			}
 
 			$valid_periods[ $preset_targets[ $field ] ] = $value;
+		}
+
+		// Ένα μήνυμα, όσα πεδία κι αν είναι άκυρα.
+		if ( $invalid_period ) {
+			$errors[] = __( 'Μη έγκυρο χρονικό διάστημα.', 'store-pulse' );
 		}
 
 		// ---- Low-stock threshold ----
@@ -519,6 +557,7 @@ final class SP_Admin {
 		}
 
 		if ( '' !== $raw_publisher
+			&& sp_rs_active()
 			&& ! in_array( $raw_publisher, RS_Beneficiaries::collect_names(), true ) ) {
 			// Άγνωστος δικαιούχος — δεν γράφουμε τιμή, warning όχι fatal.
 			$raw_publisher = '';

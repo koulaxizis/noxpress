@@ -1,32 +1,31 @@
 <?php
 /**
- * SF_Rules — Registry κανόνων μορφοποίησης (Wave 1).
+ * SF_Rules — Registry κανόνων μορφοποίησης (v1.1.0).
  *
  * Κάθε κανόνας δηλώνεται με:
- *  - id           σταθερή τιμή (checkbox values στο UI)
- *  - label        Greek msgid (μεταφράζεται στο UI μέσω __())
- *  - scope        'document' (ολόκληρο το HTML string, ΠΡΙΝ την
- *                 tokenization) ή 'text' (ανά text segment, ΜΕΤΑ —
- *                 ποτέ δεν βλέπει tags/attributes/entities)
- *  - order        deterministic σειρά εκτέλεσης μέσα στο scope
- *  - callback      string => string
+ *  - id        σταθερή τιμή (checkbox values στο UI, persisted στα profiles/runs)
+ *  - label     Greek msgid (μεταφράζεται στο UI μέσω __())
+ *  - scope     'document' (ολόκληρο το HTML string, ΜΕΤΑ την προστασία
+ *              code/pre/script/style/comments/shortcodes) ή 'text'
+ *              (ανά text segment — ποτέ δεν βλέπει tags/attributes/entities)
+ *  - type      μόνο για scope 'text':
+ *               'edit' → callback( string $text, array $ctx ): string
+ *                        (αλλάζει το ίδιο το κείμενο — π.χ. κενά)
+ *               'mark' → callback( string $text ): array of [start, end)
+ *                        byte ranges που πρέπει να πάρουν το 'tag'
+ *  - tag       'strong' | 'em' (μόνο για 'mark')
+ *  - order     deterministic σειρά εκτέλεσης μέσα στο scope
  *
- * Σειρά scope 'text' (σημασιολογία «combos»):
- *  20 normalize_whitespace  — καθάρισμα πρώτα
- *  30/31 quoted_*            — μηνιαία value rules
- *  40 parens_italic
- *  50 numbers_bold
- *  90/91 all_italic/all_bold — ΟΛΟΚΛΗΡΩΤΙΚΑ wraps ΤΕΛΕΥΤΑΙΑ ώστε να
- *               περικλείουν και τα tags που πρόσθεσαν οι προηγούμενοι
- *               κανόνες (έγκυρο nesting, όχι σπασμένο HTML)
- *
- * Exclusions (ρώτησε μηχανής): το ctx['excluded'] (array φράσεων)
- * προστατεύεται ΜΕΣΑ σε κάθε segment μέσω placeholders — οι φράσεις
- * αυτές δεν μεταμορφώνονται ποτέ, όποιος κανόνας κι αν τρέχει.
+ * v1.1.0 — γιατί ranges και όχι regex replace:
+ *  Οι κανόνες 'mark' ΔΕΝ γράφουν πια tags. Επιστρέφουν περιοχές και το
+ *  SF_Engine::render_marks() χτίζει ΕΝΑ well-formed markup από όλες μαζί
+ *  (επικαλυπτόμενες περιοχές → σωστό nesting, όχι διασταυρούμενα tags).
+ *  Το engine επίσης παραλείπει κάθε 'mark' κανόνα όταν το segment βρίσκεται
+ *  ήδη μέσα στο αντίστοιχο tag (<strong>/<b> ή <em>/<i>) → idempotent:
+ *  δεύτερη εφαρμογή = καμία αλλαγή.
  *
  * Security: καθαρό string-in/string-out, καμία DB access, κανένα
- * eval/create_function. Κανένα input δεν εμπιστεύεται από εδώ —
- * το SF_Engine καλεί πάντα με validated data.
+ * eval/create_function.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -43,8 +42,12 @@ final class SF_Rules {
 	const R_ALL_ITALIC   = 'sf_all_italic';
 	const R_ALL_BOLD     = 'sf_all_bold';
 
-	/** Tags που αφαιρεί το strip (keep content, drop markup). */
-	const STRIP_TAGS = 'strong|b|em|i|u|s|strike|del|ins|mark';
+	/**
+	 * Inline formatting tags που αφαιρεί το strip (keep content, drop markup).
+	 * Ακριβή ονόματα — ΠΟΤΕ prefix match (<ul>, <br>, <span>, <small>,
+	 * <sup>, <img>, <blockquote> μένουν άθικτα).
+	 */
+	const STRIP_TAGS = array( 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'del', 'ins', 'mark' );
 
 	/**
 	 * Registry — ΠΑΝΤΑ fresh array (όχι static cache): τα labels είναι
@@ -63,6 +66,7 @@ final class SF_Rules {
 				'id'       => self::R_WS,
 				'label'    => 'Κανονικοποίηση κενών',
 				'scope'    => 'text',
+				'type'     => 'edit',
 				'order'    => 20,
 				'callback' => array( __CLASS__, 'cb_ws' ),
 			),
@@ -70,131 +74,87 @@ final class SF_Rules {
 				'id'       => self::R_QUOTES_IT,
 				'label'    => 'Περιεχόμενο εισαγωγικών italic',
 				'scope'    => 'text',
+				'type'     => 'mark',
+				'tag'      => 'em',
 				'order'    => 30,
-				'callback' => array( __CLASS__, 'cb_quotes_italic' ),
+				'callback' => array( __CLASS__, 'cb_quotes' ),
 			),
 			self::R_QUOTES_BD  => array(
 				'id'       => self::R_QUOTES_BD,
 				'label'    => 'Περιεχόμενο εισαγωγικών bold',
 				'scope'    => 'text',
+				'type'     => 'mark',
+				'tag'      => 'strong',
 				'order'    => 31,
-				'callback' => array( __CLASS__, 'cb_quotes_bold' ),
+				'callback' => array( __CLASS__, 'cb_quotes' ),
 			),
 			self::R_PARENS_IT  => array(
 				'id'       => self::R_PARENS_IT,
 				'label'    => 'Περιεχόμενο παρενθέσεων italic',
 				'scope'    => 'text',
+				'type'     => 'mark',
+				'tag'      => 'em',
 				'order'    => 40,
-				'callback' => array( __CLASS__, 'cb_parens_italic' ),
+				'callback' => array( __CLASS__, 'cb_parens' ),
 			),
 			self::R_NUMBERS_BD => array(
 				'id'       => self::R_NUMBERS_BD,
 				'label'    => 'Αριθμοί bold',
 				'scope'    => 'text',
+				'type'     => 'mark',
+				'tag'      => 'strong',
 				'order'    => 50,
-				'callback' => array( __CLASS__, 'cb_numbers_bold' ),
+				'callback' => array( __CLASS__, 'cb_numbers' ),
 			),
 			self::R_ALL_ITALIC => array(
 				'id'       => self::R_ALL_ITALIC,
 				'label'    => 'Όλο το κείμενο italic',
 				'scope'    => 'text',
+				'type'     => 'mark',
+				'tag'      => 'em',
 				'order'    => 90,
-				'callback' => array( __CLASS__, 'cb_all_italic' ),
+				'callback' => array( __CLASS__, 'cb_all' ),
 			),
 			self::R_ALL_BOLD   => array(
 				'id'       => self::R_ALL_BOLD,
 				'label'    => 'Όλο το κείμενο bold',
 				'scope'    => 'text',
+				'type'     => 'mark',
+				'tag'      => 'strong',
 				'order'    => 91,
-				'callback' => array( __CLASS__, 'cb_all_bold' ),
+				'callback' => array( __CLASS__, 'cb_all' ),
 			),
 		);
 	}
 
-	/** Ενεργά text rules σε σειρά order (helper για το SF_Engine). */
+	/** Ενεργά rules ενός scope σε σειρά order (helper για το SF_Engine). */
+	private static function rules_of_scope( string $scope, array $enabled ): array {
+		$out = array();
+		foreach ( self::registry() as $id => $def ) {
+			if ( $scope === $def['scope'] && in_array( $id, $enabled, true ) ) {
+				$out[ $def['order'] ] = $def;
+			}
+		}
+		ksort( $out );
+		return array_values( $out );
+	}
+
+	/** Ενεργά text rules σε σειρά order. */
 	public static function text_rules( array $enabled ): array {
-		$out = array();
-		foreach ( self::registry() as $id => $def ) {
-			if ( 'text' === $def['scope'] && in_array( $id, $enabled, true ) ) {
-				$out[ $def['order'] ] = $def;
-			}
-		}
-		ksort( $out );
-		return array_values( $out );
+		return self::rules_of_scope( 'text', $enabled );
 	}
 
-	/** Ενεργά document rules σε σειρά order (helper για το SF_Engine). */
+	/** Ενεργά document rules σε σειρά order. */
 	public static function document_rules( array $enabled ): array {
-		$out = array();
-		foreach ( self::registry() as $id => $def ) {
-			if ( 'document' === $def['scope'] && in_array( $id, $enabled, true ) ) {
-				$out[ $def['order'] ] = $def;
-			}
-		}
-		ksort( $out );
-		return array_values( $out );
+		return self::rules_of_scope( 'document', $enabled );
 	}
 
 	/**
-	 * Εφαρμογή ΟΛΩΝ των ενεργών κανόνων σε ένα text segment, με
-	 * protection των excluded φράσεων και των tags που παράγουν οι
-	 * προηγούμενοι κανόνες (τα <strong>/<em> χωρίς attributes είναι
-	 * αδύνατο να μπερδέψουν τα regex των επόμενων — αλλά τα excluded
-	 * προστατεύονται ρητά σε ΚΑΘΕ κανόνα ξεχωριστά).
+	 * Letters-only encoding (a, b … z, aa, ab …) — markers χωρίς ψηφία,
+	 * ώστε κανένα rule regex (\d+) να μην τα αγγίζει. Κοινό για SF_Engine
+	 * και exclusions (μία υλοποίηση).
 	 */
-	public static function apply_text( string $text, array $enabled, array $ctx = array() ): string {
-
-		$rules = self::text_rules( $enabled );
-		if ( empty( $rules ) ) {
-			return $text;
-		}
-
-		foreach ( $rules as $rule ) {
-			$text = self::with_exclusions( $text, $ctx['excluded'] ?? array(), $rule['callback'] );
-		}
-
-		return $text;
-	}
-
-	/**
-	 * Protection μηχανισμός: Οι φράσεις του exclusion list
-	 * αντικαθίστανται με μοναδικά placeholders (\x00N\x00, ώστε
-	 * ούτε κανένα regex να τις φτάσει), τρέχει το callback, γίνεται
-	 * restore. Τα control chars \x00 δεν υπάρχουν ΠΟΤΕ σε
-	 * legitimate περιεχόμενο (WordPress τα φιλτράρει) — safe marker.
-	 */
-	public static function with_exclusions( string $text, array $excluded, callable $cb ): string {
-
-		if ( empty( $excluded ) ) {
-			return $cb( $text );
-		}
-
-		$placeholders = array();
-		$i            = 0;
-
-		// Μεγαλύτερες φράσεις πρώτα — ώστε «The Pleiades and the
-		// Morning Star» να μην κοπεί από το «Morning Star».
-		$excluded = array_values( array_unique( array_filter( array_map( 'strval', $excluded ) ) ) );
-		usort( $excluded, static function ( $a, $b ) {
-			return mb_strlen( $b ) <=> mb_strlen( $a );
-		} );
-
-		foreach ( $excluded as $phrase ) {
-			if ( '' !== $phrase && false !== mb_strpos( $text, $phrase ) ) {
-				$ph          = "\x00SF" . self::num_alpha( $i ) . "\x00";
-				$text        = str_replace( $phrase, $ph, $text );
-				$placeholders[ $ph ] = $phrase;
-				$i++;
-			}
-		}
-
-		$text = $cb( $text );
-
-		return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $text );
-	}
-
-	/** Letters-only encoding (a, b … z, aa, ab …) — markers χωρίς ψηφία, ώστε κανένα rule regex (\d+) να μην τα αγγίζει. */
-	private static function num_alpha( int $n ): string {
+	public static function num_alpha( int $n ): string {
 		$s = '';
 		$n = max( 0, $n );
 		do {
@@ -209,101 +169,93 @@ final class SF_Rules {
 	 * =================================================================== */
 
 	/**
-	 * Πλήρης αφαίρεση μορφοποίησης: πετάει τα (opening/closing) tags
-	 * της STRIP_TAGS list, ΚΡΑΤΩΝΕΙ το περιεχόμενο. Τρέχει ΠΡΙΝ την
-	 * tokenization — είναι ο μόνος κανόνας που επιτρέπεται να
-	 * «αντιμετωπίζει» markup. Attributes δεν απομένουν (ολόκληρο το
-	 * tag σβήνεται), οπότε δεν υπάρχει attribute-injection επιφάνεια.
+	 * Πλήρης αφαίρεση μορφοποίησης: πετάει τα (opening/closing) tags της
+	 * STRIP_TAGS list, ΚΡΑΤΑ το περιεχόμενο. Το όνομα του tag πρέπει να
+	 * ταιριάζει ΑΚΡΙΒΩΣ (ακολουθεί κενό, '/' ή '>') — το <b> δεν πιάνει
+	 * το <br>/<blockquote>, το <s> δεν πιάνει το <span>/<small>/<sup>,
+	 * το <i> δεν πιάνει το <img>/<iframe>. Τρέχει ΜΕΤΑ την προστασία
+	 * code/pre/script/style (το SF_Engine τα έχει ήδη κάνει placeholders).
 	 */
 	public static function cb_strip( string $html ): string {
-		return preg_replace( '~</?(?:' . self::STRIP_TAGS . ')[^>]*>~i', '', $html );
+		$names = implode( '|', self::STRIP_TAGS );
+		return (string) preg_replace( '~</?(?:' . $names . ')(?=[\s/>])[^>]*>~i', '', $html );
 	}
 
 	/* =====================================================================
-	 * Callbacks — text scope (input = καθαρό text segment, ΟΧΙ tags)
+	 * Callbacks — text scope 'edit'
 	 * =================================================================== */
 
 	/**
 	 * Κανονικοποίηση κενών (συντηρητικό, safe by design):
 	 *  - \r\n / \r → \n
 	 *  - Πολλαπλά spaces/tabs σε ένα
-	 *  - Trailing spaces στο τέλος κάθε γραμμής
-	 *  - 3+ κενές γραμμές → 2
-	 *  - Κενό ΠΡΙΝ από σημεία στίξης έξω (συχνό λάθος «κείμενο , κείμενο»)
-	 * ΔΕΝ προσθέτει κενά (κίνδυνος σε URLs, entitites, συντομογραφίες).
+	 *  - Trailing spaces ΠΡΙΝ από πραγματική αλλαγή γραμμής (\n) και στο
+	 *    τέλος ολόκληρου του κειμένου ($ctx['is_last']) — ΟΧΙ στο τέλος
+	 *    ενός segment που ακολουθείται από tag («Hello <b>World</b>» μένει).
+	 *  - 3+ αλλαγές γραμμής → 2
+	 *  - Κενό ΠΡΙΝ από σημεία στίξης («κείμενο , κείμενο» → «κείμενο, κείμενο»)
+	 * ΔΕΝ προσθέτει κενά (κίνδυνος σε URLs, entities, συντομογραφίες).
 	 */
-	public static function cb_ws( string $text ): string {
+	public static function cb_ws( string $text, array $ctx = array() ): string {
 		$text = str_replace( array( "\r\n", "\r" ), "\n", $text );
-		$text = preg_replace( '~[ \t]{2,}~', ' ', $text );
-		$text = preg_replace( '~[ \t]+$~m', '', $text );
-		$text = preg_replace( '~\n{3,}~', "\n\n", $text );
-		$text = preg_replace( '~[ \t]+([,.!?;:])~u', '$1', $text );
-		return $text;
-	}
-
-	/**
-	 * Περικλείει ΟΛΟ το quoted segment (μαζί με τα εισαγωγικά) σε
-	 * <em> ή <strong>. Υποστήριξη: ελληνικά guillemets «», curly
-	 * “”, straight "" — δεν σπάει σε nesting (η [^»] δεν ταιριάζει
-	 * το closing mark, δεν υπάρχουν tags στο input).
-	 */
-	public static function cb_quotes_italic( string $text ): string {
-		return self::wrap_quotes( $text, 'em' );
-	}
-
-	public static function cb_quotes_bold( string $text ): string {
-		return self::wrap_quotes( $text, 'strong' );
-	}
-
-	/** Κοινή υλοποίηση quoted-wrap (τα τρία στυλ εισαγωγικών). */
-	private static function wrap_quotes( string $text, string $tag ): string {
-		$text = preg_replace( '~«([^»]+)»~u', '<' . $tag . '>«$1»</' . $tag . '>', $text );
-		$text = preg_replace( '~“([^”]+)”~u', '<' . $tag . '>“$1”</' . $tag . '>', $text );
-		$text = preg_replace( '~"([^"]+)"~', '<' . $tag . '>"$1"</' . $tag . '>', $text );
-		return $text;
-	}
-
-	/**
-	 * Περιεχόμενο παρενθέσεων italic — περιλαμβάνει και τα παρενθέσεις
-	 * στο wrap (πιο ομοιόμορφο οπτικά απ' ό,τι μόνο το εσωτερικό).
-	 * Nesting παρενθέσεων ΔΕΝ υποστηρίζεται (ΣΚΟΠΙΜΟ, Wave 1 — το
-	 * [^)] σταματά στο πρώτο ')' — απρόβλεπτα deep-nest περιεχόμενα
-	 * είναι έξω scope των περιγραφών προϊόντων).
-	 */
-	public static function cb_parens_italic( string $text ): string {
-		return preg_replace( '~\(([^()\n]{1,300})\)~u', '<em>($1)</em>', $text );
-	}
-
-	/**
-	 * Αριθμοί bold — ακέραιοι και δεκαδικοί (κόμμα ή τελεία, π.χ.
-	 * «σελίδες 320» → bold 320). Το input είναι καθαρό text segment:
-	 * καμία πιθανότητα να πιάσει digits μέσα σε attributes/entities.
-	 */
-	public static function cb_numbers_bold( string $text ): string {
-		return preg_replace( '~\d+(?:[.,]\d+)*~u', '<strong>$0</strong>', $text );
-	}
-
-	/**
-	 * Whole-segment wraps. ΠΡΟΣΟΧΗ στα semantics: τρέχουν ΤΕΛΕΥΤΑΙΑ
-	 * (order 90/91), οπότε περικλείουν και tags προηγούμενων κανόνων
-	 * → <em><strong>123</strong></em> = έγκυρο nesting. Κενό segment
-	 * (whitespace-only, π.χ. newline μεταξύ <p>) ΔΕΝ τυλίγεται —
-	 * αφήνουμε το whitespace απ' έξω.
-	 */
-	public static function cb_all_italic( string $text ): string {
-		return self::wrap_if_content( $text, 'em' );
-	}
-
-	public static function cb_all_bold( string $text ): string {
-		return self::wrap_if_content( $text, 'strong' );
-	}
-
-	/** Wrap μόνο αν υπάρχει μη-whitespace περιεχόμενο. */
-	private static function wrap_if_content( string $text, string $tag ): string {
-		if ( '' === trim( $text ) ) {
-			return $text;
+		$text = (string) preg_replace( '~[ \t]{2,}~', ' ', $text );
+		$text = (string) preg_replace( '~[ \t]+(?=\n)~', '', $text );
+		if ( ! empty( $ctx['is_last'] ) ) {
+			$text = rtrim( $text, " \t" );
 		}
-		return '<' . $tag . '>' . $text . '</' . $tag . '>';
+		$text = (string) preg_replace( '~\n{3,}~', "\n\n", $text );
+		$text = (string) preg_replace( '~[ \t]+([,.!?;:])~u', '$1', $text );
+		return $text;
 	}
 
+	/* =====================================================================
+	 * Callbacks — text scope 'mark' (επιστρέφουν byte ranges [start, end))
+	 * =================================================================== */
+
+	/**
+	 * Quoted segment ΜΑΖΙ με τα εισαγωγικά. Υποστήριξη: ελληνικά
+	 * guillemets «», curly “”, straight "".
+	 */
+	public static function cb_quotes( string $text ): array {
+		return array_merge(
+			self::match_ranges( '~«[^»]+»~u', $text ),
+			self::match_ranges( '~“[^”]+”~u', $text ),
+			self::match_ranges( '~"[^"]+"~', $text )
+		);
+	}
+
+	/**
+	 * Περιεχόμενο παρενθέσεων ΜΑΖΙ με τις παρενθέσεις. Nesting παρενθέσεων
+	 * δεν υποστηρίζεται (το [^()] σταματά στο πρώτο ')').
+	 */
+	public static function cb_parens( string $text ): array {
+		return self::match_ranges( '~\([^()\n]{1,300}\)~u', $text );
+	}
+
+	/** Αριθμοί — ακέραιοι και δεκαδικοί (κόμμα ή τελεία, π.χ. «σελίδες 320»). */
+	public static function cb_numbers( string $text ): array {
+		return self::match_ranges( '~\d+(?:[.,]\d+)*~u', $text );
+	}
+
+	/** Όλο το (μη-whitespace) περιεχόμενο του segment. */
+	public static function cb_all( string $text ): array {
+		$trimmed = ltrim( $text );
+		if ( '' === $trimmed ) {
+			return array();
+		}
+		$start = strlen( $text ) - strlen( $trimmed );
+		$end   = strlen( rtrim( $text ) );
+		return array( array( $start, $end ) );
+	}
+
+	/** Όλα τα matches ενός regex ως byte ranges. */
+	private static function match_ranges( string $re, string $text ): array {
+		$out = array();
+		if ( preg_match_all( $re, $text, $m, PREG_OFFSET_CAPTURE ) ) {
+			foreach ( $m[0] as $hit ) {
+				$out[] = array( (int) $hit[1], (int) $hit[1] + strlen( $hit[0] ) );
+			}
+		}
+		return $out;
+	}
 }

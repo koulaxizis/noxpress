@@ -1,4 +1,4 @@
-			<?php
+<?php
 /**
  * RS_Admin_UI — Admin pages: Dashboard, Ρυθμίσεις, widget, exports,
  * backup/import.
@@ -114,8 +114,31 @@ final class RS_Admin_UI {
 		'rs_email_reports',     // vNext (#1): opt-in μηνιαίας αναφοράς.
 	);
 
+	/** @var array|null Per-request cache: χρώματα δικαιούχων. */
+	private static $color_cache = null;
+
+	/** @var array|null Per-request cache: λίστα καναλιών. */
+	private static $channels_cache = null;
+
+	/** @var string|null Per-request cache: default κανάλι. */
+	private static $default_channel_cache = null;
+
+	/**
+	 * v1.7.0: καθαρισμός των per-request caches (rs_invalidate_cache) —
+	 * π.χ. το state import ξαναδιαβάζει τα κανάλια πριν το ledger.
+	 */
+	public static function clear_cache(): void {
+		self::$color_cache           = null;
+		self::$channels_cache        = null;
+		self::$default_channel_cache = null;
+	}
+
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
+		add_action( 'rs_invalidate_cache', array( __CLASS__, 'clear_cache' ) );
+
+		// Noxpress contract: RS = priority 9 → δημιουργεί ΠΑΝΤΑ πρώτο το
+		// κοινό top-level (Store Pulse: 20, Smart Formatter: 30).
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 9 );
 		add_action( 'admin_init', array( __CLASS__, 'route_exports' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_backup' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_settings' ) );
@@ -131,14 +154,32 @@ final class RS_Admin_UI {
 
 	public static function admin_menu(): void {
 
-		add_menu_page(
-			__( 'Noxpress', 'revenue-splitter' ),         // Title του top-level
-			__( 'Noxpress', 'revenue-splitter' ),         // Menu label
-			self::CAP,
-			self::SLUG_MENU,                             // Parent slug = 'noxpress'
-			array( __CLASS__, 'render_noxpress_home' ),
-			'dashicons-chart-pie'
-		);
+		// Κοινό top-level «Noxpress»: όποιος τρέχει πρώτος το δημιουργεί.
+		// Το RS (priority 9) το δημιουργεί κανονικά πάντα — ο έλεγχος
+		// υπάρχει για την απίθανη περίπτωση που κάποιο άλλο plugin του
+		// οικοσυστήματος το έχει ήδη καταχωρίσει.
+		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
+			add_menu_page(
+				__( 'Noxpress', 'revenue-splitter' ),
+				__( 'Noxpress', 'revenue-splitter' ),
+				self::CAP,
+				self::SLUG_MENU,
+				array( __CLASS__, 'render_noxpress_home' ),
+				'dashicons-chart-pie',
+				57
+			);
+
+			// Το WP επαναλαμβάνει το top-level ως πρώτο submenu — του δίνουμε
+			// ρητή ετικέτα αντί για διπλό «Noxpress».
+			add_submenu_page(
+				self::SLUG_MENU,
+				__( 'Noxpress', 'revenue-splitter' ),
+				__( 'Επισκόπηση', 'revenue-splitter' ),
+				self::CAP,
+				self::SLUG_MENU,
+				array( __CLASS__, 'render_noxpress_home' )
+			);
+		}
 
 		add_submenu_page(
 			self::SLUG_MENU,
@@ -158,19 +199,10 @@ final class RS_Admin_UI {
 			array( __CLASS__, 'render_settings' )
 		);
 
-		// Portal Settings (frontend作者 portal)
-		if ( function_exists( 'RS_Portal' ) ) {
-			add_submenu_page(
-				self::SLUG_MENU,
-				__( 'Noxpress — Portal', 'revenue-splitter' ),
-				__( 'Portal', 'revenue-splitter' ),
-				self::CAP,
-				'noxpress-portal',
-				array( 'RS_Portal', 'render_index' )
-			);
-		}
+		// Η σελίδα «RS Portal» (κλειδιά δικαιούχων) καταχωρείται από το
+		// RS_Portal::admin_menu() — εδώ καμία διπλή εγγραφή.
 	}
-	
+
 		/**
 	 * Landing page του κοινού top-level «Noxpress» menu.
 	 *
@@ -199,25 +231,37 @@ final class RS_Admin_UI {
 		// Portal — διαχείριση κλειδιών δικαιούχων (μόνο αν το module φορτώνει).
 		if ( class_exists( 'RS_Portal' ) ) {
 			$cards[] = array(
-				'title' => __( 'Portal', 'revenue-splitter' ),
+				'title' => __( 'RS Portal', 'revenue-splitter' ),
 				'desc'  => __( 'Διαχείριση κλειδιών πρόσβασης των δικαιούχων στο portal.', 'revenue-splitter' ),
 				'url'   => admin_url( 'admin.php?page=' . RS_Portal::SLUG_ADMIN ),
 			);
 		}
 
-		// Store Pulse — μόνο αν είναι ενεργό (η κλάση φορτώνει μαζί του).
-		if ( class_exists( 'SP_Admin' ) ) {
-			$cards[] = array(
-				'title' => __( 'Store Pulse', 'revenue-splitter' ),
-				'desc'  => __( 'Σύντομη εικόνα καταστήματος: παραγγελίες, στοκ, έσοδα.', 'revenue-splitter' ),
-				'url'   => admin_url( 'admin.php?page=sp-dashboard' ),
-			);
-			$cards[] = array(
-				'title' => __( 'SP Ρυθμίσεις', 'revenue-splitter' ),
-				'desc'  => __( 'Ρυθμίσεις του Store Pulse.', 'revenue-splitter' ),
-				'url'   => admin_url( 'admin.php?page=sp-settings' ),
-			);
-		}
+		// Οικοσύστημα Noxpress — ΜΟΝΟ defined()/class_exists(), καμία
+		// εξάρτηση από σειρά φόρτωσης ή εσωτερικά APIs των άλλων plugins.
+		$sp_active = defined( 'SP_VERSION' ) || class_exists( 'SP_Admin' );
+		$sf_active = defined( 'SF_VERSION' ) || class_exists( 'SF_Admin_UI' );
+
+		$ecosystem = array(
+			array(
+				'name'    => 'Revenue Splitter',
+				'active'  => true,
+				'version' => RS_VERSION,
+				'url'     => admin_url( 'admin.php?page=' . self::SLUG_DASH ),
+			),
+			array(
+				'name'    => 'Store Pulse',
+				'active'  => $sp_active,
+				'version' => defined( 'SP_VERSION' ) ? (string) constant( 'SP_VERSION' ) : '',
+				'url'     => admin_url( 'admin.php?page=sp-dashboard' ),
+			),
+			array(
+				'name'    => 'Smart Formatter',
+				'active'  => $sf_active,
+				'version' => defined( 'SF_VERSION' ) ? (string) constant( 'SF_VERSION' ) : '',
+				'url'     => admin_url( 'admin.php?page=sf-formatter' ),
+			),
+		);
 
 		?>
 		<div class="wrap rs-wrap">
@@ -228,13 +272,47 @@ final class RS_Admin_UI {
 			<div class="rs-kpis">
 				<?php foreach ( $cards as $c ) : ?>
 					<div class="rs-kpi">
-						<a href="<?php echo esc_url( $c['url'] ); ?>" style="text-decoration:none;">
+						<a class="rs-card-link" href="<?php echo esc_url( $c['url'] ); ?>">
 							<strong><?php echo esc_html( $c['title'] ); ?></strong>
 						</a>
 						<span class="rs-kpi-label"><?php echo esc_html( $c['desc'] ); ?></span>
 					</div>
 				<?php endforeach; ?>
 			</div>
+
+			<h2 class="rs-h2"><?php esc_html_e( 'Noxpress plugins', 'revenue-splitter' ); ?></h2>
+			<table class="widefat striped rs-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Plugin', 'revenue-splitter' ); ?></th>
+						<th><?php esc_html_e( 'Κατάσταση', 'revenue-splitter' ); ?></th>
+						<th><?php esc_html_e( 'Έκδοση', 'revenue-splitter' ); ?></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $ecosystem as $eco ) : ?>
+					<tr>
+						<td><strong><?php echo esc_html( $eco['name'] ); ?></strong></td>
+						<td>
+							<?php if ( $eco['active'] ) : ?>
+								<span class="rs-status-on"><?php esc_html_e( 'Ενεργό', 'revenue-splitter' ); ?></span>
+							<?php else : ?>
+								<span class="rs-muted"><?php esc_html_e( 'Μη εγκατεστημένο / ανενεργό', 'revenue-splitter' ); ?></span>
+							<?php endif; ?>
+						</td>
+						<td><?php echo esc_html( '' !== $eco['version'] ? $eco['version'] : '—' ); ?></td>
+						<td>
+							<?php if ( $eco['active'] ) : ?>
+								<a href="<?php echo esc_url( $eco['url'] ); ?>"><?php esc_html_e( 'Άνοιγμα', 'revenue-splitter' ); ?> →</a>
+							<?php else : ?>
+								<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
 
 			<?php self::footer(); ?>
 		</div>
@@ -252,14 +330,18 @@ final class RS_Admin_UI {
 	 */
 	public static function assets( string $hook ): void {
 
-		// Το top-level «Noxpress» landing (hook: toplevel_page_noxpress)
-		// δεν περιέχει το 'revenue-splitter' — χωρίς αυτόν τον έλεγχο
-		// η σελίδα φόρτωνε χωρίς CSS/JS (unstyled). Χρησιμοποιούμε
-		// ακριβές match ώστε να ΜΗΝ ταιριάζουν και οι σελίδες του
-		// Store Pulse (noxpress_page_sp-*) που έχουν δικό τους CSS.
-		$is_ours = ( false !== strpos( $hook, 'revenue-splitter' ) )
-			|| ( 'toplevel_page_noxpress' === $hook );
-		$product = ( 'post.php' === $hook || 'post-new.php' === $hook );
+		// Noxpress contract: ταίριασμα με το $_GET['page'] (sanitized) απέναντι
+		// στα ΔΙΚΑ μας slugs — λειτουργεί είτε το parent είναι το «noxpress»
+		// είτε όχι (καμία εικασία πάνω στο hook suffix).
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page slug.
+		$page    = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$own     = array( self::SLUG_MENU, self::SLUG_DASH, self::SLUG_SET, 'revenue-splitter-portal' );
+		$is_ours = ( '' !== $page && in_array( $page, $own, true ) );
+
+		// Metabox προϊόντος: μόνο σε οθόνες επεξεργασίας product.
+		$screen  = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$product = ( 'post.php' === $hook || 'post-new.php' === $hook )
+			&& ( ! $screen || 'product' === $screen->post_type );
 		$is_dash = ( 'index.php' === $hook ); // v1.3.2 (#1): dashboard widget.
 
 		if ( ! $is_ours && ! $product && ! $is_dash ) {
@@ -453,8 +535,10 @@ final class RS_Admin_UI {
 	 * #3: Φιλτράρει το report κατά δικαιούχο (in-place semantics, νέο
 	 * array). Το product filter ΔΕΝ γίνεται εδώ — περνάει upstream στο
 	 * RS_Reports::run() ως product_ids (single source of truth + cache).
+	 *
+	 * v1.7.0: public — το χρησιμοποιεί και το `wp rs report --ben` (RS_CLI).
 	 */
-	private static function apply_ben_filter( array $report, string $ben ): array {
+	public static function apply_ben_filter( array $report, string $ben ): array {
 
 		if ( '' === $ben ) {
 			return $report;
@@ -795,6 +879,7 @@ final class RS_Admin_UI {
 						<td>
 							<strong><?php echo esc_html( $p['title'] ); ?></strong>
 							<?php if ( $p['ben_default'] ) : ?><small> · <?php esc_html_e( 'global defaults', 'revenue-splitter' ); ?></small><?php endif; ?>
+							<?php if ( ! empty( $p['sale_est'] ) ) : ?><small> · <?php esc_html_e( 'εκτίμηση έκπτωσης (τιμοκατάλογος)', 'revenue-splitter' ); ?></small><?php endif; ?>
 						</td>
 						<td class="num"><?php echo esc_html( number_format_i18n( $p['qty'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( number_format_i18n( $p['qty_full'] ) ); ?></td>
@@ -908,7 +993,7 @@ final class RS_Admin_UI {
 					<tr>
 						<?php // v1.3.8 (#1): custom χρώμα και στο όνομα του πίνακα. ?>
 						<td>
-							<strong class="rs-chip-name" style="display:inline-block;background:<?php echo esc_attr( self::ben_color( $a['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $a['name'] ) ) ); ?>;padding:1px 8px;border-radius:10px;">
+							<strong class="rs-chip-name rs-name-pill" style="background:<?php echo esc_attr( self::ben_color( $a['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $a['name'] ) ) ); ?>;">
 								<?php echo esc_html( $a['name'] ); ?>
 							</strong>
 						</td>
@@ -1283,7 +1368,7 @@ final class RS_Admin_UI {
 		// ---------- v1.3.8 (#1): Χρώματα δικαιούχων ----------
 		// POST σχήμα: rs_ben_color[md5(όνομα)] => '#rrggbb' (από <input type=color>)
 		//             rs_ben_color_name[md5(όνομα)] => όνομα (hidden mirror)
-		// Η σύζευξη γίνεται ΜΟΝΑΔΑΔΙΚΑ μέσω του md5 key — ουδέποτε
+		// Η σύζευξη γίνεται ΜΟΝΑΔΙΚΑ μέσω του md5 key — ουδέποτε
 		// εμπιστευόμαστε το όνομα απευθείας από το name attribute.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- arrays validated παρακάτω.
 		$colors_in  = isset( $_POST['rs_ben_color'] ) && is_array( $_POST['rs_ben_color'] ) ? wp_unslash( $_POST['rs_ben_color'] ) : array();
@@ -1402,7 +1487,7 @@ final class RS_Admin_UI {
 		foreach ( preg_split( '/\r\n|\r|\n/', $channels_raw ) as $ch_line ) {
 			$ch_line = trim( sanitize_text_field( (string) $ch_line ) );
 			if ( mb_strlen( $ch_line ) > 100 ) {
-				$ch_line = mb_substr( $ch_line, 0, 100 ); // Χαράμι 100 chars/κανάλι.
+				$ch_line = mb_substr( $ch_line, 0, 100 ); // Όριο 100 χαρακτήρες/κανάλι.
 			}
 			if ( '' !== $ch_line ) {
 				$channels[] = $ch_line;
@@ -1515,14 +1600,7 @@ final class RS_Admin_UI {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- custom cleaning παρακάτω.
 		$codes = isset( $_POST['rs_reason_coupons'] ) ? wp_unslash( (string) $_POST['rs_reason_coupons'] ) : '';
 
-		$clean_codes = array();
-		foreach ( explode( ',', $codes ) as $c ) {
-			$c = sanitize_key( strtoupper( trim( $c ) ) );
-			if ( '' !== $c ) {
-				$clean_codes[] = $c;
-			}
-		}
-		update_option( self::OPT_COUPONS, implode( ',', array_unique( $clean_codes ) ) );
+		update_option( self::OPT_COUPONS, self::clean_coupon_codes( $codes ) );
 
 		if ( empty( $notices ) ) {
 			$notices[] = array(
@@ -1532,6 +1610,41 @@ final class RS_Admin_UI {
 		}
 
 		return $notices;
+	}
+
+	/**
+	 * v1.7.0: Κανονικοποίηση λίστας κωδικών κουπονιών (comma-separated)
+	 * με ΤΟΝ ΙΔΙΟ τρόπο που το WooCommerce κανονικοποιεί τους κωδικούς
+	 * (wc_format_coupon_code → html_entity_decode + wc_sanitize_coupon_code
+	 * + wc_strtolower, multibyte-safe). Το παλιό sanitize_key(strtoupper())
+	 * έκοβε κενά/μη-ASCII χαρακτήρες (π.χ. «ΔΩΡΟ 2025» → «2025»).
+	 */
+	public static function clean_coupon_codes( string $raw ): string {
+
+		$clean = array();
+
+		foreach ( explode( ',', $raw ) as $c ) {
+			$c = self::normalize_coupon_code( $c );
+			if ( '' !== $c ) {
+				$clean[] = $c;
+			}
+		}
+
+		return implode( ',', array_unique( $clean ) );
+	}
+
+	/** Ένας κωδικός κουπονιού σε μορφή σύγκρισης του WooCommerce. */
+	public static function normalize_coupon_code( string $code ): string {
+
+		$code = trim( sanitize_text_field( $code ) );
+
+		if ( function_exists( 'wc_format_coupon_code' ) ) {
+			$code = (string) wc_format_coupon_code( $code );
+		}
+
+		return function_exists( 'wc_strtolower' )
+			? trim( (string) wc_strtolower( $code ) )
+			: trim( mb_strtolower( $code, 'UTF-8' ) );
 	}
 
 	/**
@@ -1579,9 +1692,7 @@ final class RS_Admin_UI {
 	 */
 	public static function get_color_map(): array {
 
-		static $map = null;
-
-		if ( null === $map ) {
+		if ( null === self::$color_cache ) {
 			$map = array();
 			$raw = get_option( self::OPT_COLORS, '' );
 			if ( is_string( $raw ) && '' !== $raw ) {
@@ -1595,9 +1706,10 @@ final class RS_Admin_UI {
 					}
 				}
 			}
+			self::$color_cache = $map;
 		}
 
-		return $map;
+		return self::$color_cache;
 	}
 
 	/**
@@ -1608,9 +1720,7 @@ final class RS_Admin_UI {
 	 */
 	public static function get_channels(): array {
 
-		static $channels = null;
-
-		if ( null === $channels ) {
+		if ( null === self::$channels_cache ) {
 			$channels = array();
 			$raw      = get_option( self::OPT_CHANNELS, '' );
 			if ( is_string( $raw ) && '' !== $raw ) {
@@ -1623,9 +1733,10 @@ final class RS_Admin_UI {
 					}
 				}
 			}
+			self::$channels_cache = $channels;
 		}
 
-		return $channels;
+		return self::$channels_cache;
 	}
 	
 	
@@ -1635,14 +1746,13 @@ final class RS_Admin_UI {
 	 */
 	public static function default_channel(): string {
 
-		static $ch = null;
-
-		if ( null === $ch ) {
+		if ( null === self::$default_channel_cache ) {
 			$raw = trim( (string) get_option( self::OPT_DEFAULT_CHANNEL, '' ) );
-			$ch  = ( '' !== $raw ) ? mb_substr( $raw, 0, 100 ) : self::FALLBACK_CHANNEL;
+
+			self::$default_channel_cache = ( '' !== $raw ) ? mb_substr( $raw, 0, 100 ) : self::FALLBACK_CHANNEL;
 		}
 
-		return $ch;
+		return self::$default_channel_cache;
 	}
 
 	/**
@@ -1747,7 +1857,7 @@ final class RS_Admin_UI {
 	 *    store-wide μετρικό· εξοικονομεί και 12× queries ανά φίλτρο).
 	 *  - «shares»: χωρίς φίλτρο δικαιούχου = σύνολο μεριδίων (≈ net).
 	 *    Με φίλτρο = ΜΟΝΟ ο επιλεγμένος δικαιούχος (μετρικά διαχωρισμένα
-	 *    στατικά — οτίποτα σε αναφορά #3, μεγαλύτερη ακρίβεια).
+	 *    στατικά — όπως στο φίλτρο #3).
 	 *  - Το φίλτρο προϊόντων ΔΕΝ εφαρμόζεται στο trend (ΣΚΟΠΙΜΟ — lower
 	 *    cost, ενιαία εικόνα).
 	 *  - Clamp στο rs_sales_since + caching 5'/μήνα: μέσα στο run().
@@ -1835,7 +1945,7 @@ final class RS_Admin_UI {
 				$pid = (int) $r['post_id'];
 				$state['postmeta'][] = array(
 					'post_id' => $pid,
-					'title'   => (string) get_the_title( $pid ), // pliroforiko — βοηθά να αναγνωρίσεις το προϊόν.
+					'title'   => (string) get_the_title( $pid ), // Πληροφοριακό — βοηθά να αναγνωρίσεις το προϊόν.
 					'key'     => (string) $r['meta_key'],
 					'value'   => (string) $r['meta_value'],
 				);
@@ -2145,62 +2255,9 @@ final class RS_Admin_UI {
 			}
 		}
 
-		// ---- Ledger: ATOMIC import (all-or-nothing, audit finding #1) ----
-		// Audit FIX: non-string rs_ledger (π.χ. tampered JSON) δεν αγνοείται
-		// πια σιωπηλά — ρητό error, ενιαία με channels/colors/portal-keys.
-		if ( isset( $opts['rs_ledger'] ) && ! is_string( $opts['rs_ledger'] ) ) {
-			$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ledger (JSON).', 'revenue-splitter' ) );
-		}
-		if ( isset( $opts['rs_ledger'] ) && is_string( $opts['rs_ledger'] ) ) {
-			$decoded  = json_decode( $opts['rs_ledger'], true );
-			$entries_ = is_array( $decoded ) ? $decoded : array();
-
-			if ( null === $decoded && '' !== trim( $opts['rs_ledger'] ) ) {
-				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ledger (JSON).', 'revenue-splitter' ) );
-			} else {
-				$result = RS_Ledger::import_bulk( $entries_ );
-
-				if ( true === $result ) {
-					$notes[] = array(
-						'type' => 'success',
-						'text' => sprintf(
-							/* translators: %d: πλήθος εγγραφών */
-							__( 'Ledger: εισήχθησαν %d εγγραφές (με πλήρη validation).', 'revenue-splitter' ),
-							count( $entries_ )
-						),
-					);
-				} else {
-					foreach ( $result as $err ) {
-						$notes[] = array( 'type' => 'error', 'text' => $err );
-					}
-					$notes[] = array( 'type' => 'error', 'text' => __( 'Ledger: ΚΑΜΙΑ αλλαγή δεν έγινε — το υπάρχον ledger παρέμεινε άθικτο.', 'revenue-splitter' ) );
-				}
-			}
-		}
-
-		// ---- v1.4.1 (#2): Backup χωρίς ledger section — ρητό info ----
-		// Όταν απουσιάζει ΠΛΗΡΩΣ το rs_ledger key (π.χ. backup από
-		// παλαιότερη έκδοση ή hand-made JSON), το υπάρχον ledger ΔΕΝ
-		// αγγίζεται. Η απουσία πρέπει να είναι ορατή στο αποτέλεσμα
-		// (replace-semantics διαφάνεια), όχι σιωπηλό skip — ενιαία
-		// λογική με το notice «ΔΕΝ βρέθηκαν τα προϊόντα με IDs %s».
-		if ( ! isset( $opts['rs_ledger'] ) ) {
-			$notes[] = array(
-				'type' => 'info',
-				'text' => __( 'Το backup δεν περιέχει ledger — το υπάρχον ledger παρέμεινε άθικτο.', 'revenue-splitter' ),
-			);
-		}
-
 		// ---- Reason coupons ----
 		if ( isset( $opts['rs_reason_coupons'] ) && is_string( $opts['rs_reason_coupons'] ) ) {
-			$clean_codes = array();
-			foreach ( explode( ',', $opts['rs_reason_coupons'] ) as $c ) {
-				$c = sanitize_key( strtoupper( trim( $c ) ) );
-				if ( '' !== $c ) {
-					$clean_codes[] = $c;
-				}
-			}
-			update_option( self::OPT_COUPONS, implode( ',', array_unique( $clean_codes ) ) );
+			update_option( self::OPT_COUPONS, self::clean_coupon_codes( $opts['rs_reason_coupons'] ) );
 		}
 
 		// ---- v1.3.6 (#9): Sales since (STRICT) ----
@@ -2332,6 +2389,59 @@ final class RS_Admin_UI {
 					);
 				}
 			}
+		}
+
+		// ---- Ledger: ATOMIC import (all-or-nothing, audit finding #1) ----
+		// v1.7.0: το ledger εισάγεται ΜΕΤΑ τα global defaults, τα κανάλια
+		// ΚΑΙ τα per-product overrides (postmeta) — αλλιώς εγγραφές για
+		// δικαιούχους που υπάρχουν ΜΟΝΟ σε override προϊόντος απορρίπτονταν
+		// ως «Άγνωστος δικαιούχος». Το invalidate καθαρίζει το static cache
+		// του collect_names()/καναλιών πριν το validation.
+		do_action( 'rs_invalidate_cache' );
+
+		// Audit FIX: non-string rs_ledger (π.χ. tampered JSON) δεν αγνοείται
+		// πια σιωπηλά — ρητό error, ενιαία με channels/colors/portal-keys.
+		if ( isset( $opts['rs_ledger'] ) && ! is_string( $opts['rs_ledger'] ) ) {
+			$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ledger (JSON).', 'revenue-splitter' ) );
+		}
+		if ( isset( $opts['rs_ledger'] ) && is_string( $opts['rs_ledger'] ) ) {
+			$decoded  = json_decode( $opts['rs_ledger'], true );
+			$entries_ = is_array( $decoded ) ? $decoded : array();
+
+			if ( null === $decoded && '' !== trim( $opts['rs_ledger'] ) ) {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ledger (JSON).', 'revenue-splitter' ) );
+			} else {
+				$result = RS_Ledger::import_bulk( $entries_ );
+
+				if ( true === $result ) {
+					$notes[] = array(
+						'type' => 'success',
+						'text' => sprintf(
+							/* translators: %d: πλήθος εγγραφών */
+							__( 'Ledger: εισήχθησαν %d εγγραφές (με πλήρη validation).', 'revenue-splitter' ),
+							count( $entries_ )
+						),
+					);
+				} else {
+					foreach ( $result as $err ) {
+						$notes[] = array( 'type' => 'error', 'text' => $err );
+					}
+					$notes[] = array( 'type' => 'error', 'text' => __( 'Ledger: ΚΑΜΙΑ αλλαγή δεν έγινε — το υπάρχον ledger παρέμεινε άθικτο.', 'revenue-splitter' ) );
+				}
+			}
+		}
+
+		// ---- v1.4.1 (#2): Backup χωρίς ledger section — ρητό info ----
+		// Όταν απουσιάζει ΠΛΗΡΩΣ το rs_ledger key (π.χ. backup από
+		// παλαιότερη έκδοση ή hand-made JSON), το υπάρχον ledger ΔΕΝ
+		// αγγίζεται. Η απουσία πρέπει να είναι ορατή στο αποτέλεσμα
+		// (replace-semantics διαφάνεια), όχι σιωπηλό skip — ενιαία
+		// λογική με το notice «ΔΕΝ βρέθηκαν τα προϊόντα με IDs %s».
+		if ( ! isset( $opts['rs_ledger'] ) ) {
+			$notes[] = array(
+				'type' => 'info',
+				'text' => __( 'Το backup δεν περιέχει ledger — το υπάρχον ledger παρέμεινε άθικτο.', 'revenue-splitter' ),
+			);
 		}
 
 		// ---- v1.3.6: HPOS free-copy reasons (αν υπάρχει το datastore) ----
@@ -2920,7 +3030,7 @@ final class RS_Admin_UI {
 				<div class="rs-kpi"><span class="rs-kpi-label"><?php esc_html_e( 'Καθαρό', 'revenue-splitter' ); ?></span><strong><?php echo esc_html( $cur( $report['totals']['net'] ) ); ?></strong></div>
 			</div>
 
-			<p style="margin:10px 0 4px;">
+			<p class="rs-widget-period">
 				<strong><?php echo esc_html( $per['label'] ); ?></strong>
 				<span class="rs-muted"> · <?php echo esc_html( RS_Lang::fmt_date( $per['start'] ) ); ?> → <?php echo esc_html( RS_Lang::fmt_date( $per['end'] ) ); ?></span>
 			</p>
@@ -2940,7 +3050,7 @@ final class RS_Admin_UI {
 					<?php foreach ( array_slice( $report['beneficiaries'], 0, 5 ) as $b ) : ?>
 					<tr>
 						<?php // v1.3.8 (#1): custom χρώμα και στο widget. ?>
-						<td><strong class="rs-chip-name" style="display:inline-block;background:<?php echo esc_attr( self::ben_color( $b['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $b['name'] ) ) ); ?>;padding:1px 8px;border-radius:10px;"><?php echo esc_html( $b['name'] ); ?></strong></td>
+						<td><strong class="rs-chip-name rs-name-pill" style="background:<?php echo esc_attr( self::ben_color( $b['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $b['name'] ) ) ); ?>;"><?php echo esc_html( $b['name'] ); ?></strong></td>
 						<td class="num"><?php echo esc_html( $cur( (float) $b['amount'] ) ); ?></td>
 						<?php
 						// v1.4.1 FIX: ενιαία σημασιολογία με το dashboard (sales + income − payments).
@@ -2958,12 +3068,12 @@ final class RS_Admin_UI {
 				</tbody>
 			</table>
 
-			<p style="margin:8px 0 0;">
+			<p class="rs-widget-links">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SLUG_DASH ) ); ?>">
 					<?php esc_html_e( '🤓 Dashboard', 'revenue-splitter' ); ?>
 				</a>
 				<span class="rs-muted"> · </span>
-				<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer" style="font-weight:600;">
+				<a class="rs-strong-link" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
 					<?php esc_html_e( '☕ Ko-fi', 'revenue-splitter' ); ?>
 				</a>
 			</p>
@@ -3012,17 +3122,17 @@ final class RS_Admin_UI {
 	/**
 	 * Footer με clickable cross-links (v1.3.0) + Ko-fi support CTA.
 	 *
-	 * Ko-fi: μωβ pill (inline styled — δεν εξαρτάται από admin.css),
-	 * ορατό σε κάθε admin του site που εγκαθιστά το plugin.
+	 * v1.7.0: public — το χρησιμοποιεί και η admin σελίδα του RS_Portal.
+	 * Κοινό pattern του οικοσυστήματος Noxpress (Ko-fi + Dashboard links,
+	 * μεταφράσιμο «Made with ❤»). Styles στο admin.css (.rs-footer, .rs-kofi).
 	 */
-	private static function footer(): void {
+	public static function footer(): void {
 		?>
-		<hr style="margin-top:24px;" />
 		<p class="rs-footer">
 			<?php
 			printf(
 				/* translators: %s: όνομα δημιουργού */
-				esc_html__( 'Made with <3 by %s', 'revenue-splitter' ),
+				esc_html__( 'Made with ❤ by %s', 'revenue-splitter' ),
 				'<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a>'
 			);
 			?>
@@ -3032,10 +3142,12 @@ final class RS_Admin_UI {
 			<?php esc_html_e( 'More plugins at', 'revenue-splitter' ); ?>
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
-		<p class="rs-footer" style="margin-top:10px;">
-			<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
-				style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
+		<p class="rs-footer-cta">
+			<a class="rs-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
 				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
+			</a>
+			<a class="rs-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SLUG_MENU ) ); ?>">
+				<?php esc_html_e( 'Noxpress Dashboard', 'revenue-splitter' ); ?>
 			</a>
 		</p>
 		<?php

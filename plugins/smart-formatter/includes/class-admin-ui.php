@@ -1,6 +1,6 @@
 <?php
 /**
- * SF_Admin_UI (+ SF_Lang) — Admin pages, AJAX endpoints, settings,
+ * SF_Admin_UI — Admin pages, AJAX endpoints, settings,
  * profiles, state export/import.
  *
  * Security pattern (RS mirror):
@@ -19,9 +19,10 @@
  *  JS -> sf_apply {phase:'finish', total} → server: ::finalize()
  *  Progress bar στο UI (ακριβώς όπως το roadmap του κανόνα batching).
  *
- * Menu (Bible §8): submenu κάτω από 'noxpress' όταν το RS είναι
- * ενεργό (SLUG_MENU constant reference — ποτέ hardcoded duplicate),
- * standalone top-level αλλιώς. Labels: «Smart Formatter» + «SF Ρυθμίσεις».
+ * Menu (Bible §8, admin_menu priority 30): κοινό top-level 'noxpress'.
+ * Αν υπάρχει ήδη (RS στο 9 / Store Pulse στο 20) → submenus. Αλλιώς το
+ * SF το δημιουργεί με το formatter ως landing. Τα δικά μας slugs
+ * (sf-formatter, sf-settings) δουλεύουν σε ΚΑΘΕ συνδυασμό plugins.
  *
  * Language (Bible §9): ΔΙΑΒΑΣΗ ΜΟΝΟ του rs_lang user meta (το
  * γράφει μόνο το RS). EN μέσω gettext filter στο domain
@@ -36,8 +37,18 @@ defined( 'ABSPATH' ) || exit;
 final class SF_Admin_UI {
 
 	const CAP        = 'manage_woocommerce';
+	const SLUG_MENU  = 'noxpress';     // Κοινό top-level του Noxpress ecosystem.
 	const SLUG_DASH  = 'sf-formatter';
 	const SLUG_SET   = 'sf-settings';
+
+	/** Units ανά dry-run request (μόνο ανάγνωση — μεγαλύτερο από το apply BATCH). */
+	const DRY_BATCH = 50;
+
+	/** Μέγιστος αριθμός δειγμάτων before/after ανά dry-run/apply response. */
+	const SAMPLE = 5;
+
+	/** true όταν το SF δημιούργησε το top-level 'noxpress' σε αυτό το request. */
+	private static $owns_top = false;
 
 	/** Options (state export whitelist). */
 	const OPT_PROFILES   = 'sf_profiles';   // JSON: name => {rules[],fields[]} (strict).
@@ -52,7 +63,7 @@ final class SF_Admin_UI {
 	const AJAX_NONCE = 'sf_ajax';
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 30 );
 		add_action( 'admin_init', array( __CLASS__, 'route_settings' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_backup' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
@@ -65,7 +76,6 @@ final class SF_Admin_UI {
 		add_action( 'wp_ajax_sf_search', array( __CLASS__, 'ajax_search' ) );
 		add_action( 'wp_ajax_sf_profile_save', array( __CLASS__, 'ajax_profile_save' ) );
 		add_action( 'wp_ajax_sf_profile_delete', array( __CLASS__, 'ajax_profile_delete' ) );
-		add_filter( 'gettext', array( 'SF_Lang', 'filter' ), 10, 3 );
 	}
 
 	/* =====================================================================
@@ -74,79 +84,102 @@ final class SF_Admin_UI {
 
 	public static function admin_menu(): void {
 
-		$parent = self::parent_slug();
-
-		if ( null === $parent ) {
-			// Standalone: το Smart Formatter δημιουργεί το top-level
-			// μόνο του (Bible §8 standalone mode).
+		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
+			// Κανένα άλλο Noxpress plugin δεν έφτιαξε το top-level → το
+			// φτιάχνουμε εμείς, με το formatter ως landing page.
 			add_menu_page(
-				__( 'Smart Formatter', 'smart-formatter' ),
-				__( 'Smart Formatter', 'smart-formatter' ),
+				__( 'Noxpress', 'smart-formatter' ),
+				__( 'Noxpress', 'smart-formatter' ),
 				self::CAP,
-				self::SLUG_DASH,
+				self::SLUG_MENU,
 				array( __CLASS__, 'render_formatter' ),
-				'dashicons-editor-textcolor',
+				'dashicons-chart-pie',
 				57
 			);
-			$parent = self::SLUG_DASH;
-		}
-
-		if ( self::SLUG_DASH !== $parent ) {
-			add_submenu_page(
-				$parent,
-				__( 'Smart Formatter', 'smart-formatter' ),
-				__( 'Smart Formatter', 'smart-formatter' ),
-				self::CAP,
-				self::SLUG_DASH,
-				array( __CLASS__, 'render_formatter' )
-			);
+			self::$owns_top = true;
 		}
 
 		add_submenu_page(
-			$parent,
+			self::SLUG_MENU,
+			__( 'Smart Formatter', 'smart-formatter' ),
+			__( 'Smart Formatter', 'smart-formatter' ),
+			self::CAP,
+			self::SLUG_DASH,
+			array( __CLASS__, 'render_formatter' )
+		);
+
+		add_submenu_page(
+			self::SLUG_MENU,
 			__( 'Smart Formatter — Ρυθμίσεις', 'smart-formatter' ),
 			__( 'SF Ρυθμίσεις', 'smart-formatter' ),
 			self::CAP,
 			self::SLUG_SET,
 			array( __CLASS__, 'render_settings' )
 		);
-	}
 
-	/** Parent slug: 'noxpress' αν το RS δημιούργησε το top-level. */
-	private static function parent_slug(): ?string {
-		if ( class_exists( 'RS_Admin_UI' ) && defined( 'RS_Admin_UI::SLUG_MENU' ) ) {
-			return RS_Admin_UI::SLUG_MENU; // Constant reference (Bible §10).
+		if ( self::$owns_top ) {
+			// Το WP επαναλαμβάνει το top-level ως πρώτο submenu («Noxpress»)
+			// — διπλότυπο του «Smart Formatter». Το top-level link οδηγεί
+			// πλέον στο sf-formatter (πρώτο submenu).
+			remove_submenu_page( self::SLUG_MENU, self::SLUG_MENU );
 		}
-		return null;
 	}
 
-	public static function assets( string $hook ): void {
+	/** Το τρέχον admin page slug (sanitized) — '' εκτός admin.php?page=. */
+	private static function current_page(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
+		return isset( $_GET['page'] ) ? sanitize_key( wp_unslash( (string) $_GET['page'] ) ) : '';
+	}
 
-		$ours = ( false !== strpos( $hook, 'sf-formatter' ) )
-			|| ( false !== strpos( $hook, 'sf-settings' ) );
+	public static function assets(): void {
 
-		if ( ! $ours ) {
+		$page    = self::current_page();
+		$is_tool = ( self::SLUG_DASH === $page ) || ( self::$owns_top && self::SLUG_MENU === $page );
+		$is_set  = ( self::SLUG_SET === $page );
+
+		if ( ! $is_tool && ! $is_set ) {
 			return;
 		}
 
 		$base = plugin_dir_url( SF_FILE );
 
-		$css_v = file_exists( SF_PATH . 'assets/admin.css' ) ? (string) filemtime( SF_PATH . 'assets/admin.css' ) : SF_VERSION;
-		wp_enqueue_style( 'sf-admin', $base . 'assets/admin.css', array(), $css_v );
+		wp_enqueue_style( 'sf-admin', $base . 'assets/admin.css', array(), SF_VERSION );
 
-		$js_v = file_exists( SF_PATH . 'assets/admin.js' ) ? (string) filemtime( SF_PATH . 'assets/admin.js' ) : SF_VERSION;
-		wp_enqueue_script( 'sf-admin', $base . 'assets/admin.js', array(), $js_v, true );
+		// Το JS χρειάζεται μόνο στη σελίδα του εργαλείου (η σελίδα ρυθμίσεων
+		// είναι καθαρές φόρμες POST).
+		if ( ! $is_tool ) {
+			return;
+		}
+
+		wp_enqueue_script( 'sf-admin', $base . 'assets/admin.js', array(), SF_VERSION, true );
 
 		wp_localize_script( 'sf-admin', 'SF_CFG', array(
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 			'nonce'   => wp_create_nonce( self::AJAX_NONCE ),
 			'i18n'    => array(
-				'confirmApply' => __( 'Είσαι σίγουρος; Θα μορφοποιηθούν τα επιλεγμένα κείμενα — δημιουργείται snapshot για undo.', 'smart-formatter' ),
-				'working'     => __( 'Επεξεργασία…', 'smart-formatter' ),
-				'done'        => __( 'Ολοκληρώθηκε!', 'smart-formatter' ),
-				'fail'        => __( 'Απέτυχε — δοκίμασε ξανά.', 'smart-formatter' ),
-				'nothing'     => __( 'Καμία αλλαγή δεν εντοπίστηκε.', 'smart-formatter' ),
-				'confirmDel'  => __( 'Διαγραφή του snapshot; Δεν επηρεάζει τα προϊόντα — χάνεται μόνο η δυνατότητα undo.', 'smart-formatter' ),
+				'confirmApply'    => __( 'Είσαι σίγουρος; Θα μορφοποιηθούν τα επιλεγμένα κείμενα — δημιουργείται snapshot για undo.', 'smart-formatter' ),
+				'working'         => __( 'Επεξεργασία…', 'smart-formatter' ),
+				'done'            => __( 'Ολοκληρώθηκε!', 'smart-formatter' ),
+				'fail'            => __( 'Απέτυχε — δοκίμασε ξανά.', 'smart-formatter' ),
+				'nothing'         => __( 'Καμία αλλαγή δεν εντοπίστηκε.', 'smart-formatter' ),
+				'confirmDel'      => __( 'Διαγραφή του snapshot; Δεν επηρεάζει τα προϊόντα — χάνεται μόνο η δυνατότητα undo.', 'smart-formatter' ),
+				/* translators: 1: αλλαγμένα, 2: πλήθος δείγματος */
+				'previewSummary'  => __( 'Θα αλλάξουν %1$s από %2$s στοιχεία του δείγματος (πρώτα 5).', 'smart-formatter' ),
+				/* translators: 1: αλλαγμένα, 2: σύνολο */
+				'dryrunSummary'   => __( 'Θα αλλάξουν %1$s από %2$s στοιχεία. Δείγμα παρακάτω.', 'smart-formatter' ),
+				/* translators: 1: αλλαγμένα */
+				'applySummary'    => __( 'Άλλαξαν %1$s στοιχεία.', 'smart-formatter' ),
+				'confirmRestore'  => __( 'Επαναφορά όλων των αποθηκευμένων τιμών αυτού του run στα προϊόντα;', 'smart-formatter' ),
+				'confirmRestoreP' => __( 'Το snapshot είναι μερικό (περικομμένο): θα επαναφερθούν ΜΟΝΟ τα units που κρατήθηκαν. Συνέχεια;', 'smart-formatter' ),
+				'confirmRestoreS' => __( 'Επαναφορά των επιλεγμένων units στα προϊόντα;', 'smart-formatter' ),
+				'restoreSel'      => __( 'Επαναφορά επιλεγμένων', 'smart-formatter' ),
+				/* translators: 1: units που επαναφέρθηκαν, 2: units που παραλείφθηκαν */
+				'restoredMsg'     => __( 'Επαναφέρθηκαν %1$s units· παραλείφθηκαν %2$s.', 'smart-formatter' ),
+				'partialMsg'      => __( 'ΜΕΡΙΚΗ επαναφορά: το snapshot ήταν περικομμένο — τα παλαιότερα units δεν είχαν κρατηθεί.', 'smart-formatter' ),
+				'kindProduct'     => __( 'Προϊόν', 'smart-formatter' ),
+				'kindTerm'        => __( 'Όρος', 'smart-formatter' ),
+				'saved'           => __( 'Αποθηκεύτηκε.', 'smart-formatter' ),
+				'pickProfile'     => __( 'Διάλεξε ένα προφίλ.', 'smart-formatter' ),
 			),
 		) );
 	}
@@ -163,7 +196,6 @@ final class SF_Admin_UI {
 
 		$rules   = SF_Rules::registry();
 		$fields  = SF_Targets::fields();
-		$excl    = self::get_exclusions();
 		$prof    = self::get_profiles();
 		?>
 		<div class="wrap sf-wrap">
@@ -200,7 +232,7 @@ final class SF_Admin_UI {
 					<?php foreach ( $fields as $f ) : ?>
 						<label class="sf-check">
 							<input type="checkbox" name="sf_fields[]" value="<?php echo esc_attr( $f['id'] ); ?>" <?php checked( $f['id'], SF_Targets::F_LONG_DESC ); ?> />
-							<?php echo esc_html( $f['label'] ); ?>
+							<?php echo esc_html( __( $f['label'], 'smart-formatter' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid από το fields registry. ?>
 						</label>
 					<?php endforeach; ?>
 					<p class="description"><?php esc_html_e( 'Σημείωση: στις ιδιότητες μορφοποιούνται μόνο τα custom (όχι τα global) — τα global είναι κοινά όροι σε όλο το κατάστημα.', 'smart-formatter' ); ?></p>
@@ -211,7 +243,7 @@ final class SF_Admin_UI {
 					<?php foreach ( $rules as $r ) : ?>
 						<label class="sf-check">
 							<input type="checkbox" name="sf_rules[]" value="<?php echo esc_attr( $r['id'] ); ?>" />
-							<?php echo esc_html( $r['label'] ); ?>
+							<?php echo esc_html( __( $r['label'], 'smart-formatter' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid από το rules registry. ?>
 						</label>
 					<?php endforeach; ?>
 					<p class="description"><?php esc_html_e( 'Η αφαίρεση μορφοποίησης τρέχει πρώτη· τα «όλο bold/italic» τελευταία — κάθε συνδυασμός δίνει έγκυρο HTML.', 'smart-formatter' ); ?></p>
@@ -300,19 +332,19 @@ final class SF_Admin_UI {
 				<tr><td colspan="5" class="sf-empty"><?php esc_html_e( 'Δεν υπάρχουν runs ακόμη.', 'smart-formatter' ); ?></td></tr>
 			<?php else : ?>
 				<?php foreach ( $history as $h ) : ?>
-				<tr data-run="<?php echo esc_attr( $h['run_id'] ); ?>">
+				<tr data-run="<?php echo esc_attr( $h['run_id'] ); ?>" data-partial="<?php echo $h['truncated'] ? '1' : '0'; ?>">
 					<td><code class="sf-run-id"><?php echo esc_html( substr( $h['run_id'], 0, 10 ) ); ?></code></td>
 					<td><?php echo esc_html( $h['created'] ); ?></td>
 					<td>
 						<?php echo esc_html( SF_Snapshots::STATE_DONE === $h['state'] ? __( 'Ολοκληρώθηκε', 'smart-formatter' ) : __( 'Σε εξέλιξη', 'smart-formatter' ) ); ?>
 						<?php if ( $h['truncated'] ) : ?>
-							<span class="sf-warn"> · <?php esc_html_e( 'περικομμένο', 'smart-formatter' ); ?></span>
+							<span class="sf-warn"> · <?php esc_html_e( 'μερικό (περικομμένο)', 'smart-formatter' ); ?></span>
 						<?php endif; ?>
 					</td>
 					<td><?php echo esc_html( number_format_i18n( $h['changed_total'] ) ); ?></td>
 					<td>
 						<button type="button" class="button sf-btn-units"><?php esc_html_e( 'Δες μονάδες', 'smart-formatter' ); ?></button>
-						<button type="button" class="button sf-btn-restore"><?php esc_html_e( 'Επαναφορά όλων', 'smart-formatter' ); ?></button>
+						<button type="button" class="button sf-btn-restore"><?php echo esc_html( $h['truncated'] ? __( 'Επαναφορά διαθέσιμων', 'smart-formatter' ) : __( 'Επαναφορά όλων', 'smart-formatter' ) ); ?></button>
 						<button type="button" class="button sf-btn-delete"><?php esc_html_e( 'Διαγραφή', 'smart-formatter' ); ?></button>
 					</td>
 				</tr>
@@ -334,9 +366,8 @@ final class SF_Admin_UI {
 			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'smart-formatter' ) );
 		}
 
-		$notices   = self::take_msgs();
-		$excl      = self::get_exclusions();
-		$hist_link = admin_url( 'admin.php?page=' . self::SLUG_DASH );
+		$notices = self::take_msgs();
+		$excl    = self::get_exclusions();
 		?>
 		<div class="wrap sf-wrap">
 			<h1><?php esc_html_e( 'Smart Formatter — Ρυθμίσεις', 'smart-formatter' ); ?></h1>
@@ -353,13 +384,13 @@ final class SF_Admin_UI {
 				<textarea name="sf_exclusions" rows="5" class="large-text code"
 					placeholder="<?php esc_attr_e( 'The Pleiades and the Morning Star', 'smart-formatter' ); ?>"><?php echo esc_textarea( implode( "\n", $excl ) ); ?></textarea>
 
-				<p style="margin-top:20px;">
+				<p class="sf-submit">
 					<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'smart-formatter' ); ?></button>
 				</p>
 			</form>
 
 			<h2 class="sf-h2"><?php esc_html_e( 'Backup & Επαναφορά', 'smart-formatter' ); ?></h2>
-			<form method="post" enctype="multipart/form-data" style="display:inline; margin-right:10px;">
+			<form method="post" enctype="multipart/form-data" class="sf-inline-form">
 				<?php wp_nonce_field( 'sf_backup', 'sf_backup_nonce' ); ?>
 				<input type="file" name="sf_import_file" accept=".json,application/json" />
 				<button type="submit" name="sf_import" value="1" class="button"><?php esc_html_e( 'Εισαγωγή state (JSON)', 'smart-formatter' ); ?></button>
@@ -367,7 +398,7 @@ final class SF_Admin_UI {
 			<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG_SET . '&sf_backup_export=1' ), 'sf_backup' ) ); ?>">
 				<?php esc_html_e( 'Εξαγωγή state (JSON)', 'smart-formatter' ); ?>
 			</a>
-			<p class="description" style="margin-top:8px;">
+			<p class="description sf-mt-8">
 				<?php esc_html_e( 'Συμπεριλαμβάνονται: προφίλ, καθολικές εξαιρέσεις και ιστορικό snapshots (με τα undo payloads). Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα. Τα Undo εκτελούνται από τη σελίδα του εργαλείου.', 'smart-formatter' ); ?>
 			</p>
 
@@ -449,9 +480,14 @@ final class SF_Admin_UI {
 		self::ajax_run( array( 'limit' => 5, 'apply' => false, 'preview' => true ) );
 	}
 
+	/**
+	 * Dry run σε slices (DRY_BATCH units/request) — το JS κάνει loop με
+	 * offset. Επιστρέφει counts + μικρό δείγμα, ποτέ ολόκληρα before/after
+	 * όλου του καταλόγου (timeouts / τεράστιο JSON σε μεγάλα καταστήματα).
+	 */
 	public static function ajax_dryrun(): void {
 		self::ajax_gate();
-		self::ajax_run( array( 'limit' => null, 'apply' => false ) );
+		self::ajax_run( array( 'limit' => self::DRY_BATCH, 'apply' => false, 'sample' => self::SAMPLE ) );
 	}
 
 	public static function ajax_apply(): void {
@@ -476,7 +512,7 @@ final class SF_Admin_UI {
 				if ( 1 !== preg_match( '/^[a-f0-9]{40}$/', $run_id ) ) {
 					wp_send_json_error( array( 'message' => __( 'Μη έγκυρο run id.', 'smart-formatter' ) ) );
 				}
-				self::ajax_run( array( 'limit' => SF_Targets::BATCH, 'apply' => true, 'run_id' => $run_id ) );
+				self::ajax_run( array( 'limit' => SF_Targets::BATCH, 'apply' => true, 'run_id' => $run_id, 'sample' => self::SAMPLE ) );
 				break;
 
 			case 'finish':
@@ -522,48 +558,59 @@ final class SF_Admin_UI {
 		);
 
 		// Apply: append ΤΩΝ before-values των changed units στο snapshot.
+		$changed_products = array();
 		if ( $args['apply'] && ! empty( $run_id ) ) {
 			$snap_units = array();
+			$term_tax   = array();
+			foreach ( SF_Targets::resolve_terms( $sel ) as $t ) {
+				$term_tax[ (int) $t['id'] ] = $t['taxonomy'];
+			}
 			foreach ( $plan['entries'] as $e ) {
-				if ( ! empty( $e['changed'] ) && empty( $e['error'] ) ) {
-					$u = array(
-						'kind'   => $e['kind'],
-						'id'     => $e['id'],
-						'field'  => $e['field'],
-						'before' => $e['before'],
-					);
-					if ( 'term' === $e['kind'] ) {
-						// Taxonomy χρειάζεται το restore — από resolve_terms.
-						$terms = SF_Targets::resolve_terms( $sel );
-						foreach ( $terms as $t ) {
-							if ( (int) $t['id'] === (int) $e['id'] ) {
-								$u['taxonomy'] = $t['taxonomy'];
-								break;
-							}
-						}
-						if ( ! isset( $u['taxonomy'] ) ) {
-							continue; // Δεν αναγνωρίστηκε ο όρος — skip, όχι corrupted restore.
-						}
-					}
-					$snap_units[] = $u;
+				if ( empty( $e['changed'] ) || ! empty( $e['error'] ) ) {
+					continue;
 				}
+				$u = array(
+					'kind'   => $e['kind'],
+					'id'     => $e['id'],
+					'field'  => $e['field'],
+					'before' => $e['before'],
+				);
+				if ( 'term' === $e['kind'] ) {
+					if ( ! isset( $term_tax[ (int) $e['id'] ] ) ) {
+						continue; // Δεν αναγνωρίστηκε ο όρος — skip, όχι corrupted restore.
+					}
+					$u['taxonomy'] = $term_tax[ (int) $e['id'] ];
+				} else {
+					$changed_products[ (int) $e['id'] ] = true;
+				}
+				$snap_units[] = $u;
 			}
 			if ( ! empty( $snap_units ) ) {
 				SF_Snapshots::append_units( $run_id, $snap_units );
 			}
 		}
 
-		// Entries: ελαφριά έκδοση για το wire (cap preview σε 5, batches
-		// προχωρούν στα 20 — αποδεκτό μέγεθος JSON).
+		// Noxpress cache cooperation (contract §6): ενημέρωση άλλων plugins
+		// (π.χ. Store Pulse) ότι άλλαξαν προϊόντα.
+		if ( ! empty( $changed_products ) ) {
+			do_action( 'noxpress_products_changed', array_keys( $changed_products ) );
+		}
+
+		// Entries για το wire: το preview στέλνει ό,τι ζητήθηκε (5 units)·
+		// dry run / apply στέλνουν μόνο δείγμα αλλαγμένων (SAMPLE).
+		$sample  = isset( $args['sample'] ) ? (int) $args['sample'] : 0;
 		$entries = array();
 		foreach ( $plan['entries'] as $e ) {
+			if ( $sample > 0 && ( count( $entries ) >= $sample || ( empty( $e['changed'] ) && empty( $e['error'] ) ) ) ) {
+				continue;
+			}
 			$entries[] = array(
-				'title'       => $e['title'],
-				'field'       => $e['field_label'],
-				'before'      => $e['before'],
-				'after'       => $e['after'],
-				'changed'     => (bool) $e['changed'],
-				'error'       => $e['error'] ?? '',
+				'title'   => $e['title'],
+				'field'   => __( $e['field_label'], 'smart-formatter' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid από το fields registry.
+				'before'  => $e['before'],
+				'after'   => $e['after'],
+				'changed' => (bool) $e['changed'],
+				'error'   => $e['error'] ?? '',
 			);
 		}
 
@@ -601,7 +648,28 @@ final class SF_Admin_UI {
 		}
 
 		$res = SF_Snapshots::restore( $run_id, $idx );
-		wp_send_json_success( $res );
+
+		if ( ! empty( $res['product_ids'] ) ) {
+			do_action( 'noxpress_products_changed', array_values( array_unique( array_map( 'intval', $res['product_ids'] ) ) ) );
+		}
+
+		$payload = array(
+			'restored' => (int) $res['restored'],
+			'skipped'  => (int) $res['skipped'],
+			'partial'  => (bool) $res['partial'],
+			'errors'   => array_values( array_map( 'strval', $res['errors'] ) ),
+		);
+
+		// Πραγματικό αποτέλεσμα: αποτυχία όταν ΤΙΠΟΤΑ δεν επαναφέρθηκε
+		// (snapshot άγνωστο ή όλα τα units απέτυχαν/παραλείφθηκαν).
+		if ( ! $res['found'] || ( 0 === $payload['restored'] && ( $payload['skipped'] > 0 || ! empty( $payload['errors'] ) ) ) ) {
+			$payload['message'] = ! empty( $payload['errors'] )
+				? implode( ' ', $payload['errors'] )
+				: __( 'Τίποτα δεν επαναφέρθηκε.', 'smart-formatter' );
+			wp_send_json_error( $payload );
+		}
+
+		wp_send_json_success( $payload );
 	}
 
 	public static function ajax_snapshot_delete(): void {
@@ -872,15 +940,24 @@ final class SF_Admin_UI {
 			}
 		}
 
-		// ---- Snapshots history (payload passthrough — το load() του
-		//      SF_Snapshots επανα-κάνει strict validation στο read) ----
+		// ---- Snapshots history — UNTRUSTED: ένα Restore θα το γράψει σε
+		//      προϊόντα. Strict validation + wp_kses_post (SF_Snapshots). ----
 		if ( isset( $opts[ SF_Snapshots::OPT_HISTORY ] ) ) {
-			$raw = $opts[ SF_Snapshots::OPT_HISTORY ];
-			if ( is_string( $raw ) && ( '' === $raw || null !== json_decode( $raw, true ) ) ) {
-				if ( '' === $raw ) {
-					delete_option( SF_Snapshots::OPT_HISTORY );
-				} else {
-					update_option( SF_Snapshots::OPT_HISTORY, $raw, false );
+			$raw   = $opts[ SF_Snapshots::OPT_HISTORY ];
+			$clean = ( is_string( $raw ) && '' !== $raw ) ? SF_Snapshots::sanitize_import( $raw ) : null;
+			if ( '' === $raw ) {
+				delete_option( SF_Snapshots::OPT_HISTORY );
+			} elseif ( null !== $clean ) {
+				update_option( SF_Snapshots::OPT_HISTORY, $clean['json'], false );
+				if ( $clean['dropped'] > 0 ) {
+					$notes[] = array(
+						'type' => 'warning',
+						'text' => sprintf(
+							/* translators: %d: πλήθος units */
+							__( 'Παραλείφθηκαν %d units ιστορικού (άκυρα ή για προϊόντα/όρους που δεν υπάρχουν).', 'smart-formatter' ),
+							$clean['dropped']
+						),
+					);
 				}
 			} else {
 				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρο blob ιστορικού snapshots.', 'smart-formatter' ) );
@@ -940,8 +1017,9 @@ final class SF_Admin_UI {
 				$decoded = json_decode( $raw, true );
 				if ( is_array( $decoded ) ) {
 					foreach ( $decoded as $name => $p ) {
-						if ( is_string( $name ) && is_array( $p ) ) {
-							$prof[ $name ] = array(
+						// Αριθμητικά ονόματα («2024») γίνονται int keys στο json_decode.
+						if ( ( is_string( $name ) || is_int( $name ) ) && is_array( $p ) ) {
+							$prof[ (string) $name ] = array(
 								'rules'  => self::valid_rules( is_array( $p['rules'] ?? null ) ? $p['rules'] : array() ),
 								'fields' => SF_Targets::valid_fields( is_array( $p['fields'] ?? null ) ? $p['fields'] : array() ),
 							);
@@ -953,7 +1031,7 @@ final class SF_Admin_UI {
 		return $prof;
 	}
 
-	/** Αποθήκευση profile (AΡΙ endpoints αργότερα — και για AJAX). */
+	/** Αποθήκευση profile (χρησιμοποιείται από το AJAX endpoint). */
 	public static function save_profile( string $name, array $rules, array $fields ): bool {
 		$name = trim( sanitize_text_field( $name ) );
 		if ( '' === $name || mb_strlen( $name ) > 60 ) {
@@ -986,12 +1064,11 @@ final class SF_Admin_UI {
 
 	private static function footer(): void {
 		?>
-		<hr style="margin-top:24px;" />
 		<p class="sf-footer">
 			<?php
 			printf(
 				/* translators: %s: όνομα δημιουργού */
-				esc_html__( 'Made with <3 by %s', 'smart-formatter' ),
+				esc_html__( 'Made with ❤ by %s', 'smart-formatter' ),
 				'<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a>'
 			);
 			?>
@@ -1001,137 +1078,14 @@ final class SF_Admin_UI {
 			<?php esc_html_e( 'More plugins at', 'smart-formatter' ); ?>
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
-		<p class="sf-footer" style="margin-top:10px;">
-			<a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"
-				style="display:inline-block;background:#6d4aff;color:#fff;padding:6px 18px;border-radius:999px;text-decoration:none;font-weight:600;">
+		<p class="sf-footer-cta">
+			<a class="sf-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
 				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'smart-formatter' ); ?>
+			</a>
+			<a class="sf-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>">
+				<?php esc_html_e( 'Noxpress Dashboard', 'smart-formatter' ); ?>
 			</a>
 		</p>
 		<?php
-	}
-}
-
-/**
- * SF_Lang — Domain dict + gettext filter (pattern RS_Lang, compact).
- *
- * Το rs_lang ΔΙΑΒΑΖΕΤΑΙ μόνο (Bible §9): 'el'|'en'|'' (auto). Όταν
- * el/auto-ελληνικά → τα Greek msgids (πηγή) περνούν ως έχουν. Όταν
- * 'en' (ή auto σε αγγλικό WP) → το dict δίνει EN όπου υπάρχει entry.
- */
-final class SF_Lang {
-
-	private static $dict = array(
-		'Smart Formatter'                                        => 'Smart Formatter',
-		'Μαζική μορφοποίηση κειμένων προϊόντων. Το κείμενο σε HTML tags, attributes, shortcodes, code/pre blocks και entities δεν αγγίζεται ποτέ.' => 'Bulk-format product texts. Text inside HTML tags, attributes, shortcodes, code/pre blocks and entities is never touched.',
-		'Όλα τα δημοσιευμένα προϊόντα'                            => 'All published products',
-		'Ξεχωριστά προϊόντα'                                     => 'Specific products',
-		'Κατηγορίες'                                              => 'Categories',
-		'Ετικέτες'                                                => 'Tags',
-		'Πεδία'                                                   => 'Fields',
-		'Σύντομη περιγραφή'                                       => 'Short description',
-		'Αναλυτική περιγραφή'                                     => 'Long description',
-		'Σημείωση αγοράς (purchase note)'                         => 'Purchase note',
-		'Ιδιότητες (custom μόνο)'                                 => 'Attributes (custom only)',
-		'Περιγραφές κατηγοριών/ετικετών'                          => 'Category/tag descriptions',
-		'Κανόνες'                                                  => 'Rules',
-		'Πλήρης αφαίρεση μορφοποίησης'                            => 'Strip all formatting',
-		'Κανονικοποίηση κενών'                                    => 'Normalize whitespace',
-		'Περιεχόμενο εισαγωγικών italic'                         => 'Quoted text italic',
-		'Περιεχόμενο εισαγωγικών bold'                           => 'Quoted text bold',
-		'Περιεχόμενο παρενθέσεων italic'                        => 'Parentheses italic',
-		'Αριθμοί bold'                                           => 'Numbers bold',
-		'Όλο το κείμενο italic'                                  => 'All text italic',
-		'Όλο το κείμενο bold'                                    => 'All text bold',
-		'Προφίλ'                                                  => 'Profiles',
-		'Εξαιρέσεις φράσεων (εκτός από τα global)'               => 'Phrase exclusions (besides global)',
-		'Εκτέλεση'                                                => 'Run',
-		'Preview (πρώτα 5)'                                       => 'Preview (first 5)',
-		'Dry Run (καταμέτρηση)'                                   => 'Dry Run (count only)',
-		'Εφαρμογή'                                                => 'Apply',
-		'Αποτελέσματα'                                            => 'Results',
-		'Ιστορικό & Undo'                                         => 'History & Undo',
-		'Ολοκληρώθηκε'                                            => 'Completed',
-		'Σε εξέλιξη'                                              => 'Running',
-		'Δες μονάδες'                                             => 'View units',
-		'Επαναφορά όλων'                                          => 'Restore all',
-		'Διαγραφή'                                                => 'Delete',
-		'SF Ρυθμίσεις'                                            => 'SF Settings',
-		'Καθολικές εξαιρέσεις φράσεων'                            => 'Global phrase exclusions',
-		'Αποθήκευση ρυθμίσεων'                                    => 'Save settings',
-		'Οι ρυθμίσεις αποθηκεύτηκαν.'                              => 'Settings saved.',
-		'Η εισαγωγή ολοκληρώθηκε.'                                => 'Import completed.',
-		'1. Στόχος'                                               => '1. Target',
-		'Αναζήτηση προϊόντος…'                                    => 'Search products…',
-		'Ctrl/Cmd + click για πολλαπλή επιλογή.'                   => 'Ctrl/Cmd + click for multiple selection.',
-		'Επιλογή όρων (πολλαπλή).'                                 => 'Select terms (multiple).',
-		'2. Πεδία'                                                 => '2. Fields',
-		'Σημείωση: στις ιδιότητες μορφοποιούνται μόνο τα custom (όχι τα global) — τα global είναι κοινά όροι σε όλο το κατάστημα.' => 'Note: attributes — only custom ones are formatted (not global); global attributes are shared terms across the whole store.',
-		'3. Κανόνες'                                               => '3. Rules',
-		'Η αφαίρεση μορφοποίησης τρέχει πρώτη· τα «όλο bold/italic» τελευταία — κάθε συνδυασμός δίνει έγκυρο HTML.' => 'Stripping runs first; "all bold/italic" rules run last — every combination yields valid HTML.',
-		'4. Προφίλ'                                                => '4. Profiles',
-		'— Φόρτωση προφίλ —'                                      => '— Load profile —',
-		'Όνομα νέου προφίλ'                                        => 'New profile name',
-		'Αποθήκευση κανόνων/πεδίων ως προφίλ'                       => 'Save rules/fields as profile',
-		'Διαγραφή προφίλ'                                          => 'Delete profile',
-		'Δεν υπάρχουν αποθηκευμένα προφίλ.'                         => 'No saved profiles yet.',
-		'Μία φράση ανά γραμμή (προαιρετικό)'                        => 'One phrase per line (optional)',
-		'6. Εκτέλεση'                                              => '6. Run',
-		'Στοιχείο'                                                 => 'Item',
-		'Πεδίο'                                                    => 'Field',
-		'Πριν'                                                     => 'Before',
-		'Μετά'                                                     => 'After',
-		'Run'                                                      => 'Run',
-		'Ημερομηνία'                                               => 'Date',
-		'Κατάσταση'                                                => 'Status',
-		'Αλλαγές'                                                  => 'Changes',
-		'Ενέργειες'                                                => 'Actions',
-		'Δεν υπάρχουν runs ακόμη.'                                 => 'No runs yet.',
-		'περικομμένο'                                              => 'truncated',
-		'Είσαι σίγουρος; Θα μορφοποιηθούν τα επιλεγμένα κείμενα — δημιουργείται snapshot για undo.' => 'Are you sure? The selected texts will be formatted — a snapshot is created for undo.',
-		'Επεξεργασία…'                                             => 'Working…',
-		'Ολοκληρώθηκε!'                                            => 'Done!',
-		'Απέτυχε — δοκίμασε ξανά.'                                  => 'Failed — try again.',
-		'Καμία αλλαγή δεν εντοπίστηκε.'                             => 'No changes detected.',
-		'Διαγραφή του snapshot; Δεν επηρεάζει τα προϊόντα — χάνεται μόνο η δυνατότητα undo.' => 'Delete snapshot? Products are not affected — only the undo opportunity is lost.',
-		'Διάλεξε τουλάχιστον έναν κανόνα και ένα πεδίο.'           => 'Pick at least one rule and one field.',
-		'Μη έγκυρο run id.'                                        => 'Invalid run id.',
-		'Άγνωστη φάση.'                                            => 'Unknown phase.',
-		'Δεν έχεις δικαίωμα.'                                       => 'You do not have permission.',
-		'Άγνωστος τύπος αναζήτησης.'                               => 'Unknown search type.',
-		'Δώσε όνομα προφίλ.'                                        => 'Give a profile name.',
-		'Η αποθήκευση απέτυχε.'                                     => 'Saving failed.',
-		'Το προφίλ δεν βρέθηκε.'                                    => 'Profile not found.',
-		'Το snapshot δεν βρέθηκε.'                                  => 'Snapshot not found.',
-		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.'           => 'You do not have access to this page.',
-		'Smart Formatter — Ρυθμίσεις'                              => 'Smart Formatter — Settings',
-		'Backup & Επαναφορά'                                       => 'Backup & Restore',
-		'Εισαγωγή state (JSON)'                                    => 'Import state (JSON)',
-		'Εξαγωγή state (JSON)'                                      => 'Export state (JSON)',
-		'Made with <3 by %s'                                       => 'Made with <3 by %s',
-		'More plugins at'                                          => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                           => '☕ Support the project on Ko-fi',
-		'Μη έγκυρο blob προφίλ.'                                   => 'Invalid profiles blob.',
-		'Μη έγκυρο blob εξαιρέσεων.'                               => 'Invalid exclusions blob.',
-		'Μη έγκυρο blob ιστορικού snapshots.'                      => 'Invalid snapshots history blob.',
-		'Δεν επιλέχθηκε αρχείο JSON.'                              => 'No JSON file selected.',
-		'Το αρχείο δεν είναι έγκυρο JSON.'                         => 'The file is not valid JSON.',
-		'Μη έγκυρο αρχείο backup (λείπουν τα options).'            => 'Invalid backup file (options missing).',
-		'Η εισαγωγή ολοκληρώθηκε ΜΕΡΙΚΩΣ — τα άκυρα τμήματα ΔΕΝ αντικαταστάθηκαν.' => 'Import completed PARTIALLY — invalid sections were NOT replaced.',
-	);
-
-	public static function filter( $translation, $text, $domain ) {
-		if ( 'smart-formatter' === $domain && isset( self::$dict[ $text ] ) ) {
-			$lang = get_user_meta( get_current_user_id(), 'rs_lang', true );
-			if ( 'en' === $lang ) {
-				return self::$dict[ $text ];
-			}
-			if ( '' === $lang || 'auto' === $lang ) {
-				$locale = get_user_locale();
-				if ( ! str_starts_with( $locale, 'el' ) && isset( self::$dict[ $text ] ) ) {
-					return self::$dict[ $text ];
-				}
-			}
-		}
-		return $translation;
 	}
 }

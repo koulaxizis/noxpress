@@ -1,31 +1,28 @@
 <?php
 /**
  * SP_Dashboard — Το rendering: full dashboard, Quick View widget,
- * κάρτες, πίνακες, footer. Όλα τα νούμερα έρχονται από SP_Data
- * (Part 3) — εδώ δεν υπάρχει κανένας υπολογισμός, μόνο παρουσίαση.
+ * κάρτες, πίνακες, footer. Όλα τα νούμερα έρχονται από SP_Data —
+ * εδώ δεν υπάρχει κανένας υπολογισμός, μόνο παρουσίαση.
  *
  * Δομή σελίδας (full dashboard):
- *   [Header: τίτλος + active period chips]
+ *   [Header: τίτλος (+ notice αν δεν έχει επιλεγεί εκδότης)]
  *   [Grid 4 στηλών: εκκρεμείς | παλιές εκκρεμείς | πελάτες | AOV]
  *   [Grid: εξυπηρετημένες | επιστροφές | ακυρωμένες]
  *   [Money section: κέρδος εκδότη (share + καθαρό) | οφειλές προς άλλους
  *    + πίνακας ανά δικαιούχο | placeholder χωρίς Revenue Splitter]
  *   [Στοκ: πίνακες χαμηλού/εξαντλημένου]
  *   [Top sellers: πίνακας 10 καλύτερων]
- *   [Footer: Made with ❤ / glarolykoi.net / noxpress.tech]
+ *   [Footer: Made with ❤ / glarolykoi.net / noxpress.tech + Ko-fi]
  *
- * Render helpers: οι κάρτες είναι €-agnostic — η ίδια sp-card()
- * δεν ξέρει αν δείχνει κομμάτια ή ευρώ. Το formatting γίνεται από
- * sp_money()/sp_int() πριν την κλήση.
+ * Render helpers: οι κάρτες είναι €-agnostic — η ίδια card() δεν
+ * ξέρει αν δείχνει κομμάτια ή ευρώ. Το formatting γίνεται από
+ * sp_money()/number_format_i18n() πριν την κλήση· το escaping γίνεται
+ * ΜΙΑ φορά, μέσα στο card().
  */
 
 defined( 'ABSPATH' ) || exit;
 
 final class SP_Dashboard {
-
-	public static function init(): void {
-		// Δεν χρειάζεται hook — καλείται στατικά από SP_Admin.
-	}
 
 	/* =====================================================================
 	 * Full dashboard page
@@ -65,14 +62,11 @@ final class SP_Dashboard {
 				<div class="notice notice-warning">
 					<p>
 						<?php
-						echo wp_kses_post(
-							sprintf(
-								/* translators: %s: settings URL */
-								'%s <a href="%s">%s</a>',
-								esc_html__( 'Δεν έχεις επιλέξει εκδότη — πήγαινε στις Ρυθμίσεις.', 'store-pulse' ),
-								esc_url( SP_Admin::settings_url() ),
-								esc_html__( 'Ρυθμίσεις', 'store-pulse' )
-							)
+						printf(
+							'%s <a href="%s">%s</a>',
+							esc_html__( 'Δεν έχεις επιλέξει εκδότη — πήγαινε στις Ρυθμίσεις.', 'store-pulse' ),
+							esc_url( SP_Admin::settings_url() ),
+							esc_html__( 'Ρυθμίσεις', 'store-pulse' )
 						);
 						?>
 					</p>
@@ -119,11 +113,7 @@ final class SP_Dashboard {
 					),
 					number_format_i18n( $done['count'] ),
 					'',
-					sprintf(
-						'%s → %s',
-						esc_html( SP_Lang::fmt_date( $r_orders[0] ) ),
-						esc_html( SP_Lang::fmt_date( $r_orders[1] ) )
-					)
+					SP_Lang::fmt_date( $r_orders[0] ) . ' → ' . SP_Lang::fmt_date( $r_orders[1] )
 				);
 				self::card(
 					'refunds',
@@ -131,16 +121,16 @@ final class SP_Dashboard {
 					number_format_i18n( $refunds['count'] ),
 					( $refunds['count'] > 0 ) ? 'sp-warn' : '',
 					sp_money( $refunds['amount'] ) . ' · '
-						. esc_html( SP_Lang::fmt_date( $r_refunds[0] ) ) . ' → '
-						. esc_html( SP_Lang::fmt_date( $r_refunds[1] ) )
+						. SP_Lang::fmt_date( $r_refunds[0] ) . ' → '
+						. SP_Lang::fmt_date( $r_refunds[1] )
 				);
 				self::card(
 					'cancelled',
 					__( 'Ακυρωμένες', 'store-pulse' ),
 					number_format_i18n( $cancels['count'] ),
 					( $cancels['count'] > 0 ) ? 'sp-warn' : '',
-					esc_html( SP_Lang::fmt_date( $r_cancel[0] ) ) . ' → '
-						. esc_html( SP_Lang::fmt_date( $r_cancel[1] ) )
+					SP_Lang::fmt_date( $r_cancel[0] ) . ' → '
+						. SP_Lang::fmt_date( $r_cancel[1] )
 				);
 				?>
 			</div>
@@ -164,7 +154,13 @@ final class SP_Dashboard {
 						<?php esc_html_e( 'Κέρδος εκδότη', 'store-pulse' ); ?>
 					</p>
 					<p>
-						<?php esc_html_e( 'Ο εκδότης δεν είναι γνωστός δικαιούχος του Revenue Splitter.', 'store-pulse' ); ?>
+						<?php
+						if ( '' === $publisher ) {
+							esc_html_e( 'Δεν έχεις επιλέξει εκδότη — πήγαινε στις Ρυθμίσεις.', 'store-pulse' );
+						} else {
+							esc_html_e( 'Ο εκδότης δεν είναι γνωστός δικαιούχος του Revenue Splitter.', 'store-pulse' );
+						}
+						?>
 					</p>
 				</div>
 
@@ -181,16 +177,16 @@ final class SP_Dashboard {
 						),
 						sp_money( $money['share'] ),
 						'',
-						esc_html( SP_Lang::fmt_date( $r_money[0] ) ) . ' → '
-							. esc_html( SP_Lang::fmt_date( $r_money[1] ) )
+						SP_Lang::fmt_date( $r_money[0] ) . ' → '
+							. SP_Lang::fmt_date( $r_money[1] )
 					);
 					self::card(
 						'publisher_net',
 						__( 'Καθαρό (μετά κρατήσεων)', 'store-pulse' ),
 						sp_money( $money['net'] ),
 						'',
-						esc_html( SP_Lang::fmt_date( $r_money[0] ) ) . ' → '
-							. esc_html( SP_Lang::fmt_date( $r_money[1] ) )
+						SP_Lang::fmt_date( $r_money[0] ) . ' → '
+							. SP_Lang::fmt_date( $r_money[1] )
 					);
 					self::card(
 						'others',
@@ -256,7 +252,7 @@ final class SP_Dashboard {
 						<?php foreach ( $stock['low']['items'] as $item ) : ?>
 							<tr>
 								<td>
-									<a href="<?php echo esc_url( get_edit_post_link( $item['id'] ) ); ?>">
+									<a href="<?php echo esc_url( (string) get_edit_post_link( $item['id'] ) ); ?>">
 										<?php echo esc_html( $item['title'] ); ?>
 									</a>
 								</td>
@@ -282,7 +278,7 @@ final class SP_Dashboard {
 						<?php foreach ( $stock['out']['items'] as $item ) : ?>
 							<tr>
 								<td>
-									<a href="<?php echo esc_url( get_edit_post_link( $item['id'] ) ); ?>">
+									<a href="<?php echo esc_url( (string) get_edit_post_link( $item['id'] ) ); ?>">
 										<?php echo esc_html( $item['title'] ); ?>
 									</a>
 								</td>
@@ -298,10 +294,12 @@ final class SP_Dashboard {
 			<!-- ================= Top sellers ================= -->
 			<h2 class="sp-h2">
 				<?php
-				printf(
-					/* translators: %s: period label */
-					__( 'Καλύτερες πωλήσεις (%s)', 'store-pulse' ),
-					__( SP_Admin::PRESET_LABELS[ $p_orders ], 'store-pulse' )
+				echo esc_html(
+					sprintf(
+						/* translators: %s: period label */
+						__( 'Καλύτερες πωλήσεις (%s)', 'store-pulse' ),
+						__( SP_Admin::PRESET_LABELS[ $p_orders ], 'store-pulse' ) // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgids στο SP_Lang.
+					)
 				);
 				?>
 			</h2>
@@ -318,7 +316,7 @@ final class SP_Dashboard {
 						<?php foreach ( $done['products'] as $row ) : ?>
 							<tr>
 								<td>
-									<a href="<?php echo esc_url( get_edit_post_link( $row['id'] ) ); ?>">
+									<a href="<?php echo esc_url( (string) get_edit_post_link( $row['id'] ) ); ?>">
 										<?php echo esc_html( $row['title'] ); ?>
 									</a>
 								</td>
@@ -343,7 +341,7 @@ final class SP_Dashboard {
 
 	public static function render_widget(): void {
 
-		$cards   = SP_Data::safe_quick_cards();
+		$cards    = SP_Data::safe_quick_cards();
 		$p_orders = SP_Data::safe_preset( 'sp_default_period_orders', '7d' );
 		$p_money  = SP_Data::safe_preset( 'sp_default_period_money', 'month' );
 
@@ -409,18 +407,17 @@ final class SP_Dashboard {
 		}
 
 		if ( in_array( 'publisher', $cards, true ) ) {
-			if ( null !== $money && $money['publisher_known'] ) {
-				self::widget_row(
-					__( 'Κέρδος εκδότη', 'store-pulse' ),
-					sp_money( $money['net'] )
-				);
+			if ( null === $money ) {
+				$pub_value = __( 'Χρειάζεται το Revenue Splitter', 'store-pulse' );
+			} elseif ( ! $money['publisher_known'] ) {
+				$pub_value = ( '' === $publisher )
+					? __( 'Δεν έχει επιλεγεί εκδότης', 'store-pulse' )
+					: __( 'Άγνωστος εκδότης', 'store-pulse' );
 			} else {
-				self::widget_row(
-					__( 'Κέρδος εκδότη', 'store-pulse' ),
-					__( 'Χρειάζεται το Revenue Splitter', 'store-pulse' ),
-					false
-				);
+				$pub_value = sp_money( $money['net'] );
 			}
+
+			self::widget_row( __( 'Κέρδος εκδότη', 'store-pulse' ), $pub_value );
 		}
 
 		if ( in_array( 'others', $cards, true ) ) {
@@ -449,7 +446,7 @@ final class SP_Dashboard {
 		);
 		echo ' <span class="sp-muted"> · </span> ';
 		printf(
-			'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+			'<a class="sp-widget-kofi" href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
 			'https://ko-fi.com/koulaxizis',
 			esc_html__( '☕ Ko-fi', 'store-pulse' )
 		);
@@ -459,39 +456,32 @@ final class SP_Dashboard {
 	}
 
 	/* =====================================================================
-	 * Footer (κοινό για dashboard)
+	 * Footer (κοινό pattern Noxpress — ίδιο markup με το RS footer:
+	 * credits + Ko-fi pill + Noxpress Dashboard link)
 	 * =================================================================== */
 
 	private static function render_footer(): void {
 		?>
-		<hr class="sp-hr" />
 		<p class="sp-footer">
 			<?php
 			printf(
-				/* translators: %s: author name */
-				'Made with <span aria-label="heart">❤</span> by %s',
-				'Christos Koulaxizis'
+				/* translators: %s: όνομα δημιουργού (link) */
+				esc_html__( 'Made with ❤ by %s', 'store-pulse' ),
+				'<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a>'
 			);
 			?>
-			<br />
-			<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">koulaxizis.gr</a>
-			&middot;
-			<?php esc_html_e( 'Part of glarolykoi.net', 'store-pulse' ); ?>
-			&middot;
-			<?php
-			echo wp_kses_post(
-				sprintf(
-					'%s <a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-					esc_html__( 'More plugins at', 'store-pulse' ),
-					'https://noxpress.tech',
-					'noxpress.tech'
-				)
-			);
-			?>
+			<span class="sp-muted"> · </span>
+			<a href="https://glarolykoi.net" target="_blank" rel="noopener noreferrer">glarolykoi.net</a>
+			<span class="sp-muted"> · </span>
+			<?php esc_html_e( 'More plugins at', 'store-pulse' ); ?>
+			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
-		<p class="sp-footer">
-			<a class="sp-footer-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( 'Στήριξε την ανάπτυξη στο Ko-Fi', 'store-pulse' ); ?>
+		<p class="sp-footer-cta">
+			<a class="sp-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'store-pulse' ); ?>
+			</a>
+			<a class="sp-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=' . SP_Admin::SLUG_MENU ) ); ?>">
+				<?php esc_html_e( 'Noxpress Dashboard', 'store-pulse' ); ?>
 			</a>
 		</p>
 		<?php
