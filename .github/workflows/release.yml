@@ -8,7 +8,8 @@
 #  - χειροκίνητα από Actions → «Release plugin» → Run workflow.
 #
 #   rs → revenue-splitter   sp → store-pulse
-#   sf → smart-formatter    nm → data-migrator (μόνο με tag)
+#   sf → smart-formatter    lf → loop-fixer
+#   nm → data-migrator (μόνο με tag)
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
@@ -31,7 +32,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf'
+  AUTO: 'rs sp sf lf'
 
 jobs:
   release:
@@ -50,6 +51,7 @@ jobs:
               rs) echo revenue-splitter ;;
               sp) echo store-pulse ;;
               sf) echo smart-formatter ;;
+              lf) echo loop-fixer ;;
               nm) echo data-migrator ;;
               *) return 1 ;;
             esac
@@ -59,6 +61,7 @@ jobs:
               rs) echo "Revenue Splitter" ;;
               sp) echo "Store Pulse" ;;
               sf) echo "Smart Formatter" ;;
+              lf) echo "Loop Fixer" ;;
               nm) echo "Data Migrator" ;;
             esac
           }

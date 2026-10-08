@@ -1,0 +1,366 @@
+/**
+ * Loop Fixer — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors lf-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.lf-wrap {
+	--lf-bg: #101218;
+	--lf-panel: #14161d;
+	--lf-panel-2: #1d2029;
+	--lf-input: #1a1d26;
+	--lf-border: #2e3240;
+	--lf-border-input: #3a3f52;
+	--lf-row-border: #23262f;
+	--lf-stripe: #181b23;
+	--lf-hover: #1e212c;
+	--lf-text: #eae8fa;
+	--lf-heading: #f6f4ff;
+	--lf-muted: #b7b2d6;
+	--lf-link: #beb1ff;
+	--lf-link-hover: #d4c9ff;
+	--lf-accent: #6d4aff;
+	--lf-accent-hover: #8263ff;
+	--lf-warn: #f5c97e;
+	--lf-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.lf-wrap {
+	color-scheme: dark;
+	background: var(--lf-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--lf-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+	max-width: 1180px;
+}
+
+.lf-wrap h1,
+.lf-wrap h2 {
+	color: var(--lf-heading);
+}
+
+.lf-wrap a { color: var(--lf-link); }
+.lf-wrap a:hover { color: var(--lf-link-hover); }
+
+.lf-wrap .lf-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--lf-muted);
+	border-bottom: 1px solid var(--lf-border);
+	padding-bottom: 6px;
+}
+
+.lf-wrap .description,
+.lf-wrap p.description,
+.lf-wrap .lf-hint {
+	color: var(--lf-muted) !important;
+}
+
+.lf-zone {
+	background: var(--lf-panel);
+	border: 1px solid var(--lf-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.lf-wrap input[type="text"],
+.lf-wrap input[type="url"],
+.lf-wrap input[type="number"],
+.lf-wrap textarea,
+.lf-wrap select {
+	background-color: var(--lf-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--lf-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.lf-wrap input::placeholder,
+.lf-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.lf-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.lf-wrap input[type="file"] {
+	color: var(--lf-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.lf-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.lf-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.lf-wrap input[type="checkbox"],
+.lf-wrap input[type="radio"] {
+	accent-color: var(--lf-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.lf-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.lf-wrap .button:hover:not(:disabled) {
+	border-color: var(--lf-accent) !important;
+	color: #ffffff !important;
+}
+
+.lf-wrap .button-primary {
+	background: var(--lf-accent) !important;
+	border-color: var(--lf-accent) !important;
+	color: #ffffff !important;
+}
+
+.lf-wrap .button-primary:hover:not(:disabled) {
+	background: var(--lf-accent-hover) !important;
+}
+
+.lf-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.lf-submit { margin-top: 20px; }
+.lf-inline-form { display: inline; margin-right: 10px; }
+.lf-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.lf-table,
+table.widefat.lf-table {
+	background: var(--lf-panel) !important;
+	border: 1px solid var(--lf-border) !important;
+	border-radius: 6px;
+	color: var(--lf-text) !important;
+	margin-top: 14px !important;
+}
+
+.lf-table thead th,
+.lf-table thead td {
+	background: var(--lf-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.lf-table tbody td,
+.lf-table tbody th {
+	background: var(--lf-panel) !important;
+	color: var(--lf-text) !important;
+	border-bottom: 1px solid var(--lf-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.lf-table tbody tr:nth-child(2n) td,
+.lf-table tbody tr:nth-child(2n) th {
+	background: var(--lf-stripe) !important;
+}
+
+.lf-table tbody tr:hover td,
+.lf-table tbody tr:hover th {
+	background: var(--lf-hover) !important;
+}
+
+.lf-table td,
+.lf-table th {
+	padding: 12px 14px;
+}
+
+.lf-table td code {
+	background: transparent !important;
+	color: var(--lf-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.lf-table .lf-empty {
+	color: var(--lf-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.lf-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.lf-footer a { color: #beb1ff; text-decoration: none; }
+.lf-footer a:hover { text-decoration: underline; }
+
+.lf-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.lf-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.lf-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.lf-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.lf-muted { color: var(--lf-muted) !important; }
+.lf-warn { color: var(--lf-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.lf-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Loop Fixer additions ===== */
+.lf-wrap .lf-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--lf-heading);
+}
+
+.lf-status p { margin: 0 0 8px; }
+.lf-status p:last-child { margin-bottom: 0; }
+.lf-status code,
+.lf-wrap .description code,
+.lf-wrap .lf-hint code {
+	background: var(--lf-panel-2);
+	color: var(--lf-muted);
+	border: 1px solid var(--lf-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.lf-suspended { margin: 8px 0 0; }
+.lf-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.lf-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--lf-border);
+	background: var(--lf-panel-2);
+	color: var(--lf-text);
+	white-space: nowrap;
+}
+.lf-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.lf-badge--muted { color: var(--lf-muted); }
+.lf-badge--warn { border-color: #6b5a33; color: var(--lf-warn); }
+.lf-badge--danger { border-color: #6b3a3a; color: var(--lf-danger); }
+
+/* Area fieldsets. */
+.lf-area {
+	background: var(--lf-panel);
+	border: 1px solid var(--lf-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.lf-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--lf-heading);
+}
+.lf-row { margin: 4px 0 8px; }
+
+.lf-details > summary {
+	cursor: pointer;
+	color: var(--lf-link);
+	margin: 4px 0;
+}
+.lf-details[open] > summary { margin-bottom: 12px; }
+
+.lf-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.lf-wrap .lf-label {
+	display: block;
+	font-weight: 600;
+	color: var(--lf-heading);
+	margin: 8px 0 6px;
+}
+.lf-grid .lf-label:first-child { margin-top: 0; }
+
+.lf-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.lf-field > span:first-child {
+	min-width: 150px;
+	color: var(--lf-text);
+}
+.lf-wrap .lf-color { width: 96px; font-family: monospace; }
+.lf-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--lf-border-input);
+}
+
+.lf-wrap .lf-hint { display: block; font-size: 12px; margin-top: 4px; }
+.lf-wrap td .lf-hint { display: inline; }
+.lf-table td.lf-warn { color: var(--lf-warn) !important; }

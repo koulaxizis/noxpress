@@ -440,6 +440,27 @@ footer a:hover { text-decoration: underline; }
 		</div>
 	</article>
 
+	<article class="card" id="loop-fixer">
+		<h2><a href="#loop-fixer">Loop Fixer</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="lf_desc">Brings back the price, the add-to-cart button and the rating in product cards of themes that draw their own cards — no child theme, no theme file changes.</p>
+		<ul>
+			<li data-i18n="lf_li1">Areas: shop / categories / search, related products, up-sells, cross-sells and any theme file with its own product query</li>
+			<li data-i18n="lf_li2">Inject: adds the missing parts inside the theme's own card, keeping its design</li>
+			<li data-i18n="lf_li3">Replace: draws the area with WooCommerce's standard template — also fixes broken theme loops</li>
+			<li data-i18n="lf_li4">Uses WooCommerce's own loop templates: sale prices, taxes, variable / external / out-of-stock products and AJAX add to cart just work</li>
+			<li data-i18n="lf_li5">Theme detector and page probe: see which files draw cards, what they miss and how many cards were fixed</li>
+			<li data-i18n="lf_li6">Text fixes for shop pages (e.g. a fixed «Shop» heading becomes the right page title) and per-area styling</li>
+			<li data-i18n="lf_li7">Safe by design: off until enabled, test mode for shop managers, per-theme settings, automatic pause after theme updates, LF_DISABLE emergency switch</li>
+			<li data-i18n="lf_li8">Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lf-1.0.0/loop-fixer.zip" rel="nofollow noopener" data-i18n="lf_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/loop-fixer" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
@@ -525,6 +546,16 @@ footer a:hover { text-decoration: underline; }
 		sf_li9: 'Profiles for rule / field combinations, plus JSON backup &amp; restore with strict validation',
 		sf_li10: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
 		sf_download: 'Download v1.1.0 (.zip)',
+		lf_desc: 'Brings back the price, the add-to-cart button and the rating in product cards of themes that draw their own cards — no child theme, no theme file changes.',
+		lf_li1: 'Areas: shop / categories / search, related products, up-sells, cross-sells and any theme file with its own product query',
+		lf_li2: 'Inject: adds the missing parts inside the theme\'s own card, keeping its design',
+		lf_li3: 'Replace: draws the area with WooCommerce\'s standard template — also fixes broken theme loops',
+		lf_li4: 'Uses WooCommerce\'s own loop templates: sale prices, taxes, variable / external / out-of-stock products and AJAX add to cart just work',
+		lf_li5: 'Theme detector and page probe: see which files draw cards, what they miss and how many cards were fixed',
+		lf_li6: 'Text fixes for shop pages (e.g. a fixed «Shop» heading becomes the right page title) and per-area styling',
+		lf_li7: 'Safe by design: off until enabled, test mode for shop managers, per-theme settings, automatic pause after theme updates, LF_DISABLE emergency switch',
+		lf_li8: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
+		lf_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Your download is ready',
 		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
@@ -590,6 +621,16 @@ footer a:hover { text-decoration: underline; }
 		sf_li9: 'Profiles για συνδυασμούς κανόνων / πεδίων, και backup &amp; restore σε JSON με αυστηρό έλεγχο',
 		sf_li10: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
 		sf_download: 'Λήψη v1.1.0 (.zip)',
+		lf_desc: 'Επαναφέρει την τιμή, το κουμπί καλαθιού και τη βαθμολογία στις κάρτες προϊόντων θεμάτων που ζωγραφίζουν δικές τους κάρτες — χωρίς child theme, χωρίς αλλαγές σε αρχεία του θέματος.',
+		lf_li1: 'Περιοχές: κατάστημα / κατηγορίες / αναζήτηση, σχετικά προϊόντα, up-sells, cross-sells και κάθε αρχείο θέματος με δικό του βρόχο προϊόντων',
+		lf_li2: 'Έγχυση: προσθέτει ό,τι λείπει μέσα στην κάρτα του θέματος, κρατώντας τον σχεδιασμό της',
+		lf_li3: 'Αντικατάσταση: σχεδιάζει την περιοχή με το κανονικό πρότυπο του WooCommerce — διορθώνει και σπασμένους βρόχους του θέματος',
+		lf_li4: 'Χρησιμοποιεί τα πρότυπα του ίδιου του WooCommerce: εκπτώσεις, φόροι, μεταβλητά / εξωτερικά / εξαντλημένα προϊόντα και AJAX καλάθι δουλεύουν κανονικά',
+		lf_li5: 'Ανιχνευτής θέματος και σάρωση σελίδας: δες ποια αρχεία ζωγραφίζουν κάρτες, τι τους λείπει και πόσες κάρτες διορθώθηκαν',
+		lf_li6: 'Διορθώσεις κειμένου στις σελίδες καταστήματος (π.χ. ένας σταθερός τίτλος «Shop» γίνεται ο σωστός τίτλος σελίδας) και εμφάνιση ανά περιοχή',
+		lf_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, ρυθμίσεις ανά θέμα, αυτόματη παύση μετά από ενημέρωση θέματος, διακόπτης έκτακτης ανάγκης LF_DISABLE',
+		lf_li8: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
+		lf_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
