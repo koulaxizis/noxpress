@@ -1,8 +1,14 @@
-# Χτίζει το zip ενός plugin και δημοσιεύει GitHub release όταν γίνεται
-# push ένα tag της μορφής nox-<code>-<version> (π.χ. nox-rs-1.7.0).
+# Δημοσιεύει GitHub releases για τα plugins του noxpress.
+#
+# Πότε τρέχει:
+#  - push στο main που αλλάζει κάτι στο plugins/ → για κάθε plugin της
+#    λίστας AUTO, αν δεν υπάρχει ακόμα release για την έκδοση του header
+#    του, το φτιάχνει (ανέβασε το Version: και κάνε merge — τίποτα άλλο).
+#  - push tag nox-<code>-<version> (π.χ. nox-rs-1.7.0) → μόνο αυτό.
+#  - χειροκίνητα από Actions → «Release plugin» → Run workflow.
 #
 #   rs → revenue-splitter   sp → store-pulse
-#   sf → smart-formatter    nm → data-migrator
+#   sf → smart-formatter    nm → data-migrator (μόνο με tag)
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
@@ -12,11 +18,20 @@ name: Release plugin
 
 on:
   push:
-    tags:
-      - 'nox-*-*'
+    branches: [main]
+    paths: ['plugins/**', '.github/workflows/release.yml']
+    tags: ['nox-*-*']
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-plugin
+  cancel-in-progress: false
+
+env:
+  AUTO: 'rs sp sf'
 
 jobs:
   release:
@@ -24,62 +39,80 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve plugin from tag
-        id: meta
-        run: |
-          tag="${GITHUB_REF_NAME}"
-          code="$(echo "$tag" | cut -d- -f2)"
-          version="${tag#nox-${code}-}"
-          case "$code" in
-            rs) slug=revenue-splitter; name="Revenue Splitter" ;;
-            sp) slug=store-pulse;      name="Store Pulse" ;;
-            sf) slug=smart-formatter;  name="Smart Formatter" ;;
-            nm) slug=data-migrator;    name="Data Migrator" ;;
-            *) echo "::error::Unknown plugin code '$code' in tag $tag"; exit 1 ;;
-          esac
-          main="plugins/$slug/$slug.php"
-          header="$(grep -m1 -E '^\s*\*\s*Version:' "$main" | sed -E 's/.*Version:\s*//; s/\s+$//')"
-          if [ "$header" != "$version" ]; then
-            echo "::error::Tag version $version does not match plugin header $header ($main)"
-            exit 1
-          fi
-          {
-            echo "slug=$slug"
-            echo "name=$name"
-            echo "version=$version"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Lint PHP
-        run: |
-          find "plugins/${{ steps.meta.outputs.slug }}" -name '*.php' -print0 \
-            | xargs -0 -n1 php -l > /dev/null
-
-      - name: Build zip
-        run: |
-          cd plugins
-          zip -qrX "../${{ steps.meta.outputs.slug }}.zip" "${{ steps.meta.outputs.slug }}" -x '*.DS_Store'
-
-      - name: Release notes from readme.txt
-        run: |
-          readme="plugins/${{ steps.meta.outputs.slug }}/readme.txt"
-          {
-            echo "**Beta**: under testing before it is marked stable."
-            echo
-            echo "Requires WordPress 6.0+, PHP 7.4+ and WooCommerce."
-            echo
-            echo "### Changes"
-            if [ -f "$readme" ]; then
-              awk -v v="= ${{ steps.meta.outputs.version }} =" \
-                '$0==v{f=1;next} /^= /{f=0} f' "$readme"
-            fi
-          } > notes.md
-
-      - name: Publish release
+      - name: Build and publish missing releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "${{ steps.meta.outputs.slug }}.zip" \
-            --title "${{ steps.meta.outputs.name }} ${{ steps.meta.outputs.version }} (beta)" \
-            --notes-file notes.md \
-            --prerelease \
-            --verify-tag
+          set -euo pipefail
+
+          slug_of() {
+            case "$1" in
+              rs) echo revenue-splitter ;;
+              sp) echo store-pulse ;;
+              sf) echo smart-formatter ;;
+              nm) echo data-migrator ;;
+              *) return 1 ;;
+            esac
+          }
+          name_of() {
+            case "$1" in
+              rs) echo "Revenue Splitter" ;;
+              sp) echo "Store Pulse" ;;
+              sf) echo "Smart Formatter" ;;
+              nm) echo "Data Migrator" ;;
+            esac
+          }
+          header_version() {
+            grep -m1 -E '^\s*\*\s*Version:' "plugins/$1/$1.php" \
+              | sed -E 's/.*Version:\s*//; s/\s+$//'
+          }
+
+          release_one() {
+            local code="$1" slug name version tag
+            slug="$(slug_of "$code")" || { echo "::error::Unknown plugin code '$code'"; exit 1; }
+            name="$(name_of "$code")"
+            version="$(header_version "$slug")"
+            tag="nox-${code}-${version}"
+
+            if [ -n "${2:-}" ] && [ "$2" != "$version" ]; then
+              echo "::error::Tag version $2 does not match plugin header $version ($slug)"
+              exit 1
+            fi
+            if gh release view "$tag" > /dev/null 2>&1; then
+              echo "$tag already released — skipping."
+              return 0
+            fi
+
+            echo "::group::$tag"
+            find "plugins/$slug" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+            rm -f "$slug.zip"
+            (cd plugins && zip -qrX "../$slug.zip" "$slug" -x '*.DS_Store')
+
+            {
+              echo "**Beta**: under testing before it is marked stable."
+              echo
+              echo "Requires WordPress 6.0+, PHP 7.4+ and WooCommerce."
+              echo
+              echo "### Changes"
+              if [ -f "plugins/$slug/readme.txt" ]; then
+                awk -v v="= $version =" '$0==v{f=1;next} /^= /{f=0} f' "plugins/$slug/readme.txt"
+              fi
+            } > notes.md
+
+            gh release create "$tag" "$slug.zip" \
+              --target "$GITHUB_SHA" \
+              --title "$name $version (beta)" \
+              --notes-file notes.md \
+              --prerelease
+            echo "::endgroup::"
+          }
+
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            code="$(echo "$GITHUB_REF_NAME" | cut -d- -f2)"
+            release_one "$code" "${GITHUB_REF_NAME#nox-${code}-}"
+          else
+            for code in $AUTO; do
+              release_one "$code"
+            done
+          fi
