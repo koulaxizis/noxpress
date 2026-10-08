@@ -146,6 +146,11 @@ section.plugins { padding-bottom: 40px; }
 	color: var(--muted);
 	background: rgba(155, 151, 184, 0.12);
 }
+.card .meta .badge.beta {
+	border-color: #e0a84f;
+	color: #f5c97e;
+	background: rgba(224, 168, 79, 0.14);
+}
 .card p { color: var(--text); max-width: 46em; }
 .card ul {
 	margin: 14px 0 0;
@@ -288,6 +293,50 @@ footer a:hover { text-decoration: underline; }
 @media (prefers-color-scheme: light) {
 	/* Dark mode only — respected intentionally, no light mode offered. */
 }
+.dl-dialog {
+	width: min(440px, calc(100vw - 32px));
+	margin: auto;
+	padding: 28px 28px 22px;
+	background: var(--surface);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-top: 3px solid var(--accent);
+	border-radius: 12px;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+.dl-dialog::backdrop { background: rgba(5, 6, 10, 0.72); backdrop-filter: blur(2px); }
+.dl-dialog h2 { font-size: 1.15rem; margin-bottom: 8px; padding-right: 28px; }
+.dl-dialog p { color: var(--muted); font-size: 0.95rem; margin-bottom: 18px; }
+.dl-dialog .dl-actions { display: flex; flex-direction: column; gap: 10px; }
+.dl-dialog .dl-actions .btn { justify-content: center; text-align: center; padding: 11px 16px; }
+.dl-dialog .dl-skip {
+	display: block;
+	margin: 16px auto 0;
+	background: none;
+	border: 0;
+	color: var(--muted);
+	font: inherit;
+	font-size: 0.82rem;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+.dl-dialog .dl-skip:hover { color: var(--accent-bright); }
+.dl-dialog .dl-close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	width: 32px;
+	height: 32px;
+	background: none;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	color: var(--muted);
+	font-size: 1.2rem;
+	line-height: 1;
+	cursor: pointer;
+}
+.dl-dialog .dl-close:hover { border-color: var(--border); color: #fff; }
 </style>
 </head>
 <body id="top">
@@ -315,7 +364,7 @@ footer a:hover { text-decoration: underline; }
 
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
-		<div class="meta">v1.7.0 · WooCommerce · MIT<span class="badge">stable</span></div>
+		<div class="meta">v1.7.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<ul>
 			<li data-i18n="rs_li1">Per-product VAT override with global default (gross × rate ÷ (100 + rate)), aggregated per VAT rate</li>
@@ -347,7 +396,7 @@ footer a:hover { text-decoration: underline; }
 
 	<article class="card" id="store-pulse">
 		<h2><a href="#store-pulse">Store Pulse</a></h2>
-		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge">stable</span></div>
+		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sp_desc">A store-health dashboard and a WordPress home-screen widget for WooCommerce managers: pending and completed orders, refunds, cancellations and stock at a glance. With Revenue Splitter active, it also shows the publisher's profit and what is owed to every other beneficiary for the period.</p>
 		<ul>
 			<li data-i18n="sp_li1">Pending orders (pending, processing, on hold), with a separate count of those older than 7 days</li>
@@ -370,7 +419,7 @@ footer a:hover { text-decoration: underline; }
 
 	<article class="card" id="smart-formatter">
 		<h2><a href="#smart-formatter">Smart Formatter</a></h2>
-		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge">stable</span></div>
+		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sf_desc">Bulk formatting for WooCommerce product texts — safely. Strip stray formatting, normalize whitespace or highlight quotes, parentheses and numbers across your whole catalogue, with preview, dry run and one-click undo for every run.</p>
 		<ul>
 			<li data-i18n="sf_li1">Targets: all published products, hand-picked products, or selected categories / tags</li>
@@ -403,6 +452,17 @@ footer a:hover { text-decoration: underline; }
 <footer>
 	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
 </footer>
+
+<dialog class="dl-dialog" id="dlDialog" aria-labelledby="dlTitle">
+	<button type="button" class="dl-close" id="dlClose" aria-label="Close">×</button>
+	<h2 id="dlTitle"><span data-i18n="dl_title">Your download is ready</span></h2>
+	<p data-i18n="dl_text">noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.</p>
+	<div class="dl-actions">
+		<a class="btn primary" id="dlKofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="dl_kofi">☕ Support on Ko-fi &amp; download</a>
+		<a class="btn" id="dlSub" href="https://preview.mailerlite.io/forms/642133/197598403923805558/share" target="_blank" rel="noopener" data-i18n="dl_sub">✦ Subscribe to updates &amp; download</a>
+	</div>
+	<button type="button" class="dl-skip" id="dlSkip" data-i18n="dl_skip">Skip to download</button>
+</dialog>
 
 <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
@@ -465,6 +525,13 @@ footer a:hover { text-decoration: underline; }
 		sf_li9: 'Profiles for rule / field combinations, plus JSON backup &amp; restore with strict validation',
 		sf_li10: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
 		sf_download: 'Download v1.1.0 (.zip)',
+		badge_beta: 'beta',
+		dl_title: 'Your download is ready',
+		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
+		dl_kofi: '☕ Support on Ko-fi &amp; download',
+		dl_sub: '✦ Subscribe to updates &amp; download',
+		dl_skip: 'Skip to download',
+		dl_close: 'Close',
 		sub_title: 'Stay in the loop ✦',
 		sub_text: 'Get notified about new plugins, updates &amp; maintenance.',
 		sub_btn: 'Subscribe',
@@ -523,6 +590,13 @@ footer a:hover { text-decoration: underline; }
 		sf_li9: 'Profiles για συνδυασμούς κανόνων / πεδίων, και backup &amp; restore σε JSON με αυστηρό έλεγχο',
 		sf_li10: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
 		sf_download: 'Λήψη v1.1.0 (.zip)',
+		badge_beta: 'beta',
+		dl_title: 'Η λήψη σου είναι έτοιμη',
+		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
+		dl_kofi: '☕ Στήριξε στο Ko-fi &amp; κατέβασε',
+		dl_sub: '✦ Εγγραφή για ενημερώσεις &amp; λήψη',
+		dl_skip: 'Παράλειψη, κατέβασέ το',
+		dl_close: 'Κλείσιμο',
 		sub_title: 'Μείνε ενήμερος ✦',
 		sub_text: 'Ενημερώσου για νέα plugins, ενημερώσεις &amp; συντήρηση.',
 		sub_btn: 'Εγγραφή',
@@ -559,6 +633,9 @@ footer a:hover { text-decoration: underline; }
 			}
 		}
 
+		var dlClose = document.getElementById('dlClose');
+		if (dlClose) { dlClose.setAttribute('aria-label', dict.dl_close); }
+
 		try { localStorage.setItem('nx_lang', lang); } catch (e) { /* private mode */ }
 	}
 
@@ -575,6 +652,41 @@ footer a:hover { text-decoration: underline; }
 	if ('el' === current) { applyLang('el'); }
 })();
 
+(function () {
+	'use strict';
+	/* ------------------------------------------------------------------
+	 * Download popup — πριν από κάθε λήψη: Ko-fi, newsletter ή απλή λήψη.
+	 * Χωρίς JS / χωρίς <dialog> το link κατεβάζει κανονικά.
+	 * ------------------------------------------------------------------ */
+	var dlg = document.getElementById('dlDialog');
+	if (!dlg || typeof dlg.showModal !== 'function') { return; }
+	var pending = '';
+	function startDownload() {
+		if (!pending) { return; }
+		var url = pending;
+		pending = '';
+		dlg.close();
+		window.location.href = url;
+	}
+	var links = document.querySelectorAll('a[href*="/releases/download/"]');
+	for (var i = 0; i < links.length; i++) {
+		links[i].addEventListener('click', function (e) {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { return; }
+			e.preventDefault();
+			pending = this.getAttribute('href');
+			dlg.showModal();
+		});
+	}
+	// Ko-fi / newsletter ανοίγουν σε νέα καρτέλα (target=_blank)· η λήψη ξεκινά εδώ.
+	document.getElementById('dlKofi').addEventListener('click', startDownload);
+	document.getElementById('dlSub').addEventListener('click', startDownload);
+	document.getElementById('dlSkip').addEventListener('click', startDownload);
+	document.getElementById('dlClose').addEventListener('click', function () { pending = ''; dlg.close(); });
+	dlg.addEventListener('click', function (e) {
+		if (e.target === dlg) { pending = ''; dlg.close(); }
+	});
+	dlg.addEventListener('cancel', function () { pending = ''; });
+})();
 (function () {
 	var btn = document.querySelector('.back-to-top');
 	if (!btn) { return; }
