@@ -1,6 +1,6 @@
 <?php
 /**
- * LF_Runtime — injection of the slot into theme-drawn product cards.
+ * TP_Runtime — injection of the slot into theme-drawn product cards.
  *
  * How it works (per loop, never per page):
  *
@@ -16,7 +16,7 @@
  *     the card is a standard one and is skipped.
  *  3. Marker. When the anchor fires for the card (`the_title` or
  *     `post_thumbnail_html`), the slot is rendered right then (correct
- *     global $product) and a marker <!--lf:{nonce}:{n}--> is appended.
+ *     global $product) and a marker <!--tp:{nonce}:{n}--> is appended.
  *     The nonce is random per request, so product titles cannot forge it.
  *  4. Placement. self::process() is pure string work (no ob_* calls, as
  *     PHP requires inside a handler): for each marker it takes the first
@@ -36,12 +36,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-final class LF_Runtime {
+final class TP_Runtime {
 
-	const HANDLER      = 'LF_Runtime::process';
+	const HANDLER      = 'TP_Runtime::process';
 	const MAX_BUFFER   = 8388608; // 8 MB — larger buffers are only cleaned of markers.
-	const PROBE_ARG    = 'lf_probe';
-	const PROBE_NONCE  = 'lf_probe';
+	const PROBE_ARG    = 'tp_probe';
+	const PROBE_NONCE  = 'tp_probe';
 	const PROBE_TTL    = 3600;
 	const STD_HOOKS    = array(
 		'woocommerce_before_shop_loop_item',
@@ -68,9 +68,6 @@ final class LF_Runtime {
 	/** Context stack (nested loops). */
 	private static $stack = array();
 
-	/** Area ids whose CSS was already printed. */
-	private static $css_done = array();
-
 	/** Probe mode (admin with nonce) and its report. */
 	private static $probe  = false;
 	private static $report = array();
@@ -85,7 +82,7 @@ final class LF_Runtime {
 	}
 
 	/**
-	 * Common front-end gate (also used by LF_Replace): a normal page
+	 * Common front-end gate (also used by TP_Replace): a normal page
 	 * request on a classic theme.
 	 */
 	public static function request_ok(): bool {
@@ -112,7 +109,7 @@ final class LF_Runtime {
 		if ( self::is_probe() ) {
 			return true; // Admin preview: works even with the master switch off.
 		}
-		$s = LF_Settings::get();
+		$s = TP_Settings::get();
 		if ( empty( $s['enabled'] ) ) {
 			return false;
 		}
@@ -122,7 +119,7 @@ final class LF_Runtime {
 		return true;
 	}
 
-	/** Valid probe request: ?lf_probe=<nonce> by a shop manager. */
+	/** Valid probe request: ?tp_probe=<nonce> by a shop manager. */
 	public static function is_probe(): bool {
 		static $probe = null;
 		if ( null !== $probe ) {
@@ -142,7 +139,7 @@ final class LF_Runtime {
 				return;
 			}
 			self::$probe = self::is_probe();
-			if ( ! self::$probe && ! LF_Settings::has_active_areas() ) {
+			if ( ! self::$probe && ! TP_Settings::has_active_areas() ) {
 				return;
 			}
 
@@ -159,13 +156,14 @@ final class LF_Runtime {
 			}
 			add_filter( 'the_title', array( __CLASS__, 'on_title' ), 999, 2 );
 			add_filter( 'post_thumbnail_html', array( __CLASS__, 'on_thumbnail' ), 999, 2 );
-			add_action( 'wp_footer', array( 'LF_Render', 'maybe_enqueue_cart_script' ), 5 );
+			add_filter( 'post_thumbnail_size', array( __CLASS__, 'thumbnail_size' ), 999, 2 );
+			add_action( 'wp_footer', array( 'TP_Render', 'maybe_enqueue_cart_script' ), 5 );
 
 			if ( self::$probe ) {
 				self::$report = array(
 					'url'   => esc_url_raw( home_url( add_query_arg( array() ) ) ),
 					'time'  => time(),
-					'theme' => LF_Settings::theme_key(),
+					'theme' => TP_Settings::theme_key(),
 					'loops' => array(),
 				);
 				add_action( 'shutdown', array( __CLASS__, 'save_probe' ), 0 );
@@ -203,8 +201,8 @@ final class LF_Runtime {
 
 	/** Push a context; opens our buffer when the area injects. */
 	private static function push( string $area, string $key, string $file ): void {
-		$cfg    = LF_Settings::area( $area );
-		$inject = 'inject' === LF_Settings::mode( $area );
+		$cfg    = TP_Settings::area( $area );
+		$inject = 'inject' === TP_Settings::mode( $area );
 
 		$ctx = array(
 			'area'    => $area,
@@ -249,7 +247,7 @@ final class LF_Runtime {
 			self::$report['loops'][] = array(
 				'area'     => $ctx['area'],
 				'file'     => $ctx['file'],
-				'mode'     => LF_Settings::mode( $ctx['area'] ),
+				'mode'     => TP_Settings::mode( $ctx['area'] ),
 				'cards'    => $ctx['cards'],
 				'standard' => $ctx['std_n'],
 				'marked'   => $ctx['marked'],
@@ -291,7 +289,7 @@ final class LF_Runtime {
 			$key = 'q:' . spl_object_hash( $query );
 
 			if ( $query->is_main_query() ) {
-				if ( LF_Areas::is_product_archive() ) {
+				if ( TP_Areas::is_product_archive() ) {
 					self::push_if_wanted( 'shop', $key, '' );
 				}
 				return;
@@ -305,7 +303,7 @@ final class LF_Runtime {
 			if ( '' === $file ) {
 				return;
 			}
-			self::push_if_wanted( LF_Areas::FILE_PREFIX . $file, $key, $file );
+			self::push_if_wanted( TP_Areas::FILE_PREFIX . $file, $key, $file );
 		} catch ( \Throwable $e ) {
 			self::fail();
 		}
@@ -316,7 +314,7 @@ final class LF_Runtime {
 	 * product loop is recorded so the admin sees what exists).
 	 */
 	private static function push_if_wanted( string $area, string $key, string $file ): void {
-		if ( 'inject' === LF_Settings::mode( $area ) || self::$probe ) {
+		if ( 'inject' === TP_Settings::mode( $area ) || self::$probe ) {
 			self::push( $area, $key, $file );
 		}
 	}
@@ -340,11 +338,11 @@ final class LF_Runtime {
 			return;
 		}
 		try {
-			$area = LF_Areas::area_for_template( (string) $template_name );
+			$area = TP_Areas::area_for_template( (string) $template_name );
 			if ( '' === $area ) {
 				return;
 			}
-			$file = LF_Areas::theme_relative( (string) $located );
+			$file = TP_Areas::theme_relative( (string) $located );
 			self::push_if_wanted( $area, 'tpl:' . $template_name, $file );
 		} catch ( \Throwable $e ) {
 			self::fail();
@@ -388,7 +386,7 @@ final class LF_Runtime {
 			if ( empty( $frame['file'] ) ) {
 				continue;
 			}
-			$rel = LF_Areas::theme_relative( $frame['file'] );
+			$rel = TP_Areas::theme_relative( $frame['file'] );
 			if ( '' !== $rel ) {
 				return $rel;
 			}
@@ -413,6 +411,13 @@ final class LF_Runtime {
 			// contexts (foreach + setup_postdata) accept any.
 			$own = ( $query instanceof WP_Query ) && false !== strpos( $top['key'], spl_object_hash( $query ) );
 			if ( ! $own && 0 !== strpos( $top['key'], 'tpl:' ) ) {
+				// Another product loop runs while this context is still open
+				// (e.g. its loop was left with "break"): its last card is over,
+				// so the same product drawn elsewhere gets no second marker.
+				if ( $top['card'] > 0 && 'product' === $post->post_type ) {
+					self::close_card( $top );
+					self::set_top( $top );
+				}
 				return;
 			}
 			self::close_card( $top );
@@ -425,9 +430,9 @@ final class LF_Runtime {
 		}
 	}
 
-	/** Standard card hooks fired → this card is a standard one. */
+	/** Standard card hooks fired → this card is a standard one (not when we run them). */
 	public static function on_standard_hook(): void {
-		if ( ! self::live() ) {
+		if ( ! self::live() || TP_Render::rendering() ) {
 			return;
 		}
 		$top = self::top();
@@ -446,11 +451,33 @@ final class LF_Runtime {
 	}
 
 	/**
+	 * Card image size of the area (e.g. woocommerce_thumbnail instead of a
+	 * full-size image), for the card being drawn only.
+	 *
+	 * @param string|int[] $size    Requested size.
+	 * @param int          $post_id Post id.
+	 */
+	public static function thumbnail_size( $size, $post_id = 0 ) {
+		if ( ! self::live() ) {
+			return $size;
+		}
+		try {
+			$top = self::top();
+			if ( null === $top || ! $top['inject'] || $top['card'] !== (int) $post_id || '' === $top['cfg']['thumb'] ) {
+				return $size;
+			}
+			return TP_Settings::size_exists( $top['cfg']['thumb'] ) ? $top['cfg']['thumb'] : $size;
+		} catch ( \Throwable $e ) {
+			return $size;
+		}
+	}
+
+	/**
 	 * Append the card's marker when this is the anchor of the current
 	 * card (same product, inject area, configured anchor, not standard).
 	 */
 	private static function anchor( $value, int $id, string $kind ) {
-		if ( ! self::live() || ! is_string( $value ) || $id <= 0 ) {
+		if ( ! self::live() || ! is_string( $value ) || $id <= 0 || TP_Render::rendering() ) {
 			return $value;
 		}
 		try {
@@ -463,7 +490,7 @@ final class LF_Runtime {
 			}
 
 			if ( 0 === $top['token'] ) {
-				$html = LF_Render::slot( $id, $top['cfg'], $top['area'] );
+				$html = TP_Render::slot( $id, $top['cfg'], $top['area'] );
 				if ( '' === $html ) {
 					$top['token'] = -1; // Nothing to show for this card.
 					self::set_top( $top );
@@ -490,7 +517,7 @@ final class LF_Runtime {
 	}
 
 	private static function marker( int $token ): string {
-		return '<!--lf:' . self::$nonce . ':' . $token . '-->';
+		return '<!--tp:' . self::$nonce . ':' . $token . '-->';
 	}
 
 	/* =====================================================================
@@ -505,11 +532,11 @@ final class LF_Runtime {
 		if ( ! is_string( $buffer ) || '' === self::$nonce ) {
 			return $buffer;
 		}
-		$prefix = '<!--lf:' . self::$nonce . ':';
+		$prefix = '<!--tp:' . self::$nonce . ':';
 		if ( false === strpos( $buffer, $prefix ) ) {
 			return $buffer;
 		}
-		$pattern = '/<!--lf:' . preg_quote( self::$nonce, '/' ) . ':(\d+)-->/';
+		$pattern = '/<!--tp:' . preg_quote( self::$nonce, '/' ) . ':(\d+)-->/';
 
 		try {
 			if ( self::$failed || strlen( $buffer ) > self::MAX_BUFFER ) {
@@ -570,12 +597,7 @@ final class LF_Runtime {
 				unset( self::$slots[ $token ] );
 				continue;
 			}
-			$insert = $slot['html'];
-			if ( ! isset( self::$css_done[ $slot['area'] ] ) ) {
-				self::$css_done[ $slot['area'] ] = true;
-				$insert = LF_Render::css( $slot['area'], LF_Settings::area( $slot['area'] ) ) . $insert;
-			}
-			$edits[] = array( $at, 0, $insert, 1 );
+			$edits[] = array( $at, 0, $slot['html'], 1 );
 			unset( self::$slots[ $token ] );
 		}
 
@@ -661,6 +683,11 @@ final class LF_Runtime {
 			self::$misses[ $loop['area'] ]         = 0; // Count once per area.
 		}
 		self::$report['failed'] = self::$failed;
-		set_transient( 'lf_probe_' . get_current_user_id(), self::$report, self::PROBE_TTL );
+		self::$report['patch']  = array(
+			'page'  => TP_Page::stats(),
+			'theme' => TP_Theme::stats(),
+			'cats'  => TP_Categories::stats(),
+		);
+		set_transient( 'tp_probe_' . get_current_user_id(), self::$report, self::PROBE_TTL );
 	}
 }

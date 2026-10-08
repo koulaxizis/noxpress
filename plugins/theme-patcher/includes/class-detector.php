@@ -1,6 +1,6 @@
 <?php
 /**
- * LF_Detector — reads (never writes) the active theme's files and tells
+ * TP_Detector — reads (never writes) the active theme's files and tells
  * where product cards are drawn and what they are missing.
  *
  *  - WooCommerce overrides in <theme>/woocommerce/: archive, taxonomies,
@@ -22,10 +22,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
-final class LF_Detector {
+final class TP_Detector {
 
 	const SCAN_TTL      = 43200; // 12 h.
-	const CHECK_KEY     = 'lf_fp_check';
+	const CHECK_KEY     = 'tp_fp_check';
 	const CHECK_TTL     = 43200;
 	const MAX_FILES     = 600;
 	const MAX_FILE_SIZE = 262144; // 256 KB.
@@ -67,7 +67,7 @@ final class LF_Detector {
 	 * @param bool $fresh Ignore the cache.
 	 */
 	public static function scan( bool $fresh = false ): array {
-		$key = 'lf_scan_' . md5( self::signature() );
+		$key = 'tp_scan_' . md5( self::signature() );
 		if ( ! $fresh ) {
 			$cached = get_transient( $key );
 			if ( is_array( $cached ) ) {
@@ -81,7 +81,7 @@ final class LF_Detector {
 
 		// 1) WooCommerce overrides (T1).
 		foreach ( self::OVERRIDES as $rel => $area ) {
-			$abs = LF_Areas::theme_file( $rel );
+			$abs = TP_Areas::theme_file( $rel );
 			if ( '' === $abs ) {
 				continue;
 			}
@@ -108,7 +108,7 @@ final class LF_Detector {
 			$rows[] = array(
 				'file'    => $rel,
 				'kind'    => 'T2',
-				'area'    => LF_Areas::FILE_PREFIX . $rel,
+				'area'    => TP_Areas::FILE_PREFIX . $rel,
 				'flags'   => $a,
 				'suggest' => ( $a['std'] || ( $a['price'] && $a['button'] ) ) ? 'off' : 'inject',
 			);
@@ -129,13 +129,13 @@ final class LF_Detector {
 	}
 
 	/** rel path => abs path of the theme's PHP files (child overrides parent). */
-	private static function theme_php_files(): array {
+	public static function theme_php_files(): array {
 		static $cache = null;
 		if ( null !== $cache ) {
 			return $cache;
 		}
 		$out = array();
-		foreach ( array_reverse( LF_Areas::theme_dirs() ) as $dir ) { // Parent first, child overrides.
+		foreach ( array_reverse( TP_Areas::theme_dirs() ) as $dir ) { // Parent first, child overrides.
 			$dir = trailingslashit( $dir );
 			if ( ! is_dir( $dir ) ) {
 				continue;
@@ -294,8 +294,8 @@ final class LF_Detector {
 	/** Theme-relative files an area depends on (that exist). */
 	public static function files_of_area( string $id ): array {
 		$files = array();
-		if ( LF_Areas::is_file_area( $id ) ) {
-			$files[] = LF_Areas::file_of( $id );
+		if ( TP_Areas::is_file_area( $id ) ) {
+			$files[] = TP_Areas::file_of( $id );
 		} else {
 			foreach ( self::OVERRIDES as $rel => $area ) {
 				if ( $area === $id ) {
@@ -305,7 +305,7 @@ final class LF_Detector {
 		}
 		$out = array();
 		foreach ( $files as $rel ) {
-			if ( '' !== LF_Areas::theme_file( $rel ) ) {
+			if ( '' !== TP_Areas::theme_file( $rel ) ) {
 				$out[] = $rel;
 			}
 		}
@@ -320,7 +320,7 @@ final class LF_Detector {
 				continue; // Replace mode does not depend on the theme's markup.
 			}
 			foreach ( self::files_of_area( (string) $id ) as $rel ) {
-				$abs = LF_Areas::theme_file( $rel );
+				$abs = TP_Areas::theme_file( $rel );
 				$h   = '' !== $abs ? @sha1_file( $abs ) : false; // phpcs:ignore WordPress.PHP.NoSilencedErrors
 				if ( is_string( $h ) ) {
 					$fp[ $rel ] = $h;
@@ -335,7 +335,7 @@ final class LF_Detector {
 	 * files changed (or vanished). Returns the newly suspended area ids.
 	 */
 	public static function check(): array {
-		$theme = LF_Settings::theme();
+		$theme = TP_Settings::theme();
 		if ( empty( $theme['fingerprints'] ) ) {
 			return array();
 		}
@@ -347,7 +347,7 @@ final class LF_Detector {
 			if ( 'inject' !== $a['mode'] || in_array( $id, $theme['suspended'], true ) ) {
 				continue;
 			}
-			$files = LF_Areas::is_file_area( $id ) ? array( LF_Areas::file_of( $id ) ) : array_keys( array_intersect( self::OVERRIDES, array( $id ) ) );
+			$files = TP_Areas::is_file_area( $id ) ? array( TP_Areas::file_of( $id ) ) : array_keys( array_intersect( self::OVERRIDES, array( $id ) ) );
 			foreach ( $files as $rel ) {
 				$stored = isset( $theme['fingerprints'][ $rel ] ) ? $theme['fingerprints'][ $rel ] : null;
 				$now    = isset( $current[ $rel ] ) ? $current[ $rel ] : null;
@@ -360,17 +360,17 @@ final class LF_Detector {
 
 		if ( $new ) {
 			$theme['suspended'] = array_values( array_unique( array_merge( $theme['suspended'], $new ) ) );
-			LF_Settings::save_theme( $theme );
+			TP_Settings::save_theme( $theme );
 		}
 		return $new;
 	}
 
 	/** Admin confirmed the changed files: refresh fingerprints, lift suspension. */
 	public static function confirm( string $id ): void {
-		$theme              = LF_Settings::theme();
+		$theme              = TP_Settings::theme();
 		$theme['suspended'] = array_values( array_diff( $theme['suspended'], array( $id ) ) );
 		$theme['fingerprints'] = self::fingerprints( $theme );
-		LF_Settings::save_theme( $theme );
+		TP_Settings::save_theme( $theme );
 	}
 
 	public static function on_upgrade( $upgrader, $extra = array() ): void {

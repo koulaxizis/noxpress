@@ -1,6 +1,6 @@
 <?php
 /**
- * LF_Areas — where a product loop is drawn, and which fixes it accepts.
+ * TP_Areas — where a product loop is drawn, and which fixes it accepts.
  *
  * Built-in areas:
  *  - shop        main query on product archives (shop, product taxonomies,
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-final class LF_Areas {
+final class TP_Areas {
 
 	const FILE_PREFIX = 'file:';
 
@@ -52,17 +52,17 @@ final class LF_Areas {
 
 	/** Allowed modes of an area. */
 	public static function modes_for( string $id ): array {
-		return self::is_file_area( $id ) ? array( 'off', 'inject' ) : LF_Settings::MODES;
+		return self::is_file_area( $id ) ? array( 'off', 'inject' ) : TP_Settings::MODES;
 	}
 
 	/** Translated label of an area. */
 	public static function label( string $id ): string {
 		$b = self::builtin();
 		if ( isset( $b[ $id ] ) ) {
-			return __( $b[ $id ]['label'], 'loop-fixer' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid from the registry.
+			return __( $b[ $id ]['label'], 'theme-patcher' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid from the registry.
 		}
 		/* translators: %s: theme-relative file path */
-		return sprintf( __( 'Αρχείο θέματος: %s', 'loop-fixer' ), self::file_of( $id ) );
+		return sprintf( __( 'Αρχείο θέματος: %s', 'theme-patcher' ), self::file_of( $id ) );
 	}
 
 	/** Built-in area id for a WooCommerce template name ('' when none). */

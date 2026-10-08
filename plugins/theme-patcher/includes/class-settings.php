@@ -1,6 +1,6 @@
 <?php
 /**
- * LF_Settings — single option `lf_settings` (JSON, autoloaded: it is read
+ * TP_Settings — single option `tp_settings` (JSON, autoloaded: it is read
  * on every front-end request and stays small).
  *
  * Shape:
@@ -9,8 +9,15 @@
  *    "test_mode": bool,                 changes visible to shop managers only (default true)
  *    "themes": {
  *      "<stylesheet>": {
- *        "areas":        { "<area id>": { area config } },
- *        "text_fixes":   [ { "find": str, "replace": "wc_title"|"custom", "custom": str } ],
+ *        "areas":  { "<area id>": { area config } },
+ *        "texts":  [ { "find": str, "replace": "wc_title"|"custom", "custom": html, "scope": "all"|"shop"|"home"|"product" } ],
+ *        "page":   { "same_tab": bool, "img_alt": bool, "aria": bool, "cat_img_size": size,
+ *                    "remove": [ "tag.class" | ".class" | "#id", … ], "css": str },
+ *        "guard":  bool,                theme settings cannot be written by page views
+ *        "local_files": bool,           theme reads its own files from disk, not over HTTP
+ *        "mods":   { "<theme setting>": value },   values forced on the front end
+ *        "cats":   { "fallback": bool, "source": "recent"|"popular",
+ *                    "lists": [ { "file": path, "include": [ term ids ], "hide_empty": bool } ] },
  *        "fingerprints": { "<theme-relative path>": "<sha1>" },
  *        "suspended":    [ "<area id>", … ]
  *      }
@@ -18,7 +25,7 @@
  *  }
  *
  * Settings are stored per theme (stylesheet): with another theme active,
- * no area applies (Bible §14 — safe theme switching).
+ * nothing applies (Bible §14 — safe theme switching).
  *
  * Every value is validated against a whitelist on save AND on import
  * (one implementation, Bible §11).
@@ -26,22 +33,29 @@
 
 defined( 'ABSPATH' ) || exit;
 
-final class LF_Settings {
+final class TP_Settings {
 
-	const OPT = 'lf_settings';
+	const OPT = 'tp_settings';
 
 	const MODES   = array( 'off', 'inject', 'replace' );
-	const PARTS   = array( 'rating', 'price', 'button' );
+	const PARTS   = array( 'sale_badge', 'rating', 'price', 'button' );
 	const ANCHORS = array( 'title', 'thumbnail' );
 	const TAGS    = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'p', 'div', 'span' );
 	const ALIGNS  = array( '', 'left', 'center', 'right' );
-	const STYLE_COLORS = array( 'price', 'price_hover', 'btn_bg', 'btn_text' );
+	const STYLE_COLORS = array( 'price', 'price_hover', 'btn_bg', 'btn_text', 'badge_bg', 'badge_text' );
+	const SCOPES  = array( 'all', 'shop', 'home', 'product' );
+	const SOURCES = array( 'recent', 'popular' );
 
 	const MAX_FILE_AREAS = 20;
-	const MAX_TEXT_FIXES = 10;
-	const MAX_FIND_LEN   = 200;
-	const MAX_CUSTOM_LEN = 200;
+	const MAX_TEXTS      = 40;
+	const MAX_FIND_LEN   = 300;
+	const MAX_CUSTOM_LEN = 500;
 	const MAX_CSS_LEN    = 5120;
+	const MAX_CAT_LISTS  = 5;
+	const MAX_CAT_IDS    = 200;
+	const MAX_REMOVE     = 10;
+	const MAX_MODS       = 30;
+	const MAX_MOD_LEN    = 500;
 
 	/** Per-request cache of the decoded option. */
 	private static $cache = null;
@@ -61,28 +75,58 @@ final class LF_Settings {
 	public static function theme_defaults(): array {
 		return array(
 			'areas'        => array(),
-			'text_fixes'   => array(),
+			'texts'        => array(),
+			'page'         => self::page_defaults(),
+			'guard'        => false,
+			'local_files'  => false,
+			'mods'         => array(),
+			'cats'         => array(
+				'fallback' => false,
+				'source'   => 'recent',
+				'lists'    => array(),
+			),
 			'fingerprints' => array(),
 			'suspended'    => array(),
 		);
 	}
 
+	public static function page_defaults(): array {
+		return array(
+			'same_tab'     => false,
+			'img_alt'      => false,
+			'aria'         => false,
+			'cat_img_size' => '',
+			'remove'       => array(),
+			'css'          => '',
+		);
+	}
+
 	public static function area_defaults(): array {
 		return array(
-			'mode'   => 'off',
-			'parts'  => array( 'price', 'button' ),
-			'anchor' => 'title',
-			'tag'    => 'h3',
-			'card'   => '',
-			'style'  => array(
+			'mode'       => 'off',
+			'parts'      => array( 'price', 'button' ),
+			'hooks'      => false,
+			'anchor'     => 'title',
+			'tag'        => 'h3',
+			'card'       => '',
+			'badge_hide' => '',
+			'thumb'      => '',
+			'title'      => array(
+				'sel'   => '',
+				'lines' => '',
+				'size'  => '',
+			),
+			'style'      => array(
 				'price'       => '',
 				'price_hover' => '',
 				'btn_bg'      => '',
 				'btn_text'    => '',
+				'badge_bg'    => '',
+				'badge_text'  => '',
 				'align'       => '',
 				'gap'         => '',
 			),
-			'css'    => '',
+			'css'        => '',
 		);
 	}
 
@@ -144,6 +188,19 @@ final class LF_Settings {
 		return false;
 	}
 
+	/** True when page-level features (texts / HTML rules / CSS) are configured. */
+	public static function has_page_features(): bool {
+		$t = self::theme();
+		$p = $t['page'];
+		return ! empty( $t['texts'] ) || $p['same_tab'] || $p['img_alt'] || $p['aria'] || '' !== $p['cat_img_size'] || ! empty( $p['remove'] ) || '' !== $p['css'];
+	}
+
+	/** True when anything at all is configured for the active theme. */
+	public static function has_anything(): bool {
+		$t = self::theme();
+		return self::has_active_areas() || self::has_page_features() || $t['guard'] || $t['local_files'] || ! empty( $t['mods'] ) || $t['cats']['fallback'] || ! empty( $t['cats']['lists'] );
+	}
+
 	/* =====================================================================
 	 * Write
 	 * =================================================================== */
@@ -203,7 +260,7 @@ final class LF_Settings {
 				if ( '' === $id || ! is_array( $area ) ) {
 					continue;
 				}
-				$is_file = LF_Areas::is_file_area( $id );
+				$is_file = TP_Areas::is_file_area( $id );
 				if ( $is_file && ++$files > self::MAX_FILE_AREAS ) {
 					continue;
 				}
@@ -211,16 +268,27 @@ final class LF_Settings {
 			}
 		}
 
-		if ( isset( $raw['text_fixes'] ) && is_array( $raw['text_fixes'] ) ) {
-			foreach ( $raw['text_fixes'] as $fix ) {
-				if ( count( $out['text_fixes'] ) >= self::MAX_TEXT_FIXES ) {
-					break;
-				}
-				$fix = is_array( $fix ) ? self::sanitize_text_fix( $fix ) : null;
-				if ( null !== $fix ) {
-					$out['text_fixes'][] = $fix;
-				}
+		$texts = isset( $raw['texts'] ) && is_array( $raw['texts'] ) ? $raw['texts'] : array();
+		foreach ( $texts as $fix ) {
+			if ( count( $out['texts'] ) >= self::MAX_TEXTS ) {
+				break;
 			}
+			$fix = is_array( $fix ) ? self::sanitize_text( $fix ) : null;
+			if ( null !== $fix ) {
+				$out['texts'][] = $fix;
+			}
+		}
+
+		if ( isset( $raw['page'] ) && is_array( $raw['page'] ) ) {
+			$out['page'] = self::sanitize_page( $raw['page'] );
+		}
+
+		$out['guard']       = ! empty( $raw['guard'] );
+		$out['local_files'] = ! empty( $raw['local_files'] );
+		$out['mods']        = self::sanitize_mods( isset( $raw['mods'] ) && is_array( $raw['mods'] ) ? $raw['mods'] : array() );
+
+		if ( isset( $raw['cats'] ) && is_array( $raw['cats'] ) ) {
+			$out['cats'] = self::sanitize_cats( $raw['cats'] );
 		}
 
 		if ( isset( $raw['fingerprints'] ) && is_array( $raw['fingerprints'] ) ) {
@@ -246,12 +314,12 @@ final class LF_Settings {
 
 	/** Area ids: built-in ids or "file:<theme-relative .php path>". */
 	public static function valid_area_id( string $id ): string {
-		if ( isset( LF_Areas::builtin()[ $id ] ) ) {
+		if ( isset( TP_Areas::builtin()[ $id ] ) ) {
 			return $id;
 		}
-		if ( 0 === strpos( $id, LF_Areas::FILE_PREFIX ) ) {
-			$path = self::valid_rel_path( substr( $id, strlen( LF_Areas::FILE_PREFIX ) ) );
-			return '' === $path ? '' : LF_Areas::FILE_PREFIX . $path;
+		if ( 0 === strpos( $id, TP_Areas::FILE_PREFIX ) ) {
+			$path = self::valid_rel_path( substr( $id, strlen( TP_Areas::FILE_PREFIX ) ) );
+			return '' === $path ? '' : TP_Areas::FILE_PREFIX . $path;
 		}
 		return '';
 	}
@@ -276,9 +344,20 @@ final class LF_Settings {
 		return $path;
 	}
 
+	/** Image size name (existence is checked at run time). */
+	public static function valid_size( string $size ): string {
+		$size = trim( $size );
+		return 1 === preg_match( '/^[A-Za-z0-9_-]{1,60}$/', $size ) ? $size : '';
+	}
+
+	/** Registered image size (core sizes included). */
+	public static function size_exists( string $size ): bool {
+		return '' !== $size && in_array( $size, get_intermediate_image_sizes(), true );
+	}
+
 	public static function sanitize_area( array $raw, string $id ): array {
 		$out   = self::area_defaults();
-		$modes = LF_Areas::modes_for( $id );
+		$modes = TP_Areas::modes_for( $id );
 
 		$mode        = isset( $raw['mode'] ) ? (string) $raw['mode'] : 'off';
 		$out['mode'] = in_array( $mode, $modes, true ) ? $mode : 'off';
@@ -293,17 +372,28 @@ final class LF_Settings {
 			$out['parts'] = $parts;
 		}
 
+		$out['hooks'] = ! empty( $raw['hooks'] );
+
 		$anchor        = isset( $raw['anchor'] ) ? (string) $raw['anchor'] : 'title';
 		$out['anchor'] = in_array( $anchor, self::ANCHORS, true ) ? $anchor : 'title';
 
 		$tag        = isset( $raw['tag'] ) ? strtolower( (string) $raw['tag'] ) : 'h3';
 		$out['tag'] = in_array( $tag, self::TAGS, true ) ? $tag : 'h3';
 
-		$out['card'] = self::valid_selector( isset( $raw['card'] ) ? (string) $raw['card'] : '' );
+		$out['card']       = self::valid_selector( isset( $raw['card'] ) ? (string) $raw['card'] : '' );
+		$out['badge_hide'] = self::valid_selector( isset( $raw['badge_hide'] ) ? (string) $raw['badge_hide'] : '' );
+		$out['thumb']      = self::valid_size( isset( $raw['thumb'] ) ? (string) $raw['thumb'] : '' );
+
+		$title               = isset( $raw['title'] ) && is_array( $raw['title'] ) ? $raw['title'] : array();
+		$out['title']['sel'] = self::valid_selector( isset( $title['sel'] ) ? (string) $title['sel'] : '' );
+		$lines               = isset( $title['lines'] ) ? trim( (string) $title['lines'] ) : '';
+		$out['title']['lines'] = ( 1 === preg_match( '/^[1-5]$/', $lines ) ) ? $lines : '';
+		$size                = isset( $title['size'] ) ? trim( (string) $title['size'] ) : '';
+		$out['title']['size'] = ( 1 === preg_match( '/^\d{1,2}$/', $size ) && (int) $size >= 8 ) ? $size : '';
 
 		$style = isset( $raw['style'] ) && is_array( $raw['style'] ) ? $raw['style'] : array();
 		foreach ( self::STYLE_COLORS as $k ) {
-			$c                   = isset( $style[ $k ] ) ? sanitize_hex_color( (string) $style[ $k ] ) : '';
+			$c                  = isset( $style[ $k ] ) ? sanitize_hex_color( (string) $style[ $k ] ) : '';
 			$out['style'][ $k ] = is_string( $c ) ? $c : '';
 		}
 		$align                 = isset( $style['align'] ) ? (string) $style['align'] : '';
@@ -317,8 +407,85 @@ final class LF_Settings {
 		return $out;
 	}
 
+	public static function sanitize_page( array $raw ): array {
+		$out                 = self::page_defaults();
+		$out['same_tab']     = ! empty( $raw['same_tab'] );
+		$out['img_alt']      = ! empty( $raw['img_alt'] );
+		$out['aria']         = ! empty( $raw['aria'] );
+		$out['cat_img_size'] = self::valid_size( isset( $raw['cat_img_size'] ) ? (string) $raw['cat_img_size'] : '' );
+		$out['css']          = self::valid_css( isset( $raw['css'] ) ? (string) $raw['css'] : '' );
+		foreach ( ( isset( $raw['remove'] ) && is_array( $raw['remove'] ) ) ? $raw['remove'] : array() as $sel ) {
+			$sel = self::valid_simple_selector( (string) $sel );
+			if ( '' !== $sel && ! in_array( $sel, $out['remove'], true ) && count( $out['remove'] ) < self::MAX_REMOVE ) {
+				$out['remove'][] = $sel;
+			}
+		}
+		return $out;
+	}
+
 	/**
-	 * Plain CSS selector used only to scope the hover rule. No braces,
+	 * "tag.class", ".class", "tag#id" or "#id", optionally followed by
+	 * ":empty" (removed only when it holds no text and no image / icon) —
+	 * elements removed from the page HTML.
+	 */
+	public static function valid_simple_selector( string $sel ): string {
+		$sel = trim( $sel );
+		return 1 === preg_match( '/^([a-z][a-z0-9]{0,9})?[.#][A-Za-z_][A-Za-z0-9_-]{0,60}(:empty)?$/', $sel ) ? $sel : '';
+	}
+
+	/**
+	 * Theme setting overrides: name => value. Values are plain text
+	 * (numbers become integers) — the theme escapes them where it prints.
+	 */
+	public static function sanitize_mods( array $raw ): array {
+		$out = array();
+		foreach ( $raw as $name => $value ) {
+			$name = (string) $name;
+			if ( 1 !== preg_match( '/^[A-Za-z0-9_\-]{1,100}$/', $name ) || count( $out ) >= self::MAX_MODS || ! is_scalar( $value ) ) {
+				continue;
+			}
+			$value = sanitize_text_field( (string) $value );
+			if ( mb_strlen( $value ) > self::MAX_MOD_LEN ) {
+				continue;
+			}
+			$out[ $name ] = 1 === preg_match( '/^-?\d{1,9}$/', $value ) ? (int) $value : $value;
+		}
+		return $out;
+	}
+
+	public static function sanitize_cats( array $raw ): array {
+		$out = array(
+			'fallback' => ! empty( $raw['fallback'] ),
+			'source'   => isset( $raw['source'] ) && in_array( $raw['source'], self::SOURCES, true ) ? $raw['source'] : 'recent',
+			'lists'    => array(),
+		);
+		$lists = isset( $raw['lists'] ) && is_array( $raw['lists'] ) ? $raw['lists'] : array();
+		foreach ( $lists as $l ) {
+			if ( ! is_array( $l ) || count( $out['lists'] ) >= self::MAX_CAT_LISTS ) {
+				continue;
+			}
+			$file = self::valid_rel_path( isset( $l['file'] ) ? (string) $l['file'] : '' );
+			if ( '' === $file ) {
+				continue;
+			}
+			$ids = array();
+			foreach ( ( isset( $l['include'] ) && is_array( $l['include'] ) ) ? $l['include'] : array() as $tid ) {
+				$tid = (int) $tid;
+				if ( $tid > 0 && ! in_array( $tid, $ids, true ) && count( $ids ) < self::MAX_CAT_IDS ) {
+					$ids[] = $tid;
+				}
+			}
+			$out['lists'][] = array(
+				'file'       => $file,
+				'include'    => $ids,
+				'hide_empty' => ! empty( $l['hide_empty'] ),
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Plain CSS selector (card, title, theme badge). No braces,
 	 * semicolons, angle brackets, quotes, backslashes or at-rules.
 	 */
 	public static function valid_selector( string $sel ): string {
@@ -329,10 +496,10 @@ final class LF_Settings {
 		return 1 === preg_match( '/^[A-Za-z0-9_\-.#\s,:()\[\]=*>+~]+$/', $sel ) && false === strpos( $sel, '@' ) ? $sel : '';
 	}
 
-	/** Custom CSS: tags stripped, no "</" sequences, length cap. */
+	/** Custom CSS: tags stripped, no "<" at all, length cap. */
 	public static function valid_css( string $css ): string {
 		$css = wp_strip_all_tags( $css );
-		$css = str_replace( array( '</', '<' ), '', $css );
+		$css = str_replace( '<', '', $css );
 		$css = trim( $css );
 		if ( strlen( $css ) > self::MAX_CSS_LEN ) {
 			$css = substr( $css, 0, self::MAX_CSS_LEN );
@@ -340,20 +507,27 @@ final class LF_Settings {
 		return $css;
 	}
 
-	public static function sanitize_text_fix( array $raw ): ?array {
+	/**
+	 * Text table row. "find" is kept raw (it is only searched for); the
+	 * custom replacement may hold simple HTML (links, emphasis) and goes
+	 * through wp_kses_post(). An empty custom text removes the found text.
+	 */
+	public static function sanitize_text( array $raw ): ?array {
 		$find = isset( $raw['find'] ) ? trim( (string) $raw['find'] ) : '';
 		if ( '' === $find || mb_strlen( $find ) > self::MAX_FIND_LEN ) {
 			return null;
 		}
-		$replace = isset( $raw['replace'] ) && 'custom' === $raw['replace'] ? 'custom' : 'wc_title';
-		$custom  = isset( $raw['custom'] ) ? sanitize_text_field( (string) $raw['custom'] ) : '';
+		$replace = isset( $raw['replace'] ) && 'wc_title' === $raw['replace'] ? 'wc_title' : 'custom';
+		$custom  = isset( $raw['custom'] ) ? trim( wp_kses_post( (string) $raw['custom'] ) ) : '';
 		if ( mb_strlen( $custom ) > self::MAX_CUSTOM_LEN ) {
-			$custom = mb_substr( $custom, 0, self::MAX_CUSTOM_LEN );
+			$custom = '';
 		}
+		$scope = isset( $raw['scope'] ) && in_array( $raw['scope'], self::SCOPES, true ) ? $raw['scope'] : 'all';
 		return array(
 			'find'    => $find,
 			'replace' => $replace,
 			'custom'  => $custom,
+			'scope'   => $scope,
 		);
 	}
 }

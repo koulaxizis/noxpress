@@ -20,7 +20,7 @@
 
 ## §2 Παλέτα (dark admin)
 
-Ίδιες τιμές σε όλα τα plugins, ως CSS custom properties με το prefix του plugin (`--rs-*`, `--sp-*`, `--sf-*`, `--lf-*`):
+Ίδιες τιμές σε όλα τα plugins, ως CSS custom properties με το prefix του plugin (`--rs-*`, `--sp-*`, `--sf-*`, `--tp-*`):
 
 | Token | Τιμή | Χρήση |
 |---|---|---|
@@ -67,7 +67,7 @@
   - `rs_invalidate_cache`: ο RS το πυροδοτεί όταν αλλάζουν δεδομένα RS ή παραγγελίες. Το SP το ακούει.
   - `noxpress_products_changed( int[] $product_ids )`: το πυροδοτεί όποιο plugin αλλάζει δεδομένα προϊόντων (SF μετά από apply/restore). Το SP το ακούει.
   - Δημόσια APIs του RS που διαβάζει το SP: `RS_Reports::run`, `RS_Beneficiaries::collect_names`, `RS_Ledger::sum`.
-- Plugin που **δεν** αλλάζει δεδομένα (π.χ. Loop Fixer, που αλλάζει μόνο την εμφάνιση) δεν πυροδοτεί τίποτα.
+- Plugin που **δεν** αλλάζει δεδομένα (π.χ. Theme Patcher, που αλλάζει μόνο την εμφάνιση) δεν πυροδοτεί τίποτα.
 
 ## §7 Footer
 
@@ -86,7 +86,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 
 - **Κοινό top-level:** slug `noxpress`, τίτλος «Noxpress», `dashicons-chart-pie`, θέση 57, capability `manage_woocommerce`.
 - **Προτεραιότητες `admin_menu`:**
-  - RS 9, SP 20, SF 30, LF 40.
+  - RS 9, SP 20, SF 30, TP 40.
   - Νέα plugins παίρνουν το επόμενο +10.
   - Το Data Migrator δεν έχει ακόμα ενταχθεί.
 - **Όποιο τρέξει πρώτο** (`empty( $GLOBALS['admin_page_hooks']['noxpress'] )`) δημιουργεί το top-level με τη δική του κύρια σελίδα ως landing, κρατά `owns_top = true` και αφαιρεί το διπλότυπο πρώτο submenu (`remove_submenu_page( 'noxpress', 'noxpress' )`).
@@ -161,7 +161,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Μικρή αλλαγή ανεβαίνει κατά patch. Πέρασμα με fix και feature ανεβαίνει κατά minor.
 - **Τρία σημεία σε κάθε έκδοση:** η έκδοση αλλάζει μαζί στο header, στη σταθερά `{P}_VERSION` και στο `Stable tag` του readme.
 - **Release workflow** (`.github/workflows/release.yml`):
-  - Κωδικός ανά plugin: rs, sp, sf, nm, lf.
+  - Κωδικός ανά plugin: rs, sp, sf, nm, tp.
   - Tag `nox-<code>-<version>`, zip `<slug>.zip` με τον φάκελο στη ρίζα.
   - Βγαίνει ως pre-release (beta) μέχρι να δοκιμαστεί.
   - Τα plugins στη λίστα `AUTO` βγαίνουν αυτόματα με το merge στο main.
@@ -174,7 +174,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Script που συγκρίνει τα msgids του κώδικα με το EN dict (καμία έλλειψη, κανένα αχρησιμοποίητο, κανένα διπλότυπο).
   - Για plugins με frontend: E2E σε τοπικό WordPress με Storefront (byte-identical output όταν δεν υπάρχει τίποτα να διορθωθεί), ένα block theme και ένα συνθετικό test theme. Τα tests μένουν εκτός repo.
 
-## §14 Κανόνες frontend (νέο, από το Loop Fixer)
+## §14 Κανόνες frontend (νέο, από το Theme Patcher)
 
 Για plugins που επεμβαίνουν σε ό,τι βλέπει ο επισκέπτης:
 
@@ -186,7 +186,10 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 6. **Απομόνωση σφαλμάτων.** Κάθε callback τυλίγεται σε `try/catch( \Throwable )`. Σε σφάλμα το plugin σταματά για το υπόλοιπο request και επιστρέφει το αρχικό output.
 7. **Output buffering** μόνο στο ελάχιστο απαραίτητο εύρος. Μέσα σε handler δεν καλείται καμία συνάρτηση `ob_*`. Ένα buffer κλείνει μόνο αν είναι το ανώτερο και είναι δικό μας.
 8. **Κανένα αρχείο θέματος ή άλλου plugin** δεν αλλάζει ποτέ. Η απενεργοποίηση επαναφέρει αμέσως το site.
-9. **CSS και JS** φορτώνονται μόνο όταν η σελίδα χρειάζεται πραγματικά το αποτέλεσμα (inline, scoped με prefix).
+9. **CSS και JS** φορτώνονται μόνο όταν η σελίδα χρειάζεται πραγματικά το αποτέλεσμα. Το CSS τυπώνεται μία φορά στο `<head>`, scoped με prefix.
+10. **Υπολογισμοί με queries** (π.χ. ποια εικόνα δείχνει μια κατηγορία) γίνονται στο admin ή σε hooks αποθήκευσης (`save_post_*`, `edited_*`) και αποθηκεύονται. Η προβολή σελίδας μόνο διαβάζει.
+11. **Αλλαγές σε όλο το HTML της σελίδας** γίνονται μόνο όταν υπάρχει ρύθμιση που τις χρειάζεται: ένα wrapper template (`template_include`) τρέχει το πρότυπο του θέματος μέσα σε buffer με pure-string handler.
+12. **Με ενεργή την προστασία ρυθμίσεων, ο κώδικας του θέματος δεν γράφει στη βάση από το front end:** η προστασία ακυρώνει την εγγραφή μέσω `pre_update_option_*` χωρίς να αλλάζει την αποθηκευμένη τιμή. Ο Customizer, το admin, το AJAX και το REST δεν μπλοκάρονται ποτέ.
 
 ## §15 Τρόπος εργασίας (Chris ↔ Claude)
 
