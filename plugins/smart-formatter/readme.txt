@@ -5,7 +5,7 @@ Tags: woocommerce, formatting, bulk edit, product description, typography
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -25,7 +25,9 @@ Smart Formatter applies formatting rules to WooCommerce product texts in bulk, s
 * **Profiles:** save and reload rule / field combinations.
 * **Backup:** export / import profiles, exclusions and snapshot history as JSON (imports are strictly validated).
 * Bilingual admin UI (Greek / English) following the Noxpress language choice, or the WordPress user locale.
-* Part of the Noxpress ecosystem: shares the "Noxpress" admin menu with Revenue Splitter and Store Pulse, and fires `noxpress_products_changed` after it changes products.
+* Part of the Noxpress ecosystem: shares the "Noxpress" admin menu with the other Noxpress plugins, and fires `noxpress_products_changed` after it changes products.
+* Noxpress hub: the "Noxpress" menu opens the Noxpress hub: one page for the whole suite with status, installed and available version, and update, install, activate, changelog and auto-update links.
+* Updates: updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
 
 == Installation ==
 
@@ -49,6 +51,13 @@ No. Global attribute values are terms shared by the whole store, so only custom 
 The plugin's own options and transients are removed. Product texts that were already formatted stay as they are.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Noxpress hub. The "Noxpress" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).
+* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.
+* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.
+* Changed: the shared "Noxpress" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.
+* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.
 
 = 1.1.0 =
 * Fixed: "Strip formatting" removed unrelated tags (`<ul>`, `<br>`, `<img>`, `<span>`, `<sup>`, `<small>`, `<blockquote>`…); it now matches exact tag names only.

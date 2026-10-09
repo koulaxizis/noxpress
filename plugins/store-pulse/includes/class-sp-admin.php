@@ -3,9 +3,9 @@
  * SP_Admin — Μενού, Ρυθμίσεις, Widget, Assets.
  *
  * Κοινό μενού «Noxpress» (admin_menu, priority 20 — RS = 9, SF = 30):
- *  - Αν το top-level 'noxpress' υπάρχει ήδη (το δημιούργησε το
- *    Revenue Splitter), δένουμε ως submenus.
- *  - Αλλιώς το δημιουργούμε εμείς, με το SP dashboard ως landing.
+ *  - Το top-level 'noxpress' (hub) το δημιουργεί το Noxpress Core
+ *    (includes/noxpress-core, priority 5, Bible §16). Εμείς δένουμε
+ *    ως submenus.
  *  - Σε ΚΑΘΕ συνδυασμό υπάρχουν οι δικές μας σελίδες 'sp-dashboard'
  *    και 'sp-settings' — το admin.php?page=sp-dashboard δουλεύει πάντα.
  *
@@ -55,8 +55,6 @@ final class SP_Admin {
 		'others'      => 'Οφειλές προς άλλους',
 	);
 
-	/** true όταν το Store Pulse δημιούργησε το top-level 'noxpress'. */
-	private static $owns_top = false;
 
 	/** Μηνύματα λάθους του τελευταίου POST (ίδιο request με το render). */
 	private static $errors = array();
@@ -95,25 +93,8 @@ final class SP_Admin {
 
 	public static function register_menu(): void {
 
-		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
-			/*
-			 * Κανείς δεν έχει δημιουργήσει το κοινό «Noxpress» menu
-			 * (το Revenue Splitter δεν είναι ενεργό) — το δημιουργούμε
-			 * εμείς, με το dashboard μας ως landing.
-			 */
-			self::$owns_top = true;
-
-			add_menu_page(
-				__( 'Noxpress', 'store-pulse' ),
-				__( 'Noxpress', 'store-pulse' ),
-				self::CAP,
-				self::SLUG_MENU,
-				array( __CLASS__, 'render_dashboard' ),
-				'dashicons-chart-pie',
-				57
-			);
-		}
-
+		// Το κοινό top-level «Noxpress» (με το hub ως landing) το δημιουργεί
+		// το Noxpress Core (priority 5, Bible §16). Εδώ μόνο submenus.
 		add_submenu_page(
 			self::SLUG_MENU,
 			__( 'Store Pulse — Dashboard', 'store-pulse' ),
@@ -130,15 +111,6 @@ final class SP_Admin {
 			self::SLUG_SETTINGS,
 			array( __CLASS__, 'render_settings' )
 		);
-
-		if ( self::$owns_top ) {
-			// Το WP επαναλαμβάνει το top-level ως πρώτο submenu
-			// («Noxpress» → page=noxpress). Το αφαιρούμε: το top-level
-			// link οδηγεί πλέον στο πρώτο submenu (sp-dashboard), ενώ
-			// το admin.php?page=noxpress εξακολουθεί να αποδίδει την
-			// ίδια σελίδα.
-			remove_submenu_page( self::SLUG_MENU, self::SLUG_MENU );
-		}
 	}
 
 	/* =====================================================================
@@ -152,7 +124,6 @@ final class SP_Admin {
 			: '';
 
 		$load = in_array( $page, array( self::SLUG_DASH, self::SLUG_SETTINGS ), true )
-			|| ( self::$owns_top && self::SLUG_MENU === $page )
 			|| ( 'index.php' === $hook ); // Quick View widget.
 
 		if ( ! $load ) {

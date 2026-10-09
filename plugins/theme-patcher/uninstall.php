@@ -51,3 +51,43 @@ if ( is_multisite() ) {
 } else {
 	tp_uninstall_site();
 }
+
+// ---------------------------------------------------------------------
+// Noxpress Core (Bible §16): the update channel, the cached version list
+// and the hub notices are shared by the suite. They are deleted only
+// when no other Noxpress plugin is installed (main file check).
+// ---------------------------------------------------------------------
+
+$tp_suite_left = false;
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher' ) as $tp_slug ) {
+	if ( 'theme-patcher' !== $tp_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $tp_slug . '/' . $tp_slug . '.php' ) ) {
+		$tp_suite_left = true;
+		break;
+	}
+}
+
+if ( ! $tp_suite_left ) {
+	global $wpdb;
+
+	delete_site_option( 'noxpress_channel' );
+	delete_site_option( 'noxpress_checked' );
+	delete_site_transient( 'noxpress_manifest' );
+
+	$tp_sites = is_multisite() ? get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) : array( 0 );
+	foreach ( $tp_sites as $tp_site_id ) {
+		if ( $tp_site_id ) {
+			switch_to_blog( (int) $tp_site_id );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_noxpress_hub_msg_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_noxpress_hub_msg_' ) . '%'
+			)
+		);
+		if ( $tp_site_id ) {
+			restore_current_blog();
+		}
+	}
+}

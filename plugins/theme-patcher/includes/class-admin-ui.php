@@ -2,9 +2,8 @@
 /**
  * TP_Admin_UI — admin pages, POST routes (PRG), page probe, backup.
  *
- * Pages (Bible §8, admin_menu priority 40): shared top-level 'noxpress'.
- * When another Noxpress plugin created it (RS 9 / SP 20 / SF 30) we add
- * submenus; otherwise Theme Patcher creates it with its own page as landing.
+ * Pages (Bible §8, admin_menu priority 40): submenus of the shared
+ * top-level 'noxpress', created by Noxpress Core (priority 5, Bible §16).
  *  - tp-theme-patcher  status + tabs: cards (detector, areas, page probe),
  *                      texts, page rules, theme, categories, checks
  *  - tp-settings       master switch, test mode, backup & restore
@@ -51,9 +50,6 @@ final class TP_Admin_UI {
 	/** Max size of an imported backup file (bytes). */
 	const MAX_IMPORT = 1048576;
 
-	/** true when Theme Patcher created the top-level 'noxpress' in this request. */
-	private static $owns_top = false;
-
 	public static function init(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 40 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
@@ -68,21 +64,8 @@ final class TP_Admin_UI {
 
 	public static function admin_menu(): void {
 
-		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
-			// No other Noxpress plugin created the top-level: we do, with
-			// the Theme Patcher page as landing page.
-			add_menu_page(
-				__( 'Noxpress', 'theme-patcher' ),
-				__( 'Noxpress', 'theme-patcher' ),
-				self::CAP,
-				self::SLUG_MENU,
-				array( __CLASS__, 'render_main' ),
-				'dashicons-chart-pie',
-				57
-			);
-			self::$owns_top = true;
-		}
-
+		// The shared top-level "Noxpress" (with the hub as landing page) is
+		// created by Noxpress Core (priority 5, Bible §16): submenus only here.
 		add_submenu_page(
 			self::SLUG_MENU,
 			__( 'Theme Patcher', 'theme-patcher' ),
@@ -100,12 +83,6 @@ final class TP_Admin_UI {
 			self::SLUG_SET,
 			array( __CLASS__, 'render_settings' )
 		);
-
-		if ( self::$owns_top ) {
-			// WordPress repeats the top-level as first submenu ("Noxpress"),
-			// a duplicate of "Theme Patcher": the top-level link now opens tp-theme-patcher.
-			remove_submenu_page( self::SLUG_MENU, self::SLUG_MENU );
-		}
 	}
 
 	public static function action_links( $links ): array {
@@ -124,7 +101,7 @@ final class TP_Admin_UI {
 	}
 
 	private static function is_main_page( string $page ): bool {
-		return self::SLUG_MAIN === $page || ( self::$owns_top && self::SLUG_MENU === $page );
+		return self::SLUG_MAIN === $page;
 	}
 
 	public static function assets(): void {
@@ -1202,7 +1179,7 @@ final class TP_Admin_UI {
 	public static function route(): void {
 
 		$page = self::current_page();
-		if ( self::SLUG_MAIN !== $page && self::SLUG_SET !== $page && self::SLUG_MENU !== $page ) {
+		if ( self::SLUG_MAIN !== $page && self::SLUG_SET !== $page ) {
 			return;
 		}
 		if ( ! isset( $_POST[ self::NONCE_FIELD ], $_POST['tp_action'] ) ) {

@@ -443,17 +443,6 @@ class RS_Lang {
 		'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s.' => 'The following emails were NOT saved (invalid address): %s.',
 		'Τα παρακάτω emails ΔΕΝ αποθηκεύτηκαν (μη έγκυρη διεύθυνση): %s. Ο καταμερισμός αποθηκεύτηκε κανονικά.' => 'The following emails were NOT saved (invalid address): %s. The split was saved normally.',
 
-		'Επισκόπηση' => 'Overview',
-		'Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal.' => 'Revenue split per beneficiary, VAT, ledger and portal.',
-		'Ρυθμίσεις του Revenue Splitter.' => 'Revenue Splitter settings.',
-		'Διαχείριση κλειδιών πρόσβασης των δικαιούχων στο portal.' => 'Manage the beneficiaries\' portal access keys.',
-		'Το οικοσύστημα των plugins του καταστήματός σου. Διάλεξε πού θα πας:' => 'Your store\'s plugin ecosystem. Choose where to go:',
-		'Κατάσταση' => 'Status',
-		'Έκδοση' => 'Version',
-		'Ενεργό' => 'Active',
-		'Μη εγκατεστημένο / ανενεργό' => 'Not installed / inactive',
-		'Άνοιγμα' => 'Open',
-
 		'Emails δικαιούχων & μηνιαία αναφορά' => 'Beneficiary emails & monthly report',
 		'Το email χρησιμοποιείται για την αποστολή νέου κλειδιού portal (ροή «Ξέχασα το κλειδί») και για τη μηνιαία αναφορά πωλήσεων (στέλνεται τις πρώτες μέρες κάθε μήνα για τον προηγούμενο). Ο συγγραφέας μπορεί να ενεργοποιήσει/απενεργοποιήσει την αναφορά και μόνος του από το portal του.' => 'The email is used to send a new portal key ("Forgot my key" flow) and for the monthly sales report (sent in the first days of each month for the previous one). The author can also enable/disable the report from their own portal.',
 		'Μηνιαία αναφορά' => 'Monthly report',

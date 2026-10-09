@@ -68,8 +68,8 @@ final class RS_Portal {
 		add_shortcode( 'rs_portal', array( __CLASS__, 'shortcode' ) );
 		add_action( 'init', array( __CLASS__, 'route' ) );
 
-		// Ίδια προτεραιότητα με το RS_Admin_UI (9) — μετά από αυτό στη
-		// σειρά init, άρα το top-level «Noxpress» υπάρχει ήδη.
+		// Ίδια προτεραιότητα με το RS_Admin_UI (9): το top-level «Noxpress»
+		// το έχει ήδη δημιουργήσει το Noxpress Core (priority 5).
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 9 );
 		add_action( 'admin_init', array( __CLASS__, 'route_admin_keys' ) );
 	}

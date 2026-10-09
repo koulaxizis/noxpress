@@ -42,8 +42,6 @@
 }
 
 /* v1.7.0: Noxpress home — κάρτες + κατάσταση plugins. */
-.rs-card-link { display: block; margin-bottom: 6px; text-decoration: none; }
-.rs-status-on { color: #8fe6ab; font-weight: 600; }
 
 /* Όνομα δικαιούχου ως pill (bg/fg ανά δικαιούχο έρχονται inline). */
 .rs-name-pill {

@@ -3,7 +3,7 @@
  * Plugin Name:          Smart Formatter
  * Plugin URI:           https://noxpress.tech
  * Description:          Μαζική μορφοποίηση κειμένων προϊόντων WooCommerce (bold, italic, παρενθέσεις, αριθμοί, εισαγωγικά, κενά) με preview, dry run, snapshots/undo και profiles.
- * Version:              1.1.0
+ * Version:              1.2.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,6 +13,7 @@
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
  * Donate URI:           https://ko-fi.com/koulaxizis
+ * Update URI:           https://noxpress.tech/updates/smart-formatter
  * Text Domain:          smart-formatter
  * Domain Path:          /languages
  *
@@ -38,9 +39,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SF_VERSION', '1.1.0' );
+define( 'SF_VERSION', '1.2.0' );
 define( 'SF_FILE', __FILE__ );
 define( 'SF_PATH', plugin_dir_path( __FILE__ ) );
+
+// Noxpress Core: shared menu, hub and updates (Bible §16). The newest
+// copy among the active Noxpress plugins is the one that loads.
+require_once SF_PATH . 'includes/noxpress-core/loader.php';
 
 // WooCommerce HPOS (custom order tables) compatibility: το SF δεν αγγίζει παραγγελίες.
 add_action(

@@ -1,0 +1,219 @@
+/**
+ * Noxpress Core — hub.css
+ *
+ * Noxpress standards (Bible §2–§5, §7): same palette and page shell as
+ * Revenue Splitter, prefixed nx-*, hardened with !important where WP core
+ * light rules would break the dark panel. Nothing leaves .nx-wrap.
+ */
+
+.nx-wrap {
+	--nx-bg: #101218;
+	--nx-panel: #14161d;
+	--nx-panel-2: #1d2029;
+	--nx-border: #2e3240;
+	--nx-row-border: #23262f;
+	--nx-stripe: #181b23;
+	--nx-hover: #1e212c;
+	--nx-text: #eae8fa;
+	--nx-heading: #f6f4ff;
+	--nx-muted: #b7b2d6;
+	--nx-link: #beb1ff;
+	--nx-link-hover: #d4c9ff;
+	--nx-accent: #6d4aff;
+	--nx-accent-hover: #8263ff;
+	--nx-warn: #f5c97e;
+	--nx-danger: #ff9a9a;
+
+	color-scheme: dark;
+	background: var(--nx-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--nx-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+	max-width: 1180px;
+}
+
+.nx-wrap h1,
+.nx-wrap h2 { color: var(--nx-heading); }
+
+.nx-wrap a { color: var(--nx-link); }
+.nx-wrap a:hover { color: var(--nx-link-hover); }
+
+.nx-wrap .description { color: var(--nx-muted) !important; }
+
+.nx-wrap .nx-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--nx-muted);
+	border-bottom: 1px solid var(--nx-border);
+	padding-bottom: 6px;
+}
+
+.nx-zone {
+	background: var(--nx-panel);
+	border: 1px solid var(--nx-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+.nx-wrap .nx-label {
+	font-weight: 600;
+	color: var(--nx-heading);
+	margin: 0 0 8px;
+}
+
+.nx-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.nx-wrap input[type="radio"] { accent-color: var(--nx-accent); }
+
+.nx-check-form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 14px 0 0;
+	padding-top: 14px;
+	border-top: 1px solid var(--nx-row-border);
+}
+
+/* Buttons (Bible §5). */
+.nx-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+}
+
+.nx-wrap .button:hover {
+	border-color: var(--nx-accent) !important;
+	color: #ffffff !important;
+}
+
+.nx-wrap .button-primary {
+	background: var(--nx-accent) !important;
+	border-color: var(--nx-accent) !important;
+	color: #ffffff !important;
+}
+
+.nx-wrap .button-primary:hover { background: var(--nx-accent-hover) !important; }
+
+/* Table — hardened (= .rs-table). */
+table.widefat.nx-table {
+	background: var(--nx-panel) !important;
+	border: 1px solid var(--nx-border) !important;
+	border-radius: 6px;
+	color: var(--nx-text) !important;
+	margin-top: 14px !important;
+}
+
+.nx-table thead th {
+	background: var(--nx-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+}
+
+.nx-table tbody td {
+	background: var(--nx-panel) !important;
+	color: var(--nx-text) !important;
+	border-bottom: 1px solid var(--nx-row-border);
+	vertical-align: top;
+	padding: 12px 14px;
+}
+
+.nx-table tbody tr:nth-child(2n) td { background: var(--nx-stripe) !important; }
+.nx-table tbody tr:hover td { background: var(--nx-hover) !important; }
+
+.nx-table td code {
+	background: var(--nx-panel-2) !important;
+	color: var(--nx-text) !important;
+	border-radius: 4px;
+	padding: 1px 6px;
+}
+
+.nx-desc {
+	display: block;
+	margin-top: 4px;
+	color: var(--nx-muted);
+	font-size: 12px;
+	max-width: 420px;
+}
+
+.nx-actions .button { margin: 0 6px 6px 0; }
+.nx-actions > a:not(.button) { margin-right: 10px; }
+
+.nx-auto {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+	color: var(--nx-muted);
+}
+
+/* Badges. */
+.nx-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--nx-border);
+	background: var(--nx-panel-2);
+	color: var(--nx-text);
+	white-space: nowrap;
+}
+
+.nx-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.nx-badge--muted { color: var(--nx-muted); }
+.nx-badge--warn { border-color: #6b5a33; color: var(--nx-warn); }
+.nx-badge--beta { border-color: #e0a84f; background: rgba(224, 168, 79, 0.14); color: #f5c97e; }
+
+.nx-muted { color: var(--nx-muted) !important; }
+.nx-small { font-size: 12px; margin: 10px 0 0; }
+
+.nx-wrap .notice.inline { margin: 0 0 14px !important; }
+
+/* Footer (Bible §7). */
+.nx-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.nx-footer a { color: #beb1ff; text-decoration: none; }
+.nx-footer a:hover { text-decoration: underline; }
+
+.nx-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.nx-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.nx-kofi:hover { background: #8263ff; color: #ffffff; }
+
+.nx-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }

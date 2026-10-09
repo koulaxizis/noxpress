@@ -5,8 +5,11 @@
  * Διαγράφει ΜΟΝΟ τα δεδομένα αυτού του plugin από τη βάση:
  *  - Όλα τα options του plugin (λίστα παρακάτω — επαληθευμένη με grep
  *    σε κάθε get/update/add_option του κώδικα).
- *  - User meta: rs_lang — ΜΟΝΟ αν δεν είναι εγκατεστημένα το Store Pulse
- *    ή το Smart Formatter (το διαβάζουν ως κοινή επιλογή γλώσσας Noxpress).
+ *  - User meta: rs_lang — ΜΟΝΟ αν δεν είναι εγκατεστημένα το Store Pulse,
+ *    το Smart Formatter ή το Theme Patcher (το διαβάζουν ως κοινή
+ *    επιλογή γλώσσας Noxpress).
+ *  - Noxpress Core (noxpress_channel, noxpress_checked, noxpress_manifest,
+ *    noxpress_hub_msg_*) — ΜΟΝΟ αν δεν μένει άλλο plugin της σουίτας.
  *  - Transients: rs_tok_* (portal sessions), rs_rl_* (rate limit),
  *    rs_report_* (cached reports), rs_ledger_msg_* / rs_aui_msg_* (PRG
  *    notices), rs_split_error_* / rs_split_warn_* (metabox notices),
@@ -75,13 +78,14 @@ wp_clear_scheduled_hook( 'rs_email_monthly_check' );
 // User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
 //
 // Το rs_lang είναι η ΚΟΙΝΗ επιλογή γλώσσας του οικοσυστήματος Noxpress:
-// το Store Pulse και το Smart Formatter τη διαβάζουν. Σβήνεται ΜΟΝΟ αν
-// κανένα από τα δύο δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
+// το Store Pulse, το Smart Formatter και το Theme Patcher τη διαβάζουν.
+// Σβήνεται ΜΟΝΟ αν κανένα δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
 // ------------------------------------------------------------------------
 
 $rs_lang_readers = array(
 	'store-pulse/store-pulse.php',
 	'smart-formatter/smart-formatter.php',
+	'theme-patcher/theme-patcher.php',
 );
 
 $rs_lang_in_use = false;
@@ -222,3 +226,43 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $rs_itemmeta_table )
 // Done. Καμία σιωπηλή αποτυχία — αν κάτι πήγε στραβά, θα το δεις στα
 // υπολειπόμενα δεδομένα (option inspector / DB browser).
 // ------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------
+// Noxpress Core (Bible §16): the update channel, the cached version list
+// and the hub notices are shared by the suite. They are deleted only
+// when no other Noxpress plugin is installed (main file check).
+// ---------------------------------------------------------------------
+
+$rs_suite_left = false;
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher' ) as $rs_slug ) {
+	if ( 'revenue-splitter' !== $rs_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $rs_slug . '/' . $rs_slug . '.php' ) ) {
+		$rs_suite_left = true;
+		break;
+	}
+}
+
+if ( ! $rs_suite_left ) {
+	global $wpdb;
+
+	delete_site_option( 'noxpress_channel' );
+	delete_site_option( 'noxpress_checked' );
+	delete_site_transient( 'noxpress_manifest' );
+
+	$rs_sites = is_multisite() ? get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) : array( 0 );
+	foreach ( $rs_sites as $rs_site_id ) {
+		if ( $rs_site_id ) {
+			switch_to_blog( (int) $rs_site_id );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_noxpress_hub_msg_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_noxpress_hub_msg_' ) . '%'
+			)
+		);
+		if ( $rs_site_id ) {
+			restore_current_blog();
+		}
+	}
+}
