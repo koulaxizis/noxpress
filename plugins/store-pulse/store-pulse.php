@@ -3,7 +3,7 @@
  * Plugin Name:          Store Pulse
  * Plugin URI:           https://noxpress.tech
  * Description:          Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
- * Version:              1.3.0
+ * Version:              1.4.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,6 +13,7 @@
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
  * Donate URI:           https://ko-fi.com/koulaxizis
+ * Update URI:           https://noxpress.tech/updates/store-pulse
  * Text Domain:          store-pulse
  * Domain Path:          /languages
  *
@@ -30,10 +31,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SP_VERSION', '1.3.0' );
+define( 'SP_VERSION', '1.4.0' );
 define( 'SP_FILE', __FILE__ );
 define( 'SP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SP_URL', plugin_dir_url( __FILE__ ) );
+
+// Noxpress Core: shared menu, hub and updates (Bible §16). The newest
+// copy among the active Noxpress plugins is the one that loads.
+require_once SP_PATH . 'includes/noxpress-core/loader.php';
 
 /**
  * HPOS compatibility (custom order tables) — δηλώνεται πριν το

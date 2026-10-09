@@ -129,7 +129,6 @@ final class SP_Lang {
 	private static $dict = array(
 
 		// --- Menus / σελίδες ---
-		'Noxpress'                                        => 'Noxpress',
 		'Store Pulse'                                      => 'Store Pulse',
 		'Store Pulse — Dashboard'                          => 'Store Pulse — Dashboard',
 		'Store Pulse — Ρυθμίσεις'                          => 'Store Pulse — Settings',

@@ -25,7 +25,6 @@ final class TP_Lang {
 	private static $dict = array(
 		// Bootstrap / menu / pages.
 		'Το Theme Patcher χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Theme Patcher requires WooCommerce to be active — the plugin stays inactive until it is activated.',
-		'Noxpress'                                                => 'Noxpress',
 		'Theme Patcher'                                              => 'Theme Patcher',
 		'Theme Patcher — Ρυθμίσεις'                                  => 'Theme Patcher — Settings',
 		'TP Ρυθμίσεις'                                            => 'TP Settings',

@@ -70,7 +70,7 @@ defined( 'ABSPATH' ) || exit;
 final class RS_Admin_UI {
 
 	const CAP       = 'manage_woocommerce';
-	const SLUG_MENU = 'noxpress';            // Top-level parent (κοινό με το Store Pulse)
+	const SLUG_MENU = 'noxpress';            // Κοινό top-level (Noxpress Core, Bible §16)
 	const SLUG_DASH = 'revenue-splitter-dashboard';
 	const SLUG_SET  = 'revenue-splitter-settings';
 
@@ -136,8 +136,8 @@ final class RS_Admin_UI {
 	public static function init(): void {
 		add_action( 'rs_invalidate_cache', array( __CLASS__, 'clear_cache' ) );
 
-		// Noxpress contract: RS = priority 9 → δημιουργεί ΠΑΝΤΑ πρώτο το
-		// κοινό top-level (Store Pulse: 20, Smart Formatter: 30).
+		// Noxpress contract (Bible §8): RS = priority 9, μετά το Noxpress
+		// Core (5) που δημιουργεί το κοινό top-level.
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 9 );
 		add_action( 'admin_init', array( __CLASS__, 'route_exports' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_backup' ) );
@@ -154,33 +154,9 @@ final class RS_Admin_UI {
 
 	public static function admin_menu(): void {
 
-		// Κοινό top-level «Noxpress»: όποιος τρέχει πρώτος το δημιουργεί.
-		// Το RS (priority 9) το δημιουργεί κανονικά πάντα — ο έλεγχος
-		// υπάρχει για την απίθανη περίπτωση που κάποιο άλλο plugin του
-		// οικοσυστήματος το έχει ήδη καταχωρίσει.
-		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
-			add_menu_page(
-				__( 'Noxpress', 'revenue-splitter' ),
-				__( 'Noxpress', 'revenue-splitter' ),
-				self::CAP,
-				self::SLUG_MENU,
-				array( __CLASS__, 'render_noxpress_home' ),
-				'dashicons-chart-pie',
-				57
-			);
-
-			// Το WP επαναλαμβάνει το top-level ως πρώτο submenu — του δίνουμε
-			// ρητή ετικέτα αντί για διπλό «Noxpress».
-			add_submenu_page(
-				self::SLUG_MENU,
-				__( 'Noxpress', 'revenue-splitter' ),
-				__( 'Επισκόπηση', 'revenue-splitter' ),
-				self::CAP,
-				self::SLUG_MENU,
-				array( __CLASS__, 'render_noxpress_home' )
-			);
-		}
-
+		// Το κοινό top-level «Noxpress» και η landing σελίδα του (hub) ανήκουν
+		// στο Noxpress Core (includes/noxpress-core, Bible §16), που τρέχει
+		// πρώτο (priority 5). Εδώ μόνο τα δικά μας submenus.
 		add_submenu_page(
 			self::SLUG_MENU,
 			__( 'Revenue Splitter — Γρήγορη ματιά', 'revenue-splitter' ),
@@ -203,122 +179,6 @@ final class RS_Admin_UI {
 		// RS_Portal::admin_menu() — εδώ καμία διπλή εγγραφή.
 	}
 
-		/**
-	 * Landing page του κοινού top-level «Noxpress» menu.
-	 *
-	 * ΔΕΝ είναι το RS dashboard — είναι ο κεντρικός πίνακας του brand,
-	 * με shortcuts σε όλα τα Noxpress plugins που είναι ενεργά.
-	 */
-	public static function render_noxpress_home(): void {
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
-		}
-
-		$cards = array(
-			array(
-				'title' => __( 'Revenue Splitter', 'revenue-splitter' ),
-				'desc'  => __( 'Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal.', 'revenue-splitter' ),
-				'url'   => admin_url( 'admin.php?page=' . self::SLUG_DASH ),
-			),
-			array(
-				'title' => __( 'RS Ρυθμίσεις', 'revenue-splitter' ),
-				'desc'  => __( 'Ρυθμίσεις του Revenue Splitter.', 'revenue-splitter' ),
-				'url'   => admin_url( 'admin.php?page=' . self::SLUG_SET ),
-			),
-		);
-
-		// Portal — διαχείριση κλειδιών δικαιούχων (μόνο αν το module φορτώνει).
-		if ( class_exists( 'RS_Portal' ) ) {
-			$cards[] = array(
-				'title' => __( 'RS Portal', 'revenue-splitter' ),
-				'desc'  => __( 'Διαχείριση κλειδιών πρόσβασης των δικαιούχων στο portal.', 'revenue-splitter' ),
-				'url'   => admin_url( 'admin.php?page=' . RS_Portal::SLUG_ADMIN ),
-			);
-		}
-
-		// Οικοσύστημα Noxpress — ΜΟΝΟ defined()/class_exists(), καμία
-		// εξάρτηση από σειρά φόρτωσης ή εσωτερικά APIs των άλλων plugins.
-		$sp_active = defined( 'SP_VERSION' ) || class_exists( 'SP_Admin' );
-		$sf_active = defined( 'SF_VERSION' ) || class_exists( 'SF_Admin_UI' );
-
-		$ecosystem = array(
-			array(
-				'name'    => 'Revenue Splitter',
-				'active'  => true,
-				'version' => RS_VERSION,
-				'url'     => admin_url( 'admin.php?page=' . self::SLUG_DASH ),
-			),
-			array(
-				'name'    => 'Store Pulse',
-				'active'  => $sp_active,
-				'version' => defined( 'SP_VERSION' ) ? (string) constant( 'SP_VERSION' ) : '',
-				'url'     => admin_url( 'admin.php?page=sp-dashboard' ),
-			),
-			array(
-				'name'    => 'Smart Formatter',
-				'active'  => $sf_active,
-				'version' => defined( 'SF_VERSION' ) ? (string) constant( 'SF_VERSION' ) : '',
-				'url'     => admin_url( 'admin.php?page=sf-formatter' ),
-			),
-		);
-
-		?>
-		<div class="wrap rs-wrap">
-
-			<h1><?php esc_html_e( 'Noxpress', 'revenue-splitter' ); ?></h1>
-			<p class="description"><?php esc_html_e( 'Το οικοσύστημα των plugins του καταστήματός σου. Διάλεξε πού θα πας:', 'revenue-splitter' ); ?></p>
-
-			<div class="rs-kpis">
-				<?php foreach ( $cards as $c ) : ?>
-					<div class="rs-kpi">
-						<a class="rs-card-link" href="<?php echo esc_url( $c['url'] ); ?>">
-							<strong><?php echo esc_html( $c['title'] ); ?></strong>
-						</a>
-						<span class="rs-kpi-label"><?php echo esc_html( $c['desc'] ); ?></span>
-					</div>
-				<?php endforeach; ?>
-			</div>
-
-			<h2 class="rs-h2"><?php esc_html_e( 'Noxpress plugins', 'revenue-splitter' ); ?></h2>
-			<table class="widefat striped rs-table">
-				<thead>
-					<tr>
-						<th><?php esc_html_e( 'Plugin', 'revenue-splitter' ); ?></th>
-						<th><?php esc_html_e( 'Κατάσταση', 'revenue-splitter' ); ?></th>
-						<th><?php esc_html_e( 'Έκδοση', 'revenue-splitter' ); ?></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ( $ecosystem as $eco ) : ?>
-					<tr>
-						<td><strong><?php echo esc_html( $eco['name'] ); ?></strong></td>
-						<td>
-							<?php if ( $eco['active'] ) : ?>
-								<span class="rs-status-on"><?php esc_html_e( 'Ενεργό', 'revenue-splitter' ); ?></span>
-							<?php else : ?>
-								<span class="rs-muted"><?php esc_html_e( 'Μη εγκατεστημένο / ανενεργό', 'revenue-splitter' ); ?></span>
-							<?php endif; ?>
-						</td>
-						<td><?php echo esc_html( '' !== $eco['version'] ? $eco['version'] : '—' ); ?></td>
-						<td>
-							<?php if ( $eco['active'] ) : ?>
-								<a href="<?php echo esc_url( $eco['url'] ); ?>"><?php esc_html_e( 'Άνοιγμα', 'revenue-splitter' ); ?> →</a>
-							<?php else : ?>
-								<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-
-			<?php self::footer(); ?>
-		</div>
-		<?php
-	}
-
 	/**
 	 * v1.3.2 FIX (#1): το CSS φορτώνεται ΚΑΙ στο dashboard (wp-admin/
 	 * index.php) για το widget. Εκεί enqueue-άρει ΜΟΝΟ το stylesheet.
@@ -335,7 +195,7 @@ final class RS_Admin_UI {
 		// είτε όχι (καμία εικασία πάνω στο hook suffix).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page slug.
 		$page    = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-		$own     = array( self::SLUG_MENU, self::SLUG_DASH, self::SLUG_SET, 'revenue-splitter-portal' );
+		$own     = array( self::SLUG_DASH, self::SLUG_SET, 'revenue-splitter-portal' );
 		$is_ours = ( '' !== $page && in_array( $page, $own, true ) );
 
 		// Metabox προϊόντος: μόνο σε οθόνες επεξεργασίας product.

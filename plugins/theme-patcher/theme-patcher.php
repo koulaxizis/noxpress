@@ -3,7 +3,7 @@
  * Plugin Name:          Theme Patcher
  * Plugin URI:           https://noxpress.tech
  * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
- * Version:              1.0.0
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,6 +13,7 @@
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
  * Donate URI:           https://ko-fi.com/koulaxizis
+ * Update URI:           https://noxpress.tech/updates/theme-patcher
  * Text Domain:          theme-patcher
  * Domain Path:          /languages
  *
@@ -50,10 +51,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TP_VERSION', '1.0.0' );
+define( 'TP_VERSION', '1.1.0' );
 define( 'TP_FILE', __FILE__ );
 define( 'TP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TP_URL', plugin_dir_url( __FILE__ ) );
+
+// Noxpress Core: shared menu, hub and updates (Bible §16). The newest
+// copy among the active Noxpress plugins is the one that loads.
+require_once TP_PATH . 'includes/noxpress-core/loader.php';
 
 // WooCommerce HPOS (custom order tables) compatibility: Theme Patcher never touches orders.
 add_action(

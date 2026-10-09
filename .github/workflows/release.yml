@@ -15,13 +15,23 @@
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
 # Οι εκδόσεις βγαίνουν ως pre-release (beta)· όταν δοκιμαστούν,
 # αφαιρείς το «pre-release» από τη σελίδα του release στο GitHub.
+#
+# updates.json (Bible §16): μετά από κάθε release, και κάθε φορά που
+# αλλάζεις ένα release στο GitHub (π.χ. βγάζεις το «pre-release»), το job
+# «manifest» ξαναφτιάχνει το updates.json στη ρίζα του main. Από εκεί το
+# διαβάζουν τα sites (https://noxpress.tech/updates.json): για κάθε plugin
+# το νεότερο stable και το νεότερο beta, με sha256 και υπογραφή Ed25519.
+# Χρειάζεται το secret NOXPRESS_SIGNING_KEY (ιδιωτικό κλειδί PEM)· χωρίς
+# αυτό το workflow σταματά πριν βγάλει οτιδήποτε.
 name: Release plugin
 
 on:
   push:
     branches: [main]
-    paths: ['plugins/**', '.github/workflows/release.yml']
+    paths: ['plugins/**', '.github/workflows/release.yml', '.github/scripts/**']
     tags: ['nox-*-*']
+  release:
+    types: [published, edited, prereleased, released, unpublished, deleted]
   workflow_dispatch:
 
 permissions:
@@ -36,9 +46,30 @@ env:
 
 jobs:
   release:
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check signing key
+        env:
+          NOXPRESS_SIGNING_KEY: ${{ secrets.NOXPRESS_SIGNING_KEY }}
+        run: |
+          if [ -z "$NOXPRESS_SIGNING_KEY" ]; then
+            echo "::error::The NOXPRESS_SIGNING_KEY secret is missing: add it in Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+
+      - name: Check Noxpress Core copies
+        run: |
+          set -euo pipefail
+          ref=plugins/revenue-splitter/includes/noxpress-core
+          for slug in store-pulse smart-formatter theme-patcher; do
+            if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
+              echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
+              exit 1
+            fi
+          done
 
       - name: Build and publish missing releases
         env:
@@ -119,3 +150,43 @@ jobs:
               release_one "$code"
             done
           fi
+
+  manifest:
+    needs: release
+    if: always() && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Build and push updates.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SIGNING_KEY: ${{ secrets.NOXPRESS_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::The NOXPRESS_SIGNING_KEY secret is missing."
+            exit 1
+          fi
+          key="$RUNNER_TEMP/noxpress-signing.pem"
+          (umask 077 && printf '%s\n' "$SIGNING_KEY" > "$key")
+          NOXPRESS_SIGNING_KEY="$key" python3 .github/scripts/build-manifest.py updates.json $AUTO
+          rm -f "$key"
+
+          if git diff --quiet -- updates.json && git ls-files --error-unmatch updates.json > /dev/null 2>&1; then
+            echo "updates.json unchanged."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add updates.json
+          git commit -m 'Update updates.json'
+          for i in 1 2 3 4; do
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((i * 4))
+            git pull --rebase origin main
+          done
+          echo "::error::Could not push updates.json"
+          exit 1

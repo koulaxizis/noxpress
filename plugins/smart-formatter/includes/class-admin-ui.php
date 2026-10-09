@@ -19,10 +19,10 @@
  *  JS -> sf_apply {phase:'finish', total} → server: ::finalize()
  *  Progress bar στο UI (ακριβώς όπως το roadmap του κανόνα batching).
  *
- * Menu (Bible §8, admin_menu priority 30): κοινό top-level 'noxpress'.
- * Αν υπάρχει ήδη (RS στο 9 / Store Pulse στο 20) → submenus. Αλλιώς το
- * SF το δημιουργεί με το formatter ως landing. Τα δικά μας slugs
- * (sf-formatter, sf-settings) δουλεύουν σε ΚΑΘΕ συνδυασμό plugins.
+ * Menu (Bible §8, admin_menu priority 30): submenus στο κοινό top-level
+ * 'noxpress', που το δημιουργεί το Noxpress Core (priority 5, Bible §16).
+ * Τα δικά μας slugs (sf-formatter, sf-settings) δουλεύουν σε ΚΑΘΕ
+ * συνδυασμό plugins.
  *
  * Language (Bible §9): ΔΙΑΒΑΣΗ ΜΟΝΟ του rs_lang user meta (το
  * γράφει μόνο το RS). EN μέσω gettext filter στο domain
@@ -46,9 +46,6 @@ final class SF_Admin_UI {
 
 	/** Μέγιστος αριθμός δειγμάτων before/after ανά dry-run/apply response. */
 	const SAMPLE = 5;
-
-	/** true όταν το SF δημιούργησε το top-level 'noxpress' σε αυτό το request. */
-	private static $owns_top = false;
 
 	/** Options (state export whitelist). */
 	const OPT_PROFILES   = 'sf_profiles';   // JSON: name => {rules[],fields[]} (strict).
@@ -84,21 +81,8 @@ final class SF_Admin_UI {
 
 	public static function admin_menu(): void {
 
-		if ( empty( $GLOBALS['admin_page_hooks'][ self::SLUG_MENU ] ) ) {
-			// Κανένα άλλο Noxpress plugin δεν έφτιαξε το top-level → το
-			// φτιάχνουμε εμείς, με το formatter ως landing page.
-			add_menu_page(
-				__( 'Noxpress', 'smart-formatter' ),
-				__( 'Noxpress', 'smart-formatter' ),
-				self::CAP,
-				self::SLUG_MENU,
-				array( __CLASS__, 'render_formatter' ),
-				'dashicons-chart-pie',
-				57
-			);
-			self::$owns_top = true;
-		}
-
+		// Το κοινό top-level «Noxpress» (με το hub ως landing) το δημιουργεί
+		// το Noxpress Core (priority 5, Bible §16). Εδώ μόνο submenus.
 		add_submenu_page(
 			self::SLUG_MENU,
 			__( 'Smart Formatter', 'smart-formatter' ),
@@ -116,13 +100,6 @@ final class SF_Admin_UI {
 			self::SLUG_SET,
 			array( __CLASS__, 'render_settings' )
 		);
-
-		if ( self::$owns_top ) {
-			// Το WP επαναλαμβάνει το top-level ως πρώτο submenu («Noxpress»)
-			// — διπλότυπο του «Smart Formatter». Το top-level link οδηγεί
-			// πλέον στο sf-formatter (πρώτο submenu).
-			remove_submenu_page( self::SLUG_MENU, self::SLUG_MENU );
-		}
 	}
 
 	/** Το τρέχον admin page slug (sanitized) — '' εκτός admin.php?page=. */
@@ -134,7 +111,7 @@ final class SF_Admin_UI {
 	public static function assets(): void {
 
 		$page    = self::current_page();
-		$is_tool = ( self::SLUG_DASH === $page ) || ( self::$owns_top && self::SLUG_MENU === $page );
+		$is_tool = ( self::SLUG_DASH === $page );
 		$is_set  = ( self::SLUG_SET === $page );
 
 		if ( ! $is_tool && ! $is_set ) {

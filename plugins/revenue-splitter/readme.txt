@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -26,7 +26,8 @@ Revenue Splitter is built for publishers and shops that owe a share of each sale
 * **Backup & restore** – export/import the full plugin state as JSON.
 * **WP-CLI** – `wp rs report`, `wp rs ledger-add`, `wp rs ledger-list`, `wp rs ledger-delete`, `wp rs balance`, `wp rs backup`.
 * **Bilingual UI** – Greek and English, chosen per user (or following the WordPress locale).
-* **Noxpress menu** – shares the "Noxpress" admin menu with Store Pulse and Smart Formatter; the Noxpress overview page lists which of these plugins are active.
+* **Noxpress hub** – the "Noxpress" menu opens the Noxpress hub: one page for the whole suite with status, installed and available version, and update, install, activate, changelog and auto-update links.
+* **Updates** – updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
 
 HPOS (custom order tables) compatible.
 
@@ -53,6 +54,14 @@ Without `--user` the commands run as a trusted shell context. If you pass `--use
 Only this plugin's own options, transients, cron event, product/order meta and order item meta. The shared `rs_lang` user meta is kept when Store Pulse or Smart Formatter is still installed.
 
 == Changelog ==
+
+= 1.8.0 =
+* New: Noxpress hub. The "Noxpress" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).
+* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.
+* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.
+* Removed: the old Noxpress overview page of Revenue Splitter (replaced by the hub).
+* Changed: the shared "Noxpress" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.
+* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.
 
 = 1.7.0 =
 * Fixed: WP-CLI was broken by stray JavaScript appended to the CLI class file; `wp rs report --ben` no longer calls a private method; CLI runs without `--user` are allowed, with `--user` the capability is enforced.

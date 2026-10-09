@@ -24,7 +24,6 @@ final class SF_Lang {
 
 	private static $dict = array(
 		// Menu / σελίδες.
-		'Noxpress'                                                => 'Noxpress',
 		'Smart Formatter'                                         => 'Smart Formatter',
 		'Smart Formatter — Ρυθμίσεις'                             => 'Smart Formatter — Settings',
 		'SF Ρυθμίσεις'                                            => 'SF Settings',

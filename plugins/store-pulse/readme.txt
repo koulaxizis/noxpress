@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, reports
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -21,7 +21,9 @@ Store Pulse adds a compact dashboard and a WordPress home-screen widget ("Quick 
 * Low-stock and out-of-stock products, including variations that manage their own stock. Counts are complete; the lists show up to 50 products.
 * With the Revenue Splitter plugin active: the publisher's share and net amount for the period, and what is owed to every other beneficiary. Store Pulse only reads Revenue Splitter's public APIs and never recalculates splits, VAT or shipping.
 
-Part of the Noxpress plugin family. All Noxpress plugins share a single "Noxpress" admin menu; Store Pulse creates it when no other Noxpress plugin has, otherwise it adds its pages under it. The pages are always available at `admin.php?page=sp-dashboard` and `admin.php?page=sp-settings`.
+Part of the Noxpress plugin family. All Noxpress plugins share a single "Noxpress" admin menu; its first page is the Noxpress hub (status, versions and updates of the whole suite), and Store Pulse adds its pages under it. The pages are always available at `admin.php?page=sp-dashboard` and `admin.php?page=sp-settings`.
+
+Updates: updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
 
 The interface is available in Greek and English. The language is chosen per user in the Revenue Splitter settings; without Revenue Splitter it follows the user's WordPress profile language.
 
@@ -49,6 +51,13 @@ Yes. All order queries use the WooCommerce order API.
 Only Store Pulse's own options and cached transients. Revenue Splitter data and the shared language setting are left untouched.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: Noxpress hub. The "Noxpress" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).
+* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.
+* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.
+* Changed: the shared "Noxpress" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.
+* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.
 
 = 1.3.0 =
 * Shared "Noxpress" menu: attaches at admin_menu priority 20, creates the menu only when it does not exist yet, and always registers `sp-dashboard` and `sp-settings` (the "Dashboard" link in the widget and on the Plugins screen no longer points to a missing page when Revenue Splitter is inactive).
