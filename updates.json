@@ -1,0 +1,67 @@
+{
+  "plugins": {
+    "revenue-splitter": {
+      "beta": {
+        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Removed: the old Noxpress overview page of Revenue Splitter (replaced by the hub).\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
+        "published": "2026-10-09",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "a2bfb82ba2df66b710941f9a58eb6ea7565988bacd48675c74d6bdd6eae5aff4",
+        "signature": "0WMPAwLnLu0/5nswnrSV6Mhu32R3ULwhjXzB/7rtFPJ99EDnHjmBJhNoDfMkel0Xg5XYjjGCyHBAe/TLYgzTCQ==",
+        "tested_wp": "6.8",
+        "version": "1.8.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.8.0/revenue-splitter.zip"
+      },
+      "stable": {
+        "changelog": "",
+        "published": "2026-09-25",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "80780010e40f6cb7190289292b0c7aaadbf38ed9626ffe585c2d07eb1cc2c10a",
+        "signature": "OSOj9IfDPOhweIlY0wCqm/wvw8bEB7zQaNQXYYIaBW/WCQQGG7+32pzCEBCohYuuZllmS09LRfCvNTYCb1rUDw==",
+        "tested_wp": "",
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.5.0/revenue-splitter.zip"
+      }
+    },
+    "smart-formatter": {
+      "beta": {
+        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
+        "published": "2026-10-09",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "7e56589656fc6907e93a9f4b7c579a7b2703d20c39ac0e21752c8e826c6de86e",
+        "signature": "tEAHowqXkcCk9w/NV5wveEfHtOfHg9nbiS9o08bWXTuoY9jzF0FptEWIMn6s8Oaoh3NRPh1sCQ8QJyqEAiqcAQ==",
+        "tested_wp": "6.8",
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.2.0/smart-formatter.zip"
+      }
+    },
+    "store-pulse": {
+      "beta": {
+        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
+        "published": "2026-10-09",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "f5a69b5aa9de994f412b951777cae51e321302df3f8510b74df880fb2a71f85a",
+        "signature": "OC8hr/JXpbtRsQLzAN0Mftz9o3OIwS+BPsDle5ssgFO3Uz6rxERgADFkTDaJ8ds6wfj8QjJ4qml4TQ+IfSqFBA==",
+        "tested_wp": "6.8",
+        "version": "1.4.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.4.0/store-pulse.zip"
+      }
+    },
+    "theme-patcher": {
+      "beta": {
+        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
+        "published": "2026-10-09",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "fb63cba817f899377f5b6b4fa4ca33b9b87b60d63b507697e4c09d5a3769321a",
+        "signature": "UMD5s3XdwfCE1MSfWC0V3dklPrIsV/kxYROpYZB/vB8W/7x0mHRR3Avp6uf+GgjSxx31En3Pk5C/bG/fbysmDQ==",
+        "tested_wp": "6.8",
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.0/theme-patcher.zip"
+      }
+    }
+  }
+}
