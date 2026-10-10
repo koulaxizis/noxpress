@@ -1,5 +1,31 @@
 {
   "plugins": {
+    "easy-withdrawal": {
+      "beta": {
+        "changelog": "* Initial release.\n* Withdrawal form `[nox_withdrawal]` for customers and guests: order lookup, products and quantities, review with \"Confirm withdrawal\", receipt page.\n* Immediate recording with date and time, receipt to the order's billing email, signed tokens between steps, rate limit, honeypot, no page cache.\n* Links in My Account, customer order emails and the thank-you page; optional footer link.\n* Withdrawal window from order creation until completion + delivery days + withdrawal days; virtual items from payment.\n* Exclusions: personalised products, categories, products, digital content with checkout consent (classic and block checkout).\n* Admin: request list with filters, search, paging and CSV; request detail with statuses, notes, history and refund pre-fill; order metabox and notes.\n* WooCommerce emails: receipt, store notice, status change, each customer email in the customer's language.\n* Test mode, EWD_DISABLE, HPOS compatible, Greek / English.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.0.4).",
+        "published": "2026-10-10",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "4435610248d06395aa5d8d4867f3b35f6e2da8ec9a0057ab583089086c98ec85",
+        "signature": "lPopi2+QyBEvwdsfvSNNbRE3mumUVsLXBD6FjdNfyrrn3HkjFdz9NMYoH/uuQw4nMHYpbU5GCbDMmEJTfTpNBA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.0.0/easy-withdrawal.zip"
+      }
+    },
+    "product-formats": {
+      "beta": {
+        "changelog": "* Initial release.\n* Works: hidden taxonomy, one format and an optional subtitle per product, precomputed member list, cache purge for every product of a changed work.\n* Formats: five built-in formats plus custom ones, Greek and English labels, slug suffixes and categories, drag-and-drop order.\n* Suggestions from slugs, normalised titles and upsells, with confidence, editing, accept, reject and bulk accept.\n* \"Formats\" tab in the product data panel and a works screen (search, edit, add, merge, delete).\n* \"Available formats\" block with label, price and link: below the price, below add to cart, above the tabs, or by shortcode; classic themes, Astra hooks and block themes.\n* Optional \"Also: …\" line in product lists; optional front-end hiding of upsells.\n* Upsell cleanup with preview, batches, snapshots and restore.\n* Test mode, PFM_DISABLE, backup / import, public API (`pfm_get_work`, `pfm_formats` filter).\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.0.3).",
+        "published": "2026-10-10",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "b4ac00bc7afbd4e9ce87976e7ae0bcffdc499063b04b1336681d41bf353ad0de",
+        "signature": "gorqM5ziDKKrOoCNAeM9cjkhy+qY9DXFnvkKRGqMF2KQGkeK2kuVYJD4ZDB4cJLZpjpVjh/9JkykQNyHDjRPAA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.0.0/product-formats.zip"
+      }
+    },
     "revenue-splitter": {
       "beta": {
         "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling Revenue Splitter keeps the shared Noxpress data (update channel, hub notices) and the language choice (rs_lang) while Shop Filters is still installed.",
