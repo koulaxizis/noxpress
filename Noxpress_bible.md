@@ -2,7 +2,9 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.6 (2026-10-10). Νέο: Shop Filters στη σουίτα (§8, §13, §16)· φίλτρο `noxpress_filters_present` (§6)· κωδικός release πάντα δύο γράμματα (§13)· κανόνες για CSS που αντέχει το θέμα και για μετρήσεις στην προβολή σελίδας (§14).
+- **Έκδοση:** 1.8 (2026-10-10). Νέο: Easy Withdrawal στη σουίτα (§8, §13, §16)· hooks `noxpress_withdrawal_*` (§6)· δεδομένα που είναι αρχείο του καταστήματος μένουν μετά το uninstall (§12)· φόρμες επισκεπτών που καταγράφουν δήλωση και κουμπιά με την κλάση του θέματος (§14).
+- **1.7** (2026-10-10): Product Formats στη σουίτα (§8, §13, §16)· φίλτρο `pfm_formats` και API `pfm_get_work()` (§6)· αλλαγή μόνο στον κατάλογο του Core χωρίς νέα έκδοση στα άλλα plugins (§16).
+- **1.6** (2026-10-10): Shop Filters στη σουίτα (§8, §13, §16)· φίλτρο `noxpress_filters_present` (§6)· κωδικός release πάντα δύο γράμματα (§13)· κανόνες για CSS που αντέχει το θέμα και για μετρήσεις στην προβολή σελίδας (§14).
 - **Προέλευση:** η v1.0 δεν υπήρχε στο repo. Η v1.1 ανασυντέθηκε από τον κώδικα των Revenue Splitter 1.7.0, Store Pulse 1.3.0 και Smart Formatter 1.1.0, από τις αναφορές «Bible §N» μέσα σε αυτόν, και από τις συμβάσεις του PR #1. Η αρίθμηση §2–§10 κρατά τη σημασία που ήδη έχει στον κώδικα.
 - **Πρότυπη υλοποίηση:** Revenue Splitter. Το `admin.css` του είναι το «leading design».
 - Όταν ένα plugin αποκλίνει από το Bible, η απόκλιση γράφεται στο docblock του bootstrap με αιτιολόγηση.
@@ -66,9 +68,11 @@
 - **Dashboard widget** (όπου υπάρχει): `wp_add_dashboard_widget` με capability `manage_woocommerce` και compound scope στο CSS.
 - **Συμβόλαιο συνεργασίας** (hooks που ακούνε ή πυροδοτούν τα plugins):
   - `rs_invalidate_cache`: ο RS το πυροδοτεί όταν αλλάζουν δεδομένα RS ή παραγγελίες. Το SP το ακούει.
-  - `noxpress_products_changed( int[] $product_ids )`: το πυροδοτεί όποιο plugin αλλάζει δεδομένα προϊόντων (SF μετά από apply/restore). Το SP το ακούει.
+  - `noxpress_products_changed( int[] $product_ids )`: το πυροδοτεί όποιο plugin αλλάζει δεδομένα προϊόντων (SF μετά από apply/restore, Product Formats μετά από καθαρισμό ή επαναφορά upsells). Το SP το ακούει.
   - Δημόσια APIs του RS που διαβάζει το SP: `RS_Reports::run`, `RS_Beneficiaries::collect_names`, `RS_Ledger::sum`.
   - `noxpress_filters_present( bool $present )`: φίλτρο. Το Shop Filters επιστρέφει `true` όταν τα φίλτρα του είναι ενεργά (ενεργοποιημένα, με τουλάχιστον ένα σετ). Το διαβάζει όποιο plugin χρειάζεται να ξέρει ότι υπάρχουν φίλτρα. Το Theme Patcher θα το διαβάζει σε επόμενη έκδοση (`TP_Checks`), ώστε να μην προτείνει τα classic widgets φίλτρων του WooCommerce όταν τα φίλτρα του Shop Filters είναι ενεργά.
+- `pfm_get_work( int $product_id ): ?array` (Product Formats): το έργο ενός προϊόντος (`id`, `name`, `members` με `id`, `format`, `variant`, `status`, `visible`), ή `null`. Το φίλτρο `pfm_formats( array $work, int $product_id )` αλλάζει το αποτέλεσμα. Τα διαβάζει όποιο plugin χρειάζεται τις μορφές ενός έργου (π.χ. ένα μελλοντικό plugin βιβλίων για schema).
+- `noxpress_withdrawal_submitted( int $order_id, array $request )` και `noxpress_withdrawal_status_changed( int $order_id, array $request, string $old_status )` (Easy Withdrawal): πυροδοτούνται όταν καταγράφεται μια δήλωση υπαναχώρησης και όταν αλλάζει η κατάστασή της. Το `$request` έχει `id`, `status`, `created`, `items` (`item_id`, `product_id`, `name`, `qty`, `unit`), `email`, `lang`, `source`. Τα ακούει όποιο plugin χρειάζεται να ξέρει για επιστροφές (π.χ. ένα μελλοντικό Store Pulse με αναφορά επιστροφών).
 - Plugin που **δεν** αλλάζει δεδομένα (π.χ. Theme Patcher, που αλλάζει μόνο την εμφάνιση) δεν πυροδοτεί τίποτα.
 
 ## §7 Footer
@@ -89,7 +93,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Κοινό top-level:** slug `noxpress`, τίτλος «Noxpress», `dashicons-chart-pie`, θέση 57, capability `manage_woocommerce`.
 - **Ποιος το δημιουργεί:** το Noxpress Core (§16), στο `admin_menu` με προτεραιότητα 5, με το hub ως landing και πρώτο submenu «Επισκόπηση». Τα plugins **δεν** δημιουργούν ποτέ το top-level· προσθέτουν μόνο submenus.
 - **Προτεραιότητες `admin_menu`:**
-  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50.
+  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70.
   - Νέα plugins παίρνουν το επόμενο +10.
   - Το Data Migrator δεν έχει ακόμα ενταχθεί.
 - **Παλιές εκδόσεις** (πριν από το Core) έλεγχαν `empty( $GLOBALS['admin_page_hooks']['noxpress'] )` και έφτιαχναν το top-level μόνο αν έλειπε. Επειδή το Core τρέχει πρώτο, σε ανάμεικτους συνδυασμούς απλώς προσθέτουν τα submenus τους.
@@ -157,6 +161,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Στο multisite καθαρίζει κάθε site **μία** φορά.
   - Δεν αγγίζει δεδομένα άλλων plugins. Ειδικά το `rs_lang` το διαγράφει μόνο ο RS, και μόνο αν δεν υπάρχει άλλο plugin της σουίτας.
 - **Παραγωγικά δεδομένα** (π.χ. κείμενα προϊόντων που άλλαξε το SF) **δεν** επαναφέρονται στο uninstall. Το readme το λέει ρητά.
+- **Δεδομένα που είναι αρχείο του καταστήματος** (νέο, από το Easy Withdrawal): ό,τι δήλωσε ή αποδέχτηκε ο πελάτης (π.χ. δηλώσεις υπαναχώρησης, συναίνεση στο checkout) μένει στο order meta μετά το uninstall και φεύγει μαζί με την παραγγελία. Το uninstall σβήνει μόνο ρυθμίσεις, transients και σημαίες προϊόντων. Η εξαίρεση γράφεται στο docblock του bootstrap, στο `uninstall.php` και στο readme.
 
 ## §13 Εκδόσεις, release, site
 
@@ -167,7 +172,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Τρία σημεία σε κάθε έκδοση:** η έκδοση αλλάζει μαζί στο header, στη σταθερά `{P}_VERSION` και στο `Stable tag` του readme.
 - **Stable:** όταν ο Chris πει «stable», βγαίνει το τικ «pre-release» από το release στο GitHub. Το workflow ξαναφτιάχνει τότε το `updates.json` (§16) και τα sites στο κανάλι Stable βλέπουν την έκδοση.
 - **Release workflow** (`.github/workflows/release.yml`):
-  - Κωδικός ανά plugin: rs, sp, sf, nm, tp, sh. Ο κωδικός είναι **πάντα δύο πεζά γράμματα**, γιατί ο updater (§16) δέχεται μόνο tags `nox-[a-z]{2}-<version>`. Το prefix του κώδικα μπορεί να είναι μεγαλύτερο (Shop Filters: `SHF_`, κωδικός `sh`).
+  - Κωδικός ανά plugin: rs, sp, sf, nm, tp, sh, pf, ew. Ο κωδικός είναι **πάντα δύο πεζά γράμματα**, γιατί ο updater (§16) δέχεται μόνο tags `nox-[a-z]{2}-<version>`. Το prefix του κώδικα μπορεί να είναι μεγαλύτερο (Shop Filters: `SHF_`, κωδικός `sh`· Product Formats: `PFM_`, κωδικός `pf`· Easy Withdrawal: `EWD_`, κωδικός `ew`).
   - Tag `nox-<code>-<version>`, zip `<slug>.zip` με τον φάκελο στη ρίζα.
   - Βγαίνει ως pre-release (beta) μέχρι να δοκιμαστεί.
   - Τα plugins στη λίστα `AUTO` βγαίνουν αυτόματα με το merge στο main.
@@ -206,6 +211,12 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
     - Markup χωρίς `ul / li`, χωρίς checkbox inputs (κουτιά από CSS), χωρίς icon fonts (inline SVG), και `<details>` για ό,τι ανοιγοκλείνει.
     - Δοκιμή σε συνθετικό θέμα με εχθρικούς κανόνες (§13).
 14. **Μετρήσεις που εξαρτώνται από το αίτημα** (π.χ. μετρητές φίλτρων) δεν μπορούν να αποθηκευτούν από πριν (κανόνας 10). Υπολογίζονται στην προβολή με queries μόνο ανάγνωσης, κρατιούνται στην object cache με κλειδί το «last changed» των posts / terms, και δεν γράφουν τίποτα στη βάση. Η σελίδα του plugin δείχνει αν υπάρχει μόνιμη object cache.
+15. **Φόρμες επισκεπτών που καταγράφουν δήλωση** (νέο, από το Easy Withdrawal). Όταν ο σκοπός του plugin είναι να καταγράψει κάτι που στέλνει ο επισκέπτης (π.χ. δήλωση υπαναχώρησης), η εγγραφή στη βάση επιτρέπεται ως εξαίρεση στον κανόνα 5, με αυτούς τους όρους:
+    - Γράφει μόνο το τελικό, ρητό βήμα («Επιβεβαίωση»). Τα ενδιάμεσα βήματα μεταφέρονται σε υπογεγραμμένο token (HMAC με `wp_salt`, με λήξη) και δεν γράφουν τίποτα.
+    - Nonce για συνδεδεμένους χρήστες, honeypot, όριο αποτυχημένων προσπαθειών ανά IP (η IP μόνο ως hash), αποθήκευση μόνο με CRUD (HPOS και legacy).
+    - Η σελίδα της φόρμας δεν μπαίνει ποτέ σε cache: `DONOTCACHEPAGE` και `nocache_headers()` πριν από το output.
+    - Μετά την εγγραφή γίνεται redirect (PRG), ώστε ένα refresh να μη στέλνει ξανά τη φόρμα, και τα διπλά submit μέσα σε λίγα λεπτά αγνοούνται.
+16. **Κουμπιά στο front end** (νέο, από το Easy Withdrawal): `class="button"` μαζί με `wc_wp_theme_get_element_class_name( 'button' )`, ώστε τα block themes (TT25) να δίνουν στα κουμπιά το δικό τους στυλ, όπως στις φόρμες του WooCommerce.
 
 ## §15 Τρόπος εργασίας (Chris ↔ Claude)
 
@@ -223,8 +234,9 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Πού ζει:** `includes/noxpress-core/` σε **κάθε** plugin, byte-identical. Πηγή είναι το αντίγραφο του RS· το `.github/scripts/sync-core.sh` το αντιγράφει στα υπόλοιπα. Το release workflow σταματά αν διαφέρουν.
 - **Φόρτωση:** το bootstrap κάθε plugin κάνει `require_once` το `loader.php` αμέσως μετά τις σταθερές. Κάθε αντίγραφο δηλώνει την έκδοσή του· στο `plugins_loaded` (προτεραιότητα 1) φορτώνεται **μόνο το νεότερο**, μία φορά (μοτίβο Action Scheduler). Ορίζει `NOXPRESS_CORE` (έκδοση) και `NOXPRESS_CORE_PATH`.
 - **Αλλαγή στο Core:** ανεβαίνει το κλειδί έκδοσης στο `loader.php`, συγχρονίζονται όλα τα αντίγραφα και βγαίνει νέα έκδοση σε **όλα** τα plugins.
+- **Εξαίρεση: αλλαγή μόνο στον κατάλογο** (νέο plugin στη σουίτα). Το κλειδί έκδοσης ανεβαίνει και τα αντίγραφα συγχρονίζονται, αλλά τα άλλα plugins **δεν** βγάζουν νέα έκδοση γι' αυτό: το νέο plugin φέρνει το νεότερο Core στα sites όπου εγκαθίσταται, και τα υπόλοιπα το παίρνουν με την επόμενη έκδοσή τους. Μέχρι τότε, ένα site χωρίς το νέο plugin απλώς δεν το βλέπει στο hub.
 - **Κλάσεις:** `Noxpress_Core` (κατάλογος σουίτας, μενού §8, γλώσσα με domain `noxpress`), `Noxpress_Updater`, `Noxpress_Hub`. CSS με prefix `nx-` (`assets/hub.css`).
-- **Κατάλογος:** RS, SP, SF, TP, Shop Filters (από το Core 1.0.2). Το Data Migrator μπαίνει όταν διορθωθεί. Νέο plugin = νέα γραμμή στο `Noxpress_Core::catalog()` και στο `AUTO` του workflow.
+- **Κατάλογος:** RS, SP, SF, TP, Shop Filters (από το Core 1.0.2), Product Formats (από το Core 1.0.3), Easy Withdrawal (από το Core 1.0.4, με την ίδια εξαίρεση: χωρίς νέες εκδόσεις στα άλλα plugins). Το Data Migrator μπαίνει όταν διορθωθεί. Νέο plugin = νέα γραμμή στο `Noxpress_Core::catalog()` και στο `AUTO` του workflow.
 - **Hub (σελίδα `noxpress`):**
   - Πίνακας με όλη τη σουίτα: κατάσταση (ενεργό / ανενεργό / δεν είναι εγκατεστημένο), εγκατεστημένη και διαθέσιμη έκδοση, badge beta.
   - Ενέργειες του ίδιου του WordPress: Ενημέρωση (`update.php?action=upgrade-plugin`), Εγκατάσταση (`install-plugin`, μέσω `plugins_api`), Ενεργοποίηση, Αλλαγές (popup λεπτομερειών), διακόπτης αυτόματων ενημερώσεων.

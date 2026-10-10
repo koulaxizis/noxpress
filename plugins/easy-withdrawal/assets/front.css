@@ -1,0 +1,71 @@
+/**
+ * Easy Withdrawal — front.css (v1.0.0)
+ *
+ * The form takes the theme's fonts, colours, inputs and buttons. Only
+ * layout, the step list, the notes and the greyed rows are styled here,
+ * scoped to .ewd-root (Bible §14.9). Loaded only on the form page and on
+ * My Account → View order when there is something to show.
+ */
+
+.ewd-root { margin: 0 0 1.5em; }
+.ewd-root .ewd-h { margin: .4em 0 .6em; }
+.ewd-root .ewd-h3 { margin: 1.2em 0 .5em; font-size: 1.05em; }
+
+.ewd-root .ewd-steps {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	margin: 0 0 1em;
+	padding: 0;
+	list-style: none;
+	counter-reset: ewd-step;
+	font-size: .9em;
+	opacity: .85;
+}
+.ewd-root .ewd-steps li { margin: 0; padding: 0; counter-increment: ewd-step; }
+.ewd-root .ewd-steps li::before { content: counter(ewd-step) ". "; }
+.ewd-root .ewd-steps li.is-current { font-weight: 700; opacity: 1; }
+.ewd-root .ewd-steps li.is-done { text-decoration: line-through; }
+
+.ewd-root .ewd-field { margin: 0 0 1em; }
+.ewd-root .ewd-field label { display: block; margin: 0 0 .3em; font-weight: 600; }
+.ewd-root .ewd-field input[type="text"],
+.ewd-root .ewd-field input[type="email"],
+.ewd-root .ewd-field textarea { width: 100%; max-width: 480px; box-sizing: border-box; padding: .5em .6em; }
+
+.ewd-root .ewd-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 1em 0 0; }
+.ewd-root .ewd-hint { font-size: .9em; opacity: .8; }
+
+.ewd-root .ewd-table { width: 100%; margin: 0 0 1em; }
+.ewd-root .ewd-table th { text-align: left; vertical-align: bottom; }
+.ewd-root .ewd-table td { vertical-align: top; }
+.ewd-root .ewd-table td.ewd-right { text-align: right; }
+.ewd-root .ewd-table tr.is-off td { opacity: .55; }
+.ewd-root .ewd-why { display: inline-block; margin-top: .2em; font-size: .85em; }
+
+.ewd-root .ewd-note {
+	margin: 0 0 1em;
+	padding: .7em 1em;
+	border-left: 4px solid rgba(0, 0, 0, .25);
+	background: rgba(0, 0, 0, .04);
+}
+.ewd-root .ewd-note--error { border-left-color: #b32d2e; }
+.ewd-root .ewd-note--ok { border-left-color: #2e7d32; }
+.ewd-root .ewd-note--test { border-left-color: #b26a00; font-size: .9em; }
+
+.ewd-root .ewd-statement {
+	margin: 0 0 1em;
+	padding: 1em 1.2em;
+	border: 1px solid rgba(0, 0, 0, .15);
+	border-radius: 4px;
+}
+.ewd-root .ewd-previous ul { margin: 0 0 1em 1.2em; }
+
+/* Honeypot: off screen, still in the form. */
+.ewd-root .ewd-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}

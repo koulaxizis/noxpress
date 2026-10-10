@@ -1,0 +1,446 @@
+/**
+ * Easy Withdrawal — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors ewd-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.ewd-wrap {
+	--ewd-bg: #101218;
+	--ewd-panel: #14161d;
+	--ewd-panel-2: #1d2029;
+	--ewd-input: #1a1d26;
+	--ewd-border: #2e3240;
+	--ewd-border-input: #3a3f52;
+	--ewd-row-border: #23262f;
+	--ewd-stripe: #181b23;
+	--ewd-hover: #1e212c;
+	--ewd-text: #eae8fa;
+	--ewd-heading: #f6f4ff;
+	--ewd-muted: #b7b2d6;
+	--ewd-link: #beb1ff;
+	--ewd-link-hover: #d4c9ff;
+	--ewd-accent: #6d4aff;
+	--ewd-accent-hover: #8263ff;
+	--ewd-warn: #f5c97e;
+	--ewd-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.ewd-wrap {
+	color-scheme: dark;
+	background: var(--ewd-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--ewd-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.ewd-wrap h1,
+.ewd-wrap h2 {
+	color: var(--ewd-heading);
+}
+
+.ewd-wrap a { color: var(--ewd-link); }
+.ewd-wrap a:hover { color: var(--ewd-link-hover); }
+
+.ewd-wrap .ewd-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--ewd-muted);
+	border-bottom: 1px solid var(--ewd-border);
+	padding-bottom: 6px;
+}
+
+.ewd-wrap .description,
+.ewd-wrap p.description,
+.ewd-wrap .ewd-hint {
+	color: var(--ewd-muted) !important;
+}
+
+.ewd-zone {
+	background: var(--ewd-panel);
+	border: 1px solid var(--ewd-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.ewd-wrap input[type="text"],
+.ewd-wrap input[type="url"],
+.ewd-wrap input[type="number"],
+.ewd-wrap textarea,
+.ewd-wrap select {
+	background-color: var(--ewd-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--ewd-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.ewd-wrap input::placeholder,
+.ewd-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.ewd-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.ewd-wrap input[type="file"] {
+	color: var(--ewd-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.ewd-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.ewd-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.ewd-wrap input[type="checkbox"],
+.ewd-wrap input[type="radio"] {
+	accent-color: var(--ewd-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.ewd-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.ewd-wrap .button:hover:not(:disabled) {
+	border-color: var(--ewd-accent) !important;
+	color: #ffffff !important;
+}
+
+.ewd-wrap .button-primary {
+	background: var(--ewd-accent) !important;
+	border-color: var(--ewd-accent) !important;
+	color: #ffffff !important;
+}
+
+.ewd-wrap .button-primary:hover:not(:disabled) {
+	background: var(--ewd-accent-hover) !important;
+}
+
+.ewd-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.ewd-submit { margin-top: 20px; }
+.ewd-inline-form { display: inline; margin-right: 10px; }
+.ewd-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.ewd-table,
+table.widefat.ewd-table {
+	background: var(--ewd-panel) !important;
+	border: 1px solid var(--ewd-border) !important;
+	border-radius: 6px;
+	color: var(--ewd-text) !important;
+	margin-top: 14px !important;
+}
+
+.ewd-table thead th,
+.ewd-table thead td {
+	background: var(--ewd-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.ewd-table tbody td,
+.ewd-table tbody th {
+	background: var(--ewd-panel) !important;
+	color: var(--ewd-text) !important;
+	border-bottom: 1px solid var(--ewd-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.ewd-table tbody tr:nth-child(2n) td,
+.ewd-table tbody tr:nth-child(2n) th {
+	background: var(--ewd-stripe) !important;
+}
+
+.ewd-table tbody tr:hover td,
+.ewd-table tbody tr:hover th {
+	background: var(--ewd-hover) !important;
+}
+
+.ewd-table td,
+.ewd-table th {
+	padding: 12px 14px;
+}
+
+.ewd-table td code {
+	background: transparent !important;
+	color: var(--ewd-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.ewd-table .ewd-empty {
+	color: var(--ewd-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.ewd-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.ewd-footer a { color: #beb1ff; text-decoration: none; }
+.ewd-footer a:hover { text-decoration: underline; }
+
+.ewd-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.ewd-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.ewd-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.ewd-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.ewd-muted { color: var(--ewd-muted) !important; }
+.ewd-warn { color: var(--ewd-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.ewd-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.ewd-wrap .ewd-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--ewd-heading);
+}
+
+.ewd-status p { margin: 0 0 8px; }
+.ewd-status p:last-child { margin-bottom: 0; }
+.ewd-status code,
+.ewd-wrap .description code,
+.ewd-wrap .ewd-hint code {
+	background: var(--ewd-panel-2);
+	color: var(--ewd-muted);
+	border: 1px solid var(--ewd-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.ewd-suspended { margin: 8px 0 0; }
+.ewd-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.ewd-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--ewd-border);
+	background: var(--ewd-panel-2);
+	color: var(--ewd-text);
+	white-space: nowrap;
+}
+.ewd-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.ewd-badge--muted { color: var(--ewd-muted); }
+.ewd-badge--warn { border-color: #6b5a33; color: var(--ewd-warn); }
+.ewd-badge--danger { border-color: #6b3a3a; color: var(--ewd-danger); }
+
+/* Area fieldsets. */
+.ewd-area {
+	background: var(--ewd-panel);
+	border: 1px solid var(--ewd-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.ewd-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--ewd-heading);
+}
+.ewd-row { margin: 4px 0 8px; }
+
+.ewd-details > summary {
+	cursor: pointer;
+	color: var(--ewd-link);
+	margin: 4px 0;
+}
+.ewd-details[open] > summary { margin-bottom: 12px; }
+
+.ewd-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.ewd-wrap .ewd-label {
+	display: block;
+	font-weight: 600;
+	color: var(--ewd-heading);
+	margin: 8px 0 6px;
+}
+.ewd-grid .ewd-label:first-child { margin-top: 0; }
+
+.ewd-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.ewd-field > span:first-child {
+	min-width: 150px;
+	color: var(--ewd-text);
+}
+.ewd-wrap .ewd-color { width: 96px; font-family: monospace; }
+.ewd-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--ewd-border-input);
+}
+
+.ewd-wrap .ewd-hint { display: block; font-size: 12px; margin-top: 4px; }
+.ewd-wrap td .ewd-hint { display: inline; }
+.ewd-table td.ewd-warn { color: var(--ewd-warn) !important; }
+
+/* Tabs of the main page. */
+.ewd-wrap .ewd-tabs {
+	border-bottom: 1px solid var(--ewd-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.ewd-wrap .ewd-tabs .nav-tab {
+	background: var(--ewd-panel);
+	border-color: var(--ewd-border);
+	color: var(--ewd-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.ewd-wrap .ewd-tabs .nav-tab:hover { color: var(--ewd-link-hover); background: var(--ewd-hover); }
+.ewd-wrap .ewd-tabs .nav-tab-active,
+.ewd-wrap .ewd-tabs .nav-tab-active:hover {
+	background: var(--ewd-bg);
+	border-bottom-color: var(--ewd-bg);
+	color: var(--ewd-heading);
+}
+
+/* One input per line (removal rules). */
+.ewd-wrap .ewd-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.ewd-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--ewd-border);
+	border-radius: 6px;
+	background: var(--ewd-panel-2);
+}
+.ewd-scroll .ewd-field { margin-bottom: 4px; }
+
+/* ===== Easy Withdrawal ===== */
+
+.ewd-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin: 0 0 6px;
+}
+.ewd-wrap .ewd-filters input[type="search"] {
+	min-width: 280px;
+	background-color: var(--ewd-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--ewd-border-input) !important;
+	border-radius: 4px !important;
+}
+.ewd-wrap .ewd-wide { width: 100%; max-width: 640px; }
+.ewd-wrap .ewd-num { width: 90px; }
+.ewd-pager { margin-top: 12px; }
+.ewd-pager a, .ewd-pager strong { margin-right: 8px; }
+
+/* Request status badges. */
+.ewd-badge.ewd-st-new { border-color: #5a4bb3; color: #d4c9ff; }
+.ewd-badge.ewd-st-progress { border-color: #6b5a33; color: var(--ewd-warn); }
+.ewd-badge.ewd-st-done { border-color: #3d6b4f; color: #9fe0b5; }
+.ewd-badge.ewd-st-disputed { border-color: #6b3a3a; color: var(--ewd-danger); }
+
+.ewd-request { margin: 0 0 16px; }
+.ewd-request .ewd-h3 { display: flex; gap: 10px; align-items: center; margin-top: 0; }
+.ewd-status-form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: flex-start;
+	margin-top: 14px;
+	padding-top: 12px;
+	border-top: 1px solid var(--ewd-row-border);
+}
+.ewd-status-form .ewd-label { width: 100%; margin: 0; }
+.ewd-status-form textarea { flex: 1 1 320px; min-height: 34px; }
+.ewd-status-form .ewd-hint { width: 100%; }
+.ewd-log { margin: 0; padding-left: 18px; list-style: disc; }
+.ewd-log li { margin: 0 0 6px; }
