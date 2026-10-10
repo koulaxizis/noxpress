@@ -511,6 +511,26 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="easy-withdrawal">
+		<h2><a href="#easy-withdrawal">Easy Withdrawal</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="ew_desc">The online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673): a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.</p>
+		<ul>
+			<li data-i18n="ew_li1">Form by shortcode in four steps: find the order, choose products and quantities, confirm, receipt; links in order emails, on the thank-you page and in My Account</li>
+			<li data-i18n="ew_li2">Recorded the moment it is confirmed, receipt to the order’s billing email in the customer’s language; signed tokens between steps, rate limit, no page cache</li>
+			<li data-i18n="ew_li3">Withdrawal period from order to completion plus delivery and withdrawal days; virtual items from payment</li>
+			<li data-i18n="ew_li4">Exclusions: personalised products, categories, products, and digital content only when the customer consented at checkout (classic and block checkout)</li>
+			<li data-i18n="ew_li5">Request list with filters, search and CSV; statuses New, In progress, Completed, Disputed; refund form pre-filled in WooCommerce</li>
+			<li data-i18n="ew_li6">Three WooCommerce emails with the store’s template; no custom order statuses, so revenue reports stay correct; HPOS compatible</li>
+			<li data-i18n="ew_li7">Safe by design: test mode for shop managers, EWD_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.0.0/easy-withdrawal.zip" rel="nofollow noopener" data-i18n="ew_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/easy-withdrawal" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
@@ -626,6 +646,15 @@ footer .heart { color: var(--accent-bright); }
 		pf_li6: 'No database writes on visitor requests; theme-proof markup and CSS; public API for other plugins',
 		pf_li7: 'Safe by design: off until enabled, test mode for shop managers, PFM_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
 		pf_download: 'Download v1.0.0 (.zip)',
+		ew_desc: 'The online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673): a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.',
+		ew_li1: 'Form by shortcode in four steps: find the order, choose products and quantities, confirm, receipt; links in order emails, on the thank-you page and in My Account',
+		ew_li2: 'Recorded the moment it is confirmed, receipt to the order’s billing email in the customer’s language; signed tokens between steps, rate limit, no page cache',
+		ew_li3: 'Withdrawal period from order to completion plus delivery and withdrawal days; virtual items from payment',
+		ew_li4: 'Exclusions: personalised products, categories, products, and digital content only when the customer consented at checkout (classic and block checkout)',
+		ew_li5: 'Request list with filters, search and CSV; statuses New, In progress, Completed, Disputed; refund form pre-filled in WooCommerce',
+		ew_li6: 'Three WooCommerce emails with the store’s template; no custom order statuses, so revenue reports stay correct; HPOS compatible',
+		ew_li7: 'Safe by design: test mode for shop managers, EWD_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
+		ew_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Your download is ready',
 		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
@@ -721,6 +750,15 @@ footer .heart { color: var(--accent-bright); }
 		pf_li6: 'Καμία εγγραφή στη βάση στις επισκέψεις· markup και CSS που αντέχουν τους κανόνες του θέματος· δημόσιο API για άλλα plugins',
 		pf_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης PFM_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		pf_download: 'Λήψη v1.0.0 (.zip)',
+		ew_desc: 'Η λειτουργία υπαναχώρησης που ζητά η ΕΕ από τις 19 Ιουνίου 2026 (Οδηγία 2023/2673): φόρμα για πελάτες και επισκέπτες, «Επιβεβαίωση υπαναχώρησης» σε δύο βήματα, απόδειξη με email με ημερομηνία και ώρα, και λίστα αιτημάτων για το κατάστημα.',
+		ew_li1: 'Φόρμα με shortcode σε τέσσερα βήματα: εύρεση παραγγελίας, προϊόντα και ποσότητες, επιβεβαίωση, απόδειξη· σύνδεσμοι στα email παραγγελίας, στη σελίδα ευχαριστιών και στον λογαριασμό μου',
+		ew_li2: 'Καταγράφεται τη στιγμή της επιβεβαίωσης, απόδειξη στο email χρέωσης στη γλώσσα του πελάτη· υπογεγραμμένα tokens ανάμεσα στα βήματα, όριο προσπαθειών, χωρίς cache σελίδας',
+		ew_li3: 'Προθεσμία από την παραγγελία έως την ολοκλήρωση συν τις ημέρες παράδοσης και υπαναχώρησης· τα εικονικά προϊόντα από την πληρωμή',
+		ew_li4: 'Εξαιρέσεις: εξατομικευμένα προϊόντα, κατηγορίες, προϊόντα, και ψηφιακό περιεχόμενο μόνο όταν ο πελάτης συναίνεσε στο checkout (κλασικό και block checkout)',
+		ew_li5: 'Λίστα αιτημάτων με φίλτρα, αναζήτηση και CSV· καταστάσεις Νέα, Σε εξέλιξη, Ολοκληρώθηκε, Αμφισβητείται· φόρμα επιστροφής χρημάτων του WooCommerce συμπληρωμένη',
+		ew_li6: 'Τρία email του WooCommerce με το πρότυπο του καταστήματος· χωρίς δικές του καταστάσεις παραγγελίας, ώστε οι αναφορές εσόδων να μένουν σωστές· συμβατό με HPOS',
+		ew_li7: 'Ασφαλές εκ σχεδιασμού: λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης EWD_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		ew_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',

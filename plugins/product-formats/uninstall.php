@@ -93,7 +93,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $pfm_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats' ) as $pfm_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal' ) as $pfm_slug ) {
 	if ( 'product-formats' !== $pfm_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $pfm_slug . '/' . $pfm_slug . '.php' ) ) {
 		$pfm_suite_left = true;
 		break;
