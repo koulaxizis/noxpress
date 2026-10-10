@@ -53,7 +53,9 @@ The plugin's own options and transients are removed. Product texts that were alr
 == Changelog ==
 
 = 1.2.1 =
+* Fixed: the Smart Formatter admin pages now use the full width of the screen, like the other Noxpress plugins (they stopped at 1180px).
 * Fix: the hub's "Changelog" link and "Install" button no longer end in "Plugin not found" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).
+* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).
 
 = 1.2.0 =
 * New: Noxpress hub. The "Noxpress" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).
