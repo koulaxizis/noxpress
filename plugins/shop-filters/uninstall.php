@@ -89,7 +89,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $shf_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters' ) as $shf_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal' ) as $shf_slug ) {
 	if ( 'shop-filters' !== $shf_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $shf_slug . '/' . $shf_slug . '.php' ) ) {
 		$shf_suite_left = true;
 		break;

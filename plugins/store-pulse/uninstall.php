@@ -84,7 +84,7 @@ if ( is_array( $sp_names ) ) {
 // ---------------------------------------------------------------------
 
 $sp_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters' ) as $sp_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal' ) as $sp_slug ) {
 	if ( 'store-pulse' !== $sp_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $sp_slug . '/' . $sp_slug . '.php' ) ) {
 		$sp_suite_left = true;
 		break;

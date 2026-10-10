@@ -1,0 +1,541 @@
+/**
+ * Product Formats — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors pfm-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.pfm-wrap {
+	--pfm-bg: #101218;
+	--pfm-panel: #14161d;
+	--pfm-panel-2: #1d2029;
+	--pfm-input: #1a1d26;
+	--pfm-border: #2e3240;
+	--pfm-border-input: #3a3f52;
+	--pfm-row-border: #23262f;
+	--pfm-stripe: #181b23;
+	--pfm-hover: #1e212c;
+	--pfm-text: #eae8fa;
+	--pfm-heading: #f6f4ff;
+	--pfm-muted: #b7b2d6;
+	--pfm-link: #beb1ff;
+	--pfm-link-hover: #d4c9ff;
+	--pfm-accent: #6d4aff;
+	--pfm-accent-hover: #8263ff;
+	--pfm-warn: #f5c97e;
+	--pfm-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.pfm-wrap {
+	color-scheme: dark;
+	background: var(--pfm-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--pfm-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.pfm-wrap h1,
+.pfm-wrap h2 {
+	color: var(--pfm-heading);
+}
+
+.pfm-wrap a { color: var(--pfm-link); }
+.pfm-wrap a:hover { color: var(--pfm-link-hover); }
+
+.pfm-wrap .pfm-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--pfm-muted);
+	border-bottom: 1px solid var(--pfm-border);
+	padding-bottom: 6px;
+}
+
+.pfm-wrap .description,
+.pfm-wrap p.description,
+.pfm-wrap .pfm-hint {
+	color: var(--pfm-muted) !important;
+}
+
+.pfm-zone {
+	background: var(--pfm-panel);
+	border: 1px solid var(--pfm-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.pfm-wrap input[type="text"],
+.pfm-wrap input[type="url"],
+.pfm-wrap input[type="number"],
+.pfm-wrap textarea,
+.pfm-wrap select {
+	background-color: var(--pfm-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--pfm-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.pfm-wrap input::placeholder,
+.pfm-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.pfm-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.pfm-wrap input[type="file"] {
+	color: var(--pfm-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.pfm-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.pfm-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.pfm-wrap input[type="checkbox"],
+.pfm-wrap input[type="radio"] {
+	accent-color: var(--pfm-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.pfm-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.pfm-wrap .button:hover:not(:disabled) {
+	border-color: var(--pfm-accent) !important;
+	color: #ffffff !important;
+}
+
+.pfm-wrap .button-primary {
+	background: var(--pfm-accent) !important;
+	border-color: var(--pfm-accent) !important;
+	color: #ffffff !important;
+}
+
+.pfm-wrap .button-primary:hover:not(:disabled) {
+	background: var(--pfm-accent-hover) !important;
+}
+
+.pfm-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.pfm-submit { margin-top: 20px; }
+.pfm-inline-form { display: inline; margin-right: 10px; }
+.pfm-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.pfm-table,
+table.widefat.pfm-table {
+	background: var(--pfm-panel) !important;
+	border: 1px solid var(--pfm-border) !important;
+	border-radius: 6px;
+	color: var(--pfm-text) !important;
+	margin-top: 14px !important;
+}
+
+.pfm-table thead th,
+.pfm-table thead td {
+	background: var(--pfm-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.pfm-table tbody td,
+.pfm-table tbody th {
+	background: var(--pfm-panel) !important;
+	color: var(--pfm-text) !important;
+	border-bottom: 1px solid var(--pfm-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.pfm-table tbody tr:nth-child(2n) td,
+.pfm-table tbody tr:nth-child(2n) th {
+	background: var(--pfm-stripe) !important;
+}
+
+.pfm-table tbody tr:hover td,
+.pfm-table tbody tr:hover th {
+	background: var(--pfm-hover) !important;
+}
+
+.pfm-table td,
+.pfm-table th {
+	padding: 12px 14px;
+}
+
+.pfm-table td code {
+	background: transparent !important;
+	color: var(--pfm-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.pfm-table .pfm-empty {
+	color: var(--pfm-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.pfm-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.pfm-footer a { color: #beb1ff; text-decoration: none; }
+.pfm-footer a:hover { text-decoration: underline; }
+
+.pfm-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.pfm-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.pfm-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.pfm-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.pfm-muted { color: var(--pfm-muted) !important; }
+.pfm-warn { color: var(--pfm-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.pfm-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.pfm-wrap .pfm-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--pfm-heading);
+}
+
+.pfm-status p { margin: 0 0 8px; }
+.pfm-status p:last-child { margin-bottom: 0; }
+.pfm-status code,
+.pfm-wrap .description code,
+.pfm-wrap .pfm-hint code {
+	background: var(--pfm-panel-2);
+	color: var(--pfm-muted);
+	border: 1px solid var(--pfm-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.pfm-suspended { margin: 8px 0 0; }
+.pfm-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.pfm-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--pfm-border);
+	background: var(--pfm-panel-2);
+	color: var(--pfm-text);
+	white-space: nowrap;
+}
+.pfm-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.pfm-badge--muted { color: var(--pfm-muted); }
+.pfm-badge--warn { border-color: #6b5a33; color: var(--pfm-warn); }
+.pfm-badge--danger { border-color: #6b3a3a; color: var(--pfm-danger); }
+
+/* Area fieldsets. */
+.pfm-area {
+	background: var(--pfm-panel);
+	border: 1px solid var(--pfm-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.pfm-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--pfm-heading);
+}
+.pfm-row { margin: 4px 0 8px; }
+
+.pfm-details > summary {
+	cursor: pointer;
+	color: var(--pfm-link);
+	margin: 4px 0;
+}
+.pfm-details[open] > summary { margin-bottom: 12px; }
+
+.pfm-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.pfm-wrap .pfm-label {
+	display: block;
+	font-weight: 600;
+	color: var(--pfm-heading);
+	margin: 8px 0 6px;
+}
+.pfm-grid .pfm-label:first-child { margin-top: 0; }
+
+.pfm-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.pfm-field > span:first-child {
+	min-width: 150px;
+	color: var(--pfm-text);
+}
+.pfm-wrap .pfm-color { width: 96px; font-family: monospace; }
+.pfm-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--pfm-border-input);
+}
+
+.pfm-wrap .pfm-hint { display: block; font-size: 12px; margin-top: 4px; }
+.pfm-wrap td .pfm-hint { display: inline; }
+.pfm-table td.pfm-warn { color: var(--pfm-warn) !important; }
+
+/* Tabs of the main page. */
+.pfm-wrap .pfm-tabs {
+	border-bottom: 1px solid var(--pfm-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.pfm-wrap .pfm-tabs .nav-tab {
+	background: var(--pfm-panel);
+	border-color: var(--pfm-border);
+	color: var(--pfm-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.pfm-wrap .pfm-tabs .nav-tab:hover { color: var(--pfm-link-hover); background: var(--pfm-hover); }
+.pfm-wrap .pfm-tabs .nav-tab-active,
+.pfm-wrap .pfm-tabs .nav-tab-active:hover {
+	background: var(--pfm-bg);
+	border-bottom-color: var(--pfm-bg);
+	color: var(--pfm-heading);
+}
+
+/* One input per line (removal rules). */
+.pfm-wrap .pfm-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.pfm-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--pfm-border);
+	border-radius: 6px;
+	background: var(--pfm-panel-2);
+}
+.pfm-scroll .pfm-field { margin-bottom: 4px; }
+
+/* ===== Product Formats ===== */
+
+.pfm-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.pfm-toolbar .pfm-inline-form { margin-right: 6px; }
+
+.pfm-table .pfm-col-narrow { width: 90px; }
+.pfm-table .pfm-col-check { width: 36px; text-align: center; }
+.pfm-table--compact td,
+.pfm-table--compact th { padding: 8px 12px; }
+.pfm-table--compact { margin-top: 8px !important; }
+.pfm-wrap .pfm-table select { max-width: 100%; }
+.pfm-table tr.pfm-add-row td { border-top: 1px dashed var(--pfm-border-input); }
+
+/* Paging of the works list. */
+.pfm-pages { margin: 12px 0 0; }
+.pfm-wrap .pfm-page {
+	display: inline-block;
+	min-width: 28px;
+	padding: 2px 8px;
+	margin: 0 4px 4px 0;
+	text-align: center;
+	text-decoration: none;
+	border: 1px solid var(--pfm-border);
+	border-radius: 4px;
+	background: var(--pfm-panel);
+}
+.pfm-wrap .pfm-page--current {
+	background: var(--pfm-accent);
+	border-color: var(--pfm-accent);
+	color: #ffffff;
+}
+
+/* Suggestion cards. */
+.pfm-sug {
+	background: var(--pfm-panel);
+	border: 1px solid var(--pfm-border);
+	border-left: 3px solid var(--pfm-warn);
+	border-radius: 6px;
+	padding: 12px 14px;
+	margin: 0 0 12px;
+}
+.pfm-sug--high { border-left-color: #3d9b62; }
+.pfm-sug__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 10px;
+}
+.pfm-sug__head .pfm-badge { margin: 0; }
+.pfm-sug__actions { margin-left: auto; display: inline-flex; gap: 6px; }
+
+/* Formats table (sortable rows). */
+.pfm-table .pfm-handle {
+	cursor: move;
+	color: var(--pfm-muted) !important;
+	font-size: 16px;
+	user-select: none;
+	width: 24px;
+	text-align: center;
+}
+.pfm-sortable .ui-sortable-placeholder {
+	visibility: visible !important;
+	height: 44px;
+	outline: 1px dashed var(--pfm-accent);
+	background: none !important;
+}
+.pfm-sortable .ui-sortable-helper td { background: var(--pfm-hover) !important; }
+.pfm-wrap .pfm-sortable input[type="text"] { width: 100%; min-width: 110px; }
+
+/* Category checklist. */
+.pfm-cats {
+	max-height: 260px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--pfm-border);
+	border-radius: 6px;
+	background: var(--pfm-panel-2);
+	min-width: 200px;
+}
+.pfm-cats .pfm-check { margin: 0 0 4px; }
+.pfm-cats .pfm-depth-1 { padding-left: 18px; }
+.pfm-cats .pfm-depth-2 { padding-left: 36px; }
+.pfm-cats .pfm-depth-3 { padding-left: 54px; }
+.pfm-cats .pfm-depth-4 { padding-left: 72px; }
+
+/* Upsell cleanup progress. */
+.pfm-progress {
+	height: 10px;
+	margin: 10px 0 0;
+	max-width: 420px;
+	background: var(--pfm-panel-2);
+	border: 1px solid var(--pfm-border);
+	border-radius: 999px;
+	overflow: hidden;
+}
+.pfm-progress[hidden] { display: none; }
+.pfm-progress__bar {
+	width: 0;
+	height: 100%;
+	background: var(--pfm-accent);
+	transition: width .3s ease;
+}
+
+/* Autocomplete menu (jQuery UI, appended to <body>; also on the product edit screen). */
+.ui-autocomplete.pfm-ac-menu {
+	position: absolute;
+	z-index: 100100;
+	max-height: 320px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	margin: 0;
+	padding: 4px 0;
+	list-style: none;
+	background: #ffffff;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, .15);
+}
+.ui-autocomplete.pfm-ac-menu .ui-menu-item { margin: 0; padding: 0; }
+.ui-autocomplete.pfm-ac-menu .ui-menu-item-wrapper {
+	display: block;
+	padding: 6px 10px;
+	color: #1d2327;
+	cursor: pointer;
+}
+.ui-autocomplete.pfm-ac-menu .ui-state-active {
+	background: #6d4aff;
+	color: #ffffff;
+	border: 0;
+	margin: 0;
+}
+.ui-helper-hidden-accessible { position: absolute; left: -9999px; }

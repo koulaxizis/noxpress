@@ -122,6 +122,8 @@ The plugin's own options (`tp_settings`, `tp_cat_images`) and transients are rem
 * New: label texts in Greek and English, with the language chosen in the plugin (automatic from the site language, Greek or English). Developers can change a text with the `tp_price_label_text` filter.
 * Price labels work on block themes too, follow the master switch, test mode and `TP_DISABLE`, run on the cart's AJAX requests, and never change orders, emails, invoices, feeds or the price schema. They are included in the settings backup.
 * Changed: on block themes the Theme Patcher page shows the Prices tab (the only feature that applies there).
+* New: Product Formats and Easy Withdrawal join the Noxpress suite: the hub lists them and can install them (Noxpress Core 1.0.4).
+* Fix: uninstalling this plugin keeps the shared Noxpress data while Product Formats or Easy Withdrawal is still installed.
 
 = 1.1.2 =
 * New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).

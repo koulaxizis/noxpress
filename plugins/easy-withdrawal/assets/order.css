@@ -1,0 +1,12 @@
+/**
+ * Easy Withdrawal — order.css (v1.0.0): the "Υπαναχωρήσεις" metabox on the
+ * WooCommerce order screen (light admin, like the other metaboxes).
+ */
+
+#ewd-requests .ewd-mb { margin: 0; }
+#ewd-requests .ewd-mb li {
+	margin: 0 0 10px;
+	padding: 0 0 10px;
+	border-bottom: 1px solid #f0f0f1;
+}
+#ewd-requests .ewd-mb li:last-child { border-bottom: 0; }
