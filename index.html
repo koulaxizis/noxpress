@@ -295,6 +295,8 @@ footer {
 }
 footer a { color: var(--accent-bright); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
+footer .credits { margin-top: 6px; }
+footer .heart { color: var(--accent-bright); }
 
 @media (prefers-color-scheme: light) {
 	/* Dark mode only — respected intentionally, no light mode offered. */
@@ -479,7 +481,8 @@ footer a:hover { text-decoration: underline; }
 </section>
 
 <footer>
-	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
+	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
+	<p class="credits" data-i18n="credits">Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.</p>
 </footer>
 
 <dialog class="dl-dialog" id="dlDialog" aria-labelledby="dlTitle">
@@ -576,7 +579,8 @@ footer a:hover { text-decoration: underline; }
 		sub_text: 'Get notified about new plugins, updates &amp; maintenance.',
 		sub_btn: 'Subscribe',
 		sub_note: 'No spam — only release announcements. Your email stays with MailerLite.',
-		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, made with ♥ by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.'
+		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
+		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
 
 	var EL = {
@@ -652,7 +656,8 @@ footer a:hover { text-decoration: underline; }
 		sub_text: 'Ενημερώσου για νέα plugins, ενημερώσεις &amp; συντήρηση.',
 		sub_btn: 'Εγγραφή',
 		sub_note: 'Χωρίς spam — μόνο ανακοινώσεις εκδόσεων. Το email σου μένει στη MailerLite.',
-		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins, φτιαγμένα με ♥ από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a> · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.'
+		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
+		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
 
 	var TITLE_EN = 'noxpress — WordPress & WooCommerce plugins by Christos Koulaxizis';

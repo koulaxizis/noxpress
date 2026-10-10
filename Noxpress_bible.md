@@ -2,7 +2,7 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.3 (2026-10-10). Νέο: §17 Μετρητής λήψεων στο site.
+- **Έκδοση:** 1.4 (2026-10-10). Νέο: γραμμή credits στο footer του site (§13).
 - **Προέλευση:** η v1.0 δεν υπήρχε στο repo. Η v1.1 ανασυντέθηκε από τον κώδικα των Revenue Splitter 1.7.0, Store Pulse 1.3.0 και Smart Formatter 1.1.0, από τις αναφορές «Bible §N» μέσα σε αυτόν, και από τις συμβάσεις του PR #1. Η αρίθμηση §2–§10 κρατά τη σημασία που ήδη έχει στον κώδικα.
 - **Πρότυπη υλοποίηση:** Revenue Splitter. Το `admin.css` του είναι το «leading design».
 - Όταν ένα plugin αποκλίνει από το Bible, η απόκλιση γράφεται στο docblock του bootstrap με αιτιολόγηση.
@@ -176,6 +176,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Το link download δείχνει στο asset του release.
   - Badge beta μέχρι να γίνει stable.
   - Κάτω από το tagline, η γραμμή «More than X downloads» (§17).
+  - Footer σε δύο γραμμές: πρώτα η γραμμή του brand (`footer`), από κάτω τα credits (`credits`, EN/EL): «Designed with ♥ by Christos Koulaxizis. Assisted by Lumo. Audited by Claude.», με links σε koulaxizis.gr, lumo.proton.me και claude.ai. Η καρδιά είναι `♥` στο `--accent-bright`.
 - **Έλεγχοι πριν από κάθε release:**
   - `php -l` σε όλα τα αρχεία και PHPCompatibilityWP με `testVersion 7.4-`.
   - Script που συγκρίνει τα msgids του κώδικα με το EN dict (καμία έλλειψη, κανένα αχρησιμοποίητο, κανένα διπλότυπο).
