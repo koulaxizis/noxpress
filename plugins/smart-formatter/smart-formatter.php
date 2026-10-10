@@ -3,7 +3,7 @@
  * Plugin Name:          Smart Formatter
  * Plugin URI:           https://noxpress.tech
  * Description:          Μαζική μορφοποίηση κειμένων προϊόντων WooCommerce (bold, italic, παρενθέσεις, αριθμοί, εισαγωγικά, κενά) με preview, dry run, snapshots/undo και profiles.
- * Version:              1.2.1
+ * Version:              1.2.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -39,7 +39,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SF_VERSION', '1.2.1' );
+define( 'SF_VERSION', '1.2.2' );
 define( 'SF_FILE', __FILE__ );
 define( 'SF_PATH', plugin_dir_path( __FILE__ ) );
 

@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -54,6 +54,10 @@ Without `--user` the commands run as a trusted shell context. If you pass `--use
 Only this plugin's own options, transients, cron event, product/order meta and order item meta. The shared `rs_lang` user meta is kept when Store Pulse or Smart Formatter is still installed.
 
 == Changelog ==
+
+= 1.8.2 =
+* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).
+* Fix: uninstalling Revenue Splitter keeps the shared Noxpress data (update channel, hub notices) and the language choice (rs_lang) while Shop Filters is still installed.
 
 = 1.8.1 =
 * Fix: the hub's "Changelog" link and "Install" button no longer end in "Plugin not found" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).
