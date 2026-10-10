@@ -9,7 +9,7 @@
 #
 #   rs → revenue-splitter   sp → store-pulse
 #   sf → smart-formatter    tp → theme-patcher
-#   sh → shop-filters
+#   sh → shop-filters      pf → product-formats
 #   nm → data-migrator (μόνο με tag)
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
@@ -43,7 +43,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf tp sh'
+  AUTO: 'rs sp sf tp sh pf'
 
 jobs:
   release:
@@ -65,7 +65,7 @@ jobs:
         run: |
           set -euo pipefail
           ref=plugins/revenue-splitter/includes/noxpress-core
-          for slug in store-pulse smart-formatter theme-patcher shop-filters; do
+          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats; do
             if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
               echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
               exit 1
@@ -85,6 +85,7 @@ jobs:
               sf) echo smart-formatter ;;
               tp) echo theme-patcher ;;
               sh) echo shop-filters ;;
+              pf) echo product-formats ;;
               nm) echo data-migrator ;;
               *) return 1 ;;
             esac
@@ -96,6 +97,7 @@ jobs:
               sf) echo "Smart Formatter" ;;
               tp) echo "Theme Patcher" ;;
               sh) echo "Shop Filters" ;;
+              pf) echo "Product Formats" ;;
               nm) echo "Data Migrator" ;;
             esac
           }

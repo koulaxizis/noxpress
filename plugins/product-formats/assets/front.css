@@ -1,0 +1,171 @@
+/**
+ * Product Formats — front.css (v1.0.0)
+ *
+ * Scoped to .pfm-formats (the block) and .pfm-also (the list line).
+ * Layout properties carry !important so theme rules with an id (e.g.
+ * "#content .summary span { float: right }", which outranks any class
+ * selector) cannot rearrange the block (Bible §14, rule 13). Colours and
+ * fonts are inherited from the element that holds the block; the price
+ * keeps WooCommerce's and the theme's own look. --pfm-line sets the
+ * border colour of the format boxes.
+ */
+
+.pfm-formats {
+	--pfm-line: rgba(127, 127, 127, .4);
+	--pfm-gap: .5em;
+	display: block !important;
+	float: none !important;
+	clear: both !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 1em 0 1.25em !important;
+	padding: 0 !important;
+	line-height: 1.35 !important;
+	text-align: start;
+}
+
+.pfm-formats *,
+.pfm-formats *::before,
+.pfm-formats *::after { box-sizing: border-box !important; }
+
+/*
+ * Reset of our own elements only. The price inside (WooCommerce markup:
+ * del, ins, bdi, .amount, .screen-reader-text) is left to WooCommerce and
+ * the theme, so sale prices and hidden screen-reader texts keep working.
+ */
+.pfm-formats div,
+.pfm-formats a.pfm-format,
+.pfm-formats span.pfm-format,
+.pfm-formats .pfm-format > span {
+	float: none !important;
+	clear: none !important;
+	position: static !important;
+	min-height: 0 !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	color: inherit !important;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	font-style: normal !important;
+	font-weight: inherit !important;
+	line-height: inherit !important;
+	letter-spacing: normal !important;
+	text-indent: 0 !important;
+	text-transform: none !important;
+	text-decoration: none !important;
+	vertical-align: baseline !important;
+}
+
+.pfm-formats .pfm-formats__title {
+	display: block !important;
+	margin: 0 0 .5em !important;
+	font-weight: 600 !important;
+}
+
+.pfm-formats .pfm-formats__list {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	align-items: stretch !important;
+	gap: var(--pfm-gap) !important;
+}
+
+.pfm-formats .pfm-formats__item {
+	display: flex !important;
+	flex: 0 1 auto !important;
+	min-width: 7.5em !important;
+	max-width: 100% !important;
+}
+
+.pfm-formats .pfm-formats__item > .pfm-format {
+	display: flex !important;
+	flex-direction: column !important;
+	justify-content: flex-start !important;
+	gap: .15em !important;
+	width: 100% !important;
+	padding: .5em .8em !important;
+	border: 1px solid var(--pfm-line) !important;
+	border-radius: 6px !important;
+	transition: border-color .15s ease;
+}
+
+.pfm-formats .pfm-formats__item > a.pfm-format:hover,
+.pfm-formats .pfm-formats__item > a.pfm-format:focus-visible {
+	border-color: currentColor !important;
+}
+
+.pfm-formats .pfm-formats__item > a.pfm-format:focus-visible {
+	outline: 2px solid currentColor !important;
+	outline-offset: 2px !important;
+}
+
+.pfm-formats .pfm-formats__item > .pfm-format--current {
+	border: 2px solid currentColor !important;
+	padding: calc(.5em - 1px) calc(.8em - 1px) !important;
+	cursor: default;
+}
+
+.pfm-formats .pfm-format > .pfm-format__label {
+	display: block !important;
+	font-weight: 600 !important;
+}
+
+.pfm-formats .pfm-format > .pfm-format__variant,
+.pfm-formats .pfm-format > .pfm-format__stock {
+	display: block !important;
+	font-size: .85em !important;
+	opacity: .8;
+}
+
+.pfm-formats .pfm-format > .pfm-format__price {
+	display: block !important;
+	font-size: .95em !important;
+}
+
+/* Keep the price on its own line, whatever the theme does with .price spans. */
+.pfm-formats .pfm-format__price del,
+.pfm-formats .pfm-format__price ins {
+	display: inline !important;
+	float: none !important;
+	margin: 0 .25em 0 0 !important;
+	padding: 0 !important;
+	background: none !important;
+}
+
+/* WooCommerce's hidden texts ("Original price was: …") stay hidden. */
+.pfm-formats .screen-reader-text {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	margin: -1px !important;
+	padding: 0 !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	clip-path: inset(50%) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+/* ===== List line «Also: …» ===== */
+
+.pfm-also {
+	display: block !important;
+	float: none !important;
+	clear: both !important;
+	margin: .25em 0 .5em !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	color: inherit !important;
+	font-size: .85em !important;
+	font-weight: normal !important;
+	line-height: 1.35 !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	opacity: .8;
+}

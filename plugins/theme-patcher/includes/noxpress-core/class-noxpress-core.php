@@ -37,6 +37,7 @@ final class Noxpress_Core {
 		'Μαζική μορφοποίηση κειμένων προϊόντων με preview, dry run και undo.' => 'Bulk formatting of product texts with preview, dry run and undo.',
 		'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους.' => 'Fixes classic WooCommerce themes without a child theme and without editing their files.',
 		'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.' => 'Lean product filters for classic themes, with value groups for attributes.',
+		'Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».' => 'Links the formats of a work (print, e-book, audiobook, film) with an "Available formats" block.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -96,7 +97,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -132,6 +133,11 @@ final class Noxpress_Core {
 				'name' => 'Shop Filters',
 				'desc' => __( 'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.', 'noxpress' ),
 				'page' => 'shf-filters',
+			),
+			'product-formats'  => array(
+				'name' => 'Product Formats',
+				'desc' => __( 'Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».', 'noxpress' ),
+				'page' => 'pfm-formats',
 			),
 		);
 	}
