@@ -3,7 +3,7 @@
  * Plugin Name:          Theme Patcher
  * Plugin URI:           https://noxpress.tech
  * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
- * Version:              1.1.0
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -51,7 +51,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TP_VERSION', '1.1.0' );
+define( 'TP_VERSION', '1.1.1' );
 define( 'TP_FILE', __FILE__ );
 define( 'TP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TP_URL', plugin_dir_url( __FILE__ ) );

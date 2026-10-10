@@ -44,6 +44,11 @@ final class Noxpress_Updater {
 	public static function init(): void {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'inject' ) );
 		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api' ), 10, 3 );
+		// Other plugins' plugins_api filters run after ours and some of them
+		// replace any result (e.g. with WordPress.org's "Plugin not found").
+		// The suite's own details win at the very end of both filters.
+		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api_last' ), PHP_INT_MAX, 3 );
+		add_filter( 'plugins_api_result', array( __CLASS__, 'plugins_api_last' ), PHP_INT_MAX, 3 );
 		add_filter( 'upgrader_pre_download', array( __CLASS__, 'pre_download' ), 10, 3 );
 	}
 
@@ -223,17 +228,35 @@ final class Noxpress_Updater {
 
 	/** plugins_api: details popup and install source for suite plugins. */
 	public static function plugins_api( $result, $action, $args ) {
-		if ( 'plugin_information' !== $action || ! is_object( $args ) || empty( $args->slug ) ) {
+		$info = self::info( $action, $args );
+		return $info ? $info : $result;
+	}
+
+	/**
+	 * plugins_api and plugins_api_result, last: puts the suite's details back
+	 * when a later filter replaced them.
+	 */
+	public static function plugins_api_last( $result, $action, $args ) {
+		if ( is_object( $result ) && ! empty( $result->noxpress ) ) {
 			return $result;
 		}
-		$slug    = (string) $args->slug;
+		$info = self::info( $action, $args );
+		return $info ? $info : $result;
+	}
+
+	/** Plugin details of a suite plugin for plugins_api(), or null. */
+	private static function info( $action, $args ): ?object {
+		if ( 'plugin_information' !== $action || ! is_object( $args ) || empty( $args->slug ) || ! is_string( $args->slug ) ) {
+			return null;
+		}
+		$slug    = $args->slug;
 		$catalog = Noxpress_Core::catalog();
 		if ( ! isset( $catalog[ $slug ] ) ) {
-			return $result;
+			return null;
 		}
 		$rel = self::latest( $slug );
 		if ( ! $rel ) {
-			return $result;
+			return null;
 		}
 
 		return (object) array(
@@ -251,6 +274,8 @@ final class Noxpress_Updater {
 				'description' => '<p>' . esc_html( $catalog[ $slug ]['desc'] ) . '</p>',
 				'changelog'   => self::changelog_html( $rel ),
 			),
+			'external'      => true,
+			'noxpress'      => true,
 		);
 	}
 

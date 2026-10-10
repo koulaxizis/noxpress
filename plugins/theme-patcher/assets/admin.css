@@ -1,5 +1,5 @@
 /**
- * Theme Patcher — admin.css (v1.0.0)
+ * Theme Patcher — admin.css (v1.1.1)
  *
  * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
  * the leading design; base rules mirror Smart Formatter's admin.css:
@@ -8,6 +8,8 @@
  *  - Prefixed selectors tp-* — no clash with WP core or other plugins.
  *  - Hardening !important on tables/inputs so light-theme rules of WP
  *    core / other plugins cannot break the dark panel.
+ *  - v1.1.1: no max-width, the panel fills the full width like .rs-wrap
+ *    and .sp-wrap.
  */
 
 /* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
@@ -42,7 +44,6 @@
 	margin: 16px 0 32px;
 	color: var(--tp-text);
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-	max-width: 1180px;
 }
 
 .tp-wrap h1,
