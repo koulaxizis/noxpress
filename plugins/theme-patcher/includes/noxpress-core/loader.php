@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$GLOBALS['noxpress_core_candidates']['1.0.0'] = __DIR__;
+$GLOBALS['noxpress_core_candidates']['1.0.1'] = __DIR__;
 
 if ( ! function_exists( 'noxpress_core_boot' ) ) {
 

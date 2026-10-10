@@ -2,7 +2,7 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.4 (2026-10-10). Νέο: γραμμή credits στο footer του site (§13).
+- **Έκδοση:** 1.5 (2026-10-10). Νέο: το Core ξαναβάζει τις λεπτομέρειες των plugins του στο τέλος του `plugins_api` (§16).
 - **Προέλευση:** η v1.0 δεν υπήρχε στο repo. Η v1.1 ανασυντέθηκε από τον κώδικα των Revenue Splitter 1.7.0, Store Pulse 1.3.0 και Smart Formatter 1.1.0, από τις αναφορές «Bible §N» μέσα σε αυτόν, και από τις συμβάσεις του PR #1. Η αρίθμηση §2–§10 κρατά τη σημασία που ήδη έχει στον κώδικα.
 - **Πρότυπη υλοποίηση:** Revenue Splitter. Το `admin.css` του είναι το «leading design».
 - Όταν ένα plugin αποκλίνει από το Bible, η απόκλιση γράφεται στο docblock του bootstrap με αιτιολόγηση.
@@ -226,6 +226,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Πηγή: `https://noxpress.tech/updates.json`, που γράφει το workflow. Για κάθε plugin: `stable` (νεότερο χωρίς pre-release) και `beta` (νεότερο οποιοδήποτε), με `version`, `zip`, `sha256`, `signature`, `requires_wp`, `requires_php`, `tested_wp`, `published`, `changelog`.
   - Κανάλι: site option `noxpress_channel`, προεπιλογή **Stable**. Στο Beta ισχύει το νεότερο από beta και stable. Υποβάθμιση δεν προτείνεται ποτέ.
   - Το Core γεμίζει το `update_plugins` transient στο `pre_set_site_transient_update_plugins` (σβήνει και κάθε ξένη εγγραφή για τα slugs μας). Οι αυτόματες ενημερώσεις μένουν στον διακόπτη του WordPress, κλειστές από προεπιλογή.
+  - Λεπτομέρειες plugin (`plugins_api`, για το popup «Αλλαγές» και την εγκατάσταση): το Core απαντά στην προτεραιότητα 10 και ξαναβάζει τα δικά του στοιχεία στο τέλος του `plugins_api` και του `plugins_api_result` (`PHP_INT_MAX`), γιατί άλλα plugins μπορεί να τα αντικαταστήσουν (π.χ. με το «Plugin not found» του WordPress.org).
   - Αιτήματα μόνο με `wp_safe_remote_get`, timeout 10 s, cache 12 ώρες (1 ώρα μετά από αποτυχία) στο site transient `noxpress_manifest`. Ποτέ σε αίτηση επισκέπτη.
 - **Ασφάλεια πακέτων:**
   - Δεκτά μόνο zip από `https://github.com/koulaxizis/noxpress/releases/download/nox-<code>-<version>/<slug>.zip`, με version σε μορφή semver.

@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, accessibility, categories
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -99,6 +99,9 @@ The theme files of that area changed after you configured it (usually a theme up
 The plugin's own options (`tp_settings`, `tp_cat_images`) and transients are removed. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fix: the hub's "Changelog" link and "Install" button no longer end in "Plugin not found" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).
 
 = 1.1.0 =
 * New: Noxpress hub. The "Noxpress" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).

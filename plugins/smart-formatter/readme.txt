@@ -5,7 +5,7 @@ Tags: woocommerce, formatting, bulk edit, product description, typography
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -51,6 +51,9 @@ No. Global attribute values are terms shared by the whole store, so only custom 
 The plugin's own options and transients are removed. Product texts that were already formatted stay as they are.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: the hub's "Changelog" link and "Install" button no longer end in "Plugin not found" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).
 
 = 1.2.0 =
 * New: Noxpress hub. The "Noxpress" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).
