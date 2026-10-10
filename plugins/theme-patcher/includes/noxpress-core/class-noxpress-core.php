@@ -36,6 +36,7 @@ final class Noxpress_Core {
 		'Εικόνα του καταστήματος με μια ματιά: παραγγελίες, επιστροφές, στοκ και οφειλές.' => 'Your store at a glance: orders, refunds, stock and amounts owed.',
 		'Μαζική μορφοποίηση κειμένων προϊόντων με preview, dry run και undo.' => 'Bulk formatting of product texts with preview, dry run and undo.',
 		'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους.' => 'Fixes classic WooCommerce themes without a child theme and without editing their files.',
+		'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.' => 'Lean product filters for classic themes, with value groups for attributes.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -126,6 +127,11 @@ final class Noxpress_Core {
 				'name' => 'Theme Patcher',
 				'desc' => __( 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους.', 'noxpress' ),
 				'page' => 'tp-theme-patcher',
+			),
+			'shop-filters'     => array(
+				'name' => 'Shop Filters',
+				'desc' => __( 'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.', 'noxpress' ),
+				'page' => 'shf-filters',
 			),
 		);
 	}
