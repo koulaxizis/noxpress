@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 src=plugins/revenue-splitter/includes/noxpress-core
-for slug in store-pulse smart-formatter theme-patcher shop-filters; do
+for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats; do
   rm -rf "plugins/$slug/includes/noxpress-core"
   cp -R "$src" "plugins/$slug/includes/noxpress-core"
   echo "synced $slug"
