@@ -14,6 +14,11 @@ Environment:
   NOXPRESS_SIGNING_KEY   path to the Ed25519 private key (PEM)
   GH_TOKEN               token for the gh CLI
 
+A zip is downloaded only when the current manifest has no entry for that
+version whose sha256 matches the asset's GitHub digest. Every download adds
+to the public download count shown on the site (Bible §17), so unchanged
+zips are never fetched again.
+
 Usage: build-manifest.py <output.json> <code>...
 Only the Python standard library, gh and openssl are used.
 """
@@ -118,6 +123,25 @@ def zip_info(path, slug, version):
     }
 
 
+def asset_digest(rel, slug):
+    """The sha256 GitHub reports for the plugin zip of a release, or ''."""
+    for a in rel.get('assets', []):
+        if a.get('name') == f'{slug}.zip':
+            digest = a.get('digest') or ''
+            return digest[len('sha256:'):] if digest.startswith('sha256:') else ''
+    return ''
+
+
+def known_entry(previous, version, sha):
+    """The current manifest's entry for this version and zip, if any."""
+    if not sha:
+        return None
+    for e in previous.values():
+        if isinstance(e, dict) and e.get('version') == version and e.get('sha256') == sha:
+            return e
+    return None
+
+
 def main():
     out_file, codes = sys.argv[1], sys.argv[2:]
     repo = os.environ['GITHUB_REPOSITORY']
@@ -131,6 +155,10 @@ def main():
 
     all_releases = [r for r in releases(repo) if not r.get('draft')]
     manifest = {'plugins': {}}
+    previous = {}
+    if os.path.exists(out_file):
+        with open(out_file, encoding='utf-8') as fh:
+            previous = json.load(fh).get('plugins', {})
 
     with tempfile.TemporaryDirectory() as tmp:
         for code in codes:
@@ -158,6 +186,14 @@ def main():
                     continue
                 _, version, rel = picks[channel]
                 tag = rel['tag_name']
+                reused = known_entry(previous.get(slug, {}), version, asset_digest(rel, slug))
+                if reused:
+                    entry[channel] = dict(
+                        reused,
+                        signature=sign(key_file, f'noxpress|{slug}|{version}|{reused["sha256"]}'),
+                        published=(rel.get('published_at') or '')[:10],
+                    )
+                    continue
                 dest = os.path.join(tmp, tag)
                 os.makedirs(dest, exist_ok=True)
                 run('gh', 'release', 'download', tag, '--repo', repo, '--pattern', f'{slug}.zip', '--dir', dest, '--clobber')
