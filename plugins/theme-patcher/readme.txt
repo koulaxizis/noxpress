@@ -1,15 +1,15 @@
 === Theme Patcher ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, theme compatibility, product cards, accessibility, categories
+Tags: woocommerce, theme compatibility, product cards, accessibility, price labels
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings and accessibility.
+Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility and price labels.
 
 == Description ==
 
@@ -53,11 +53,19 @@ Many classic themes draw product cards, category tiles and texts with their own 
 
 * Warns on the Widgets screen when WooCommerce block filters are used in widget areas of a classic theme, and points to the classic filter widgets.
 
+**Price labels**
+
+* **Price 0:** "Free" (your own text, Greek and English) instead of 0,00 € on the product page, shop and category lists, related products, up-sells, cross-sells, widgets and the product blocks. A variable product changes only when all its variations cost 0; a sale price of 0 shows the text only.
+* **Cart, mini cart and checkout:** the price and subtotal of each free line show the same text. The order subtotal and total stay numbers.
+* **Products without a price** (they cannot be bought, e.g. music to listen to): a label where the price would be, per category ("Free listening", "Free viewing"…), with subcategories, the first matching rule winning, and a general text for the rest.
+* **Language:** automatic (site language), Greek or English.
+* Store-wide, with any theme (block themes too). Orders, emails, the thank-you page, My Account, invoices, product feeds and the price schema keep the real price. The Cart and Checkout blocks draw prices with JavaScript and keep 0,00 €; the Prices tab says so when they are in use.
+
 **Tools and safety**
 
 * **Theme detector:** a code scan (comments ignored) lists template overrides and product loops of the active theme, with what each one is missing and a suggested mode.
 * **Page probe:** open any page with the current settings applied for you only and see, per product loop, how many cards were found and fixed, plus every page-level change (texts, removed elements, names, images, blocked setting writes).
-* **Safe by design:** off until enabled; test mode shows changes to shop managers only; settings are stored per theme (switching themes switches settings); areas are suspended automatically when the theme files they depend on change (e.g. after a theme update) until an admin confirms; any error leaves the theme's HTML untouched; no database writes on visitor requests; block themes are left alone; `define( 'TP_DISABLE', true );` in wp-config.php stops every front-end hook.
+* **Safe by design:** off until enabled; test mode shows changes to shop managers only; settings are stored per theme (switching themes switches settings); areas are suspended automatically when the theme files they depend on change (e.g. after a theme update) until an admin confirms; any error leaves the theme's HTML untouched; no database writes on visitor requests; block themes are left alone (except the price labels); `define( 'TP_DISABLE', true );` in wp-config.php stops every front-end hook.
 * **Backup:** export / import all settings as JSON (strictly validated).
 * Bilingual admin UI (Greek / English) following the Noxpress language choice, or the WordPress user locale.
 * Part of the Noxpress ecosystem: shares the "Noxpress" admin menu with Revenue Splitter, Store Pulse and Smart Formatter.
@@ -94,11 +102,28 @@ The search is exact, against the page HTML: copy the text from the page source (
 
 The theme files of that area changed after you configured it (usually a theme update). Check the page with the probe and confirm on the Theme Patcher page to turn the area back on.
 
+= The price label does not show up for visitors. =
+
+Check that Theme Patcher is enabled and test mode is off (TP Settings), then clear the page cache (e.g. WP Rocket): cached pages keep the old price until they are rebuilt.
+
+= Does "Free" change the price in Google results? =
+
+No. The label is only text for visitors. The structured data (schema) keeps the real price: 0 for free products, which search engines show as free, and no offer for products without a price.
+
 = What happens on uninstall? =
 
 The plugin's own options (`tp_settings`, `tp_cat_images`) and transients are removed. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: price labels (Prices tab). Products with price 0 show "Free" (your own text) instead of 0,00 € on product pages, lists, related products, up-sells, cross-sells, widgets and product blocks, and on each cart, mini cart and checkout line. The order subtotal and total stay numbers.
+* New: labels for products without a price, per product category (with subcategories, first matching rule wins), plus a general text for the rest.
+* New: label texts in Greek and English, with the language chosen in the plugin (automatic from the site language, Greek or English). Developers can change a text with the `tp_price_label_text` filter.
+* Price labels work on block themes too, follow the master switch, test mode and `TP_DISABLE`, run on the cart's AJAX requests, and never change orders, emails, invoices, feeds or the price schema. They are included in the settings backup.
+* Changed: on block themes the Theme Patcher page shows the Prices tab (the only feature that applies there).
+* New: Product Formats and Easy Withdrawal join the Noxpress suite: the hub lists them and can install them (Noxpress Core 1.0.4).
+* Fix: uninstalling this plugin keeps the shared Noxpress data while Product Formats or Easy Withdrawal is still installed.
 
 = 1.1.2 =
 * New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).

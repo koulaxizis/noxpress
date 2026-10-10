@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Theme Patcher
  * Plugin URI:           https://noxpress.tech
- * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
- * Version:              1.1.2
+ * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή). Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
+ * Version:              1.2.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -36,6 +36,8 @@
  *                      same-tab links, image size / alt, aria names), CSS
  *  - TP_Theme        → theme settings guard, setting overrides, local files
  *  - TP_Categories   → category image fallback, category lists
+ *  - TP_Prices       → price labels ("Free" for price 0, per-category
+ *                      labels for products without a price)
  *  - TP_Checks       → admin checks (block filter widgets)
  *  - TP_Admin_UI     → menu, pages, PRG routes, backup, footer
  *
@@ -45,13 +47,19 @@
  * settings guard even blocks the theme's own); theme files are never
  * modified.
  *
+ * Deviation (Bible §14.4): the price labels also run on AJAX requests,
+ * because WooCommerce refreshes the cart, the mini cart and the checkout
+ * over AJAX. They never run on admin screens, REST (the Store API
+ * included), feeds, cron, CLI or XML-RPC, and they work on block themes
+ * too (WooCommerce's price blocks call get_price_html() on the server).
+ *
  * Cooperation (Bible §6): Theme Patcher changes presentation only, so it
  * fires no suite hook and listens to none.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TP_VERSION', '1.1.2' );
+define( 'TP_VERSION', '1.2.0' );
 define( 'TP_FILE', __FILE__ );
 define( 'TP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TP_URL', plugin_dir_url( __FILE__ ) );
@@ -100,6 +108,7 @@ final class Theme_Patcher {
 		require_once TP_PATH . 'includes/class-page.php';
 		require_once TP_PATH . 'includes/class-theme.php';
 		require_once TP_PATH . 'includes/class-categories.php';
+		require_once TP_PATH . 'includes/class-prices.php';
 
 		TP_Detector::init();
 
@@ -110,6 +119,7 @@ final class Theme_Patcher {
 			TP_Runtime::init();
 			TP_Replace::init();
 			TP_Page::init();
+			TP_Prices::init();
 		}
 
 		if ( is_admin() ) {
