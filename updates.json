@@ -2,15 +2,15 @@
   "plugins": {
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Removed: the old Noxpress overview page of Revenue Splitter (replaced by the hub).\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
-        "published": "2026-10-09",
+        "changelog": "* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a2bfb82ba2df66b710941f9a58eb6ea7565988bacd48675c74d6bdd6eae5aff4",
-        "signature": "0WMPAwLnLu0/5nswnrSV6Mhu32R3ULwhjXzB/7rtFPJ99EDnHjmBJhNoDfMkel0Xg5XYjjGCyHBAe/TLYgzTCQ==",
+        "sha256": "2280ce6d31e21458845a36ca55e6a55ebdf7fd967e34b73adfc98562980f95d5",
+        "signature": "9KGFshlb7AqUhX3LRXdHoVWhMZcXJMBDU45zjgGp3VcnKlU+i2lvd4+BntP7IQLZVzJa4AhZwgSpjDZExdPlAQ==",
         "tested_wp": "6.8",
-        "version": "1.8.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.8.0/revenue-splitter.zip"
+        "version": "1.8.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.8.1/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -26,41 +26,41 @@
     },
     "smart-formatter": {
       "beta": {
-        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
-        "published": "2026-10-09",
+        "changelog": "* Fixed: the Smart Formatter admin pages now use the full width of the screen, like the other Noxpress plugins (they stopped at 1180px).\n* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "7e56589656fc6907e93a9f4b7c579a7b2703d20c39ac0e21752c8e826c6de86e",
-        "signature": "tEAHowqXkcCk9w/NV5wveEfHtOfHg9nbiS9o08bWXTuoY9jzF0FptEWIMn6s8Oaoh3NRPh1sCQ8QJyqEAiqcAQ==",
+        "sha256": "53a84bbbb25d9ddb3a51d82a2d8845328179ba5bf5d1f052211383a749e3073a",
+        "signature": "8a7xpbSK6Hk7aGq1Sq4KdYcS1k1oVb5LylBluWcfK5OvtxlxNLrp8KgyeXwOGQkYL63qbMY9aVBA0NJguBnJAQ==",
         "tested_wp": "6.8",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.2.0/smart-formatter.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.2.1/smart-formatter.zip"
       }
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
-        "published": "2026-10-09",
+        "changelog": "* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f5a69b5aa9de994f412b951777cae51e321302df3f8510b74df880fb2a71f85a",
-        "signature": "OC8hr/JXpbtRsQLzAN0Mftz9o3OIwS+BPsDle5ssgFO3Uz6rxERgADFkTDaJ8ds6wfj8QjJ4qml4TQ+IfSqFBA==",
+        "sha256": "f8be2d0a903ef1993e8f946ad45c0c7ebb8dd47c1911ce72b13a6bb32cce4a91",
+        "signature": "IdiexMbEXMd2VcxkReRawtURC5427HoEi3IzSvofuDZ0PDU+oFnm6nDf03Wybt7F7shQcUqBIjAt5k5aZGsVAg==",
         "tested_wp": "6.8",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.4.0/store-pulse.zip"
+        "version": "1.4.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.4.1/store-pulse.zip"
       }
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: Noxpress hub. The \"Noxpress\" menu now opens one page for the whole suite: status, installed and available version, with update, install, activate, changelog and auto-update links (each shown only to users who may use it).\n* New: updates without WordPress.org. WordPress shows Noxpress updates like any other, from noxpress.tech. Stable or Beta channel (Stable by default); every package is checked with sha256 and an Ed25519 signature before it is installed.\n* New: `Update URI` header, so WordPress.org can never offer a different plugin with the same slug as an update.\n* Changed: the shared \"Noxpress\" menu is created by Noxpress Core (bundled in every suite plugin, the newest copy loads), no longer by this plugin. It also works without WooCommerce, so updates keep arriving.\n* Note: sites on an earlier version need this version installed by hand once; later versions arrive as updates.",
-        "published": "2026-10-09",
+        "changelog": "* Fixed: the Theme Patcher admin pages now use the full width of the screen, like the other Noxpress plugins (they stopped at 1180px).\n* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "fb63cba817f899377f5b6b4fa4ca33b9b87b60d63b507697e4c09d5a3769321a",
-        "signature": "UMD5s3XdwfCE1MSfWC0V3dklPrIsV/kxYROpYZB/vB8W/7x0mHRR3Avp6uf+GgjSxx31En3Pk5C/bG/fbysmDQ==",
+        "sha256": "8d83c5e1cb801e813e99e79bd0489782686a159a64e3d5769dc6cba2969230f3",
+        "signature": "J46a2advPgAOkGuceF+gwWcuIyK9j0fGG70h70WcdKpljPp4l3BvJlJIPKCe1OcTAH+sARcesV1I0hRWcxz9Cw==",
         "tested_wp": "6.8",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.0/theme-patcher.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.1/theme-patcher.zip"
       }
     }
   }
