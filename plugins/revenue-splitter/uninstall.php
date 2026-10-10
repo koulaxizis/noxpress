@@ -6,8 +6,8 @@
  *  - Όλα τα options του plugin (λίστα παρακάτω — επαληθευμένη με grep
  *    σε κάθε get/update/add_option του κώδικα).
  *  - User meta: rs_lang — ΜΟΝΟ αν δεν είναι εγκατεστημένα το Store Pulse,
- *    το Smart Formatter ή το Theme Patcher (το διαβάζουν ως κοινή
- *    επιλογή γλώσσας Noxpress).
+ *    το Smart Formatter, το Theme Patcher ή το Shop Filters (το διαβάζουν
+ *    ως κοινή επιλογή γλώσσας Noxpress).
  *  - Noxpress Core (noxpress_channel, noxpress_checked, noxpress_manifest,
  *    noxpress_hub_msg_*) — ΜΟΝΟ αν δεν μένει άλλο plugin της σουίτας.
  *  - Transients: rs_tok_* (portal sessions), rs_rl_* (rate limit),
@@ -78,7 +78,7 @@ wp_clear_scheduled_hook( 'rs_email_monthly_check' );
 // User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
 //
 // Το rs_lang είναι η ΚΟΙΝΗ επιλογή γλώσσας του οικοσυστήματος Noxpress:
-// το Store Pulse, το Smart Formatter και το Theme Patcher τη διαβάζουν.
+// το Store Pulse, το Smart Formatter, το Theme Patcher και το Shop Filters τη διαβάζουν.
 // Σβήνεται ΜΟΝΟ αν κανένα δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
 // ------------------------------------------------------------------------
 
@@ -86,6 +86,7 @@ $rs_lang_readers = array(
 	'store-pulse/store-pulse.php',
 	'smart-formatter/smart-formatter.php',
 	'theme-patcher/theme-patcher.php',
+	'shop-filters/shop-filters.php',
 );
 
 $rs_lang_in_use = false;
@@ -234,7 +235,7 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $rs_itemmeta_table )
 // ---------------------------------------------------------------------
 
 $rs_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher' ) as $rs_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters' ) as $rs_slug ) {
 	if ( 'revenue-splitter' !== $rs_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $rs_slug . '/' . $rs_slug . '.php' ) ) {
 		$rs_suite_left = true;
 		break;

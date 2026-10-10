@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, accessibility, categories
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -99,6 +99,10 @@ The theme files of that area changed after you configured it (usually a theme up
 The plugin's own options (`tp_settings`, `tp_cat_images`) and transients are removed. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.1.2 =
+* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).
+* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.
 
 = 1.1.1 =
 * Fixed: the Theme Patcher admin pages now use the full width of the screen, like the other Noxpress plugins (they stopped at 1180px).
