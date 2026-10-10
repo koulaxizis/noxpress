@@ -1,5 +1,5 @@
 /**
- * Smart Formatter — admin.css (v1.1.0)
+ * Smart Formatter — admin.css (v1.2.1)
  *
  * Noxpress standards — RS (Revenue Splitter admin.css) = leading design:
  *  - Ίδια palette με το RS (dark panel #101218, accent #6d4aff, κείμενο
@@ -9,6 +9,8 @@
  *    WP core / άλλων plugins δεν σπάνε το dark panel.
  *  - v1.1.0: το .sf-wrap γίνεται dark panel όπως το .rs-wrap (πριν οι
  *    τίτλοι/περιγραφές τυπώνονταν ανοιχτόχρωμα πάνω στο ανοιχτό WP admin).
+ *  - v1.2.1: χωρίς max-width — το panel γεμίζει όλο το πλάτος, όπως το
+ *    .rs-wrap και το .sp-wrap.
  */
 
 /* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
@@ -43,7 +45,6 @@
 	margin: 16px 0 32px;
 	color: var(--sf-text);
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-	max-width: 1180px;
 }
 
 .sf-wrap h1,
