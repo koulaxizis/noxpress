@@ -7,6 +7,13 @@
  *  {
  *    "enabled":   bool,                 master switch (default false)
  *    "test_mode": bool,                 changes visible to shop managers only (default true)
+ *    "prices": {                        price labels, for the whole store (not per theme)
+ *      "zero": bool, "zero_text": { "el": str, "en": str }, "cart": bool,
+ *      "empty": bool, "empty_text": { "el", "en" },
+ *      "rules": [ { "cat": term id, "children": bool, "el": str, "en": str } ],
+ *      "map":   { "<term id>": rule index },   derived from rules on save (§14.10)
+ *      "lang":  "auto"|"el"|"en"
+ *    },
  *    "themes": {
  *      "<stylesheet>": {
  *        "areas":  { "<area id>": { area config } },
@@ -25,7 +32,8 @@
  *  }
  *
  * Settings are stored per theme (stylesheet): with another theme active,
- * nothing applies (Bible §14 — safe theme switching).
+ * nothing applies (Bible §14 — safe theme switching). Price labels do not
+ * depend on the theme, so they live outside the per-theme blocks.
  *
  * Every value is validated against a whitelist on save AND on import
  * (one implementation, Bible §11).
@@ -45,6 +53,7 @@ final class TP_Settings {
 	const STYLE_COLORS = array( 'price', 'price_hover', 'btn_bg', 'btn_text', 'badge_bg', 'badge_text' );
 	const SCOPES  = array( 'all', 'shop', 'home', 'product' );
 	const SOURCES = array( 'recent', 'popular' );
+	const LANGS   = array( 'auto', 'el', 'en' );
 
 	const MAX_FILE_AREAS = 20;
 	const MAX_TEXTS      = 40;
@@ -57,6 +66,9 @@ final class TP_Settings {
 	const MAX_MODS       = 30;
 	const MAX_MOD_LEN    = 500;
 
+	const MAX_PRICE_RULES = 30;
+	const MAX_LABEL_LEN   = 40;
+
 	/** Per-request cache of the decoded option. */
 	private static $cache = null;
 
@@ -68,7 +80,27 @@ final class TP_Settings {
 		return array(
 			'enabled'   => false,
 			'test_mode' => true,
+			'prices'    => self::prices_defaults(),
 			'themes'    => array(),
+		);
+	}
+
+	public static function prices_defaults(): array {
+		return array(
+			'zero'       => false,
+			'zero_text'  => array(
+				'el' => 'Δωρεάν',
+				'en' => 'Free',
+			),
+			'cart'       => true,
+			'empty'      => false,
+			'empty_text' => array(
+				'el' => '',
+				'en' => '',
+			),
+			'rules'      => array(),
+			'map'        => array(),
+			'lang'       => 'auto',
 		);
 	}
 
@@ -143,6 +175,11 @@ final class TP_Settings {
 		// Stored data was validated on write; sanitize again anyway (cheap, defensive).
 		self::$cache = is_array( $decoded ) ? self::sanitize_all( $decoded ) : self::defaults();
 		return self::$cache;
+	}
+
+	/** Price label settings (store-wide). */
+	public static function prices(): array {
+		return self::get()['prices'];
 	}
 
 	/** Active theme key (child theme stylesheet when a child is active). */
@@ -234,6 +271,10 @@ final class TP_Settings {
 		$out['enabled']   = ! empty( $raw['enabled'] );
 		$out['test_mode'] = array_key_exists( 'test_mode', $raw ) ? ! empty( $raw['test_mode'] ) : true;
 
+		if ( isset( $raw['prices'] ) && is_array( $raw['prices'] ) ) {
+			$out['prices'] = self::sanitize_prices( $raw['prices'] );
+		}
+
 		if ( isset( $raw['themes'] ) && is_array( $raw['themes'] ) ) {
 			foreach ( $raw['themes'] as $key => $theme ) {
 				$key = self::valid_theme_key( (string) $key );
@@ -310,6 +351,74 @@ final class TP_Settings {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Price labels. Texts are plain text (no HTML), at most 40 characters.
+	 * The map is kept only for term ids that a rule names or covers; it is
+	 * rebuilt from the rules whenever the admin saves them.
+	 */
+	public static function sanitize_prices( array $raw ): array {
+		$out = self::prices_defaults();
+
+		$out['zero']  = ! empty( $raw['zero'] );
+		$out['cart']  = array_key_exists( 'cart', $raw ) ? ! empty( $raw['cart'] ) : true;
+		$out['empty'] = ! empty( $raw['empty'] );
+		$out['lang']  = isset( $raw['lang'] ) && in_array( $raw['lang'], self::LANGS, true ) ? $raw['lang'] : 'auto';
+
+		$zero             = isset( $raw['zero_text'] ) && is_array( $raw['zero_text'] ) ? $raw['zero_text'] : array();
+		$out['zero_text'] = array(
+			'el' => self::valid_label( isset( $zero['el'] ) ? $zero['el'] : '' ),
+			'en' => self::valid_label( isset( $zero['en'] ) ? $zero['en'] : '' ),
+		);
+		if ( '' === $out['zero_text']['el'] ) {
+			$out['zero_text']['el'] = 'Δωρεάν';
+		}
+
+		$empty             = isset( $raw['empty_text'] ) && is_array( $raw['empty_text'] ) ? $raw['empty_text'] : array();
+		$out['empty_text'] = array(
+			'el' => self::valid_label( isset( $empty['el'] ) ? $empty['el'] : '' ),
+			'en' => self::valid_label( isset( $empty['en'] ) ? $empty['en'] : '' ),
+		);
+
+		$cats = array();
+		foreach ( ( isset( $raw['rules'] ) && is_array( $raw['rules'] ) ) ? $raw['rules'] : array() as $r ) {
+			if ( ! is_array( $r ) || count( $out['rules'] ) >= self::MAX_PRICE_RULES ) {
+				continue;
+			}
+			$cat = isset( $r['cat'] ) ? (int) $r['cat'] : 0;
+			$el  = self::valid_label( isset( $r['el'] ) ? $r['el'] : '' );
+			$en  = self::valid_label( isset( $r['en'] ) ? $r['en'] : '' );
+			if ( $cat <= 0 || isset( $cats[ $cat ] ) || ( '' === $el && '' === $en ) ) {
+				continue;
+			}
+			$cats[ $cat ]   = true;
+			$out['rules'][] = array(
+				'cat'      => $cat,
+				'children' => ! empty( $r['children'] ),
+				'el'       => '' !== $el ? $el : $en,
+				'en'       => $en,
+			);
+		}
+
+		$n = count( $out['rules'] );
+		foreach ( ( isset( $raw['map'] ) && is_array( $raw['map'] ) ) ? $raw['map'] : array() as $tid => $idx ) {
+			$tid = (int) $tid;
+			$idx = is_numeric( $idx ) ? (int) $idx : -1;
+			if ( $tid > 0 && $idx >= 0 && $idx < $n ) {
+				$out['map'][ $tid ] = $idx;
+			}
+		}
+		return $out;
+	}
+
+	/** Label text: plain text, one line, at most MAX_LABEL_LEN characters. */
+	public static function valid_label( $text ): string {
+		if ( ! is_scalar( $text ) ) {
+			return '';
+		}
+		$text = sanitize_text_field( (string) $text );
+		return mb_strlen( $text ) > self::MAX_LABEL_LEN ? mb_substr( $text, 0, self::MAX_LABEL_LEN ) : $text;
 	}
 
 	/** Area ids: built-in ids or "file:<theme-relative .php path>". */

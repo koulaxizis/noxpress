@@ -451,8 +451,8 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="theme-patcher">
 		<h2><a href="#theme-patcher">Theme Patcher</a></h2>
-		<div class="meta">v1.1.1 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
-		<p data-i18n="tp_desc">Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings and accessibility.</p>
+		<div class="meta">v1.2.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="tp_desc">Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility and price labels.</p>
 		<ul>
 			<li data-i18n="tp_li1">Product cards: price with the old price struck through, add-to-cart button, rating, sale badge for every product type (variable too), and other plugins' card additions</li>
 			<li data-i18n="tp_li2">Every area on its own: shop / categories / search, related products, up-sells, cross-sells and each theme section with its own product query</li>
@@ -461,11 +461,12 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="tp_li5">Categories: an image from one of their products when they have none, chosen categories and order for theme tiles, same-tab links, smaller images with alt text</li>
 			<li data-i18n="tp_li6">Theme settings guard: page views can no longer overwrite what you set in the Customizer, fixed values for settings the theme resets (e.g. slider speed), theme files read from disk instead of over HTTP</li>
 			<li data-i18n="tp_li7">Accessibility: names for icon-only links and buttons, alt text for images; warning when block filter widgets are used on a classic theme</li>
+			<li data-i18n="tp_li10">Price labels: «Free» instead of 0,00 € in product pages, lists and cart lines; a label per category for products without a price (e.g. «Free listening»), in Greek and English, with any theme</li>
 			<li data-i18n="tp_li8">Safe by design: off until enabled, test mode for shop managers, per-theme settings, theme detector and page probe, automatic pause after theme updates, TP_DISABLE emergency switch</li>
 			<li data-i18n="tp_li9">Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.1/theme-patcher.zip" rel="nofollow noopener" data-i18n="tp_download">Download v1.1.1 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.2.0/theme-patcher.zip" rel="nofollow noopener" data-i18n="tp_download">Download v1.2.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/theme-patcher" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -557,7 +558,7 @@ footer .heart { color: var(--accent-bright); }
 		sf_li9: 'Profiles for rule / field combinations, plus JSON backup &amp; restore with strict validation',
 		sf_li10: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
 		sf_download: 'Download v1.2.1 (.zip)',
-		tp_desc: 'Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings and accessibility.',
+		tp_desc: 'Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility and price labels.',
 		tp_li1: 'Product cards: price with the old price struck through, add-to-cart button, rating, sale badge for every product type (variable too), and other plugins\' card additions',
 		tp_li2: 'Every area on its own: shop / categories / search, related products, up-sells, cross-sells and each theme section with its own product query',
 		tp_li3: 'Card title lines and size, the right thumbnail size instead of full-size images, the theme\'s empty sale tags removed',
@@ -565,9 +566,10 @@ footer .heart { color: var(--accent-bright); }
 		tp_li5: 'Categories: an image from one of their products when they have none, chosen categories and order for theme tiles, same-tab links, smaller images with alt text',
 		tp_li6: 'Theme settings guard: page views can no longer overwrite what you set in the Customizer, fixed values for settings the theme resets (e.g. slider speed), theme files read from disk instead of over HTTP',
 		tp_li7: 'Accessibility: names for icon-only links and buttons, alt text for images; warning when block filter widgets are used on a classic theme',
+		tp_li10: 'Price labels: «Free» instead of 0,00 € in product pages, lists and cart lines; a label per category for products without a price (e.g. «Free listening»), in Greek and English, with any theme',
 		tp_li8: 'Safe by design: off until enabled, test mode for shop managers, per-theme settings, theme detector and page probe, automatic pause after theme updates, TP_DISABLE emergency switch',
 		tp_li9: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
-		tp_download: 'Download v1.1.1 (.zip)',
+		tp_download: 'Download v1.2.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Your download is ready',
 		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
@@ -634,7 +636,7 @@ footer .heart { color: var(--accent-bright); }
 		sf_li9: 'Profiles για συνδυασμούς κανόνων / πεδίων, και backup &amp; restore σε JSON με αυστηρό έλεγχο',
 		sf_li10: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
 		sf_download: 'Λήψη v1.2.1 (.zip)',
-		tp_desc: 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: κάρτες προϊόντων, κείμενα, πλακίδια κατηγοριών, ρυθμίσεις θέματος και προσβασιμότητα.',
+		tp_desc: 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: κάρτες προϊόντων, κείμενα, πλακίδια κατηγοριών, ρυθμίσεις θέματος, προσβασιμότητα και ετικέτες τιμής.',
 		tp_li1: 'Κάρτες προϊόντων: τιμή με διαγραμμένη την παλιά, κουμπί καλαθιού, βαθμολογία, ένδειξη έκπτωσης για κάθε τύπο προϊόντος (και μεταβλητά) και ό,τι προσθέτουν άλλα plugins στην κάρτα',
 		tp_li2: 'Κάθε περιοχή ξεχωριστά: κατάστημα / κατηγορίες / αναζήτηση, σχετικά προϊόντα, up-sells, cross-sells και κάθε ενότητα του θέματος με δικό της query προϊόντων',
 		tp_li3: 'Γραμμές και μέγεθος τίτλου στην κάρτα, σωστό μέγεθος μικρογραφίας αντί για εικόνες πλήρους μεγέθους, αφαίρεση των κενών ετικετών έκπτωσης του θέματος',
@@ -642,9 +644,10 @@ footer .heart { color: var(--accent-bright); }
 		tp_li5: 'Κατηγορίες: εικόνα από προϊόν τους όταν δεν έχουν δική τους, επιλογή και σειρά κατηγοριών στα πλακίδια του θέματος, σύνδεσμοι στην ίδια καρτέλα, μικρότερες εικόνες με alt',
 		tp_li6: 'Προστασία ρυθμίσεων θέματος: οι προβολές σελίδων δεν πατάνε πια ό,τι ορίζεις στον Customizer, σταθερές τιμές για ρυθμίσεις που επαναφέρει το θέμα (π.χ. ταχύτητα slider), ανάγνωση αρχείων του θέματος από τον δίσκο αντί για HTTP',
 		tp_li7: 'Προσβασιμότητα: ονόματα σε συνδέσμους και κουμπιά με μόνο εικονίδιο, alt στις εικόνες· προειδοποίηση για φίλτρα τύπου block σε κλασικό θέμα',
+		tp_li10: 'Ετικέτες τιμής: «Δωρεάν» αντί για 0,00 € σε σελίδες προϊόντων, λίστες και γραμμές καλαθιού· ετικέτα ανά κατηγορία για προϊόντα χωρίς τιμή (π.χ. «Δωρεάν ακρόαση»), σε ελληνικά και αγγλικά, με οποιοδήποτε θέμα',
 		tp_li8: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, ρυθμίσεις ανά θέμα, ανιχνευτής θέματος και σάρωση σελίδας, αυτόματη αναστολή μετά από ενημέρωση θέματος, διακόπτης έκτακτης ανάγκης TP_DISABLE',
 		tp_li9: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
-		tp_download: 'Λήψη v1.1.1 (.zip)',
+		tp_download: 'Λήψη v1.2.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
