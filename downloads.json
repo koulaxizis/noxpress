@@ -1,0 +1,44 @@
+{
+  "display": 5,
+  "total": 8,
+  "offset": 5,
+  "updated": "2026-10-10",
+  "assets": {
+    "588348470": {
+      "file": "nox-rs-1.5.0/revenue-splitter.zip",
+      "count": 5
+    },
+    "621321719": {
+      "file": "nox-rs-1.7.0/revenue-splitter.zip",
+      "count": 2
+    },
+    "621321844": {
+      "file": "nox-sp-1.3.0/store-pulse.zip",
+      "count": 1
+    },
+    "621321950": {
+      "file": "nox-sf-1.1.0/smart-formatter.zip",
+      "count": 1
+    },
+    "621874283": {
+      "file": "nox-tp-1.0.0/theme-patcher.zip",
+      "count": 0
+    },
+    "625232940": {
+      "file": "nox-rs-1.8.0/revenue-splitter.zip",
+      "count": 1
+    },
+    "625233066": {
+      "file": "nox-sp-1.4.0/store-pulse.zip",
+      "count": 1
+    },
+    "625233214": {
+      "file": "nox-sf-1.2.0/smart-formatter.zip",
+      "count": 1
+    },
+    "625233376": {
+      "file": "nox-tp-1.1.0/theme-patcher.zip",
+      "count": 1
+    }
+  }
+}

@@ -71,6 +71,12 @@ header { padding: 72px 0 48px; text-align: left; }
 }
 .lang-toggle:hover { border-color: var(--accent); color: #fff; }
 
+.dl-count {
+	color: var(--muted);
+	margin-top: 8px;
+	font-size: 0.95rem;
+}
+.dl-count strong { color: var(--accent-bright); font-weight: 600; }
 .support-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -346,6 +352,7 @@ footer a:hover { text-decoration: underline; }
 		<div>
 			<div class="wordmark">noxpress<span class="dot">.</span></div>
 			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
+			<p class="dl-count" id="dlCount" hidden></p>
 			<div class="support-row">
 				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" aria-label="Support noxpress on Ko-fi">
 					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
@@ -739,6 +746,37 @@ footer a:hover { text-decoration: underline; }
 	};
 	window.addEventListener('scroll', t, { passive: true });
 	t();
+})();
+
+(function () {
+	'use strict';
+	/* ------------------------------------------------------------------
+	 * Μετρητής λήψεων (Bible §17): «More than X downloads» από το
+	 * downloads.json του ίδιου site, που γράφει το workflow «Count
+	 * downloads». Χωρίς αρχείο ή με 0, η γραμμή μένει κρυφή.
+	 * ------------------------------------------------------------------ */
+	var el = document.getElementById('dlCount');
+	if (!el || typeof fetch !== 'function') { return; }
+	var shown = 0;
+	function render() {
+		if (!shown) { return; }
+		var isEl = 'el' === document.documentElement.lang;
+		var n = shown.toLocaleString(isEl ? 'el-GR' : 'en-US');
+		el.innerHTML = isEl
+			? 'Πάνω από <strong>' + n + '</strong> λήψεις'
+			: 'More than <strong>' + n + '</strong> downloads';
+		el.hidden = false;
+	}
+	fetch('downloads.json', { cache: 'no-cache' }).then(function (r) {
+		if (!r.ok) { throw new Error(r.status); }
+		return r.json();
+	}).then(function (d) {
+		var n = parseInt(d && d.display, 10);
+		if (n > 0) { shown = n; render(); }
+	}).catch(function () { /* η γραμμή μένει κρυφή */ });
+	if (typeof MutationObserver === 'function') {
+		new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+	}
 })();
 </script>
 

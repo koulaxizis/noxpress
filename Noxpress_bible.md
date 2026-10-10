@@ -2,7 +2,7 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.2 (2026-10-09). Νέο: §16 Noxpress Core (hub και ενημερώσεις).
+- **Έκδοση:** 1.3 (2026-10-10). Νέο: §17 Μετρητής λήψεων στο site.
 - **Προέλευση:** η v1.0 δεν υπήρχε στο repo. Η v1.1 ανασυντέθηκε από τον κώδικα των Revenue Splitter 1.7.0, Store Pulse 1.3.0 και Smart Formatter 1.1.0, από τις αναφορές «Bible §N» μέσα σε αυτόν, και από τις συμβάσεις του PR #1. Η αρίθμηση §2–§10 κρατά τη σημασία που ήδη έχει στον κώδικα.
 - **Πρότυπη υλοποίηση:** Revenue Splitter. Το `admin.css` του είναι το «leading design».
 - Όταν ένα plugin αποκλίνει από το Bible, η απόκλιση γράφεται στο docblock του bootstrap με αιτιολόγηση.
@@ -175,6 +175,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Μία κάρτα ανά plugin, με EN/EL strings `data-i18n` (`{p}_desc`, `{p}_li*`, `{p}_download`).
   - Το link download δείχνει στο asset του release.
   - Badge beta μέχρι να γίνει stable.
+  - Κάτω από το tagline, η γραμμή «More than X downloads» (§17).
 - **Έλεγχοι πριν από κάθε release:**
   - `php -l` σε όλα τα αρχεία και PHPCompatibilityWP με `testVersion 7.4-`.
   - Script που συγκρίνει τα msgids του κώδικα με το EN dict (καμία έλλειψη, κανένα αχρησιμοποίητο, κανένα διπλότυπο).
@@ -232,3 +233,13 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Δεδομένα (§12):** `noxpress_channel`, `noxpress_checked` (site options), `noxpress_manifest` (site transient), `noxpress_hub_msg_{uid}` (transient). Τα σβήνει το `uninstall.php` όποιου plugin φύγει **τελευταίο** από τη σουίτα.
 - **Πρώτη εγκατάσταση:** εκδόσεις πριν από το Core (RS ≤ 1.7.0, SP ≤ 1.3.0, SF ≤ 1.1.0, TP 1.0.0) δεν έχουν updater. Η πρώτη έκδοση με Core ανεβαίνει με το χέρι μία φορά.
 
+## §17 Μετρητής λήψεων στο site (νέο, 1.3)
+
+Η γραμμή «More than X downloads» / «Πάνω από X λήψεις» κάτω από το tagline του noxpress.tech. Χωρίς analytics και χωρίς κλήση του επισκέπτη σε τρίτο server.
+
+- **Πηγή:** το δημόσιο `download_count` που κρατά το GitHub για κάθε asset των releases `nox-*`. Μετράει κάθε λήψη του zip: από το site, από τη σελίδα Releases και από τον updater (§16). Λήψεις, όχι εγκαταστάσεις.
+- **Workflow** `.github/workflows/downloads.yml` με το `.github/scripts/count-downloads.py`: κάθε μέρα στις 03:00 UTC, μετά από κάθε «Release plugin» και χειροκίνητα. Γράφει το `downloads.json` στη ρίζα του main.
+- **`downloads.json`:** `display` (ό,τι δείχνει το site), `total`, `offset`, `updated` και καθολικό `assets` ανά id asset. Μια μέτρηση δεν μειώνεται ποτέ, ούτε όταν σβηστεί release.
+- **Στρογγυλοποίηση:** το μεγαλύτερο σκαλοπάτι κάτω από το σύνολο: 1, 5, 10, 25, 50, 100, 250, 500, 1.000, 2.500… Με 0 η γραμμή κρύβεται. Αριθμοί με `toLocaleString` (EN `1,000`, EL `1.000`).
+- **Commits:** μόνο όταν αλλάζει το `display` ή εμφανίζεται νέο asset.
+- **Δικές μας λήψεις:** κανένα workflow δεν κατεβάζει zip χωρίς λόγο. Το `build-manifest.py` κατεβάζει ένα zip μόνο όταν το `updates.json` δεν έχει ήδη την έκδοση με sha256 ίδιο με το `digest` του GitHub. Όσες έγιναν πριν από αυτόν τον κανόνα αφαιρούνται με το `OFFSET` του workflow.

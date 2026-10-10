@@ -1,0 +1,61 @@
+# Μετράει τις λήψεις των plugins για τη γραμμή «More than X downloads» του
+# noxpress.tech (Bible §17). Χωρίς analytics: αθροίζει το δημόσιο
+# download_count που κρατά το GitHub για κάθε zip των releases nox-*.
+#
+# Πότε τρέχει: κάθε μέρα στις 03:00 UTC, μετά από κάθε «Release plugin» και
+# χειροκίνητα από Actions → «Count downloads» → Run workflow.
+#
+# Γράφει το downloads.json στη ρίζα του main μόνο όταν αλλάζει ο αριθμός
+# που δείχνει το site ή όταν εμφανίζεται νέο zip.
+#
+# OFFSET: λήψεις που έκανε το δικό μας job «manifest» πριν σταματήσει να
+# κατεβάζει τα zip που δεν άλλαξαν (μία εκτέλεση, 9/10/2026: 5 λήψεις).
+name: Count downloads
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_run:
+    workflows: ['Release plugin']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: count-downloads
+  cancel-in-progress: false
+
+env:
+  OFFSET: '5'
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Count and push downloads.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-[a-z]+-' --offset "$OFFSET")"
+          echo "downloads.json: $result"
+          if [ "$result" != changed ]; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads.json
+          git commit -m 'Update downloads.json'
+          for i in 1 2 3 4; do
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((i * 4))
+            git pull --rebase origin main
+          done
+          echo "::error::Could not push downloads.json"
+          exit 1
