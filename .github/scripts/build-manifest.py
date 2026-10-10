@@ -38,6 +38,7 @@ SLUGS = {
     'sp': 'store-pulse',
     'sf': 'smart-formatter',
     'tp': 'theme-patcher',
+    'sh': 'shop-filters',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

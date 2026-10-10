@@ -1,0 +1,444 @@
+/**
+ * Shop Filters — front.css (v1.0.0)
+ *
+ * Scoped to .shf-root. Layout properties carry !important so theme rules
+ * with an id (e.g. "#sidebar ul li { display: flex }", which outranks any
+ * class selector) cannot rearrange the filters. Colours and fonts are
+ * inherited from the element that holds the filters; --shf-accent sets the
+ * colour of checked boxes, the slider and the selected range, --shf-bg the
+ * background of the sticky "Apply" bar.
+ */
+
+.shf-root {
+	--shf-accent: currentColor;
+	--shf-check: #fff;
+	--shf-line: rgba(127, 127, 127, .35);
+	--shf-bg: Canvas;
+	display: block !important;
+	float: none !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 0 1em !important;
+	padding: 0 !important;
+	line-height: 1.35 !important;
+	text-align: start;
+}
+
+.shf-root *,
+.shf-root *::before,
+.shf-root *::after { box-sizing: border-box !important; }
+
+/*
+ * Reset: theme rules such as "#sidebar span { float: right; padding: 4px 9px;
+ * background: ...; border-radius: 50% }" or "#sidebar a { display: block;
+ * text-transform: uppercase }" hit every span and link of the filters. The
+ * reset neutralises box, decoration and typography; the class rules below
+ * (higher specificity, also !important) set what the filters need. Form
+ * controls (inputs, buttons) keep the theme's look apart from their size.
+ */
+.shf-root div,
+.shf-root a,
+.shf-root span,
+.shf-root details,
+.shf-root summary,
+.shf-root form,
+.shf-root label {
+	float: none !important;
+	clear: none !important;
+	min-height: 0 !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	color: inherit !important;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	font-style: inherit !important;
+	font-weight: inherit !important;
+	line-height: inherit !important;
+	letter-spacing: normal !important;
+	word-spacing: normal !important;
+	text-indent: 0 !important;
+	text-transform: none !important;
+	text-decoration: none !important;
+	vertical-align: baseline !important;
+}
+.shf-root button,
+.shf-root input { float: none !important; text-transform: none !important; letter-spacing: normal !important; }
+
+.shf-root a:focus-visible,
+.shf-root summary:focus-visible,
+.shf-root button:focus-visible,
+.shf-root input:focus-visible {
+	outline: 2px solid currentColor !important;
+	outline-offset: 2px !important;
+}
+
+/* ===== Filter shell (details / summary) ===== */
+.shf-root .shf-filter {
+	display: block !important;
+	width: 100% !important;
+	margin: 0 0 1em !important;
+	padding: 0 0 .75em !important;
+	border: 0 !important;
+	border-bottom: 1px solid var(--shf-line) !important;
+	background: none !important;
+}
+
+.shf-root .shf-head {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	gap: 8px !important;
+	width: 100% !important;
+	margin: 0 0 .4em !important;
+	padding: .25em 0 !important;
+	list-style: none !important;
+	cursor: pointer;
+	font-weight: 600 !important;
+	font-size: 1.05em !important;
+}
+.shf-root .shf-head::-webkit-details-marker { display: none !important; }
+.shf-root .shf-head::marker { content: "" !important; }
+.shf-root .shf-head::before,
+.shf-root .shf-head::after { content: none !important; display: none !important; }
+.shf-root .shf-title { display: block !important; min-width: 0 !important; overflow-wrap: anywhere; }
+
+.shf-root .shf-chev {
+	display: block !important;
+	flex: 0 0 auto !important;
+	width: 12px !important;
+	height: 12px !important;
+	margin: 0 !important;
+	transition: transform .15s ease;
+}
+.shf-root details[open] > .shf-head .shf-chev { transform: rotate(180deg); }
+
+.shf-root .shf-body { display: block !important; margin: 0 !important; padding: 0 !important; }
+
+/* ===== Lists ===== */
+.shf-root .shf-list,
+.shf-root .shf-sub {
+	display: block !important;
+	width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none !important;
+	border: 0 !important;
+}
+
+.shf-root .shf-item {
+	display: block !important;
+	width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none !important;
+	border: 0 !important;
+	background: none !important;
+}
+.shf-root .shf-item::before,
+.shf-root .shf-item::after,
+.shf-root .shf-opt::before { content: none !important; display: none !important; }
+
+.shf-root .shf-row {
+	display: flex !important;
+	flex-wrap: nowrap !important;
+	align-items: flex-start !important;
+	justify-content: flex-start !important;
+	gap: 2px !important;
+	width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.shf-root .shf-opt {
+	display: flex !important;
+	flex: 1 1 auto !important;
+	flex-wrap: nowrap !important;
+	align-items: flex-start !important;
+	justify-content: flex-start !important;
+	gap: 8px !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	margin: 0 !important;
+	padding: 4px 0 !important;
+	border: 0 !important;
+	background: none !important;
+	color: inherit !important;
+	text-decoration: none !important;
+	line-height: 1.35 !important;
+	text-align: start !important;
+	cursor: pointer;
+}
+.shf-root .shf-row > .shf-opt { width: auto !important; }
+.shf-root a.shf-opt:hover .shf-name { text-decoration: underline !important; }
+
+.shf-root .shf-name {
+	display: block !important;
+	flex: 1 1 auto !important;
+	min-width: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	white-space: normal !important;
+	overflow-wrap: anywhere !important;
+	word-break: normal !important;
+}
+
+.shf-root .shf-count {
+	display: block !important;
+	flex: 0 0 auto !important;
+	margin: 0 !important;
+	margin-inline-start: auto !important;
+	padding: 0 0 0 6px !important;
+	font-size: .85em !important;
+	opacity: .65;
+	white-space: nowrap !important;
+}
+
+.shf-root .shf-box {
+	display: block !important;
+	position: relative !important;
+	flex: 0 0 auto !important;
+	width: 16px !important;
+	height: 16px !important;
+	margin: .1em 0 0 !important;
+	padding: 0 !important;
+	border: 1.5px solid currentColor !important;
+	border-radius: 3px !important;
+	background: none !important;
+	opacity: .7;
+}
+.shf-root .is-on > .shf-box {
+	opacity: 1;
+	border-color: var(--shf-accent) !important;
+	background: var(--shf-accent) !important;
+}
+.shf-root .is-on > .shf-box::after {
+	content: "" !important;
+	display: block !important;
+	position: absolute !important;
+	left: 4.5px !important;
+	top: 1px !important;
+	width: 5px !important;
+	height: 9px !important;
+	border: solid var(--shf-check) !important;
+	border-width: 0 2px 2px 0 !important;
+	transform: rotate(45deg);
+}
+.shf-root .is-on > .shf-name { font-weight: 600 !important; }
+.shf-root .is-empty { opacity: .45; cursor: default; }
+
+/* ===== Category tree ===== */
+.shf-root .shf-sub {
+	display: none !important;
+	padding-inline-start: 14px !important;
+}
+.shf-root .is-open > .shf-sub { display: block !important; }
+.shf-root .shf-cat.is-on > .shf-name { font-weight: 700 !important; }
+.shf-root .shf-all { opacity: .85; }
+
+.shf-root .shf-tog {
+	display: inline-flex !important;
+	flex: 0 0 auto !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 28px !important;
+	min-width: 0 !important;
+	height: 28px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 4px !important;
+	background: none !important;
+	box-shadow: none !important;
+	color: inherit !important;
+	line-height: 1 !important;
+	cursor: pointer;
+}
+.shf-root .shf-tog[hidden] { display: none !important; }
+.shf-root .shf-tog:hover { background: var(--shf-line) !important; }
+.shf-root .is-open > .shf-row > .shf-tog .shf-chev { transform: rotate(180deg); }
+
+/* ===== Active filters ===== */
+.shf-root .shf-active {
+	display: block !important;
+	width: 100% !important;
+	margin: 0 0 1em !important;
+	padding: 0 !important;
+}
+.shf-root .shf-chips {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 6px !important;
+	margin: 0 0 .5em !important;
+	padding: 0 !important;
+}
+.shf-root .shf-chip {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 3px 8px !important;
+	border: 1px solid var(--shf-line) !important;
+	border-radius: 999px !important;
+	background: none !important;
+	color: inherit !important;
+	font-size: .85em !important;
+	line-height: 1.3 !important;
+	text-decoration: none !important;
+}
+.shf-root .shf-chip-text { display: block !important; min-width: 0 !important; overflow-wrap: anywhere; }
+.shf-root .shf-x {
+	display: block !important;
+	position: relative !important;
+	flex: 0 0 auto !important;
+	width: 10px !important;
+	height: 10px !important;
+}
+.shf-root .shf-x::before,
+.shf-root .shf-x::after {
+	content: "" !important;
+	display: block !important;
+	position: absolute !important;
+	left: 4px !important;
+	top: 0 !important;
+	width: 1.6px !important;
+	height: 10px !important;
+	background: currentColor !important;
+	transform: rotate(45deg);
+}
+.shf-root .shf-x::after { transform: rotate(-45deg); }
+.shf-root .shf-clear {
+	display: inline-block !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	color: inherit !important;
+	font-size: .85em !important;
+	text-decoration: underline !important;
+}
+
+/* ===== Price ===== */
+.shf-root .shf-price { display: block !important; margin: 0 !important; padding: 0 !important; }
+
+.shf-root .shf-range {
+	display: block !important;
+	position: relative !important;
+	width: 100% !important;
+	height: 28px !important;
+	margin: 4px 0 8px !important;
+	padding: 0 !important;
+}
+.shf-root .shf-range[hidden] { display: none !important; }
+.shf-root .shf-range::before,
+.shf-root .shf-range-fill {
+	content: "" !important;
+	display: block !important;
+	position: absolute !important;
+	top: 12px !important;
+	height: 4px !important;
+	border-radius: 2px !important;
+}
+.shf-root .shf-range::before { left: 0 !important; right: 0 !important; background: var(--shf-line) !important; }
+.shf-root .shf-range-fill { background: var(--shf-accent) !important; }
+
+.shf-root .shf-range input[type="range"] {
+	position: absolute !important;
+	left: 0 !important;
+	top: 0 !important;
+	width: 100% !important;
+	height: 28px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	pointer-events: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.shf-root .shf-range input[type="range"]::-webkit-slider-runnable-track { background: none; border: 0; height: 28px; }
+.shf-root .shf-range input[type="range"]::-moz-range-track { background: none; border: 0; }
+.shf-root .shf-range input[type="range"]::-webkit-slider-thumb {
+	pointer-events: auto;
+	-webkit-appearance: none;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	margin-top: 5px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: var(--shf-accent);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, .35);
+	cursor: pointer;
+}
+.shf-root .shf-range input[type="range"]::-moz-range-thumb {
+	pointer-events: auto;
+	width: 14px;
+	height: 14px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: var(--shf-accent);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, .35);
+	cursor: pointer;
+}
+
+.shf-root .shf-price-fields {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 8px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.shf-root .shf-field {
+	display: flex !important;
+	flex: 1 1 90px !important;
+	flex-direction: column !important;
+	min-width: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	font-size: .85em !important;
+}
+.shf-root .shf-field-label { display: block !important; margin: 0 0 2px !important; }
+.shf-root .shf-num {
+	display: block !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	max-width: 100% !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 4px 6px !important;
+	font-size: 1.1em !important;
+}
+
+.shf-root .shf-btn {
+	display: inline-block !important;
+	width: auto !important;
+	margin: 8px 0 0 !important;
+	cursor: pointer;
+	text-decoration: none !important;
+}
+.shf-root.shf-js-instant .shf-price-go { display: none !important; }
+
+/* ===== "Apply" button mode (front.js) ===== */
+.shf-root .shf-applybar {
+	display: none !important;
+	position: sticky !important;
+	bottom: 0 !important;
+	margin: 0 !important;
+	padding: 8px 0 !important;
+	background: var(--shf-bg) !important;
+}
+.shf-root.is-dirty .shf-applybar { display: block !important; }
+.shf-root .shf-applybar .shf-btn { width: 100% !important; margin: 0 !important; }
+
+/* ===== Results anchor ===== */
+.shf-anchor {
+	display: block !important;
+	height: 0 !important;
+	scroll-margin-top: 1em;
+}

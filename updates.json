@@ -2,15 +2,15 @@
   "plugins": {
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling Revenue Splitter keeps the shared Noxpress data (update channel, hub notices) and the language choice (rs_lang) while Shop Filters is still installed.",
         "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2280ce6d31e21458845a36ca55e6a55ebdf7fd967e34b73adfc98562980f95d5",
-        "signature": "9KGFshlb7AqUhX3LRXdHoVWhMZcXJMBDU45zjgGp3VcnKlU+i2lvd4+BntP7IQLZVzJa4AhZwgSpjDZExdPlAQ==",
+        "sha256": "988df2fb2badc9b1b38ba7d03304e09049ea1f4fb29a431c4a1c87243bf35973",
+        "signature": "fH2QVQErisa5Ox/xA3U1Xz0EM5Gc1HsWz9DTy2dySRRYcHuy8WX23RM9alHi0K7/Rh1i/2ZSsH/ep5ZlMs6WBA==",
         "tested_wp": "6.8",
-        "version": "1.8.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.8.1/revenue-splitter.zip"
+        "version": "1.8.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.8.2/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -24,43 +24,56 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.5.0/revenue-splitter.zip"
       }
     },
-    "smart-formatter": {
+    "shop-filters": {
       "beta": {
-        "changelog": "* Fixed: the Smart Formatter admin pages now use the full width of the screen, like the other Noxpress plugins (they stopped at 1180px).\n* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "changelog": "* Initial release.\n* Filters: category tree (any depth, open / close per parent), attributes with counts, price slider without jQuery UI; collapsible filters, hidden or dimmed empty options, active filter tags, \"Clear all\".\n* Value groups per attribute, many-to-many, with suggestions from ranges and keywords, an ignore list and a choice for values in no group.\n* Filter sets with drag-and-drop order and a set per product category.\n* Counts from WooCommerce's attributes lookup table (stock per variation), fallback to product terms; object cache, no database writes on visitor requests.\n* Clean links that work without JavaScript; noindex and canonical on filtered pages; nofollow filter links.\n* Theme-proof markup and CSS; one small CSS and JS file, no external libraries.\n* Apply mode (immediate, button, or button on narrow screens), test mode, SHF_DISABLE, backup / import, classic widget and shortcode.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.0.2).",
         "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "53a84bbbb25d9ddb3a51d82a2d8845328179ba5bf5d1f052211383a749e3073a",
-        "signature": "8a7xpbSK6Hk7aGq1Sq4KdYcS1k1oVb5LylBluWcfK5OvtxlxNLrp8KgyeXwOGQkYL63qbMY9aVBA0NJguBnJAQ==",
+        "sha256": "da65ed140fe160afa1e877276a9dd4e4a5290a7de9020eac256cf51df6a6ec72",
+        "signature": "qmOYqStjMZ9R70fhZRZaLBwKh7x+56xWEF4g+9h8XHomYuAjJs3DMVSeBB+TOCfg2tmJuYaNdfd5XTNS5akQBA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.0.0/shop-filters.zip"
+      }
+    },
+    "smart-formatter": {
+      "beta": {
+        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.",
+        "published": "2026-10-10",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "965970432e831d93cbbfe7f3d6d9d8e1ebb6b7f5c56889141a4e4442a00949fc",
+        "signature": "JwIo07XGtrt13Gc7L9pbnMghEScbxb5CmaPqm2wlnhgRbV5iWGNyVh8UIPUxMU/C+Bqc7e7b0bMqSkedje1WAw==",
         "tested_wp": "6.8",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.2.1/smart-formatter.zip"
+        "version": "1.2.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.2.2/smart-formatter.zip"
       }
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.",
         "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f8be2d0a903ef1993e8f946ad45c0c7ebb8dd47c1911ce72b13a6bb32cce4a91",
-        "signature": "IdiexMbEXMd2VcxkReRawtURC5427HoEi3IzSvofuDZ0PDU+oFnm6nDf03Wybt7F7shQcUqBIjAt5k5aZGsVAg==",
+        "sha256": "689e8eb4c827fe5a620b0f5c3920548eb6062f5feb96318b272d63a692fb9574",
+        "signature": "fAE4RWyqUfg6VKXvh7XLtRcDSHeNBxjIvxRfXGQTQWe10ROsQUw9LrkKIAUbeVgPSglkwnKrztWRVVc/rffmBg==",
         "tested_wp": "6.8",
-        "version": "1.4.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.4.1/store-pulse.zip"
+        "version": "1.4.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.4.2/store-pulse.zip"
       }
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* Fixed: the Theme Patcher admin pages now use the full width of the screen, like the other Noxpress plugins (they stopped at 1180px).\n* Fix: the hub's \"Changelog\" link and \"Install\" button no longer end in \"Plugin not found\" when another plugin on the site overrides plugin details. The suite's own details are now applied last (Noxpress Core 1.0.1).\n* Changed: the Noxpress hub page uses the full width of the screen (Noxpress Core 1.0.1).",
+        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.",
         "published": "2026-10-10",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8d83c5e1cb801e813e99e79bd0489782686a159a64e3d5769dc6cba2969230f3",
-        "signature": "J46a2advPgAOkGuceF+gwWcuIyK9j0fGG70h70WcdKpljPp4l3BvJlJIPKCe1OcTAH+sARcesV1I0hRWcxz9Cw==",
+        "sha256": "620f0fd60594bca25c8f014ecdc895e2d7f124ff2baa88d6118a4c06164ba22c",
+        "signature": "d4AyCK5kR9QmCfvFDZfYjacj6sJlSaRN2yMFt4ykFR18YAs89e5LHQWZQVFTkwWg+nNGQtuTMwS1xyAVLieCCA==",
         "tested_wp": "6.8",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.1/theme-patcher.zip"
+        "version": "1.1.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.2/theme-patcher.zip"
       }
     }
   }

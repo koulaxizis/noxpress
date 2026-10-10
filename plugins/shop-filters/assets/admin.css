@@ -1,0 +1,460 @@
+/**
+ * Shop Filters — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors shf-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.shf-wrap {
+	--shf-bg: #101218;
+	--shf-panel: #14161d;
+	--shf-panel-2: #1d2029;
+	--shf-input: #1a1d26;
+	--shf-border: #2e3240;
+	--shf-border-input: #3a3f52;
+	--shf-row-border: #23262f;
+	--shf-stripe: #181b23;
+	--shf-hover: #1e212c;
+	--shf-text: #eae8fa;
+	--shf-heading: #f6f4ff;
+	--shf-muted: #b7b2d6;
+	--shf-link: #beb1ff;
+	--shf-link-hover: #d4c9ff;
+	--shf-accent: #6d4aff;
+	--shf-accent-hover: #8263ff;
+	--shf-warn: #f5c97e;
+	--shf-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.shf-wrap {
+	color-scheme: dark;
+	background: var(--shf-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--shf-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.shf-wrap h1,
+.shf-wrap h2 {
+	color: var(--shf-heading);
+}
+
+.shf-wrap a { color: var(--shf-link); }
+.shf-wrap a:hover { color: var(--shf-link-hover); }
+
+.shf-wrap .shf-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--shf-muted);
+	border-bottom: 1px solid var(--shf-border);
+	padding-bottom: 6px;
+}
+
+.shf-wrap .description,
+.shf-wrap p.description,
+.shf-wrap .shf-hint {
+	color: var(--shf-muted) !important;
+}
+
+.shf-zone {
+	background: var(--shf-panel);
+	border: 1px solid var(--shf-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.shf-wrap input[type="text"],
+.shf-wrap input[type="url"],
+.shf-wrap input[type="number"],
+.shf-wrap textarea,
+.shf-wrap select {
+	background-color: var(--shf-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--shf-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.shf-wrap input::placeholder,
+.shf-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.shf-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.shf-wrap input[type="file"] {
+	color: var(--shf-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.shf-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.shf-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.shf-wrap input[type="checkbox"],
+.shf-wrap input[type="radio"] {
+	accent-color: var(--shf-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.shf-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.shf-wrap .button:hover:not(:disabled) {
+	border-color: var(--shf-accent) !important;
+	color: #ffffff !important;
+}
+
+.shf-wrap .button-primary {
+	background: var(--shf-accent) !important;
+	border-color: var(--shf-accent) !important;
+	color: #ffffff !important;
+}
+
+.shf-wrap .button-primary:hover:not(:disabled) {
+	background: var(--shf-accent-hover) !important;
+}
+
+.shf-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.shf-submit { margin-top: 20px; }
+.shf-inline-form { display: inline; margin-right: 10px; }
+.shf-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.shf-table,
+table.widefat.shf-table {
+	background: var(--shf-panel) !important;
+	border: 1px solid var(--shf-border) !important;
+	border-radius: 6px;
+	color: var(--shf-text) !important;
+	margin-top: 14px !important;
+}
+
+.shf-table thead th,
+.shf-table thead td {
+	background: var(--shf-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.shf-table tbody td,
+.shf-table tbody th {
+	background: var(--shf-panel) !important;
+	color: var(--shf-text) !important;
+	border-bottom: 1px solid var(--shf-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.shf-table tbody tr:nth-child(2n) td,
+.shf-table tbody tr:nth-child(2n) th {
+	background: var(--shf-stripe) !important;
+}
+
+.shf-table tbody tr:hover td,
+.shf-table tbody tr:hover th {
+	background: var(--shf-hover) !important;
+}
+
+.shf-table td,
+.shf-table th {
+	padding: 12px 14px;
+}
+
+.shf-table td code {
+	background: transparent !important;
+	color: var(--shf-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.shf-table .shf-empty {
+	color: var(--shf-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.shf-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.shf-footer a { color: #beb1ff; text-decoration: none; }
+.shf-footer a:hover { text-decoration: underline; }
+
+.shf-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.shf-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.shf-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.shf-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.shf-muted { color: var(--shf-muted) !important; }
+.shf-warn { color: var(--shf-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.shf-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Theme Patcher additions ===== */
+.shf-wrap .shf-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--shf-heading);
+}
+
+.shf-status p { margin: 0 0 8px; }
+.shf-status p:last-child { margin-bottom: 0; }
+.shf-status code,
+.shf-wrap .description code,
+.shf-wrap .shf-hint code {
+	background: var(--shf-panel-2);
+	color: var(--shf-muted);
+	border: 1px solid var(--shf-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.shf-suspended { margin: 8px 0 0; }
+.shf-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.shf-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--shf-border);
+	background: var(--shf-panel-2);
+	color: var(--shf-text);
+	white-space: nowrap;
+}
+.shf-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.shf-badge--muted { color: var(--shf-muted); }
+.shf-badge--warn { border-color: #6b5a33; color: var(--shf-warn); }
+.shf-badge--danger { border-color: #6b3a3a; color: var(--shf-danger); }
+
+/* Area fieldsets. */
+.shf-area {
+	background: var(--shf-panel);
+	border: 1px solid var(--shf-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.shf-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--shf-heading);
+}
+.shf-row { margin: 4px 0 8px; }
+
+.shf-details > summary {
+	cursor: pointer;
+	color: var(--shf-link);
+	margin: 4px 0;
+}
+.shf-details[open] > summary { margin-bottom: 12px; }
+
+.shf-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.shf-wrap .shf-label {
+	display: block;
+	font-weight: 600;
+	color: var(--shf-heading);
+	margin: 8px 0 6px;
+}
+.shf-grid .shf-label:first-child { margin-top: 0; }
+
+.shf-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.shf-field > span:first-child {
+	min-width: 150px;
+	color: var(--shf-text);
+}
+.shf-wrap .shf-color { width: 96px; font-family: monospace; }
+.shf-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--shf-border-input);
+}
+
+.shf-wrap .shf-hint { display: block; font-size: 12px; margin-top: 4px; }
+.shf-wrap td .shf-hint { display: inline; }
+.shf-table td.shf-warn { color: var(--shf-warn) !important; }
+
+/* Tabs of the main page. */
+.shf-wrap .shf-tabs {
+	border-bottom: 1px solid var(--shf-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.shf-wrap .shf-tabs .nav-tab {
+	background: var(--shf-panel);
+	border-color: var(--shf-border);
+	color: var(--shf-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.shf-wrap .shf-tabs .nav-tab:hover { color: var(--shf-link-hover); background: var(--shf-hover); }
+.shf-wrap .shf-tabs .nav-tab-active,
+.shf-wrap .shf-tabs .nav-tab-active:hover {
+	background: var(--shf-bg);
+	border-bottom-color: var(--shf-bg);
+	color: var(--shf-heading);
+}
+
+/* One input per line (removal rules). */
+.shf-wrap .shf-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.shf-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--shf-border);
+	border-radius: 6px;
+	background: var(--shf-panel-2);
+}
+.shf-scroll .shf-field { margin-bottom: 4px; }
+
+/* ===== Shop Filters ===== */
+
+/* Filter rows of a set (sortable). */
+.shf-filters { margin: 0; padding: 0; list-style: none; }
+.shf-filters .shf-frow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	margin: 0 0 6px;
+	padding: 8px 12px;
+	background: var(--shf-panel-2);
+	border: 1px solid var(--shf-border);
+	border-radius: 6px;
+}
+.shf-frow .shf-handle {
+	cursor: move;
+	color: var(--shf-muted);
+	font-size: 16px;
+	user-select: none;
+}
+.shf-frow .shf-ftype { min-width: 150px; font-weight: 600; color: var(--shf-heading); }
+.shf-frow input[type="text"] { width: 220px; }
+.shf-filters .ui-sortable-placeholder {
+	visibility: visible !important;
+	height: 40px;
+	margin: 0 0 6px;
+	border: 1px dashed var(--shf-accent);
+	border-radius: 6px;
+	background: none;
+}
+
+/* Category checklist. */
+.shf-cats label { display: block; margin: 0 0 4px; }
+.shf-cats .shf-d1 { padding-left: 18px; }
+.shf-cats .shf-d2 { padding-left: 36px; }
+.shf-cats .shf-d3 { padding-left: 54px; }
+.shf-cats .shf-d4 { padding-left: 72px; }
+.shf-cats .shf-d5 { padding-left: 90px; }
+.shf-cats .shf-d6 { padding-left: 108px; }
+
+/* Groups editor and term matrix. */
+.shf-attrs { margin: 4px 0 14px; }
+.shf-attrs a { margin-right: 10px; text-decoration: none; }
+.shf-attrs a.is-current { color: var(--shf-heading); font-weight: 700; }
+/* Wide tables (groups) scroll inside their zone on narrow screens. */
+.shf-zone-x { overflow-x: auto; }
+.shf-wrap .shf-num { width: 80px; }
+.shf-wrap .shf-kw { width: 100%; min-width: 180px; }
+.shf-matrix-wrap { max-height: 640px; overflow: auto; border: 1px solid var(--shf-border); border-radius: 6px; }
+.shf-matrix { border: 0 !important; }
+.shf-matrix thead th { position: sticky; top: 0; z-index: 1; }
+.shf-matrix th.shf-gcol,
+.shf-matrix td.shf-gcol { text-align: center; white-space: nowrap; }
+.shf-matrix td.shf-gcol.is-suggested { box-shadow: inset 0 0 0 2px var(--shf-accent); }
+.shf-matrix td.shf-tname { min-width: 180px; }
+.shf-matrix tr.is-ignored td.shf-tname { text-decoration: line-through; color: var(--shf-muted) !important; }
