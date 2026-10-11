@@ -1,0 +1,230 @@
+/**
+ * Featured Creators — front.css (v1.0.0)
+ *
+ * Scoped to .crt-root (creator page, creator box, index). The product
+ * cards inside .crt-products are WooCommerce's and the theme's own and are
+ * not styled here. Layout properties of our own elements carry !important
+ * so theme rules with an id cannot rearrange them (Bible §14, rule 13).
+ * Colours and fonts are inherited; --crt-gap and --crt-avatar can be set
+ * by the theme.
+ */
+
+.crt-root {
+	--crt-gap: 1.5em;
+	--crt-avatar: 72px;
+	--crt-line: rgba(127, 127, 127, .25);
+	display: block !important;
+	float: none !important;
+	clear: both !important;
+	width: auto !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	position: static !important;
+	padding-right: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	text-align: start;
+}
+
+.crt-root *,
+.crt-root *::before,
+.crt-root *::after { box-sizing: border-box; }
+
+
+/* Reset of our own elements only (never of the product cards in
+   .crt-products, never of the biography's content): theme rules with an
+   id, e.g. "#main div { float: right; width: 40%; border: … }", lose to
+   !important. The layout rules below set what each element needs. */
+.crt-root .crt-head, .crt-root .crt-head__photo, .crt-root .crt-head__id, .crt-root .crt-head__name,
+.crt-root .crt-head__roles, .crt-root .crt-links, .crt-root .crt-link, .crt-root .crt-link > span,
+.crt-root .crt-bio, .crt-root .crt-sec, .crt-root .crt-h, .crt-root .crt-list, .crt-root .crt-item,
+.crt-root .crt-item__thumb, .crt-root .crt-item__body, .crt-root .crt-item__meta, .crt-root .crt-item__date,
+.crt-root .crt-item__outlet, .crt-root .crt-item__title, .crt-root .crt-card, .crt-root .crt-card__img,
+.crt-root .crt-card__body, .crt-root .crt-card__name, .crt-root .crt-card__role, .crt-root .crt-card__bio,
+.crt-root .crt-card__more, .crt-root .crt-card__more > span, .crt-root .crt-box__title, .crt-root .crt-box__cards,
+.crt-root .crt-filter, .crt-root .crt-filter__btn, .crt-root .crt-letters, .crt-root .crt-letters__a,
+.crt-root .crt-group, .crt-root .crt-group__letter, .crt-root .crt-group__cards, .crt-root .crt-avatar,
+.crt-root .crt-products {
+	float: none !important;
+	clear: none !important;
+	position: static !important;
+	top: auto !important;
+	right: auto !important;
+	bottom: auto !important;
+	left: auto !important;
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	height: auto !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	transform: none !important;
+}
+.crt-root .crt-head__name, .crt-root .crt-head__roles, .crt-root .crt-link > span, .crt-root .crt-item__meta,
+.crt-root .crt-item__date, .crt-root .crt-item__outlet, .crt-root .crt-item__title, .crt-root .crt-card__name,
+.crt-root .crt-card__role, .crt-root .crt-card__bio, .crt-root .crt-card__more { display: block; }
+.crt-root .crt-link > span, .crt-root .crt-card__more > span, .crt-root .crt-item__date, .crt-root .crt-item__outlet { display: inline !important; }
+
+.crt-root .crt-ico { display: inline-block !important; float: none !important; position: static !important; flex: 0 0 auto; width: 18px !important; height: 18px !important; margin: 0 !important; vertical-align: middle; }
+
+/* ===== Creator page ===== */
+
+/* Our classic template's wrapper. */
+.crt-template { display: block !important; float: none !important; position: static !important; width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+
+/* Our classic template prints no sidebar: the content area takes the full width. */
+body.crt-creator-page #primary.content-area { width: 100% !important; max-width: 100% !important; float: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+
+.crt-page { margin: 0 0 2em !important; }
+
+.crt-page .crt-head {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	align-items: center !important;
+	gap: var(--crt-gap) !important;
+	margin: 0 0 var(--crt-gap) !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	position: static !important;
+}
+
+.crt-page .crt-head__photo { flex: 0 0 auto !important; width: 180px !important; max-width: 40vw !important; margin: 0 !important; }
+.crt-page .crt-head__photo img {
+	display: block !important;
+	float: none !important;
+	position: static !important;
+	max-width: 100% !important;
+	padding: 0 !important;
+	border: 0 !important;
+	width: 100% !important;
+	height: auto !important;
+	aspect-ratio: 1 / 1;
+	object-fit: cover !important;
+	border-radius: 50% !important;
+	margin: 0 !important;
+}
+.crt-page .crt-head__id { flex: 1 1 260px !important; min-width: 0 !important; }
+.crt-page .crt-head__name { margin: 0 0 .25em !important; padding: 0 !important; }
+.crt-page .crt-head__roles { margin: 0 0 .5em !important; opacity: .8; font-size: 1.05em; }
+
+.crt-page .crt-links {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: .4em 1em !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none !important;
+}
+.crt-page .crt-link {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: .35em !important;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.crt-page .crt-link:hover span,
+.crt-page .crt-link:focus span { text-decoration: underline; }
+
+.crt-page .crt-bio { margin: 0 0 var(--crt-gap) !important; max-width: 46em !important; }
+
+.crt-page .crt-sec { display: block !important; clear: both !important; margin: 0 0 calc(var(--crt-gap) * 1.5) !important; padding: 0 !important; }
+.crt-page .crt-h { margin: 0 0 .75em !important; padding: 0 0 .3em !important; border-bottom: 1px solid var(--crt-line) !important; }
+
+/* The product grid keeps the theme's cards; only the "In 3 formats" line is ours. */
+.crt-root .crt-products { display: block !important; clear: both !important; }
+.crt-products .crt-formats { display: block; margin: .25em 0 .5em; font-size: .85em; opacity: .8; }
+
+/* Press lists. */
+.crt-page .crt-list { display: flex !important; flex-direction: column !important; gap: .9em !important; margin: 0 !important; padding: 0 !important; }
+.crt-page .crt-item { display: flex !important; align-items: flex-start !important; gap: .9em !important; margin: 0 !important; padding: 0 !important; }
+.crt-page .crt-item__thumb { flex: 0 0 auto !important; display: block !important; width: 96px !important; }
+.crt-page .crt-item__thumb img { display: block !important; float: none !important; position: static !important; width: 96px !important; max-width: none !important; height: 64px !important; object-fit: cover !important; border-radius: 4px; margin: 0 !important; }
+.crt-page .crt-item__body { display: flex !important; flex-direction: column !important; min-width: 0 !important; flex: 1 1 auto !important; }
+.crt-page .crt-item__meta { font-size: .85em; opacity: .75; }
+.crt-page .crt-item__title { font-weight: 600; overflow-wrap: anywhere; }
+
+/* ===== Cards (box and index) ===== */
+
+.crt-root .crt-card {
+	display: flex !important;
+	align-items: flex-start !important;
+	gap: .9em !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	float: none !important;
+	position: static !important;
+	min-width: 0 !important;
+}
+.crt-root .crt-card__img { flex: 0 0 auto !important; display: block !important; width: var(--crt-avatar) !important; height: var(--crt-avatar) !important; line-height: 0; text-decoration: none !important; }
+.crt-root .crt-avatar {
+	display: block !important;
+	width: var(--crt-avatar) !important;
+	height: var(--crt-avatar) !important;
+	max-width: none !important;
+	object-fit: cover !important;
+	border-radius: 50% !important;
+	margin: 0 !important;
+}
+.crt-root .crt-avatar--empty {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	background: var(--crt-line) !important;
+	font-size: calc(var(--crt-avatar) * .4);
+	line-height: 1;
+	text-transform: uppercase;
+	text-decoration: none !important;
+}
+.crt-root .crt-card__body { display: flex !important; flex-direction: column !important; gap: .15em !important; min-width: 0 !important; flex: 1 1 auto !important; }
+.crt-root .crt-card__name { font-weight: 600; text-decoration: none; }
+.crt-root .crt-card__name:hover,
+.crt-root .crt-card__name:focus { text-decoration: underline; }
+.crt-root .crt-card__role { font-size: .9em; opacity: .8; }
+.crt-root .crt-card__bio { font-size: .9em; }
+.crt-root .crt-card__more { font-size: .9em; }
+
+/* Product box. */
+.crt-box { margin: 1.5em 0 !important; padding: 1.25em 0 0 !important; border-top: 1px solid var(--crt-line) !important; }
+.crt-box .crt-box__title { margin: 0 0 .75em !important; padding: 0 !important; font-size: 1.1em; }
+.crt-box .crt-box__cards { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)) !important; gap: 1.25em !important; }
+
+/* ===== Index ===== */
+
+.crt-index { margin: 0 0 2em !important; --crt-avatar: 56px; }
+.crt-index .crt-filter,
+.crt-index .crt-letters {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: .4em !important;
+	margin: 0 0 1em !important;
+	padding: 0 !important;
+}
+.crt-index .crt-filter__btn {
+	display: inline-block !important;
+	padding: .3em .85em !important;
+	border: 1px solid var(--crt-line) !important;
+	border-radius: 999px !important;
+	text-decoration: none !important;
+	line-height: 1.4 !important;
+}
+.crt-index .crt-filter__btn.is-on { border-color: currentColor !important; font-weight: 600; }
+.crt-index .crt-letters__a { display: inline-block !important; min-width: 1.8em; padding: .1em .3em !important; text-align: center; text-decoration: none !important; font-weight: 600; }
+.crt-index .crt-group { display: block !important; margin: 0 0 1.5em !important; scroll-margin-top: 6em; }
+.crt-index .crt-group__letter { margin: 0 0 .6em !important; padding: 0 0 .2em !important; border-bottom: 1px solid var(--crt-line) !important; font-size: 1.2em; }
+.crt-index .crt-group__cards { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)) !important; gap: 1em 1.5em !important; }
+.crt-index .crt-card { align-items: center !important; }
+
+@media (max-width: 600px) {
+	.crt-page .crt-head { flex-direction: column !important; align-items: flex-start !important; }
+	.crt-page .crt-head__photo { width: 140px !important; }
+}
+
+/* Last, and doubled for specificity: hidden always wins over the layout rules above. */
+.crt-root [hidden][hidden] { display: none !important; }

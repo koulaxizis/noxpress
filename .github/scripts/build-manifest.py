@@ -43,6 +43,7 @@ SLUGS = {
     'ew': 'easy-withdrawal',
     'bp': 'book-preview',
     'sn': 'shipping-notes',
+    'cr': 'featured-creators',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
