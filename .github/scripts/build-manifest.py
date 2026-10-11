@@ -41,6 +41,7 @@ SLUGS = {
     'sh': 'shop-filters',
     'pf': 'product-formats',
     'ew': 'easy-withdrawal',
+    'bp': 'book-preview',
     'sn': 'shipping-notes',
     'nm': 'data-migrator',
 }

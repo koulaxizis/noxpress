@@ -39,6 +39,7 @@ final class Noxpress_Core {
 		'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.' => 'Lean product filters for classic themes, with value groups for attributes.',
 		'Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».' => 'Links the formats of a work (print, e-book, audiobook, film) with an "Available formats" block.',
 		'Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.' => 'Withdrawal form for customers and guests, with a receipt and a request list.',
+		'Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.' => 'A book sample on the product page: a separate PDF with only the pages you choose.',
 		'Δωρεάν αποστολή με μπάρα προόδου και χρόνος παράδοσης στη σελίδα προϊόντος.' => 'Free shipping progress bar and delivery time on the product page.',
 
 		// Hub.
@@ -160,6 +161,11 @@ final class Noxpress_Core {
 				'name' => 'Easy Withdrawal',
 				'desc' => __( 'Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.', 'noxpress' ),
 				'page' => 'ewd-requests',
+			),
+			'book-preview'     => array(
+				'name' => 'Book Preview',
+				'desc' => __( 'Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.', 'noxpress' ),
+				'page' => 'bpv-samples',
 			),
 			'shipping-notes'   => array(
 				'name' => 'Shipping Notes',
