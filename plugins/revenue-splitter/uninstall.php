@@ -79,7 +79,7 @@ wp_clear_scheduled_hook( 'rs_email_monthly_check' );
 // User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
 //
 // Το rs_lang είναι η ΚΟΙΝΗ επιλογή γλώσσας του οικοσυστήματος Noxpress:
-// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview και το Featured Creators τη διαβάζουν.
+// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators και το Store Pickup τη διαβάζουν.
 // Σβήνεται ΜΟΝΟ αν κανένα δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
 // ------------------------------------------------------------------------
 
@@ -93,6 +93,7 @@ $rs_lang_readers = array(
 	'shipping-notes/shipping-notes.php',
 	'book-preview/book-preview.php',
 	'featured-creators/featured-creators.php',
+	'store-pickup/store-pickup.php',
 );
 
 $rs_lang_in_use = false;
@@ -241,7 +242,7 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $rs_itemmeta_table )
 // ---------------------------------------------------------------------
 
 $rs_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators' ) as $rs_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup' ) as $rs_slug ) {
 	if ( 'revenue-splitter' !== $rs_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $rs_slug . '/' . $rs_slug . '.php' ) ) {
 		$rs_suite_left = true;
 		break;
