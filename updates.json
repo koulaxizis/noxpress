@@ -115,6 +115,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.3.0/smart-formatter.zip"
       }
     },
+    "store-pickup": {
+      "beta": {
+        "changelog": "* Initial release.\n* Shipping method \"Store pickup\" for WooCommerce shipping zones, with Greek / English name, cost and tax status, and a choice of stores per zone.\n* Stores with name, address, Greek / English hours and details, map link, active flag and order.\n* Store choice under the method in the classic checkout, with validation; a single store is chosen automatically.\n* Store saved on the order's shipping line; \"Pickup store\" row on the thank-you page, in My account and in emails; public function `pkp_get_order_store()`.\n* Optional shipping address hiding (checkout form, order, emails); taxes as WooCommerce local pickup.\n* Checkout block: the method is offered only when a single store is possible.\n* Editable Greek / English texts, settings export / import.\n* Test mode, PKP_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.4).",
+        "published": "2026-10-11",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "8df45fde2b3c87fce6282ce2764a5b8f01c034cff7d0e592336765d6ca16014c",
+        "signature": "SuvUb8VYYdJ7n6zfSGB5+FfNUpeLK1fr92LVNxK7zHYZEaSG68R+QjIRC83gcenug7ktqIF91XAST0mzaH74AQ==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.0.0/store-pickup.zip"
+      }
+    },
     "store-pulse": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
