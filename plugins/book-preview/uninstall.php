@@ -60,7 +60,7 @@ function bpv_uninstall_site(): void {
 	if ( is_dir( $bpv_dir ) ) {
 		foreach ( (array) scandir( $bpv_dir ) as $bpv_file ) {
 			$bpv_file = (string) $bpv_file;
-			$bpv_ours = preg_match( '/^\d+-[0-9a-f]{32}\.pdf(\.tmp|\.qpdf\.tmp)?$/', $bpv_file ) || 'index.php' === $bpv_file;
+			$bpv_ours = preg_match( '/^\d+-[0-9a-f]{32}\.pdf(\.tmp|\.qpdf\.tmp|\.gs\.tmp)?$/', $bpv_file ) || 'index.php' === $bpv_file;
 			if ( $bpv_ours && is_file( $bpv_dir . '/' . $bpv_file ) ) {
 				wp_delete_file( $bpv_dir . '/' . $bpv_file );
 			}

@@ -38,14 +38,25 @@ final class BPV_Engine {
 				'error' => '',
 			);
 		} catch ( BPV_Pdf_Error $e ) {
-			if ( in_array( $e->reason, array( 'encrypted', 'damaged', 'unsupported' ), true ) && self::tool( 'qpdf' ) ) {
-				$out = self::run( array( self::tool( 'qpdf' ), '--show-npages', $path ) );
-				if ( 0 === $out['code'] && preg_match( '/^\s*(\d+)\s*$/', $out['out'], $m ) ) {
-					return array(
-						'ok'    => true,
-						'total' => (int) $m[1],
-						'error' => '',
-					);
+			if ( in_array( $e->reason, array( 'encrypted', 'damaged', 'unsupported' ), true ) && BPV_Settings::get()['external'] ) {
+				$cmds = array();
+				if ( self::tool( 'qpdf' ) ) {
+					$cmds[] = array( self::tool( 'qpdf' ), '--show-npages', $path );
+				}
+				if ( self::tool( 'gs' ) ) {
+					// PostScript string: escape \ ( ). SAFER stays on; only this file may be read.
+					$ps     = '(' . addcslashes( $path, '\\()' ) . ') (r) file runpdfbegin pdfpagecount = quit';
+					$cmds[] = array( self::tool( 'gs' ), '-q', '-dNODISPLAY', '-dBATCH', '-dNOPAUSE', '--permit-file-read=' . $path, '-c', $ps );
+				}
+				foreach ( $cmds as $cmd ) {
+					$out = self::run( $cmd );
+					if ( 0 === $out['code'] && preg_match( '/^\s*(\d+)\s*$/', $out['out'], $m ) && (int) $m[1] > 0 ) {
+						return array(
+							'ok'    => true,
+							'total' => (int) $m[1],
+							'error' => '',
+						);
+					}
 				}
 			}
 			return array(
@@ -105,33 +116,46 @@ final class BPV_Engine {
 			$run = self::run( array( $qpdf, '--empty', '--pages', $src, $list, '--', $mid ) );
 			// qpdf exits with 3 for warnings: the file is written.
 			if ( in_array( $run['code'], array( 0, 3 ), true ) && is_file( $mid ) ) {
-				try {
-					$r = new BPV_Pdf_Reader( $mid );
-					$w = new BPV_Pdf_Writer( $r );
-					$w->write( range( 0, count( $r->pages() ) - 1 ), $tmp );
-					unset( $r, $w );
-					self::unlink( $mid );
-					return self::finish( $tmp, $dest, count( $pages ), 'qpdf' );
-				} catch ( \Throwable $e ) {
-					// qpdf's own output is fine too.
-					self::unlink( $tmp );
-					if ( @rename( $mid, $tmp ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions.rename_rename
-						return self::finish( $tmp, $dest, count( $pages ), 'qpdf' );
-					}
-				}
+				return self::rewrite( $mid, $tmp, $dest, count( $pages ), 'qpdf' );
 			}
 			self::unlink( $mid );
 		}
 
 		$gs = self::tool( 'gs' );
 		if ( '' !== $gs ) {
-			$run = self::run( array( $gs, '-q', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/default', '-sPageList=' . $list, '-sOutputFile=' . $tmp, $src ) );
-			if ( 0 === $run['code'] && is_file( $tmp ) ) {
-				return self::finish( $tmp, $dest, count( $pages ), 'gs' );
+			$mid = $dest . '.gs.tmp';
+			$run = self::run( array( $gs, '-q', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/default', '-sPageList=' . $list, '-sOutputFile=' . $mid, $src ) );
+			if ( 0 === $run['code'] && is_file( $mid ) ) {
+				return self::rewrite( $mid, $tmp, $dest, count( $pages ), 'gs' );
 			}
-			self::unlink( $tmp );
+			self::unlink( $mid );
 		}
 		return self::fail( $error );
+	}
+
+	/**
+	 * Passes a tool's output through our writer: unused resources go, and
+	 * links the tool left to dropped pages (Ghostscript keeps outline
+	 * entries that point to missing objects) are cut. When our reader
+	 * cannot read it, the tool's own file is used as it is.
+	 */
+	private static function rewrite( string $mid, string $tmp, string $dest, int $expect, string $engine ): array {
+		try {
+			$r = new BPV_Pdf_Reader( $mid );
+			$w = new BPV_Pdf_Writer( $r );
+			$w->write( range( 0, count( $r->pages() ) - 1 ), $tmp );
+			unset( $r, $w );
+			self::unlink( $mid );
+			return self::finish( $tmp, $dest, $expect, $engine );
+		} catch ( \Throwable $e ) {
+			self::unlink( $tmp );
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions.rename_rename
+			if ( @rename( $mid, $tmp ) ) {
+				return self::finish( $tmp, $dest, $expect, $engine );
+			}
+			self::unlink( $mid );
+			return self::fail( 'io' );
+		}
 	}
 
 	/** Reads the new file back; moves it into place when it has the right page count. */

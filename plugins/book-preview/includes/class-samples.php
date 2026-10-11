@@ -107,7 +107,16 @@ final class BPV_Samples {
 		clearstatcache( true, $path );
 		$size  = is_file( $path ) ? (int) filesize( $path ) : 0;
 		$mtime = is_file( $path ) ? (int) filemtime( $path ) : 0;
-		return md5( $path . '|' . $size . '|' . $mtime . '|' . $pages . '|' . self::ENGINE );
+		// The path counts from the site's own folders, so moving the site to another server keeps samples ready.
+		$rel = wp_normalize_path( $path );
+		foreach ( array( WP_CONTENT_DIR, ABSPATH ) as $base ) {
+			$base = trailingslashit( wp_normalize_path( $base ) );
+			if ( 0 === strpos( $rel, $base ) ) {
+				$rel = substr( $rel, strlen( $base ) );
+				break;
+			}
+		}
+		return md5( $rel . '|' . $size . '|' . $mtime . '|' . $pages . '|' . self::ENGINE );
 	}
 
 	/**
