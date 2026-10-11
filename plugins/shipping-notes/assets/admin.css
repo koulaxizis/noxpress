@@ -1,0 +1,430 @@
+/**
+ * Shipping Notes — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors shn-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.shn-wrap {
+	--shn-bg: #101218;
+	--shn-panel: #14161d;
+	--shn-panel-2: #1d2029;
+	--shn-input: #1a1d26;
+	--shn-border: #2e3240;
+	--shn-border-input: #3a3f52;
+	--shn-row-border: #23262f;
+	--shn-stripe: #181b23;
+	--shn-hover: #1e212c;
+	--shn-text: #eae8fa;
+	--shn-heading: #f6f4ff;
+	--shn-muted: #b7b2d6;
+	--shn-link: #beb1ff;
+	--shn-link-hover: #d4c9ff;
+	--shn-accent: #6d4aff;
+	--shn-accent-hover: #8263ff;
+	--shn-warn: #f5c97e;
+	--shn-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.shn-wrap {
+	color-scheme: dark;
+	background: var(--shn-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--shn-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.shn-wrap h1,
+.shn-wrap h2 {
+	color: var(--shn-heading);
+}
+
+.shn-wrap a { color: var(--shn-link); }
+.shn-wrap a:hover { color: var(--shn-link-hover); }
+
+.shn-wrap .shn-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--shn-muted);
+	border-bottom: 1px solid var(--shn-border);
+	padding-bottom: 6px;
+}
+
+.shn-wrap .description,
+.shn-wrap p.description,
+.shn-wrap .shn-hint {
+	color: var(--shn-muted) !important;
+}
+
+.shn-zone {
+	background: var(--shn-panel);
+	border: 1px solid var(--shn-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.shn-wrap input[type="text"],
+.shn-wrap input[type="url"],
+.shn-wrap input[type="number"],
+.shn-wrap input[type="time"],
+.shn-wrap input[type="date"],
+.shn-wrap textarea,
+.shn-wrap select {
+	background-color: var(--shn-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--shn-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.shn-wrap input::placeholder,
+.shn-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.shn-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.shn-wrap input[type="file"] {
+	color: var(--shn-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.shn-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.shn-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.shn-wrap input[type="checkbox"],
+.shn-wrap input[type="radio"] {
+	accent-color: var(--shn-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.shn-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.shn-wrap .button:hover:not(:disabled) {
+	border-color: var(--shn-accent) !important;
+	color: #ffffff !important;
+}
+
+.shn-wrap .button-primary {
+	background: var(--shn-accent) !important;
+	border-color: var(--shn-accent) !important;
+	color: #ffffff !important;
+}
+
+.shn-wrap .button-primary:hover:not(:disabled) {
+	background: var(--shn-accent-hover) !important;
+}
+
+.shn-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.shn-submit { margin-top: 20px; }
+.shn-inline-form { display: inline; margin-right: 10px; }
+.shn-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.shn-table,
+table.widefat.shn-table {
+	background: var(--shn-panel) !important;
+	border: 1px solid var(--shn-border) !important;
+	border-radius: 6px;
+	color: var(--shn-text) !important;
+	margin-top: 14px !important;
+}
+
+.shn-table thead th,
+.shn-table thead td {
+	background: var(--shn-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.shn-table tbody td,
+.shn-table tbody th {
+	background: var(--shn-panel) !important;
+	color: var(--shn-text) !important;
+	border-bottom: 1px solid var(--shn-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.shn-table tbody tr:nth-child(2n) td,
+.shn-table tbody tr:nth-child(2n) th {
+	background: var(--shn-stripe) !important;
+}
+
+.shn-table tbody tr:hover td,
+.shn-table tbody tr:hover th {
+	background: var(--shn-hover) !important;
+}
+
+.shn-table td,
+.shn-table th {
+	padding: 12px 14px;
+}
+
+.shn-table td code {
+	background: transparent !important;
+	color: var(--shn-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.shn-table .shn-empty {
+	color: var(--shn-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.shn-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.shn-footer a { color: #beb1ff; text-decoration: none; }
+.shn-footer a:hover { text-decoration: underline; }
+
+.shn-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.shn-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.shn-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.shn-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.shn-muted { color: var(--shn-muted) !important; }
+.shn-warn { color: var(--shn-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.shn-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.shn-wrap .shn-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--shn-heading);
+}
+
+.shn-status p { margin: 0 0 8px; }
+.shn-status p:last-child { margin-bottom: 0; }
+.shn-status code,
+.shn-wrap .description code,
+.shn-wrap .shn-hint code {
+	background: var(--shn-panel-2);
+	color: var(--shn-muted);
+	border: 1px solid var(--shn-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.shn-suspended { margin: 8px 0 0; }
+.shn-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.shn-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--shn-border);
+	background: var(--shn-panel-2);
+	color: var(--shn-text);
+	white-space: nowrap;
+}
+.shn-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.shn-badge--muted { color: var(--shn-muted); }
+.shn-badge--warn { border-color: #6b5a33; color: var(--shn-warn); }
+.shn-badge--danger { border-color: #6b3a3a; color: var(--shn-danger); }
+
+/* Area fieldsets. */
+.shn-area {
+	background: var(--shn-panel);
+	border: 1px solid var(--shn-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.shn-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--shn-heading);
+}
+.shn-row { margin: 4px 0 8px; }
+
+.shn-details > summary {
+	cursor: pointer;
+	color: var(--shn-link);
+	margin: 4px 0;
+}
+.shn-details[open] > summary { margin-bottom: 12px; }
+
+.shn-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.shn-wrap .shn-label {
+	display: block;
+	font-weight: 600;
+	color: var(--shn-heading);
+	margin: 8px 0 6px;
+}
+.shn-grid .shn-label:first-child { margin-top: 0; }
+
+.shn-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.shn-field > span:first-child {
+	min-width: 150px;
+	color: var(--shn-text);
+}
+.shn-wrap .shn-color { width: 96px; font-family: monospace; }
+.shn-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--shn-border-input);
+}
+
+.shn-wrap .shn-hint { display: block; font-size: 12px; margin-top: 4px; }
+.shn-wrap td .shn-hint { display: inline; }
+.shn-table td.shn-warn { color: var(--shn-warn) !important; }
+
+/* Tabs of the main page. */
+.shn-wrap .shn-tabs {
+	border-bottom: 1px solid var(--shn-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.shn-wrap .shn-tabs .nav-tab {
+	background: var(--shn-panel);
+	border-color: var(--shn-border);
+	color: var(--shn-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.shn-wrap .shn-tabs .nav-tab:hover { color: var(--shn-link-hover); background: var(--shn-hover); }
+.shn-wrap .shn-tabs .nav-tab-active,
+.shn-wrap .shn-tabs .nav-tab-active:hover {
+	background: var(--shn-bg);
+	border-bottom-color: var(--shn-bg);
+	color: var(--shn-heading);
+}
+
+/* One input per line (removal rules). */
+.shn-wrap .shn-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.shn-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--shn-border);
+	border-radius: 6px;
+	background: var(--shn-panel-2);
+}
+.shn-scroll .shn-field { margin-bottom: 4px; }
+
+/* ===== Shipping Notes ===== */
+
+.shn-wrap .shn-wide { width: 100%; max-width: 640px; }
+.shn-wrap .shn-num { width: 90px; }
+.shn-wrap .shn-time { width: 110px; }
+.shn-wrap .shn-days { white-space: nowrap; }
+.shn-wrap .shn-days input[type="number"] { width: 70px; }
+.shn-wrap .shn-holidays { width: 100%; max-width: 360px; min-height: 160px; font-family: monospace; }
+.shn-wrap .shn-texts td:first-child { width: 220px; }
+.shn-wrap .shn-texts input[type="text"] { width: 100%; }
+.shn-wrap .shn-zone-name { font-weight: 600; color: var(--shn-heading); }
+
+/* Preview: a light card, like a cart on a white theme. */
+.shn-preview {
+	background: #fff;
+	color: #1d2327;
+	border-radius: 6px;
+	padding: 14px 16px;
+	max-width: 520px;
+	margin: 8px 0 0;
+}
+.shn-preview .shn-fs { margin: 0 !important; }
+.shn-preview .shn-fs__bar { height: 6px; margin-top: .4em; border-radius: 3px; background: rgba(127,127,127,.25); overflow: hidden; }
+.shn-preview .shn-fs__fill { display: block; height: 100%; background: var(--shn-color, #1d2327); }
+.shn-preview p { margin: 0; }
