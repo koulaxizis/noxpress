@@ -44,6 +44,7 @@ SLUGS = {
     'bp': 'book-preview',
     'sn': 'shipping-notes',
     'cr': 'featured-creators',
+    'pk': 'store-pickup',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

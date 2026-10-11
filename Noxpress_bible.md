@@ -2,7 +2,8 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.13 (2026-10-11). Νέο: Featured Creators στη σουίτα (§8, θέση μενού 100· §13, κωδικός `cr`· §16, Core 1.1.3)· `crt_get_creators()`, φίλτρο `crt_text`, action `crt_creator_changed` (§6)· περιεχόμενο που γράφει ο χρήστης μένει μετά το uninstall, εκτός αν το ζητήσει (§12)· σελίδες δικού μας post type σε κλασικά και block themes (§14.19)· structured data μαζί με SEO plugins (§14.20).
+- **Έκδοση:** 1.14 (2026-10-11). Νέο: Store Pickup στη σουίτα (§8, θέση μενού 110· §13, κωδικός `pk`· §16, Core 1.1.4)· `pkp_get_order_store()` και φίλτρο `pkp_text` (§6)· μέθοδοι αποστολής και επιλογές του πελάτη στο ταμείο (§14.21).
+- **1.13** (2026-10-11): Featured Creators στη σουίτα (§8, θέση μενού 100· §13, κωδικός `cr`· §16, Core 1.1.3)· `crt_get_creators()`, φίλτρο `crt_text`, action `crt_creator_changed` (§6)· περιεχόμενο που γράφει ο χρήστης μένει μετά το uninstall, εκτός αν το ζητήσει (§12)· σελίδες δικού μας post type σε κλασικά και block themes (§14.19)· structured data μαζί με SEO plugins (§14.20).
 - **1.12** (2026-10-11): Book Preview στη σουίτα (§8, §13, §16, Core 1.1.2)· κώδικας τρίτων στο plugin με τις άδειές του (§10)· αρχεία που φτιάχνει το plugin στο uploads (§12)· βαριές βιβλιοθήκες front end μόνο μετά από ενέργεια του επισκέπτη (§14.18).
 - **1.11** (2026-10-11): Shipping Notes στη σουίτα (§8, θέση μενού 90, γιατί το Book Preview κράτησε το 80· §13, §16)· φίλτρα `shn_threshold`, `shn_available_from`, `shn_text` (§6)· ονόματα plugins χωρίς το πρόθεμα «Noxpress» (§10)· δεδομένα extension του Store API μόνο για ανάγνωση (§14.4).
 - **1.10** (2026-10-11): ειδοποίηση στο hub για νεότερη έκδοση στο άλλο κανάλι, με «Εγκατάσταση beta» ανά plugin και απόκρυψη ανά έκδοση (§16, Core 1.1.0).
@@ -80,6 +81,7 @@
 - `noxpress_withdrawal_submitted( int $order_id, array $request )` και `noxpress_withdrawal_status_changed( int $order_id, array $request, string $old_status )` (Easy Withdrawal): πυροδοτούνται όταν καταγράφεται μια δήλωση υπαναχώρησης και όταν αλλάζει η κατάστασή της. Το `$request` έχει `id`, `status`, `created`, `items` (`item_id`, `product_id`, `name`, `qty`, `unit`), `email`, `lang`, `source`. Τα ακούει όποιο plugin χρειάζεται να ξέρει για επιστροφές (π.χ. ένα μελλοντικό Store Pulse με αναφορά επιστροφών).
 - `shn_threshold( float $threshold, WC_Shipping_Zone $zone )`, `shn_available_from( string $date, WC_Product $product )` και `shn_text( string $text, string $key, string $lang )` (Shipping Notes): το όριο δωρεάν αποστολής μιας ζώνης, η ημερομηνία κυκλοφορίας (`YYYY-MM-DD`) ενός προϊόντος σε προπαραγγελία και τα κείμενα του επισκέπτη. Το `shn_available_from` το γεμίζει όποιο plugin ξέρει για προπαραγγελίες (π.χ. ένα μελλοντικό plugin βιβλίων).
 - `crt_get_creators( int $product_id ): array` (Featured Creators): οι δημόσιοι δημιουργοί ενός προϊόντος (`id`, `name`, `url`, `roles` με τα taxonomies των χαρακτηριστικών). Φίλτρο `crt_text( string $text, string $key, string $lang )` για τα κείμενα του επισκέπτη (τα κείμενα ρόλων με κλειδιά `h:pa_…` και `l:pa_…`). Action `crt_creator_changed( int $creator_id, int[] $product_ids )` όταν αλλάζουν τα προϊόντα ενός δημιουργού, για page caches (το plugin ήδη καλεί `clean_post_cache()`). Τα διαβάζει όποιο plugin χρειάζεται τους δημιουργούς ενός προϊόντος (π.χ. ένα μελλοντικό plugin βιβλίων).
+- `pkp_get_order_store( int|WC_Order $order ): ?array` (Store Pickup): το κατάστημα παραλαβής μιας παραγγελίας (`id`, `name`, `address`, `details`, `map`), όπως αποθηκεύτηκε στη γραμμή αποστολής στο ταμείο, ή `null`. Φίλτρο `pkp_text( string $text, string $key, string $lang )` για τα κείμενα του πελάτη. Το id της μεθόδου είναι `nox_store_pickup`. Τα διαβάζει όποιο plugin χρειάζεται το σημείο παραλαβής (π.χ. ένα μελλοντικό Store Pulse με αναφορά ανά κατάστημα).
 - Plugin που **δεν** αλλάζει δεδομένα (π.χ. Theme Patcher, που αλλάζει μόνο την εμφάνιση) δεν πυροδοτεί τίποτα.
 
 ## §7 Footer
@@ -100,7 +102,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Κοινό top-level:** slug `noxpress`, τίτλος «Noxpress», `dashicons-chart-pie`, θέση 57, capability `manage_woocommerce`.
 - **Ποιος το δημιουργεί:** το Noxpress Core (§16), στο `admin_menu` με προτεραιότητα 5, με το hub ως landing και πρώτο submenu «Επισκόπηση». Τα plugins **δεν** δημιουργούν ποτέ το top-level· προσθέτουν μόνο submenus.
 - **Προτεραιότητες `admin_menu`:**
-  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80 (Book Preview), SHN 90, CRT 100 (Featured Creators).
+  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80 (Book Preview), SHN 90, CRT 100 (Featured Creators), PKP 110 (Store Pickup).
   - Νέα plugins παίρνουν το επόμενο +10.
   - Το Data Migrator δεν έχει ακόμα ενταχθεί.
 - **Παλιές εκδόσεις** (πριν από το Core) έλεγχαν `empty( $GLOBALS['admin_page_hooks']['noxpress'] )` και έφτιαχναν το top-level μόνο αν έλειπε. Επειδή το Core τρέχει πρώτο, σε ανάμεικτους συνδυασμούς απλώς προσθέτουν τα submenus τους.
@@ -192,7 +194,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Τρία σημεία σε κάθε έκδοση:** η έκδοση αλλάζει μαζί στο header, στη σταθερά `{P}_VERSION` και στο `Stable tag` του readme.
 - **Stable:** όταν ο Chris πει «stable», βγαίνει το τικ «pre-release» από το release στο GitHub. Το workflow ξαναφτιάχνει τότε το `updates.json` (§16) και τα sites στο κανάλι Stable βλέπουν την έκδοση.
 - **Release workflow** (`.github/workflows/release.yml`):
-  - Κωδικός ανά plugin: rs, sp, sf, nm, tp, sh, pf, ew, sn, bp, cr. Ο κωδικός είναι **πάντα δύο πεζά γράμματα**, γιατί ο updater (§16) δέχεται μόνο tags `nox-[a-z]{2}-<version>`. Το prefix του κώδικα μπορεί να είναι μεγαλύτερο (Shop Filters: `SHF_`, κωδικός `sh`· Product Formats: `PFM_`, κωδικός `pf`· Easy Withdrawal: `EWD_`, κωδικός `ew`· Shipping Notes: `SHN_`, κωδικός `sn`· Book Preview: `BPV_`, κωδικός `bp`· Featured Creators: `CRT_`, κωδικός `cr`).
+  - Κωδικός ανά plugin: rs, sp, sf, nm, tp, sh, pf, ew, sn, bp, cr, pk. Ο κωδικός είναι **πάντα δύο πεζά γράμματα**, γιατί ο updater (§16) δέχεται μόνο tags `nox-[a-z]{2}-<version>`. Το prefix του κώδικα μπορεί να είναι μεγαλύτερο (Shop Filters: `SHF_`, κωδικός `sh`· Product Formats: `PFM_`, κωδικός `pf`· Easy Withdrawal: `EWD_`, κωδικός `ew`· Shipping Notes: `SHN_`, κωδικός `sn`· Book Preview: `BPV_`, κωδικός `bp`· Featured Creators: `CRT_`, κωδικός `cr`· Store Pickup: `PKP_`, κωδικός `pk`).
   - Tag `nox-<code>-<version>`, zip `<slug>.zip` με τον φάκελο στη ρίζα.
   - Βγαίνει ως pre-release (beta) μέχρι να δοκιμαστεί.
   - Τα plugins στη λίστα `AUTO` βγαίνουν αυτόματα με το merge στο main.
@@ -254,6 +256,12 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
     - Όσο δεν τη βλέπει ο επισκέπτης (λειτουργία δοκιμής, ανενεργό, πρόχειρο, κωδικός), η σελίδα απαντά 404 και λείπει από τα sitemaps (WordPress και Rank Math).
     - Οθόνη επεξεργασίας με τον κλασικό editor (`use_block_editor_for_post_type`) όταν τα δεδομένα είναι κυρίως meta boxes· το `show_in_rest` μένει για τα μπλοκ και το REST.
 20. **Structured data μαζί με SEO plugins** (νέο, από το Featured Creators): ποτέ δύο graphs για την ίδια σελίδα. Με Rank Math, οι κόμβοι μπαίνουν στο δικό του graph (`rank_math/json_ld`) και διορθώνεται ό,τι δεν ταιριάζει (π.χ. το Article που βάζει για νέο post type)· δικό μας `<script type="application/ld+json">` μόνο όταν το SEO plugin δεν τύπωσε graph στη σελίδα. Ιδιότητες που ο τύπος του schema.org δεν έχει (π.χ. `author` στο `Product`) μπαίνουν μόνο με πολλαπλό τύπο (`["Product", "Book"]`), από αντιστοίχιση που ορίζει ο χρήστης· αλλιώς το schema μένει όπως είναι.
+21. **Μέθοδοι αποστολής και επιλογές του πελάτη στο ταμείο** (νέο, από το Store Pickup):
+    - Μια μέθοδος αποστολής είναι κανονική κλάση `WC_Shipping_Method` με ζώνες (`shipping-zones`, `instance-settings`). Με το `{P}_DISABLE` δεν δηλώνεται καν, ώστε το WooCommerce να αγνοεί τις εγγραφές της στις ζώνες και το ταμείο να πέφτει στις άλλες μεθόδους.
+    - Η λειτουργία δοκιμής κρύβεται στο `is_available()`. Ό,τι αλλάζει τη διαθεσιμότητα (ποιος βλέπει, κλασικό ταμείο ή Store API) μπαίνει στο πακέτο (`woocommerce_cart_shipping_packages`), γιατί το WooCommerce κρατά τις τιμές ανά hash πακέτου· η αποθήκευση ρυθμίσεων ακυρώνει την cache (`WC_Cache_Helper::get_transient_version( 'shipping', true )`).
+    - Μια επιλογή του πελάτη κάτω από τη μέθοδο (π.χ. κατάστημα) τυπώνεται στο `woocommerce_after_shipping_rate` μόνο για την επιλεγμένη τιμή και μόνο στο ταμείο. Κρατιέται στις ανανεώσεις από το `post_data` του `update_order_review`, ποτέ από cookie ή session (κανόνας 5). Ελέγχεται στο `woocommerce_after_checkout_validation` με whitelist.
+    - Αποθηκεύεται στη γραμμή αποστολής της παραγγελίας (`woocommerce_checkout_create_order_shipping_item`) ως στιγμιότυπο: κρυφό meta για τον κώδικα και αναγνώσιμο meta με ετικέτα για το admin, ώστε να διαβάζεται και χωρίς το plugin. Στη σελίδα ευχαριστίας, στον λογαριασμό και στα emails μπαίνει γραμμή στο `woocommerce_get_order_item_totals`.
+    - Το Checkout block δεν έχει θέση για τέτοια επιλογή: εκεί η μέθοδος προσφέρεται μόνο όταν η επιλογή είναι μία, αλλιώς κρύβεται.
 
 ## §15 Τρόπος εργασίας (Chris ↔ Claude)
 
@@ -273,7 +281,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Αλλαγή στο Core:** ανεβαίνει το κλειδί έκδοσης στο `loader.php`, συγχρονίζονται όλα τα αντίγραφα και βγαίνει νέα έκδοση σε **όλα** τα plugins.
 - **Εξαίρεση: αλλαγή μόνο στον κατάλογο** (νέο plugin στη σουίτα). Το κλειδί έκδοσης ανεβαίνει και τα αντίγραφα συγχρονίζονται, αλλά τα άλλα plugins **δεν** βγάζουν νέα έκδοση γι' αυτό: το νέο plugin φέρνει το νεότερο Core στα sites όπου εγκαθίσταται, και τα υπόλοιπα το παίρνουν με την επόμενη έκδοσή τους. Μέχρι τότε, ένα site χωρίς το νέο plugin απλώς δεν το βλέπει στο hub.
 - **Κλάσεις:** `Noxpress_Core` (κατάλογος σουίτας, μενού §8, γλώσσα με domain `noxpress`), `Noxpress_Updater`, `Noxpress_Hub`. CSS με prefix `nx-` (`assets/hub.css`).
-- **Κατάλογος:** RS, SP, SF, TP, Shop Filters (από το Core 1.0.2), Product Formats (από το Core 1.0.3), Easy Withdrawal (από το Core 1.0.4, με την ίδια εξαίρεση: χωρίς νέες εκδόσεις στα άλλα plugins), Shipping Notes (από το Core 1.1.1, με την ίδια εξαίρεση), Book Preview (από το Core 1.1.2, με την ίδια εξαίρεση), Featured Creators (από το Core 1.1.3, με την ίδια εξαίρεση). Το Data Migrator μπαίνει όταν διορθωθεί. Νέο plugin = νέα γραμμή στο `Noxpress_Core::catalog()` και στο `AUTO` του workflow.
+- **Κατάλογος:** RS, SP, SF, TP, Shop Filters (από το Core 1.0.2), Product Formats (από το Core 1.0.3), Easy Withdrawal (από το Core 1.0.4, με την ίδια εξαίρεση: χωρίς νέες εκδόσεις στα άλλα plugins), Shipping Notes (από το Core 1.1.1, με την ίδια εξαίρεση), Book Preview (από το Core 1.1.2, με την ίδια εξαίρεση), Featured Creators (από το Core 1.1.3, με την ίδια εξαίρεση), Store Pickup (από το Core 1.1.4, με την ίδια εξαίρεση). Το Data Migrator μπαίνει όταν διορθωθεί. Νέο plugin = νέα γραμμή στο `Noxpress_Core::catalog()` και στο `AUTO` του workflow.
 - **Hub (σελίδα `noxpress`):**
   - Πίνακας με όλη τη σουίτα: κατάσταση (ενεργό / ανενεργό / δεν είναι εγκατεστημένο), εγκατεστημένη και διαθέσιμη έκδοση, badge beta.
   - Ενέργειες του ίδιου του WordPress: Ενημέρωση (`update.php?action=upgrade-plugin`), Εγκατάσταση (`install-plugin`, μέσω `plugins_api`), Ενεργοποίηση, Αλλαγές (popup λεπτομερειών), διακόπτης αυτόματων ενημερώσεων.
