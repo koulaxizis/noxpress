@@ -26,6 +26,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.1.0/easy-withdrawal.zip"
       }
     },
+    "featured-creators": {
+      "beta": {
+        "changelog": "* First release (beta).\n* Creator post type with photo, roles line, biography, links and lists of interviews, videos and reviews.\n* Matching by slug across the chosen role attributes, with exclusions, extra terms and conflict detection.\n* Creator page for classic and block themes, with one section per role, a bundles group and the press lists; one card per work with Product Formats.\n* Links in \"Additional information\", creator box on the product, index with role filter and A–Z order; shortcodes and blocks.\n* Draft creators from the terms, coverage check, settings export and import.\n* ProfilePage and Person schema (Rank Math graph or standalone JSON-LD), creators on products as author, illustrator and more.\n* Test mode, CRT_DISABLE, Greek and English texts, clean uninstall.",
+        "published": "2026-10-11",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "1e48e05f281307de4a2d500055a531bcc91c31bc74d878a5e67b64a0fd76b3d8",
+        "signature": "pjyRF1VMv/6cT13SD+Bf5HIviMQmrCwsmjjuPYYt/ODSYq4VCNTnGT3KS+KtCgX5p/q8aGIiPoHbvBETAyu5AA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.0.0/featured-creators.zip"
+      }
+    },
     "product-formats": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
