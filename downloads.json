@@ -1,8 +1,8 @@
 {
   "display": 10,
-  "total": 19,
+  "total": 21,
   "offset": 5,
-  "updated": "2026-10-10",
+  "updated": "2026-10-11",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -78,10 +78,14 @@
     },
     "629075252": {
       "file": "nox-pf-1.0.0/product-formats.zip",
-      "count": 0
+      "count": 1
     },
     "629075362": {
       "file": "nox-ew-1.0.0/easy-withdrawal.zip",
+      "count": 1
+    },
+    "630423613": {
+      "file": "nox-tp-1.2.0/theme-patcher.zip",
       "count": 0
     }
   }
