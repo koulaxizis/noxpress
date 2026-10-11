@@ -5,7 +5,7 @@ Tags: woocommerce, product filters, layered navigation, attributes, classic them
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -81,6 +81,12 @@ On block themes the widget and the shortcode work where a classic widget or a sh
 The plugin's options (`shf_settings`, `shf_sets`, `shf_groups_*`, `widget_shf_filters`), its widgets in the sidebars and its transients are removed. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
+* New: "Install beta" for a single plugin, without moving the whole suite to Beta, or "Switch everything to Beta". Every package is still checked with sha256 and its signature.
+* New: "Hide for this version" per user; the notice comes back with a newer version.
+* Changed: Noxpress Core 1.1.0.
 
 = 1.0.0 =
 * Initial release.

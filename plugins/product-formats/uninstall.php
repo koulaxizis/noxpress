@@ -106,6 +106,7 @@ if ( ! $pfm_suite_left ) {
 	delete_site_option( 'noxpress_channel' );
 	delete_site_option( 'noxpress_checked' );
 	delete_site_transient( 'noxpress_manifest' );
+	delete_metadata( 'user', 0, 'noxpress_hidden', '', true ); // Core 1.1.0: hidden other-channel notices.
 
 	$pfm_sites = is_multisite() ? get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) : array( 0 );
 	foreach ( $pfm_sites as $pfm_site_id ) {

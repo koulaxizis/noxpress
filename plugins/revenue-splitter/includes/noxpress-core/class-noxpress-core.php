@@ -78,6 +78,20 @@ final class Noxpress_Core {
 		'Ο έλεγχος για ενημερώσεις ολοκληρώθηκε.'               => 'The update check is complete.',
 		'Κάθε πακέτο ελέγχεται με sha256 και ψηφιακή υπογραφή πριν από την εγκατάσταση.' => 'Every package is checked with sha256 and a digital signature before it is installed.',
 
+		// Other channel (hub).
+		'Υπάρχει νεότερη beta έκδοση για %d plugin.'            => 'There is a newer beta version for %d plugin.',
+		'Υπάρχουν νεότερες beta εκδόσεις για %d plugins.'       => 'There are newer beta versions for %d plugins.',
+		'Οι beta εκδόσεις δοκιμάζονται ακόμα. Σε live site, καλύτερα πρώτα σε δοκιμαστικό ή με πρόσφατο backup.' => 'Beta versions are still being tested. On a live site, try them on a test site first or have a recent backup.',
+		'Μετάβαση στο Beta για όλα'                             => 'Switch everything to Beta',
+		'ή «Εγκατάσταση beta» μόνο για όποιο plugin θέλεις, πιο κάτω.' => 'or "Install beta" only for the plugins you choose, below.',
+		'Νεότερη beta: %s'                                      => 'Newer beta: %s',
+		'Νεότερη stable: %s'                                    => 'Newer stable: %s',
+		'Εγκατάσταση beta'                                      => 'Install beta',
+		'Αλλαγές beta'                                          => 'Beta changelog',
+		'Οι beta εκδόσεις δοκιμάζονται ακόμα. Να εγκατασταθεί η beta;' => 'Beta versions are still being tested. Install the beta?',
+		'Απόκρυψη για αυτή την έκδοση'                          => 'Hide for this version',
+		'Η ειδοποίηση για το %1$s %2$s κρύφτηκε. Θα ξαναεμφανιστεί με νεότερη έκδοση.' => 'The notice for %1$s %2$s is hidden. It comes back with a newer version.',
+
 		// Updater errors.
 		'Το πακέτο δεν υπάρχει στη λίστα εκδόσεων του Noxpress.' => 'The package is not in the Noxpress version list.',
 		'Το πακέτο δεν ταιριάζει με το sha256 της λίστας εκδόσεων. Η εγκατάσταση ακυρώθηκε.' => 'The package does not match the sha256 of the version list. The install was cancelled.',
@@ -92,6 +106,7 @@ final class Noxpress_Core {
 
 	public static function init(): void {
 		add_filter( 'gettext_noxpress', array( __CLASS__, 'translate' ), 10, 3 );
+		add_filter( 'ngettext_noxpress', array( __CLASS__, 'translate_plural' ), 10, 5 );
 
 		require_once NOXPRESS_CORE_PATH . '/class-noxpress-updater.php';
 		Noxpress_Updater::init();
@@ -184,11 +199,18 @@ final class Noxpress_Core {
 	}
 
 	public static function admin_menu(): void {
-		$cap = self::view_cap();
+		$cap   = self::view_cap();
+		$title = __( 'Noxpress', 'noxpress' );
+
+		// Bubble: newer releases in the other channel (hub, Bible §16).
+		$count = current_user_can( 'update_plugins' ) ? Noxpress_Updater::other_count() : 0;
+		if ( $count ) {
+			$title .= ' <span class="update-plugins count-' . (int) $count . '"><span class="plugin-count">' . (int) $count . '</span></span>';
+		}
 
 		add_menu_page(
 			__( 'Noxpress', 'noxpress' ),
-			__( 'Noxpress', 'noxpress' ),
+			$title,
 			$cap,
 			self::MENU,
 			array( 'Noxpress_Hub', 'render' ),
@@ -230,6 +252,15 @@ final class Noxpress_Core {
 			self::$lang = $lang;
 		}
 		return $lang;
+	}
+
+	/** ngettext_noxpress filter: both Greek forms are dictionary keys. */
+	public static function translate_plural( $translation, $single, $plural, $number, $domain ) {
+		$text = 1 === (int) $number ? $single : $plural;
+		if ( 'noxpress' === $domain && isset( self::$dict[ $text ] ) && 'en' === self::lang() ) {
+			return self::$dict[ $text ];
+		}
+		return $translation;
 	}
 
 	/** gettext_noxpress filter. */

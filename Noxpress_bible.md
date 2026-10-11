@@ -2,7 +2,9 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.9 (2026-10-10). Νέο: εξαίρεση για τα AJAX του καλαθιού (§14.4)· κανόνας για κείμενα που βλέπει ο επισκέπτης και για ρυθμίσεις που δεν εξαρτώνται από το θέμα (§14.17), από τις ετικέτες τιμής του Theme Patcher.
+- **Έκδοση:** 1.11 (2026-10-11). Νέο: Book Preview στη σουίτα (§8, §13, §16, Core 1.1.1)· κώδικας τρίτων στο plugin με τις άδειές του (§10)· αρχεία που φτιάχνει το plugin στο uploads (§12)· βαριές βιβλιοθήκες front end μόνο μετά από ενέργεια του επισκέπτη (§14.18).
+- **1.10** (2026-10-11): ειδοποίηση στο hub για νεότερη έκδοση στο άλλο κανάλι, με «Εγκατάσταση beta» ανά plugin και απόκρυψη ανά έκδοση (§16, Core 1.1.0).
+- **1.9** (2026-10-10): εξαίρεση για τα AJAX του καλαθιού (§14.4)· κανόνας για κείμενα που βλέπει ο επισκέπτης και για ρυθμίσεις που δεν εξαρτώνται από το θέμα (§14.17), από τις ετικέτες τιμής του Theme Patcher.
 - **1.8** (2026-10-10): Easy Withdrawal στη σουίτα (§8, §13, §16)· hooks `noxpress_withdrawal_*` (§6)· δεδομένα που είναι αρχείο του καταστήματος μένουν μετά το uninstall (§12)· φόρμες επισκεπτών που καταγράφουν δήλωση και κουμπιά με την κλάση του θέματος (§14).
 - **1.7** (2026-10-10): Product Formats στη σουίτα (§8, §13, §16)· φίλτρο `pfm_formats` και API `pfm_get_work()` (§6)· αλλαγή μόνο στον κατάλογο του Core χωρίς νέα έκδοση στα άλλα plugins (§16).
 - **1.6** (2026-10-10): Shop Filters στη σουίτα (§8, §13, §16)· φίλτρο `noxpress_filters_present` (§6)· κωδικός release πάντα δύο γράμματα (§13)· κανόνες για CSS που αντέχει το θέμα και για μετρήσεις στην προβολή σελίδας (§14).
@@ -94,7 +96,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Κοινό top-level:** slug `noxpress`, τίτλος «Noxpress», `dashicons-chart-pie`, θέση 57, capability `manage_woocommerce`.
 - **Ποιος το δημιουργεί:** το Noxpress Core (§16), στο `admin_menu` με προτεραιότητα 5, με το hub ως landing και πρώτο submenu «Επισκόπηση». Τα plugins **δεν** δημιουργούν ποτέ το top-level· προσθέτουν μόνο submenus.
 - **Προτεραιότητες `admin_menu`:**
-  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70.
+  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80.
   - Νέα plugins παίρνουν το επόμενο +10.
   - Το Data Migrator δεν έχει ακόμα ενταχθεί.
 - **Παλιές εκδόσεις** (πριν από το Core) έλεγχαν `empty( $GLOBALS['admin_page_hooks']['noxpress'] )` και έφτιαχναν το top-level μόνο αν έλειπε. Επειδή το Core τρέχει πρώτο, σε ανάμεικτους συνδυασμούς απλώς προσθέτουν τα submenus τους.
@@ -139,6 +141,11 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Γλώσσα: PHP 7.4+, χωρίς `match`, enums ή named arguments.
   - `defined( 'ABSPATH' ) || exit;` σε κάθε αρχείο.
   - Τα σχόλια μπορεί να είναι ελληνικά ή αγγλικά (ο νέος κώδικας σε αγγλικά). Το changelog γράφεται στα αγγλικά.
+- **Κώδικας τρίτων** (νέο, από το Book Preview, που φέρνει το PDF.js):
+  - Μόνο όταν δεν γίνεται αλλιώς, μόνο με άδεια συμβατή με MIT/GPL, και πάντα τοπικά: ποτέ CDN ή άλλη εξωτερική κλήση.
+  - Στο `assets/vendor/<βιβλιοθήκη>/`, χωρίς αλλαγές στο περιεχόμενο, με αρχείο `VERSION` και όλα τα αρχεία άδειας της βιβλιοθήκης δίπλα στα αρχεία της.
+  - Ένα `LICENSES.md` στη ρίζα του plugin γράφει τι είναι κάθε αρχείο, την έκδοση, την άδεια, ό,τι άλλαξε (π.χ. μετονομασία) ή έμεινε έξω, και πώς ενημερώνεται.
+  - Ό,τι λείπει ή αλλάζει σε σχέση με το πακέτο της βιβλιοθήκης γράφεται στο docblock του bootstrap ως απόκλιση.
 
 ## §11 Μοτίβα ασφαλείας (admin)
 
@@ -161,6 +168,12 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Διαγράφει μια hardcoded λίστα options και τα transients με `LIKE` που έχει escaped `_`.
   - Στο multisite καθαρίζει κάθε site **μία** φορά.
   - Δεν αγγίζει δεδομένα άλλων plugins. Ειδικά το `rs_lang` το διαγράφει μόνο ο RS, και μόνο αν δεν υπάρχει άλλο plugin της σουίτας.
+- **Αρχεία που φτιάχνει το plugin** (νέο, από το Book Preview):
+  - Σε δικό του φάκελο `uploads/noxpress-<όνομα>/` (από το `wp_upload_dir()`, όχι hardcoded path), με `index.php` και `.htaccess` (`Options -Indexes`, κανένα script).
+  - Ονόματα που δεν μαντεύονται (π.χ. `<id>-<32 hex>.pdf`) και αυστηρό pattern: κάθε ανάγνωση, διαγραφή ή URL περνά πρώτα από το pattern, ώστε κανένα αρχείο έξω από αυτό να μην αγγίζεται.
+  - Γράψιμο σε `.tmp` και `rename` στο τέλος, ώστε ο επισκέπτης να μη βλέπει ποτέ μισό αρχείο.
+  - Το `uninstall.php` σβήνει μόνο τα αρχεία που ταιριάζουν στο pattern (και τα δύο guard αρχεία), και τον φάκελο μόνο αν έμεινε άδειος. Τα αρχεία-πηγή του καταστήματος δεν αγγίζονται ποτέ.
+- **Εργασίες στο παρασκήνιο:** Action Scheduler του WooCommerce με group το slug, αλλιώς WP-Cron· το `uninstall.php` τις ακυρώνει και στα δύο.
 - **Παραγωγικά δεδομένα** (π.χ. κείμενα προϊόντων που άλλαξε το SF) **δεν** επαναφέρονται στο uninstall. Το readme το λέει ρητά.
 - **Δεδομένα που είναι αρχείο του καταστήματος** (νέο, από το Easy Withdrawal): ό,τι δήλωσε ή αποδέχτηκε ο πελάτης (π.χ. δηλώσεις υπαναχώρησης, συναίνεση στο checkout) μένει στο order meta μετά το uninstall και φεύγει μαζί με την παραγγελία. Το uninstall σβήνει μόνο ρυθμίσεις, transients και σημαίες προϊόντων. Η εξαίρεση γράφεται στο docblock του bootstrap, στο `uninstall.php` και στο readme.
 
@@ -173,7 +186,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Τρία σημεία σε κάθε έκδοση:** η έκδοση αλλάζει μαζί στο header, στη σταθερά `{P}_VERSION` και στο `Stable tag` του readme.
 - **Stable:** όταν ο Chris πει «stable», βγαίνει το τικ «pre-release» από το release στο GitHub. Το workflow ξαναφτιάχνει τότε το `updates.json` (§16) και τα sites στο κανάλι Stable βλέπουν την έκδοση.
 - **Release workflow** (`.github/workflows/release.yml`):
-  - Κωδικός ανά plugin: rs, sp, sf, nm, tp, sh, pf, ew. Ο κωδικός είναι **πάντα δύο πεζά γράμματα**, γιατί ο updater (§16) δέχεται μόνο tags `nox-[a-z]{2}-<version>`. Το prefix του κώδικα μπορεί να είναι μεγαλύτερο (Shop Filters: `SHF_`, κωδικός `sh`· Product Formats: `PFM_`, κωδικός `pf`· Easy Withdrawal: `EWD_`, κωδικός `ew`).
+  - Κωδικός ανά plugin: rs, sp, sf, nm, tp, sh, pf, ew, bp. Ο κωδικός είναι **πάντα δύο πεζά γράμματα**, γιατί ο updater (§16) δέχεται μόνο tags `nox-[a-z]{2}-<version>`. Το prefix του κώδικα μπορεί να είναι μεγαλύτερο (Shop Filters: `SHF_`, κωδικός `sh`· Product Formats: `PFM_`, κωδικός `pf`· Easy Withdrawal: `EWD_`, κωδικός `ew`· Book Preview: `BPV_`, κωδικός `bp`).
   - Tag `nox-<code>-<version>`, zip `<slug>.zip` με τον φάκελο στη ρίζα.
   - Βγαίνει ως pre-release (beta) μέχρι να δοκιμαστεί.
   - Τα plugins στη λίστα `AUTO` βγαίνουν αυτόματα με το merge στο main.
@@ -225,6 +238,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
     - Απλό κείμενο με όριο μήκους, `sanitize_text_field` στην αποθήκευση και `esc_html` στην έξοδο. Ένα φίλτρο (`{p}_…_text`) επιτρέπει αλλαγές από κώδικα (π.χ. WPML).
     - Ρυθμίσεις που δεν εξαρτώνται από το θέμα (π.χ. ετικέτες τιμής) αποθηκεύονται έξω από τα μπλοκ ανά θέμα και ισχύουν και σε block themes, όταν περνούν από φίλτρα του WooCommerce που τρέχουν σε κάθε θέμα.
     - Τιμές, παραγγελίες, emails, τιμολόγια, feeds και schema κρατούν πάντα την πραγματική τιμή: το κείμενο είναι μόνο για την προβολή.
+18. **Βαριές βιβλιοθήκες στο front end** (νέο, από το Book Preview): η σελίδα φορτώνει μόνο ένα μικρό script· η βιβλιοθήκη (π.χ. ο viewer PDF.js, ~1 MB) φορτώνεται με `import()` στην πρώτη ενέργεια του επισκέπτη (κλικ), από τον φάκελο `assets/vendor/` του plugin (§10). Αρχεία ES module σερβίρονται με κατάληξη `.js`, γιατί πολλοί servers στέλνουν το `.mjs` με λάθος MIME type. Αν η φόρτωση αποτύχει, ο επισκέπτης βλέπει μήνυμα και το υπόλοιπο της σελίδας δεν επηρεάζεται.
 
 ## §15 Τρόπος εργασίας (Chris ↔ Claude)
 
@@ -244,7 +258,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Αλλαγή στο Core:** ανεβαίνει το κλειδί έκδοσης στο `loader.php`, συγχρονίζονται όλα τα αντίγραφα και βγαίνει νέα έκδοση σε **όλα** τα plugins.
 - **Εξαίρεση: αλλαγή μόνο στον κατάλογο** (νέο plugin στη σουίτα). Το κλειδί έκδοσης ανεβαίνει και τα αντίγραφα συγχρονίζονται, αλλά τα άλλα plugins **δεν** βγάζουν νέα έκδοση γι' αυτό: το νέο plugin φέρνει το νεότερο Core στα sites όπου εγκαθίσταται, και τα υπόλοιπα το παίρνουν με την επόμενη έκδοσή τους. Μέχρι τότε, ένα site χωρίς το νέο plugin απλώς δεν το βλέπει στο hub.
 - **Κλάσεις:** `Noxpress_Core` (κατάλογος σουίτας, μενού §8, γλώσσα με domain `noxpress`), `Noxpress_Updater`, `Noxpress_Hub`. CSS με prefix `nx-` (`assets/hub.css`).
-- **Κατάλογος:** RS, SP, SF, TP, Shop Filters (από το Core 1.0.2), Product Formats (από το Core 1.0.3), Easy Withdrawal (από το Core 1.0.4, με την ίδια εξαίρεση: χωρίς νέες εκδόσεις στα άλλα plugins). Το Data Migrator μπαίνει όταν διορθωθεί. Νέο plugin = νέα γραμμή στο `Noxpress_Core::catalog()` και στο `AUTO` του workflow.
+- **Κατάλογος:** RS, SP, SF, TP, Shop Filters (από το Core 1.0.2), Product Formats (από το Core 1.0.3), Easy Withdrawal (από το Core 1.0.4, με την ίδια εξαίρεση: χωρίς νέες εκδόσεις στα άλλα plugins), Book Preview (από το Core 1.1.1, με την ίδια εξαίρεση). Το Data Migrator μπαίνει όταν διορθωθεί. Νέο plugin = νέα γραμμή στο `Noxpress_Core::catalog()` και στο `AUTO` του workflow.
 - **Hub (σελίδα `noxpress`):**
   - Πίνακας με όλη τη σουίτα: κατάσταση (ενεργό / ανενεργό / δεν είναι εγκατεστημένο), εγκατεστημένη και διαθέσιμη έκδοση, badge beta.
   - Ενέργειες του ίδιου του WordPress: Ενημέρωση (`update.php?action=upgrade-plugin`), Εγκατάσταση (`install-plugin`, μέσω `plugins_api`), Ενεργοποίηση, Αλλαγές (popup λεπτομερειών), διακόπτης αυτόματων ενημερώσεων.
@@ -253,6 +267,9 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Ενημερώσεις:**
   - Πηγή: `https://noxpress.tech/updates.json`, που γράφει το workflow. Για κάθε plugin: `stable` (νεότερο χωρίς pre-release) και `beta` (νεότερο οποιοδήποτε), με `version`, `zip`, `sha256`, `signature`, `requires_wp`, `requires_php`, `tested_wp`, `published`, `changelog`.
   - Κανάλι: site option `noxpress_channel`, προεπιλογή **Stable**. Στο Beta ισχύει το νεότερο από beta και stable. Υποβάθμιση δεν προτείνεται ποτέ.
+  - **Άλλο κανάλι:** όταν το κανάλι που δεν ακολουθεί το site έχει νεότερη έκδοση (στην πράξη: νεότερη beta σε site με Stable), το hub δείχνει badge «Νεότερη beta: X», πλαίσιο με «Μετάβαση στο Beta για όλα» και προειδοποίηση για live sites, και στη γραμμή του plugin «Εγκατάσταση beta» (με confirm), «Αλλαγές beta» και «Απόκρυψη για αυτή την έκδοση». Στο μενού Noxpress μπαίνει μετρητής (μόνο για `update_plugins`, μόνο εγκατεστημένα plugins, μόνο από την cache, χωρίς αίτημα δικτύου).
+  - «Εγκατάσταση beta» = το συνηθισμένο `update.php` / `install-plugin` του WordPress με `noxpress_pick=beta`: μόνο σε εκείνο το αίτημα και μόνο για εκείνο το plugin, το Core δίνει τη beta στο `update_plugins` (κατά την ανάγνωση, δεν αποθηκεύεται) και στο `plugins_api`. Το κανάλι δεν αλλάζει, το nonce και το capability τα ελέγχει το WordPress, το πακέτο ελέγχεται κανονικά (sha256 + υπογραφή). Υποβάθμιση δεν προτείνεται ποτέ.
+  - Απόκρυψη: user meta `noxpress_hidden` (slug → έκδοση), POST με PRG (§11). Η ειδοποίηση ξαναβγαίνει μόνο με νεότερη έκδοση.
   - Το Core γεμίζει το `update_plugins` transient στο `pre_set_site_transient_update_plugins` (σβήνει και κάθε ξένη εγγραφή για τα slugs μας). Οι αυτόματες ενημερώσεις μένουν στον διακόπτη του WordPress, κλειστές από προεπιλογή.
   - Λεπτομέρειες plugin (`plugins_api`, για το popup «Αλλαγές» και την εγκατάσταση): το Core απαντά στην προτεραιότητα 10 και ξαναβάζει τα δικά του στοιχεία στο τέλος του `plugins_api` και του `plugins_api_result` (`PHP_INT_MAX`), γιατί άλλα plugins μπορεί να τα αντικαταστήσουν (π.χ. με το «Plugin not found» του WordPress.org).
   - Αιτήματα μόνο με `wp_safe_remote_get`, timeout 10 s, cache 12 ώρες (1 ώρα μετά από αποτυχία) στο site transient `noxpress_manifest`. Ποτέ σε αίτηση επισκέπτη.
@@ -260,7 +277,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Δεκτά μόνο zip από `https://github.com/koulaxizis/noxpress/releases/download/nox-<code>-<version>/<slug>.zip`, με version σε μορφή semver.
   - Στο `upgrader_pre_download` το Core κατεβάζει το πακέτο, ελέγχει το `sha256` και την υπογραφή Ed25519 του μηνύματος `noxpress|<slug>|<version>|<sha256>` με το `Noxpress_Updater::PUBLIC_KEY`. Αποτυχία = ακύρωση εγκατάστασης.
   - Το ιδιωτικό κλειδί υπάρχει **μόνο** στο secret `NOXPRESS_SIGNING_KEY` του repo. Το workflow ελέγχει ότι ταιριάζει με το δημόσιο κλειδί του κώδικα. Αλλαγή κλειδιού = νέα έκδοση του Core σε όλα τα plugins, πριν αλλάξει το secret.
-- **Δεδομένα (§12):** `noxpress_channel`, `noxpress_checked` (site options), `noxpress_manifest` (site transient), `noxpress_hub_msg_{uid}` (transient). Τα σβήνει το `uninstall.php` όποιου plugin φύγει **τελευταίο** από τη σουίτα.
+- **Δεδομένα (§12):** `noxpress_channel`, `noxpress_checked` (site options), `noxpress_manifest` (site transient), `noxpress_hub_msg_{uid}` (transient), `noxpress_hidden` (user meta). Τα σβήνει το `uninstall.php` όποιου plugin φύγει **τελευταίο** από τη σουίτα.
 - **Πρώτη εγκατάσταση:** εκδόσεις πριν από το Core (RS ≤ 1.7.0, SP ≤ 1.3.0, SF ≤ 1.1.0, TP 1.0.0) δεν έχουν updater. Η πρώτη έκδοση με Core ανεβαίνει με το χέρι μία φορά.
 
 ## §17 Μετρητής λήψεων στο site (νέο, 1.3)

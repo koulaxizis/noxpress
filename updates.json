@@ -2,41 +2,41 @@
   "plugins": {
     "easy-withdrawal": {
       "beta": {
-        "changelog": "* Initial release.\n* Withdrawal form `[nox_withdrawal]` for customers and guests: order lookup, products and quantities, review with \"Confirm withdrawal\", receipt page.\n* Immediate recording with date and time, receipt to the order's billing email, signed tokens between steps, rate limit, honeypot, no page cache.\n* Links in My Account, customer order emails and the thank-you page; optional footer link.\n* Withdrawal window from order creation until completion + delivery days + withdrawal days; virtual items from payment.\n* Exclusions: personalised products, categories, products, digital content with checkout consent (classic and block checkout).\n* Admin: request list with filters, search, paging and CSV; request detail with statuses, notes, history and refund pre-fill; order metabox and notes.\n* WooCommerce emails: receipt, store notice, status change, each customer email in the customer's language.\n* Test mode, EWD_DISABLE, HPOS compatible, Greek / English.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.0.4).",
-        "published": "2026-10-10",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4435610248d06395aa5d8d4867f3b35f6e2da8ec9a0057ab583089086c98ec85",
-        "signature": "lPopi2+QyBEvwdsfvSNNbRE3mumUVsLXBD6FjdNfyrrn3HkjFdz9NMYoH/uuQw4nMHYpbU5GCbDMmEJTfTpNBA==",
+        "sha256": "e6bf50670a7cb20970960d456cf32c6bff37c5e90001d2b72d881b108c2ef22a",
+        "signature": "zn04THs9pyV7O8pdzBDvN+BSv2KnWKJlisJi3ehUtE3OAKgCvri2qIsuLHzdL8NftBY3qWtA2i+HpKAzVCyAAg==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.0.0/easy-withdrawal.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.1.0/easy-withdrawal.zip"
       }
     },
     "product-formats": {
       "beta": {
-        "changelog": "* Initial release.\n* Works: hidden taxonomy, one format and an optional subtitle per product, precomputed member list, cache purge for every product of a changed work.\n* Formats: five built-in formats plus custom ones, Greek and English labels, slug suffixes and categories, drag-and-drop order.\n* Suggestions from slugs, normalised titles and upsells, with confidence, editing, accept, reject and bulk accept.\n* \"Formats\" tab in the product data panel and a works screen (search, edit, add, merge, delete).\n* \"Available formats\" block with label, price and link: below the price, below add to cart, above the tabs, or by shortcode; classic themes, Astra hooks and block themes.\n* Optional \"Also: …\" line in product lists; optional front-end hiding of upsells.\n* Upsell cleanup with preview, batches, snapshots and restore.\n* Test mode, PFM_DISABLE, backup / import, public API (`pfm_get_work`, `pfm_formats` filter).\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.0.3).",
-        "published": "2026-10-10",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b4ac00bc7afbd4e9ce87976e7ae0bcffdc499063b04b1336681d41bf353ad0de",
-        "signature": "gorqM5ziDKKrOoCNAeM9cjkhy+qY9DXFnvkKRGqMF2KQGkeK2kuVYJD4ZDB4cJLZpjpVjh/9JkykQNyHDjRPAA==",
+        "sha256": "3eb18a5213125c55dd2bfd1762c62f6515a958d295bc26d9f9578c9a923f52a5",
+        "signature": "YEBYJoIA7umh9m5lI+66U5YzjoNSVzEk60OumPXIeC2UtOvMYb+sJ3/Se3mP+13lVQIrJSAj3A371GlnHON3Dw==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.0.0/product-formats.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.1.0/product-formats.zip"
       }
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling Revenue Splitter keeps the shared Noxpress data (update channel, hub notices) and the language choice (rs_lang) while Shop Filters is still installed.",
-        "published": "2026-10-10",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "988df2fb2badc9b1b38ba7d03304e09049ea1f4fb29a431c4a1c87243bf35973",
-        "signature": "fH2QVQErisa5Ox/xA3U1Xz0EM5Gc1HsWz9DTy2dySRRYcHuy8WX23RM9alHi0K7/Rh1i/2ZSsH/ep5ZlMs6WBA==",
+        "sha256": "2967dd01ab3f9697e44d9e2b0c6496d8b0811b265d81248f56be907f77be135b",
+        "signature": "6asDYGfrRt+RXq1DvRC6ufjf4YDPEyQzmxJfp41xgHPCqvMLolRYq9pLvAnPM0rUyVEthdP5dwwXlKwunQFeCg==",
         "tested_wp": "6.8",
-        "version": "1.8.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.8.2/revenue-splitter.zip"
+        "version": "1.9.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.0/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -52,54 +52,54 @@
     },
     "shop-filters": {
       "beta": {
-        "changelog": "* Initial release.\n* Filters: category tree (any depth, open / close per parent), attributes with counts, price slider without jQuery UI; collapsible filters, hidden or dimmed empty options, active filter tags, \"Clear all\".\n* Value groups per attribute, many-to-many, with suggestions from ranges and keywords, an ignore list and a choice for values in no group.\n* Filter sets with drag-and-drop order and a set per product category.\n* Counts from WooCommerce's attributes lookup table (stock per variation), fallback to product terms; object cache, no database writes on visitor requests.\n* Clean links that work without JavaScript; noindex and canonical on filtered pages; nofollow filter links.\n* Theme-proof markup and CSS; one small CSS and JS file, no external libraries.\n* Apply mode (immediate, button, or button on narrow screens), test mode, SHF_DISABLE, backup / import, classic widget and shortcode.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.0.2).",
-        "published": "2026-10-10",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "da65ed140fe160afa1e877276a9dd4e4a5290a7de9020eac256cf51df6a6ec72",
-        "signature": "qmOYqStjMZ9R70fhZRZaLBwKh7x+56xWEF4g+9h8XHomYuAjJs3DMVSeBB+TOCfg2tmJuYaNdfd5XTNS5akQBA==",
+        "sha256": "fd0abcda14ead2f05fbb8e5000a0cb120699b6f71b63c9c621c17993e7d72099",
+        "signature": "MGc9ELrWTj2syZIsHWUXwh4uPiKKRPSittXCRssPVYDHx6I3e7JKaUCPaLKWWgk6Wj5bChS9VbA+thOWc3PpDw==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.0.0/shop-filters.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.1.0/shop-filters.zip"
       }
     },
     "smart-formatter": {
       "beta": {
-        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.",
-        "published": "2026-10-10",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "965970432e831d93cbbfe7f3d6d9d8e1ebb6b7f5c56889141a4e4442a00949fc",
-        "signature": "JwIo07XGtrt13Gc7L9pbnMghEScbxb5CmaPqm2wlnhgRbV5iWGNyVh8UIPUxMU/C+Bqc7e7b0bMqSkedje1WAw==",
+        "sha256": "fca000461375a73b3af673557299cd37d3790508a94398a09488b16e1f0e58eb",
+        "signature": "0UWl9AtMDLTFhyFuSh8bYXR9q8Bsy3/zkzmFWA8+UJcDrC3Qlejv+HOsqQMoQQsMvhdoI/EaAAXUTaugXCf1DA==",
         "tested_wp": "6.8",
-        "version": "1.2.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.2.2/smart-formatter.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.3.0/smart-formatter.zip"
       }
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.",
-        "published": "2026-10-10",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "689e8eb4c827fe5a620b0f5c3920548eb6062f5feb96318b272d63a692fb9574",
-        "signature": "fAE4RWyqUfg6VKXvh7XLtRcDSHeNBxjIvxRfXGQTQWe10ROsQUw9LrkKIAUbeVgPSglkwnKrztWRVVc/rffmBg==",
+        "sha256": "980638bd612fe78573a4b27d308cb6090400efc3db0b1030d12ad0ca72f83db6",
+        "signature": "NdSrDnhtp5Zd447bogXjauQzoYaJW7TFy4N7iGHi2mQZP8B6d9QzW0V/TzoFV8I3s1/NK9rR7tB/kxoGI5ckCg==",
         "tested_wp": "6.8",
-        "version": "1.4.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.4.2/store-pulse.zip"
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.5.0/store-pulse.zip"
       }
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: price labels (Prices tab). Products with price 0 show \"Free\" (your own text) instead of 0,00 € on product pages, lists, related products, up-sells, cross-sells, widgets and product blocks, and on each cart, mini cart and checkout line. The order subtotal and total stay numbers.\n* New: labels for products without a price, per product category (with subcategories, first matching rule wins), plus a general text for the rest.\n* New: label texts in Greek and English, with the language chosen in the plugin (automatic from the site language, Greek or English). Developers can change a text with the `tp_price_label_text` filter.\n* Price labels work on block themes too, follow the master switch, test mode and `TP_DISABLE`, run on the cart's AJAX requests, and never change orders, emails, invoices, feeds or the price schema. They are included in the settings backup.\n* Changed: on block themes the Theme Patcher page shows the Prices tab (the only feature that applies there).\n* New: Product Formats and Easy Withdrawal join the Noxpress suite: the hub lists them and can install them (Noxpress Core 1.0.4).\n* Fix: uninstalling this plugin keeps the shared Noxpress data while Product Formats or Easy Withdrawal is still installed.",
+        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
         "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "815bb967fb562bfb77832d20131f67a6a7205adff9979cfaa70441e9f3461fd8",
-        "signature": "jvn7F/824UoS1lCWxDmPt4KiJRXwwA0XB6bT4HyBWgSyJuFe/2H7mB6jqv2yG7dRQQT6ZFiMpw8bvG3gPqW6DQ==",
+        "sha256": "785a18256239ec77306655792419b9a3a27380e8d2f0a582b10d76efbfbda066",
+        "signature": "Lqz7PwwSR7m4lI3GgNw28+dv3sQcheUW69WABHzd0tG8NQ4gTDk+S2kkW44X7wSw2BrM4+CFRSXHIaovOrVFBw==",
         "tested_wp": "6.8",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.2.0/theme-patcher.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.3.0/theme-patcher.zip"
       }
     }
   }

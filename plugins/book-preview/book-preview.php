@@ -51,7 +51,9 @@
  *
  * Deviations from the Bible: the PDF reader and writer are instances, not
  * static classes (several files may be open in one request). Third-party
- * code: PDF.js (Apache-2.0) in assets/vendor/pdfjs, see LICENSES.md.
+ * code: PDF.js (Apache-2.0) in assets/vendor/pdfjs, unchanged but for the
+ * .mjs → .js rename; the no-WebAssembly fallbacks and the scripting sandbox
+ * are left out (see LICENSES.md).
  */
 
 defined( 'ABSPATH' ) || exit;

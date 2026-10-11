@@ -216,3 +216,13 @@ a.nx-kofi {
 a.nx-kofi:hover { background: #8263ff; color: #ffffff; }
 
 .nx-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+/* Newer release in the other channel (§16). */
+.nx-other { margin: 0 0 18px; border-color: rgba(224, 168, 79, 0.45); }
+.nx-other p { margin: 0 0 8px; }
+.nx-other .nx-badge { margin-right: 6px; }
+.nx-small-inline { font-size: 12px; margin-left: 8px; }
+.nx-other-badge { margin-top: 4px; }
+.nx-actions .nx-beta-button { border-color: #e0a84f !important; color: #f5c97e !important; background: transparent !important; }
+.nx-hide-form { display: inline; margin: 0; }
+.nx-wrap .button-link.nx-hide { color: var(--nx-muted); font-size: 12px; text-decoration: underline; }

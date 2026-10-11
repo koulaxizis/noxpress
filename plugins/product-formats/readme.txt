@@ -5,7 +5,7 @@ Tags: woocommerce, product formats, ebook, audiobook, linked products
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -77,6 +77,12 @@ The product's own price HTML, as WooCommerce (and plugins that change it) prints
 The plugin's options, works, product meta and transients are removed, including the upsell snapshots. **Upsells removed by the cleanup are not restored on uninstall**: restore them from the Upsells tab first if you want them back. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
+* New: "Install beta" for a single plugin, without moving the whole suite to Beta, or "Switch everything to Beta". Every package is still checked with sha256 and its signature.
+* New: "Hide for this version" per user; the notice comes back with a newer version.
+* Changed: Noxpress Core 1.1.0.
 
 = 1.0.0 =
 * Initial release.
