@@ -97,4 +97,4 @@ Everything the plugin created is removed: its options, product meta, background 
 * "Read a sample" button below the short description, below add to cart, by shortcode or block; classic themes, Astra hooks and block themes.
 * Full-screen PDF.js viewer (bundled, loaded on the first click) with lazy pages, zoom and an optional "Keep reading" card.
 * Greek and English visitor texts, test mode, BPV_DISABLE, backup / import, server check.
-* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.1).
+* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.2).

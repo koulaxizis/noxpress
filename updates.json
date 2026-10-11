@@ -50,6 +50,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.5.0/revenue-splitter.zip"
       }
     },
+    "shipping-notes": {
+      "beta": {
+        "changelog": "* Initial release.\n* Free shipping progress bar in the classic cart, mini-cart and checkout and in the Cart and Checkout blocks; threshold from the WooCommerce shipping zones or fixed.\n* Delivery time on the product page per shipping method, with preparation days per store, category and product, backorders, pre-orders, cut-off time, Saturday delivery and holidays (Greek holidays button).\n* Optional dates and cut-off countdown computed in the browser for page-cache safety.\n* Shortcodes `[nox_free_shipping]`, `[nox_delivery]` and two blocks.\n* Editable Greek / English texts, preview tab, settings export / import.\n* Test mode, SHN_DISABLE, HPOS and Cart / Checkout blocks compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.1).",
+        "published": "2026-10-11",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "06b4bdd58719afecdfa0aa3e276ef39d2d35e6a80409e309e5ce833e783155b9",
+        "signature": "hYF9QH+DfN6065Ya6vmOOBDQrIadowOmSEn9UsGsLz7zpsR61gloqPxYlJuLbO9NsDJMkvkyI4YzSVmo0caxDQ==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.0.0/shipping-notes.zip"
+      }
+    },
     "shop-filters": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",

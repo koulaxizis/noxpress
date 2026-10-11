@@ -532,6 +532,25 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="shipping-notes">
+		<h2><a href="#shipping-notes">Shipping Notes</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="sn_desc">Two messages for your customers, without third-party plugins: how much is left for free shipping, with a progress bar, in the cart, mini-cart and checkout, and how many business days delivery takes on the product page.</p>
+		<ul>
+			<li data-i18n="sn_li1">Free shipping threshold read from your WooCommerce shipping zones (or a fixed amount), counted like WooCommerce counts it: coupons, tax display, “won” confirmed by the method itself</li>
+			<li data-i18n="sn_li2">Progress bar with empty, remaining and won states in the classic cart, mini-cart and checkout and in the Cart and Checkout blocks; refreshes with WooCommerce’s own fragments and Store API</li>
+			<li data-i18n="sn_li3">Delivery time per shipping method (e.g. BOX NOW, ACS) plus preparation days per store, category or product; backorders and pre-orders</li>
+			<li data-i18n="sn_li4">Business-day calendar with cut-off time, Saturday delivery and holidays; one button for the Greek holidays, Orthodox Easter included</li>
+			<li data-i18n="sn_li5">Optional dates and “order within” countdown computed in the browser, so page caches stay correct; shortcodes and blocks for any page</li>
+			<li data-i18n="sn_li6">Safe by design: off by default, test mode for shop managers, SHN_DISABLE emergency switch; no cookies, no external calls; Greek and English texts</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.0.0/shipping-notes.zip" rel="nofollow noopener" data-i18n="sn_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/shipping-notes" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 	<article class="card" id="book-preview">
 		<h2><a href="#book-preview">Book Preview</a></h2>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
@@ -677,6 +696,14 @@ footer .heart { color: var(--accent-bright); }
 		ew_li6: 'Three WooCommerce emails with the store’s template; no custom order statuses, so revenue reports stay correct; HPOS compatible',
 		ew_li7: 'Safe by design: test mode for shop managers, EWD_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
 		ew_download: 'Download v1.1.0 (.zip)',
+		sn_desc: 'Two messages for your customers, without third-party plugins: how much is left for free shipping, with a progress bar, in the cart, mini-cart and checkout, and how many business days delivery takes on the product page.',
+		sn_li1: 'Free shipping threshold read from your WooCommerce shipping zones (or a fixed amount), counted like WooCommerce counts it: coupons, tax display, “won” confirmed by the method itself',
+		sn_li2: 'Progress bar with empty, remaining and won states in the classic cart, mini-cart and checkout and in the Cart and Checkout blocks; refreshes with WooCommerce’s own fragments and Store API',
+		sn_li3: 'Delivery time per shipping method (e.g. BOX NOW, ACS) plus preparation days per store, category or product; backorders and pre-orders',
+		sn_li4: 'Business-day calendar with cut-off time, Saturday delivery and holidays; one button for the Greek holidays, Orthodox Easter included',
+		sn_li5: 'Optional dates and “order within” countdown computed in the browser, so page caches stay correct; shortcodes and blocks for any page',
+		sn_li6: 'Safe by design: off by default, test mode for shop managers, SHN_DISABLE emergency switch; no cookies, no external calls; Greek and English texts',
+		sn_download: 'Download v1.0.0 (.zip)',
 		bp_desc: 'A book sample on the product page: the server builds a separate PDF with only the pages you choose, and visitors read it in a full-screen viewer. The full PDF never reaches the browser.',
 		bp_li1: 'Per product: the PDF from the downloadable files or the media library and a page list such as 1-12, 20, 35-40; clear messages for every error',
 		bp_li2: 'Own pure-PHP PDF engine for files from any layout app (PDF 1.5+ compressed cross-references, repair of damaged files); unused images and fonts left out; qpdf and Ghostscript as automatic fallbacks',
@@ -791,6 +818,14 @@ footer .heart { color: var(--accent-bright); }
 		ew_li6: 'Τρία email του WooCommerce με το πρότυπο του καταστήματος· χωρίς δικές του καταστάσεις παραγγελίας, ώστε οι αναφορές εσόδων να μένουν σωστές· συμβατό με HPOS',
 		ew_li7: 'Ασφαλές εκ σχεδιασμού: λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης EWD_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ew_download: 'Λήψη v1.1.0 (.zip)',
+		sn_desc: 'Δύο μηνύματα για τον πελάτη, χωρίς plugins τρίτων: πόσα απομένουν για δωρεάν αποστολή, με μπάρα προόδου, σε καλάθι, mini-cart και ταμείο, και σε πόσες εργάσιμες γίνεται η παράδοση στη σελίδα προϊόντος.',
+		sn_li1: 'Όριο δωρεάν αποστολής από τις ζώνες αποστολής του WooCommerce (ή σταθερό ποσό), μετρημένο όπως το μετράει το WooCommerce: κουπόνια, εμφάνιση ΦΠΑ, το «κερδίσατε» επιβεβαιώνεται από την ίδια τη μέθοδο',
+		sn_li2: 'Μπάρα προόδου σε τρεις καταστάσεις (άδειο, απομένουν, κερδίσατε) σε κλασικό καλάθι, mini-cart και ταμείο και στα blocks Cart και Checkout· ανανεώνεται με τα fragments και το Store API του WooCommerce',
+		sn_li3: 'Χρόνος παράδοσης ανά μέθοδο αποστολής (π.χ. BOX NOW, ACS) συν ημέρες προετοιμασίας ανά κατάστημα, κατηγορία ή προϊόν· backorders και προπαραγγελίες',
+		sn_li4: 'Ημερολόγιο εργάσιμων με ώρα cut-off, παράδοση Σάββατο και αργίες· ένα κουμπί για τις ελληνικές αργίες, μαζί με το Πάσχα',
+		sn_li5: 'Προαιρετικά ημερομηνίες και αντίστροφη μέτρηση «παραγγείλτε μέσα σε», υπολογισμένες στον browser, ώστε να είναι σωστές και με page cache· shortcodes και blocks για κάθε σελίδα',
+		sn_li6: 'Ασφαλές εκ σχεδιασμού: ανενεργό από προεπιλογή, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης SHN_DISABLE· χωρίς cookies και εξωτερικές κλήσεις· κείμενα σε ελληνικά και αγγλικά',
+		sn_download: 'Λήψη v1.0.0 (.zip)',
 		bp_desc: 'Δείγμα βιβλίου στη σελίδα του προϊόντος: ο server φτιάχνει ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις, και ο επισκέπτης το διαβάζει σε viewer πλήρους οθόνης. Το πλήρες PDF δεν φτάνει ποτέ στον browser.',
 		bp_li1: 'Ανά προϊόν: το PDF από τα αρχεία για λήψη ή τη βιβλιοθήκη πολυμέσων και λίστα σελίδων όπως 1-12, 20, 35-40· καθαρά μηνύματα για κάθε σφάλμα',
 		bp_li2: 'Δική του μηχανή PDF σε καθαρή PHP για αρχεία από κάθε πρόγραμμα σελιδοποίησης (συμπιεσμένα cross-reference PDF 1.5+, επισκευή κατεστραμμένων αρχείων)· χωρίς τις εικόνες και τις γραμματοσειρές που δεν χρειάζονται· qpdf και Ghostscript ως αυτόματη εναλλακτική',
