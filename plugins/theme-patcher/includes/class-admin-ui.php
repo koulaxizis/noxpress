@@ -5,7 +5,8 @@
  * Pages (Bible §8, admin_menu priority 40): submenus of the shared
  * top-level 'noxpress', created by Noxpress Core (priority 5, Bible §16).
  *  - tp-theme-patcher  status + tabs: cards (detector, areas, page probe),
- *                      texts, page rules, theme, categories, checks
+ *                      texts, page rules, theme, categories, prices, checks
+ *                      (block themes: prices only)
  *  - tp-settings       master switch, test mode, backup & restore
  *
  * Security (Bible §11): every state change is a POST handled on
@@ -44,6 +45,7 @@ final class TP_Admin_UI {
 		'page'   => 'Σελίδα',
 		'theme'  => 'Ρυθμίσεις θέματος',
 		'cats'   => 'Κατηγορίες',
+		'prices' => 'Τιμές',
 		'checks' => 'Έλεγχοι',
 	);
 
@@ -180,6 +182,9 @@ final class TP_Admin_UI {
 	}
 
 	private static function current_tab(): string {
+		if ( ! self::theme_supported() ) {
+			return 'prices'; // Block themes: price labels are the only feature that applies.
+		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : 'cards';
 		return isset( self::TABS[ $tab ] ) ? $tab : 'cards';
@@ -205,9 +210,11 @@ final class TP_Admin_UI {
 
 			<?php
 			self::render_status();
-			if ( self::theme_supported() ) {
-				$tab = self::current_tab();
-				self::render_tabs( $tab );
+			$tab = self::current_tab();
+			self::render_tabs( $tab );
+			if ( 'prices' === $tab ) {
+				self::render_prices();
+			} else {
 				switch ( $tab ) {
 					case 'texts':
 						self::render_texts();
@@ -239,6 +246,9 @@ final class TP_Admin_UI {
 	private static function render_tabs( string $current ): void {
 		echo '<nav class="nav-tab-wrapper tp-tabs">';
 		foreach ( self::TABS as $slug => $label ) {
+			if ( 'prices' !== $slug && ! self::theme_supported() ) {
+				continue;
+			}
 			printf(
 				'<a href="%1$s" class="nav-tab%2$s">%3$s</a>',
 				esc_url( admin_url( 'admin.php?page=' . self::SLUG_MAIN . '&tab=' . $slug ) ),
@@ -286,7 +296,7 @@ final class TP_Admin_UI {
 			</p>
 
 			<?php if ( ! self::theme_supported() ) : ?>
-				<p class="tp-warn"><?php esc_html_e( 'Το ενεργό θέμα είναι block theme: οι κάρτες προϊόντων σχεδιάζονται από blocks του WooCommerce και δεν χρειάζονται διόρθωση. Το Theme Patcher μένει ανενεργό σε αυτό το θέμα.', 'theme-patcher' ); ?></p>
+				<p class="tp-warn"><?php esc_html_e( 'Το ενεργό θέμα είναι block theme: οι κάρτες προϊόντων σχεδιάζονται από blocks του WooCommerce και δεν χρειάζονται διόρθωση. Σε αυτό το θέμα ισχύουν μόνο οι ετικέτες τιμής.', 'theme-patcher' ); ?></p>
 			<?php endif; ?>
 
 			<?php foreach ( $theme['suspended'] as $id ) : ?>
@@ -927,6 +937,176 @@ final class TP_Admin_UI {
 		<?php
 	}
 
+	/* ---------- Tab: prices ---------- */
+
+	/** Product categories as a flat tree: term id => "— — Name (count)". */
+	private static function cat_options(): array {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'orderby'    => 'name',
+			)
+		);
+		$kids  = array();
+		foreach ( is_array( $terms ) ? $terms : array() as $t ) {
+			$kids[ (int) $t->parent ][] = $t;
+		}
+		$out  = array();
+		$walk = static function ( int $parent, int $depth ) use ( &$walk, &$out, $kids ) {
+			foreach ( isset( $kids[ $parent ] ) ? $kids[ $parent ] : array() as $t ) {
+				$out[ (int) $t->term_id ] = str_repeat( '— ', $depth ) . $t->name . ' (' . (int) $t->count . ')';
+				if ( $depth < 10 ) {
+					$walk( (int) $t->term_id, $depth + 1 );
+				}
+			}
+		};
+		$walk( 0, 0 );
+		return $out;
+	}
+
+	private static function render_prices(): void {
+		$p      = TP_Settings::prices();
+		$counts = TP_Prices::counts();
+		$cats   = self::cat_options();
+		$rules  = $p['rules'];
+		$free   = max( 0, min( self::NEW_FIX_ROWS, TP_Settings::MAX_PRICE_RULES - count( $rules ) ) );
+		for ( $i = 0; $i < $free; $i++ ) {
+			$rules[] = array(
+				'cat'      => 0,
+				'children' => true,
+				'el'       => '',
+				'en'       => '',
+			);
+		}
+		$langs = array(
+			'auto' => __( 'Αυτόματα (γλώσσα του site)', 'theme-patcher' ),
+			'el'   => __( 'Ελληνικά', 'theme-patcher' ),
+			'en'   => __( 'English', 'theme-patcher' ),
+		);
+		?>
+		<h2 class="tp-h2"><?php esc_html_e( 'Ετικέτες τιμής', 'theme-patcher' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Κείμενο στη θέση της τιμής για δωρεάν προϊόντα και για προϊόντα χωρίς τιμή. Ισχύουν για όλο το κατάστημα, με οποιοδήποτε θέμα. Οι τιμές των προϊόντων, οι παραγγελίες, τα emails, τα τιμολόγια και το schema δεν αλλάζουν.', 'theme-patcher' ); ?></p>
+		<p>
+			<?php
+			printf(
+				/* translators: 1: products with price 0, 2: products without a price, 3: of those, covered by a category rule */
+				esc_html__( 'Δημοσιευμένα προϊόντα: %1$d με τιμή 0, %2$d χωρίς τιμή (από αυτά, %3$d καλύπτονται από κανόνα κατηγορίας).', 'theme-patcher' ),
+				(int) $counts['zero'],
+				(int) $counts['empty'],
+				(int) $counts['covered']
+			);
+			?>
+		</p>
+		<?php if ( TP_Prices::uses_cart_blocks() ) : ?>
+			<p class="tp-warn"><?php esc_html_e( 'Το καλάθι ή το ταμείο χρησιμοποιεί τα blocks του WooCommerce. Αυτά δείχνουν τις τιμές με JavaScript, οπότε εκεί η τιμή 0 μένει 0,00 €. Οι ετικέτες ισχύουν στις υπόλοιπες σελίδες και στο mini-cart.', 'theme-patcher' ); ?></p>
+		<?php endif; ?>
+
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="tp_action" value="save_prices" />
+			<?php self::tab_field( 'prices' ); ?>
+
+			<h3 class="tp-h3"><?php esc_html_e( 'Προϊόντα με τιμή 0', 'theme-patcher' ); ?></h3>
+			<div class="tp-zone">
+				<label class="tp-check">
+					<input type="checkbox" name="tp_prices[zero]" value="1" <?php checked( $p['zero'] ); ?> />
+					<?php esc_html_e( 'Κείμενο αντί για 0,00 €', 'theme-patcher' ); ?>
+				</label>
+				<span class="tp-hint"><?php esc_html_e( 'Σελίδα προϊόντος, λίστες καταστήματος και κατηγοριών, σχετικά προϊόντα, up-sells, cross-sells, widgets. Ένα variable προϊόν αλλάζει μόνο όταν όλες οι παραλλαγές του κοστίζουν 0. Έκπτωση στο 0 δείχνει μόνο το κείμενο.', 'theme-patcher' ); ?></span>
+				<div class="tp-row">
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Ελληνικά', 'theme-patcher' ); ?></span>
+						<input type="text" class="regular-text" name="tp_prices[zero_text][el]" value="<?php echo esc_attr( $p['zero_text']['el'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Settings::MAX_LABEL_LEN ); ?>" placeholder="Δωρεάν" />
+					</label>
+					<label class="tp-field">
+						<span><?php esc_html_e( 'English', 'theme-patcher' ); ?></span>
+						<input type="text" class="regular-text" name="tp_prices[zero_text][en]" value="<?php echo esc_attr( $p['zero_text']['en'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Settings::MAX_LABEL_LEN ); ?>" placeholder="Free" />
+					</label>
+				</div>
+				<label class="tp-check">
+					<input type="checkbox" name="tp_prices[cart]" value="1" <?php checked( $p['cart'] ); ?> />
+					<?php esc_html_e( 'Και στο καλάθι, στο mini-cart και στο ταμείο', 'theme-patcher' ); ?>
+				</label>
+				<span class="tp-hint"><?php esc_html_e( 'Αλλάζουν η τιμή και το υποσύνολο κάθε γραμμής. Το υποσύνολο και το σύνολο της παραγγελίας μένουν αριθμοί (0,00 €).', 'theme-patcher' ); ?></span>
+			</div>
+
+			<h3 class="tp-h3"><?php esc_html_e( 'Προϊόντα χωρίς τιμή', 'theme-patcher' ); ?></h3>
+			<div class="tp-zone">
+				<label class="tp-check">
+					<input type="checkbox" name="tp_prices[empty]" value="1" <?php checked( $p['empty'] ); ?> />
+					<?php esc_html_e( 'Κείμενο εκεί όπου θα ήταν η τιμή', 'theme-patcher' ); ?>
+				</label>
+				<span class="tp-hint"><?php esc_html_e( 'Για προϊόντα χωρίς τιμή (δεν αγοράζονται, π.χ. μουσική για ακρόαση). Ισχύει ο πρώτος κανόνας του πίνακα που ταιριάζει σε μια κατηγορία του προϊόντος. Τα υπόλοιπα παίρνουν το γενικό κείμενο. Άδειο γενικό κείμενο = καμία ετικέτα.', 'theme-patcher' ); ?></span>
+				<div class="tp-row">
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Γενικό κείμενο, Ελληνικά', 'theme-patcher' ); ?></span>
+						<input type="text" class="regular-text" name="tp_prices[empty_text][el]" value="<?php echo esc_attr( $p['empty_text']['el'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Settings::MAX_LABEL_LEN ); ?>" />
+					</label>
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Γενικό κείμενο, English', 'theme-patcher' ); ?></span>
+						<input type="text" class="regular-text" name="tp_prices[empty_text][en]" value="<?php echo esc_attr( $p['empty_text']['en'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Settings::MAX_LABEL_LEN ); ?>" />
+					</label>
+				</div>
+			</div>
+
+			<table class="widefat striped tp-table tp-mt-8">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Σειρά', 'theme-patcher' ); ?></th>
+						<th><?php esc_html_e( 'Κατηγορία', 'theme-patcher' ); ?></th>
+						<th><?php esc_html_e( 'Και υποκατηγορίες', 'theme-patcher' ); ?></th>
+						<th><?php esc_html_e( 'Ελληνικά', 'theme-patcher' ); ?></th>
+						<th><?php esc_html_e( 'English', 'theme-patcher' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $rules as $i => $r ) : ?>
+						<?php $n = 'tp_prices[rules][' . $i . ']'; ?>
+						<tr>
+							<td><input type="number" min="1" max="999" class="small-text" name="<?php echo esc_attr( $n . '[order]' ); ?>" value="<?php echo $r['cat'] ? (int) $i + 1 : ''; ?>" /></td>
+							<td>
+								<select name="<?php echo esc_attr( $n . '[cat]' ); ?>">
+									<option value="0"><?php esc_html_e( '— Καμία —', 'theme-patcher' ); ?></option>
+									<?php foreach ( $cats as $tid => $label ) : ?>
+										<option value="<?php echo (int) $tid; ?>" <?php selected( (int) $r['cat'], (int) $tid ); ?>><?php echo esc_html( $label ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</td>
+							<td><input type="checkbox" name="<?php echo esc_attr( $n . '[children]' ); ?>" value="1" <?php checked( $r['children'] ); ?> /></td>
+							<td><input type="text" class="regular-text" name="<?php echo esc_attr( $n . '[el]' ); ?>" value="<?php echo esc_attr( $r['el'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Settings::MAX_LABEL_LEN ); ?>" placeholder="Δωρεάν ακρόαση" /></td>
+							<td><input type="text" class="regular-text" name="<?php echo esc_attr( $n . '[en]' ); ?>" value="<?php echo esc_attr( $r['en'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Settings::MAX_LABEL_LEN ); ?>" placeholder="Free listening" /></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p class="description tp-mt-8">
+				<?php
+				printf(
+					/* translators: %d: maximum number of rules */
+					esc_html__( 'Διάλεξε «— Καμία —» για να διαγράψεις έναν κανόνα. Η σειρά ορίζει ποιος κανόνας ισχύει όταν ένα προϊόν είναι σε πολλές κατηγορίες. Έως %d κανόνες. Μετά την αποθήκευση εμφανίζονται δύο νέες κενές γραμμές.', 'theme-patcher' ),
+					(int) TP_Settings::MAX_PRICE_RULES
+				);
+				?>
+			</p>
+
+			<h3 class="tp-h3"><?php esc_html_e( 'Γλώσσα των ετικετών', 'theme-patcher' ); ?></h3>
+			<div class="tp-zone">
+				<select name="tp_prices[lang]">
+					<?php foreach ( $langs as $k => $label ) : ?>
+						<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $p['lang'], $k ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<span class="tp-hint"><?php esc_html_e( 'Αυτόματα: ελληνικά όταν η γλώσσα του site είναι ελληνική, αλλιώς αγγλικά. Κενό αγγλικό κείμενο δείχνει το ελληνικό.', 'theme-patcher' ); ?></span>
+			</div>
+
+			<p class="tp-submit">
+				<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ετικετών', 'theme-patcher' ); ?></button>
+			</p>
+		</form>
+		<?php
+	}
+
 	/* ---------- Tab: checks ---------- */
 
 	private static function render_checks(): void {
@@ -1228,6 +1408,9 @@ final class TP_Admin_UI {
 			case 'save_cats':
 				$msgs = self::do_save_cats();
 				break;
+			case 'save_prices':
+				$msgs = self::do_save_prices();
+				break;
 			case 'rebuild_cats':
 				/* translators: %d: number of categories */
 				$msgs = array( self::msg( 'success', sprintf( __( 'Επιλέχθηκε εικόνα προϊόντος για %d κατηγορίες.', 'theme-patcher' ), TP_Categories::rebuild() ) ) );
@@ -1240,7 +1423,7 @@ final class TP_Admin_UI {
 		}
 
 		$s = TP_Settings::get();
-		if ( 0 === strpos( $action, 'save_' ) && 'save_settings' !== $action && empty( $s['enabled'] ) && TP_Settings::has_anything() ) {
+		if ( 0 === strpos( $action, 'save_' ) && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Το Theme Patcher είναι ακόμη ανενεργό: δοκίμασε με τη σάρωση σελίδας και ενεργοποίησέ το από τις Ρυθμίσεις.', 'theme-patcher' ) );
 		}
 
@@ -1421,6 +1604,53 @@ final class TP_Admin_UI {
 		if ( count( $clean['mods'] ) < count( $mods ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Κάποιες σταθερές τιμές δεν είναι έγκυρες (όνομα με γράμματα, αριθμούς, - και _) και αγνοήθηκαν.', 'theme-patcher' ) );
 		}
+		return $msgs;
+	}
+
+	/**
+	 * Price labels: rules sorted by their "order" field (rows without one
+	 * keep their place after the numbered ones), validated, then the
+	 * category map is rebuilt (§14.10).
+	 */
+	private static function do_save_prices(): array {
+		$raw   = self::posted_array( 'tp_prices' );
+		$rules = ( isset( $raw['rules'] ) && is_array( $raw['rules'] ) ) ? array_values( $raw['rules'] ) : array();
+		$keyed = array();
+		$blank = 0;
+		foreach ( $rules as $pos => $r ) {
+			if ( ! is_array( $r ) || empty( $r['cat'] ) ) {
+				continue;
+			}
+			if ( '' === trim( (string) ( isset( $r['el'] ) ? $r['el'] : '' ) ) && '' === trim( (string) ( isset( $r['en'] ) ? $r['en'] : '' ) ) ) {
+				++$blank;
+			}
+			$order   = isset( $r['order'] ) && is_numeric( $r['order'] ) && (int) $r['order'] > 0 ? (int) $r['order'] : 1000;
+			$keyed[] = array( $order, $pos, $r );
+		}
+		usort(
+			$keyed,
+			static function ( $a, $b ) {
+				return $a[0] === $b[0] ? $a[1] - $b[1] : $a[0] - $b[0];
+			}
+		);
+		$raw['rules'] = array_column( $keyed, 2 );
+		unset( $raw['map'] );
+
+		$clean        = TP_Settings::sanitize_prices( $raw );
+		$clean['map'] = TP_Prices::build_map( $clean['rules'] );
+
+		$s           = TP_Settings::get();
+		$s['prices'] = $clean;
+		TP_Settings::save( $s );
+
+		$msgs = array( self::msg( 'success', __( 'Οι ετικέτες τιμής αποθηκεύτηκαν.', 'theme-patcher' ) ) );
+		if ( $blank ) {
+			$msgs[] = self::msg( 'warning', __( 'Κανόνες χωρίς κείμενο αγνοήθηκαν.', 'theme-patcher' ) );
+		}
+		if ( count( $clean['rules'] ) + $blank < count( $keyed ) ) {
+			$msgs[] = self::msg( 'warning', __( 'Κάθε κατηγορία μπαίνει σε έναν μόνο κανόνα: οι επαναλήψεις αγνοήθηκαν.', 'theme-patcher' ) );
+		}
+		$msgs[] = self::msg( 'info', __( 'Αν το site έχει cache σελίδων (π.χ. WP Rocket), καθάρισέ το για να δουν οι επισκέπτες τις αλλαγές.', 'theme-patcher' ) );
 		return $msgs;
 	}
 
