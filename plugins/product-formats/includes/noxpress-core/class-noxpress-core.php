@@ -39,6 +39,7 @@ final class Noxpress_Core {
 		'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.' => 'Lean product filters for classic themes, with value groups for attributes.',
 		'Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».' => 'Links the formats of a work (print, e-book, audiobook, film) with an "Available formats" block.',
 		'Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.' => 'Withdrawal form for customers and guests, with a receipt and a request list.',
+		'Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.' => 'A book sample on the product page: a separate PDF with only the pages you choose.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -98,7 +99,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -144,6 +145,11 @@ final class Noxpress_Core {
 				'name' => 'Easy Withdrawal',
 				'desc' => __( 'Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.', 'noxpress' ),
 				'page' => 'ewd-requests',
+			),
+			'book-preview'     => array(
+				'name' => 'Book Preview',
+				'desc' => __( 'Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.', 'noxpress' ),
+				'page' => 'bpv-samples',
 			),
 		);
 	}

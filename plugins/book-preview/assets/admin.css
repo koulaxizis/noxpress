@@ -1,0 +1,477 @@
+/**
+ * Book Preview — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors bpv-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.bpv-wrap {
+	--bpv-bg: #101218;
+	--bpv-panel: #14161d;
+	--bpv-panel-2: #1d2029;
+	--bpv-input: #1a1d26;
+	--bpv-border: #2e3240;
+	--bpv-border-input: #3a3f52;
+	--bpv-row-border: #23262f;
+	--bpv-stripe: #181b23;
+	--bpv-hover: #1e212c;
+	--bpv-text: #eae8fa;
+	--bpv-heading: #f6f4ff;
+	--bpv-muted: #b7b2d6;
+	--bpv-link: #beb1ff;
+	--bpv-link-hover: #d4c9ff;
+	--bpv-accent: #6d4aff;
+	--bpv-accent-hover: #8263ff;
+	--bpv-warn: #f5c97e;
+	--bpv-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.bpv-wrap {
+	color-scheme: dark;
+	background: var(--bpv-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--bpv-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.bpv-wrap h1,
+.bpv-wrap h2 {
+	color: var(--bpv-heading);
+}
+
+.bpv-wrap a { color: var(--bpv-link); }
+.bpv-wrap a:hover { color: var(--bpv-link-hover); }
+
+.bpv-wrap .bpv-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--bpv-muted);
+	border-bottom: 1px solid var(--bpv-border);
+	padding-bottom: 6px;
+}
+
+.bpv-wrap .description,
+.bpv-wrap p.description,
+.bpv-wrap .bpv-hint {
+	color: var(--bpv-muted) !important;
+}
+
+.bpv-zone {
+	background: var(--bpv-panel);
+	border: 1px solid var(--bpv-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.bpv-wrap input[type="text"],
+.bpv-wrap input[type="url"],
+.bpv-wrap input[type="number"],
+.bpv-wrap textarea,
+.bpv-wrap select {
+	background-color: var(--bpv-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--bpv-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.bpv-wrap input::placeholder,
+.bpv-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.bpv-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.bpv-wrap input[type="file"] {
+	color: var(--bpv-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.bpv-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.bpv-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.bpv-wrap input[type="checkbox"],
+.bpv-wrap input[type="radio"] {
+	accent-color: var(--bpv-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.bpv-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.bpv-wrap .button:hover:not(:disabled) {
+	border-color: var(--bpv-accent) !important;
+	color: #ffffff !important;
+}
+
+.bpv-wrap .button-primary {
+	background: var(--bpv-accent) !important;
+	border-color: var(--bpv-accent) !important;
+	color: #ffffff !important;
+}
+
+.bpv-wrap .button-primary:hover:not(:disabled) {
+	background: var(--bpv-accent-hover) !important;
+}
+
+.bpv-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.bpv-submit { margin-top: 20px; }
+.bpv-inline-form { display: inline; margin-right: 10px; }
+.bpv-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.bpv-table,
+table.widefat.bpv-table {
+	background: var(--bpv-panel) !important;
+	border: 1px solid var(--bpv-border) !important;
+	border-radius: 6px;
+	color: var(--bpv-text) !important;
+	margin-top: 14px !important;
+}
+
+.bpv-table thead th,
+.bpv-table thead td {
+	background: var(--bpv-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.bpv-table tbody td,
+.bpv-table tbody th {
+	background: var(--bpv-panel) !important;
+	color: var(--bpv-text) !important;
+	border-bottom: 1px solid var(--bpv-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.bpv-table tbody tr:nth-child(2n) td,
+.bpv-table tbody tr:nth-child(2n) th {
+	background: var(--bpv-stripe) !important;
+}
+
+.bpv-table tbody tr:hover td,
+.bpv-table tbody tr:hover th {
+	background: var(--bpv-hover) !important;
+}
+
+.bpv-table td,
+.bpv-table th {
+	padding: 12px 14px;
+}
+
+.bpv-table td code {
+	background: transparent !important;
+	color: var(--bpv-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.bpv-table .bpv-empty {
+	color: var(--bpv-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.bpv-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.bpv-footer a { color: #beb1ff; text-decoration: none; }
+.bpv-footer a:hover { text-decoration: underline; }
+
+.bpv-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.bpv-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.bpv-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.bpv-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.bpv-muted { color: var(--bpv-muted) !important; }
+.bpv-warn { color: var(--bpv-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.bpv-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.bpv-wrap .bpv-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--bpv-heading);
+}
+
+.bpv-status p { margin: 0 0 8px; }
+.bpv-status p:last-child { margin-bottom: 0; }
+.bpv-status code,
+.bpv-wrap .description code,
+.bpv-wrap .bpv-hint code {
+	background: var(--bpv-panel-2);
+	color: var(--bpv-muted);
+	border: 1px solid var(--bpv-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.bpv-suspended { margin: 8px 0 0; }
+.bpv-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.bpv-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--bpv-border);
+	background: var(--bpv-panel-2);
+	color: var(--bpv-text);
+	white-space: nowrap;
+}
+.bpv-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.bpv-badge--muted { color: var(--bpv-muted); }
+.bpv-badge--warn { border-color: #6b5a33; color: var(--bpv-warn); }
+.bpv-badge--danger { border-color: #6b3a3a; color: var(--bpv-danger); }
+
+/* Area fieldsets. */
+.bpv-area {
+	background: var(--bpv-panel);
+	border: 1px solid var(--bpv-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.bpv-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--bpv-heading);
+}
+.bpv-row { margin: 4px 0 8px; }
+
+.bpv-details > summary {
+	cursor: pointer;
+	color: var(--bpv-link);
+	margin: 4px 0;
+}
+.bpv-details[open] > summary { margin-bottom: 12px; }
+
+.bpv-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.bpv-wrap .bpv-label {
+	display: block;
+	font-weight: 600;
+	color: var(--bpv-heading);
+	margin: 8px 0 6px;
+}
+.bpv-grid .bpv-label:first-child { margin-top: 0; }
+
+.bpv-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.bpv-field > span:first-child {
+	min-width: 150px;
+	color: var(--bpv-text);
+}
+.bpv-wrap .bpv-color { width: 96px; font-family: monospace; }
+.bpv-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--bpv-border-input);
+}
+
+.bpv-wrap .bpv-hint { display: block; font-size: 12px; margin-top: 4px; }
+.bpv-wrap td .bpv-hint { display: inline; }
+.bpv-table td.bpv-warn { color: var(--bpv-warn) !important; }
+
+/* Tabs of the main page. */
+.bpv-wrap .bpv-tabs {
+	border-bottom: 1px solid var(--bpv-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.bpv-wrap .bpv-tabs .nav-tab {
+	background: var(--bpv-panel);
+	border-color: var(--bpv-border);
+	color: var(--bpv-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.bpv-wrap .bpv-tabs .nav-tab:hover { color: var(--bpv-link-hover); background: var(--bpv-hover); }
+.bpv-wrap .bpv-tabs .nav-tab-active,
+.bpv-wrap .bpv-tabs .nav-tab-active:hover {
+	background: var(--bpv-bg);
+	border-bottom-color: var(--bpv-bg);
+	color: var(--bpv-heading);
+}
+
+/* One input per line (removal rules). */
+.bpv-wrap .bpv-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.bpv-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--bpv-border);
+	border-radius: 6px;
+	background: var(--bpv-panel-2);
+}
+.bpv-scroll .bpv-field { margin-bottom: 4px; }
+
+/* ===== Book Preview ===== */
+.bpv-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.bpv-wrap .bpv-toolbar select { max-width: 260px; }
+.bpv-table .bpv-col-narrow { width: 110px; }
+.bpv-table .bpv-error { color: var(--bpv-danger) !important; }
+
+/* Paging of the samples list. */
+.bpv-pages { margin: 12px 0 0; }
+.bpv-wrap .bpv-page {
+	display: inline-block;
+	min-width: 28px;
+	padding: 2px 8px;
+	margin: 0 4px 4px 0;
+	text-align: center;
+	text-decoration: none;
+	border: 1px solid var(--bpv-border);
+	border-radius: 4px;
+	background: var(--bpv-panel);
+}
+.bpv-wrap .bpv-page--current {
+	background: var(--bpv-accent);
+	border-color: var(--bpv-accent);
+	color: #ffffff;
+}
+
+/* Bulk run progress. */
+.bpv-progress {
+	height: 10px;
+	margin: 10px 0 0;
+	max-width: 420px;
+	background: var(--bpv-panel-2);
+	border: 1px solid var(--bpv-border);
+	border-radius: 999px;
+	overflow: hidden;
+}
+.bpv-progress[hidden] { display: none; }
+.bpv-progress__bar {
+	width: 0;
+	height: 100%;
+	background: var(--bpv-accent);
+	transition: width .3s ease;
+}
+.bpv-progress-text { margin: 6px 0 0; color: var(--bpv-muted); }
+.bpv-wrap .bpv-num { width: 80px; }
+.bpv-wrap .bpv-tool-ok { color: #9fe0b5; }
+.bpv-wrap .bpv-error { color: var(--bpv-danger) !important; }
+
+/* ===== Product screen box (light WordPress admin, not the dark panel) ===== */
+.bpv-box .bpv-box__label { display: block; font-weight: 600; margin: 0 0 4px; }
+.bpv-box .bpv-box__field { width: 100%; max-width: 100%; }
+.bpv-box .bpv-media { margin-top: 4px; }
+.bpv-box .bpv-box__status { border-top: 1px solid #dcdcde; margin-top: 10px; padding-top: 6px; }
+.bpv-box .bpv-box__status p { margin: 6px 0; }
+.bpv-box .bpv-box__actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bpv-box .bpv-box__actions .spinner { float: none; margin: 0; }
+.bpv-box .bpv-box-warn { color: #8a5a00; }
+.bpv-box .bpv-box-error { color: #b32d2e; font-weight: 600; }
+.bpv-box .bpv-badge {
+	display: inline-block;
+	padding: 0 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.8;
+	border: 1px solid #c3c4c7;
+}
+.bpv-box .bpv-badge--ok { border-color: #68de7c; background: #edfaef; color: #005c12; }
+.bpv-box .bpv-badge--warn { border-color: #f0c33c; background: #fcf9e8; color: #6b4c00; }
+.bpv-box .bpv-box__msg { font-weight: 600; }

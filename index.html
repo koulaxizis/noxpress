@@ -532,6 +532,26 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="book-preview">
+		<h2><a href="#book-preview">Book Preview</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="bp_desc">A book sample on the product page: the server builds a separate PDF with only the pages you choose, and visitors read it in a full-screen viewer. The full PDF never reaches the browser.</p>
+		<ul>
+			<li data-i18n="bp_li1">Per product: the PDF from the downloadable files or the media library and a page list such as 1-12, 20, 35-40; clear messages for every error</li>
+			<li data-i18n="bp_li2">Own pure-PHP PDF engine for files from any layout app (PDF 1.5+ compressed cross-references, repair of damaged files); unused images and fonts left out; qpdf and Ghostscript as automatic fallbacks</li>
+			<li data-i18n="bp_li3">«Read a sample» button below the short description or add to cart, shortcode and block; classic themes, Astra and block themes</li>
+			<li data-i18n="bp_li4">Bundled PDF.js viewer loaded on the first click: lazy pages, zoom, full screen, optional «Keep reading» card with a buy button</li>
+			<li data-i18n="bp_li5">Bulk creation per category (first N pages, skip K) with a progress bar; background rebuild when the PDF or the pages change</li>
+			<li data-i18n="bp_li6">No cookies, no external calls; Greek and English visitor texts; full cleanup on uninstall</li>
+			<li data-i18n="bp_li7">Safe by design: off until enabled, test mode for shop managers, BPV_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.0.0/book-preview.zip" rel="nofollow noopener" data-i18n="bp_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/book-preview" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
@@ -657,6 +677,15 @@ footer .heart { color: var(--accent-bright); }
 		ew_li6: 'Three WooCommerce emails with the store’s template; no custom order statuses, so revenue reports stay correct; HPOS compatible',
 		ew_li7: 'Safe by design: test mode for shop managers, EWD_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
 		ew_download: 'Download v1.0.0 (.zip)',
+		bp_desc: 'A book sample on the product page: the server builds a separate PDF with only the pages you choose, and visitors read it in a full-screen viewer. The full PDF never reaches the browser.',
+		bp_li1: 'Per product: the PDF from the downloadable files or the media library and a page list such as 1-12, 20, 35-40; clear messages for every error',
+		bp_li2: 'Own pure-PHP PDF engine for files from any layout app (PDF 1.5+ compressed cross-references, repair of damaged files); unused images and fonts left out; qpdf and Ghostscript as automatic fallbacks',
+		bp_li3: '«Read a sample» button below the short description or add to cart, shortcode and block; classic themes, Astra and block themes',
+		bp_li4: 'Bundled PDF.js viewer loaded on the first click: lazy pages, zoom, full screen, optional «Keep reading» card with a buy button',
+		bp_li5: 'Bulk creation per category (first N pages, skip K) with a progress bar; background rebuild when the PDF or the pages change',
+		bp_li6: 'No cookies, no external calls; Greek and English visitor texts; full cleanup on uninstall',
+		bp_li7: 'Safe by design: off until enabled, test mode for shop managers, BPV_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
+		bp_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Your download is ready',
 		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
@@ -762,6 +791,15 @@ footer .heart { color: var(--accent-bright); }
 		ew_li6: 'Τρία email του WooCommerce με το πρότυπο του καταστήματος· χωρίς δικές του καταστάσεις παραγγελίας, ώστε οι αναφορές εσόδων να μένουν σωστές· συμβατό με HPOS',
 		ew_li7: 'Ασφαλές εκ σχεδιασμού: λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης EWD_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ew_download: 'Λήψη v1.0.0 (.zip)',
+		bp_desc: 'Δείγμα βιβλίου στη σελίδα του προϊόντος: ο server φτιάχνει ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις, και ο επισκέπτης το διαβάζει σε viewer πλήρους οθόνης. Το πλήρες PDF δεν φτάνει ποτέ στον browser.',
+		bp_li1: 'Ανά προϊόν: το PDF από τα αρχεία για λήψη ή τη βιβλιοθήκη πολυμέσων και λίστα σελίδων όπως 1-12, 20, 35-40· καθαρά μηνύματα για κάθε σφάλμα',
+		bp_li2: 'Δική του μηχανή PDF σε καθαρή PHP για αρχεία από κάθε πρόγραμμα σελιδοποίησης (συμπιεσμένα cross-reference PDF 1.5+, επισκευή κατεστραμμένων αρχείων)· χωρίς τις εικόνες και τις γραμματοσειρές που δεν χρειάζονται· qpdf και Ghostscript ως αυτόματη εναλλακτική',
+		bp_li3: 'Κουμπί «Διαβάστε ένα δείγμα» κάτω από τη σύντομη περιγραφή ή το καλάθι, shortcode και block· κλασικά θέματα, Astra και block themes',
+		bp_li4: 'Ενσωματωμένος viewer PDF.js που φορτώνει στο πρώτο κλικ: σελίδες κατά την κύλιση, zoom, πλήρης οθόνη, προαιρετική κάρτα «Συνεχίστε την ανάγνωση» με κουμπί αγοράς',
+		bp_li5: 'Μαζική δημιουργία ανά κατηγορία (πρώτες Ν σελίδες, παράλειψη Κ) με μπάρα προόδου· αναδημιουργία στο παρασκήνιο όταν αλλάζει το PDF ή οι σελίδες',
+		bp_li6: 'Χωρίς cookies, χωρίς εξωτερικές κλήσεις· κείμενα επισκέπτη σε ελληνικά και αγγλικά· πλήρης καθαρισμός κατά την απεγκατάσταση',
+		bp_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να ενεργοποιηθεί, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης BPV_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		bp_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
