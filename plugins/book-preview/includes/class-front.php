@@ -337,8 +337,10 @@ final class BPV_Front {
 			$action = 'scroll';
 			$href   = '';
 		} elseif ( $p->is_type( 'simple' ) && $p->supports( 'ajax_add_to_cart' ) ) {
+			// Add to cart on the cart page, where WooCommerce shows the
+			// "added" notice (a page with the shortcode may show no notices).
 			$action = 'link';
-			$href   = (string) $p->add_to_cart_url();
+			$href   = (string) add_query_arg( 'add-to-cart', $p->get_id(), wc_get_cart_url() );
 		} else {
 			$action = 'link';
 			$href   = (string) $p->get_permalink();

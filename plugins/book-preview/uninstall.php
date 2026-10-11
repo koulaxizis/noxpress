@@ -4,7 +4,7 @@
  *
  * Full cleanup (nothing left after deactivate + delete):
  *  - Sample files: the folder uploads/noxpress-previews/ (only our own
- *    file names, the guard files and then the folder itself).
+ *    file names, the index.php guard and then the folder itself).
  *  - Product meta: _bpv_source, _bpv_pages, _bpv_hidden, _bpv_sample,
  *    _bpv_error.
  *  - Options: bpv_settings, bpv_bulk (a bulk run in progress).
@@ -60,7 +60,7 @@ function bpv_uninstall_site(): void {
 	if ( is_dir( $bpv_dir ) ) {
 		foreach ( (array) scandir( $bpv_dir ) as $bpv_file ) {
 			$bpv_file = (string) $bpv_file;
-			$bpv_ours = preg_match( '/^\d+-[0-9a-f]{32}\.pdf(\.tmp|\.qpdf\.tmp)?$/', $bpv_file ) || in_array( $bpv_file, array( 'index.php', '.htaccess' ), true );
+			$bpv_ours = preg_match( '/^\d+-[0-9a-f]{32}\.pdf(\.tmp|\.qpdf\.tmp)?$/', $bpv_file ) || 'index.php' === $bpv_file;
 			if ( $bpv_ours && is_file( $bpv_dir . '/' . $bpv_file ) ) {
 				wp_delete_file( $bpv_dir . '/' . $bpv_file );
 			}

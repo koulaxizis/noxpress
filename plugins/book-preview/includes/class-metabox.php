@@ -217,7 +217,7 @@ final class BPV_Metabox {
 		if ( ! current_user_can( 'edit_post', $pid ) ) {
 			return;
 		}
-		self::store(
+		BPV_Samples::$changed[ $pid ] = self::store(
 			$pid,
 			isset( $_POST['bpv_source'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['bpv_source'] ) ) : '',
 			isset( $_POST['bpv_pages'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['bpv_pages'] ) ) : '',

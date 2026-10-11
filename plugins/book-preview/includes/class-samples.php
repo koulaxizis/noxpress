@@ -11,8 +11,7 @@
  *
  * Files: uploads/noxpress-previews/{product id}-{32 random hex}.pdf. Every
  * rebuild gets a new name and the old file goes, so no cache or CDN keeps
- * an old sample. The folder has an empty index.php and an .htaccess that
- * stops listings and script execution.
+ * an old sample. The folder has an empty index.php (no file list).
  *
  * A sample is stale when the source file (size, modification time), the
  * page field or the engine version changed. Stale samples keep showing
@@ -50,21 +49,20 @@ final class BPV_Samples {
 		);
 	}
 
-	/** Creates the folder with its guard files; false when it cannot be written. */
+	/**
+	 * Creates the folder with an empty index.php (no file list); false when it
+	 * cannot be written. No .htaccess: a directive the host does not allow
+	 * (AllowOverride) turns every file of the folder into a 500 error, and
+	 * the folder only ever holds the PDFs this plugin writes.
+	 */
 	public static function ensure_dir(): bool {
 		$dir = self::dir()['path'];
 		if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
 			return false;
 		}
-		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- tiny guard files.
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- tiny guard file.
 		if ( ! is_file( $dir . '/index.php' ) ) {
 			@file_put_contents( $dir . '/index.php', "<?php\n// Silence is golden.\n" ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-		}
-		if ( ! is_file( $dir . '/.htaccess' ) ) {
-			@file_put_contents( // phpcs:ignore WordPress.PHP.NoSilencedErrors
-				$dir . '/.htaccess',
-				"Options -Indexes\n<FilesMatch \"\\.(php|phtml|phar|pl|py|cgi|sh)$\">\n  Require all denied\n</FilesMatch>\n"
-			);
 		}
 		// phpcs:enable
 		return wp_is_writable( $dir );
@@ -138,7 +136,7 @@ final class BPV_Samples {
 		if ( $sample ) {
 			$state = ( $src['ok'] && self::signature( $src['path'], self::effective_pages( $pages ) ) === ( $sample['sig'] ?? '' ) ) ? 'ready' : 'stale';
 		}
-		if ( $err && ( ! $sample || (int) ( $err['time'] ?? 0 ) > (int) ( $sample['created'] ?? 0 ) ) ) {
+		if ( $err && ( ! $sample || (int) ( $err['time'] ?? 0 ) >= (int) ( $sample['created'] ?? 0 ) ) ) {
 			$state = $sample ? 'stale' : 'error';
 		}
 		return array(
@@ -309,14 +307,24 @@ final class BPV_Samples {
 	 * Background rebuild
 	 * ------------------------------------------------------------------- */
 
-	/** After a product save: queue a rebuild when the sample is stale. */
+	/** Products whose PDF or pages changed in this request's product save (set by the box). */
+	public static $changed = array();
+
+	/**
+	 * After a product save: queue a build when the sample is stale, or when
+	 * the PDF or pages were just set and there is no sample yet. A sample
+	 * the admin deleted is not rebuilt by a later, unrelated save.
+	 */
 	public static function on_product_saved( $product_id ): void {
 		$product_id = (int) $product_id;
 		if ( ! BPV_Settings::get()['auto_regen'] || '' === (string) get_post_meta( $product_id, '_bpv_source', true ) ) {
 			return;
 		}
 		$st = self::state( $product_id );
-		if ( 'stale' === $st['state'] && ! $st['error'] ) {
+		if ( $st['error'] ) {
+			return;
+		}
+		if ( 'stale' === $st['state'] || ( 'none' === $st['state'] && ! empty( self::$changed[ $product_id ] ) ) ) {
 			self::schedule( $product_id );
 		}
 	}

@@ -362,7 +362,7 @@
 			rezoom( 0.8 );
 		} );
 		var resizeTimer = null;
-		window.addEventListener( 'resize', function () {
+		function onResize() {
 			if ( closed || ! slots.length ) {
 				return;
 			}
@@ -370,6 +370,11 @@
 			resizeTimer = setTimeout( function () {
 				rezoom( 1 );
 			}, 200 );
+		}
+		window.addEventListener( 'resize', onResize );
+		dlg.addEventListener( 'close', function () {
+			clearTimeout( resizeTimer );
+			window.removeEventListener( 'resize', onResize );
 		} );
 	}
 

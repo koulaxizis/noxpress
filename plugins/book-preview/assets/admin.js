@@ -66,10 +66,10 @@
 				if ( r && r.success ) {
 					$box.find( '.bpv-box__status' ).html( r.data.status );
 					$box.find( '.bpv-delete' ).prop( 'hidden', ! r.data.has );
-					$( '<p class="bpv-box__msg"></p>' )
-						.addClass( r.data.ok ? '' : 'bpv-box-error' )
-						.text( r.data.message )
-						.prependTo( $box.find( '.bpv-box__status' ) );
+					// An error is already part of the new status; only success gets its own line.
+					if ( r.data.ok ) {
+						$( '<p class="bpv-box__msg"></p>' ).text( r.data.message ).prependTo( $box.find( '.bpv-box__status' ) );
+					}
 				} else {
 					$( '<p class="bpv-box__msg bpv-box-error"></p>' ).text( cfg.failed ).prependTo( $box.find( '.bpv-box__status' ) );
 				}
