@@ -3,7 +3,7 @@
  * SHN_Admin_UI — menu, settings page, PRG routes, backup (Bible §3–§8, §11).
  *
  * One page, submenu «Αποστολή» of the shared "Noxpress" menu (admin_menu
- * priority 80), slug shn-settings, with tabs:
+ * priority 90), slug shn-settings, with tabs:
  *  - free      free-shipping bar: mode, threshold source, zones, places,
  *              look, texts
  *  - delivery  delivery time: mode, product-page zone, transit days per
@@ -32,7 +32,7 @@ final class SHN_Admin_UI {
 	const MAX_IMPORT  = 262144;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 80 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 90 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );

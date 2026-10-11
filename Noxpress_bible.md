@@ -2,7 +2,7 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.11 (2026-10-11). Νέο: Shipping Notes στη σουίτα (§8, §13, §16)· φίλτρα `shn_threshold`, `shn_available_from`, `shn_text` (§6)· ονόματα plugins χωρίς το πρόθεμα «Noxpress» (§10)· δεδομένα extension του Store API μόνο για ανάγνωση (§14.4).
+- **Έκδοση:** 1.11 (2026-10-11). Νέο: Shipping Notes στη σουίτα (§8, θέση μενού 90, γιατί το Book Preview κράτησε το 80· §13, §16)· φίλτρα `shn_threshold`, `shn_available_from`, `shn_text` (§6)· ονόματα plugins χωρίς το πρόθεμα «Noxpress» (§10)· δεδομένα extension του Store API μόνο για ανάγνωση (§14.4).
 - **1.10** (2026-10-11): ειδοποίηση στο hub για νεότερη έκδοση στο άλλο κανάλι, με «Εγκατάσταση beta» ανά plugin και απόκρυψη ανά έκδοση (§16, Core 1.1.0).
 - **1.8** (2026-10-10): Easy Withdrawal στη σουίτα (§8, §13, §16)· hooks `noxpress_withdrawal_*` (§6)· δεδομένα που είναι αρχείο του καταστήματος μένουν μετά το uninstall (§12)· φόρμες επισκεπτών που καταγράφουν δήλωση και κουμπιά με την κλάση του θέματος (§14).
 - **1.7** (2026-10-10): Product Formats στη σουίτα (§8, §13, §16)· φίλτρο `pfm_formats` και API `pfm_get_work()` (§6)· αλλαγή μόνο στον κατάλογο του Core χωρίς νέα έκδοση στα άλλα plugins (§16).
@@ -96,7 +96,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Κοινό top-level:** slug `noxpress`, τίτλος «Noxpress», `dashicons-chart-pie`, θέση 57, capability `manage_woocommerce`.
 - **Ποιος το δημιουργεί:** το Noxpress Core (§16), στο `admin_menu` με προτεραιότητα 5, με το hub ως landing και πρώτο submenu «Επισκόπηση». Τα plugins **δεν** δημιουργούν ποτέ το top-level· προσθέτουν μόνο submenus.
 - **Προτεραιότητες `admin_menu`:**
-  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, SHN 80.
+  - Core 5, RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80 (Book Preview), SHN 90.
   - Νέα plugins παίρνουν το επόμενο +10.
   - Το Data Migrator δεν έχει ακόμα ενταχθεί.
 - **Παλιές εκδόσεις** (πριν από το Core) έλεγχαν `empty( $GLOBALS['admin_page_hooks']['noxpress'] )` και έφτιαχναν το top-level μόνο αν έλειπε. Επειδή το Core τρέχει πρώτο, σε ανάμεικτους συνδυασμούς απλώς προσθέτουν τα submenus τους.

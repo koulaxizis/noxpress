@@ -114,7 +114,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, SHN 80).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
