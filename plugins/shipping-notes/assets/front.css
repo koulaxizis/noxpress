@@ -1,0 +1,99 @@
+/**
+ * Shipping Notes — front.css (v1.0.0)
+ *
+ * Scoped to .shn-fs (free-shipping bar) and .shn-dl (delivery time).
+ * Layout properties carry !important so theme rules with an id (e.g.
+ * "#sidebar span { float: right; background: … }", which outrank any
+ * class selector) cannot rearrange them (Bible §14, rule 13). Colours and
+ * fonts are inherited from the place that holds them; prices keep
+ * WooCommerce's and the theme's own look. --shn-color sets the bar colour
+ * (default: the text colour).
+ */
+
+.shn-fs-wrap:empty { display: none !important; }
+
+.shn-fs,
+.shn-dl {
+	display: block !important;
+	float: none !important;
+	clear: both !important;
+	width: auto !important;
+	max-width: 100% !important;
+	position: static !important;
+	box-sizing: border-box !important;
+	text-align: start;
+	line-height: 1.4 !important;
+}
+
+.shn-fs p,
+.shn-fs div,
+.shn-fs span.shn-fs__fill,
+.shn-dl p {
+	float: none !important;
+	clear: none !important;
+	position: static !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	color: inherit !important;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	font-style: normal !important;
+	letter-spacing: normal !important;
+	text-indent: 0 !important;
+	text-transform: none !important;
+	box-sizing: border-box !important;
+}
+
+/* ===== Free shipping ===== */
+
+.shn-fs {
+	--shn-track: rgba(127, 127, 127, .25);
+	margin: 0 0 1em !important;
+	padding: 0 !important;
+}
+
+.shn-fs .shn-fs__text { display: block !important; }
+.shn-fs .shn-fs__text .amount { font-weight: 600; }
+
+.shn-fs .shn-fs__bar {
+	display: block !important;
+	overflow: hidden !important;
+	height: 6px !important;
+	margin: .4em 0 0 !important;
+	border-radius: 3px !important;
+	background: var(--shn-track) !important;
+}
+
+.shn-fs .shn-fs__bar .shn-fs__fill {
+	display: block !important;
+	height: 100% !important;
+	max-width: 100% !important;
+	border-radius: 3px !important;
+	background: var(--shn-color, currentColor) !important;
+	transition: width .3s ease;
+}
+
+.shn-fs.shn-fs--won .shn-fs__text { font-weight: 600 !important; }
+
+/* Mini-cart: a little room around it. */
+.widget_shopping_cart_content .shn-fs { margin: 0 0 .75em !important; }
+
+/* Cart and Checkout blocks. */
+.shn-fs-block .shn-fs { margin: 0 0 .5em !important; padding: 0 16px !important; }
+
+/* ===== Delivery time ===== */
+
+.shn-dl { margin: .75em 0 1em !important; padding: 0 !important; }
+.shn-dl .shn-dl__title { font-weight: 600 !important; }
+.shn-dl .shn-dl__cutoff { font-size: .9em !important; opacity: .85; }
+.shn-dl .shn-dl__cutoff[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+	.shn-fs .shn-fs__bar .shn-fs__fill { transition: none; }
+}

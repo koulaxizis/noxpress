@@ -41,6 +41,7 @@ SLUGS = {
     'sh': 'shop-filters',
     'pf': 'product-formats',
     'ew': 'easy-withdrawal',
+    'sn': 'shipping-notes',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
