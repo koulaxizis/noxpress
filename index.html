@@ -571,6 +571,26 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="featured-creators">
+		<h2><a href="#featured-creators">Featured Creators</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="cr_desc">One page for every creator of your catalog (authors, illustrators, translators, musicians…), filled automatically with their products by role from your WooCommerce attributes, and their name turned into a link across the store.</p>
+		<ul>
+			<li data-i18n="cr_li1">Creator pages with photo, roles, biography, links (Spotify, YouTube, Instagram… recognised from the address) and lists of interviews, videos and reviews</li>
+			<li data-i18n="cr_li2">Matching by the same slug across the role attributes you choose, with manual fixes for pseudonyms and homonyms and a coverage check</li>
+			<li data-i18n="cr_li3">One section per role in your order, a separate bundles group, the theme’s own product cards; one card per work with Product Formats</li>
+			<li data-i18n="cr_li4">Names in «Additional information» become links; creator box under the product description; index with role filter and A–Z by sort name (shortcode or block)</li>
+			<li data-i18n="cr_li5">Draft creators from your attribute terms in one click; classic themes, Astra and block themes (Site Editor template)</li>
+			<li data-i18n="cr_li6">Schema ProfilePage and Person, products as Book, Audiobook, MusicAlbum or Movie with author, illustrator and more; inside Rank Math’s graph when it is active</li>
+			<li data-i18n="cr_li7">Safe by design: test mode for shop managers, CRT_DISABLE emergency switch; no cookies, no external calls; Greek and English texts; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.0.0/featured-creators.zip" rel="nofollow noopener" data-i18n="cr_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/featured-creators" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
@@ -713,6 +733,15 @@ footer .heart { color: var(--accent-bright); }
 		bp_li6: 'No cookies, no external calls; Greek and English visitor texts; full cleanup on uninstall',
 		bp_li7: 'Safe by design: off until enabled, test mode for shop managers, BPV_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
 		bp_download: 'Download v1.0.0 (.zip)',
+		cr_desc: 'One page for every creator of your catalog (authors, illustrators, translators, musicians…), filled automatically with their products by role from your WooCommerce attributes, and their name turned into a link across the store.',
+		cr_li1: 'Creator pages with photo, roles, biography, links (Spotify, YouTube, Instagram… recognised from the address) and lists of interviews, videos and reviews',
+		cr_li2: 'Matching by the same slug across the role attributes you choose, with manual fixes for pseudonyms and homonyms and a coverage check',
+		cr_li3: 'One section per role in your order, a separate bundles group, the theme’s own product cards; one card per work with Product Formats',
+		cr_li4: 'Names in «Additional information» become links; creator box under the product description; index with role filter and A–Z by sort name (shortcode or block)',
+		cr_li5: 'Draft creators from your attribute terms in one click; classic themes, Astra and block themes (Site Editor template)',
+		cr_li6: 'Schema ProfilePage and Person, products as Book, Audiobook, MusicAlbum or Movie with author, illustrator and more; inside Rank Math’s graph when it is active',
+		cr_li7: 'Safe by design: test mode for shop managers, CRT_DISABLE emergency switch; no cookies, no external calls; Greek and English texts; bilingual UI and shared «Noxpress» menu',
+		cr_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Your download is ready',
 		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
@@ -835,6 +864,15 @@ footer .heart { color: var(--accent-bright); }
 		bp_li6: 'Χωρίς cookies, χωρίς εξωτερικές κλήσεις· κείμενα επισκέπτη σε ελληνικά και αγγλικά· πλήρης καθαρισμός κατά την απεγκατάσταση',
 		bp_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να ενεργοποιηθεί, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης BPV_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		bp_download: 'Λήψη v1.0.0 (.zip)',
+		cr_desc: 'Μία σελίδα για κάθε δημιουργό του καταλόγου σου (συγγραφείς, εικονογράφους, μεταφραστές, μουσικούς…), που γεμίζει αυτόματα με τα προϊόντα του ανά ρόλο από τα χαρακτηριστικά του WooCommerce, και το όνομά του γίνεται σύνδεσμος σε όλο το κατάστημα.',
+		cr_li1: 'Σελίδες δημιουργών με φωτογραφία, ιδιότητες, βιογραφικό, συνδέσμους (Spotify, YouTube, Instagram… αναγνωρίζονται από τη διεύθυνση) και λίστες με συνεντεύξεις, βίντεο και κριτικές',
+		cr_li2: 'Ταίριασμα με το ίδιο slug σε όσα χαρακτηριστικά-ρόλους διαλέξεις, με χειροκίνητες διορθώσεις για ψευδώνυμα και συνωνυμίες και έλεγχο κάλυψης',
+		cr_li3: 'Μία ενότητα ανά ρόλο με τη σειρά που θέλεις, χωριστή ομάδα για τα πακέτα, οι κάρτες προϊόντων του ίδιου του θέματος· μία κάρτα ανά έργο με το Product Formats',
+		cr_li4: 'Τα ονόματα στις «Επιπλέον πληροφορίες» γίνονται σύνδεσμοι· πλαίσιο δημιουργών κάτω από την περιγραφή του προϊόντος· ευρετήριο με φίλτρο ρόλου και αλφαβητική σειρά (shortcode ή block)',
+		cr_li5: 'Πρόχειροι δημιουργοί από τα terms των χαρακτηριστικών με ένα κλικ· κλασικά θέματα, Astra και block themes (πρότυπο στον Site Editor)',
+		cr_li6: 'Schema ProfilePage και Person, προϊόντα ως Book, Audiobook, MusicAlbum ή Movie με author, illustrator κ.ά.· μέσα στο graph του Rank Math όταν είναι ενεργό',
+		cr_li7: 'Ασφαλές εκ σχεδιασμού: λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης CRT_DISABLE· χωρίς cookies και εξωτερικές κλήσεις· κείμενα σε ελληνικά και αγγλικά· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		cr_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
