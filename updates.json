@@ -91,15 +91,15 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).\n* Fix: uninstalling this plugin keeps the shared Noxpress data (update channel, hub notices) while Shop Filters is still installed.",
-        "published": "2026-10-10",
+        "changelog": "* New: price labels (Prices tab). Products with price 0 show \"Free\" (your own text) instead of 0,00 € on product pages, lists, related products, up-sells, cross-sells, widgets and product blocks, and on each cart, mini cart and checkout line. The order subtotal and total stay numbers.\n* New: labels for products without a price, per product category (with subcategories, first matching rule wins), plus a general text for the rest.\n* New: label texts in Greek and English, with the language chosen in the plugin (automatic from the site language, Greek or English). Developers can change a text with the `tp_price_label_text` filter.\n* Price labels work on block themes too, follow the master switch, test mode and `TP_DISABLE`, run on the cart's AJAX requests, and never change orders, emails, invoices, feeds or the price schema. They are included in the settings backup.\n* Changed: on block themes the Theme Patcher page shows the Prices tab (the only feature that applies there).\n* New: Product Formats and Easy Withdrawal join the Noxpress suite: the hub lists them and can install them (Noxpress Core 1.0.4).\n* Fix: uninstalling this plugin keeps the shared Noxpress data while Product Formats or Easy Withdrawal is still installed.",
+        "published": "2026-10-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "620f0fd60594bca25c8f014ecdc895e2d7f124ff2baa88d6118a4c06164ba22c",
-        "signature": "d4AyCK5kR9QmCfvFDZfYjacj6sJlSaRN2yMFt4ykFR18YAs89e5LHQWZQVFTkwWg+nNGQtuTMwS1xyAVLieCCA==",
+        "sha256": "815bb967fb562bfb77832d20131f67a6a7205adff9979cfaa70441e9f3461fd8",
+        "signature": "jvn7F/824UoS1lCWxDmPt4KiJRXwwA0XB6bT4HyBWgSyJuFe/2H7mB6jqv2yG7dRQQT6ZFiMpw8bvG3gPqW6DQ==",
         "tested_wp": "6.8",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.1.2/theme-patcher.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.2.0/theme-patcher.zip"
       }
     }
   }
