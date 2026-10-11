@@ -5,7 +5,7 @@ Tags: woocommerce, withdrawal, right of withdrawal, eu directive 2023/2673, retu
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -83,6 +83,12 @@ No. Version 1.0 opens WooCommerce's refund form pre-filled; you confirm the refu
 The settings, the email settings, the transients and the "personalised" flags are removed. The requests and the digital-content consent stay in the order meta: they are your record of what customers declared and agreed to, and they go away with their orders.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
+* New: "Install beta" for a single plugin, without moving the whole suite to Beta, or "Switch everything to Beta". Every package is still checked with sha256 and its signature.
+* New: "Hide for this version" per user; the notice comes back with a newer version.
+* Changed: Noxpress Core 1.1.0.
 
 = 1.0.0 =
 * Initial release.

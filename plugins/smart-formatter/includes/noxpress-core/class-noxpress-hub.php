@@ -70,6 +70,15 @@ final class Noxpress_Hub {
 		} elseif ( 'check' === $action ) {
 			Noxpress_Updater::refresh();
 			$msg = __( 'Ο έλεγχος για ενημερώσεις ολοκληρώθηκε.', 'noxpress' );
+		} elseif ( 'hide' === $action ) {
+			$slug    = isset( $_POST['noxpress_slug'] ) ? sanitize_key( wp_unslash( $_POST['noxpress_slug'] ) ) : '';
+			$version = isset( $_POST['noxpress_version'] ) ? sanitize_text_field( wp_unslash( $_POST['noxpress_version'] ) ) : '';
+			$catalog = Noxpress_Core::catalog();
+			if ( isset( $catalog[ $slug ] ) && preg_match( '/^\d+\.\d+\.\d+$/', $version ) ) {
+				Noxpress_Updater::hide( $slug, $version );
+				/* translators: 1: plugin name, 2: version number */
+				$msg = sprintf( __( 'Η ειδοποίηση για το %1$s %2$s κρύφτηκε. Θα ξαναεμφανιστεί με νεότερη έκδοση.', 'noxpress' ), $catalog[ $slug ]['name'], $version );
+			}
 		}
 
 		if ( '' !== $msg ) {
@@ -109,6 +118,13 @@ final class Noxpress_Hub {
 			$is_in  = isset( $installed[ $slug ] );
 			$active = $is_in && ( is_plugin_active( $file ) || is_plugin_active_for_network( $file ) );
 			$rel    = Noxpress_Updater::latest( $slug, $manifest );
+			$other  = Noxpress_Updater::other( $slug, $manifest );
+			$hidden = Noxpress_Updater::hidden( $slug );
+			// Shown when newer than what is installed and not hidden at this version.
+			if ( $other && ( ( $is_in && ! version_compare( $other['version'], (string) $installed[ $slug ]['Version'], '>' ) )
+				|| ( '' !== $hidden && ! version_compare( $other['version'], $hidden, '>' ) ) ) ) {
+				$other = null;
+			}
 
 			$rows[] = array(
 				'slug'      => $slug,
@@ -118,6 +134,7 @@ final class Noxpress_Hub {
 				'active'    => $active,
 				'version'   => $is_in ? (string) $installed[ $slug ]['Version'] : '',
 				'release'   => $rel,
+				'other'     => $other,
 				'update'    => $is_in && $rel && version_compare( $rel['version'], (string) $installed[ $slug ]['Version'], '>' ),
 				'queued'    => is_object( $updates ) && isset( $updates->response[ $file ] ),
 				'auto'      => in_array( $file, $auto, true ),
@@ -159,6 +176,31 @@ final class Noxpress_Hub {
 
 			<?php if ( ! $have_list ) : ?>
 				<div class="notice notice-warning inline"><p><?php esc_html_e( 'Η λίστα εκδόσεων δεν είναι διαθέσιμη αυτή τη στιγμή (noxpress.tech). Θα ξαναδοκιμάσει αυτόματα.', 'noxpress' ); ?></p></div>
+			<?php endif; ?>
+
+			<?php
+			$others = count( array_filter( $rows, static function ( $r ) {
+				return $r['other'] && $r['installed'];
+			} ) );
+			?>
+			<?php if ( $others && $can_update && ! $file_mods && 'stable' === Noxpress_Updater::channel() ) : ?>
+				<div class="nx-zone nx-other">
+					<p>
+						<span class="nx-badge nx-badge--beta"><?php esc_html_e( 'beta', 'noxpress' ); ?></span>
+						<?php
+						/* translators: %d: number of plugins */
+						printf( esc_html( _n( 'Υπάρχει νεότερη beta έκδοση για %d plugin.', 'Υπάρχουν νεότερες beta εκδόσεις για %d plugins.', $others, 'noxpress' ) ), (int) $others );
+						?>
+					</p>
+					<p class="nx-muted"><?php esc_html_e( 'Οι beta εκδόσεις δοκιμάζονται ακόμα. Σε live site, καλύτερα πρώτα σε δοκιμαστικό ή με πρόσφατο backup.', 'noxpress' ); ?></p>
+					<form method="post" class="nx-inline-form">
+						<?php wp_nonce_field( self::NONCE, self::NONCE_FIELD ); ?>
+						<input type="hidden" name="noxpress_action" value="channel">
+						<input type="hidden" name="noxpress_channel" value="beta">
+						<button type="submit" class="button"><?php esc_html_e( 'Μετάβαση στο Beta για όλα', 'noxpress' ); ?></button>
+						<span class="nx-muted nx-small-inline"><?php esc_html_e( 'ή «Εγκατάσταση beta» μόνο για όποιο plugin θέλεις, πιο κάτω.', 'noxpress' ); ?></span>
+					</form>
+				</div>
 			<?php endif; ?>
 
 			<h2 class="nx-h2"><?php esc_html_e( 'Plugins', 'noxpress' ); ?></h2>
@@ -255,6 +297,14 @@ final class Noxpress_Hub {
 				<?php if ( $rel && ! empty( $rel['beta'] ) && ( $row['update'] || ! $row['installed'] ) ) : ?>
 					<span class="nx-badge nx-badge--beta"><?php esc_html_e( 'beta', 'noxpress' ); ?></span>
 				<?php endif; ?>
+				<?php if ( $row['other'] ) : ?>
+					<span class="nx-badge nx-badge--beta nx-other-badge">
+						<?php
+						/* translators: %s: version number */
+						printf( esc_html( ! empty( $row['other']['beta'] ) ? __( 'Νεότερη beta: %s', 'noxpress' ) : __( 'Νεότερη stable: %s', 'noxpress' ) ), esc_html( $row['other']['version'] ) );
+						?>
+					</span>
+				<?php endif; ?>
 			</td>
 			<td class="nx-actions">
 				<?php
@@ -275,8 +325,33 @@ final class Noxpress_Hub {
 				if ( $rel && current_user_can( 'install_plugins' ) ) {
 					$links[] = '<a class="thickbox open-plugin-details-modal" href="' . esc_url( self::manage_url( 'plugin-install.php?tab=plugin-information&plugin=' . rawurlencode( $slug ) . '&section=changelog&TB_iframe=true&width=640&height=560' ) ) . '">' . esc_html__( 'Αλλαγές', 'noxpress' ) . '</a>';
 				}
+				$other   = $row['other'];
+				$confirm = esc_attr( __( 'Οι beta εκδόσεις δοκιμάζονται ακόμα. Να εγκατασταθεί η beta;', 'noxpress' ) );
+				if ( ! $file_mods && $other && ! empty( $other['beta'] ) && $row['installed'] && current_user_can( 'update_plugins' ) ) {
+					$url     = wp_nonce_url( self::manage_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( $file ) . '&' . Noxpress_Updater::PICK . '=beta' ), 'upgrade-plugin_' . $file );
+					$links[] = '<a class="button nx-beta-button" href="' . esc_url( $url ) . '" onclick="return confirm(\'' . esc_js( $confirm ) . '\');">' . esc_html__( 'Εγκατάσταση beta', 'noxpress' ) . '</a>';
+				}
+				if ( ! $file_mods && $other && ! empty( $other['beta'] ) && ! $row['installed'] && ! $rel && current_user_can( 'install_plugins' ) ) {
+					$url     = wp_nonce_url( self::manage_url( 'update.php?action=install-plugin&plugin=' . rawurlencode( $slug ) . '&' . Noxpress_Updater::PICK . '=beta' ), 'install-plugin_' . $slug );
+					$links[] = '<a class="button nx-beta-button" href="' . esc_url( $url ) . '" onclick="return confirm(\'' . esc_js( $confirm ) . '\');">' . esc_html__( 'Εγκατάσταση beta', 'noxpress' ) . '</a>';
+				}
+				if ( $other && ! empty( $other['beta'] ) && current_user_can( 'install_plugins' ) ) {
+					$links[] = '<a class="thickbox open-plugin-details-modal" href="' . esc_url( self::manage_url( 'plugin-install.php?tab=plugin-information&plugin=' . rawurlencode( $slug ) . '&' . Noxpress_Updater::PICK . '=beta&section=changelog&TB_iframe=true&width=640&height=560' ) ) . '">' . ( $rel ? esc_html__( 'Αλλαγές beta', 'noxpress' ) : esc_html__( 'Αλλαγές', 'noxpress' ) ) . '</a>';
+				}
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part escaped above.
 				echo implode( ' ', $links );
+
+				if ( $other && ( current_user_can( 'update_plugins' ) || current_user_can( 'install_plugins' ) ) ) {
+					?>
+					<form method="post" class="nx-hide-form">
+						<?php wp_nonce_field( self::NONCE, self::NONCE_FIELD ); ?>
+						<input type="hidden" name="noxpress_action" value="hide">
+						<input type="hidden" name="noxpress_slug" value="<?php echo esc_attr( $slug ); ?>">
+						<input type="hidden" name="noxpress_version" value="<?php echo esc_attr( $other['version'] ); ?>">
+						<button type="submit" class="button-link nx-hide"><?php esc_html_e( 'Απόκρυψη για αυτή την έκδοση', 'noxpress' ); ?></button>
+					</form>
+					<?php
+				}
 
 				if ( $auto_ok && ! $file_mods && $row['installed'] && $rel && current_user_can( 'update_plugins' ) ) {
 					$toggle = $row['auto'] ? 'disable-auto-update' : 'enable-auto-update';

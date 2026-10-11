@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, reports
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.2
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -51,6 +51,12 @@ Yes. All order queries use the WooCommerce order API.
 Only Store Pulse's own options and cached transients. Revenue Splitter data and the shared language setting are left untouched.
 
 == Changelog ==
+
+= 1.5.0 =
+* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
+* New: "Install beta" for a single plugin, without moving the whole suite to Beta, or "Switch everything to Beta". Every package is still checked with sha256 and its signature.
+* New: "Hide for this version" per user; the notice comes back with a newer version.
+* Changed: Noxpress Core 1.1.0.
 
 = 1.4.2 =
 * New: Shop Filters joins the Noxpress suite: the hub lists it and can install it (Noxpress Core 1.0.2).

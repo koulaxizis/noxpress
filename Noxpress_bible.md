@@ -2,7 +2,7 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.9 (2026-10-10). Νέο: εξαίρεση για τα AJAX του καλαθιού (§14.4)· κανόνας για κείμενα που βλέπει ο επισκέπτης και για ρυθμίσεις που δεν εξαρτώνται από το θέμα (§14.17), από τις ετικέτες τιμής του Theme Patcher.
+- **Έκδοση:** 1.10 (2026-10-11). Νέο: ειδοποίηση στο hub για νεότερη έκδοση στο άλλο κανάλι, με «Εγκατάσταση beta» ανά plugin και απόκρυψη ανά έκδοση (§16, Core 1.1.0).
 - **1.8** (2026-10-10): Easy Withdrawal στη σουίτα (§8, §13, §16)· hooks `noxpress_withdrawal_*` (§6)· δεδομένα που είναι αρχείο του καταστήματος μένουν μετά το uninstall (§12)· φόρμες επισκεπτών που καταγράφουν δήλωση και κουμπιά με την κλάση του θέματος (§14).
 - **1.7** (2026-10-10): Product Formats στη σουίτα (§8, §13, §16)· φίλτρο `pfm_formats` και API `pfm_get_work()` (§6)· αλλαγή μόνο στον κατάλογο του Core χωρίς νέα έκδοση στα άλλα plugins (§16).
 - **1.6** (2026-10-10): Shop Filters στη σουίτα (§8, §13, §16)· φίλτρο `noxpress_filters_present` (§6)· κωδικός release πάντα δύο γράμματα (§13)· κανόνες για CSS που αντέχει το θέμα και για μετρήσεις στην προβολή σελίδας (§14).
@@ -253,6 +253,9 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Ενημερώσεις:**
   - Πηγή: `https://noxpress.tech/updates.json`, που γράφει το workflow. Για κάθε plugin: `stable` (νεότερο χωρίς pre-release) και `beta` (νεότερο οποιοδήποτε), με `version`, `zip`, `sha256`, `signature`, `requires_wp`, `requires_php`, `tested_wp`, `published`, `changelog`.
   - Κανάλι: site option `noxpress_channel`, προεπιλογή **Stable**. Στο Beta ισχύει το νεότερο από beta και stable. Υποβάθμιση δεν προτείνεται ποτέ.
+  - **Άλλο κανάλι:** όταν το κανάλι που δεν ακολουθεί το site έχει νεότερη έκδοση (στην πράξη: νεότερη beta σε site με Stable), το hub δείχνει badge «Νεότερη beta: X», πλαίσιο με «Μετάβαση στο Beta για όλα» και προειδοποίηση για live sites, και στη γραμμή του plugin «Εγκατάσταση beta» (με confirm), «Αλλαγές beta» και «Απόκρυψη για αυτή την έκδοση». Στο μενού Noxpress μπαίνει μετρητής (μόνο για `update_plugins`, μόνο εγκατεστημένα plugins, μόνο από την cache, χωρίς αίτημα δικτύου).
+  - «Εγκατάσταση beta» = το συνηθισμένο `update.php` / `install-plugin` του WordPress με `noxpress_pick=beta`: μόνο σε εκείνο το αίτημα και μόνο για εκείνο το plugin, το Core δίνει τη beta στο `update_plugins` (κατά την ανάγνωση, δεν αποθηκεύεται) και στο `plugins_api`. Το κανάλι δεν αλλάζει, το nonce και το capability τα ελέγχει το WordPress, το πακέτο ελέγχεται κανονικά (sha256 + υπογραφή). Υποβάθμιση δεν προτείνεται ποτέ.
+  - Απόκρυψη: user meta `noxpress_hidden` (slug → έκδοση), POST με PRG (§11). Η ειδοποίηση ξαναβγαίνει μόνο με νεότερη έκδοση.
   - Το Core γεμίζει το `update_plugins` transient στο `pre_set_site_transient_update_plugins` (σβήνει και κάθε ξένη εγγραφή για τα slugs μας). Οι αυτόματες ενημερώσεις μένουν στον διακόπτη του WordPress, κλειστές από προεπιλογή.
   - Λεπτομέρειες plugin (`plugins_api`, για το popup «Αλλαγές» και την εγκατάσταση): το Core απαντά στην προτεραιότητα 10 και ξαναβάζει τα δικά του στοιχεία στο τέλος του `plugins_api` και του `plugins_api_result` (`PHP_INT_MAX`), γιατί άλλα plugins μπορεί να τα αντικαταστήσουν (π.χ. με το «Plugin not found» του WordPress.org).
   - Αιτήματα μόνο με `wp_safe_remote_get`, timeout 10 s, cache 12 ώρες (1 ώρα μετά από αποτυχία) στο site transient `noxpress_manifest`. Ποτέ σε αίτηση επισκέπτη.
@@ -260,7 +263,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Δεκτά μόνο zip από `https://github.com/koulaxizis/noxpress/releases/download/nox-<code>-<version>/<slug>.zip`, με version σε μορφή semver.
   - Στο `upgrader_pre_download` το Core κατεβάζει το πακέτο, ελέγχει το `sha256` και την υπογραφή Ed25519 του μηνύματος `noxpress|<slug>|<version>|<sha256>` με το `Noxpress_Updater::PUBLIC_KEY`. Αποτυχία = ακύρωση εγκατάστασης.
   - Το ιδιωτικό κλειδί υπάρχει **μόνο** στο secret `NOXPRESS_SIGNING_KEY` του repo. Το workflow ελέγχει ότι ταιριάζει με το δημόσιο κλειδί του κώδικα. Αλλαγή κλειδιού = νέα έκδοση του Core σε όλα τα plugins, πριν αλλάξει το secret.
-- **Δεδομένα (§12):** `noxpress_channel`, `noxpress_checked` (site options), `noxpress_manifest` (site transient), `noxpress_hub_msg_{uid}` (transient). Τα σβήνει το `uninstall.php` όποιου plugin φύγει **τελευταίο** από τη σουίτα.
+- **Δεδομένα (§12):** `noxpress_channel`, `noxpress_checked` (site options), `noxpress_manifest` (site transient), `noxpress_hub_msg_{uid}` (transient), `noxpress_hidden` (user meta). Τα σβήνει το `uninstall.php` όποιου plugin φύγει **τελευταίο** από τη σουίτα.
 - **Πρώτη εγκατάσταση:** εκδόσεις πριν από το Core (RS ≤ 1.7.0, SP ≤ 1.3.0, SF ≤ 1.1.0, TP 1.0.0) δεν έχουν updater. Η πρώτη έκδοση με Core ανεβαίνει με το χέρι μία φορά.
 
 ## §17 Μετρητής λήψεων στο site (νέο, 1.3)

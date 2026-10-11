@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, accessibility, price labe
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -115,6 +115,12 @@ No. The label is only text for visitors. The structured data (schema) keeps the 
 The plugin's own options (`tp_settings`, `tp_cat_images`) and transients are removed. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
+* New: "Install beta" for a single plugin, without moving the whole suite to Beta, or "Switch everything to Beta". Every package is still checked with sha256 and its signature.
+* New: "Hide for this version" per user; the notice comes back with a newer version.
+* Changed: Noxpress Core 1.1.0.
 
 = 1.2.0 =
 * New: price labels (Prices tab). Products with price 0 show "Free" (your own text) instead of 0,00 € on product pages, lists, related products, up-sells, cross-sells, widgets and product blocks, and on each cart, mini cart and checkout line. The order subtotal and total stay numbers.
