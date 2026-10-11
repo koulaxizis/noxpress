@@ -1,6 +1,6 @@
 {
   "display": 25,
-  "total": 31,
+  "total": 32,
   "offset": 5,
   "updated": "2026-10-11",
   "assets": {
@@ -126,6 +126,10 @@
     },
     "630955070": {
       "file": "nox-cr-1.0.0/featured-creators.zip",
+      "count": 1
+    },
+    "631666736": {
+      "file": "nox-pk-1.0.0/store-pickup.zip",
       "count": 0
     }
   }
