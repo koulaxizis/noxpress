@@ -41,6 +41,12 @@ final class Noxpress_Updater {
 	/** Site option: unix time of the last manifest fetch attempt. */
 	const OPT_CHECKED = 'noxpress_checked';
 
+	/** User meta: slug => version of the other channel's release this user hid in the hub. */
+	const META_HIDDEN = 'noxpress_hidden';
+
+	/** Query argument of the hub's "Install this beta" links. */
+	const PICK = 'noxpress_pick';
+
 	public static function init(): void {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'inject' ) );
 		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api' ), 10, 3 );
@@ -50,6 +56,8 @@ final class Noxpress_Updater {
 		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api_last' ), PHP_INT_MAX, 3 );
 		add_filter( 'plugins_api_result', array( __CLASS__, 'plugins_api_last' ), PHP_INT_MAX, 3 );
 		add_filter( 'upgrader_pre_download', array( __CLASS__, 'pre_download' ), 10, 3 );
+		// Hub "Install this beta": one plugin, one request, the channel stays.
+		add_filter( 'site_transient_update_plugins', array( __CLASS__, 'pick_transient' ) );
 	}
 
 	public static function channel(): string {
@@ -175,6 +183,141 @@ final class Noxpress_Updater {
 		return null;
 	}
 
+	/**
+	 * Newer release in the channel the site does not follow (in practice a
+	 * beta newer than the stable a Stable site gets), or null.
+	 */
+	public static function other( string $slug, ?array $manifest = null ): ?array {
+		$manifest = null === $manifest ? self::manifest() : $manifest;
+		if ( empty( $manifest[ $slug ] ) ) {
+			return null;
+		}
+		$on_beta = 'beta' === self::channel();
+		$alt     = $manifest[ $slug ][ $on_beta ? 'stable' : 'beta' ];
+		$cur     = self::latest( $slug, $manifest );
+		if ( ! $alt || ( $cur && ! version_compare( $alt['version'], $cur['version'], '>' ) ) ) {
+			return null;
+		}
+		return $alt + array( 'beta' => ! $on_beta );
+	}
+
+	/** Version of the other channel's release this user hid for a slug ('' if none). */
+	public static function hidden( string $slug ): string {
+		$hidden = get_user_meta( get_current_user_id(), self::META_HIDDEN, true );
+		return is_array( $hidden ) && isset( $hidden[ $slug ] ) ? (string) $hidden[ $slug ] : '';
+	}
+
+	public static function hide( string $slug, string $version ): void {
+		$uid    = get_current_user_id();
+		$hidden = get_user_meta( $uid, self::META_HIDDEN, true );
+		$hidden = is_array( $hidden ) ? $hidden : array();
+		$hidden[ $slug ] = $version;
+		update_user_meta( $uid, self::META_HIDDEN, $hidden );
+	}
+
+	/**
+	 * Installed suite plugins with a newer release in the other channel that
+	 * this user has not hidden. Reads the cached list only (never fetches), so
+	 * the menu can show it on every admin page.
+	 */
+	public static function other_count(): int {
+		$manifest = get_site_transient( self::CACHE );
+		if ( ! is_array( $manifest ) || ! $manifest ) {
+			return 0;
+		}
+		// Most of the time no slug has one: skip reading the plugins folder.
+		$any = false;
+		foreach ( array_keys( $manifest ) as $slug ) {
+			if ( self::other( (string) $slug, $manifest ) ) {
+				$any = true;
+				break;
+			}
+		}
+		if ( ! $any ) {
+			return 0;
+		}
+		$count = 0;
+		foreach ( Noxpress_Core::installed() as $slug => $data ) {
+			$alt = self::other( $slug, $manifest );
+			if ( $alt && version_compare( $alt['version'], (string) $data['Version'], '>' )
+				&& version_compare( $alt['version'], self::hidden( $slug ) ?: '0', '>' ) ) {
+				++$count;
+			}
+		}
+		return $count;
+	}
+
+	/**
+	 * The beta picked by a hub "Install this beta" link for this plugin in
+	 * this request, or null. WordPress still checks the nonce and capability
+	 * of update.php; the package is still verified in pre_download().
+	 */
+	private static function picked( string $slug ): ?array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- update.php verifies its own nonce.
+		if ( ! is_admin() || ! isset( $_GET[ self::PICK ], $_GET['plugin'] ) || 'beta' !== $_GET[ self::PICK ] ) {
+			return null;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$target = sanitize_text_field( wp_unslash( (string) $_GET['plugin'] ) );
+		if ( $target !== $slug && $target !== Noxpress_Core::plugin_file( $slug ) ) {
+			return null;
+		}
+		if ( ! current_user_can( 'install_plugins' ) && ! current_user_can( 'update_plugins' ) ) {
+			return null;
+		}
+		$manifest = self::manifest();
+		$beta     = isset( $manifest[ $slug ]['beta'] ) ? $manifest[ $slug ]['beta'] : null;
+		return $beta ? $beta + array( 'beta' => true ) : null;
+	}
+
+	/** Release offered for a slug in this request: a picked beta, else the channel's. */
+	private static function offer( string $slug ): ?array {
+		$picked = self::picked( $slug );
+		return $picked ? $picked : self::latest( $slug );
+	}
+
+	/** Update entry for the plugin transient. */
+	private static function item( string $slug, array $rel ): object {
+		return (object) array(
+			'id'           => 'noxpress.tech/' . $slug,
+			'slug'         => $slug,
+			'plugin'       => Noxpress_Core::plugin_file( $slug ),
+			'new_version'  => $rel['version'],
+			'url'          => 'https://noxpress.tech',
+			'package'      => $rel['zip'],
+			'requires'     => $rel['requires'],
+			'requires_php' => $rel['requires_php'],
+			'tested'       => $rel['tested'],
+			'icons'        => array(),
+			'banners'      => array(),
+		);
+	}
+
+	/**
+	 * site_transient_update_plugins: during a hub "Install this beta" update,
+	 * WordPress reads the picked beta. Read-time only, never saved.
+	 */
+	public static function pick_transient( $transient ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET[ self::PICK ] ) || ! is_object( $transient ) ) {
+			return $transient;
+		}
+		foreach ( array_keys( Noxpress_Core::catalog() ) as $slug ) {
+			$rel = self::picked( $slug );
+			if ( ! $rel ) {
+				continue;
+			}
+			$file = Noxpress_Core::plugin_file( $slug );
+			$data = Noxpress_Core::installed();
+			if ( isset( $data[ $slug ] ) && version_compare( $rel['version'], (string) $data[ $slug ]['Version'], '>' ) ) {
+				$transient           = clone $transient;
+				$transient->response = isset( $transient->response ) && is_array( $transient->response ) ? $transient->response : array();
+				$transient->response[ $file ] = self::item( $slug, $rel );
+			}
+		}
+		return $transient;
+	}
+
 	/** pre_set_site_transient_update_plugins: suite entries from updates.json. */
 	public static function inject( $transient ) {
 		if ( ! is_object( $transient ) ) {
@@ -202,19 +345,7 @@ final class Noxpress_Updater {
 				continue;
 			}
 
-			$item = (object) array(
-				'id'           => 'noxpress.tech/' . $slug,
-				'slug'         => $slug,
-				'plugin'       => $file,
-				'new_version'  => $rel['version'],
-				'url'          => 'https://noxpress.tech',
-				'package'      => $rel['zip'],
-				'requires'     => $rel['requires'],
-				'requires_php' => $rel['requires_php'],
-				'tested'       => $rel['tested'],
-				'icons'        => array(),
-				'banners'      => array(),
-			);
+			$item = self::item( $slug, $rel );
 
 			$current = isset( $data['Version'] ) ? (string) $data['Version'] : '0';
 			if ( version_compare( $rel['version'], $current, '>' ) ) {
@@ -254,7 +385,7 @@ final class Noxpress_Updater {
 		if ( ! isset( $catalog[ $slug ] ) ) {
 			return null;
 		}
-		$rel = self::latest( $slug );
+		$rel = self::offer( $slug );
 		if ( ! $rel ) {
 			return null;
 		}
