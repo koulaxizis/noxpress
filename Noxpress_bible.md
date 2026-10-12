@@ -2,7 +2,8 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.14 (2026-10-11). Νέο: Store Pickup στη σουίτα (§8, θέση μενού 110· §13, κωδικός `pk`· §16, Core 1.1.4)· `pkp_get_order_store()` και φίλτρο `pkp_text` (§6)· μέθοδοι αποστολής και επιλογές του πελάτη στο ταμείο (§14.21).
+- **Έκδοση:** 1.15 (2026-10-12). Νέο: συνταγή «Εξαγωγή CSV» (§5), από τις Πωλήσεις του Store Pulse 1.6.0· `RS_VAT::get_rate` στα δημόσια APIs του RS που διαβάζει το SP (§6).
+- **1.14** (2026-10-11): Store Pickup στη σουίτα (§8, θέση μενού 110· §13, κωδικός `pk`· §16, Core 1.1.4)· `pkp_get_order_store()` και φίλτρο `pkp_text` (§6)· μέθοδοι αποστολής και επιλογές του πελάτη στο ταμείο (§14.21).
 - **1.13** (2026-10-11): Featured Creators στη σουίτα (§8, θέση μενού 100· §13, κωδικός `cr`· §16, Core 1.1.3)· `crt_get_creators()`, φίλτρο `crt_text`, action `crt_creator_changed` (§6)· περιεχόμενο που γράφει ο χρήστης μένει μετά το uninstall, εκτός αν το ζητήσει (§12)· σελίδες δικού μας post type σε κλασικά και block themes (§14.19)· structured data μαζί με SEO plugins (§14.20).
 - **1.12** (2026-10-11): Book Preview στη σουίτα (§8, §13, §16, Core 1.1.2)· κώδικας τρίτων στο plugin με τις άδειές του (§10)· αρχεία που φτιάχνει το plugin στο uploads (§12)· βαριές βιβλιοθήκες front end μόνο μετά από ενέργεια του επισκέπτη (§14.18).
 - **1.11** (2026-10-11): Shipping Notes στη σουίτα (§8, θέση μενού 90, γιατί το Book Preview κράτησε το 80· §13, §16)· φίλτρα `shn_threshold`, `shn_available_from`, `shn_text` (§6)· ονόματα plugins χωρίς το πρόθεμα «Noxpress» (§10)· δεδομένα extension του Store API μόνο για ανάγνωση (§14.4).
@@ -68,6 +69,14 @@
 - **KPI κάρτες και period form:** όπως στο Store Pulse.
 - **Μακριές εργασίες:** batches με progress bar (π.χ. Smart Formatter: 20 units ανά request στο apply).
 - **Notices μέσα στη σελίδα:** `.notice.inline`, από transient (§11).
+- **Εξαγωγή CSV** (νέο, 1.15, από τις Πωλήσεις του Store Pulse):
+  - Privileged GET στο `admin_init` (§11), με τα ίδια φίλτρα που δείχνει η οθόνη· η οθόνη και το αρχείο βγαίνουν από τον ίδιο υπολογισμό.
+  - UTF-8 με BOM, επικεφαλίδες στη γλώσσα του admin (§9), όνομα `<slug>-<τι>-<από>_<έως>.csv`.
+  - Δύο μορφές: «Excel ελληνικά» (`;` και δεκαδικό κόμμα, προεπιλογή όταν η γλώσσα είναι ελληνικά) και «Τυπικό» (`,` και δεκαδική τελεία). Αριθμοί χωρίς διαχωριστικό χιλιάδων, ώστε το Excel να τους διαβάζει ως αριθμούς.
+  - Προστασία από formulas μόνο στα κελιά κειμένου: τιμή που ξεκινά με `=`, `+`, `-`, `@`, tab ή CR παίρνει `'` μπροστά. Τα αριθμητικά κελιά μένουν αριθμοί (και αρνητικοί).
+  - Ποσά προϊόντων μόνο από τις γραμμές προϊόντων, με ΦΠΑ: μεταφορικά και fees ποτέ. Ο ΦΠΑ από τον συντελεστή του RS όταν υπάρχει (ίδιο νούμερο με τον RS), αλλιώς από τον φόρο της γραμμής του WooCommerce· η σελίδα λέει ποιο ισχύει.
+  - Επιστροφές ανά γραμμή (`_refunded_item_id`)· επιστροφή μόνο ποσού μοιράζεται αναλογικά στις γραμμές, όπως στο `RS_Reports::collect_refunds()`.
+  - Οι τελευταίες επιλογές θυμούνται ανά χρήστη σε user option (`update_user_option`, με το prefix του site), μόνο με έγκυρο nonce· τις σβήνει το `uninstall.php`.
 
 ## §6 Widget και συνεργασία
 
@@ -75,7 +84,7 @@
 - **Συμβόλαιο συνεργασίας** (hooks που ακούνε ή πυροδοτούν τα plugins):
   - `rs_invalidate_cache`: ο RS το πυροδοτεί όταν αλλάζουν δεδομένα RS ή παραγγελίες. Το SP το ακούει.
   - `noxpress_products_changed( int[] $product_ids )`: το πυροδοτεί όποιο plugin αλλάζει δεδομένα προϊόντων (SF μετά από apply/restore, Product Formats μετά από καθαρισμό ή επαναφορά upsells). Το SP το ακούει.
-  - Δημόσια APIs του RS που διαβάζει το SP: `RS_Reports::run`, `RS_Beneficiaries::collect_names`, `RS_Ledger::sum`.
+  - Δημόσια APIs του RS που διαβάζει το SP: `RS_Reports::run`, `RS_Beneficiaries::collect_names`, `RS_Ledger::sum`, `RS_VAT::get_rate( int $product_id ): float` (από το SP 1.6.0: ο συντελεστής ΦΠΑ ενός προϊόντος για τις Πωλήσεις· οι αλλαγές του πυροδοτούν `rs_invalidate_cache`).
   - `noxpress_filters_present( bool $present )`: φίλτρο. Το Shop Filters επιστρέφει `true` όταν τα φίλτρα του είναι ενεργά (ενεργοποιημένα, με τουλάχιστον ένα σετ). Το διαβάζει όποιο plugin χρειάζεται να ξέρει ότι υπάρχουν φίλτρα. Το Theme Patcher θα το διαβάζει σε επόμενη έκδοση (`TP_Checks`), ώστε να μην προτείνει τα classic widgets φίλτρων του WooCommerce όταν τα φίλτρα του Shop Filters είναι ενεργά.
 - `pfm_get_work( int $product_id ): ?array` (Product Formats): το έργο ενός προϊόντος (`id`, `name`, `members` με `id`, `format`, `variant`, `status`, `visible`), ή `null`. Το φίλτρο `pfm_formats( array $work, int $product_id )` αλλάζει το αποτέλεσμα. Τα διαβάζει όποιο plugin χρειάζεται τις μορφές ενός έργου (π.χ. ένα μελλοντικό plugin βιβλίων για schema).
 - `noxpress_withdrawal_submitted( int $order_id, array $request )` και `noxpress_withdrawal_status_changed( int $order_id, array $request, string $old_status )` (Easy Withdrawal): πυροδοτούνται όταν καταγράφεται μια δήλωση υπαναχώρησης και όταν αλλάζει η κατάστασή της. Το `$request` έχει `id`, `status`, `created`, `items` (`item_id`, `product_id`, `name`, `qty`, `unit`), `email`, `lang`, `source`. Τα ακούει όποιο plugin χρειάζεται να ξέρει για επιστροφές (π.χ. ένα μελλοντικό Store Pulse με αναφορά επιστροφών).

@@ -6,6 +6,7 @@
  *  - Options: sp_low_stock_threshold, sp_default_period_*,
  *    sp_publisher, sp_quick_cards, sp_cache_version.
  *  - Transients: sp_<md5> (cached pulse datasets) + τα timeout τους.
+ *  - User option sp_sales_last (last choices of "SP Πωλήσεις", 1.6.0).
  *
  * ΔΕΝ αγγίζει ΤΙΠΟΤΑ του Revenue Splitter (rs_* options/meta,
  * user meta rs_lang) — αν και τα δύο plugins είναι εγκατεστημένα,
@@ -71,10 +72,19 @@ if ( is_array( $sp_names ) ) {
 }
 
 // ---------------------------------------------------------------------
-// Done. Το Store Pulse δεν γράφει user meta δικό του (η γλώσσα
-// οθόνης διαβάζεται από το κοινό rs_lang του Revenue Splitter —
-// δεν το σβήνουμε εδώ), δεν γράφει post/order meta, δεν έχει
-// custom tables. Καθαρό uninstall.
+// 1.6.0: the last choices of "SP Πωλήσεις" per user (user option
+// sp_sales_last, stored with the blog prefix: <prefix>sp_sales_last).
+// Only this site's key; other sites of a network keep theirs until
+// the plugin is uninstalled there.
+// ---------------------------------------------------------------------
+
+delete_metadata( 'user', 0, $wpdb->get_blog_prefix() . 'sp_sales_last', '', true );
+
+// ---------------------------------------------------------------------
+// Done. Apart from sp_sales_last, Store Pulse writes no user meta of its
+// own (the display language comes from the shared rs_lang of Revenue
+// Splitter, which we never delete), no post/order meta and no custom
+// tables. Clean uninstall.
 // ---------------------------------------------------------------------
 
 // ---------------------------------------------------------------------

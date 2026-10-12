@@ -460,7 +460,7 @@ final class SP_Dashboard {
 	 * credits + Ko-fi pill + Noxpress Dashboard link)
 	 * =================================================================== */
 
-	private static function render_footer(): void {
+	public static function render_footer(): void {
 		?>
 		<p class="sp-footer">
 			<?php

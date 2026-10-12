@@ -6,8 +6,9 @@
  *  - Το top-level 'noxpress' (hub) το δημιουργεί το Noxpress Core
  *    (includes/noxpress-core, priority 5, Bible §16). Εμείς δένουμε
  *    ως submenus.
- *  - Σε ΚΑΘΕ συνδυασμό υπάρχουν οι δικές μας σελίδες 'sp-dashboard'
- *    και 'sp-settings' — το admin.php?page=sp-dashboard δουλεύει πάντα.
+ *  - Σε ΚΑΘΕ συνδυασμό υπάρχουν οι δικές μας σελίδες 'sp-dashboard',
+ *    'sp-sales' (1.6.0, SP_Sales) και 'sp-settings' — το
+ *    admin.php?page=sp-dashboard δουλεύει πάντα.
  *
  * Ρυθμίσεις: PRG pattern (POST → validate → redirect) με nonce
  * 'sp-save-settings', στο admin_init (πριν σταλεί οποιοδήποτε output,
@@ -105,6 +106,14 @@ final class SP_Admin {
 		);
 		add_submenu_page(
 			self::SLUG_MENU,
+			__( 'Store Pulse — Πωλήσεις ανά προϊόν', 'store-pulse' ),
+			__( 'SP Πωλήσεις', 'store-pulse' ),
+			self::CAP,
+			SP_Sales::SLUG,
+			array( 'SP_Sales', 'render_page' )
+		);
+		add_submenu_page(
+			self::SLUG_MENU,
 			__( 'Store Pulse — Ρυθμίσεις', 'store-pulse' ),
 			__( 'SP Ρυθμίσεις', 'store-pulse' ),
 			self::CAP,
@@ -123,7 +132,7 @@ final class SP_Admin {
 			? sanitize_key( wp_unslash( $_GET['page'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			: '';
 
-		$load = in_array( $page, array( self::SLUG_DASH, self::SLUG_SETTINGS ), true )
+		$load = in_array( $page, array( self::SLUG_DASH, self::SLUG_SETTINGS, SP_Sales::SLUG ), true )
 			|| ( 'index.php' === $hook ); // Quick View widget.
 
 		if ( ! $load ) {
@@ -136,6 +145,14 @@ final class SP_Admin {
 			array(),
 			SP_VERSION
 		);
+
+		// SP Πωλήσεις: WooCommerce's own select boxes (categories, and the
+		// product search from the 3rd character, Bible §5). WooCommerce
+		// registers both handles on every admin page.
+		if ( SP_Sales::SLUG === $page ) {
+			wp_enqueue_style( 'woocommerce_admin_styles' );
+			wp_enqueue_script( 'wc-enhanced-select' );
+		}
 	}
 
 	/* =====================================================================
