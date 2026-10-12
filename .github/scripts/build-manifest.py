@@ -45,6 +45,7 @@ SLUGS = {
     'sn': 'shipping-notes',
     'cr': 'featured-creators',
     'pk': 'store-pickup',
+    'vp': 'variation-picker',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
