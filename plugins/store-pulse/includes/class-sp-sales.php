@@ -18,6 +18,7 @@
  *  - ref_qty, ref_amount: refunded units and amount (always shown as is).
  *  - orders    distinct orders with at least one counted line.
  * Shipping and fees never count. Refunds per line: SP_Data::line_refunds().
+ * Line amounts are rounded to the shop's decimals before they are added.
  *
  * Orders: wc_get_orders only (HPOS and legacy), BATCH per page, filtered
  * by the chosen date (completed, paid or created) with local-day bounds
@@ -402,6 +403,11 @@ final class SP_Sales {
 		}
 		$pid_set = ( 'products' === $args['scope'] ) ? array_flip( $args['products'] ) : array();
 
+		// Line amounts are rounded to the shop's decimals, as shown on the
+		// order: WooCommerce keeps net amounts with 6 decimals, so a
+		// price incl. tax of 20.00 can read back as 19.999032.
+		$dp = wc_get_price_decimals();
+
 		$cat_cache  = array();
 		$rows       = array();
 		$all_orders = array();
@@ -442,7 +448,7 @@ final class SP_Sales {
 					$pid  = (int) $item->get_product_id();
 					$vid  = (int) $item->get_variation_id();
 					$tax  = (float) $item->get_total_tax();
-					$paid = (float) $item->get_total() + $tax;
+					$paid = round( (float) $item->get_total() + $tax, $dp );
 
 					if ( ! $args['free'] && $paid < 0.005 ) {
 						continue;
@@ -498,7 +504,7 @@ final class SP_Sales {
 
 					$r                = &$rows[ $key ];
 					$r['qty']        += (int) $item->get_quantity();
-					$r['before']     += (float) $item->get_subtotal() + (float) $item->get_subtotal_tax();
+					$r['before']     += round( (float) $item->get_subtotal() + (float) $item->get_subtotal_tax(), $dp );
 					$r['paid']       += $paid;
 					$r['tax']        += $tax;
 					$r['ref_qty']    += (int) $ref['qty'];
@@ -974,7 +980,7 @@ final class SP_Sales {
 			echo esc_html(
 				sprintf(
 					/* translators: 1: products, 2: orders */
-					__( '%1$s προϊόντα από %2$s παραγγελίες.', 'store-pulse' ),
+					__( 'Προϊόντα: %1$s · Παραγγελίες: %2$s.', 'store-pulse' ),
 					number_format_i18n( count( $rows ) ),
 					number_format_i18n( (int) $report['orders'] )
 				)

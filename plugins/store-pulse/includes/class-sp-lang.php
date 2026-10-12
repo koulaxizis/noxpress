@@ -270,7 +270,7 @@ final class SP_Lang {
 		'Τυπικό (, και δεκαδική τελεία)' => 'Standard (, and decimal point)',
 		'Προβολή' => 'Show',
 		'Λήψη CSV' => 'Download CSV',
-		'%1$s προϊόντα από %2$s παραγγελίες.' => '%1$s products from %2$s orders.',
+		'Προϊόντα: %1$s · Παραγγελίες: %2$s.' => 'Products: %1$s · Orders: %2$s.',
 		'Εδώ φαίνονται οι πρώτες %s γραμμές· το CSV έχει όλες.' => 'The first %s rows are shown here; the CSV has them all.',
 		'Ο ΦΠΑ υπολογίζεται με τον συντελεστή του Revenue Splitter για κάθε προϊόν.' => 'VAT uses the Revenue Splitter rate of each product.',
 		'Ο ΦΠΑ είναι αυτός που κατέγραψε το WooCommerce στις γραμμές των παραγγελιών. Με το Revenue Splitter υπολογίζεται με τον συντελεστή κάθε προϊόντος.' => 'VAT is the tax WooCommerce stored on the order lines. With Revenue Splitter it uses the rate of each product.',

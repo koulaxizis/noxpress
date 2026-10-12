@@ -259,12 +259,14 @@ final class SP_Data {
 	 * refund) is spread over the lines in proportion to what is still
 	 * unrefunded, against the order total minus the itemized part, so
 	 * the share of shipping and fees never lands on products. Quantities
-	 * come only from itemized lines.
+	 * come only from itemized lines. Amounts are rounded to the shop's
+	 * decimals per line, as the order shows them.
 	 *
 	 * @return array<int,array{qty:int,amount:float,tax:float}>
 	 */
 	public static function line_refunds( WC_Order $order ): array {
 
+		$dp             = wc_get_price_decimals();
 		$out            = array();
 		$unassigned     = 0.0;
 		$itemized_total = 0.0;
@@ -276,7 +278,7 @@ final class SP_Data {
 
 			foreach ( $refund->get_items( array( 'line_item', 'shipping', 'fee' ) ) as $ref_item ) {
 
-				$amount    = abs( (float) $ref_item->get_total() + (float) $ref_item->get_total_tax() );
+				$amount    = round( abs( (float) $ref_item->get_total() + (float) $ref_item->get_total_tax() ), $dp );
 				$itemized += $amount;
 
 				if ( ! $ref_item instanceof WC_Order_Item_Product ) {
@@ -322,7 +324,7 @@ final class SP_Data {
 					}
 
 					$tax   = (float) $item->get_total_tax();
-					$gross = (float) $item->get_total() + $tax;
+					$gross = round( (float) $item->get_total() + $tax, $dp );
 					$done  = $out[ $item_id ] ?? array(
 						'qty'    => 0,
 						'amount' => 0.0,
@@ -500,7 +502,7 @@ final class SP_Data {
 
 						$ref  = $line_refunds[ $item_id ] ?? array( 'qty' => 0, 'amount' => 0.0 );
 						$qty -= (int) $ref['qty'];
-						$line = (float) $item->get_total() + (float) $item->get_total_tax() - (float) $ref['amount'];
+						$line = round( (float) $item->get_total() + (float) $item->get_total_tax(), wc_get_price_decimals() ) - (float) $ref['amount'];
 
 						if ( ! isset( $per_prod[ $pid ] ) ) {
 							$per_prod[ $pid ] = array(
