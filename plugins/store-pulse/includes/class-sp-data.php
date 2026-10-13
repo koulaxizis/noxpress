@@ -222,22 +222,23 @@ final class SP_Data {
 	}
 
 	/**
-	 * Local-day [start, end] → UTC 'Y-m-d H:i:s...Y-m-d H:i:s' για το
-	 * date_created του wc_get_orders (το ερμηνεύει σε UTC — ίδιο fix
-	 * με το RS_Reports v1.3.1 #7, χωρίς το οποίο οι μεσονύκτιες
-	 * παραγγελίες πήγαιναν σε λάθος μέρα).
+	 * Local-day [start, end] → 'from_ts...to_ts' για το date_created του
+	 * wc_get_orders (ίδιο fix με το RS_Reports v1.3.1 #7, χωρίς το οποίο
+	 * οι μεσονύκτιες παραγγελίες πήγαιναν σε λάθος μέρα).
+	 *
+	 * 1.6.0: timestamps αντί για strings 'Y-m-d H:i:s...': αυτά το
+	 * WooCommerce τα συγκρίνει μόνο κατά ημέρα, οπότε το εύρος έπιανε
+	 * και τις ώρες γύρω από τα μεσάνυχτα UTC (Bible §1.3).
 	 */
 	private static function utc_created_range( string $start, string $end ): string {
 
 		try {
 			$tz = wp_timezone();
 
-			$from = ( new DateTimeImmutable( $start . ' 00:00:00', $tz ) )
-				->setTimezone( new DateTimeZone( 'UTC' ) );
-			$to = ( new DateTimeImmutable( $end . ' 23:59:59', $tz ) )
-				->setTimezone( new DateTimeZone( 'UTC' ) );
+			$from = new DateTimeImmutable( $start . ' 00:00:00', $tz );
+			$to   = new DateTimeImmutable( $end . ' 23:59:59', $tz );
 
-			return $from->format( 'Y-m-d H:i:s' ) . '...' . $to->format( 'Y-m-d H:i:s' );
+			return $from->getTimestamp() . '...' . $to->getTimestamp();
 		} catch ( Exception $e ) {
 			/*
 			 * Defensive fallback — ποτέ fatal από άκυρα date inputs.

@@ -61,6 +61,7 @@ VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The
 * New: SP Sales page (Noxpress → SP Sales): sales per product or per variation for any period, with an on-screen preview and a CSV download. Filters for period, date type, order statuses, categories and products; options for variations, free lines, refunds and a totals row; choice of columns and sort order; CSV for Greek Excel (semicolon, decimal comma) or standard. Replaces third-party "sales by product" exporters.
 * New: with Revenue Splitter, VAT uses Revenue Splitter's rate for each product.
 * Changed: the dashboard's top sellers subtract refunds per order line (units included), so they match SP Sales. Before, a refund was spread over the whole order.
+* Fixed: the dashboard's periods start and end at the exact local time. WooCommerce compared the old bounds by day only, so refunds and cancellations from late in the evening could land in the next day's figures.
 
 = 1.5.0 =
 * New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
