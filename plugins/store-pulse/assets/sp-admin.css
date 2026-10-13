@@ -372,3 +372,68 @@
 	color: #ffffff;
 }
 .sp-wrap .sp-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+/* ---------- SP Πωλήσεις (1.6.0) ---------- */
+
+.sp-wrap .sp-zone {
+	background: #14161d;
+	border: 1px solid #2e3240;
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin: 0 0 20px;
+}
+
+.sp-wrap.sp-sales .form-table th { width: 220px; }
+
+.sp-wrap.sp-sales .sp-checks label.sp-check,
+.sp-wrap.sp-sales .form-table td > label.sp-check {
+	display: inline-block;
+	margin: 0 18px 6px 0;
+}
+
+.sp-wrap.sp-sales .sp-sales-dates label { margin-left: 12px; }
+
+.sp-wrap.sp-sales input[type="date"] {
+	background: #0f1115 !important;
+	border: 1px solid #34394a !important;
+	color: #f2f0fe !important;
+	border-radius: 3px;
+	box-shadow: none;
+}
+
+.sp-wrap.sp-sales .sp-sales-pick { margin: 10px 0 0; max-width: 640px; }
+.sp-wrap.sp-sales .sp-sales-pick > label { display: block; margin-bottom: 4px; color: #b7b2d6 !important; }
+.sp-wrap.sp-sales .sp-sales-pick select { width: 100%; }
+
+/* WooCommerce select boxes (select2). The open dropdown is attached to
+   <body> by select2 and keeps the WooCommerce look (Bible §4: no rule
+   outside .sp-wrap). */
+.sp-wrap.sp-sales .select2-container .select2-selection {
+	background: #1a1d26 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #f0eefc !important;
+	min-height: 32px;
+}
+.sp-wrap.sp-sales .select2-container .select2-selection__choice {
+	background: #1d2029 !important;
+	border: 1px solid #3a3f52 !important;
+	color: #eae8fa !important;
+}
+.sp-wrap.sp-sales .select2-container .select2-search__field { color: #f0eefc !important; }
+
+.sp-wrap.sp-sales .sp-sales-actions { margin: 8px 0 0; }
+.sp-wrap.sp-sales .sp-sales-actions .button { margin-right: 8px; }
+
+.sp-wrap.sp-sales .sp-sales-scroll { overflow-x: auto; margin: 12px 0 20px; }
+.sp-wrap.sp-sales .sp-sales-scroll .sp-table { min-width: 560px; }
+/* The sticky header (above) would stick inside the scroll box and cover
+   the first row, so it stays static here. */
+.sp-wrap.sp-sales .sp-sales-scroll .sp-table thead th { position: static; }
+.sp-wrap.sp-sales .sp-table th.sp-num,
+.sp-wrap.sp-sales .sp-table td.sp-num { text-align: right; }
+
+@media screen and (max-width: 782px) {
+	.sp-wrap.sp-sales .form-table th { width: auto; }
+	.sp-wrap.sp-sales .sp-sales-dates { display: block; margin-top: 8px; }
+	.sp-wrap.sp-sales .sp-sales-dates label:first-child { margin-left: 0; }
+}

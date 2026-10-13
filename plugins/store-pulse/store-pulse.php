@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Store Pulse
  * Plugin URI:           https://noxpress.tech
- * Description:          Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
- * Version:              1.5.0
+ * Description:          Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, πωλήσεις ανά προϊόν με εξαγωγή CSV, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
+ * Version:              1.6.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -23,15 +23,18 @@
  *    ενημερωτικό μήνυμα με link.
  *  - Με Revenue Splitter: διαβάζει ΜΟΝΟ τα public APIs του
  *    (RS_Reports::run, RS_Beneficiaries::collect_names,
- *    RS_Ledger::sum) — μηδενικός διπλός υπολογισμός, κοινό
+ *    RS_Ledger::sum, and RS_VAT::get_rate for the VAT of the sales
+ *    export, 1.6.0) — μηδενικός διπλός υπολογισμός, κοινό
  *    invalidation μέσω rs_cache_version / rs_invalidate_cache.
+ *  - SP Πωλήσεις (1.6.0, SP_Sales): sales per product for any period,
+ *    preview + CSV download; works without Revenue Splitter.
  *  - Με Smart Formatter: ακούμε το noxpress_products_changed ώστε
  *    οι αλλαγές προϊόντων να ανανεώνουν άμεσα το cache.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SP_VERSION', '1.5.0' );
+define( 'SP_VERSION', '1.6.0' );
 define( 'SP_FILE', __FILE__ );
 define( 'SP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SP_URL', plugin_dir_url( __FILE__ ) );
@@ -86,9 +89,11 @@ function sp_bootstrap(): void {
 	require_once SP_PATH . 'includes/class-sp-data.php';
 	require_once SP_PATH . 'includes/class-sp-admin.php';
 	require_once SP_PATH . 'includes/class-sp-dashboard.php';
+	require_once SP_PATH . 'includes/class-sp-sales.php';
 
 	SP_Data::init();
 	SP_Admin::init();
+	SP_Sales::init();
 }
 
 /** Είναι ενεργό το Revenue Splitter (με όλα τα APIs που χρειαζόμαστε); */

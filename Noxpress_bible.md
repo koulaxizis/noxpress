@@ -2,7 +2,8 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.20 (2026-10-13). Νέο: Greeklish Permalinks στη σουίτα (§8, θέση μενού 140· §13, κωδικός `gl`· §16, Core 1.1.7)· plugins μόνο για WordPress, χωρίς WooCommerce (§1.2)· `glp_convert()` και φίλτρο `glp_convert` (§6)· πίνακας ανακατευθύνσεων μετά το uninstall (§12)· μαζικές αλλαγές σε υπάρχον περιεχόμενο (§14.24).
+- **Έκδοση:** 1.21 (2026-10-13). Νέο: συνταγή «Εξαγωγή CSV» (§5), από τις Πωλήσεις του Store Pulse 1.6.0· `RS_VAT::get_rate` στα δημόσια APIs του RS που διαβάζει το SP (§6)· κανόνας για εύρος ημερομηνιών στο `wc_get_orders` (§1.3), από τον Revenue Splitter 1.9.1.
+- **1.20** (2026-10-13): Greeklish Permalinks στη σουίτα (§8, θέση μενού 140· §13, κωδικός `gl`· §16, Core 1.1.7)· plugins μόνο για WordPress, χωρίς WooCommerce (§1.2)· `glp_convert()` και φίλτρο `glp_convert` (§6)· πίνακας ανακατευθύνσεων μετά το uninstall (§12)· μαζικές αλλαγές σε υπάρχον περιεχόμενο (§14.24).
 - **1.19** (2026-10-13): σελίδα Supporters του site, με τη λίστα ζωντανά από το NULL JSFX, και σύνδεσμοι Ko-fi και Supporters στο footer του site (§19).
 - **1.18** (2026-10-13): δωρεάν για πάντα, πληρωμένα πρόσθετα μόνο ως ξεχωριστά plugins, υπηρεσίες και υποστηρικτές (§18).
 - **1.17** (2026-10-13): μαζικές αλλαγές δεδομένων γράφουν το αντίγραφο ασφαλείας πριν από την αλλαγή και δεν ξεκινούν αν δεν χωρά ολόκληρο (§12), από το Smart Formatter 1.4.0.
@@ -28,7 +29,7 @@
 1. **Αυτονομία.** Κάθε plugin δουλεύει μόνο του. Η συνεργασία με τα άλλα γίνεται **μόνο** μέσω των δημόσιων hooks και APIs του §6, ποτέ με απευθείας ανάγνωση των options ή των πινάκων άλλου plugin.
 2. **WooCommerce ως προϋπόθεση.** Χωρίς ενεργό WooCommerce το plugin φορτώνει μόνο τη γλώσσα (§9), το Noxpress Core (§16, ώστε το hub και οι ενημερώσεις να δουλεύουν πάντα) και ένα admin notice (σε χρήστες με `activate_plugins`). Κανένας κώδικας που εξαρτάται από το WC δεν φορτώνεται.
    - **Εξαίρεση: plugins μόνο για WordPress** (νέο, από το Greeklish Permalinks). Ένα plugin που δεν χρειάζεται το WooCommerce (π.χ. permalinks) δουλεύει και χωρίς αυτό: χωρίς `Requires Plugins`, χωρίς τα headers `WC requires / tested`, χωρίς δήλωση HPOS και χωρίς notice. Ό,τι αφορά το WooCommerce (προϊόντα, ιδιότητες, αρχεία για download) φορτώνεται μόνο όταν υπάρχει (`function_exists` / `class_exists`). Capability `manage_options` για ρυθμίσεις όλου του site. Η απόκλιση γράφεται στο docblock του bootstrap.
-3. **HPOS.** Κάθε plugin δηλώνει συμβατότητα `custom_order_tables` στο `before_woocommerce_init`. Παραγγελίες διαβάζονται μόνο μέσω CRUD ή `wc_get_orders`.
+3. **HPOS.** Κάθε plugin δηλώνει συμβατότητα `custom_order_tables` στο `before_woocommerce_init`. Παραγγελίες διαβάζονται μόνο μέσω CRUD ή `wc_get_orders`. Εύρος ημερομηνιών (`date_created`, `date_paid`, `date_completed`) δίνεται πάντα ως timestamps `from_ts...to_ts` από τα όρια της τοπικής ημέρας (`wp_timezone()`), ποτέ ως strings `Y-m-d H:i:s...`: αυτά το WooCommerce τα συγκρίνει μόνο κατά ημέρα.
 4. **Ασφάλεια πρώτα.** Nonce και capability σε κάθε αλλαγή κατάστασης. Αυστηρή επικύρωση με whitelists. Καμία εμπιστοσύνη σε εισαγόμενα δεδομένα (§11).
 5. **Καθαρό uninstall.** Μετά το Delete δεν μένει τίποτα δικό του plugin στη βάση (§12).
 6. **Κανένα υπόλειμμα στο frontend** χωρίς λόγο. Ό,τι τρέχει στο frontend ακολουθεί τον §14.
@@ -75,6 +76,14 @@
 - **KPI κάρτες και period form:** όπως στο Store Pulse.
 - **Μακριές εργασίες:** batches με progress bar (π.χ. Smart Formatter: 20 units ανά request στο apply).
 - **Notices μέσα στη σελίδα:** `.notice.inline`, από transient (§11).
+- **Εξαγωγή CSV** (νέο, 1.21, από τις Πωλήσεις του Store Pulse):
+  - Privileged GET στο `admin_init` (§11), με τα ίδια φίλτρα που δείχνει η οθόνη· η οθόνη και το αρχείο βγαίνουν από τον ίδιο υπολογισμό.
+  - UTF-8 με BOM, επικεφαλίδες στη γλώσσα του admin (§9), όνομα `<slug>-<τι>-<από>_<έως>.csv`.
+  - Δύο μορφές: «Excel ελληνικά» (`;` και δεκαδικό κόμμα, προεπιλογή όταν η γλώσσα είναι ελληνικά) και «Τυπικό» (`,` και δεκαδική τελεία). Αριθμοί χωρίς διαχωριστικό χιλιάδων, ώστε το Excel να τους διαβάζει ως αριθμούς.
+  - Προστασία από formulas μόνο στα κελιά κειμένου: τιμή που ξεκινά με `=`, `+`, `-`, `@`, tab ή CR παίρνει `'` μπροστά. Τα αριθμητικά κελιά μένουν αριθμοί (και αρνητικοί).
+  - Ποσά προϊόντων μόνο από τις γραμμές προϊόντων, με ΦΠΑ: μεταφορικά και fees ποτέ. Ο ΦΠΑ από τον συντελεστή του RS όταν υπάρχει (ίδιο νούμερο με τον RS), αλλιώς από τον φόρο της γραμμής του WooCommerce· η σελίδα λέει ποιο ισχύει.
+  - Επιστροφές ανά γραμμή (`_refunded_item_id`)· επιστροφή μόνο ποσού μοιράζεται αναλογικά στις γραμμές, όπως στο `RS_Reports::collect_refunds()`.
+  - Οι τελευταίες επιλογές θυμούνται ανά χρήστη σε user option (`update_user_option`, με το prefix του site), μόνο με έγκυρο nonce· τις σβήνει το `uninstall.php`.
 
 ## §6 Widget και συνεργασία
 
@@ -82,7 +91,7 @@
 - **Συμβόλαιο συνεργασίας** (hooks που ακούνε ή πυροδοτούν τα plugins):
   - `rs_invalidate_cache`: ο RS το πυροδοτεί όταν αλλάζουν δεδομένα RS ή παραγγελίες. Το SP το ακούει.
   - `noxpress_products_changed( int[] $product_ids )`: το πυροδοτεί όποιο plugin αλλάζει δεδομένα προϊόντων (SF μετά από apply/restore, Product Formats μετά από καθαρισμό ή επαναφορά upsells). Το SP το ακούει.
-  - Δημόσια APIs του RS που διαβάζει το SP: `RS_Reports::run`, `RS_Beneficiaries::collect_names`, `RS_Ledger::sum`.
+  - Δημόσια APIs του RS που διαβάζει το SP: `RS_Reports::run`, `RS_Beneficiaries::collect_names`, `RS_Ledger::sum`, `RS_VAT::get_rate( int $product_id ): float` (από το SP 1.6.0: ο συντελεστής ΦΠΑ ενός προϊόντος για τις Πωλήσεις· οι αλλαγές του πυροδοτούν `rs_invalidate_cache`).
   - `noxpress_filters_present( bool $present )`: φίλτρο. Το Shop Filters επιστρέφει `true` όταν τα φίλτρα του είναι ενεργά (ενεργοποιημένα, με τουλάχιστον ένα σετ). Το διαβάζει όποιο plugin χρειάζεται να ξέρει ότι υπάρχουν φίλτρα. Το Theme Patcher θα το διαβάζει σε επόμενη έκδοση (`TP_Checks`), ώστε να μην προτείνει τα classic widgets φίλτρων του WooCommerce όταν τα φίλτρα του Shop Filters είναι ενεργά.
 - `pfm_get_work( int $product_id ): ?array` (Product Formats): το έργο ενός προϊόντος (`id`, `name`, `members` με `id`, `format`, `variant`, `status`, `visible`), ή `null`. Το φίλτρο `pfm_formats( array $work, int $product_id )` αλλάζει το αποτέλεσμα. Τα διαβάζει όποιο plugin χρειάζεται τις μορφές ενός έργου (π.χ. ένα μελλοντικό plugin βιβλίων για schema).
 - `noxpress_withdrawal_submitted( int $order_id, array $request )` και `noxpress_withdrawal_status_changed( int $order_id, array $request, string $old_status )` (Easy Withdrawal): πυροδοτούνται όταν καταγράφεται μια δήλωση υπαναχώρησης και όταν αλλάζει η κατάστασή της. Το `$request` έχει `id`, `status`, `created`, `items` (`item_id`, `product_id`, `name`, `qty`, `unit`), `email`, `lang`, `source`. Τα ακούει όποιο plugin χρειάζεται να ξέρει για επιστροφές (π.χ. ένα μελλοντικό Store Pulse με αναφορά επιστροφών).

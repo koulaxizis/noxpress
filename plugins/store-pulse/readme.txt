@@ -1,11 +1,11 @@
 === Store Pulse ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, dashboard, orders, stock, reports
+Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -19,9 +19,10 @@ Store Pulse adds a compact dashboard and a WordPress home-screen widget ("Quick 
 * Completed orders in a configurable period (by completion date), unique customers, average order value and the top 10 best-selling products. Amounts use line items only (shipping and fees are excluded) minus refunds.
 * Refunds (count and amount) and cancelled orders in their own configurable periods.
 * Low-stock and out-of-stock products, including variations that manage their own stock. Counts are complete; the lists show up to 50 products.
+* Sales by product (Noxpress → SP Sales): units and amounts per product, or per variation, for any period (presets, this or last month or year, all time, or your own dates), counted by completed, paid or created date. Choose the order statuses, all products, some categories (subcategories included) or specific products, whether free lines count and whether refunds are subtracted, the columns (ID, name, SKU, categories, units, before discount, discount, sales, VAT, net, refunded units and amount, orders, stock) and the sort order. See the first 50 rows on screen with totals, or download everything as CSV: "Excel, Greek" (semicolon and decimal comma) or standard (comma and decimal point), UTF-8 with BOM. Amounts include VAT; shipping and fees never count. With Revenue Splitter, VAT uses its rate for each product, so the figures match Revenue Splitter; without it, the tax WooCommerce stored on each order line. Your last choices are remembered per user.
 * With the Revenue Splitter plugin active: the publisher's share and net amount for the period, and what is owed to every other beneficiary. Store Pulse only reads Revenue Splitter's public APIs and never recalculates splits, VAT or shipping.
 
-Part of the Noxpress plugin family. All Noxpress plugins share a single "Noxpress" admin menu; its first page is the Noxpress hub (status, versions and updates of the whole suite), and Store Pulse adds its pages under it. The pages are always available at `admin.php?page=sp-dashboard` and `admin.php?page=sp-settings`.
+Part of the Noxpress plugin family. All Noxpress plugins share a single "Noxpress" admin menu; its first page is the Noxpress hub (status, versions and updates of the whole suite), and Store Pulse adds its pages under it. The pages are always available at `admin.php?page=sp-dashboard`, `admin.php?page=sp-sales` and `admin.php?page=sp-settings`.
 
 Updates: updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
 
@@ -48,9 +49,19 @@ Yes. All order queries use the WooCommerce order API.
 
 = What is removed on uninstall? =
 
-Only Store Pulse's own options and cached transients. Revenue Splitter data and the shared language setting are left untouched.
+Only Store Pulse's own options, cached transients and each user's last choices on the SP Sales page. Revenue Splitter data and the shared language setting are left untouched.
+
+= Why can the sales figures differ from Revenue Splitter's report? =
+
+VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The totals differ only when the choices differ: Revenue Splitter counts completed and processing orders by order date, from its "sales start" date, while SP Sales counts the statuses and the date you choose.
 
 == Changelog ==
+
+= 1.6.0 =
+* New: SP Sales page (Noxpress → SP Sales): sales per product or per variation for any period, with an on-screen preview and a CSV download. Filters for period, date type, order statuses, categories and products; options for variations, free lines, refunds and a totals row; choice of columns and sort order; CSV for Greek Excel (semicolon, decimal comma) or standard. Replaces third-party "sales by product" exporters.
+* New: with Revenue Splitter, VAT uses Revenue Splitter's rate for each product.
+* Changed: the dashboard's top sellers subtract refunds per order line (units included), so they match SP Sales. Before, a refund was spread over the whole order.
+* Fixed: the dashboard's periods start and end at the exact local time. WooCommerce compared the old bounds by day only, so refunds and cancellations from late in the evening could land in the next day's figures.
 
 = 1.5.0 =
 * New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.

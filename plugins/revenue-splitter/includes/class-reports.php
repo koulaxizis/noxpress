@@ -295,24 +295,26 @@ class RS_Reports {
 		}
 
 		/*
-		 * v1.3.1 FIX (#7): UTC conversion των LOCAL-day ορίων.
+		 * v1.3.1 FIX (#7): LOCAL-day όρια της περιόδου.
 		 *
-		 * Το date_created του wc_get_orders() ερμηνεύει τα date strings
-		 * ως UTC. Χτίζουμε τα όρια της περιόδου ως αντικείμενα στην
-		 * τοπική ζώνη (00:00:00 τοπική ώρα → 23:59:59 τοπική ώρα),
-		 * τα μετατρέπουμε σε UTC και τα formatάρουμε — έτσι το query
-		 * επιστρέφει ακριβώς ό,τι αντιστοιχεί στην τοπική ημερομηνία
-		 * της περιόδου.
+		 * Χτίζουμε τα όρια ως αντικείμενα στην τοπική ζώνη (00:00:00 →
+		 * 23:59:59 τοπική ώρα) και τα δίνουμε ως timestamps (v1.9.1) —
+		 * έτσι το query επιστρέφει ακριβώς ό,τι αντιστοιχεί στην τοπική
+		 * ημερομηνία της περιόδου.
 		 */
 		try {
 			$tz         = wp_timezone();
 			$local_from = new DateTimeImmutable( $args['date_start'] . ' 00:00:00', $tz );
 			$local_to   = new DateTimeImmutable( $args['date_end'] . ' 23:59:59', $tz );
 
-			$utc_from = $local_from->setTimezone( new DateTimeZone( 'UTC' ) );
-			$utc_to   = $local_to->setTimezone( new DateTimeZone( 'UTC' ) );
-
-			$created_range = $utc_from->format( 'Y-m-d H:i:s' ) . '...' . $utc_to->format( 'Y-m-d H:i:s' );
+			/*
+			 * v1.9.1 FIX: absolute timestamps, όχι date strings. Με strings
+			 * «Y-m-d H:i:s...Y-m-d H:i:s» το WooCommerce συγκρίνει μόνο την
+			 * ημέρα, οπότε μια παραγγελία στις 23:50 τοπική ώρα της 31/12
+			 * (21:50 UTC) έμπαινε στη νέα χρονιά. Με «from_ts...to_ts» η
+			 * σύγκριση γίνεται στο δευτερόλεπτο, σε HPOS και σε posts.
+			 */
+			$created_range = $local_from->getTimestamp() . '...' . $local_to->getTimestamp();
 		} catch ( Exception $e ) {
 			// Αμυντικό fallback στην παλιά συμπεριφορά — το compute δεν
 			// πρέπει ποτέ να γίνεται αιτία fatal από άκυρο date input.

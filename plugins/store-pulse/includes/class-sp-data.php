@@ -199,7 +199,7 @@ final class SP_Data {
 	 * @param callable $producer () => array.
 	 * @return array
 	 */
-	private static function cached( string $key, callable $producer ): array {
+	public static function cached( string $key, callable $producer ): array {
 
 		$gen = 'rs' . (string) get_option( 'rs_cache_version', '0' )
 			. '|sp' . (string) get_option( 'sp_cache_version', '0' );
@@ -222,22 +222,23 @@ final class SP_Data {
 	}
 
 	/**
-	 * Local-day [start, end] → UTC 'Y-m-d H:i:s...Y-m-d H:i:s' για το
-	 * date_created του wc_get_orders (το ερμηνεύει σε UTC — ίδιο fix
-	 * με το RS_Reports v1.3.1 #7, χωρίς το οποίο οι μεσονύκτιες
-	 * παραγγελίες πήγαιναν σε λάθος μέρα).
+	 * Local-day [start, end] → 'from_ts...to_ts' για το date_created του
+	 * wc_get_orders (ίδιο fix με το RS_Reports v1.3.1 #7, χωρίς το οποίο
+	 * οι μεσονύκτιες παραγγελίες πήγαιναν σε λάθος μέρα).
+	 *
+	 * 1.6.0: timestamps αντί για strings 'Y-m-d H:i:s...': αυτά το
+	 * WooCommerce τα συγκρίνει μόνο κατά ημέρα, οπότε το εύρος έπιανε
+	 * και τις ώρες γύρω από τα μεσάνυχτα UTC (Bible §1.3).
 	 */
 	private static function utc_created_range( string $start, string $end ): string {
 
 		try {
 			$tz = wp_timezone();
 
-			$from = ( new DateTimeImmutable( $start . ' 00:00:00', $tz ) )
-				->setTimezone( new DateTimeZone( 'UTC' ) );
-			$to = ( new DateTimeImmutable( $end . ' 23:59:59', $tz ) )
-				->setTimezone( new DateTimeZone( 'UTC' ) );
+			$from = new DateTimeImmutable( $start . ' 00:00:00', $tz );
+			$to   = new DateTimeImmutable( $end . ' 23:59:59', $tz );
 
-			return $from->format( 'Y-m-d H:i:s' ) . '...' . $to->format( 'Y-m-d H:i:s' );
+			return $from->getTimestamp() . '...' . $to->getTimestamp();
 		} catch ( Exception $e ) {
 			/*
 			 * Defensive fallback — ποτέ fatal από άκυρα date inputs.
@@ -247,6 +248,103 @@ final class SP_Data {
 			 */
 			return $start . ' 00:00:00...' . $end . ' 23:59:59';
 		}
+	}
+
+	/**
+	 * Refunds of one order per product line (original item id), as
+	 * positive numbers: qty, amount (incl. tax) and tax.
+	 *
+	 * Same model as RS_Reports::collect_refunds() (Revenue Splitter
+	 * 1.7.0): itemized refund lines count against their own line; the
+	 * rest of a refund that has no lines (amount only, e.g. a gateway
+	 * refund) is spread over the lines in proportion to what is still
+	 * unrefunded, against the order total minus the itemized part, so
+	 * the share of shipping and fees never lands on products. Quantities
+	 * come only from itemized lines. Amounts are rounded to the shop's
+	 * decimals per line, as the order shows them.
+	 *
+	 * @return array<int,array{qty:int,amount:float,tax:float}>
+	 */
+	public static function line_refunds( WC_Order $order ): array {
+
+		$dp             = wc_get_price_decimals();
+		$out            = array();
+		$unassigned     = 0.0;
+		$itemized_total = 0.0;
+
+		foreach ( $order->get_refunds() as $refund ) {
+			/** @var WC_Order_Refund $refund */
+
+			$itemized = 0.0;
+
+			foreach ( $refund->get_items( array( 'line_item', 'shipping', 'fee' ) ) as $ref_item ) {
+
+				$amount    = round( abs( (float) $ref_item->get_total() + (float) $ref_item->get_total_tax() ), $dp );
+				$itemized += $amount;
+
+				if ( ! $ref_item instanceof WC_Order_Item_Product ) {
+					continue;
+				}
+
+				$orig = (int) $ref_item->get_meta( '_refunded_item_id' );
+				if ( $orig <= 0 ) {
+					continue;
+				}
+
+				if ( ! isset( $out[ $orig ] ) ) {
+					$out[ $orig ] = array(
+						'qty'    => 0,
+						'amount' => 0.0,
+						'tax'    => 0.0,
+					);
+				}
+
+				$out[ $orig ]['qty']    += abs( (int) $ref_item->get_quantity() );
+				$out[ $orig ]['amount'] += $amount;
+				$out[ $orig ]['tax']    += abs( (float) $ref_item->get_total_tax() );
+			}
+
+			$itemized_total += $itemized;
+
+			$rest = abs( (float) $refund->get_amount() ) - $itemized;
+			if ( $rest > 0.005 ) {
+				$unassigned += $rest;
+			}
+		}
+
+		if ( $unassigned > 0.005 ) {
+
+			$remaining = (float) $order->get_total() - $itemized_total;
+
+			if ( $remaining > 0.005 ) {
+				$ratio = min( 1.0, $unassigned / $remaining );
+
+				foreach ( $order->get_items() as $item_id => $item ) {
+					if ( ! $item instanceof WC_Order_Item_Product ) {
+						continue;
+					}
+
+					$tax   = (float) $item->get_total_tax();
+					$gross = round( (float) $item->get_total() + $tax, $dp );
+					$done  = $out[ $item_id ] ?? array(
+						'qty'    => 0,
+						'amount' => 0.0,
+						'tax'    => 0.0,
+					);
+
+					$left = max( 0.0, $gross - $done['amount'] );
+					if ( $left <= 0.0 ) {
+						continue;
+					}
+
+					$done['amount'] += $left * $ratio;
+					$done['tax']    += max( 0.0, $tax - $done['tax'] ) * $ratio;
+					$out[ $item_id ] = $done;
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	/* =====================================================================
@@ -292,6 +390,10 @@ final class SP_Data {
 	 *
 	 * Refunds αφαιρούνται από το gross (get_total_refunded), ώστε το
 	 * νούμερο να είναι αυτό που τελικά πληρώθηκε στην περίοδο.
+	 *
+	 * 1.6.0: the per-product figures (top sellers) subtract refunds per
+	 * line (line_refunds()), quantities included, the same way as the
+	 * sales export (SP_Sales), so both show the same numbers.
 	 *
 	 * @return array{count:int,gross:float,customers:int,aov:float,products:array<int,array{id:int,title:string,qty:int,gross:float}>}
 	 */
@@ -373,16 +475,7 @@ final class SP_Data {
 					$paid     = $order_items_gross - $refunded;
 					$gross   += $paid;
 
-					/*
-					 * Refund ratio ανά παραγγελία: μοιράζουμε το refunded
-					 * ποσό αναλογικά στα line items, ώστε το per-product
-					 * gross να συμφωνεί με το order-level gross. Clamp στο
-					 * 1.0 — το refunded μπορεί να περιλαμβάνει και return
-					 * μεταφορικών από το Woo.
-					 */
-					$ratio = ( $order_items_gross > 0 && $refunded > 0 )
-						? min( 1.0, $refunded / $order_items_gross )
-						: 0.0;
+					$line_refunds = self::line_refunds( $order );
 
 					$cid = (int) $order->get_customer_id();
 					if ( $cid > 0 ) {
@@ -394,7 +487,7 @@ final class SP_Data {
 						}
 					}
 
-					foreach ( $order->get_items() as $item ) {
+					foreach ( $order->get_items() as $item_id => $item ) {
 						/** @var WC_Order_Item_Product $item */
 
 						if ( ! $item instanceof WC_Order_Item_Product ) {
@@ -408,7 +501,9 @@ final class SP_Data {
 							continue;
 						}
 
-						$line = ( (float) $item->get_total() + (float) $item->get_total_tax() ) * ( 1.0 - $ratio );
+						$ref  = $line_refunds[ $item_id ] ?? array( 'qty' => 0, 'amount' => 0.0 );
+						$qty -= (int) $ref['qty'];
+						$line = round( (float) $item->get_total() + (float) $item->get_total_tax(), wc_get_price_decimals() ) - (float) $ref['amount'];
 
 						if ( ! isset( $per_prod[ $pid ] ) ) {
 							$per_prod[ $pid ] = array(
@@ -441,6 +536,14 @@ final class SP_Data {
 							return $b['gross'] <=> $a['gross'];
 						}
 						return $b['qty'] <=> $a['qty'];
+					}
+				);
+
+				// Fully refunded products drop out of the list.
+				$per_prod = array_filter(
+					$per_prod,
+					static function ( $row ) {
+						return $row['qty'] > 0 || $row['gross'] > 0.004;
 					}
 				);
 
