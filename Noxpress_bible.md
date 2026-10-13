@@ -2,7 +2,8 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.15 (2026-10-13). Νέο: δωρεάν για πάντα, πληρωμένα πρόσθετα μόνο ως ξεχωριστά plugins, υπηρεσίες και υποστηρικτές (§18).
+- **Έκδοση:** 1.16 (2026-10-13). Νέο: σελίδα Supporters του site, με τη λίστα ζωντανά από το NULL JSFX, και σύνδεσμοι Ko-fi και Supporters στο footer του site (§19).
+- **1.15** (2026-10-13): δωρεάν για πάντα, πληρωμένα πρόσθετα μόνο ως ξεχωριστά plugins, υπηρεσίες και υποστηρικτές (§18).
 - **1.14** (2026-10-11): Store Pickup στη σουίτα (§8, θέση μενού 110· §13, κωδικός `pk`· §16, Core 1.1.4)· `pkp_get_order_store()` και φίλτρο `pkp_text` (§6)· μέθοδοι αποστολής και επιλογές του πελάτη στο ταμείο (§14.21).
 - **1.13** (2026-10-11): Featured Creators στη σουίτα (§8, θέση μενού 100· §13, κωδικός `cr`· §16, Core 1.1.3)· `crt_get_creators()`, φίλτρο `crt_text`, action `crt_creator_changed` (§6)· περιεχόμενο που γράφει ο χρήστης μένει μετά το uninstall, εκτός αν το ζητήσει (§12)· σελίδες δικού μας post type σε κλασικά και block themes (§14.19)· structured data μαζί με SEO plugins (§14.20).
 - **1.12** (2026-10-11): Book Preview στη σουίτα (§8, §13, §16, Core 1.1.2)· κώδικας τρίτων στο plugin με τις άδειές του (§10)· αρχεία που φτιάχνει το plugin στο uploads (§12)· βαριές βιβλιοθήκες front end μόνο μετά από ενέργεια του επισκέπτη (§14.18).
@@ -325,3 +326,16 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
 - **Πληρωμένα πρόσθετα (μελλοντικά):** μόνο **νέες** λειτουργίες, ως **ξεχωριστό plugin** που απαιτεί το δωρεάν (`Requires Plugins`), σε ιδιωτικό repo. Όνομα «<Plugin> Pro» (π.χ. «Revenue Splitter Pro»), ποτέ με πρόθεμα «Noxpress» (§10). Βγαίνει προς πώληση μόνο αφού το δωρεάν plugin που χρειάζεται έχει γίνει stable (§13). Πληρωμές μέσω πλατφόρμας merchant of record.
 - **Πότε ανοίγει το θέμα:** όταν περάσουμε ~100 ενεργά sites εκτός των δικών μας, ή όταν 3+ πελάτες ζητήσουν το ίδιο πληρωμένο feature. Μέτρο μέχρι τότε: οι λήψεις κάθε νέας έκδοσης (§17), χωρίς telemetry.
 - **Στήριξη σήμερα:** Ko-fi (μία φορά, μηνιαία μέλη στο `/tiers`, υπηρεσίες στο `/commissions`) και το `.github/FUNDING.yml` του repo. Το site έχει την ενότητα `#support` με τις κάρτες `#free-forever`, `#services` και `#supporters`, με EN/EL strings `ff_*`, `sv_*`, `ms_*`.
+
+## §19 Σελίδα Supporters στο site (νέο, 1.16)
+
+Η σελίδα `/supporters/` του noxpress.tech (`supporters/index.html`), EN/EL με το ίδιο `nx_lang` της αρχικής. Δείχνει τους μηνιαίους supporters του Ko-fi, κοινούς για NULL JSFX, orOS και noxpress.
+
+- **Μία πηγή:** `https://nulljsfx.tech/supporters.json`, μορφή `{"updated":"YYYY-MM-DD","supporters":[{"name":"…","tier":"Patron|Backer"}]}`. Η λίστα **δεν αντιγράφεται** ποτέ στο repo ή στη σελίδα. Αλλαγές στη λίστα γίνονται μόνο στο repo `null-jsfx`.
+- **Fetch από τον browser** (cross-origin, χωρίς cookies). Το nulljsfx.tech είναι GitHub Pages, που στέλνει `Access-Control-Allow-Origin: *`. Αν φύγει ποτέ από το GitHub Pages, ο νέος host πρέπει να στέλνει το ίδιο header για το `supporters.json`.
+- **Αποτυχία** (δίκτυο, HTTP σφάλμα, χρόνος πάνω από 8 δευτερόλεπτα, λάθος μορφή): η σελίδα δείχνει σύνδεσμο προς `https://nulljsfx.tech/supporters/`. Χωρίς JS το ίδιο, με `<noscript>`.
+- **Ασφάλεια:** τα ονόματα γράφονται μόνο με `textContent`, ποτέ με `innerHTML`. Κρατιούνται μόνο εγγραφές με `name` κείμενο (έως 80 χαρακτήρες) και `tier` ακριβώς `Patron` ή `Backer`· οτιδήποτε άλλο αγνοείται.
+- **Σειρά:** πρώτα οι Patrons, μετά οι Backers, με τη σειρά του αρχείου μέσα σε κάθε tier. Τα ονόματα των tiers μένουν όπως στο Ko-fi και στα ελληνικά.
+- **Άδεια λίστα:** «The list is brand new. Your name could be the first one here.» / «Η λίστα μόλις ξεκίνησε. Το όνομά σου μπορεί να είναι το πρώτο εδώ.»
+- **Κάλεσμα:** ένα κουμπί «Become a monthly supporter» προς `https://ko-fi.com/koulaxizis/tiers` και η σημείωση ότι Backers και Patrons απαντούν στο μήνυμα καλωσορίσματος του Ko-fi με το όνομα που θέλουν. Ισχύει ο §18: τίποτα δεν κλειδώνει, κανένα nag, στήριξη μόνο μέσω Ko-fi.
+- **Footer του site:** σε κάθε σελίδα, η γραμμή `Ko-fi · Supporters` (`ft_supporters`) κάτω από τη γραμμή του noxpress. Νέα σελίδα του site παίρνει το ίδιο footer.

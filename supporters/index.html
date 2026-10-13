@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Supporters — noxpress</title>
+<meta name="description" content="The monthly Ko-fi supporters who keep NULL JSFX, orOS and noxpress free and open source for everyone." />
+<link rel="canonical" href="https://noxpress.tech/supporters/" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Supporters — noxpress" />
+<meta property="og:description" content="The monthly Ko-fi supporters who keep NULL JSFX, orOS and noxpress free and open source for everyone." />
+<meta property="og:url" content="https://noxpress.tech/supporters/" />
+<meta property="og:site_name" content="noxpress" />
+<style>
+:root {
+	--bg: #0d0f14;
+	--surface: #14161d;
+	--border: #262a35;
+	--text: #e4e2f5;
+	--muted: #9b97b8;
+	--accent: #6d4aff;
+	--accent-bright: #b3a4ff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+	background: var(--bg);
+	color: var(--text);
+	font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 0 24px;
+}
+
+header { padding: 72px 0 40px; }
+.header-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+.wordmark {
+	font-size: clamp(2rem, 5vw, 3rem);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: #f2f0fe;
+	text-decoration: none;
+}
+.wordmark .dot { color: var(--accent); }
+.tagline {
+	color: var(--muted);
+	margin-top: 12px;
+	font-size: 1.05rem;
+	max-width: 40em;
+}
+.lang-toggle {
+	flex-shrink: 0;
+	margin-top: 10px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	color: var(--accent-bright);
+	font: 600 0.8rem/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 9px 14px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+.lang-toggle:hover { border-color: var(--accent); color: #fff; }
+
+.section-title {
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--muted);
+	margin-bottom: 20px;
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-left: 3px solid var(--accent);
+	border-radius: 8px;
+	padding: 28px;
+	margin-bottom: 28px;
+}
+.card h2 {
+	font-size: 1.35rem;
+	font-weight: 600;
+	color: #f2f0fe;
+	margin-bottom: 4px;
+}
+.card p { color: var(--text); max-width: 46em; }
+.card .note {
+	margin-top: 14px;
+	color: var(--muted);
+	font-size: 0.92rem;
+}
+.card a { color: var(--accent-bright); }
+
+.tier + .tier { margin-top: 24px; }
+.tier h3 {
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--accent-bright);
+	margin-bottom: 10px;
+}
+.names {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.names li {
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	padding: 4px 14px;
+	font-size: 0.95rem;
+	color: var(--text);
+	background: #181b23;
+	overflow-wrap: anywhere;
+	max-width: 100%;
+}
+.tier.patron .names li {
+	border-color: var(--accent);
+	background: rgba(109, 74, 255, 0.18);
+	color: #f2f0fe;
+	font-weight: 600;
+}
+.card .list-status { color: var(--muted); }
+.card .updated {
+	margin-top: 18px;
+	font-size: 0.82rem;
+	color: var(--muted);
+}
+
+.actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+	display: inline-block;
+	padding: 8px 16px;
+	border-radius: 6px;
+	text-decoration: none;
+	font-size: 0.9rem;
+	font-weight: 500;
+	border: 1px solid var(--border);
+	color: var(--text);
+}
+.btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+.btn.primary {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #fff;
+}
+.btn.primary:hover { background: #8263ff; color: #fff; }
+.card .btn.primary { color: #fff; }
+
+footer {
+	margin-top: 24px;
+	padding: 24px 0 48px;
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	font-size: 0.85rem;
+	text-align: center;
+}
+footer a { color: var(--accent-bright); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer .credits, footer .footer-links { margin-top: 6px; }
+footer .heart { color: var(--accent-bright); }
+
+@media (prefers-color-scheme: light) {
+	/* Dark mode only — respected intentionally, no light mode offered. */
+}
+@media (max-width: 480px) {
+	body { padding: 0 16px; }
+	header { padding: 48px 0 32px; }
+	.card { padding: 22px 18px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+	<div class="header-row">
+		<div>
+			<a class="wordmark" href="/">noxpress<span class="dot">.</span></a>
+			<p class="tagline" data-i18n="intro">The monthly Ko-fi supporters who keep NULL JSFX, orOS and noxpress free and open source for everyone. Thank you.</p>
+		</div>
+		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
+	</div>
+</header>
+
+<main>
+	<h1 class="section-title" data-i18n="title">Supporters</h1>
+
+	<section class="card" aria-labelledby="listTitle">
+		<h2 id="listTitle" data-i18n="list_title">Thank you</h2>
+		<div id="list" aria-live="polite">
+			<p class="list-status" id="listStatus" data-i18n="loading">Loading the list…</p>
+		</div>
+		<noscript>
+			<p class="list-status">See the list on <a href="https://nulljsfx.tech/supporters/" rel="noopener">nulljsfx.tech/supporters</a>.</p>
+		</noscript>
+		<p class="updated" id="updated" hidden></p>
+	</section>
+
+	<section class="card" aria-labelledby="joinTitle">
+		<h2 id="joinTitle" data-i18n="join_title">Join them</h2>
+		<p data-i18n="join_desc">Everything stays free, with no paywall and no nags. Support is optional and happens only through Ko-fi.</p>
+		<div class="actions">
+			<a class="btn primary" href="https://ko-fi.com/koulaxizis/tiers" target="_blank" rel="noopener noreferrer" data-i18n="join_btn">Become a monthly supporter</a>
+		</div>
+		<p class="note" data-i18n="join_note">Backers and Patrons can have their name listed here. Reply to the Ko-fi welcome message with the name you'd like shown.</p>
+	</section>
+</main>
+
+<footer>
+	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
+	<p class="footer-links"><a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">Ko-fi</a> · <a href="/supporters/" data-i18n="ft_supporters">Supporters</a></p>
+	<p class="credits" data-i18n="credits">Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.</p>
+</footer>
+
+<script>
+(function () {
+	'use strict';
+
+	/* ------------------------------------------------------------------
+	 * Supporters (Bible §19). The list lives only in NULL JSFX's
+	 * supporters.json, shared by NULL JSFX, orOS and noxpress. Names are
+	 * written with textContent, never innerHTML. If the fetch fails, a
+	 * link to the NULL JSFX page is shown instead.
+	 * ------------------------------------------------------------------ */
+	var SOURCE = 'https://nulljsfx.tech/supporters.json';
+	var FALLBACK = 'https://nulljsfx.tech/supporters/';
+	var TIERS = ['Patron', 'Backer'];
+
+	var EN = {
+		intro: 'The monthly Ko-fi supporters who keep NULL JSFX, orOS and noxpress free and open source for everyone. Thank you.',
+		title: 'Supporters',
+		list_title: 'Thank you',
+		loading: 'Loading the list…',
+		tier_Patron: 'Patrons',
+		tier_Backer: 'Backers',
+		empty: 'The list is brand new. Your name could be the first one here.',
+		failed: 'The list could not be loaded right now. ',
+		failed_link: 'See it on nulljsfx.tech',
+		updated: 'Updated ',
+		join_title: 'Join them',
+		join_desc: 'Everything stays free, with no paywall and no nags. Support is optional and happens only through Ko-fi.',
+		join_btn: 'Become a monthly supporter',
+		join_note: 'Backers and Patrons can have their name listed here. Reply to the Ko-fi welcome message with the name you\'d like shown.',
+		ft_supporters: 'Supporters',
+		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
+		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
+	};
+
+	var EL = {
+		intro: 'Οι μηνιαίοι υποστηρικτές στο Ko-fi που κρατούν τα NULL JSFX, orOS και noxpress δωρεάν και ανοιχτού κώδικα για όλους. Ευχαριστούμε.',
+		title: 'Υποστηρικτές',
+		list_title: 'Ευχαριστούμε',
+		loading: 'Φόρτωση της λίστας…',
+		tier_Patron: 'Patrons',
+		tier_Backer: 'Backers',
+		empty: 'Η λίστα μόλις ξεκίνησε. Το όνομά σου μπορεί να είναι το πρώτο εδώ.',
+		failed: 'Η λίστα δεν φόρτωσε αυτή τη στιγμή. ',
+		failed_link: 'Δες την στο nulljsfx.tech',
+		updated: 'Ενημέρωση ',
+		join_title: 'Γίνε κι εσύ',
+		join_desc: 'Όλα μένουν δωρεάν, χωρίς paywall και χωρίς ενοχλητικά μηνύματα. Η στήριξη είναι προαιρετική και γίνεται μόνο μέσω Ko-fi.',
+		join_btn: 'Γίνε μηνιαίος υποστηρικτής',
+		join_note: 'Οι Backers και οι Patrons μπορούν να εμφανίζονται εδώ με το όνομά τους. Απάντησε στο μήνυμα καλωσορίσματος του Ko-fi με το όνομα που θέλεις να φαίνεται.',
+		ft_supporters: 'Υποστηρικτές',
+		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
+		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
+	};
+
+	var TITLE_EN = 'Supporters — noxpress';
+	var TITLE_EL = 'Υποστηρικτές — noxpress';
+
+	var listEl = document.getElementById('list');
+	var updatedEl = document.getElementById('updated');
+	var toggle = document.getElementById('langToggle');
+
+	// 'loading' | 'ok' | 'failed'
+	var state = 'loading';
+	var data = null;
+	var current = 'en';
+
+	function dict() { return ('el' === current) ? EL : EN; }
+
+	// Keeps only well-formed entries; anything else in the file is ignored.
+	function clean(json) {
+		if (!json || typeof json !== 'object' || !Array.isArray(json.supporters)) { return null; }
+		var out = { updated: '', groups: {} };
+		if (typeof json.updated === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(json.updated)) {
+			out.updated = json.updated;
+		}
+		for (var t = 0; t < TIERS.length; t++) { out.groups[TIERS[t]] = []; }
+		for (var i = 0; i < json.supporters.length; i++) {
+			var s = json.supporters[i];
+			if (!s || typeof s.name !== 'string' || typeof s.tier !== 'string') { continue; }
+			var name = s.name.replace(/\s+/g, ' ').trim().slice(0, 80);
+			if (!name || !Object.prototype.hasOwnProperty.call(out.groups, s.tier)) { continue; }
+			out.groups[s.tier].push(name);
+		}
+		return out;
+	}
+
+	function status(text) {
+		var p = document.createElement('p');
+		p.className = 'list-status';
+		p.textContent = text;
+		return p;
+	}
+
+	function render() {
+		var d = dict();
+		listEl.textContent = '';
+		updatedEl.hidden = true;
+
+		if ('loading' === state) {
+			listEl.appendChild(status(d.loading));
+			return;
+		}
+
+		if ('failed' === state) {
+			var p = status(d.failed);
+			var a = document.createElement('a');
+			a.href = FALLBACK;
+			a.rel = 'noopener';
+			a.textContent = d.failed_link;
+			p.appendChild(a);
+			listEl.appendChild(p);
+			return;
+		}
+
+		var total = 0;
+		for (var t = 0; t < TIERS.length; t++) {
+			var names = data.groups[TIERS[t]];
+			if (!names.length) { continue; }
+			total += names.length;
+
+			var group = document.createElement('div');
+			group.className = 'tier ' + TIERS[t].toLowerCase();
+			var h = document.createElement('h3');
+			h.textContent = d['tier_' + TIERS[t]];
+			group.appendChild(h);
+			var ul = document.createElement('ul');
+			ul.className = 'names';
+			for (var i = 0; i < names.length; i++) {
+				var li = document.createElement('li');
+				li.textContent = names[i];
+				ul.appendChild(li);
+			}
+			group.appendChild(ul);
+			listEl.appendChild(group);
+		}
+
+		if (!total) {
+			listEl.appendChild(status(d.empty));
+		}
+
+		if (data.updated) {
+			updatedEl.textContent = d.updated + data.updated;
+			updatedEl.hidden = false;
+		}
+	}
+
+	function applyLang(lang) {
+		current = lang;
+		var d = dict();
+		document.documentElement.lang = lang;
+		document.title = ('el' === lang) ? TITLE_EL : TITLE_EN;
+		toggle.textContent = ('el' === lang) ? 'EN' : 'ΕΛ';
+
+		// Static strings only; they come from the dictionaries above.
+		var nodes = document.querySelectorAll('[data-i18n]');
+		for (var i = 0; i < nodes.length; i++) {
+			var key = nodes[i].getAttribute('data-i18n');
+			if (Object.prototype.hasOwnProperty.call(d, key)) {
+				nodes[i].innerHTML = d[key];
+			}
+		}
+		render();
+		try { localStorage.setItem('nx_lang', lang); } catch (e) { /* private mode */ }
+	}
+
+	toggle.addEventListener('click', function () {
+		applyLang(('en' === current) ? 'el' : 'en');
+	});
+
+	try {
+		if ('el' === localStorage.getItem('nx_lang')) { current = 'el'; }
+	} catch (e) { /* blocked storage */ }
+	applyLang(current);
+
+	function fail() {
+		state = 'failed';
+		render();
+	}
+
+	if (typeof fetch !== 'function') { fail(); return; }
+
+	var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+	var timer = setTimeout(function () { if (ctrl) { ctrl.abort(); } else { fail(); } }, 8000);
+
+	fetch(SOURCE, { cache: 'no-cache', credentials: 'omit', mode: 'cors', signal: ctrl ? ctrl.signal : undefined })
+		.then(function (r) {
+			if (!r.ok) { throw new Error('HTTP ' + r.status); }
+			return r.json();
+		})
+		.then(function (json) {
+			clearTimeout(timer);
+			if ('failed' === state) { return; }
+			data = clean(json);
+			if (!data) { throw new Error('bad format'); }
+			state = 'ok';
+			render();
+		})
+		.catch(function () {
+			clearTimeout(timer);
+			fail();
+		});
+})();
+</script>
+</body>
+</html>
