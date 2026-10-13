@@ -428,22 +428,23 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="smart-formatter">
 		<h2><a href="#smart-formatter">Smart Formatter</a></h2>
-		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.4.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sf_desc">Bulk formatting for WooCommerce product texts — safely. Strip stray formatting, normalize whitespace or highlight quotes, parentheses and numbers across your whole catalogue, with preview, dry run and one-click undo for every run.</p>
 		<ul>
 			<li data-i18n="sf_li1">Targets: all published products, hand-picked products, or selected categories / tags</li>
 			<li data-i18n="sf_li2">Fields: short &amp; long description, purchase note, custom attribute values and category / tag descriptions</li>
-			<li data-i18n="sf_li3">Rules: strip inline formatting, normalize whitespace, quoted text bold / italic («» “” ""), parentheses italic, numbers bold, all text bold / italic</li>
-			<li data-i18n="sf_li4">Safe by design: HTML tags &amp; attributes, shortcodes, entities and <code>&lt;pre&gt;</code> / <code>&lt;code&gt;</code> blocks are never touched</li>
+			<li data-i18n="sf_li3">Rules: plain text (every HTML tag and attribute out, with line breaks or as one paragraph), strip inline formatting, normalize whitespace, quoted text bold / italic («» “” ""), parentheses italic, numbers bold, all text bold / italic</li>
+			<li data-i18n="sf_li4">Formatting rules are safe by design: HTML tags &amp; attributes, shortcodes, entities and <code>&lt;pre&gt;</code> / <code>&lt;code&gt;</code> blocks are never touched</li>
 			<li data-i18n="sf_li5">Every rule combination yields well-formed HTML, and re-running the same rules changes nothing</li>
 			<li data-i18n="sf_li6">Phrase exclusions — global and per run</li>
 			<li data-i18n="sf_li7">Preview, dry run and batched apply with a progress bar — no timeouts on large catalogues</li>
-			<li data-i18n="sf_li8">Undo: every run keeps a snapshot; restore a whole run or selected items from the history</li>
+			<li data-i18n="sf_li8">Undo: every run saves its backup before it changes anything; restore a whole run or selected items, or download the backup</li>
 			<li data-i18n="sf_li9">Profiles for rule / field combinations, plus JSON backup &amp; restore with strict validation</li>
 			<li data-i18n="sf_li10">Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own</li>
+			<li data-i18n="sf_li11">Optional: the short description becomes plain text whenever you save a product (handy when you paste from AI tools)</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.3.0/smart-formatter.zip" rel="nofollow noopener" data-i18n="sf_download">Download v1.3.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.4.0/smart-formatter.zip" rel="nofollow noopener" data-i18n="sf_download">Download v1.4.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/smart-formatter" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -726,15 +727,16 @@ footer .heart { color: var(--accent-bright); }
 		sf_desc: 'Bulk formatting for WooCommerce product texts — safely. Strip stray formatting, normalize whitespace or highlight quotes, parentheses and numbers across your whole catalogue, with preview, dry run and one-click undo for every run.',
 		sf_li1: 'Targets: all published products, hand-picked products, or selected categories / tags',
 		sf_li2: 'Fields: short &amp; long description, purchase note, custom attribute values and category / tag descriptions',
-		sf_li3: 'Rules: strip inline formatting, normalize whitespace, quoted text bold / italic («» “” ""), parentheses italic, numbers bold, all text bold / italic',
-		sf_li4: 'Safe by design: HTML tags &amp; attributes, shortcodes, entities and <code>&lt;pre&gt;</code> / <code>&lt;code&gt;</code> blocks are never touched',
+		sf_li3: 'Rules: plain text (every HTML tag and attribute out, with line breaks or as one paragraph), strip inline formatting, normalize whitespace, quoted text bold / italic («» “” ""), parentheses italic, numbers bold, all text bold / italic',
+		sf_li4: 'Formatting rules are safe by design: HTML tags &amp; attributes, shortcodes, entities and <code>&lt;pre&gt;</code> / <code>&lt;code&gt;</code> blocks are never touched',
 		sf_li5: 'Every rule combination yields well-formed HTML, and re-running the same rules changes nothing',
 		sf_li6: 'Phrase exclusions — global and per run',
 		sf_li7: 'Preview, dry run and batched apply with a progress bar — no timeouts on large catalogues',
-		sf_li8: 'Undo: every run keeps a snapshot; restore a whole run or selected items from the history',
+		sf_li8: 'Undo: every run saves its backup before it changes anything; restore a whole run or selected items, or download the backup',
 		sf_li9: 'Profiles for rule / field combinations, plus JSON backup &amp; restore with strict validation',
 		sf_li10: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
-		sf_download: 'Download v1.3.0 (.zip)',
+		sf_li11: 'Optional: the short description becomes plain text whenever you save a product (handy when you paste from AI tools)',
+		sf_download: 'Download v1.4.0 (.zip)',
 		tp_desc: 'Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility and price labels.',
 		tp_li1: 'Product cards: price with the old price struck through, add-to-cart button, rating, sale badge for every product type (variable too), and other plugins\' card additions',
 		tp_li2: 'Every area on its own: shop / categories / search, related products, up-sells, cross-sells and each theme section with its own product query',
@@ -882,15 +884,16 @@ footer .heart { color: var(--accent-bright); }
 		sf_desc: 'Μαζική μορφοποίηση κειμένων προϊόντων WooCommerce — με ασφάλεια. Αφαίρεσε περιττή μορφοποίηση, τακτοποίησε τα κενά ή τόνισε εισαγωγικά, παρενθέσεις και αριθμούς σε όλο τον κατάλογο, με προεπισκόπηση, dry run και αναίρεση με ένα κλικ για κάθε εκτέλεση.',
 		sf_li1: 'Στόχοι: όλα τα δημοσιευμένα προϊόντα, επιλεγμένα προϊόντα ή επιλεγμένες κατηγορίες / ετικέτες',
 		sf_li2: 'Πεδία: σύντομη &amp; πλήρης περιγραφή, σημείωση αγοράς, τιμές custom attributes και περιγραφές κατηγοριών / ετικετών',
-		sf_li3: 'Κανόνες: αφαίρεση μορφοποίησης, τακτοποίηση κενών, εισαγωγικά bold / italic («» “” ""), παρενθέσεις italic, αριθμοί bold, όλο το κείμενο bold / italic',
-		sf_li4: 'Ασφαλές εκ σχεδιασμού: HTML tags &amp; attributes, shortcodes, entities και μπλοκ <code>&lt;pre&gt;</code> / <code>&lt;code&gt;</code> δεν αγγίζονται ποτέ',
+		sf_li3: 'Κανόνες: καθαρό κείμενο (χωρίς καμία ετικέτα HTML, με αλλαγές γραμμής ή σε μία παράγραφο), αφαίρεση μορφοποίησης, τακτοποίηση κενών, εισαγωγικά bold / italic («» “” ""), παρενθέσεις italic, αριθμοί bold, όλο το κείμενο bold / italic',
+		sf_li4: 'Οι κανόνες μορφοποίησης είναι ασφαλείς εκ σχεδιασμού: HTML tags &amp; attributes, shortcodes, entities και μπλοκ <code>&lt;pre&gt;</code> / <code>&lt;code&gt;</code> δεν αγγίζονται ποτέ',
 		sf_li5: 'Κάθε συνδυασμός κανόνων δίνει έγκυρο HTML, και η επανάληψη των ίδιων κανόνων δεν αλλάζει τίποτα',
 		sf_li6: 'Εξαιρέσεις φράσεων — γενικές και ανά εκτέλεση',
 		sf_li7: 'Προεπισκόπηση, dry run και εφαρμογή σε παρτίδες με μπάρα προόδου — χωρίς timeouts σε μεγάλους καταλόγους',
-		sf_li8: 'Αναίρεση: κάθε εκτέλεση κρατά snapshot· επαναφορά ολόκληρης εκτέλεσης ή επιλεγμένων στοιχείων από το ιστορικό',
+		sf_li8: 'Αναίρεση: κάθε εκτέλεση γράφει το αντίγραφό της πριν αλλάξει οτιδήποτε· επαναφορά ολόκληρης εκτέλεσης ή επιλεγμένων στοιχείων, ή λήψη του αντιγράφου',
 		sf_li9: 'Profiles για συνδυασμούς κανόνων / πεδίων, και backup &amp; restore σε JSON με αυστηρό έλεγχο',
 		sf_li10: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
-		sf_download: 'Λήψη v1.3.0 (.zip)',
+		sf_li11: 'Προαιρετικά: η σύντομη περιγραφή γίνεται καθαρό κείμενο κάθε φορά που αποθηκεύεις προϊόν (χρήσιμο όταν επικολλάς από εργαλεία AI)',
+		sf_download: 'Λήψη v1.4.0 (.zip)',
 		tp_desc: 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: κάρτες προϊόντων, κείμενα, πλακίδια κατηγοριών, ρυθμίσεις θέματος, προσβασιμότητα και ετικέτες τιμής.',
 		tp_li1: 'Κάρτες προϊόντων: τιμή με διαγραμμένη την παλιά, κουμπί καλαθιού, βαθμολογία, ένδειξη έκπτωσης για κάθε τύπο προϊόντος (και μεταβλητά) και ό,τι προσθέτουν άλλα plugins στην κάρτα',
 		tp_li2: 'Κάθε περιοχή ξεχωριστά: κατάστημα / κατηγορίες / αναζήτηση, σχετικά προϊόντα, up-sells, cross-sells και κάθε ενότητα του θέματος με δικό της query προϊόντων',

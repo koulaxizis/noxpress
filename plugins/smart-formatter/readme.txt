@@ -5,11 +5,11 @@ Tags: woocommerce, formatting, bulk edit, product description, typography
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Bulk-format WooCommerce product texts (bold, italic, quotes, parentheses, numbers, whitespace) with preview, dry run, undo snapshots and profiles.
+Bulk-format WooCommerce product texts (plain text, bold, italic, quotes, parentheses, numbers, whitespace) with preview, dry run, undo snapshots and profiles.
 
 == Description ==
 
@@ -17,11 +17,13 @@ Smart Formatter applies formatting rules to WooCommerce product texts in bulk, s
 
 * **Targets:** all published products, hand-picked products, or products in selected categories / tags.
 * **Fields:** short description, long description, purchase note, custom (non-global) attribute values, and the descriptions of the selected categories / tags themselves.
+* **Plain text:** removes every HTML tag and attribute (including the `data-path-to-node` attributes that text copied from AI tools carries), turns `&nbsp;` into plain spaces, removes zero-width characters and collapses blank lines. Two modes: keep line breaks (every paragraph, heading and list item on its own line, a blank line between paragraphs) or one paragraph. Shortcodes stay. The dry run counts the fields that lose a link, an image or a table.
+* **Clean on save (optional, off by default):** the short description becomes plain text whenever a product is saved from its edit screen.
 * **Rules:** strip inline formatting (b, strong, i, em, u, s, strike, del, ins, mark), normalize whitespace, quoted text bold / italic («», “”, ""), parentheses italic, numbers bold, all text bold / italic.
-* **Safe by design:** HTML tags and attributes, shortcodes, entities, HTML comments and the contents of `<pre>`, `<code>`, `<script>`, `<style>` and `<textarea>` are never touched. Any combination of rules produces well-formed HTML, and applying the same rules twice changes nothing the second time.
+* **Safe by design** (formatting rules): HTML tags and attributes, shortcodes, entities, HTML comments and the contents of `<pre>`, `<code>`, `<script>`, `<style>` and `<textarea>` are never touched. Any combination of rules produces well-formed HTML, and applying the same rules twice changes nothing the second time.
 * **Phrase exclusions:** global (Settings) and per run — excluded phrases are never altered.
 * **Preview, dry run and batched apply** with a progress bar, so large catalogues do not time out.
-* **Undo:** every apply run stores a snapshot of the changed values; restore a whole run or selected units from the history.
+* **Undo:** every apply run stores the previous values **before** it changes anything; restore a whole run or selected units from the history, or download a run's backup as JSON. A run whose backup would not fit in full does not start.
 * **Profiles:** save and reload rule / field combinations.
 * **Backup:** export / import profiles, exclusions and snapshot history as JSON (imports are strictly validated).
 * Bilingual admin UI (Greek / English) following the Noxpress language choice, or the WordPress user locale.
@@ -40,7 +42,11 @@ Smart Formatter applies formatting rules to WooCommerce product texts in bulk, s
 
 = Can I undo a run? =
 
-Yes. Every apply run saves the previous values of the units it changed. Use **History & Undo** on the tool page to restore all of them or only selected units. Very large runs keep the most recent units that fit the snapshot size cap; such snapshots are marked as partial and restore only the units they kept.
+Yes. Every apply run saves the previous values of the units it changes, before it changes them. Use **History & Undo** on the tool page to restore all of them or only selected units, or **Download backup** to keep a copy (import it from SF Settings → Import state). A run's backup is capped at 4 MB: Apply first checks that the whole backup fits and does not start otherwise, so split very large jobs (for example by category). Snapshots from version 1.3.0 and earlier may be marked as partial; they restore only the units they kept.
+
+= Should I use plain text or a display filter? =
+
+Plain text changes the stored text once, with undo. A display-only filter would leave the old HTML in product feeds, structured data, page builders and the editor, so Smart Formatter does not offer one.
 
 = Are global attributes formatted? =
 
@@ -51,6 +57,15 @@ No. Global attribute values are terms shared by the whole store, so only custom 
 The plugin's own options and transients are removed. Product texts that were already formatted stay as they are.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: "Plain text" rule in two modes, keep line breaks or one paragraph. It removes every HTML tag and attribute (including `data-path-to-node` from text copied from AI tools), turns `&nbsp;` into spaces, removes zero-width characters and collapses blank lines; shortcodes stay. It works on every field; the dry run counts the fields that lose a link, an image or a table.
+* New: optional "Clean on save" setting: the short description becomes plain text when a product is saved from its edit screen. Included in the state export / import.
+* New: "Download backup" for every run in the history (JSON, importable from SF Settings).
+* Fixed: the backup of a run is now written before the products change. Before, products were saved first, so a failed backup write left changes without undo.
+* Fixed: a backup that would not fit (4 MB per run) was silently cut, dropping the oldest units. Apply now checks the size first and does not start; if a batch still does not fit, the run stops safely and everything changed so far restores in full.
+* Fixed: a value that changed between the check and the write is skipped instead of being overwritten.
+* Fixed: on narrow screens the history table scrolls on its own instead of widening the whole page.
 
 = 1.3.0 =
 * New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.
