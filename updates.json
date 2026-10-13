@@ -80,15 +80,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* Fixed: report periods now start and end at the exact local time. WooCommerce compared the old period bounds by day only, so an order placed late in the evening of the last day of a period (for example 23:50 on 31 December in Athens) could be counted in the next period.",
+        "published": "2026-10-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2967dd01ab3f9697e44d9e2b0c6496d8b0811b265d81248f56be907f77be135b",
-        "signature": "6asDYGfrRt+RXq1DvRC6ufjf4YDPEyQzmxJfp41xgHPCqvMLolRYq9pLvAnPM0rUyVEthdP5dwwXlKwunQFeCg==",
+        "sha256": "15d477d27878810bc423c8762194971e4756f680caf186eee3b1f9dc185b1633",
+        "signature": "wJQWFRjAHuJc8gbrPC5BiVTGd7GQsubiPgFduCc901SNJBlGWBNhrHIRl48zxXTmHuXKz6BhZNa7lClJj9dbAw==",
         "tested_wp": "6.8",
-        "version": "1.9.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.0/revenue-splitter.zip"
+        "version": "1.9.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.1/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -156,15 +156,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* New: SP Sales page (Noxpress → SP Sales): sales per product or per variation for any period, with an on-screen preview and a CSV download. Filters for period, date type, order statuses, categories and products; options for variations, free lines, refunds and a totals row; choice of columns and sort order; CSV for Greek Excel (semicolon, decimal comma) or standard. Replaces third-party \"sales by product\" exporters.\n* New: with Revenue Splitter, VAT uses Revenue Splitter's rate for each product.\n* Changed: the dashboard's top sellers subtract refunds per order line (units included), so they match SP Sales. Before, a refund was spread over the whole order.\n* Fixed: the dashboard's periods start and end at the exact local time. WooCommerce compared the old bounds by day only, so refunds and cancellations from late in the evening could land in the next day's figures.",
+        "published": "2026-10-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "980638bd612fe78573a4b27d308cb6090400efc3db0b1030d12ad0ca72f83db6",
-        "signature": "NdSrDnhtp5Zd447bogXjauQzoYaJW7TFy4N7iGHi2mQZP8B6d9QzW0V/TzoFV8I3s1/NK9rR7tB/kxoGI5ckCg==",
+        "sha256": "59a9f1285539a555628b7923305354daf911e35b066deb039f6c023e82768cf8",
+        "signature": "YnRYdE8uT+5Begsn//98R5u5RuBx0DtIh6mYpj9sgqSoLY6w858DfcGE+Is5U/WPmwX2tkjZefm+lZzmm4UeBA==",
         "tested_wp": "6.8",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.5.0/store-pulse.zip"
+        "version": "1.6.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.6.0/store-pulse.zip"
       }
     },
     "theme-patcher": {
