@@ -25,8 +25,14 @@
  * the redirect table. References elsewhere are counted in the dry run and
  * left to the 301.
  *
- * Undo: every apply run writes a log (glp_log, not autoloaded); a new run
- * replaces it. undo() reverts its items, newest first.
+ * Undo (Bible §12, bulk data changes): every apply run has a log (glp_log,
+ * not autoloaded) that a new run replaces. Each item's entry, with the
+ * values from before, is written to the log BEFORE the item changes (per
+ * item, not per batch: an item depends on the ones before it, e.g. a name
+ * just taken). If the entry cannot be written, the item is not touched and
+ * the run stops; the page then undoes the whole run. undo() reverts the
+ * items newest first, only where the current value is still the one the
+ * run wrote. The log can be downloaded as JSON and imported back (Tools).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -211,10 +217,11 @@ final class GLP_Bulk {
 	 * =================================================================== */
 
 	/**
-	 * @return array k, status ok|skip|error, new, note, refs (files, dry run)
-	 *               and log (apply: the undo entry).
+	 * @param string $run Run ID of the log (apply) or '' (dry run).
+	 * @return array k, status ok|skip|error, new, note, refs (files, dry
+	 *               run) and stop (apply: the undo entry was not written).
 	 */
-	public static function process( string $key, bool $apply ): array {
+	public static function process( string $key, string $run = '' ): array {
 		$res = array(
 			'k'      => $key,
 			'status' => 'error',
@@ -228,11 +235,11 @@ final class GLP_Bulk {
 		try {
 			switch ( $m[1] ) {
 				case 'p':
-					return self::post( (int) $m[2], $apply, $res );
+					return self::post( (int) $m[2], $run, $res );
 				case 't':
-					return self::term( (int) $m[2], $apply, $res );
+					return self::term( (int) $m[2], $run, $res );
 				default:
-					return self::file( (int) $m[2], $apply, $res );
+					return self::file( (int) $m[2], $run, $res );
 			}
 		} catch ( \Throwable $e ) {
 			$res['status'] = 'error';
@@ -241,13 +248,28 @@ final class GLP_Bulk {
 		}
 	}
 
+	/**
+	 * Write the undo entry before the change. False: the item must not be
+	 * touched and the run stops (the result says why).
+	 */
+	private static function save_entry( string $run, array $entry, array &$res ): bool {
+		if ( self::append( $run, $entry ) ) {
+			return true;
+		}
+		$res['status'] = 'error';
+		$res['stop']   = true;
+		$res['note']   = __( 'Το αντίγραφο ασφαλείας δεν γράφτηκε, οπότε το στοιχείο δεν άλλαξε και η εφαρμογή σταμάτησε.', 'greeklish-permalinks' );
+		return false;
+	}
+
 	private static function skip( array $res, string $note ): array {
 		$res['status'] = 'skip';
 		$res['note']   = $note;
 		return $res;
 	}
 
-	private static function post( int $id, bool $apply, array $res ): array {
+	private static function post( int $id, string $run, array $res ): array {
+		$apply = '' !== $run;
 		global $wpdb;
 		$post = get_post( $id );
 		if ( ! $post || ! isset( self::post_types()[ $post->post_type ] ) || ! in_array( $post->post_status, self::STATUSES, true ) ) {
@@ -272,34 +294,38 @@ final class GLP_Bulk {
 			return $res;
 		}
 
-		$hier     = is_post_type_hierarchical( $post->post_type );
-		$old_path = $hier && 'publish' === $post->post_status ? trim( rawurldecode( (string) get_page_uri( $post ) ), '/' ) : '';
+		$hier         = is_post_type_hierarchical( $post->post_type );
+		$old_path     = $hier && 'publish' === $post->post_status ? trim( rawurldecode( (string) get_page_uri( $post ) ), '/' ) : '';
+		$redirectable = 'publish' === $post->post_status || ( 'attachment' === $post->post_type && 'inherit' === $post->post_status );
+		$add_meta     = ! $hier && $redirectable && ! in_array( $old_raw, get_post_meta( $id, '_wp_old_slug' ), true );
 
-		$wpdb->update( $wpdb->posts, array( 'post_name' => $new ), array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- only the slug changes (see class doc).
-		clean_post_cache( $id );
-
-		$log = array(
+		$entry = array(
 			'k'    => 'p:' . $id,
 			'old'  => $old_raw,
 			'new'  => $new,
-			'meta' => false,
-			'path' => '',
+			'meta' => $add_meta,
+			'path' => $hier ? $old_path : '',
 		);
-		$redirectable = 'publish' === $post->post_status || ( 'attachment' === $post->post_type && 'inherit' === $post->post_status );
-		if ( ! $hier && $redirectable ) {
-			$olds = get_post_meta( $id, '_wp_old_slug' );
-			if ( ! in_array( $old_raw, $olds, true ) ) {
-				add_post_meta( $id, '_wp_old_slug', $old_raw );
-				$log['meta'] = true;
-			}
-		} elseif ( '' !== $old_path ) {
+		if ( ! self::save_entry( $run, $entry, $res ) ) {
+			return $res;
+		}
+
+		$ok = $wpdb->update( $wpdb->posts, array( 'post_name' => $new ), array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- only the slug changes (see class doc).
+		if ( false === $ok ) {
+			self::drop_entry( $run, $entry['k'] );
+			$res['status'] = 'error';
+			$res['note']   = $wpdb->last_error;
+			return $res;
+		}
+		clean_post_cache( $id );
+		if ( $add_meta ) {
+			add_post_meta( $id, '_wp_old_slug', $old_raw );
+		} elseif ( '' !== $entry['path'] ) {
 			$m                       = GLP_Redirects::map();
 			$m['paths'][ $old_path ] = $id;
 			GLP_Redirects::save_map( $m );
-			$log['path'] = $old_path;
 		}
 		self::touched_post( $post );
-		$res['log'] = $log;
 		return $res;
 	}
 
@@ -314,7 +340,8 @@ final class GLP_Bulk {
 		}
 	}
 
-	private static function term( int $id, bool $apply, array $res ): array {
+	private static function term( int $id, string $run, array $res ): array {
+		$apply = '' !== $run;
 		$term = get_term( $id );
 		if ( ! $term || is_wp_error( $term ) || ! isset( self::taxonomies()[ $term->taxonomy ] ) ) {
 			return self::skip( $res, __( 'Δεν βρέθηκε.', 'greeklish-permalinks' ) );
@@ -345,8 +372,20 @@ final class GLP_Bulk {
 			return $res;
 		}
 
+		$entry = array(
+			'k'   => 't:' . $id,
+			'tax' => $term->taxonomy,
+			'old' => (string) $term->slug,
+			'new' => $new,
+			'map' => $old,
+		);
+		if ( ! self::save_entry( $run, $entry, $res ) ) {
+			return $res;
+		}
+
 		$r = wp_update_term( $id, $term->taxonomy, array( 'slug' => $new ) );
 		if ( is_wp_error( $r ) ) {
+			self::drop_entry( $run, $entry['k'] );
 			$res['status'] = 'error';
 			$res['note']   = $r->get_error_message();
 			return $res;
@@ -357,14 +396,6 @@ final class GLP_Bulk {
 		}
 		$m['terms'][ $old ][ $term->taxonomy ] = $id;
 		GLP_Redirects::save_map( $m );
-
-		$res['log'] = array(
-			'k'   => 't:' . $id,
-			'tax' => $term->taxonomy,
-			'old' => (string) $term->slug,
-			'new' => $new,
-			'map' => $old,
-		);
 		return $res;
 	}
 
@@ -555,7 +586,8 @@ final class GLP_Bulk {
 		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $args ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery -- placeholders built above.
 	}
 
-	private static function file( int $id, bool $apply, array $res ): array {
+	private static function file( int $id, string $run, array $res ): array {
+		$apply = '' !== $run;
 		global $wpdb;
 		$post = get_post( $id );
 		$rel  = $post ? (string) get_post_meta( $id, '_wp_attached_file', true ) : '';
@@ -606,16 +638,49 @@ final class GLP_Bulk {
 			return $res;
 		}
 
+		// 0. Everything this item will change, with the values from before,
+		// goes to the log first.
+		$moving = array();
+		foreach ( $plan as $old => $new ) {
+			if ( file_exists( $dir_abs . $old ) ) {
+				$moving[ $old ] = $new; // A size that is gone: only the metadata changes.
+			}
+		}
+		$pairs   = self::replacements( $dir_rel, $plan );
+		$content = self::plan_posts( self::posts_with( array_keys( $pairs ) ), $pairs );
+		$dl      = self::plan_downloads( self::meta_with( array_keys( $pairs ), '_downloadable_files' ), $pairs );
+		$entry   = array(
+			'k'     => 'f:' . $id,
+			'rel'   => $rel,
+			'dir'   => $dir_rel,
+			'plan'  => $plan,
+			'moved' => $moving,
+			'meta'  => $meta,
+			'posts' => array_map(
+				static function ( $c ) {
+					return array( $c[0], $c[1] );
+				},
+				$content
+			),
+			'dl'    => array_map(
+				static function ( $d ) {
+					return $d[0];
+				},
+				$dl
+			),
+		);
+		if ( ! self::save_entry( $run, $entry, $res ) ) {
+			return $res;
+		}
+
 		// 1. Rename on disk; roll back on the first failure.
 		$done = array();
-		foreach ( $plan as $old => $new ) {
-			if ( ! file_exists( $dir_abs . $old ) ) {
-				continue; // A size that is gone: only the metadata changes.
-			}
+		foreach ( $moving as $old => $new ) {
 			if ( file_exists( $dir_abs . $new ) || ! @rename( $dir_abs . $old, $dir_abs . $new ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions.rename_rename -- failure handled below.
 				foreach ( array_reverse( $done, true ) as $o => $n ) {
 					@rename( $dir_abs . $n, $dir_abs . $o ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions.rename_rename -- best-effort rollback.
 				}
+				self::drop_entry( $run, $entry['k'] );
 				$res['status'] = 'error';
 				/* translators: %s: file name */
 				$res['note'] = sprintf( __( 'Η μετονομασία του %s απέτυχε (δικαιώματα φακέλου;). Δεν άλλαξε τίποτα.', 'greeklish-permalinks' ), $old );
@@ -625,16 +690,14 @@ final class GLP_Bulk {
 		}
 
 		// 2. Attachment data.
-		$meta_old = $meta;
 		update_attached_file( $id, $dir_abs . $plan[ $main ] );
 		if ( is_array( $meta ) ) {
 			wp_update_attachment_metadata( $id, self::meta_renamed( $meta, $plan ) );
 		}
 
 		// 3. References: content, excerpts, downloadable files.
-		$pairs = self::replacements( $dir_rel, $plan );
-		$posts = self::replace_in_posts( self::posts_with( array_keys( $pairs ) ), $pairs );
-		$dl    = self::replace_in_downloads( self::meta_with( array_keys( $pairs ), '_downloadable_files' ), $pairs );
+		self::write_posts( $content );
+		self::write_downloads( $dl );
 
 		// 4. Redirects from every old path.
 		$m = GLP_Redirects::map();
@@ -643,17 +706,6 @@ final class GLP_Bulk {
 		}
 		GLP_Redirects::save_map( $m );
 		clean_post_cache( $id );
-
-		$res['log'] = array(
-			'k'     => 'f:' . $id,
-			'rel'   => $rel,
-			'dir'   => $dir_rel,
-			'plan'  => $plan,
-			'moved' => $done,
-			'meta'  => $meta_old,
-			'posts' => $posts,
-			'dl'    => $dl,
-		);
 		return $res;
 	}
 
@@ -703,10 +755,13 @@ final class GLP_Bulk {
 		return $meta;
 	}
 
-	/** Replace in content and excerpt; returns ID => array( old content, old excerpt ) of the posts that changed. */
-	private static function replace_in_posts( array $ids, array $pairs ): array {
+	/**
+	 * Posts whose content or excerpt holds a URL of the plan:
+	 * ID => array( old content, old excerpt, new content, new excerpt ).
+	 */
+	private static function plan_posts( array $ids, array $pairs ): array {
 		global $wpdb;
-		$changed = array();
+		$out = array();
 		foreach ( $ids as $pid ) {
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT post_content, post_excerpt FROM {$wpdb->posts} WHERE ID = %d", $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- raw values, no filters.
 			if ( ! $row ) {
@@ -715,45 +770,60 @@ final class GLP_Bulk {
 			$c = strtr( (string) $row->post_content, $pairs );
 			$e = strtr( (string) $row->post_excerpt, $pairs );
 			if ( $c !== $row->post_content || $e !== $row->post_excerpt ) {
-				$wpdb->update( $wpdb->posts, array( 'post_content' => $c, 'post_excerpt' => $e ), array( 'ID' => $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- exact URL swap, no modified date.
-				clean_post_cache( $pid );
-				$changed[ $pid ] = array( (string) $row->post_content, (string) $row->post_excerpt );
+				$out[ (int) $pid ] = array( (string) $row->post_content, (string) $row->post_excerpt, $c, $e );
 			}
 		}
-		return $changed;
+		return $out;
 	}
 
-	/** Replace in _downloadable_files (file URLs only); returns post ID => old value of the posts that changed. */
-	private static function replace_in_downloads( array $rows, array $pairs ): array {
-		$changed = array();
+	/** Write plan_posts(): only where the text is still the one in the log (Bible §12). */
+	private static function write_posts( array $plan ): void {
+		global $wpdb;
+		foreach ( $plan as $pid => $c ) {
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->posts} SET post_content = %s, post_excerpt = %s WHERE ID = %d AND post_content = %s AND post_excerpt = %s", $c[2], $c[3], $pid, $c[0], $c[1] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- exact URL swap, no modified date.
+			clean_post_cache( $pid );
+		}
+	}
+
+	/** Products whose downloadable files hold a URL of the plan: ID => array( old value, new value ). */
+	private static function plan_downloads( array $rows, array $pairs ): array {
+		$out = array();
 		foreach ( $rows as $r ) {
 			$pid   = (int) $r->post_id;
 			$files = get_post_meta( $pid, '_downloadable_files', true );
-			$orig  = $files;
-			if ( ! is_array( $files ) ) {
-				continue;
-			}
-			$dirty = false;
-			foreach ( $files as $k => $f ) {
-				if ( is_array( $f ) && isset( $f['file'] ) && is_string( $f['file'] ) ) {
-					$nf = strtr( $f['file'], $pairs );
-					if ( $nf !== $f['file'] ) {
-						$files[ $k ]['file'] = $nf;
-						$dirty               = true;
-					}
+			if ( is_array( $files ) ) {
+				$new = self::swap_downloads( $files, $pairs );
+				if ( $new !== $files ) {
+					$out[ $pid ] = array( $files, $new );
 				}
-			}
-			if ( $dirty ) {
-				update_post_meta( $pid, '_downloadable_files', $files );
-				$post = get_post( $pid );
-				if ( $post ) {
-					clean_post_cache( $pid );
-					self::touched_post( $post );
-				}
-				$changed[ $pid ] = $orig;
 			}
 		}
-		return $changed;
+		return $out;
+	}
+
+	/** _downloadable_files with the plan's URLs replaced (file URLs only). */
+	private static function swap_downloads( array $files, array $pairs ): array {
+		foreach ( $files as $k => $f ) {
+			if ( is_array( $f ) && isset( $f['file'] ) && is_string( $f['file'] ) ) {
+				$files[ $k ]['file'] = strtr( $f['file'], $pairs );
+			}
+		}
+		return $files;
+	}
+
+	/** Write plan_downloads(): only where the value is still the one in the log. */
+	private static function write_downloads( array $plan ): void {
+		foreach ( $plan as $pid => $d ) {
+			if ( get_post_meta( $pid, '_downloadable_files', true ) !== $d[0] ) {
+				continue;
+			}
+			update_post_meta( $pid, '_downloadable_files', $d[1] );
+			$post = get_post( $pid );
+			if ( $post ) {
+				clean_post_cache( $pid );
+				self::touched_post( $post );
+			}
+		}
 	}
 
 	/* =====================================================================
@@ -781,14 +851,142 @@ final class GLP_Bulk {
 		return $run;
 	}
 
-	public static function append( string $run, array $entries ): bool {
+	/** Add one entry to the run's log; true only when it was written. */
+	public static function append( string $run, array $entry ): bool {
 		$l = self::log();
 		if ( ! $l || $l['run'] !== $run ) {
 			return false;
 		}
-		$l['items'] = array_merge( $l['items'], $entries );
-		update_option( self::LOG, $l, false );
-		return true;
+		$l['items'][] = $entry;
+		return update_option( self::LOG, $l, false );
+	}
+
+	/** Remove the entry of an item that did not change after all. */
+	private static function drop_entry( string $run, string $k ): void {
+		$l = self::log();
+		if ( ! $l || $l['run'] !== $run || ! $l['items'] ) {
+			return;
+		}
+		$last = end( $l['items'] );
+		if ( is_array( $last ) && isset( $last['k'] ) && $last['k'] === $k ) {
+			array_pop( $l['items'] );
+			update_option( self::LOG, $l, false );
+		}
+	}
+
+	/**
+	 * A log from a downloaded backup, checked strictly; null when anything
+	 * in it is not what a run writes. Paths stay inside uploads and file
+	 * names are plain names, so an import can only touch what undo() would.
+	 */
+	public static function sanitize_log( $l ): ?array {
+		if ( ! is_array( $l ) || ! isset( $l['run'], $l['time'], $l['items'] ) || ! is_array( $l['items'] )
+			|| ! is_string( $l['run'] ) || ! preg_match( '/^[A-Za-z0-9]{1,32}$/', $l['run'] ) || ! $l['items'] ) {
+			return null;
+		}
+		$items = array();
+		foreach ( array_values( $l['items'] ) as $e ) {
+			$e = self::sanitize_entry( $e );
+			if ( null === $e ) {
+				return null;
+			}
+			$items[] = $e;
+		}
+		return array(
+			'run'   => $l['run'],
+			'time'  => (int) $l['time'],
+			'user'  => isset( $l['user'] ) ? (int) $l['user'] : 0,
+			'items' => $items,
+		);
+	}
+
+	private static function sanitize_entry( $e ): ?array {
+		if ( ! is_array( $e ) || ! isset( $e['k'] ) || ! is_string( $e['k'] ) || ! preg_match( '/^([ptf]):(\d{1,20})$/', $e['k'], $m ) ) {
+			return null;
+		}
+		$str = static function ( $v ): bool {
+			return is_string( $v ) && strlen( $v ) <= 2000;
+		};
+		if ( 'p' === $m[1] ) {
+			if ( ! isset( $e['old'], $e['new'], $e['path'] ) || ! $str( $e['old'] ) || ! $str( $e['new'] ) || ! $str( $e['path'] ) ) {
+				return null;
+			}
+			return array(
+				'k'    => $e['k'],
+				'old'  => $e['old'],
+				'new'  => $e['new'],
+				'meta' => ! empty( $e['meta'] ),
+				'path' => $e['path'],
+			);
+		}
+		if ( 't' === $m[1] ) {
+			if ( ! isset( $e['tax'], $e['old'], $e['new'], $e['map'] ) || ! $str( $e['old'] ) || ! $str( $e['new'] ) || ! $str( $e['map'] )
+				|| ! is_string( $e['tax'] ) || ! taxonomy_exists( $e['tax'] ) ) {
+				return null;
+			}
+			return array(
+				'k'   => $e['k'],
+				'tax' => $e['tax'],
+				'old' => $e['old'],
+				'new' => $e['new'],
+				'map' => $e['map'],
+			);
+		}
+		// File: a folder under uploads and plain file names in it.
+		if ( ! isset( $e['rel'], $e['dir'], $e['plan'], $e['moved'], $e['posts'], $e['dl'] ) || ! is_string( $e['dir'] ) || ! is_string( $e['rel'] )
+			|| ! is_array( $e['plan'] ) || ! is_array( $e['moved'] ) || ! is_array( $e['posts'] ) || ! is_array( $e['dl'] ) || ! $e['plan'] ) {
+			return null;
+		}
+		$dir = $e['dir'];
+		if ( '' !== $dir && ( false !== strpos( $dir, "\0" ) || ! preg_match( '#^[^/\\\\]+(/[^/\\\\]+)*/$#', $dir ) || preg_match( '#(^|/)\.\.?/#', $dir ) ) ) {
+			return null;
+		}
+		$name = static function ( $v ): bool {
+			return is_string( $v ) && '' !== $v && strlen( $v ) <= 255 && ! preg_match( '#[/\\\\]#', $v ) && false === strpos( $v, "\0" ) && '.' !== $v && '..' !== $v;
+		};
+		foreach ( $e['plan'] as $old => $new ) {
+			if ( ! $name( (string) $old ) || ! $name( $new ) ) {
+				return null;
+			}
+		}
+		foreach ( $e['moved'] as $old => $new ) {
+			if ( ! isset( $e['plan'][ $old ] ) || $e['plan'][ $old ] !== $new ) {
+				return null;
+			}
+		}
+		if ( 0 !== strpos( $e['rel'], $dir ) || ! isset( $e['plan'][ substr( $e['rel'], strlen( $dir ) ) ] ) ) {
+			return null;
+		}
+		$posts = array();
+		foreach ( $e['posts'] as $pid => $c ) {
+			if ( ! is_array( $c ) || ! isset( $c[0], $c[1] ) || ! is_string( $c[0] ) || ! is_string( $c[1] ) ) {
+				return null;
+			}
+			$posts[ (int) $pid ] = array( $c[0], $c[1] );
+		}
+		$dl = array();
+		foreach ( $e['dl'] as $pid => $files ) {
+			if ( ! is_array( $files ) ) {
+				return null;
+			}
+			$dl[ (int) $pid ] = $files;
+		}
+		return array(
+			'k'     => $e['k'],
+			'rel'   => $e['rel'],
+			'dir'   => $dir,
+			'plan'  => $e['plan'],
+			'moved' => $e['moved'],
+			'meta'  => isset( $e['meta'] ) && is_array( $e['meta'] ) ? $e['meta'] : false,
+			'posts' => $posts,
+			'dl'    => $dl,
+		);
+	}
+
+	/** Put an imported run back as the undo log (replaces the current one). */
+	public static function import_log( array $l ): bool {
+		delete_option( self::LOG );
+		return add_option( self::LOG, $l, '', false );
 	}
 
 	/** Undo up to $n items, newest first. Returns array( done, errors[], left ). */
@@ -910,13 +1108,19 @@ final class GLP_Bulk {
 			}
 		}
 		foreach ( (array) $e['dl'] as $pid => $orig ) {
-			if ( is_array( $orig ) ) {
-				update_post_meta( (int) $pid, '_downloadable_files', $orig );
-				$post = get_post( (int) $pid );
-				if ( $post ) {
-					clean_post_cache( (int) $pid );
-					self::touched_post( $post );
-				}
+			if ( ! is_array( $orig ) ) {
+				continue;
+			}
+			if ( get_post_meta( (int) $pid, '_downloadable_files', true ) !== self::swap_downloads( $orig, self::replacements( $dir_rel, $plan ) ) ) {
+				/* translators: %d: product ID */
+				$warn = sprintf( __( 'Τα αρχεία για download του #%d άλλαξαν μετά τη μετατροπή: δεν γύρισαν πίσω.', 'greeklish-permalinks' ), (int) $pid );
+				continue;
+			}
+			update_post_meta( (int) $pid, '_downloadable_files', $orig );
+			$post = get_post( (int) $pid );
+			if ( $post ) {
+				clean_post_cache( (int) $pid );
+				self::touched_post( $post );
 			}
 		}
 

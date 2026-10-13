@@ -33,7 +33,8 @@ Greek to Latin in new permalinks and, if you want, in uploaded file names, with 
 * Runs in small batches with a progress bar; a name already in use gets a `-2` suffix and no file is ever overwritten.
 * Files are renamed with all their sizes, the scaled original and webp / avif copies. Links in post content, excerpts and downloadable product files are updated. Links found in other plugins' data (page builders) are listed before applying and left alone.
 * Old addresses answer with a 301: posts through WordPress's own old-slug redirect, pages, terms and files through the plugin's redirect table. A server check on the bulk page tells whether missing files reach WordPress.
-* The last run can be undone, row by row; anything edited after the conversion is left as it is and reported.
+* The last run can be undone; anything edited after the conversion is left as it is and reported.
+* Every change is written to the undo log before it happens. If that write fails, the run stops and everything it changed goes back. "Download backup" saves the last run as JSON, and Tools → Import loads it back for undo.
 
 **Redirects for Greek links**
 
@@ -75,6 +76,10 @@ No. Nothing existing changes unless you run a bulk conversion, and a bulk conver
 
 Only when the web server sends requests for missing files to WordPress, which most do. The bulk page checks this before you rename files.
 
+= What if a bulk run is interrupted? =
+
+What changed before the interruption is in the undo log. Scan again: the remaining items show up and can be applied as a new run (undo then covers the newer run only).
+
 = What happens on uninstall? =
 
 The settings, the undo log and the transients are removed. The redirect table is removed too, unless you ticked "Keep the redirect table" in Tools. Slugs and files you converted stay converted, and WordPress's own old-slug redirects for posts stay. The shared Noxpress options stay while another Noxpress plugin is installed.
@@ -86,6 +91,7 @@ The settings, the undo log and the transients are removed. The redirect table is
 * Latin slugs for new posts, pages, products, terms, attributes and users; simple and phonetic styles; monotonic and polytonic Greek; stop words and custom rules; live test.
 * Optional Latin file names on upload (off by default).
 * Bulk conversion on demand of existing slugs and files: scan, dry run, batches, file sizes and variants, link updates in content and downloads, 301 redirect table, undo of the last run.
+* Undo log written before every change, automatic undo when it cannot be written, "Download backup" of the last run and import back.
 * 301 for Greek addresses that lead to a 404; legacy Greek term slugs keep working.
 * Keeps the style of AutoConvert Greeklish Permalinks on first activation, with a notice while it is active.
 * Works without WooCommerce. GLP_DISABLE, settings export / import.
