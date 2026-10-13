@@ -45,6 +45,7 @@ SLUGS = {
     'sn': 'shipping-notes',
     'cr': 'featured-creators',
     'pk': 'store-pickup',
+    'hc': 'hide-catalog',
     'vp': 'variation-picker',
     'nm': 'data-migrator',
 }

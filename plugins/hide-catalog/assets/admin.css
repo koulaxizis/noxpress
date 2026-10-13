@@ -1,0 +1,429 @@
+/**
+ * Hide Catalog — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors hic-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.hic-wrap {
+	--hic-bg: #101218;
+	--hic-panel: #14161d;
+	--hic-panel-2: #1d2029;
+	--hic-input: #1a1d26;
+	--hic-border: #2e3240;
+	--hic-border-input: #3a3f52;
+	--hic-row-border: #23262f;
+	--hic-stripe: #181b23;
+	--hic-hover: #1e212c;
+	--hic-text: #eae8fa;
+	--hic-heading: #f6f4ff;
+	--hic-muted: #b7b2d6;
+	--hic-link: #beb1ff;
+	--hic-link-hover: #d4c9ff;
+	--hic-accent: #6d4aff;
+	--hic-accent-hover: #8263ff;
+	--hic-warn: #f5c97e;
+	--hic-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.hic-wrap {
+	color-scheme: dark;
+	background: var(--hic-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--hic-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.hic-wrap h1,
+.hic-wrap h2 {
+	color: var(--hic-heading);
+}
+
+.hic-wrap a { color: var(--hic-link); }
+.hic-wrap a:hover { color: var(--hic-link-hover); }
+
+.hic-wrap .hic-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--hic-muted);
+	border-bottom: 1px solid var(--hic-border);
+	padding-bottom: 6px;
+}
+
+.hic-wrap .description,
+.hic-wrap p.description,
+.hic-wrap .hic-hint {
+	color: var(--hic-muted) !important;
+}
+
+.hic-zone {
+	background: var(--hic-panel);
+	border: 1px solid var(--hic-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.hic-wrap input[type="text"],
+.hic-wrap input[type="url"],
+.hic-wrap input[type="number"],
+.hic-wrap input[type="time"],
+.hic-wrap input[type="date"],
+.hic-wrap textarea,
+.hic-wrap select {
+	background-color: var(--hic-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--hic-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.hic-wrap input::placeholder,
+.hic-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.hic-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.hic-wrap input[type="file"] {
+	color: var(--hic-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.hic-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.hic-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.hic-wrap input[type="checkbox"],
+.hic-wrap input[type="radio"] {
+	accent-color: var(--hic-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.hic-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.hic-wrap .button:hover:not(:disabled) {
+	border-color: var(--hic-accent) !important;
+	color: #ffffff !important;
+}
+
+.hic-wrap .button-primary {
+	background: var(--hic-accent) !important;
+	border-color: var(--hic-accent) !important;
+	color: #ffffff !important;
+}
+
+.hic-wrap .button-primary:hover:not(:disabled) {
+	background: var(--hic-accent-hover) !important;
+}
+
+.hic-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.hic-submit { margin-top: 20px; }
+.hic-inline-form { display: inline; margin-right: 10px; }
+.hic-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.hic-table,
+table.widefat.hic-table {
+	background: var(--hic-panel) !important;
+	border: 1px solid var(--hic-border) !important;
+	border-radius: 6px;
+	color: var(--hic-text) !important;
+	margin-top: 14px !important;
+}
+
+.hic-table thead th,
+.hic-table thead td {
+	background: var(--hic-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.hic-table tbody td,
+.hic-table tbody th {
+	background: var(--hic-panel) !important;
+	color: var(--hic-text) !important;
+	border-bottom: 1px solid var(--hic-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.hic-table tbody tr:nth-child(2n) td,
+.hic-table tbody tr:nth-child(2n) th {
+	background: var(--hic-stripe) !important;
+}
+
+.hic-table tbody tr:hover td,
+.hic-table tbody tr:hover th {
+	background: var(--hic-hover) !important;
+}
+
+.hic-table td,
+.hic-table th {
+	padding: 12px 14px;
+}
+
+.hic-table td code {
+	background: transparent !important;
+	color: var(--hic-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.hic-table .hic-empty {
+	color: var(--hic-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.hic-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.hic-footer a { color: #beb1ff; text-decoration: none; }
+.hic-footer a:hover { text-decoration: underline; }
+
+.hic-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.hic-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.hic-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.hic-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.hic-muted { color: var(--hic-muted) !important; }
+.hic-warn { color: var(--hic-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.hic-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.hic-wrap .hic-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--hic-heading);
+}
+
+.hic-status p { margin: 0 0 8px; }
+.hic-status p:last-child { margin-bottom: 0; }
+.hic-status code,
+.hic-wrap .description code,
+.hic-wrap .hic-hint code {
+	background: var(--hic-panel-2);
+	color: var(--hic-muted);
+	border: 1px solid var(--hic-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.hic-suspended { margin: 8px 0 0; }
+.hic-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.hic-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--hic-border);
+	background: var(--hic-panel-2);
+	color: var(--hic-text);
+	white-space: nowrap;
+}
+.hic-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.hic-badge--muted { color: var(--hic-muted); }
+.hic-badge--warn { border-color: #6b5a33; color: var(--hic-warn); }
+.hic-badge--danger { border-color: #6b3a3a; color: var(--hic-danger); }
+
+/* Area fieldsets. */
+.hic-area {
+	background: var(--hic-panel);
+	border: 1px solid var(--hic-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.hic-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--hic-heading);
+}
+.hic-row { margin: 4px 0 8px; }
+
+.hic-details > summary {
+	cursor: pointer;
+	color: var(--hic-link);
+	margin: 4px 0;
+}
+.hic-details[open] > summary { margin-bottom: 12px; }
+
+.hic-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.hic-wrap .hic-label {
+	display: block;
+	font-weight: 600;
+	color: var(--hic-heading);
+	margin: 8px 0 6px;
+}
+.hic-grid .hic-label:first-child { margin-top: 0; }
+
+.hic-field {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.hic-field > span:first-child {
+	min-width: 150px;
+	color: var(--hic-text);
+}
+.hic-wrap .hic-hint { display: block; font-size: 12px; margin-top: 4px; }
+.hic-wrap td .hic-hint { display: inline; }
+.hic-table td.hic-warn { color: var(--hic-warn) !important; }
+
+/* Tabs of the main page. */
+.hic-wrap .hic-tabs {
+	border-bottom: 1px solid var(--hic-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.hic-wrap .hic-tabs .nav-tab {
+	background: var(--hic-panel);
+	border-color: var(--hic-border);
+	color: var(--hic-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.hic-wrap .hic-tabs .nav-tab:hover { color: var(--hic-link-hover); background: var(--hic-hover); }
+.hic-wrap .hic-tabs .nav-tab-active,
+.hic-wrap .hic-tabs .nav-tab-active:hover {
+	background: var(--hic-bg);
+	border-bottom-color: var(--hic-bg);
+	color: var(--hic-heading);
+}
+
+/* One input per line (removal rules). */
+.hic-wrap .hic-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.hic-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--hic-border);
+	border-radius: 6px;
+	background: var(--hic-panel-2);
+}
+.hic-scroll .hic-field { margin-bottom: 4px; }
+
+/* ===== Shipping Notes ===== */
+
+.hic-wrap .hic-wide { width: 100%; max-width: 640px; }
+.hic-wrap .hic-num { width: 90px; }
+.hic-wrap .hic-texts input[type="text"] { width: 100%; }
+
+/* ===== Rule cards ===== */
+.hic-wrap .hic-rule-card {
+	min-width: 0; /* fieldsets default to min-content and overflow narrow screens */
+	margin: 12px 0 0;
+	padding: 12px 18px 10px;
+}
+.hic-wrap .hic-rule-card legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--hic-heading);
+}
+.hic-wrap .hic-rule-card--new { border-style: dashed; }
+.hic-wrap .hic-rule-card--new legend { color: var(--hic-muted); }
+.hic-wrap .hic-rule-card .hic-label { margin: 0; }
+.hic-wrap .hic-rule-card .hic-label .hic-wide {
+	display: block;
+	width: 100%;
+	max-width: none;
+	margin-top: 6px;
+	font-weight: 400;
+}
+.hic-wrap .hic-rule-card textarea { min-height: 64px; }
+.hic-wrap .hic-rule-card .hic-badge { white-space: normal; max-width: 100%; }
+.hic-wrap .hic-rule-card select,
+.hic-wrap input[type="file"] { max-width: 100%; }
+.hic-wrap .hic-texts td:first-child { width: 280px; }

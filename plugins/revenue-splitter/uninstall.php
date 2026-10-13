@@ -94,6 +94,7 @@ $rs_lang_readers = array(
 	'book-preview/book-preview.php',
 	'featured-creators/featured-creators.php',
 	'store-pickup/store-pickup.php',
+	'hide-catalog/hide-catalog.php',
 	'variation-picker/variation-picker.php',
 );
 
@@ -243,7 +244,7 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $rs_itemmeta_table )
 // ---------------------------------------------------------------------
 
 $rs_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'variation-picker' ) as $rs_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker' ) as $rs_slug ) {
 	if ( 'revenue-splitter' !== $rs_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $rs_slug . '/' . $rs_slug . '.php' ) ) {
 		$rs_suite_left = true;
 		break;

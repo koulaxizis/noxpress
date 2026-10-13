@@ -3,7 +3,7 @@
  * VPK_Admin_UI — menu, settings page, PRG routes, backup (Bible §3–§8, §11).
  *
  * One page, submenu «Swatches» of the shared "Noxpress" menu (admin_menu
- * priority 120), slug vpk-settings, with tabs:
+ * priority 130), slug vpk-settings, with tabs:
  *  - general     mode, other swatches plugins, default type, look (with a
  *                live preview), behaviour, tooltip info, cart dot
  *  - attributes  type / shape / size of every attribute
@@ -32,7 +32,7 @@ final class VPK_Admin_UI {
 	const MAX_IMPORT  = 524288;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 120 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 130 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );

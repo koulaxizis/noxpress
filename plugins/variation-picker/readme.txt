@@ -98,4 +98,4 @@ The settings, size guides, availability maps and background jobs are removed. Th
 * Color dot in the cart and mini-cart.
 * Editable Greek / English texts, settings export / import.
 * Test mode, VPK_DISABLE, HPOS compatible.
-* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.5).
+* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.6).
