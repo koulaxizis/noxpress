@@ -1,0 +1,433 @@
+/**
+ * orOS Connect — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors orc-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.orc-wrap {
+	--orc-bg: #101218;
+	--orc-panel: #14161d;
+	--orc-panel-2: #1d2029;
+	--orc-input: #1a1d26;
+	--orc-border: #2e3240;
+	--orc-border-input: #3a3f52;
+	--orc-row-border: #23262f;
+	--orc-stripe: #181b23;
+	--orc-hover: #1e212c;
+	--orc-text: #eae8fa;
+	--orc-heading: #f6f4ff;
+	--orc-muted: #b7b2d6;
+	--orc-link: #beb1ff;
+	--orc-link-hover: #d4c9ff;
+	--orc-accent: #6d4aff;
+	--orc-accent-hover: #8263ff;
+	--orc-warn: #f5c97e;
+	--orc-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.orc-wrap {
+	color-scheme: dark;
+	background: var(--orc-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--orc-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.orc-wrap h1,
+.orc-wrap h2 {
+	color: var(--orc-heading);
+}
+
+.orc-wrap a { color: var(--orc-link); }
+.orc-wrap a:hover { color: var(--orc-link-hover); }
+
+.orc-wrap .orc-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--orc-muted);
+	border-bottom: 1px solid var(--orc-border);
+	padding-bottom: 6px;
+}
+
+.orc-wrap .description,
+.orc-wrap p.description,
+.orc-wrap .orc-hint {
+	color: var(--orc-muted) !important;
+}
+
+.orc-zone {
+	background: var(--orc-panel);
+	border: 1px solid var(--orc-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.orc-wrap input[type="text"],
+.orc-wrap input[type="email"],
+.orc-wrap input[type="url"],
+.orc-wrap input[type="number"],
+.orc-wrap input[type="time"],
+.orc-wrap input[type="date"],
+.orc-wrap textarea,
+.orc-wrap select {
+	background-color: var(--orc-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--orc-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.orc-wrap input::placeholder,
+.orc-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.orc-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.orc-wrap input[type="file"] {
+	color: var(--orc-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.orc-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.orc-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.orc-wrap input[type="checkbox"],
+.orc-wrap input[type="radio"] {
+	accent-color: var(--orc-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.orc-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.orc-wrap .button:hover:not(:disabled) {
+	border-color: var(--orc-accent) !important;
+	color: #ffffff !important;
+}
+
+.orc-wrap .button-primary {
+	background: var(--orc-accent) !important;
+	border-color: var(--orc-accent) !important;
+	color: #ffffff !important;
+}
+
+.orc-wrap .button-primary:hover:not(:disabled) {
+	background: var(--orc-accent-hover) !important;
+}
+
+.orc-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.orc-submit { margin-top: 20px; }
+.orc-inline-form { display: inline; margin-right: 10px; }
+.orc-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.orc-table,
+table.widefat.orc-table {
+	background: var(--orc-panel) !important;
+	border: 1px solid var(--orc-border) !important;
+	border-radius: 6px;
+	color: var(--orc-text) !important;
+	margin-top: 14px !important;
+}
+
+.orc-table thead th,
+.orc-table thead td {
+	background: var(--orc-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.orc-table tbody td,
+.orc-table tbody th {
+	background: var(--orc-panel) !important;
+	color: var(--orc-text) !important;
+	border-bottom: 1px solid var(--orc-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.orc-table tbody tr:nth-child(2n) td,
+.orc-table tbody tr:nth-child(2n) th {
+	background: var(--orc-stripe) !important;
+}
+
+.orc-table tbody tr:hover td,
+.orc-table tbody tr:hover th {
+	background: var(--orc-hover) !important;
+}
+
+.orc-table td,
+.orc-table th {
+	padding: 12px 14px;
+}
+
+.orc-table td code {
+	background: transparent !important;
+	color: var(--orc-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.orc-table .orc-empty {
+	color: var(--orc-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.orc-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.orc-footer a { color: #beb1ff; text-decoration: none; }
+.orc-footer a:hover { text-decoration: underline; }
+
+.orc-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.orc-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.orc-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.orc-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.orc-muted { color: var(--orc-muted) !important; }
+.orc-warn { color: var(--orc-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.orc-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.orc-wrap .orc-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--orc-heading);
+}
+
+.orc-status p { margin: 0 0 8px; }
+.orc-status p:last-child { margin-bottom: 0; }
+.orc-status code,
+.orc-wrap .description code,
+.orc-wrap .orc-hint code {
+	background: var(--orc-panel-2);
+	color: var(--orc-muted);
+	border: 1px solid var(--orc-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.orc-suspended { margin: 8px 0 0; }
+.orc-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.orc-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--orc-border);
+	background: var(--orc-panel-2);
+	color: var(--orc-text);
+	white-space: nowrap;
+}
+.orc-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.orc-badge--muted { color: var(--orc-muted); }
+.orc-badge--warn { border-color: #6b5a33; color: var(--orc-warn); }
+.orc-badge--danger { border-color: #6b3a3a; color: var(--orc-danger); }
+
+/* Area fieldsets. */
+.orc-area {
+	background: var(--orc-panel);
+	border: 1px solid var(--orc-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.orc-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--orc-heading);
+}
+.orc-row { margin: 4px 0 8px; }
+
+.orc-details > summary {
+	cursor: pointer;
+	color: var(--orc-link);
+	margin: 4px 0;
+}
+.orc-details[open] > summary { margin-bottom: 12px; }
+
+.orc-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.orc-wrap .orc-label {
+	display: block;
+	font-weight: 600;
+	color: var(--orc-heading);
+	margin: 8px 0 6px;
+}
+.orc-grid .orc-label:first-child { margin-top: 0; }
+
+.orc-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.orc-field > span:first-child {
+	min-width: 150px;
+	color: var(--orc-text);
+}
+.orc-wrap .orc-color { width: 96px; font-family: monospace; }
+.orc-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--orc-border-input);
+}
+
+.orc-wrap .orc-hint { display: block; font-size: 12px; margin-top: 4px; }
+.orc-wrap td .orc-hint { display: inline; }
+.orc-table td.orc-warn { color: var(--orc-warn) !important; }
+
+/* Tabs of the main page. */
+.orc-wrap .orc-tabs {
+	border-bottom: 1px solid var(--orc-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.orc-wrap .orc-tabs .nav-tab {
+	background: var(--orc-panel);
+	border-color: var(--orc-border);
+	color: var(--orc-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.orc-wrap .orc-tabs .nav-tab:hover { color: var(--orc-link-hover); background: var(--orc-hover); }
+.orc-wrap .orc-tabs .nav-tab-active,
+.orc-wrap .orc-tabs .nav-tab-active:hover {
+	background: var(--orc-bg);
+	border-bottom-color: var(--orc-bg);
+	color: var(--orc-heading);
+}
+
+/* One input per line (removal rules). */
+.orc-wrap .orc-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.orc-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--orc-border);
+	border-radius: 6px;
+	background: var(--orc-panel-2);
+}
+.orc-scroll .orc-field { margin-bottom: 4px; }
+
+/* ===== orOS Connect ===== */
+
+.orc-wrap .orc-wide { width: 100%; max-width: 640px; }
+.orc-wrap .orc-key { width: 100%; max-width: 360px; font-family: monospace; }
+.orc-wrap textarea.orc-wide { min-height: 96px; font-family: monospace; font-size: 12px; }
+
+/* Module cards. */
+.orc-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.orc-mod { background: var(--orc-panel); border: 1px solid var(--orc-border); border-radius: 6px; padding: 14px 16px; }
+.orc-mod h3 { margin: 0 0 6px; font-size: 14px; color: var(--orc-heading); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.orc-mod p { margin: 0 0 10px; color: var(--orc-muted); }
+.orc-mod.is-soon { opacity: .7; }
+
+/* Two languages side by side. */
+.orc-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
+.orc-pair input[type="text"] { width: 100%; }
+.orc-pair .orc-lang { font-size: 12px; color: var(--orc-muted); display: block; margin-bottom: 2px; }
+
+/* Send log. */
+.orc-table td.is-ok { color: #9fe0b5 !important; }
+.orc-table td.is-retry { color: var(--orc-warn) !important; }
+.orc-table td.is-fail { color: var(--orc-danger) !important; }
+
+@media (max-width: 600px) {
+	.orc-wrap { padding: 20px 14px 18px; }
+	.orc-field { flex-wrap: wrap; }
+}

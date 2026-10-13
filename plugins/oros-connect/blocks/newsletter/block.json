@@ -1,0 +1,20 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "oros-connect/newsletter",
+	"title": "Newsletter (orOS)",
+	"category": "widgets",
+	"icon": "email-alt",
+	"description": "Sign-up form for your list in orOS Newsletter. Texts and the orOS address: Noxpress → orOS Connect.",
+	"keywords": [ "newsletter", "oros", "email", "subscribe" ],
+	"textdomain": "oros-connect",
+	"attributes": {
+		"showTitle": { "type": "boolean", "default": true }
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true, "padding": true }
+	},
+	"editorScript": "file:./index.js"
+}
