@@ -295,7 +295,7 @@ footer {
 }
 footer a { color: var(--accent-bright); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
-footer .credits { margin-top: 6px; }
+footer .credits, footer .footer-links { margin-top: 6px; }
 footer .heart { color: var(--accent-bright); }
 
 @media (prefers-color-scheme: light) {
@@ -680,9 +680,10 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="supporters">
 		<h2><a href="#supporters" data-i18n="ms_title">Monthly supporters</a></h2>
-		<p data-i18n="ms_desc">A small monthly contribution covers hosting, domains and tools, and keeps the updates coming. Supporters can be thanked by name on this page, if they wish, and vote on the next plugin.</p>
+		<p data-i18n="ms_desc">A small monthly contribution covers hosting, domains and tools, and keeps the updates coming. Supporters can be thanked by name on the Supporters page, if they wish, and vote on the next plugin.</p>
 		<div class="actions">
 			<a class="btn primary" href="https://ko-fi.com/koulaxizis/tiers" target="_blank" rel="noopener" data-i18n="ms_btn">Become a supporter</a>
+			<a class="btn" href="/supporters/" data-i18n="ms_list">See the supporters</a>
 			<a class="btn" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="ms_once">One-off coffee ☕</a>
 		</div>
 	</article>
@@ -697,6 +698,7 @@ footer .heart { color: var(--accent-bright); }
 
 <footer>
 	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
+	<p class="footer-links"><a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener">Ko-fi</a> · <a href="/supporters/" data-i18n="ft_supporters">Supporters</a></p>
 	<p class="credits" data-i18n="credits">Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.</p>
 </footer>
 
@@ -883,13 +885,15 @@ footer .heart { color: var(--accent-bright); }
 		sv_li3: '<strong>Priority support:</strong> your questions and bugs answered first',
 		sv_btn: 'Book a service on Ko-fi',
 		ms_title: 'Monthly supporters',
-		ms_desc: 'A small monthly contribution covers hosting, domains and tools, and keeps the updates coming. Supporters can be thanked by name on this page, if they wish, and vote on the next plugin.',
+		ms_desc: 'A small monthly contribution covers hosting, domains and tools, and keeps the updates coming. Supporters can be thanked by name on the Supporters page, if they wish, and vote on the next plugin.',
 		ms_btn: 'Become a supporter',
+		ms_list: 'See the supporters',
 		ms_once: 'One-off coffee ☕',
 		sub_title: 'Stay in the loop ✦',
 		sub_text: 'Get notified about new plugins, updates &amp; maintenance.',
 		sub_btn: 'Subscribe',
 		sub_note: 'No spam — only release announcements. Your email stays with MailerLite.',
+		ft_supporters: 'Supporters',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
@@ -1056,13 +1060,15 @@ footer .heart { color: var(--accent-bright); }
 		sv_li3: '<strong>Υποστήριξη με προτεραιότητα:</strong> οι ερωτήσεις και τα σφάλματά σου απαντώνται πρώτα',
 		sv_btn: 'Κλείσε υπηρεσία στο Ko-fi',
 		ms_title: 'Μηνιαίοι υποστηρικτές',
-		ms_desc: 'Μια μικρή μηνιαία συνεισφορά καλύπτει hosting, domains και εργαλεία, και κρατά τις ενημερώσεις να έρχονται. Οι υποστηρικτές, αν θέλουν, ευχαριστούνται ονομαστικά σε αυτή τη σελίδα και ψηφίζουν το επόμενο plugin.',
+		ms_desc: 'Μια μικρή μηνιαία συνεισφορά καλύπτει hosting, domains και εργαλεία, και κρατά τις ενημερώσεις να έρχονται. Οι υποστηρικτές, αν θέλουν, ευχαριστούνται ονομαστικά στη σελίδα Υποστηρικτές και ψηφίζουν το επόμενο plugin.',
 		ms_btn: 'Γίνε υποστηρικτής',
+		ms_list: 'Δες τους υποστηρικτές',
 		ms_once: 'Ένας καφές, μία φορά ☕',
 		sub_title: 'Μείνε ενήμερος ✦',
 		sub_text: 'Ενημερώσου για νέα plugins, ενημερώσεις &amp; συντήρηση.',
 		sub_btn: 'Εγγραφή',
 		sub_note: 'Χωρίς spam — μόνο ανακοινώσεις εκδόσεων. Το email σου μένει στη MailerLite.',
+		ft_supporters: 'Υποστηρικτές',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
