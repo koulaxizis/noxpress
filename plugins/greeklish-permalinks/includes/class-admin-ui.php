@@ -28,7 +28,7 @@ final class GLP_Admin_UI {
 	const NONCE_FIELD = 'glp_nonce';
 	const NONCE_BAK   = 'glp_backup';
 	const NONCE_AJAX  = 'glp_ajax';
-	const MAX_IMPORT  = 262144;
+	const MAX_IMPORT  = 33554432; // A run's backup holds the old texts of the posts it changed.
 	const BATCH       = 20;
 	const BATCH_FILES = 5;
 
@@ -125,6 +125,8 @@ final class GLP_Admin_UI {
 					'done'       => __( 'Έγινε: %1$d εντάξει, %2$d παραλείψεις, %3$d σφάλματα.', 'greeklish-permalinks' ),
 					'dryDone'    => __( 'Δοκιμή: %1$d θα αλλάξουν, %2$d παραλείψεις, %3$d σφάλματα. Δεν άλλαξε τίποτα.', 'greeklish-permalinks' ),
 					'undoDone'   => __( 'Η αναίρεση ολοκληρώθηκε.', 'greeklish-permalinks' ),
+					'stopped'    => __( 'Το αντίγραφο ασφαλείας δεν γράφτηκε, οπότε η εφαρμογή σταμάτησε. Αναιρείται ό,τι άλλαξε ως εδώ…', 'greeklish-permalinks' ),
+					'stoppedDone' => __( 'Η εφαρμογή σταμάτησε και ό,τι άλλαξε γύρισε πίσω. Έλεγξε τον χώρο της βάσης και ξαναδοκίμασε με λιγότερα στοιχεία.', 'greeklish-permalinks' ),
 					'failed'     => __( 'Το αίτημα απέτυχε. Δοκίμασε ξανά.', 'greeklish-permalinks' ),
 					'refs'       => __( '%1$d αρχεία στον δίσκο · %2$d άρθρα/σελίδες · %3$d αρχεία λήψης · %4$d άλλες αναφορές (μένουν με 301)', 'greeklish-permalinks' ),
 					'colWhat'    => __( 'Τι', 'greeklish-permalinks' ),
@@ -323,8 +325,12 @@ final class GLP_Admin_UI {
 					);
 					?>
 				</p>
-				<p class="glp-actions"><button type="button" class="button" id="glp-undo"><?php esc_html_e( 'Αναίρεση της τελευταίας εφαρμογής', 'greeklish-permalinks' ); ?></button></p>
+				<p class="glp-actions">
+					<button type="button" class="button" id="glp-undo"><?php esc_html_e( 'Αναίρεση της τελευταίας εφαρμογής', 'greeklish-permalinks' ); ?></button>
+					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG . '&tab=bulk&glp_log_export=1' ), self::NONCE_BAK ) ); ?>"><?php esc_html_e( 'Λήψη αντιγράφου', 'greeklish-permalinks' ); ?></a>
+				</p>
 				<p class="description"><?php esc_html_e( 'Γυρίζει πίσω slugs, ονόματα αρχείων και αναφορές. Ό,τι άλλαξε με το χέρι μετά την εφαρμογή μένει όπως είναι.', 'greeklish-permalinks' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Η «Λήψη αντιγράφου» κατεβάζει τις τιμές πριν από την εφαρμογή (JSON). Φορτώνεται ξανά από τα Εργαλεία → Εισαγωγή, που την κάνει την εφαρμογή προς αναίρεση.', 'greeklish-permalinks' ); ?></p>
 			<?php else : ?>
 				<p class="glp-muted"><?php esc_html_e( 'Δεν υπάρχει εφαρμογή για αναίρεση.', 'greeklish-permalinks' ); ?></p>
 			<?php endif; ?>
@@ -341,10 +347,10 @@ final class GLP_Admin_UI {
 			<form method="post" enctype="multipart/form-data" class="glp-inline-form">
 				<?php wp_nonce_field( self::NONCE_BAK, 'glp_backup_nonce' ); ?>
 				<input type="file" name="glp_import_file" accept=".json,application/json" />
-				<button type="submit" name="glp_import" value="1" class="button"><?php esc_html_e( 'Εισαγωγή ρυθμίσεων (JSON)', 'greeklish-permalinks' ); ?></button>
+				<button type="submit" name="glp_import" value="1" class="button"><?php esc_html_e( 'Εισαγωγή (JSON)', 'greeklish-permalinks' ); ?></button>
 			</form>
 			<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG . '&tab=tools&glp_export=1' ), self::NONCE_BAK ) ); ?>"><?php esc_html_e( 'Εξαγωγή ρυθμίσεων (JSON)', 'greeklish-permalinks' ); ?></a>
-			<p class="description glp-mt-8"><?php esc_html_e( 'Μόνο οι ρυθμίσεις και οι κανόνες. Ο πίνακας ανακατευθύνσεων δεν μπαίνει στο backup.', 'greeklish-permalinks' ); ?></p>
+			<p class="description glp-mt-8"><?php esc_html_e( 'Η εξαγωγή έχει μόνο τις ρυθμίσεις και τους κανόνες· ο πίνακας ανακατευθύνσεων δεν μπαίνει. Η εισαγωγή δέχεται και το αντίγραφο μιας εφαρμογής από τη Μαζική μετατροπή.', 'greeklish-permalinks' ); ?></p>
 		</div>
 
 		<h2 class="glp-h2"><?php esc_html_e( 'Ανακατευθύνσεις μαζικής μετατροπής', 'greeklish-permalinks' ); ?></h2>
@@ -543,23 +549,23 @@ final class GLP_Admin_UI {
 			wp_send_json_error( array( 'message' => __( 'Ξεκίνησε άλλη εφαρμογή στο μεταξύ. Ξανάκανε σάρωση.', 'greeklish-permalinks' ) ), 409 );
 		}
 
-		$out     = array();
-		$entries = array();
+		// Each item writes its undo entry before it changes (GLP_Bulk). When
+		// that fails the batch stops here and the page undoes the run.
+		$out  = array();
+		$stop = false;
 		foreach ( $keys as $k ) {
-			$r = GLP_Bulk::process( $k, $apply );
-			if ( isset( $r['log'] ) ) {
-				$entries[] = $r['log'];
-				unset( $r['log'] );
-			}
+			$r     = GLP_Bulk::process( $k, $apply ? $run : '' );
+			$stop  = ! empty( $r['stop'] );
 			$out[] = $r;
-		}
-		if ( $apply && $entries ) {
-			GLP_Bulk::append( $run, $entries );
+			if ( $stop ) {
+				break;
+			}
 		}
 		wp_send_json_success(
 			array(
 				'run'   => $apply ? $run : 'dry',
 				'items' => $out,
+				'stop'  => $stop,
 			)
 		);
 	}
@@ -601,23 +607,32 @@ final class GLP_Admin_UI {
 	 * Backup (export GET / import POST)
 	 * =================================================================== */
 
+	/** Settings export (glp_export) and the last run's backup (glp_log_export), GET + nonce. */
 	public static function route_export(): void {
-		if ( self::SLUG !== self::current_page() || '' === self::q( 'glp_export' ) ) {
+		$what = '' !== self::q( 'glp_export' ) ? 'settings' : ( '' !== self::q( 'glp_log_export' ) ? 'undo' : '' );
+		if ( self::SLUG !== self::current_page() || '' === $what ) {
 			return;
 		}
 		if ( ! wp_verify_nonce( self::q( '_wpnonce' ), self::NONCE_BAK ) || ! current_user_can( self::CAP ) ) {
 			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'greeklish-permalinks' ) );
 		}
+		if ( 'undo' === $what ) {
+			$log = GLP_Bulk::log();
+			if ( ! $log || ! $log['items'] ) {
+				wp_die( esc_html__( 'Δεν υπάρχει εφαρμογή για αναίρεση.', 'greeklish-permalinks' ) );
+			}
+			$opts = array( GLP_Bulk::LOG => $log );
+		} else {
+			$opts = array( GLP_Settings::OPT => GLP_Settings::get() );
+		}
 		$state = array(
 			'plugin'  => 'greeklish-permalinks',
 			'version' => GLP_VERSION,
-			'options' => array(
-				GLP_Settings::OPT => GLP_Settings::get(),
-			),
+			'options' => $opts,
 		);
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=UTF-8' );
-		header( 'Content-Disposition: attachment; filename="greeklish-permalinks-settings-' . gmdate( 'Y-m-d' ) . '.json"' );
+		header( 'Content-Disposition: attachment; filename="greeklish-permalinks-' . $what . '-' . gmdate( 'Y-m-d' ) . '.json"' );
 		echo wp_json_encode( $state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); // phpcs:ignore WordPress.Security.EscapeOutput -- JSON attachment.
 		exit;
 	}
@@ -638,6 +653,17 @@ final class GLP_Admin_UI {
 		// phpcs:enable
 		if ( ! is_array( $state ) ) {
 			return array( self::msg( 'error', __( 'Το αρχείο δεν είναι έγκυρο JSON.', 'greeklish-permalinks' ) ) );
+		}
+		// A run's backup: back as the undo log, checked in full first.
+		if ( isset( $state['options'][ GLP_Bulk::LOG ] ) ) {
+			$log = GLP_Bulk::sanitize_log( $state['options'][ GLP_Bulk::LOG ] );
+			if ( null === $log ) {
+				return array( self::msg( 'error', __( 'Μη έγκυρο αντίγραφο εφαρμογής: δεν άλλαξε τίποτα.', 'greeklish-permalinks' ) ) );
+			}
+			if ( ! GLP_Bulk::import_log( $log ) ) {
+				return array( self::msg( 'error', __( 'Το αντίγραφο δεν αποθηκεύτηκε (πολύ μεγάλο για τη βάση;).', 'greeklish-permalinks' ) ) );
+			}
+			return array( self::msg( 'success', __( 'Η εφαρμογή φορτώθηκε. Αναίρεσέ τη από τη Μαζική μετατροπή.', 'greeklish-permalinks' ) ) );
 		}
 		$blob = isset( $state['options'][ GLP_Settings::OPT ] ) ? $state['options'][ GLP_Settings::OPT ] : null;
 		if ( is_string( $blob ) ) {

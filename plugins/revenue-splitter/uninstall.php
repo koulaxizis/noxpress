@@ -79,8 +79,7 @@ wp_clear_scheduled_hook( 'rs_email_monthly_check' );
 // User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
 //
 // Το rs_lang είναι η ΚΟΙΝΗ επιλογή γλώσσας του οικοσυστήματος Noxpress:
-// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators, το Store Pickup και το Variation Picker τη διαβάζουν.
-// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators, το Store Pickup και το Greeklish Permalinks τη διαβάζουν.
+// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators, το Store Pickup, το Variation Picker και το Greeklish Permalinks τη διαβάζουν.
 // Σβήνεται ΜΟΝΟ αν κανένα δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
 // ------------------------------------------------------------------------
 
