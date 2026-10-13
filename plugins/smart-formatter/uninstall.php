@@ -3,7 +3,7 @@
  * Smart Formatter — uninstall.php (v1.1.0)
  *
  * Cleanup (πλήρες — κανένα υπόλειμμα μετά το deactivate + delete):
- *  - Options: sf_profiles, sf_exclusions,
+ *  - Options: sf_profiles, sf_exclusions, sf_autoclean,
  *    sf_snapshots (OPT_HISTORY — περιλαμβάνει τα undo payloads).
  *  - Transients: sf_aui_msg_{user_id} (PRG notices — μπορεί να
  *    έχουν μείνει εκπνευσμένα στη βάση, διαγράφονται τώρα).
@@ -28,7 +28,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 function sf_uninstall_site(): void {
 	global $wpdb;
 
-	foreach ( array( 'sf_profiles', 'sf_exclusions', 'sf_snapshots' ) as $sf_opt ) {
+	foreach ( array( 'sf_profiles', 'sf_exclusions', 'sf_autoclean', 'sf_snapshots' ) as $sf_opt ) {
 		delete_option( $sf_opt );
 	}
 
