@@ -45,6 +45,7 @@ final class Noxpress_Core {
 		'Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.' => 'Store pickup at checkout, with a choice of store, opening hours and no shipping cost.',
 		'Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.' => 'Hide categories and their products from the shop, search and blocks, without changing the products.',
 		'Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.' => 'Swatches for variations: colors, images and buttons, a size guide and swatches on shop cards.',
+		'Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.' => 'Greek to Latin in slugs and file names, with bulk conversion of existing ones.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -119,7 +120,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -195,6 +196,11 @@ final class Noxpress_Core {
 				'name' => 'Variation Picker',
 				'desc' => __( 'Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.', 'noxpress' ),
 				'page' => 'vpk-settings',
+			),
+			'greeklish-permalinks' => array(
+				'name' => 'Greeklish Permalinks',
+				'desc' => __( 'Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.', 'noxpress' ),
+				'page' => 'glp-settings',
 			),
 		);
 	}
