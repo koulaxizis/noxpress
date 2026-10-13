@@ -39,6 +39,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.0.0/featured-creators.zip"
       }
     },
+    "hide-catalog": {
+      "beta": {
+        "changelog": "* Initial release.\n* Rules per product category, with or without subcategories: hide products from the shop, other listings, search, related products / upsells / cross-sells, and product shortcodes and blocks (Product Collection, product grid blocks, Store API product list).\n* \"Only when all its categories are hidden\" option, with a preview of affected products per rule.\n* Hide the category itself from category lists, product categories and breadcrumbs; one-click rule for the default category.\n* Category page: open, noindex (WordPress, Yoast, Rank Math), 404 or redirect to the shop; closed pages leave the core and Rank Math sitemaps.\n* Import from \"Hide Categories Or Products On Shop Page\"; notice when FiboSearch is active.\n* Test mode, HIC_DISABLE, page cache clearing on save, settings backup, clean uninstall.",
+        "published": "2026-10-13",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "48630f38ea235deea22960c08bd4990ca7f95824593bbf03954b65f155939619",
+        "signature": "DFh1VyeHkn4A0Ijq8v6h2urStZ1U/xlx/3tNm1O/QVod8dwTOPIQ5Mhu4ocNIZjpzLus8EnCu284Q97QLIMEBw==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.0/hide-catalog.zip"
+      }
+    },
     "product-formats": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
