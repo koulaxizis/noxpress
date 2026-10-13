@@ -1,6 +1,6 @@
 {
   "display": 25,
-  "total": 43,
+  "total": 46,
   "offset": 5,
   "updated": "2026-10-13",
   "assets": {
@@ -134,14 +134,18 @@
     },
     "637347316": {
       "file": "nox-hc-1.0.0/hide-catalog.zip",
-      "count": 0
+      "count": 1
     },
     "637361650": {
       "file": "nox-vp-1.0.0/variation-picker.zip",
-      "count": 0
+      "count": 1
     },
     "637366211": {
       "file": "nox-sf-1.4.0/smart-formatter.zip",
+      "count": 1
+    },
+    "637573158": {
+      "file": "nox-gl-1.0.0/greeklish-permalinks.zip",
       "count": 0
     }
   }
