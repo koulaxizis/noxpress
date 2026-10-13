@@ -3,7 +3,7 @@
  * Plugin Name:          Greeklish Permalinks
  * Plugin URI:           https://noxpress.tech
  * Description:          Ελληνικά σε λατινικά στα νέα slugs (άρθρα, σελίδες, προϊόντα, κατηγορίες, ετικέτες, χρήστες) και, αν το θέλεις, στα ονόματα των αρχείων που ανεβαίνουν. Απλός ή φωνητικός τρόπος, μονοτονικό και πολυτονικό, δικοί σου κανόνες, ζωντανή δοκιμή, 301 για ελληνικά links, και μαζική μετατροπή των υπαρχόντων με δοκιμή, ανακατευθύνσεις και αναίρεση. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.0.0
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -56,7 +56,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GLP_VERSION', '1.0.0' );
+define( 'GLP_VERSION', '1.1.0' );
 define( 'GLP_FILE', __FILE__ );
 define( 'GLP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'GLP_URL', plugin_dir_url( __FILE__ ) );

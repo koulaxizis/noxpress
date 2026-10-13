@@ -5,7 +5,7 @@ Tags: greeklish, permalinks, slugs, greek, transliteration
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -86,12 +86,16 @@ The settings, the undo log and the transients are removed. The redirect table is
 
 == Changelog ==
 
+= 1.1.0 =
+* Bulk conversion follows the bulk-change rule of Noxpress Bible §12: each change is written to the undo log before it happens; if that write fails, the item is left alone, the run stops and everything it changed goes back.
+* "Download backup" saves the last run as JSON; Tools → Import checks it strictly and loads it back as the run to undo.
+* Content and downloadable files change only while they still hold the value in the log; undo of downloadable files checks the same.
+
 = 1.0.0 =
 * Initial release.
 * Latin slugs for new posts, pages, products, terms, attributes and users; simple and phonetic styles; monotonic and polytonic Greek; stop words and custom rules; live test.
 * Optional Latin file names on upload (off by default).
 * Bulk conversion on demand of existing slugs and files: scan, dry run, batches, file sizes and variants, link updates in content and downloads, 301 redirect table, undo of the last run.
-* Undo log written before every change, automatic undo when it cannot be written, "Download backup" of the last run and import back.
 * 301 for Greek addresses that lead to a 404; legacy Greek term slugs keep working.
 * Keeps the style of AutoConvert Greeklish Permalinks on first activation, with a notice while it is active.
 * Works without WooCommerce. GLP_DISABLE, settings export / import.
