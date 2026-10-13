@@ -37,7 +37,10 @@ function orc_uninstall_site(): void {
 	);
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'orc_nl_send', array(), 'oros-connect' );
+		// Hook only (and group only): with an args array Action Scheduler
+		// matches only actions without args, and every send has args.
+		as_unschedule_all_actions( 'orc_nl_send' );
+		as_unschedule_all_actions( '', array(), 'oros-connect' );
 	}
 	wp_unschedule_hook( 'orc_nl_send' );
 }
