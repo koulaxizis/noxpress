@@ -365,6 +365,15 @@
 						showResult( byKey[ r.k ], r, apply );
 					}
 				} );
+				if ( d.stop ) {
+					// The undo entry could not be written: the whole run goes back (Bible §12).
+					$( 'glp-run-msg' ).textContent = t.stopped;
+					undoAll( function ( errors ) {
+						setBusy( false );
+						$( 'glp-run-msg' ).textContent = t.stoppedDone + ( errors.length ? ' ' + errors.join( ' ' ) : '' );
+					} );
+					return;
+				}
 				i++;
 				progress( i, list.length );
 				next();
@@ -387,6 +396,24 @@
 		}
 	} );
 
+	/** Undo the whole last run in batches, then done( errors ). */
+	function undoAll( done ) {
+		var errors = [];
+		var step = function () {
+			post( 'glp_undo', {} ).then( function ( d ) {
+				errors = errors.concat( d.errors || [] );
+				if ( d.left > 0 && d.done > 0 ) {
+					step();
+					return;
+				}
+				done( errors );
+			} ).catch( function ( e ) {
+				done( errors.concat( [ e.message ] ) );
+			} );
+		};
+		step();
+	}
+
 	var undoBtn = $( 'glp-undo' );
 	if ( undoBtn ) {
 		undoBtn.addEventListener( 'click', function () {
@@ -394,32 +421,20 @@
 				return;
 			}
 			setBusy( true );
-			var errors = [];
-			var step = function () {
-				post( 'glp_undo', {} ).then( function ( d ) {
-					errors = errors.concat( d.errors || [] );
-					if ( d.left > 0 && d.done > 0 ) {
-						step();
-						return;
-					}
-					setBusy( false );
-					var zone = $( 'glp-undo-zone' );
-					zone.textContent = '';
-					var p = document.createElement( 'p' );
-					p.textContent = t.undoDone;
-					zone.appendChild( p );
-					errors.forEach( function ( er ) {
-						var e = document.createElement( 'p' );
-						e.className = 'glp-warn';
-						e.textContent = er;
-						zone.appendChild( e );
-					} );
-				} ).catch( function ( e ) {
-					setBusy( false );
-					window.alert( e.message );
+			undoAll( function ( errors ) {
+				setBusy( false );
+				var zone = $( 'glp-undo-zone' );
+				zone.textContent = '';
+				var p = document.createElement( 'p' );
+				p.textContent = t.undoDone;
+				zone.appendChild( p );
+				errors.forEach( function ( er ) {
+					var e = document.createElement( 'p' );
+					e.className = 'glp-warn';
+					e.textContent = er;
+					zone.appendChild( e );
 				} );
-			};
-			step();
+			} );
 		} );
 	}
 }() );
