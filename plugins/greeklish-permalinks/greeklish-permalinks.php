@@ -36,7 +36,7 @@
  *  - §1.2 (WooCommerce required): a WordPress plugin, it works with or
  *    without WooCommerce (no "Requires Plugins"); with WooCommerce it also
  *    handles products, product terms, attributes and downloadable files
- *    (Bible 1.19 writes the exception).
+ *    (Bible 1.20 writes the exception).
  *  - §8 (capability manage_woocommerce): manage_options, a setting of the
  *    whole site.
  *  - §14.1 (no effect after activation): converting new slugs is the

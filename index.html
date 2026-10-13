@@ -295,7 +295,7 @@ footer {
 }
 footer a { color: var(--accent-bright); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
-footer .credits { margin-top: 6px; }
+footer .credits, footer .footer-links { margin-top: 6px; }
 footer .heart { color: var(--accent-bright); }
 
 @media (prefers-color-scheme: light) {
@@ -672,6 +672,43 @@ footer .heart { color: var(--accent-bright); }
 
 </section>
 
+<section class="plugins" id="support">
+	<div class="section-title" data-i18n="spt_title">Free forever, and how to help</div>
+
+	<article class="card" id="free-forever">
+		<h2><a href="#free-forever" data-i18n="ff_title">Free forever</a></h2>
+		<p data-i18n="ff_desc">Every noxpress plugin that has been released for free stays free and open source (MIT). If paid add-ons ever exist, they will only bring new features as separate plugins; nothing you use today will be locked.</p>
+		<ul>
+			<li data-i18n="ff_li1">No feature of a released plugin is ever moved behind a paywall</li>
+			<li data-i18n="ff_li2">Easy Withdrawal, compatibility and security fixes, updates and the Noxpress hub are always free</li>
+			<li data-i18n="ff_li3">No license keys, nags or ads inside the free plugins</li>
+		</ul>
+	</article>
+
+	<article class="card" id="services">
+		<h2><a href="#services" data-i18n="sv_title">Need a hand?</a></h2>
+		<p data-i18n="sv_desc">The plugins are free; my time can be booked. Pick a service on Ko-fi and describe your shop.</p>
+		<ul>
+			<li data-i18n="sv_li1"><strong>Setup:</strong> install and configure the plugins you need on your shop</li>
+			<li data-i18n="sv_li2"><strong>Theme fit:</strong> make a plugin look and work right with your theme</li>
+			<li data-i18n="sv_li3"><strong>Priority support:</strong> your questions and bugs answered first</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://ko-fi.com/koulaxizis/commissions" target="_blank" rel="noopener" data-i18n="sv_btn">Book a service on Ko-fi</a>
+		</div>
+	</article>
+
+	<article class="card" id="supporters">
+		<h2><a href="#supporters" data-i18n="ms_title">Monthly supporters</a></h2>
+		<p data-i18n="ms_desc">A small monthly contribution covers hosting, domains and tools, and keeps the updates coming. Supporters can be thanked by name on the Supporters page, if they wish, and vote on the next plugin.</p>
+		<div class="actions">
+			<a class="btn primary" href="https://ko-fi.com/koulaxizis/tiers" target="_blank" rel="noopener" data-i18n="ms_btn">Become a supporter</a>
+			<a class="btn" href="/supporters/" data-i18n="ms_list">See the supporters</a>
+			<a class="btn" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="ms_once">One-off coffee ☕</a>
+		</div>
+	</article>
+</section>
+
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
 	<div class="subscribe-title" id="subscribe-title" data-i18n="sub_title">Stay in the loop ✦</div>
 	<p data-i18n="sub_text">Get notified about new plugins, updates &amp; maintenance.</p>
@@ -681,6 +718,7 @@ footer .heart { color: var(--accent-bright); }
 
 <footer>
 	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
+	<p class="footer-links"><a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener">Ko-fi</a> · <a href="/supporters/" data-i18n="ft_supporters">Supporters</a></p>
 	<p class="credits" data-i18n="credits">Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.</p>
 </footer>
 
@@ -863,10 +901,28 @@ footer .heart { color: var(--accent-bright); }
 		dl_sub: '✦ Subscribe to updates &amp; download',
 		dl_skip: 'Skip to download',
 		dl_close: 'Close',
+		spt_title: 'Free forever, and how to help',
+		ff_title: 'Free forever',
+		ff_desc: 'Every noxpress plugin that has been released for free stays free and open source (MIT). If paid add-ons ever exist, they will only bring new features as separate plugins; nothing you use today will be locked.',
+		ff_li1: 'No feature of a released plugin is ever moved behind a paywall',
+		ff_li2: 'Easy Withdrawal, compatibility and security fixes, updates and the Noxpress hub are always free',
+		ff_li3: 'No license keys, nags or ads inside the free plugins',
+		sv_title: 'Need a hand?',
+		sv_desc: 'The plugins are free; my time can be booked. Pick a service on Ko-fi and describe your shop.',
+		sv_li1: '<strong>Setup:</strong> install and configure the plugins you need on your shop',
+		sv_li2: '<strong>Theme fit:</strong> make a plugin look and work right with your theme',
+		sv_li3: '<strong>Priority support:</strong> your questions and bugs answered first',
+		sv_btn: 'Book a service on Ko-fi',
+		ms_title: 'Monthly supporters',
+		ms_desc: 'A small monthly contribution covers hosting, domains and tools, and keeps the updates coming. Supporters can be thanked by name on the Supporters page, if they wish, and vote on the next plugin.',
+		ms_btn: 'Become a supporter',
+		ms_list: 'See the supporters',
+		ms_once: 'One-off coffee ☕',
 		sub_title: 'Stay in the loop ✦',
 		sub_text: 'Get notified about new plugins, updates &amp; maintenance.',
 		sub_btn: 'Subscribe',
 		sub_note: 'No spam — only release announcements. Your email stays with MailerLite.',
+		ft_supporters: 'Supporters',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
@@ -1029,10 +1085,28 @@ footer .heart { color: var(--accent-bright); }
 		dl_sub: '✦ Εγγραφή για ενημερώσεις &amp; λήψη',
 		dl_skip: 'Παράλειψη, κατέβασέ το',
 		dl_close: 'Κλείσιμο',
+		spt_title: 'Δωρεάν για πάντα, και πώς να βοηθήσεις',
+		ff_title: 'Δωρεάν για πάντα',
+		ff_desc: 'Κάθε plugin του noxpress που κυκλοφόρησε δωρεάν μένει δωρεάν και ανοιχτού κώδικα (MIT). Αν ποτέ υπάρξουν πληρωμένα πρόσθετα, θα φέρνουν μόνο νέες λειτουργίες ως ξεχωριστά plugins· τίποτα από όσα χρησιμοποιείς σήμερα δεν θα κλειδωθεί.',
+		ff_li1: 'Καμία λειτουργία ενός plugin που έχει κυκλοφορήσει δεν γίνεται ποτέ πληρωμένη',
+		ff_li2: 'Το Easy Withdrawal, οι διορθώσεις συμβατότητας και ασφαλείας, οι ενημερώσεις και το Noxpress hub είναι πάντα δωρεάν',
+		ff_li3: 'Χωρίς κλειδιά άδειας, ενοχλητικά μηνύματα ή διαφημίσεις μέσα στα δωρεάν plugins',
+		sv_title: 'Χρειάζεσαι βοήθεια;',
+		sv_desc: 'Τα plugins είναι δωρεάν· τον χρόνο μου μπορείς να τον κλείσεις. Διάλεξε υπηρεσία στο Ko-fi και περίγραψε το κατάστημά σου.',
+		sv_li1: '<strong>Εγκατάσταση:</strong> εγκατάσταση και ρύθμιση των plugins που χρειάζεσαι στο κατάστημά σου',
+		sv_li2: '<strong>Ταίριασμα με το θέμα:</strong> ένα plugin να δείχνει και να δουλεύει σωστά με το θέμα σου',
+		sv_li3: '<strong>Υποστήριξη με προτεραιότητα:</strong> οι ερωτήσεις και τα σφάλματά σου απαντώνται πρώτα',
+		sv_btn: 'Κλείσε υπηρεσία στο Ko-fi',
+		ms_title: 'Μηνιαίοι υποστηρικτές',
+		ms_desc: 'Μια μικρή μηνιαία συνεισφορά καλύπτει hosting, domains και εργαλεία, και κρατά τις ενημερώσεις να έρχονται. Οι υποστηρικτές, αν θέλουν, ευχαριστούνται ονομαστικά στη σελίδα Υποστηρικτές και ψηφίζουν το επόμενο plugin.',
+		ms_btn: 'Γίνε υποστηρικτής',
+		ms_list: 'Δες τους υποστηρικτές',
+		ms_once: 'Ένας καφές, μία φορά ☕',
 		sub_title: 'Μείνε ενήμερος ✦',
 		sub_text: 'Ενημερώσου για νέα plugins, ενημερώσεις &amp; συντήρηση.',
 		sub_btn: 'Εγγραφή',
 		sub_note: 'Χωρίς spam — μόνο ανακοινώσεις εκδόσεων. Το email σου μένει στη MailerLite.',
+		ft_supporters: 'Υποστηρικτές',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
