@@ -1,6 +1,6 @@
 {
   "display": 25,
-  "total": 46,
+  "total": 49,
   "offset": 5,
   "updated": "2026-10-13",
   "assets": {
@@ -146,14 +146,18 @@
     },
     "637573158": {
       "file": "nox-gl-1.0.0/greeklish-permalinks.zip",
-      "count": 0
+      "count": 1
     },
     "637586685": {
       "file": "nox-rs-1.9.1/revenue-splitter.zip",
-      "count": 0
+      "count": 1
     },
     "637586799": {
       "file": "nox-sp-1.6.0/store-pulse.zip",
+      "count": 1
+    },
+    "638119605": {
+      "file": "nox-gl-1.1.0/greeklish-permalinks.zip",
       "count": 0
     }
   }
