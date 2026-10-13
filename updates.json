@@ -117,15 +117,15 @@
     },
     "smart-formatter": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* New: \"Plain text\" rule in two modes, keep line breaks or one paragraph. It removes every HTML tag and attribute (including `data-path-to-node` from text copied from AI tools), turns `&nbsp;` into spaces, removes zero-width characters and collapses blank lines; shortcodes stay. It works on every field; the dry run counts the fields that lose a link, an image or a table.\n* New: optional \"Clean on save\" setting: the short description becomes plain text when a product is saved from its edit screen. Included in the state export / import.\n* New: \"Download backup\" for every run in the history (JSON, importable from SF Settings).\n* Fixed: the backup of a run is now written before the products change. Before, products were saved first, so a failed backup write left changes without undo.\n* Fixed: a backup that would not fit (4 MB per run) was silently cut, dropping the oldest units. Apply now checks the size first and does not start; if a batch still does not fit, the run stops safely and everything changed so far restores in full.\n* Fixed: a value that changed between the check and the write is skipped instead of being overwritten.\n* Fixed: on narrow screens the history table scrolls on its own instead of widening the whole page.",
+        "published": "2026-10-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "fca000461375a73b3af673557299cd37d3790508a94398a09488b16e1f0e58eb",
-        "signature": "0UWl9AtMDLTFhyFuSh8bYXR9q8Bsy3/zkzmFWA8+UJcDrC3Qlejv+HOsqQMoQQsMvhdoI/EaAAXUTaugXCf1DA==",
+        "sha256": "0a21c04aa6730edc9ff967223d00db29e4ba557eeb74c209927f5513fe3f9e57",
+        "signature": "RPXjx3nBbEwbC7lNaKs0Bl9XWNF+FY4uqLuDa8pWb0tV/XkGkQ4Qe4OxfA2rgO3K+MlGByPulkj1kHSj4YD4AA==",
         "tested_wp": "6.8",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.3.0/smart-formatter.zip"
+        "version": "1.4.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.4.0/smart-formatter.zip"
       }
     },
     "store-pickup": {
