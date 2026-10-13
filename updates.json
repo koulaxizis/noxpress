@@ -65,6 +65,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.0/hide-catalog.zip"
       }
     },
+    "oros-connect": {
+      "beta": {
+        "changelog": "* Initial release, with modules switched on one by one.\n* Newsletter module: sign-up form (block, shortcode, widget) that posts to the list's orOS sign-up address, connection check, Greek and English texts.\n* Unticked checkout checkbox (classic and block checkout); paid orders sent to orOS in the background with retries, order notes and a send log; consent kept in the order; optional confirmation for checkout sign-ups and a shop key that signs them.\n* Test / live / off mode, ORC_DISABLE, privacy policy text, settings export / import.\n* Works without WooCommerce. Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.8).",
+        "published": "2026-10-13",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "b7d4e91ab725b4c2d1199baec3de43bdad899f18518874d03f3163ce62530c8d",
+        "signature": "lhkq366BSBcbSGKkVxnANwATu579++w0v7rP/RGxIBOYtC81Q844f/Ymy363YWSSTPzw6A9eOqd8r7nxN7IODg==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.0.0/oros-connect.zip"
+      }
+    },
     "product-formats": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
