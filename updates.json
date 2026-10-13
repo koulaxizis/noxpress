@@ -41,15 +41,15 @@
     },
     "greeklish-permalinks": {
       "beta": {
-        "changelog": "* Initial release.\n* Latin slugs for new posts, pages, products, terms, attributes and users; simple and phonetic styles; monotonic and polytonic Greek; stop words and custom rules; live test.\n* Optional Latin file names on upload (off by default).\n* Bulk conversion on demand of existing slugs and files: scan, dry run, batches, file sizes and variants, link updates in content and downloads, 301 redirect table, undo of the last run.\n* 301 for Greek addresses that lead to a 404; legacy Greek term slugs keep working.\n* Keeps the style of AutoConvert Greeklish Permalinks on first activation, with a notice while it is active.\n* Works without WooCommerce. GLP_DISABLE, settings export / import.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.7).",
+        "changelog": "* Bulk conversion follows the bulk-change rule of Noxpress Bible §12: each change is written to the undo log before it happens; if that write fails, the item is left alone, the run stops and everything it changed goes back.\n* \"Download backup\" saves the last run as JSON; Tools → Import checks it strictly and loads it back as the run to undo.\n* Content and downloadable files change only while they still hold the value in the log; undo of downloadable files checks the same.",
         "published": "2026-10-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "3b9cfede870af7be3758aceb093190a38f587dd3cb73ffcce042f6f66d77cc05",
-        "signature": "yH9sNg2DiJR0WC9QBmjbWIxL1RLdmvVYzOaSqo4RIOUmT4aCIs5/ClpxQEI4qh5oHx90gikJ0u0i93iJGXM3CQ==",
+        "sha256": "db5d2b113fadd4c0315ac6991409b1ddb17f54c6a93503e065ce238ddca63d8e",
+        "signature": "+gobnw8robGOyLlrQN2wHOq/iCLqC0l31CDD7tCLtcmva9rYnqVm8bRyj6c8FTnMM9iz9I331Kx3pvGYAbtiBA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.0.0/greeklish-permalinks.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.1.0/greeklish-permalinks.zip"
       }
     },
     "hide-catalog": {
