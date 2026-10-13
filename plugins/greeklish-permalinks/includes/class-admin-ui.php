@@ -4,7 +4,7 @@
  * (Bible §3–§8, §11).
  *
  * Submenu «Greeklish» of the shared "Noxpress" menu (admin_menu priority
- * 120), slug glp-settings, capability manage_options (a setting of the
+ * 140), slug glp-settings, capability manage_options (a setting of the
  * whole site, not of the shop). Tabs:
  *  - settings  slugs, mode, stop words, file names, redirects, own rules,
  *              live test (AJAX glp_test, with the unsaved form values)
@@ -33,7 +33,7 @@ final class GLP_Admin_UI {
 	const BATCH_FILES = 5;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 120 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 140 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );

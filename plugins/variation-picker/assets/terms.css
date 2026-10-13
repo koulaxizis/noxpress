@@ -1,0 +1,134 @@
+/**
+ * Variation Picker — terms.css (v1.0.0)
+ *
+ * WooCommerce's own admin screens (Products › Attributes, the value
+ * screens of an attribute, the product's "Swatches" tab): light WordPress
+ * look, prefixed vpk-* selectors only.
+ */
+
+.vpk-fields {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 10px 22px;
+}
+
+.vpk-fields .vpk-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 0;
+}
+
+.vpk-fields .vpk-field > span:first-child {
+	font-weight: 600;
+}
+
+.form-field .vpk-fields input[type="text"]:not(.vpk-color) {
+	width: 9em;
+}
+
+.vpk-image-field .vpk-image-preview {
+	display: block;
+	width: 48px;
+	height: 48px;
+	object-fit: cover;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #ffffff;
+}
+
+.vpk-image-field [hidden] {
+	display: none !important;
+}
+
+.vpk-image-field .button-link {
+	margin-left: 6px;
+	color: #b32d2e;
+}
+
+.vpk-attr-fields select,
+.vpk-attr-fields input[type="number"] {
+	width: auto !important;
+	margin: 0 6px 6px 0;
+	vertical-align: middle;
+}
+
+/* Value list column. */
+.column-vpk {
+	width: 44px;
+}
+
+.vpk-prev {
+	display: inline-block;
+	box-sizing: border-box;
+	min-width: 24px;
+	height: 24px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	vertical-align: middle;
+}
+
+.vpk-prev--img {
+	width: 24px;
+	object-fit: cover;
+}
+
+.vpk-prev--label {
+	padding: 0 5px;
+	font-size: 11px;
+	line-height: 22px;
+	background: #f6f7f7;
+	color: #1d2327;
+}
+
+/* Product › Swatches tab. */
+#vpk_product_data .vpk-product-attr {
+	border-bottom: 1px solid #eeeeee;
+	padding-bottom: 6px;
+}
+
+#vpk_product_data .vpk-note {
+	margin: 0 12px 10px 162px;
+	color: #646970;
+}
+
+#vpk_product_data .vpk-values {
+	margin: 0 12px 12px 162px;
+}
+
+#vpk_product_data .vpk-values > summary {
+	cursor: pointer;
+	color: #2271b1;
+	margin-bottom: 8px;
+}
+
+#vpk_product_data .vpk-value-row {
+	padding: 8px 0;
+	border-top: 1px solid #f0f0f1;
+}
+
+#vpk_product_data .vpk-value-row > strong {
+	display: block;
+	margin-bottom: 6px;
+}
+
+#vpk_product_data .vpk-fields .vpk-field {
+	float: none;
+	width: auto;
+	padding: 0;
+}
+
+#vpk_product_data .vpk-fields .vpk-field > span:first-child,
+#vpk_product_data .vpk-fields label {
+	float: none;
+	width: auto;
+	margin: 0;
+}
+
+@media (max-width: 782px) {
+	#vpk_product_data .vpk-note,
+	#vpk_product_data .vpk-values {
+		margin-left: 12px;
+	}
+}

@@ -63,7 +63,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $shn_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'greeklish-permalinks' ) as $shn_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks' ) as $shn_slug ) {
 	if ( 'shipping-notes' !== $shn_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $shn_slug . '/' . $shn_slug . '.php' ) ) {
 		$shn_suite_left = true;
 		break;

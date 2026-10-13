@@ -89,4 +89,4 @@ The settings, the undo log and the transients are removed. The redirect table is
 * 301 for Greek addresses that lead to a 404; legacy Greek term slugs keep working.
 * Keeps the style of AutoConvert Greeklish Permalinks on first activation, with a notice while it is active.
 * Works without WooCommerce. GLP_DISABLE, settings export / import.
-* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.5).
+* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.7).

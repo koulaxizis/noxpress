@@ -41,6 +41,11 @@ final class SF_Rules {
 	const R_NUMBERS_BD   = 'sf_numbers_bold';
 	const R_ALL_ITALIC   = 'sf_all_italic';
 	const R_ALL_BOLD     = 'sf_all_bold';
+	const R_PLAIN_LINES  = 'sf_plain_lines';
+	const R_PLAIN_SINGLE = 'sf_plain_single';
+
+	/** Plain-text rules (scope 'plain'): το πολύ ένας ανά run. */
+	const PLAIN_RULES = array( self::R_PLAIN_LINES, self::R_PLAIN_SINGLE );
 
 	/**
 	 * Inline formatting tags που αφαιρεί το strip (keep content, drop markup).
@@ -55,6 +60,20 @@ final class SF_Rules {
 	 */
 	public static function registry(): array {
 		return array(
+			// Scope 'plain': τρέχουν ΠΡΙΝ από όλα (SF_Engine βήμα 0, SF_Plain)
+			// και αντικαθιστούν το R_STRIP. Στο UI είναι μία επιλογή (radio).
+			self::R_PLAIN_LINES  => array(
+				'id'    => self::R_PLAIN_LINES,
+				'label' => 'Καθαρό κείμενο, με αλλαγές γραμμής',
+				'scope' => 'plain',
+				'order' => 1,
+			),
+			self::R_PLAIN_SINGLE => array(
+				'id'    => self::R_PLAIN_SINGLE,
+				'label' => 'Καθαρό κείμενο, μία παράγραφος',
+				'scope' => 'plain',
+				'order' => 2,
+			),
 			self::R_STRIP      => array(
 				'id'       => self::R_STRIP,
 				'label'    => 'Πλήρης αφαίρεση μορφοποίησης',
@@ -137,6 +156,19 @@ final class SF_Rules {
 		}
 		ksort( $out );
 		return array_values( $out );
+	}
+
+	/**
+	 * Ο ενεργός plain-text κανόνας ('' αν κανένας). Αν έρθουν και οι δύο,
+	 * κερδίζει ο «με αλλαγές γραμμής» (κρατά περισσότερη δομή).
+	 */
+	public static function plain_mode( array $enabled ): string {
+		foreach ( self::PLAIN_RULES as $id ) {
+			if ( in_array( $id, $enabled, true ) ) {
+				return $id;
+			}
+		}
+		return '';
 	}
 
 	/** Ενεργά text rules σε σειρά order. */
