@@ -31,7 +31,7 @@ final class SF_Lang {
 		'Το Smart Formatter χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Smart Formatter requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 
 		// Εργαλείο — ενότητες.
-		'Μαζική μορφοποίηση κειμένων προϊόντων. Το κείμενο σε HTML tags, attributes, shortcodes, code/pre blocks και entities δεν αγγίζεται ποτέ.' => 'Bulk-format product texts. Text inside HTML tags, attributes, shortcodes, code/pre blocks and entities is never touched.',
+		'Μαζική μορφοποίηση κειμένων προϊόντων. Οι κανόνες μορφοποίησης δεν αγγίζουν ποτέ HTML tags, attributes, shortcodes, code/pre blocks και entities· το καθαρό κείμενο αφαιρεί όλες τις ετικέτες.' => 'Bulk-format product texts. Formatting rules never touch HTML tags, attributes, shortcodes, code/pre blocks or entities; plain text removes every tag.',
 		'1. Στόχος'                                               => '1. Target',
 		'Όλα τα δημοσιευμένα προϊόντα'                            => 'All published products',
 		'Ξεχωριστά προϊόντα'                                      => 'Specific products',
@@ -136,6 +136,25 @@ final class SF_Lang {
 		'Ο όρος #%d δεν βρέθηκε — δεν επαναφέρθηκε.'              => 'Term #%d not found — not restored.',
 		'Αποτυχία επαναφοράς όρου: %s'                            => 'Failed to restore term: %s',
 
+		// Καθαρό κείμενο + ασφάλεια αντιγράφου (v1.4.0).
+		'Καθαρό κείμενο, με αλλαγές γραμμής'                      => 'Plain text, keep line breaks',
+		'Καθαρό κείμενο, μία παράγραφος'                          => 'Plain text, single paragraph',
+		'Καθαρό κείμενο (αφαιρεί όλες τις ετικέτες HTML και τα attributes τους)' => 'Plain text (removes every HTML tag and its attributes)',
+		'Όχι'                                                     => 'No',
+		'Κάθε παράγραφος, επικεφαλίδα και στοιχείο λίστας σε δική του γραμμή, ή όλα σε μία παράγραφο. Τα μη διακοπτόμενα κενά (nbsp) γίνονται απλά κενά, οι κενές γραμμές συμπτύσσονται, τα shortcodes μένουν. Χάνονται και links, εικόνες και πίνακες: στην αναλυτική περιγραφή σκέψου το δύο φορές. Το Dry run δείχνει πόσα πεδία επηρεάζονται.' => 'Every paragraph, heading and list item on its own line, or everything in one paragraph. Non-breaking spaces (nbsp) become plain spaces, blank lines collapse, shortcodes stay. Links, images and tables are removed too: think twice before using it on the long description. The dry run shows how many fields are affected.',
+		'Έλεγχος μεγέθους αντιγράφου ασφαλείας…'                  => 'Checking the backup size…',
+		'Το αντίγραφο ασφαλείας δεν χωρά ολόκληρο (όριο 4 MB ανά run), οπότε η Εφαρμογή δεν ξεκινά. Χώρισε τη δουλειά σε μικρότερα κομμάτια (π.χ. ανά κατηγορία).' => 'The backup does not fit in full (4 MB limit per run), so Apply will not start. Split the job into smaller parts (e.g. by category).',
+		'Το καθαρό κείμενο αφαιρεί link από %1$s πεδία, εικόνα ή media από %2$s και πίνακα από %3$s.' => 'Plain text removes a link from %1$s fields, an image or media from %2$s and a table from %3$s.',
+		'Η εφαρμογή σταμάτησε: το αντίγραφο ασφαλείας δεν χωρά άλλο (όριο 4 MB ανά run) ή δεν γράφτηκε. Ό,τι άλλαξε ως εδώ είναι στο Ιστορικό και επαναφέρεται ολόκληρο. Χώρισε τη δουλειά σε μικρότερα κομμάτια (π.χ. ανά κατηγορία).' => 'Apply stopped: the backup has no room left (4 MB limit per run) or could not be saved. Everything changed so far is in the History and can be restored in full. Split the job into smaller parts (e.g. by category).',
+		'Το κείμενο άλλαξε στο μεταξύ· παραλείφθηκε.'             => 'The text changed in the meantime; skipped.',
+		'Σταμάτησε (το αντίγραφο γέμισε)'                         => 'Stopped (backup full)',
+		'Λήψη αντιγράφου'                                         => 'Download backup',
+		'Η «Λήψη αντιγράφου» κατεβάζει τις τιμές πριν από το run (JSON). Επαναφέρεται από SF Ρυθμίσεις → Εισαγωγή state, που αντικαθιστά το ιστορικό με αυτό το run.' => '"Download backup" saves the values from before the run (JSON). Restore it from SF Settings → Import state, which replaces the history with that run.',
+		'Καθαρισμός κατά την αποθήκευση'                          => 'Clean on save',
+		'Όταν αποθηκεύεις ένα προϊόν από τη σελίδα επεξεργασίας, η σύντομη περιγραφή γίνεται καθαρό κείμενο. Χρήσιμο όταν επικολλάς κείμενο από εργαλεία AI. Δεν αγγίζει εισαγωγές, REST ή μαζικές αλλαγές.' => 'When you save a product from its edit screen, the short description becomes plain text. Useful when you paste text from AI tools. Imports, REST and bulk changes are not touched.',
+		'Ανενεργό'                                                => 'Off',
+		'Μη έγκυρη τιμή καθαρισμού κατά την αποθήκευση.'          => 'Invalid clean-on-save value.',
+
 		// Ρυθμίσεις / Backup.
 		'Καθολικές εξαιρέσεις φράσεων'                            => 'Global phrase exclusions',
 		'Φράσεις που δεν μορφοποιούνται ποτέ, σε οποιοδήποτε run (π.χ. τίτλοι έργων). Μία ανά γραμμή. Συνδυάζονται με τυχόν per-run εξαιρέσεις στη σελίδα του εργαλείου.' => 'Phrases that are never formatted, in any run (e.g. titles of works). One per line. They are combined with any per-run exclusions on the tool page.',
@@ -145,7 +164,7 @@ final class SF_Lang {
 		'Backup & Επαναφορά'                                      => 'Backup & Restore',
 		'Εισαγωγή state (JSON)'                                   => 'Import state (JSON)',
 		'Εξαγωγή state (JSON)'                                    => 'Export state (JSON)',
-		'Συμπεριλαμβάνονται: προφίλ, καθολικές εξαιρέσεις και ιστορικό snapshots (με τα undo payloads). Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα. Τα Undo εκτελούνται από τη σελίδα του εργαλείου.' => 'Included: profiles, global exclusions and snapshot history (with undo payloads). Importing REPLACES the corresponding data. Undo runs from the tool page.',
+		'Συμπεριλαμβάνονται: προφίλ, καθολικές εξαιρέσεις, καθαρισμός κατά την αποθήκευση και ιστορικό snapshots (με τα undo payloads). Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα. Τα Undo εκτελούνται από τη σελίδα του εργαλείου.' => 'Included: profiles, global exclusions, clean on save and snapshot history (with undo payloads). Importing REPLACES the corresponding data. Undo runs from the tool page.',
 		'Δεν επιλέχθηκε αρχείο JSON.'                             => 'No JSON file selected.',
 		'Το αρχείο δεν είναι έγκυρο JSON.'                        => 'The file is not valid JSON.',
 		'Μη έγκυρο αρχείο backup (λείπουν τα options).'           => 'Invalid backup file (options missing).',

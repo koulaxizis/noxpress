@@ -14,12 +14,12 @@
  *    το παλιό string, τίποτα transformations).
  *  - Ιστορικό: option 'sf_snapshots' (JSON array, newest first),
  *    cap = self::HISTORY (default 10). Παλιά runs εκπίπτουν FIFO.
- *  - Payload cap: αν ένα run άλλαξε ΟΛΑ τα πεδία εκατοντάδων
- *    προϊόντων το option μεγαλώνει. Guard: self::MAX_BYTES — αν το
- *    encoded snapshot υπερβαίνει το cap, πετιούνται τα ΠΑΛΑΙΟΤΕΡΑ units
- *    μέχρι να χωρέσει και σημειώνεται truncated=true. Τα units που
- *    κρατήθηκαν ΕΠΑΝΑΦΕΡΟΝΤΑΙ κανονικά (μερική επαναφορά, ρητά
- *    σημειωμένη στο UI και στο αποτέλεσμα του restore).
+ *  - Payload cap (v1.4.0): self::MAX_BYTES ανά run. Τα units ενός batch
+ *    γράφονται στο snapshot ΠΡΙΝ αλλάξουν τα προϊόντα· αν δεν χωρούν (ή
+ *    η εγγραφή αποτύχει) το batch δεν εφαρμόζεται και το run γίνεται
+ *    'stopped'. Ό,τι άλλαξε ως εκεί επαναφέρεται ολόκληρο. Το flag
+ *    truncated=true υπάρχει μόνο σε snapshots του 1.3.0 και παλιότερων
+ *    (τότε πετιούνταν τα παλαιότερα units) — τα διαβάζουμε ακόμα.
  *
  * Concurrency: τα snapshots γράφονται μόνο από το
  * SF_Admin_UI AJAX endpoint (capability + nonce gated). Το batching
@@ -48,6 +48,7 @@ final class SF_Snapshots {
 	/** Lifecycle states του snapshot ενός run. */
 	const STATE_RUNNING = 'running';
 	const STATE_DONE    = 'done';
+	const STATE_STOPPED = 'stopped'; // v1.4.0: το run σταμάτησε γιατί το αντίγραφο δεν χωρούσε.
 
 	/* =====================================================================
 	 * Create / append / finalize
@@ -104,21 +105,13 @@ final class SF_Snapshots {
 					}
 				}
 
-				// Byte-cap guard: αν ξεπεράστηκε, πετιούνται τα ΠΑΛΑΙΟΤΕΡΑ
-				// units του ίδιου run μέχρι να χωρέσει (κρατάμε όσα περισσότερα
-				// γίνεται — όλα παραμένουν επαναφέρσιμα).
+				// Byte-cap guard (v1.4.0): αν το snapshot δεν χωρά ΟΛΟΚΛΗΡΟ,
+				// δεν γράφεται τίποτα και επιστρέφεται false. Ο caller (apply)
+				// τότε ΔΕΝ αλλάζει τα προϊόντα του batch — καμία αλλαγή χωρίς
+				// αντίγραφο, καμία σιωπηλή περικοπή (όπως έκανε το 1.3.0).
 				$encoded = wp_json_encode( $snap, JSON_UNESCAPED_UNICODE );
-				$size    = is_string( $encoded ) ? strlen( $encoded ) : 0;
-				if ( $size > self::MAX_BYTES ) {
-					$snap['truncated'] = true;
-					$drop              = 0;
-					$count             = count( $snap['units'] );
-					while ( $drop < $count && $size > self::MAX_BYTES ) {
-						$u_json = wp_json_encode( $snap['units'][ $drop ], JSON_UNESCAPED_UNICODE );
-						$size  -= ( is_string( $u_json ) ? strlen( $u_json ) : 0 ) + 1;
-						$drop++;
-					}
-					$snap['units'] = array_slice( $snap['units'], $drop );
+				if ( ! is_string( $encoded ) || strlen( $encoded ) > self::MAX_BYTES ) {
+					return false;
 				}
 
 				return self::store( $history );
@@ -126,6 +119,55 @@ final class SF_Snapshots {
 		}
 
 		return false; // Άγνωστο run_id — τίποτα δεν γράφεται.
+	}
+
+	/**
+	 * Μέγεθος (bytes, JSON) που θα πιάσει ένα unit στο snapshot — για την
+	 * εκτίμηση του Dry run πριν από την Εφαρμογή. 0 = άκυρο unit.
+	 */
+	public static function unit_bytes( array $u ): int {
+		$c = self::clean_unit( $u );
+		if ( null === $c ) {
+			return 0;
+		}
+		$json = wp_json_encode( $c, JSON_UNESCAPED_UNICODE );
+		return is_string( $json ) ? strlen( $json ) + 1 : 0;
+	}
+
+	/**
+	 * Το run σταμάτησε (το αντίγραφο του επόμενου batch δεν χωρούσε ή δεν
+	 * γράφτηκε). Ό,τι άλλαξε ως εκεί είναι στο snapshot και επαναφέρεται.
+	 */
+	public static function mark_stopped( string $run_id ): bool {
+
+		$history = self::load();
+
+		foreach ( $history as &$snap ) {
+			if ( ( $snap['run_id'] ?? '' ) === $run_id ) {
+				$snap['state']         = self::STATE_STOPPED;
+				$snap['changed_total'] = count( $snap['units'] ?? array() );
+				return self::store( $history );
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Ένα run σε μορφή αρχείου state (ίδια με την Εξαγωγή των ρυθμίσεων,
+	 * μόνο με αυτό το run) — για το κουμπί «Λήψη αντιγράφου». null αν
+	 * δεν βρέθηκε.
+	 */
+	public static function export_run( string $run_id ): ?string {
+
+		foreach ( self::load() as $snap ) {
+			if ( ( $snap['run_id'] ?? '' ) === $run_id ) {
+				$json = wp_json_encode( self::persist_format( array( $snap ) ), JSON_UNESCAPED_UNICODE );
+				return is_string( $json ) ? $json : null;
+			}
+		}
+
+		return null;
 	}
 
 	/** Κλείνει το snapshot (τελευταίο batch του run πέρασε). */
@@ -445,17 +487,7 @@ final class SF_Snapshots {
 	/** Store — persist το history (JSON-encoded, autoload off). */
 	private static function store( array $history ): bool {
 
-		// Re-encode: εσωτερικά το κλειδί είναι 'units'· στο persisted blob
-		// γράφεται ως 'units_raw' (schema marker — το load() τα ξανακαθαρίζει).
-		$persist = array();
-		foreach ( $history as $snap ) {
-			$copy = $snap;
-			if ( isset( $copy['units'] ) ) {
-				$copy['units_raw'] = $copy['units'];
-				unset( $copy['units'] );
-			}
-			$persist[] = $copy;
-		}
+		$persist = self::persist_format( $history );
 
 		if ( empty( $persist ) ) {
 			return delete_option( self::OPT_HISTORY );
@@ -466,6 +498,23 @@ final class SF_Snapshots {
 			wp_json_encode( $persist, JSON_UNESCAPED_UNICODE ),
 			false // autoload OFF — μπορεί να γίνει μεγάλο, δεν φορτώνεται σε κάθε request.
 		);
+	}
+
+	/**
+	 * Re-encode: εσωτερικά το κλειδί είναι 'units'· στο persisted blob
+	 * γράφεται ως 'units_raw' (schema marker — το load() τα ξανακαθαρίζει).
+	 */
+	private static function persist_format( array $history ): array {
+		$persist = array();
+		foreach ( $history as $snap ) {
+			$copy = $snap;
+			if ( isset( $copy['units'] ) ) {
+				$copy['units_raw'] = $copy['units'];
+				unset( $copy['units'] );
+			}
+			$persist[] = $copy;
+		}
+		return $persist;
 	}
 
 	private static function prepend( array $snap ): bool {
@@ -555,7 +604,7 @@ final class SF_Snapshots {
 			if ( ! is_array( $snap )
 				|| ! is_string( $snap['run_id'] ?? null ) || 1 !== preg_match( '/^[a-f0-9]{40}$/', $snap['run_id'] )
 				|| ! is_string( $snap['created'] ?? null ) || 1 !== preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $snap['created'] )
-				|| ! in_array( $snap['state'] ?? null, array( self::STATE_RUNNING, self::STATE_DONE ), true )
+				|| ! in_array( $snap['state'] ?? null, array( self::STATE_RUNNING, self::STATE_DONE, self::STATE_STOPPED ), true )
 				|| ! is_array( $snap['units_raw'] ?? null ) ) {
 				return null;
 			}

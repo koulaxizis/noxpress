@@ -43,6 +43,8 @@ final class Noxpress_Core {
 		'Δωρεάν αποστολή με μπάρα προόδου και χρόνος παράδοσης στη σελίδα προϊόντος.' => 'Free shipping progress bar and delivery time on the product page.',
 		'Μία σελίδα για κάθε δημιουργό, με τα έργα του ανά ρόλο, συνδέσμους από τα προϊόντα και ευρετήριο.' => 'One page for every creator, with their works by role, links from the products and an index.',
 		'Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.' => 'Store pickup at checkout, with a choice of store, opening hours and no shipping cost.',
+		'Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.' => 'Hide categories and their products from the shop, search and blocks, without changing the products.',
+		'Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.' => 'Swatches for variations: colors, images and buttons, a size guide and swatches on shop cards.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -117,7 +119,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -183,6 +185,16 @@ final class Noxpress_Core {
 				'name' => 'Store Pickup',
 				'desc' => __( 'Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.', 'noxpress' ),
 				'page' => 'pkp-settings',
+			),
+			'hide-catalog'      => array(
+				'name' => 'Hide Catalog',
+				'desc' => __( 'Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.', 'noxpress' ),
+				'page' => 'hic-settings',
+			),
+			'variation-picker'  => array(
+				'name' => 'Variation Picker',
+				'desc' => __( 'Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.', 'noxpress' ),
+				'page' => 'vpk-settings',
 			),
 		);
 	}
