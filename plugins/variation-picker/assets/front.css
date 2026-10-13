@@ -1,0 +1,441 @@
+/**
+ * Variation Picker — front.css (v1.0.0)
+ *
+ * Bible §14.13: a reset scoped to .vpk-root first (theme rules with ids
+ * beat class selectors), then our rules with higher specificity and
+ * !important. WooCommerce's <select> keeps the theme's look and is hidden
+ * only once front.js runs (.vpk-js), so without JavaScript the visitor gets
+ * the normal dropdown. Sizes and colours come from custom properties set
+ * inline from the settings (--vpk-size, --vpk-font, --vpk-bw, --vpk-bc,
+ * --vpk-ac, --vpk-shop).
+ */
+
+/* ===== Reset (scoped) ===== */
+.vpk-root .vpk-list,
+.vpk-root .vpk-sw,
+.vpk-root .vpk-sw img,
+.vpk-root .vpk-more,
+.vpk-root .vpk-guide-btn,
+.vpk-root .vpk-guide-btn span,
+.vpk-root .vpk-dialog__head,
+.vpk-root .vpk-dialog__close,
+.vpk-tip,
+.vpk-tip img {
+	float: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	text-transform: none !important;
+	text-decoration: none !important;
+	letter-spacing: normal !important;
+	min-height: 0 !important;
+	max-width: none !important;
+	transform: none !important;
+	outline-offset: 2px;
+}
+
+/* Spans keep their background: colour swatches set it inline. */
+.vpk-root .vpk-sw span,
+.vpk-tip span {
+	float: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	text-shadow: none !important;
+	text-transform: none !important;
+	text-decoration: none !important;
+	letter-spacing: normal !important;
+}
+
+.vpk-root {
+	--vpk-size: 32px;
+	--vpk-font: 13px;
+	--vpk-bw: 1px;
+	--vpk-bc: #c8c8c8;
+	--vpk-ac: #111111;
+	--vpk-shop: 22px;
+}
+
+/* ===== Product page wrapper ===== */
+.vpk-wrap {
+	display: block;
+}
+
+.vpk-wrap.vpk-js > select {
+	display: none !important;
+}
+
+.vpk-wrap:not(.vpk-js) > .vpk-list {
+	display: none !important;
+}
+
+.vpk-root .vpk-list {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	align-items: center !important;
+	gap: 8px !important;
+	margin: 2px 0 6px !important;
+	list-style: none !important;
+}
+
+/* ===== One swatch ===== */
+.vpk-root .vpk-sw {
+	position: relative !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	box-sizing: border-box !important;
+	min-width: var(--vpk-size) !important;
+	height: var(--vpk-size) !important;
+	border: var(--vpk-bw) solid var(--vpk-bc) !important;
+	background: #ffffff !important;
+	color: #222222 !important;
+	font-size: var(--vpk-font) !important;
+	font-weight: 500 !important;
+	line-height: 1 !important;
+	cursor: pointer !important;
+	vertical-align: middle !important;
+	overflow: visible !important;
+	transition: border-color .15s ease, box-shadow .15s ease, opacity .15s ease !important;
+	-webkit-appearance: none !important;
+	appearance: none !important;
+}
+
+.vpk-root .vpk-sw--label {
+	padding: 0 .7em !important;
+	white-space: nowrap !important;
+}
+
+.vpk-root .vpk-sw--color,
+.vpk-root .vpk-sw--image {
+	width: var(--vpk-size) !important;
+	padding: 2px !important;
+}
+
+.vpk-root .vpk-sw .vpk-sw__label {
+	display: inline !important;
+	color: inherit !important;
+	font: inherit !important;
+}
+
+.vpk-root .vpk-sw .vpk-sw__color {
+	display: block !important;
+	width: 100% !important;
+	height: 100% !important;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) !important;
+	border-radius: inherit !important;
+}
+
+.vpk-root .vpk-sw .vpk-sw__img {
+	display: block !important;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover !important;
+	border-radius: inherit !important;
+}
+
+.vpk-root .vpk-sw:hover {
+	border-color: var(--vpk-ac) !important;
+}
+
+.vpk-root .vpk-sw:focus-visible {
+	outline: 2px solid var(--vpk-ac) !important;
+	outline-offset: 2px !important;
+}
+
+.vpk-root .vpk-sw.vpk-is-on {
+	border-color: var(--vpk-ac) !important;
+	box-shadow: 0 0 0 1px var(--vpk-ac) !important;
+}
+
+/* ===== Shapes (on the list, or on the shop-card root itself) ===== */
+.vpk-root .vpk-shape--square .vpk-sw,
+.vpk-root.vpk-shape--square .vpk-sw { border-radius: 0 !important; }
+.vpk-root .vpk-shape--rounded .vpk-sw,
+.vpk-root.vpk-shape--rounded .vpk-sw { border-radius: 6px !important; }
+.vpk-root .vpk-shape--circle .vpk-sw,
+.vpk-root.vpk-shape--circle .vpk-sw { border-radius: 999px !important; }
+.vpk-root .vpk-shape--circle .vpk-sw--color,
+.vpk-root .vpk-shape--circle .vpk-sw--image,
+.vpk-root.vpk-shape--circle .vpk-sw--color,
+.vpk-root.vpk-shape--circle .vpk-sw--image { border-radius: 50% !important; }
+
+/* ===== Radio list ===== */
+.vpk-root .vpk-list--radio {
+	flex-direction: column !important;
+	align-items: flex-start !important;
+	gap: 6px !important;
+}
+
+.vpk-root .vpk-list--radio .vpk-sw {
+	height: auto !important;
+	min-width: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	color: inherit !important;
+	gap: .55em !important;
+	padding: 2px 0 !important;
+	font-weight: 400 !important;
+}
+
+.vpk-root .vpk-list--radio .vpk-sw .vpk-sw__dot {
+	display: inline-block !important;
+	box-sizing: border-box !important;
+	width: 1.1em !important;
+	height: 1.1em !important;
+	border: 2px solid var(--vpk-bc) !important;
+	border-radius: 50% !important;
+	background: #ffffff !important;
+	flex: 0 0 auto !important;
+}
+
+.vpk-root .vpk-list--radio .vpk-sw.vpk-is-on .vpk-sw__dot {
+	border-color: var(--vpk-ac) !important;
+	box-shadow: inset 0 0 0 3px #ffffff !important;
+	background: var(--vpk-ac) !important;
+}
+
+.vpk-root .vpk-list--radio .vpk-sw:focus-visible {
+	outline-offset: 1px !important;
+}
+
+/* ===== Unavailable / out of stock ===== */
+.vpk-root .vpk-sw.vpk-mode-blur {
+	opacity: .35 !important;
+	filter: grayscale(1) !important;
+}
+
+.vpk-root .vpk-sw.vpk-mode-cross {
+	opacity: .55 !important;
+}
+
+.vpk-root .vpk-sw.vpk-mode-cross::after {
+	content: "" !important;
+	position: absolute !important;
+	left: 50% !important;
+	top: -2px !important;
+	bottom: -2px !important;
+	width: 1.5px !important;
+	background: #c62828 !important;
+	transform: rotate(45deg) !important;
+	pointer-events: none !important;
+}
+
+.vpk-root .vpk-sw.vpk-mode-hide {
+	display: none !important;
+}
+
+.vpk-root .vpk-list--radio .vpk-sw.vpk-mode-cross::after {
+	display: none !important;
+}
+
+.vpk-root .vpk-list--radio .vpk-sw.vpk-mode-cross .vpk-sw__label {
+	text-decoration: line-through !important;
+}
+
+/* ===== "Colour: Black" ===== */
+.vpk-current {
+	font-weight: 400;
+}
+
+/* ===== Tooltip ===== */
+.vpk-tip {
+	position: absolute !important;
+	z-index: 100000 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: center !important;
+	gap: 4px !important;
+	max-width: 220px !important;
+	padding: 6px 9px !important;
+	border-radius: 4px !important;
+	background: #111111 !important;
+	color: #ffffff !important;
+	font-size: 12px !important;
+	line-height: 1.35 !important;
+	text-align: center !important;
+	pointer-events: none !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .25) !important;
+}
+
+.vpk-tip[hidden] {
+	display: none !important;
+}
+
+.vpk-tip img {
+	display: block !important;
+	width: 96px !important;
+	height: 96px !important;
+	object-fit: cover !important;
+	border-radius: 3px !important;
+}
+
+.vpk-tip .vpk-tip__extra {
+	display: block !important;
+	opacity: .85 !important;
+}
+
+/* ===== Size guide ===== */
+.vpk-root .vpk-guide-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: .4em !important;
+	margin: 2px 0 8px !important;
+	color: inherit !important;
+	font-size: .9em !important;
+	text-decoration: underline !important;
+	cursor: pointer !important;
+}
+
+.vpk-root .vpk-guide-btn__icon {
+	flex: 0 0 auto;
+}
+
+.vpk-dialog {
+	box-sizing: border-box;
+	width: min(640px, 92vw);
+	max-height: 86vh;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: #ffffff;
+	color: #222222;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+	overflow: auto;
+}
+
+.vpk-dialog::backdrop {
+	background: rgba(0, 0, 0, .5);
+}
+
+/* Browsers without showModal(): front.js toggles [open] and .vpk-dialog--fallback. */
+.vpk-dialog.vpk-dialog--fallback[open] {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: 100001;
+	transform: translate(-50%, -50%);
+}
+
+.vpk-root .vpk-dialog__head {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	gap: 12px !important;
+	padding: 14px 18px !important;
+	border-bottom: 1px solid #e5e5e5 !important;
+}
+
+.vpk-dialog .vpk-dialog__title {
+	margin: 0;
+	font-size: 1.1em;
+	line-height: 1.3;
+}
+
+.vpk-root .vpk-dialog__close {
+	display: inline-flex !important;
+	padding: 4px !important;
+	color: inherit !important;
+	cursor: pointer !important;
+}
+
+.vpk-dialog .vpk-dialog__body {
+	padding: 14px 18px 18px;
+}
+
+.vpk-dialog .vpk-table-wrap {
+	overflow-x: auto;
+}
+
+.vpk-dialog .vpk-table {
+	width: 100%;
+	margin: 0;
+	border-collapse: collapse;
+	font-size: .92em;
+}
+
+.vpk-dialog .vpk-table th,
+.vpk-dialog .vpk-table td {
+	padding: 7px 10px;
+	border: 1px solid #e5e5e5;
+	text-align: center;
+	background: #ffffff;
+	color: #222222;
+}
+
+.vpk-dialog .vpk-table thead th {
+	background: #f4f4f4;
+	font-weight: 600;
+}
+
+.vpk-dialog .vpk-dialog__img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 14px auto 0;
+}
+
+.vpk-dialog .vpk-dialog__note {
+	margin: 12px 0 0;
+	font-size: .9em;
+	opacity: .85;
+}
+
+/* ===== Shop cards ===== */
+.vpk-root.vpk-loop {
+	display: block;
+	margin: 6px 0 !important;
+	line-height: 1 !important;
+}
+
+/* Block themes: follow the centred title of the Product Collection card. */
+.wc-block-product:has(.has-text-align-center) .vpk-root.vpk-loop {
+	text-align: center !important;
+}
+
+.vpk-root.vpk-loop .vpk-sw {
+	display: inline-flex !important;
+	margin: 0 3px 4px !important;
+	min-width: var(--vpk-shop) !important;
+	height: var(--vpk-shop) !important;
+	font-size: 11px !important;
+}
+
+.vpk-root.vpk-loop .vpk-sw--color,
+.vpk-root.vpk-loop .vpk-sw--image {
+	width: var(--vpk-shop) !important;
+	padding: 1px !important;
+}
+
+.vpk-root.vpk-loop .vpk-sw--label {
+	padding: 0 .45em !important;
+}
+
+.vpk-root.vpk-loop .vpk-sw.vpk-is-oos {
+	opacity: .4 !important;
+}
+
+.vpk-root.vpk-loop .vpk-more {
+	display: inline-block !important;
+	margin: 0 3px !important;
+	font-size: 12px !important;
+	line-height: var(--vpk-shop) !important;
+	color: inherit !important;
+	vertical-align: middle !important;
+	cursor: pointer !important;
+}
+
+/* ===== Admin preview (settings page) ===== */
+.vpk-preview__root .vpk-list + .vpk-list {
+	margin-top: 10px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.vpk-root .vpk-sw {
+		transition: none !important;
+	}
+}

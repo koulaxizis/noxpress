@@ -46,6 +46,7 @@ SLUGS = {
     'cr': 'featured-creators',
     'pk': 'store-pickup',
     'hc': 'hide-catalog',
+    'vp': 'variation-picker',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
