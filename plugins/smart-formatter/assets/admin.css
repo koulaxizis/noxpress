@@ -158,6 +158,13 @@
 /* File input στο settings (unstyled browser button → themed) */
 .sf-wrap input[type="file"] {
 	color: var(--sf-muted);
+	max-width: 100%;
+}
+
+/* Πίνακας ιστορικού: οριζόντια κύλιση σε στενές οθόνες, όχι ολόκληρη η σελίδα. */
+.sf-table-scroll {
+	overflow-x: auto;
+	max-width: 100%;
 }
 
 /* ===== Radio / checkbox rows ===== */
@@ -174,6 +181,26 @@
 	display: block;
 	margin: 0 0 8px;
 	cursor: pointer;
+}
+
+/* Καθαρό κείμενο (v1.4.0): μία επιλογή πάνω από τους υπόλοιπους κανόνες. */
+.sf-plain {
+	border: 0;
+	border-bottom: 1px solid var(--sf-border);
+	margin: 0 0 12px;
+	padding: 0 0 10px;
+	min-width: 0;
+}
+
+.sf-plain-legend {
+	font-weight: 600;
+	margin-bottom: 8px;
+	padding: 0;
+}
+
+.sf-check.sf-locked {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .sf-wrap input[type="checkbox"],

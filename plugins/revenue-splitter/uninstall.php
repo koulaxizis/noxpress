@@ -79,7 +79,8 @@ wp_clear_scheduled_hook( 'rs_email_monthly_check' );
 // User meta (rs_lang) — για ΟΛΟΥΣ τους χρήστες του site.
 //
 // Το rs_lang είναι η ΚΟΙΝΗ επιλογή γλώσσας του οικοσυστήματος Noxpress:
-// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators και το Store Pickup τη διαβάζουν.
+// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators, το Store Pickup και το Variation Picker τη διαβάζουν.
+// το Store Pulse, το Smart Formatter, το Theme Patcher, το Shop Filters, το Product Formats, το Easy Withdrawal, το Shipping Notes, το Book Preview, το Featured Creators, το Store Pickup και το Greeklish Permalinks τη διαβάζουν.
 // Σβήνεται ΜΟΝΟ αν κανένα δεν είναι εγκατεστημένο (έλεγχος κύριου αρχείου).
 // ------------------------------------------------------------------------
 
@@ -94,6 +95,9 @@ $rs_lang_readers = array(
 	'book-preview/book-preview.php',
 	'featured-creators/featured-creators.php',
 	'store-pickup/store-pickup.php',
+	'hide-catalog/hide-catalog.php',
+	'variation-picker/variation-picker.php',
+	'greeklish-permalinks/greeklish-permalinks.php',
 );
 
 $rs_lang_in_use = false;
@@ -242,7 +246,7 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $rs_itemmeta_table )
 // ---------------------------------------------------------------------
 
 $rs_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup' ) as $rs_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks' ) as $rs_slug ) {
 	if ( 'revenue-splitter' !== $rs_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $rs_slug . '/' . $rs_slug . '.php' ) ) {
 		$rs_suite_left = true;
 		break;

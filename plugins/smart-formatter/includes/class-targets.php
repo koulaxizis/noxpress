@@ -351,7 +351,9 @@ final class SF_Targets {
 	 * @param array $fields   Validated field IDs (SF_Targets::valid_fields).
 	 * @param array $rules    Validated rule IDs (SF_Admin_UI validates πριν καλέσει).
 	 * @param array $excluded Φράσεις exclusion list.
-	 * @param array $args     {offset:int, limit:int|null, apply:bool}
+	 * @param array $args     {offset:int, limit:int|null, apply:bool, expect?:array}
+	 *                        expect (v1.4.0): unit_key => before. Με apply,
+	 *                        γράφονται μόνο αυτά τα units (process_guarded).
 	 *                        limit null = ΟΛΑ τα units (το UI δεν το χρησιμοποιεί —
 	 *                        preview/dry run/apply τρέχουν πάντα σε slices).
 	 *
@@ -371,6 +373,7 @@ final class SF_Targets {
 			$limit = max( 1, absint( $limit ) );
 		}
 		$apply  = ! empty( $args['apply'] );
+		$expect = ( isset( $args['expect'] ) && is_array( $args['expect'] ) ) ? $args['expect'] : null;
 
 		$all   = self::units( $sel, $fields );
 		$total = count( $all );
@@ -383,9 +386,11 @@ final class SF_Targets {
 
 		foreach ( $slice as $unit ) {
 
-			$entry = ( 'term' === $unit['kind'] )
-				? self::process_term_unit( $unit, $rules, $excluded, $apply )
-				: self::process_product_unit( $unit, $rules, $excluded, $apply );
+			if ( $apply && null !== $expect ) {
+				$entry = self::process_guarded( $unit, $rules, $excluded, $expect );
+			} else {
+				$entry = self::process_unit( $unit, $rules, $excluded, $apply );
+			}
 
 			if ( $entry['changed'] ) {
 				$changed++;
@@ -406,6 +411,46 @@ final class SF_Targets {
 	/* =====================================================================
 	 * Per-unit processing (product / term)
 	 * =================================================================== */
+
+	/** Σταθερό κλειδί ενός unit (snapshot ↔ apply guard). */
+	public static function unit_key( string $kind, int $id, string $field ): string {
+		return $kind . ':' . $id . ':' . $field;
+	}
+
+	private static function process_unit( array $unit, array $rules, array $excluded, bool $apply ): array {
+		return ( 'term' === $unit['kind'] )
+			? self::process_term_unit( $unit, $rules, $excluded, $apply )
+			: self::process_product_unit( $unit, $rules, $excluded, $apply );
+	}
+
+	/**
+	 * Apply με guard (v1.4.0): γράφει ΜΟΝΟ units που το snapshot έχει ήδη
+	 * κρατήσει ($expect: unit_key => before) και μόνο αν η τρέχουσα τιμή
+	 * είναι ακόμα αυτή που κρατήθηκε. Έτσι κάθε αλλαγή έχει πάντα αντίγραφο.
+	 */
+	private static function process_guarded( array $unit, array $rules, array $excluded, array $expect ): array {
+
+		$probe = self::process_unit( $unit, $rules, $excluded, false );
+		$key   = self::unit_key( $probe['kind'], (int) $probe['id'], (string) $probe['field'] );
+
+		if ( ! empty( $probe['error'] ) || ! $probe['changed'] ) {
+			return $probe;
+		}
+
+		// Δεν είναι στο snapshot (π.χ. άλλαξε μετά τον έλεγχο): δεν γράφεται.
+		if ( ! array_key_exists( $key, $expect ) ) {
+			$probe['changed'] = false;
+			return $probe;
+		}
+
+		if ( $probe['before'] !== $expect[ $key ] ) {
+			$probe['changed'] = false;
+			$probe['error']   = __( 'Το κείμενο άλλαξε στο μεταξύ· παραλείφθηκε.', 'smart-formatter' );
+			return $probe;
+		}
+
+		return self::process_unit( $unit, $rules, $excluded, true );
+	}
 
 	private static function process_product_unit( array $unit, array $rules, array $excluded, bool $apply ): array {
 

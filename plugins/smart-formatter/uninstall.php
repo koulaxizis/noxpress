@@ -3,7 +3,7 @@
  * Smart Formatter — uninstall.php (v1.1.0)
  *
  * Cleanup (πλήρες — κανένα υπόλειμμα μετά το deactivate + delete):
- *  - Options: sf_profiles, sf_exclusions,
+ *  - Options: sf_profiles, sf_exclusions, sf_autoclean,
  *    sf_snapshots (OPT_HISTORY — περιλαμβάνει τα undo payloads).
  *  - Transients: sf_aui_msg_{user_id} (PRG notices — μπορεί να
  *    έχουν μείνει εκπνευσμένα στη βάση, διαγράφονται τώρα).
@@ -28,7 +28,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 function sf_uninstall_site(): void {
 	global $wpdb;
 
-	foreach ( array( 'sf_profiles', 'sf_exclusions', 'sf_snapshots' ) as $sf_opt ) {
+	foreach ( array( 'sf_profiles', 'sf_exclusions', 'sf_autoclean', 'sf_snapshots' ) as $sf_opt ) {
 		delete_option( $sf_opt );
 	}
 
@@ -62,7 +62,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $sf_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup' ) as $sf_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks' ) as $sf_slug ) {
 	if ( 'smart-formatter' !== $sf_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $sf_slug . '/' . $sf_slug . '.php' ) ) {
 		$sf_suite_left = true;
 		break;

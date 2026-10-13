@@ -50,10 +50,18 @@ final class SF_Admin_UI {
 	/** Options (state export whitelist). */
 	const OPT_PROFILES   = 'sf_profiles';   // JSON: name => {rules[],fields[]} (strict).
 	const OPT_EXCLUSIONS = 'sf_exclusions'; // JSON: array strings (strict).
+	const OPT_AUTOCLEAN  = 'sf_autoclean';  // '' | 'lines' | 'single' (v1.4.0).
+
+	/** Τιμές του OPT_AUTOCLEAN → plain-text κανόνας. */
+	const AUTOCLEAN_MODES = array(
+		'lines'  => SF_Rules::R_PLAIN_LINES,
+		'single' => SF_Rules::R_PLAIN_SINGLE,
+	);
 
 	const STATE_OPTS = array(
 		self::OPT_PROFILES,
 		self::OPT_EXCLUSIONS,
+		self::OPT_AUTOCLEAN,
 		SF_Snapshots::OPT_HISTORY,
 	);
 
@@ -73,6 +81,31 @@ final class SF_Admin_UI {
 		add_action( 'wp_ajax_sf_search', array( __CLASS__, 'ajax_search' ) );
 		add_action( 'wp_ajax_sf_profile_save', array( __CLASS__, 'ajax_profile_save' ) );
 		add_action( 'wp_ajax_sf_profile_delete', array( __CLASS__, 'ajax_profile_delete' ) );
+
+		// v1.4.0: καθαρό κείμενο στη σύντομη περιγραφή όταν αποθηκεύεται
+		// προϊόν από το admin (ρύθμιση, κλειστή από προεπιλογή).
+		add_action( 'woocommerce_admin_process_product_object', array( __CLASS__, 'autoclean_product' ) );
+	}
+
+	/**
+	 * Clean on save: τρέχει μόνο στην αποθήκευση από τη σελίδα επεξεργασίας
+	 * προϊόντος (όχι REST / imports). Ο WooCommerce κάνει save() αμέσως μετά.
+	 *
+	 * @param mixed $product WC_Product.
+	 */
+	public static function autoclean_product( $product ): void {
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+		$mode = self::get_autoclean();
+		if ( '' === $mode ) {
+			return;
+		}
+		$old = (string) $product->get_short_description( 'edit' );
+		$new = SF_Engine::transform( $old, array( self::AUTOCLEAN_MODES[ $mode ] ) );
+		if ( $new !== $old ) {
+			$product->set_short_description( $new );
+		}
 	}
 
 	/* =====================================================================
@@ -133,7 +166,13 @@ final class SF_Admin_UI {
 		wp_localize_script( 'sf-admin', 'SF_CFG', array(
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 			'nonce'   => wp_create_nonce( self::AJAX_NONCE ),
+			// Όριο αντιγράφου ανά run, με περιθώριο για τα στοιχεία του run (sel, rules…).
+			'snapMax' => SF_Snapshots::MAX_BYTES - 8192,
 			'i18n'    => array(
+				'checking'        => __( 'Έλεγχος μεγέθους αντιγράφου ασφαλείας…', 'smart-formatter' ),
+				'snapTooBig'      => __( 'Το αντίγραφο ασφαλείας δεν χωρά ολόκληρο (όριο 4 MB ανά run), οπότε η Εφαρμογή δεν ξεκινά. Χώρισε τη δουλειά σε μικρότερα κομμάτια (π.χ. ανά κατηγορία).', 'smart-formatter' ),
+				/* translators: 1: πεδία με link, 2: πεδία με εικόνα/media, 3: πεδία με πίνακα */
+				'losesSummary'    => __( 'Το καθαρό κείμενο αφαιρεί link από %1$s πεδία, εικόνα ή media από %2$s και πίνακα από %3$s.', 'smart-formatter' ),
 				'confirmApply'    => __( 'Είσαι σίγουρος; Θα μορφοποιηθούν τα επιλεγμένα κείμενα — δημιουργείται snapshot για undo.', 'smart-formatter' ),
 				'working'         => __( 'Επεξεργασία…', 'smart-formatter' ),
 				'done'            => __( 'Ολοκληρώθηκε!', 'smart-formatter' ),
@@ -177,7 +216,7 @@ final class SF_Admin_UI {
 		?>
 		<div class="wrap sf-wrap">
 			<h1><?php esc_html_e( 'Smart Formatter', 'smart-formatter' ); ?></h1>
-			<p class="description"><?php esc_html_e( 'Μαζική μορφοποίηση κειμένων προϊόντων. Το κείμενο σε HTML tags, attributes, shortcodes, code/pre blocks και entities δεν αγγίζεται ποτέ.', 'smart-formatter' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Μαζική μορφοποίηση κειμένων προϊόντων. Οι κανόνες μορφοποίησης δεν αγγίζουν ποτέ HTML tags, attributes, shortcodes, code/pre blocks και entities· το καθαρό κείμενο αφαιρεί όλες τις ετικέτες.', 'smart-formatter' ); ?></p>
 
 			<form id="sf-form" onsubmit="return false;">
 				<h2 class="sf-h2"><?php esc_html_e( '1. Στόχος', 'smart-formatter' ); ?></h2>
@@ -217,7 +256,22 @@ final class SF_Admin_UI {
 
 				<h2 class="sf-h2"><?php esc_html_e( '3. Κανόνες', 'smart-formatter' ); ?></h2>
 				<div class="sf-zone">
+					<fieldset class="sf-plain">
+						<legend class="sf-plain-legend"><?php esc_html_e( 'Καθαρό κείμενο (αφαιρεί όλες τις ετικέτες HTML και τα attributes τους)', 'smart-formatter' ); ?></legend>
+						<label class="sf-inline"><input type="radio" name="sf_plain" value="" checked />
+							<?php esc_html_e( 'Όχι', 'smart-formatter' ); ?></label>
+						<?php foreach ( SF_Rules::PLAIN_RULES as $pid ) : ?>
+							<label class="sf-inline"><input type="radio" name="sf_plain" value="<?php echo esc_attr( $pid ); ?>" />
+								<?php echo esc_html( __( $rules[ $pid ]['label'], 'smart-formatter' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid από το rules registry. ?></label>
+						<?php endforeach; ?>
+						<p class="description"><?php esc_html_e( 'Κάθε παράγραφος, επικεφαλίδα και στοιχείο λίστας σε δική του γραμμή, ή όλα σε μία παράγραφο. Τα μη διακοπτόμενα κενά (nbsp) γίνονται απλά κενά, οι κενές γραμμές συμπτύσσονται, τα shortcodes μένουν. Χάνονται και links, εικόνες και πίνακες: στην αναλυτική περιγραφή σκέψου το δύο φορές. Το Dry run δείχνει πόσα πεδία επηρεάζονται.', 'smart-formatter' ); ?></p>
+					</fieldset>
 					<?php foreach ( $rules as $r ) : ?>
+						<?php
+						if ( 'plain' === $r['scope'] ) {
+							continue;
+						}
+						?>
 						<label class="sf-check">
 							<input type="checkbox" name="sf_rules[]" value="<?php echo esc_attr( $r['id'] ); ?>" />
 							<?php echo esc_html( __( $r['label'], 'smart-formatter' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgid από το rules registry. ?>
@@ -294,6 +348,7 @@ final class SF_Admin_UI {
 		$history = SF_Snapshots::history();
 		?>
 		<h2 class="sf-h2"><?php esc_html_e( 'Ιστορικό & Undo', 'smart-formatter' ); ?></h2>
+		<div class="sf-table-scroll">
 		<table class="widefat striped sf-table" id="sf-history">
 			<thead>
 				<tr>
@@ -313,7 +368,15 @@ final class SF_Admin_UI {
 					<td><code class="sf-run-id"><?php echo esc_html( substr( $h['run_id'], 0, 10 ) ); ?></code></td>
 					<td><?php echo esc_html( $h['created'] ); ?></td>
 					<td>
-						<?php echo esc_html( SF_Snapshots::STATE_DONE === $h['state'] ? __( 'Ολοκληρώθηκε', 'smart-formatter' ) : __( 'Σε εξέλιξη', 'smart-formatter' ) ); ?>
+						<?php
+						if ( SF_Snapshots::STATE_DONE === $h['state'] ) {
+							esc_html_e( 'Ολοκληρώθηκε', 'smart-formatter' );
+						} elseif ( SF_Snapshots::STATE_STOPPED === $h['state'] ) {
+							echo '<span class="sf-warn">' . esc_html__( 'Σταμάτησε (το αντίγραφο γέμισε)', 'smart-formatter' ) . '</span>';
+						} else {
+							esc_html_e( 'Σε εξέλιξη', 'smart-formatter' );
+						}
+						?>
 						<?php if ( $h['truncated'] ) : ?>
 							<span class="sf-warn"> · <?php esc_html_e( 'μερικό (περικομμένο)', 'smart-formatter' ); ?></span>
 						<?php endif; ?>
@@ -322,6 +385,7 @@ final class SF_Admin_UI {
 					<td>
 						<button type="button" class="button sf-btn-units"><?php esc_html_e( 'Δες μονάδες', 'smart-formatter' ); ?></button>
 						<button type="button" class="button sf-btn-restore"><?php echo esc_html( $h['truncated'] ? __( 'Επαναφορά διαθέσιμων', 'smart-formatter' ) : __( 'Επαναφορά όλων', 'smart-formatter' ) ); ?></button>
+						<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG_DASH . '&sf_snapshot_download=' . $h['run_id'] ), 'sf_snap_dl' ) ); ?>"><?php esc_html_e( 'Λήψη αντιγράφου', 'smart-formatter' ); ?></a>
 						<button type="button" class="button sf-btn-delete"><?php esc_html_e( 'Διαγραφή', 'smart-formatter' ); ?></button>
 					</td>
 				</tr>
@@ -329,6 +393,8 @@ final class SF_Admin_UI {
 			<?php endif; ?>
 			</tbody>
 		</table>
+		</div>
+		<p class="description sf-mt-8"><?php esc_html_e( 'Η «Λήψη αντιγράφου» κατεβάζει τις τιμές πριν από το run (JSON). Επαναφέρεται από SF Ρυθμίσεις → Εισαγωγή state, που αντικαθιστά το ιστορικό με αυτό το run.', 'smart-formatter' ); ?></p>
 		<div id="sf-units-panel" class="sf-hidden"></div>
 		<?php
 	}
@@ -361,6 +427,15 @@ final class SF_Admin_UI {
 				<textarea name="sf_exclusions" rows="5" class="large-text code"
 					placeholder="<?php esc_attr_e( 'The Pleiades and the Morning Star', 'smart-formatter' ); ?>"><?php echo esc_textarea( implode( "\n", $excl ) ); ?></textarea>
 
+				<h2 class="sf-h2"><?php esc_html_e( 'Καθαρισμός κατά την αποθήκευση', 'smart-formatter' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Όταν αποθηκεύεις ένα προϊόν από τη σελίδα επεξεργασίας, η σύντομη περιγραφή γίνεται καθαρό κείμενο. Χρήσιμο όταν επικολλάς κείμενο από εργαλεία AI. Δεν αγγίζει εισαγωγές, REST ή μαζικές αλλαγές.', 'smart-formatter' ); ?></p>
+				<?php $auto = self::get_autoclean(); ?>
+				<select name="sf_autoclean" id="sf-autoclean">
+					<option value="" <?php selected( $auto, '' ); ?>><?php esc_html_e( 'Ανενεργό', 'smart-formatter' ); ?></option>
+					<option value="lines" <?php selected( $auto, 'lines' ); ?>><?php echo esc_html( __( 'Καθαρό κείμενο, με αλλαγές γραμμής', 'smart-formatter' ) ); ?></option>
+					<option value="single" <?php selected( $auto, 'single' ); ?>><?php echo esc_html( __( 'Καθαρό κείμενο, μία παράγραφος', 'smart-formatter' ) ); ?></option>
+				</select>
+
 				<p class="sf-submit">
 					<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'smart-formatter' ); ?></button>
 				</p>
@@ -376,7 +451,7 @@ final class SF_Admin_UI {
 				<?php esc_html_e( 'Εξαγωγή state (JSON)', 'smart-formatter' ); ?>
 			</a>
 			<p class="description sf-mt-8">
-				<?php esc_html_e( 'Συμπεριλαμβάνονται: προφίλ, καθολικές εξαιρέσεις και ιστορικό snapshots (με τα undo payloads). Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα. Τα Undo εκτελούνται από τη σελίδα του εργαλείου.', 'smart-formatter' ); ?>
+				<?php esc_html_e( 'Συμπεριλαμβάνονται: προφίλ, καθολικές εξαιρέσεις, καθαρισμός κατά την αποθήκευση και ιστορικό snapshots (με τα undo payloads). Η εισαγωγή ΑΝΤΙΚΑΘΙΣΤΑ τα αντίστοιχα δεδομένα. Τα Undo εκτελούνται από τη σελίδα του εργαλείου.', 'smart-formatter' ); ?>
 			</p>
 
 			<?php self::footer(); ?>
@@ -388,7 +463,10 @@ final class SF_Admin_UI {
 	 * Validation helpers (ΜΙΑ υλοποίηση, AJAX + POST μοιράζονται)
 	 * =================================================================== */
 
-	/** Rules: whitelist από registry. */
+	/**
+	 * Rules: whitelist από registry. Το πολύ ένας plain-text κανόνας· με
+	 * αυτόν το «Πλήρης αφαίρεση μορφοποίησης» είναι περιττό και φεύγει.
+	 */
 	private static function valid_rules( array $raw ): array {
 		$reg = SF_Rules::registry();
 		$out = array();
@@ -397,6 +475,15 @@ final class SF_Admin_UI {
 			if ( isset( $reg[ $r ] ) ) {
 				$out[ $r ] = true;
 			}
+		}
+		$plain = SF_Rules::plain_mode( array_keys( $out ) );
+		if ( '' !== $plain ) {
+			foreach ( SF_Rules::PLAIN_RULES as $id ) {
+				if ( $id !== $plain ) {
+					unset( $out[ $id ] );
+				}
+			}
+			unset( $out[ SF_Rules::R_STRIP ] );
 		}
 		return array_keys( $out );
 	}
@@ -522,48 +609,37 @@ final class SF_Admin_UI {
 		// Global exclusions + per-run → UNION (μία ερμηνεία παντού).
 		$excl = array_values( array_unique( array_merge( self::get_exclusions(), $cfg['exclusions'] ) ) );
 
-		$plan = SF_Targets::plan(
-			$sel,
-			$cfg['fields'],
-			$cfg['rules'],
-			$excl,
-			array(
-				'offset' => $offset,
-				'limit'  => $args['limit'],
-				'apply'  => $args['apply'],
-			)
+		$plan_args = array(
+			'offset' => $offset,
+			'limit'  => $args['limit'],
+			'apply'  => false,
 		);
 
-		// Apply: append ΤΩΝ before-values των changed units στο snapshot.
+		// Πρώτα ΠΑΝΤΑ χωρίς εγγραφή: τι θα αλλάξει και ποιες είναι οι τρέχουσες τιμές.
+		$plan = SF_Targets::plan( $sel, $cfg['fields'], $cfg['rules'], $excl, $plan_args );
+
+		list( $snap_units, $expect ) = self::snapshot_units( $plan['entries'], $sel );
+
+		// Apply (v1.4.0): το αντίγραφο γράφεται ΠΡΙΝ από τα προϊόντα. Αν δεν
+		// χωρά ή δεν γράφεται, το batch δεν εφαρμόζεται και το run σταματά.
 		$changed_products = array();
 		if ( $args['apply'] && ! empty( $run_id ) ) {
-			$snap_units = array();
-			$term_tax   = array();
-			foreach ( SF_Targets::resolve_terms( $sel ) as $t ) {
-				$term_tax[ (int) $t['id'] ] = $t['taxonomy'];
+			if ( ! empty( $snap_units ) && ! SF_Snapshots::append_units( $run_id, $snap_units ) ) {
+				SF_Snapshots::mark_stopped( $run_id );
+				wp_send_json_error( array(
+					'stopped' => true,
+					'message' => __( 'Η εφαρμογή σταμάτησε: το αντίγραφο ασφαλείας δεν χωρά άλλο (όριο 4 MB ανά run) ή δεν γράφτηκε. Ό,τι άλλαξε ως εδώ είναι στο Ιστορικό και επαναφέρεται ολόκληρο. Χώρισε τη δουλειά σε μικρότερα κομμάτια (π.χ. ανά κατηγορία).', 'smart-formatter' ),
+				) );
 			}
+
+			$plan_args['apply']  = true;
+			$plan_args['expect'] = $expect;
+			$plan = SF_Targets::plan( $sel, $cfg['fields'], $cfg['rules'], $excl, $plan_args );
+
 			foreach ( $plan['entries'] as $e ) {
-				if ( empty( $e['changed'] ) || ! empty( $e['error'] ) ) {
-					continue;
-				}
-				$u = array(
-					'kind'   => $e['kind'],
-					'id'     => $e['id'],
-					'field'  => $e['field'],
-					'before' => $e['before'],
-				);
-				if ( 'term' === $e['kind'] ) {
-					if ( ! isset( $term_tax[ (int) $e['id'] ] ) ) {
-						continue; // Δεν αναγνωρίστηκε ο όρος — skip, όχι corrupted restore.
-					}
-					$u['taxonomy'] = $term_tax[ (int) $e['id'] ];
-				} else {
+				if ( 'product' === $e['kind'] && ! empty( $e['changed'] ) && empty( $e['error'] ) ) {
 					$changed_products[ (int) $e['id'] ] = true;
 				}
-				$snap_units[] = $u;
-			}
-			if ( ! empty( $snap_units ) ) {
-				SF_Snapshots::append_units( $run_id, $snap_units );
 			}
 		}
 
@@ -591,7 +667,19 @@ final class SF_Admin_UI {
 			);
 		}
 
+		// Dry run: πόσο θα πιάσει το αντίγραφο (το JS το αθροίζει και δεν
+		// ξεκινά την Εφαρμογή αν δεν χωρά). Καθαρό κείμενο: τι χάνεται.
+		$snap_bytes = 0;
+		foreach ( $snap_units as $u ) {
+			$snap_bytes += SF_Snapshots::unit_bytes( $u );
+		}
+		$loses = ( '' !== SF_Rules::plain_mode( $cfg['rules'] ) )
+			? self::plain_losses( $plan['entries'] )
+			: array( 'links' => 0, 'media' => 0, 'tables' => 0 );
+
 		wp_send_json_success( array(
+			'snap_bytes'    => $snap_bytes,
+			'loses'         => $loses,
 			'total_units'   => $plan['total_units'],
 			'applied_units' => $plan['applied_units'],
 			'changed'       => $plan['changed'],
@@ -599,6 +687,68 @@ final class SF_Admin_UI {
 			'has_more'      => ( $offset + $plan['applied_units'] ) < $plan['total_units'],
 			'entries'       => $entries,
 		) );
+	}
+
+	/**
+	 * Units για το snapshot από τα entries ενός plan (μόνο όσα αλλάζουν)
+	 * + το expect map του guarded apply (unit_key => before).
+	 *
+	 * @return array{0: array, 1: array}
+	 */
+	private static function snapshot_units( array $entries, array $sel ): array {
+
+		$units    = array();
+		$expect   = array();
+		$term_tax = null;
+
+		foreach ( $entries as $e ) {
+			if ( empty( $e['changed'] ) || ! empty( $e['error'] ) ) {
+				continue;
+			}
+			$u = array(
+				'kind'   => $e['kind'],
+				'id'     => $e['id'],
+				'field'  => $e['field'],
+				'before' => $e['before'],
+			);
+			if ( 'term' === $e['kind'] ) {
+				if ( null === $term_tax ) {
+					$term_tax = array();
+					foreach ( SF_Targets::resolve_terms( $sel ) as $t ) {
+						$term_tax[ (int) $t['id'] ] = $t['taxonomy'];
+					}
+				}
+				if ( ! isset( $term_tax[ (int) $e['id'] ] ) ) {
+					continue; // Δεν αναγνωρίστηκε ο όρος — skip, όχι corrupted restore.
+				}
+				$u['taxonomy'] = $term_tax[ (int) $e['id'] ];
+			}
+			$units[] = $u;
+			$expect[ SF_Targets::unit_key( (string) $e['kind'], (int) $e['id'], (string) $e['field'] ) ] = (string) $e['before'];
+		}
+
+		return array( $units, $expect );
+	}
+
+	/** Καθαρό κείμενο: πόσα αλλαγμένα πεδία χάνουν link, εικόνα/media, πίνακα. */
+	private static function plain_losses( array $entries ): array {
+		$out = array( 'links' => 0, 'media' => 0, 'tables' => 0 );
+		foreach ( $entries as $e ) {
+			if ( empty( $e['changed'] ) || ! empty( $e['error'] ) ) {
+				continue;
+			}
+			$before = (string) $e['before'];
+			if ( 1 === preg_match( '~<a\s[^>]*href~i', $before ) ) {
+				$out['links']++;
+			}
+			if ( 1 === preg_match( '~<(?:img|iframe|video|audio|embed|object|picture|svg)\b~i', $before ) ) {
+				$out['media']++;
+			}
+			if ( 1 === preg_match( '~<table\b~i', $before ) ) {
+				$out['tables']++;
+			}
+		}
+		return $out;
 	}
 
 	/* =====================================================================
@@ -794,6 +944,9 @@ final class SF_Admin_UI {
 			update_option( self::OPT_EXCLUSIONS, wp_json_encode( $excl, JSON_UNESCAPED_UNICODE ), false );
 		}
 
+		$auto = isset( $_POST['sf_autoclean'] ) ? sanitize_key( wp_unslash( (string) $_POST['sf_autoclean'] ) ) : '';
+		self::set_autoclean( $auto );
+
 		set_transient( 'sf_aui_msg_' . get_current_user_id(), array(
 			array( 'type' => 'success', 'text' => __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'smart-formatter' ) ),
 		), 60 );
@@ -802,6 +955,34 @@ final class SF_Admin_UI {
 	}
 
 	public static function route_backup(): void {
+
+		// ---------- Λήψη αντιγράφου ενός run (GET + nonce) ----------
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce ελέγχεται παρακάτω.
+		if ( isset( $_GET['sf_snapshot_download'] ) ) {
+
+			if ( ! isset( $_GET['_wpnonce'] )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'sf_snap_dl' )
+				|| ! current_user_can( self::CAP ) ) {
+				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'smart-formatter' ) );
+			}
+
+			$run_id = sanitize_key( wp_unslash( (string) $_GET['sf_snapshot_download'] ) );
+			$json   = ( 1 === preg_match( '/^[a-f0-9]{40}$/', $run_id ) ) ? SF_Snapshots::export_run( $run_id ) : null;
+			if ( null === $json ) {
+				wp_die( esc_html__( 'Το snapshot δεν βρέθηκε.', 'smart-formatter' ) );
+			}
+
+			$state = array(
+				'version' => SF_VERSION,
+				'options' => array( SF_Snapshots::OPT_HISTORY => $json ),
+			);
+
+			nocache_headers();
+			header( 'Content-Type: application/json; charset=UTF-8' );
+			header( 'Content-Disposition: attachment; filename="smart-formatter-run-' . substr( $run_id, 0, 10 ) . '.json"' );
+			echo wp_json_encode( $state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); // phpcs:ignore WordPress.Security.EscapeOutput -- JSON attachment.
+			exit;
+		}
 
 		// ---------- Export (GET + nonce) ----------
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce ελέγχεται παρακάτω.
@@ -917,6 +1098,16 @@ final class SF_Admin_UI {
 			}
 		}
 
+		// ---- Clean on save (v1.4.0) ----
+		if ( isset( $opts[ self::OPT_AUTOCLEAN ] ) ) {
+			$v = $opts[ self::OPT_AUTOCLEAN ];
+			if ( is_string( $v ) && ( '' === $v || isset( self::AUTOCLEAN_MODES[ $v ] ) ) ) {
+				self::set_autoclean( $v );
+			} else {
+				$notes[] = array( 'type' => 'error', 'text' => __( 'Μη έγκυρη τιμή καθαρισμού κατά την αποθήκευση.', 'smart-formatter' ) );
+			}
+		}
+
 		// ---- Snapshots history — UNTRUSTED: ένα Restore θα το γράψει σε
 		//      προϊόντα. Strict validation + wp_kses_post (SF_Snapshots). ----
 		if ( isset( $opts[ SF_Snapshots::OPT_HISTORY ] ) ) {
@@ -983,6 +1174,20 @@ final class SF_Admin_UI {
 			}
 		}
 		return $excl;
+	}
+
+	/** Clean on save: '' (ανενεργό) | 'lines' | 'single'. */
+	public static function get_autoclean(): string {
+		$v = get_option( self::OPT_AUTOCLEAN, '' );
+		return ( is_string( $v ) && isset( self::AUTOCLEAN_MODES[ $v ] ) ) ? $v : '';
+	}
+
+	private static function set_autoclean( string $v ): void {
+		if ( isset( self::AUTOCLEAN_MODES[ $v ] ) ) {
+			update_option( self::OPT_AUTOCLEAN, $v, false );
+		} else {
+			delete_option( self::OPT_AUTOCLEAN );
+		}
 	}
 
 	public static function get_profiles(): array {
