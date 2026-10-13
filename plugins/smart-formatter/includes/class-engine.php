@@ -43,6 +43,9 @@ final class SF_Engine {
 	const F_STRONG = 1;
 	const F_EM     = 2;
 
+	/** Shortcodes: [name attrs]content[/name] ή [name attrs] / [name /]. */
+	const RE_SHORTCODE = '~\[([a-zA-Z_][\w-]*)(?=[\s\]/])[^\]]*\].*?\[/\1\]|\[[a-zA-Z_][\w-]*(?=[\s\]/])[^\]]*\]~s';
+
 	/** Void elements (δεν μπαίνουν στο open-tag stack). */
 	const VOID_TAGS = array( 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' );
 
@@ -58,6 +61,16 @@ final class SF_Engine {
 
 		if ( '' === $html || empty( $enabled ) ) {
 			return $html;
+		}
+
+		// 0) Plain text (v1.4.0): ΠΡΙΝ από όλα — πετάει κάθε tag και τους
+		//    control chars, οπότε τα υπόλοιπα rules βλέπουν σκέτο κείμενο.
+		$plain = SF_Rules::plain_mode( $enabled );
+		if ( '' !== $plain ) {
+			$html = SF_Plain::convert( $html, SF_Rules::R_PLAIN_SINGLE === $plain );
+			if ( '' === $html ) {
+				return '';
+			}
 		}
 
 		// Fail-safe: τα control chars \x00-\x04 είναι δικά μας markers.
@@ -112,8 +125,7 @@ final class SF_Engine {
 			'~<(script|style|textarea)\b[^>]*>.*?(?:</\1\s*>|$)~is',
 			'~<(pre)\b[^>]*>.*?</pre\s*>~is',
 			'~<(code)\b[^>]*>.*?</code\s*>~is',
-			// Shortcodes: [name attrs]content[/name] ή [name attrs] / [name /].
-			'~\[([a-zA-Z_][\w-]*)(?=[\s\]/])[^\]]*\].*?\[/\1\]|\[[a-zA-Z_][\w-]*(?=[\s\]/])[^\]]*\]~s',
+			self::RE_SHORTCODE,
 		);
 
 		foreach ( $patterns as $re ) {

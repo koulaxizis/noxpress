@@ -1,5 +1,5 @@
 /**
- * Smart Formatter — admin.js v1.1.0 (vanilla, delegated events, ES5+safe).
+ * Smart Formatter — admin.js v1.4.0 (vanilla, delegated events, ES5+safe).
  *
  * Dependencies: SF_CFG (wp_localize_script) — ajaxUrl, nonce, i18n.
  * Φορτώνεται μόνο στη σελίδα του εργαλείου· κάθε binding είναι null-safe.
@@ -53,7 +53,7 @@
 		var p = {
 			sf_mode: mode,
 			sf_fields: $$('input[name="sf_fields[]"]:checked').map(function (c) { return c.value; }),
-			sf_rules: $$('input[name="sf_rules[]"]:checked').map(function (c) { return c.value; }),
+			sf_rules: $$('input[name="sf_rules[]"]:checked').map(function (c) { return c.value; }).concat(plainRule()),
 			sf_exclusions_raw: [],
 			sf_products: $('#sf-products') ? $$('#sf-products option:checked').map(function (o) { return o.value; }) : [],
 			sf_terms: $('#sf-terms') ? $$('#sf-terms option:checked').map(function (o) { return o.value; }) : []
@@ -64,6 +64,46 @@
 			if (line) { p.sf_exclusions_raw.push(line); }
 		});
 		return p;
+	}
+
+	/* ---------- Καθαρό κείμενο (v1.4.0): radio → ένας κανόνας ---------- */
+	function plainRule() {
+		var r = $$('input[name="sf_plain"]').filter(function (x) { return x.checked; })[0];
+		return r && r.value ? [r.value] : [];
+	}
+	/* Με καθαρό κείμενο το «Πλήρης αφαίρεση μορφοποίησης» είναι περιττό: κλειδώνει. */
+	function onPlainChange() {
+		var on = plainRule().length > 0;
+		var strip = $('input[name="sf_rules[]"][value="sf_strip_formatting"]');
+		if (!strip) { return; }
+		if (on) { strip.checked = false; }
+		strip.disabled = on;
+		var lbl = strip.closest('label');
+		if (lbl) { lbl.classList.toggle('sf-locked', on); }
+	}
+	function setPlain(rules) {
+		var hit = false;
+		$$('input[name="sf_plain"]').forEach(function (r) {
+			r.checked = !!r.value && rules.indexOf(r.value) !== -1 && !hit;
+			if (r.checked) { hit = true; }
+		});
+		if (!hit) {
+			var none = $('input[name="sf_plain"][value=""]');
+			if (none) { none.checked = true; }
+		}
+		onPlainChange();
+	}
+
+	/* Dry run: γραμμή για ό,τι χάνει το καθαρό κείμενο (links, εικόνες, πίνακες). */
+	function lossLine(loses) {
+		if (!loses || !(loses.links || loses.media || loses.tables)) { return ''; }
+		return ' ' + fmt(T.losesSummary, loses.links || 0, loses.media || 0, loses.tables || 0);
+	}
+	function addLoses(acc, l) {
+		l = l || {};
+		acc.links += l.links || 0;
+		acc.media += l.media || 0;
+		acc.tables += l.tables || 0;
 	}
 
 	/* ---------- Mode pickers ---------- */
@@ -181,38 +221,46 @@
 			hideProgress();
 			if (!res || !res.success) { setSummary(errMsg(res)); return; }
 			renderEntries(res.data.entries);
-			setSummary(fmt(T.previewSummary, res.data.changed, res.data.applied_units));
+			setSummary(fmt(T.previewSummary, res.data.changed, res.data.applied_units) + lossLine(res.data.loses));
 		}).catch(function () { busy(btn, false); setSummary(T.fail); });
 	});
 
 	/* ---------- Dry run (batched: counts + μικρό δείγμα) ---------- */
+	/* Κοινό με την Εφαρμογή: μετρά αλλαγές, μέγεθος αντιγράφου και απώλειες. */
+	function scan(base, onStep) {
+		var acc = { changed: 0, bytes: 0, total: 0, sample: [], loses: { links: 0, media: 0, tables: 0 } };
+		function step(offset) {
+			return post('sf_dryrun', Object.assign({ offset: offset }, base)).then(function (res) {
+				if (!res || !res.success) { throw new Error(errMsg(res)); }
+				acc.changed += res.data.changed || 0;
+				acc.bytes += res.data.snap_bytes || 0;
+				acc.total = res.data.total_units || 0;
+				addLoses(acc.loses, res.data.loses);
+				(res.data.entries || []).forEach(function (e) { if (acc.sample.length < 10) { acc.sample.push(e); } });
+				if (onStep) { onStep(res.data.next_offset, res.data.total_units); }
+				if (res.data.has_more && res.data.applied_units > 0) { return step(res.data.next_offset); }
+				return acc;
+			});
+		}
+		return step(0);
+	}
+	function tooBig(acc) { return acc.bytes > (CFG.snapMax || 0); }
+
 	on('#sf-btn-dryrun', 'click', function () {
 		var btn = this;
-		var base = payload();
-		var changed = 0;
-		var sample = [];
 		busy(btn, true);
 		setSummary(T.working);
 		showResults();
 		hideProgress();
 		renderEntries([]);
 
-		function step(offset) {
-			return post('sf_dryrun', Object.assign({ offset: offset }, base)).then(function (res) {
-				if (!res || !res.success) { throw new Error(errMsg(res)); }
-				changed += res.data.changed || 0;
-				(res.data.entries || []).forEach(function (e) { if (sample.length < 10) { sample.push(e); } });
-				setSummary(T.working + ' ' + res.data.next_offset + ' / ' + res.data.total_units);
-				if (res.data.has_more && res.data.applied_units > 0) { return step(res.data.next_offset); }
-				return res.data.total_units;
-			});
-		}
-
-		step(0).then(function (total) {
+		scan(payload(), function (done, total) {
+			setSummary(T.working + ' ' + done + ' / ' + total);
+		}).then(function (acc) {
 			busy(btn, false);
-			if (changed === 0) { setSummary(T.nothing); return; }
-			setSummary(fmt(T.dryrunSummary, changed, total));
-			renderEntries(sample);
+			if (acc.changed === 0) { setSummary(T.nothing); return; }
+			setSummary(fmt(T.dryrunSummary, acc.changed, acc.total) + lossLine(acc.loses) + (tooBig(acc) ? ' ' + T.snapTooBig : ''));
+			renderEntries(acc.sample);
 		}).catch(function (err) {
 			busy(btn, false);
 			setSummary(err && err.message ? err.message : T.fail);
@@ -237,14 +285,28 @@
 		var totalChanged = 0;
 		var sample = [];
 
-		post('sf_apply', Object.assign({ phase: 'start' }, base)).then(function (res) {
+		// v1.4.0: πρώτα έλεγχος ότι το αντίγραφο χωρά ΟΛΟΚΛΗΡΟ· αλλιώς η
+		// Εφαρμογή δεν ξεκινά καθόλου (ο server έχει και δικό του φρένο).
+		label.textContent = T.checking;
+		scan(base, function (done, total) {
+			label.textContent = T.checking + ' ' + done + ' / ' + total;
+		}).then(function (acc) {
+			if (tooBig(acc)) { throw new Error(T.snapTooBig); }
+			if (acc.changed === 0) { throw new Error(T.nothing); }
+			label.textContent = T.working;
+			return post('sf_apply', Object.assign({ phase: 'start' }, base));
+		}).then(function (res) {
 			if (!res || !res.success) { throw new Error(errMsg(res)); }
 			var runId = res.data.run_id;
 
 			function runBatch(offset) {
 				return post('sf_apply', Object.assign({ phase: 'batch', run_id: runId, offset: offset }, base))
 					.then(function (r) {
-						if (!r || !r.success) { throw new Error(errMsg(r)); }
+						if (!r || !r.success) {
+							// Το run σταμάτησε με ασφάλεια: το Ιστορικό δείχνει τι άλλαξε.
+							if (r && r.data && r.data.stopped) { window.alert(errMsg(r)); window.location.reload(); }
+							throw new Error(errMsg(r));
+						}
 						totalChanged += r.data.changed || 0;
 						(r.data.entries || []).forEach(function (e) { if (sample.length < 10) { sample.push(e); } });
 						renderEntries(sample);
@@ -315,6 +377,7 @@
 		var fields = JSON.parse(opt.dataset.fields || '[]');
 		$$('input[name="sf_rules[]"]').forEach(function (c) { c.checked = rules.indexOf(c.value) !== -1; });
 		$$('input[name="sf_fields[]"]').forEach(function (c) { c.checked = fields.indexOf(c.value) !== -1; });
+		setPlain(rules);
 	});
 
 	/* ---------- Restore result → πραγματικό μήνυμα ---------- */
@@ -411,5 +474,7 @@
 
 	/* ---------- Init ---------- */
 	$$('input[name="sf_mode"]').forEach(function (r) { r.addEventListener('change', onModeChange); });
+	$$('input[name="sf_plain"]').forEach(function (r) { r.addEventListener('change', onPlainChange); });
 	onModeChange();
+	onPlainChange();
 })();
