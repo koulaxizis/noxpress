@@ -1,0 +1,17 @@
+/**
+ * orOS Connect — front.css (v1.0.0). The newsletter form; loaded only where
+ * the form shows (Bible §14.9). Inputs and the button keep the theme's look
+ * (Bible §14.13); this only lays them out.
+ */
+.orc-nl { margin: 0 0 1em; }
+.orc-nl .orc-nl__form { margin: 0; position: relative; }
+.orc-nl .orc-nl__title,
+.orc-nl .orc-nl__intro { margin: 0 0 .5em; }
+.orc-nl .orc-nl__row { display: flex; flex-wrap: wrap; gap: .5em; align-items: stretch; margin: 0 0 .5em; }
+.orc-nl .orc-nl__row input[type="email"],
+.orc-nl .orc-nl__row input[type="text"] { flex: 1 1 12em; min-width: 0; width: auto; margin: 0; box-sizing: border-box; }
+.orc-nl .orc-nl__row button { flex: 0 0 auto; margin: 0; }
+.orc-nl .orc-nl__note { margin: 0 0 .25em; opacity: .85; }
+/* Themes that do not style inputs (e.g. block themes): no specificity, so
+   any input rule of the theme wins. */
+:where(.orc-nl .orc-nl__row) input { font: inherit; padding: .5em .75em; }

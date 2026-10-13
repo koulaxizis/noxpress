@@ -16,6 +16,7 @@
 #   hc → hide-catalog
 #   vp → variation-picker
 #   gl → greeklish-permalinks
+#   oc → oros-connect
 #   nm → data-migrator (μόνο με tag)
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
@@ -49,7 +50,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl'
+  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc'
 
 jobs:
   release:
@@ -71,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           ref=plugins/revenue-splitter/includes/noxpress-core
-          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks; do
+          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect; do
             if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
               echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
               exit 1
@@ -100,6 +101,7 @@ jobs:
               hc) echo hide-catalog ;;
               vp) echo variation-picker ;;
               gl) echo greeklish-permalinks ;;
+              oc) echo oros-connect ;;
               nm) echo data-migrator ;;
               *) return 1 ;;
             esac
@@ -120,6 +122,7 @@ jobs:
               hc) echo "Hide Catalog" ;;
               vp) echo "Variation Picker" ;;
               gl) echo "Greeklish Permalinks" ;;
+              oc) echo "orOS Connect" ;;
               nm) echo "Data Migrator" ;;
             esac
           }

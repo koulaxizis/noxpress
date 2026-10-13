@@ -48,6 +48,7 @@ SLUGS = {
     'hc': 'hide-catalog',
     'vp': 'variation-picker',
     'gl': 'greeklish-permalinks',
+    'oc': 'oros-connect',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
