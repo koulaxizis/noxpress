@@ -43,6 +43,7 @@ final class Noxpress_Core {
 		'Δωρεάν αποστολή με μπάρα προόδου και χρόνος παράδοσης στη σελίδα προϊόντος.' => 'Free shipping progress bar and delivery time on the product page.',
 		'Μία σελίδα για κάθε δημιουργό, με τα έργα του ανά ρόλο, συνδέσμους από τα προϊόντα και ευρετήριο.' => 'One page for every creator, with their works by role, links from the products and an index.',
 		'Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.' => 'Store pickup at checkout, with a choice of store, opening hours and no shipping cost.',
+		'Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.' => 'Hide categories and their products from the shop, search and blocks, without changing the products.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -183,6 +184,11 @@ final class Noxpress_Core {
 				'name' => 'Store Pickup',
 				'desc' => __( 'Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.', 'noxpress' ),
 				'page' => 'pkp-settings',
+			),
+			'hide-catalog'      => array(
+				'name' => 'Hide Catalog',
+				'desc' => __( 'Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.', 'noxpress' ),
+				'page' => 'hic-settings',
 			),
 		);
 	}

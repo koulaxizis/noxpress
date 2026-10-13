@@ -610,6 +610,25 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="hide-catalog">
+		<h2><a href="#hide-catalog">Hide Catalog</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="hc_desc">Hide product categories and their products from the shop, other listings, search, related products, shortcodes and blocks, with one rule per category and without changing a single product.</p>
+		<ul>
+			<li data-i18n="hc_li1">Per category: hide its products from the shop page, other listings (categories, tags, attributes), search, related products / upsells / cross-sells, and product shortcodes and blocks — each switch on its own</li>
+			<li data-i18n="hc_li2">Subcategories included on request; a product in a visible category too stays hidden, or only when all its categories are hidden</li>
+			<li data-i18n="hc_li3">Hide the category itself from category lists, product categories and breadcrumbs — one click for WooCommerce’s undeletable “Uncategorized”</li>
+			<li data-i18n="hc_li4">The category page stays open, or turns noindex, 404 or a redirect to the shop; closed pages leave the core and Rank Math sitemaps</li>
+			<li data-i18n="hc_li5">Counts agree everywhere: WooCommerce’s filter widgets and Shop Filters follow the same rules with no extra setup</li>
+			<li data-i18n="hc_li6">Safe by design: query-time only (deactivate and everything is back), test mode for shop managers, HIC_DISABLE emergency switch, page cache clearing on save; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.0/hide-catalog.zip" rel="nofollow noopener" data-i18n="hc_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/hide-catalog" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
@@ -769,6 +788,14 @@ footer .heart { color: var(--accent-bright); }
 		pk_li5: 'Optionally hides the shipping address while pickup is chosen; taxes follow WooCommerce’s local pickup rule',
 		pk_li6: 'Safe by design: off until enabled, test mode for shop managers, PKP_DISABLE emergency switch; no cookies, no external calls; bilingual UI and shared «Noxpress» menu',
 		pk_download: 'Download v1.0.0 (.zip)',
+		hc_desc: 'Hide product categories and their products from the shop, other listings, search, related products, shortcodes and blocks, with one rule per category and without changing a single product.',
+		hc_li1: 'Per category: hide its products from the shop page, other listings (categories, tags, attributes), search, related products / upsells / cross-sells, and product shortcodes and blocks — each switch on its own',
+		hc_li2: 'Subcategories included on request; a product in a visible category too stays hidden, or only when all its categories are hidden',
+		hc_li3: 'Hide the category itself from category lists, product categories and breadcrumbs — one click for WooCommerce’s undeletable “Uncategorized”',
+		hc_li4: 'The category page stays open, or turns noindex, 404 or a redirect to the shop; closed pages leave the core and Rank Math sitemaps',
+		hc_li5: 'Counts agree everywhere: WooCommerce’s filter widgets and Shop Filters follow the same rules with no extra setup',
+		hc_li6: 'Safe by design: query-time only (deactivate and everything is back), test mode for shop managers, HIC_DISABLE emergency switch, page cache clearing on save; bilingual UI and shared «Noxpress» menu',
+		hc_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Your download is ready',
 		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
@@ -908,6 +935,14 @@ footer .heart { color: var(--accent-bright); }
 		pk_li5: 'Προαιρετική απόκρυψη της διεύθυνσης αποστολής όταν επιλέγεται παραλαβή· οι φόροι ακολουθούν τον κανόνα τοπικής παραλαβής του WooCommerce',
 		pk_li6: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να ενεργοποιηθεί, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης PKP_DISABLE· χωρίς cookies και εξωτερικές κλήσεις· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		pk_download: 'Λήψη v1.0.0 (.zip)',
+		hc_desc: 'Απόκρυψη κατηγοριών προϊόντων και των προϊόντων τους από το shop, τις άλλες λίστες, την αναζήτηση, τα σχετικά προϊόντα, τα shortcodes και τα blocks, με έναν κανόνα ανά κατηγορία και χωρίς να αλλάξει κανένα προϊόν.',
+		hc_li1: 'Ανά κατηγορία: απόκρυψη των προϊόντων της από τη σελίδα shop, τις άλλες λίστες (κατηγορίες, ετικέτες, χαρακτηριστικά), την αναζήτηση, τα σχετικά / upsells / cross-sells και τα shortcodes και blocks προϊόντων, με χωριστό διακόπτη για το καθένα',
+		hc_li2: 'Με ή χωρίς τις υποκατηγορίες· ένα προϊόν που είναι και σε ορατή κατηγορία κρύβεται κι αυτό, ή μόνο όταν όλες οι κατηγορίες του είναι κρυφές',
+		hc_li3: 'Απόκρυψη της ίδιας της κατηγορίας από τις λίστες κατηγοριών, τις κατηγορίες των προϊόντων και τα breadcrumbs, με ένα κλικ για τη «Χωρίς κατηγορία» του WooCommerce που δεν σβήνεται',
+		hc_li4: 'Η σελίδα της κατηγορίας μένει ανοιχτή ή γίνεται noindex, 404 ή ανακατεύθυνση στο shop· οι κλειστές σελίδες βγαίνουν από τα sitemaps του WordPress και του Rank Math',
+		hc_li5: 'Ίδιοι μετρητές παντού: τα φίλτρα του WooCommerce και το Shop Filters ακολουθούν τους ίδιους κανόνες χωρίς άλλη ρύθμιση',
+		hc_li6: 'Ασφαλές εκ σχεδιασμού: όλα γίνονται την ώρα της σελίδας (απενεργοποίηση και όλα επιστρέφουν), λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης HIC_DISABLE, καθαρισμός της page cache στην αποθήκευση· δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
+		hc_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
