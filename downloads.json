@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 51,
+  "total": 57,
   "offset": 5,
   "updated": "2026-10-14",
   "assets": {
@@ -118,15 +118,15 @@
     },
     "630701507": {
       "file": "nox-sn-1.0.0/shipping-notes.zip",
-      "count": 2
+      "count": 3
     },
     "630713994": {
       "file": "nox-bp-1.0.0/book-preview.zip",
-      "count": 2
+      "count": 3
     },
     "630955070": {
       "file": "nox-cr-1.0.0/featured-creators.zip",
-      "count": 2
+      "count": 3
     },
     "631666736": {
       "file": "nox-pk-1.0.0/store-pickup.zip",
@@ -142,7 +142,7 @@
     },
     "637366211": {
       "file": "nox-sf-1.4.0/smart-formatter.zip",
-      "count": 1
+      "count": 2
     },
     "637573158": {
       "file": "nox-gl-1.0.0/greeklish-permalinks.zip",
@@ -150,11 +150,11 @@
     },
     "637586685": {
       "file": "nox-rs-1.9.1/revenue-splitter.zip",
-      "count": 1
+      "count": 2
     },
     "637586799": {
       "file": "nox-sp-1.6.0/store-pulse.zip",
-      "count": 1
+      "count": 2
     },
     "638119605": {
       "file": "nox-gl-1.1.0/greeklish-permalinks.zip",
@@ -163,6 +163,14 @@
     "638132620": {
       "file": "nox-oc-1.0.0/oros-connect.zip",
       "count": 1
+    },
+    "640459159": {
+      "file": "nox-tp-1.4.0/theme-patcher.zip",
+      "count": 0
+    },
+    "640469052": {
+      "file": "nox-pb-1.0.0/product-bundles.zip",
+      "count": 0
     }
   }
 }

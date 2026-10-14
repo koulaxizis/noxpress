@@ -172,7 +172,7 @@ final class SP_Dashboard {
 						'publisher_share',
 						sprintf(
 							'%s (%s)',
-							__( 'Κέρδος εκδότη (περίοδος)', 'store-pulse' ),
+							__( 'Κέρδος εκδότη', 'store-pulse' ),
 							__( SP_Admin::PRESET_LABELS[ $p_money ], 'store-pulse' )
 						),
 						sp_money( $money['share'] ),

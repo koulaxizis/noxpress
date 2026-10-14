@@ -29,6 +29,10 @@ final class RS_Checkout {
 		add_action( 'woocommerce_checkout_create_order', array( __CLASS__, 'save' ), 10, 2 );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( __CLASS__, 'show_admin' ), 10, 1 );
 
+		// 1.9.2: the stamped regular price is internal data for the reports;
+		// keep it out of the order item meta list in the order screen.
+		add_filter( 'woocommerce_hidden_order_itemmeta', array( __CLASS__, 'hide_item_meta' ) );
+
 		// Audit (#2): detection του WooCommerce Blocks checkout — το πεδίο
 		// καναλιού/αιτιολογίας απαιτεί classic checkout (hooks). Αν η σελίδα
 		// checkout χρησιμοποιεί block, εμφανίζουμε warning στους admins.
@@ -301,6 +305,18 @@ final class RS_Checkout {
 				. esc_html__( 'Αιτιολογία δωρεάν αντιτύπου:', 'revenue-splitter' )
 				. '</strong> ' . esc_html( $reason ) . '</p>';
 		}
+	}
+
+	/**
+	 * 1.9.2: Hides the internal '_rs_reg_unit' line item meta in wp-admin.
+	 *
+	 * @param array $keys Hidden meta keys.
+	 * @return array
+	 */
+	public static function hide_item_meta( $keys ): array {
+		$keys   = is_array( $keys ) ? $keys : array();
+		$keys[] = '_rs_reg_unit';
+		return $keys;
 	}
 
 	/**

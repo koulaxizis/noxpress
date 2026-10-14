@@ -1340,9 +1340,12 @@ final class RS_Portal {
 
 .rs-pt-table { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
 .rs-pt-table th, .rs-pt-table td { border: 1px solid #2e3240; padding: 6px 10px; text-align: left; font-size: 0.92em; }
-.rs-pt-table th { background: #1d2029; color: #e6e1fd; }
-.rs-pt-table tbody tr:nth-child(2n) td { background: #181b23; }
-.rs-pt-table tbody tr:hover td { background: #1e212c; }
+/* Colours with !important (Bible §4): light theme table rules (e.g. Storefront's
+ * `table tbody td { background: #fdfdfd }`) must not turn the cells white. */
+.rs-portal .rs-pt-table td { background: #14161d !important; color: #eae8fa !important; }
+.rs-portal .rs-pt-table th { background: #1d2029 !important; color: #e6e1fd !important; }
+.rs-portal .rs-pt-table tbody tr:nth-child(2n) td { background: #181b23 !important; }
+.rs-portal .rs-pt-table tbody tr:hover td { background: #1e212c !important; }
 .rs-pt-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .rs-pt-table small, .rs-pt-muted { color: #b7b2d6; }
 

@@ -250,7 +250,15 @@
 			body.appendChild( el( 'p', 'bpv-end__title', end.title ) );
 			body.appendChild( el( 'p', 'bpv-end__name', end.name ) );
 			if ( end.price ) {
-				body.appendChild( el( 'p', 'bpv-end__price', end.price ) );
+				var price = el( 'p', 'bpv-end__price' );
+				if ( end.old ) {
+					price.appendChild( el( 'del', 'bpv-end__old', end.old ) );
+					price.appendChild( document.createTextNode( ' ' ) );
+					price.appendChild( el( 'ins', 'bpv-end__now', end.price ) );
+				} else {
+					price.textContent = end.price;
+				}
+				body.appendChild( price );
 			}
 			var cta;
 			if ( 'scroll' === end.action ) {
