@@ -348,15 +348,38 @@ final class BPV_Front {
 		$price = (string) $p->get_price_html();
 		$price = (string) preg_replace( '#<span class="screen-reader-text">.*?</span>#s', '', $price );
 		$price = trim( preg_replace( '/\s+/', ' ', html_entity_decode( wp_strip_all_tags( $price ), ENT_QUOTES, 'UTF-8' ) ) );
+		// 1.0.1: a single price on sale also sends the old price, so the card
+		// can strike it through (the plain text above loses the <del>).
+		$old = '';
+		if ( $p->is_on_sale() && ! $p->is_type( array( 'variable', 'grouped' ) ) ) {
+			$regular = (float) $p->get_regular_price();
+			$sale    = (float) wc_get_price_to_display( $p );
+			if ( $regular > 0 && $sale > 0 ) {
+				$old   = self::plain_price( wc_price( wc_get_price_to_display( $p, array( 'price' => $regular ) ) ) );
+				$price = self::plain_price( wc_price( $sale ) . $p->get_price_suffix() );
+			}
+		}
 		$img   = wp_get_attachment_image_url( (int) $p->get_image_id(), 'woocommerce_thumbnail' );
 		return array(
 			'title'  => BPV_Settings::text( 'end_title' ),
 			'button' => BPV_Settings::text( 'end_button' ),
 			'name'   => wp_strip_all_tags( $p->get_name() ),
 			'price'  => $price,
+			'old'    => $old,
 			'image'  => $img ? (string) $img : '',
 			'action' => $action,
 			'href'   => $href,
 		);
+	}
+
+	/**
+	 * Price HTML to plain text (no screen reader labels, single spaces).
+	 *
+	 * @param string $html Price HTML.
+	 * @return string
+	 */
+	private static function plain_price( $html ) {
+		$html = (string) preg_replace( '#<span class="screen-reader-text">.*?</span>#s', '', (string) $html );
+		return trim( (string) preg_replace( '/\s+/', ' ', html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES, 'UTF-8' ) ) );
 	}
 }
