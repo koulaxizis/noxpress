@@ -182,15 +182,15 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* New: \"Care and safety\" product tab (GPSR): care instructions, product safety, manufacturer, EU responsible person and a terms link, from care profiles chosen per product, by product type attribute or by SKU prefix. Off until enabled.\n* New: Care tab in the settings: profiles with an editor and Greek / English texts, placeholders `{product_name}`, `{material}`, `{method}`, manufacturers, EU responsible person, visitor texts, terms link and anchor, link colour, preview, restore defaults.\n* New: product box (profile, manufacturer, safety note); the three product fields are in the REST API for users who can edit the product.\n* New: `wp theme-patcher care resolve <id>` and `--all` (read only).\n* New: filters `tp_care_tab_title`, `tp_care_resolved_profile`, `tp_care_manufacturer`, `tp_care_tab_html`.\n* New: the backup includes the care settings; Settings can delete the care data from products on uninstall (off by default).",
+        "published": "2026-10-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "785a18256239ec77306655792419b9a3a27380e8d2f0a582b10d76efbfbda066",
-        "signature": "Lqz7PwwSR7m4lI3GgNw28+dv3sQcheUW69WABHzd0tG8NQ4gTDk+S2kkW44X7wSw2BrM4+CFRSXHIaovOrVFBw==",
+        "sha256": "0ad9c4b5a50dae9480014fc252e11bf5199eca7ee91edcd09ce5d751d4de0170",
+        "signature": "j9QIIoNBRDACOCWbdyqJThFDneqBTOnFZ7G7og6HdJ1ePunrD6eIKgvRcpJtoikefUwnbtzjGHnodfRDrZByAQ==",
         "tested_wp": "6.8",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.3.0/theme-patcher.zip"
+        "version": "1.4.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.4.0/theme-patcher.zip"
       }
     },
     "variation-picker": {
