@@ -1,11 +1,11 @@
 === Theme Patcher ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, theme compatibility, product cards, accessibility, price labels
+Tags: woocommerce, theme compatibility, product cards, price labels, gpsr
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -61,6 +61,16 @@ Many classic themes draw product cards, category tiles and texts with their own 
 * **Language:** automatic (site language), Greek or English.
 * Store-wide, with any theme (block themes too). Orders, emails, the thank-you page, My Account, invoices, product feeds and the price schema keep the real price. The Cart and Checkout blocks draw prices with JavaScript and keep 0,00 €; the Prices tab says so when they are in use.
 
+**Care & safety tab**
+
+* **Product tab "Care and safety"** on the product page: care instructions, product safety, the manufacturer and the EU responsible person (GPSR), plus a link to your terms. It works with any theme that uses WooCommerce's product tabs (classic themes, block themes and accordion layouts alike).
+* **Care profiles:** five ready profiles (clothing, hats, mugs, small accessories, home) with Greek texts you can edit, an optional English version, and your own profiles. Texts may use simple HTML and the placeholders `{product_name}`, `{material}` and `{method}`; a sentence whose placeholder has no value is left out.
+* **Which profile:** chosen on the product, else by the product type attribute (e.g. `pa_eidos`), else by SKU prefix, else no tab. External, grouped and virtual products (e.g. e-books, music) and products no profile matches (e.g. books) get no tab unless a profile is set on the product; "None" on a product hides the tab.
+* **Manufacturers and EU responsible person:** a list of manufacturers with address and contact, a default manufacturer per profile, and the person responsible in the EU. Empty sections are not shown.
+* **Product box:** profile, manufacturer and an extra safety note per product, also in the REST API (`_tp_care_profile`, `_tp_care_manufacturer`, `_tp_care_note`).
+* **Preview** by product ID (which profile, why, and the HTML), and `wp theme-patcher care resolve <id>` or `--all` in WP-CLI.
+* Off until enabled, with its own switch; follows the Theme Patcher switch and test mode. Product data stays on uninstall unless you tick "delete" in Settings.
+
 **Tools and safety**
 
 * **Theme detector:** a code scan (comments ignored) lists template overrides and product loops of the active theme, with what each one is missing and a suggested mode.
@@ -112,9 +122,21 @@ No. The label is only text for visitors. The structured data (schema) keeps the 
 
 = What happens on uninstall? =
 
-The plugin's own options (`tp_settings`, `tp_cat_images`) and transients are removed. Nothing else was ever changed.
+The plugin's own options (`tp_settings`, `tp_cat_images`, `tp_care`) and transients are removed. The care profile, manufacturer and note saved on products stay, unless "Delete the care details from the products when the plugin is deleted" is ticked in Settings. Nothing else was ever changed.
+
+= The care tab does not show up. =
+
+Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is off. Use the Preview with the product ID to see which profile it gets and why, then clear the page cache (e.g. WP Rocket).
 
 == Changelog ==
+
+= 1.4.0 =
+* New: "Care and safety" product tab (GPSR): care instructions, product safety, manufacturer, EU responsible person and a terms link, from care profiles chosen per product, by product type attribute or by SKU prefix. Off until enabled.
+* New: Care tab in the settings: profiles with an editor and Greek / English texts, placeholders `{product_name}`, `{material}`, `{method}`, manufacturers, EU responsible person, visitor texts, terms link and anchor, link colour, preview, restore defaults.
+* New: product box (profile, manufacturer, safety note); the three product fields are in the REST API for users who can edit the product.
+* New: `wp theme-patcher care resolve <id>` and `--all` (read only).
+* New: filters `tp_care_tab_title`, `tp_care_resolved_profile`, `tp_care_manufacturer`, `tp_care_tab_html`.
+* New: the backup includes the care settings; Settings can delete the care data from products on uninstall (off by default).
 
 = 1.3.0 =
 * New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.

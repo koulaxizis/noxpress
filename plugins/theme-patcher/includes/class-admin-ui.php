@@ -5,8 +5,9 @@
  * Pages (Bible §8, admin_menu priority 40): submenus of the shared
  * top-level 'noxpress', created by Noxpress Core (priority 5, Bible §16).
  *  - tp-theme-patcher  status + tabs: cards (detector, areas, page probe),
- *                      texts, page rules, theme, categories, prices, checks
- *                      (block themes: prices only)
+ *                      texts, page rules, theme, categories, prices, care
+ *                      (TP_Care_Admin), checks (block themes: prices and
+ *                      care only)
  *  - tp-settings       master switch, test mode, backup & restore
  *
  * Security (Bible §11): every state change is a POST handled on
@@ -46,6 +47,7 @@ final class TP_Admin_UI {
 		'theme'  => 'Ρυθμίσεις θέματος',
 		'cats'   => 'Κατηγορίες',
 		'prices' => 'Τιμές',
+		'care'   => 'Φροντίδα',
 		'checks' => 'Έλεγχοι',
 	);
 
@@ -181,12 +183,16 @@ final class TP_Admin_UI {
 		return $out;
 	}
 
+	/** Tabs that also apply on block themes (store-wide features). */
+	const BLOCK_TABS = array( 'prices', 'care' );
+
 	private static function current_tab(): string {
-		if ( ! self::theme_supported() ) {
-			return 'prices'; // Block themes: price labels are the only feature that applies.
-		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : 'cards';
+		if ( ! self::theme_supported() ) {
+			// Block themes: only the store-wide features apply.
+			return in_array( $tab, self::BLOCK_TABS, true ) ? $tab : 'prices';
+		}
 		return isset( self::TABS[ $tab ] ) ? $tab : 'cards';
 	}
 
@@ -214,6 +220,8 @@ final class TP_Admin_UI {
 			self::render_tabs( $tab );
 			if ( 'prices' === $tab ) {
 				self::render_prices();
+			} elseif ( 'care' === $tab ) {
+				TP_Care_Admin::render();
 			} else {
 				switch ( $tab ) {
 					case 'texts':
@@ -246,7 +254,7 @@ final class TP_Admin_UI {
 	private static function render_tabs( string $current ): void {
 		echo '<nav class="nav-tab-wrapper tp-tabs">';
 		foreach ( self::TABS as $slug => $label ) {
-			if ( 'prices' !== $slug && ! self::theme_supported() ) {
+			if ( ! in_array( $slug, self::BLOCK_TABS, true ) && ! self::theme_supported() ) {
 				continue;
 			}
 			printf(
@@ -1313,6 +1321,15 @@ final class TP_Admin_UI {
 					<?php endif; ?>
 				</div>
 
+				<h2 class="tp-h2"><?php esc_html_e( 'Δεδομένα', 'theme-patcher' ); ?></h2>
+				<div class="tp-zone">
+					<label class="tp-check">
+						<input type="checkbox" name="tp_care_delete_meta" value="1" <?php checked( TP_Care::get()['delete_meta'] ); ?> />
+						<?php esc_html_e( 'Διαγραφή των στοιχείων φροντίδας από τα προϊόντα όταν διαγραφεί το plugin', 'theme-patcher' ); ?>
+					</label>
+					<span class="tp-hint"><?php esc_html_e( 'Οι ρυθμίσεις του Theme Patcher φεύγουν πάντα με τη διαγραφή του plugin. Το προφίλ, ο κατασκευαστής και η σημείωση κάθε προϊόντος μένουν, εκτός αν τσεκάρεις αυτή την επιλογή.', 'theme-patcher' ); ?></span>
+				</div>
+
 				<p class="tp-submit">
 					<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'theme-patcher' ); ?></button>
 				</p>
@@ -1419,11 +1436,17 @@ final class TP_Admin_UI {
 				$msgs = self::do_confirm();
 				break;
 			default:
+				if ( 0 === strpos( $action, 'care_' ) ) {
+					$msgs = TP_Care_Admin::handle( $action );
+					$back = self::SLUG_MAIN . '&tab=care' . TP_Care_Admin::$back;
+					break;
+				}
 				$msgs = array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'theme-patcher' ) ) );
 		}
 
-		$s = TP_Settings::get();
-		if ( 0 === strpos( $action, 'save_' ) && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() ) ) {
+		$s     = TP_Settings::get();
+		$saves = 0 === strpos( $action, 'save_' ) || 0 === strpos( $action, 'care_save_' );
+		if ( $saves && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() || TP_Care::get()['enabled'] ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Το Theme Patcher είναι ακόμη ανενεργό: δοκίμασε με τη σάρωση σελίδας και ενεργοποίησέ το από τις Ρυθμίσεις.', 'theme-patcher' ) );
 		}
 
@@ -1449,6 +1472,9 @@ final class TP_Admin_UI {
 		$s['enabled']   = ! empty( $_POST['tp_enabled'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route().
 		$s['test_mode'] = ! empty( $_POST['tp_test_mode'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		TP_Settings::save( $s );
+		$care                = TP_Care::get();
+		$care['delete_meta'] = ! empty( $_POST['tp_care_delete_meta'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		TP_Care::save( $care );
 		return array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'theme-patcher' ) ) );
 	}
 
@@ -1748,6 +1774,7 @@ final class TP_Admin_UI {
 				'version' => TP_VERSION,
 				'options' => array(
 					TP_Settings::OPT => TP_Settings::get(),
+					TP_Care::OPT     => TP_Care::get(),
 				),
 			);
 
@@ -1798,21 +1825,46 @@ final class TP_Admin_UI {
 	 */
 	private static function import_state( array $state ): array {
 		$opts = isset( $state['options'] ) && is_array( $state['options'] ) ? $state['options'] : array();
-		if ( ! isset( $opts[ TP_Settings::OPT ] ) ) {
+		if ( ! isset( $opts[ TP_Settings::OPT ] ) && ! isset( $opts[ TP_Care::OPT ] ) ) {
 			return array( self::msg( 'error', __( 'Μη έγκυρο αρχείο backup (λείπουν οι ρυθμίσεις του Theme Patcher).', 'theme-patcher' ) ) );
 		}
+
+		// Each option is validated on its own (Bible §11): a file may carry only one of them.
+		$msgs = array();
+		$ok   = 0;
+		if ( isset( $opts[ TP_Care::OPT ] ) ) {
+			$care = $opts[ TP_Care::OPT ];
+			if ( is_string( $care ) ) {
+				$care = json_decode( $care, true );
+			}
+			if ( is_array( $care ) ) {
+				TP_Care::save( $care );
+				++$ok;
+			} else {
+				$msgs[] = self::msg( 'error', __( 'Μη έγκυρες ρυθμίσεις της καρτέλας «Φροντίδα και ασφάλεια»: έμειναν όπως ήταν.', 'theme-patcher' ) );
+			}
+		}
+		if ( ! isset( $opts[ TP_Settings::OPT ] ) ) {
+			array_unshift( $msgs, self::msg( $msgs ? 'error' : 'success', $msgs ? __( 'Η εισαγωγή απέτυχε.', 'theme-patcher' ) : __( 'Η εισαγωγή ολοκληρώθηκε.', 'theme-patcher' ) ) );
+			return $msgs;
+		}
+
 		$blob = $opts[ TP_Settings::OPT ];
 		if ( is_string( $blob ) ) {
 			$blob = json_decode( $blob, true );
 		}
 		if ( ! is_array( $blob ) || ! isset( $blob['themes'] ) || ! is_array( $blob['themes'] ) ) {
-			return array( self::msg( 'error', __( 'Μη έγκυρο blob ρυθμίσεων.', 'theme-patcher' ) ) );
+			$msgs[] = self::msg( 'error', __( 'Μη έγκυρο blob ρυθμίσεων.', 'theme-patcher' ) );
+			if ( $ok ) {
+				array_unshift( $msgs, self::msg( 'warning', __( 'Η εισαγωγή ολοκληρώθηκε ΜΕΡΙΚΩΣ.', 'theme-patcher' ) ) );
+			}
+			return $msgs;
 		}
 
 		$clean = TP_Settings::sanitize_all( $blob );
 		TP_Settings::save( $clean );
 
-		$msgs = array( self::msg( 'success', __( 'Η εισαγωγή ολοκληρώθηκε.', 'theme-patcher' ) ) );
+		array_unshift( $msgs, self::msg( $msgs ? 'warning' : 'success', $msgs ? __( 'Η εισαγωγή ολοκληρώθηκε ΜΕΡΙΚΩΣ.', 'theme-patcher' ) : __( 'Η εισαγωγή ολοκληρώθηκε.', 'theme-patcher' ) ) );
 		if ( count( $clean['themes'] ) < count( $blob['themes'] ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Κάποια θέματα παραλείφθηκαν επειδή τα δεδομένα τους δεν ήταν έγκυρα.', 'theme-patcher' ) );
 		}

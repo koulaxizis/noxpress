@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Theme Patcher
  * Plugin URI:           https://noxpress.tech
- * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή). Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
- * Version:              1.3.0
+ * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή), καρτέλα «Φροντίδα και ασφάλεια» στη σελίδα προϊόντος. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
+ * Version:              1.4.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -38,6 +38,11 @@
  *  - TP_Categories   → category image fallback, category lists
  *  - TP_Prices       → price labels ("Free" for price 0, per-category
  *                      labels for products without a price)
+ *  - TP_Care         → "Care & Safety" product tab (care / safety texts
+ *                      per product type, manufacturer, EU responsible
+ *                      person), product meta, resolution
+ *  - TP_Care_Admin   → its admin tab, product side box, preview
+ *  - TP_Care_CLI     → `wp theme-patcher care resolve` (read only)
  *  - TP_Checks       → admin checks (block filter widgets)
  *  - TP_Admin_UI     → menu, pages, PRG routes, backup, footer
  *
@@ -53,13 +58,21 @@
  * included), feeds, cron, CLI or XML-RPC, and they work on block themes
  * too (WooCommerce's price blocks call get_price_html() on the server).
  *
+ * Deviation (Bible §14.17): the profile texts of the Care & Safety tab are
+ * HTML (wp_kses_post), not plain text, because they are content (care
+ * instructions, warnings, lists). Headings stay plain text.
+ *
+ * Data kept after uninstall (Bible §12): the per-product choices of the
+ * Care & Safety tab (_tp_care_* post meta) stay unless "delete on
+ * uninstall" is ticked in the settings; the tp_care option always goes.
+ *
  * Cooperation (Bible §6): Theme Patcher changes presentation only, so it
  * fires no suite hook and listens to none.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TP_VERSION', '1.3.0' );
+define( 'TP_VERSION', '1.4.0' );
 define( 'TP_FILE', __FILE__ );
 define( 'TP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TP_URL', plugin_dir_url( __FILE__ ) );
@@ -109,6 +122,7 @@ final class Theme_Patcher {
 		require_once TP_PATH . 'includes/class-theme.php';
 		require_once TP_PATH . 'includes/class-categories.php';
 		require_once TP_PATH . 'includes/class-prices.php';
+		require_once TP_PATH . 'includes/class-care.php';
 
 		TP_Detector::init();
 
@@ -121,12 +135,21 @@ final class Theme_Patcher {
 			TP_Page::init();
 			TP_Prices::init();
 		}
+		// Product meta registration always; front-end hooks only without TP_DISABLE.
+		TP_Care::init();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			require_once TP_PATH . 'includes/class-care-cli.php';
+			\WP_CLI::add_command( 'theme-patcher care', 'TP_Care_CLI' );
+		}
 
 		if ( is_admin() ) {
 			require_once TP_PATH . 'includes/class-checks.php';
 			TP_Checks::init();
 			require_once TP_PATH . 'includes/class-admin-ui.php';
 			TP_Admin_UI::init();
+			require_once TP_PATH . 'includes/class-care-admin.php';
+			TP_Care_Admin::init();
 		}
 	}
 
