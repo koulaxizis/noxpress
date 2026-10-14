@@ -81,8 +81,22 @@ header { padding: 72px 0 48px; text-align: left; }
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	gap: 10px 14px;
 	margin-top: 18px;
 }
+.video-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border-radius: 999px;
+	border: 1px solid var(--border);
+	color: var(--text);
+	font-size: 0.92rem;
+	font-weight: 500;
+	text-decoration: none;
+}
+.video-cta:hover { border-color: var(--accent); color: var(--accent-bright); }
 .support-cta {
 	display: inline-flex;
 	align-items: center;
@@ -405,6 +419,56 @@ footer .heart { color: var(--accent-bright); }
 	cursor: pointer;
 }
 .dl-dialog .dl-close:hover { border-color: var(--border); color: #fff; }
+#plugins .card { position: relative; }
+#plugins .card:has(> .card-video) > h2 { padding-right: 96px; }
+.card-video {
+	position: absolute;
+	top: 22px;
+	right: 22px;
+	padding: 4px 11px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	color: var(--muted);
+	font-size: 0.8rem;
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.card-video:hover { border-color: var(--accent); color: var(--accent-bright); }
+.vid-dialog {
+	width: min(1100px, calc(100vw - 24px));
+	margin: auto;
+	padding: 0;
+	background: #000;
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+.vid-dialog::backdrop { background: rgba(5, 6, 10, 0.85); backdrop-filter: blur(2px); }
+.vid-dialog video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }
+.vid-dialog .vid-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 10px 14px;
+	background: var(--surface);
+	border-top: 1px solid var(--border);
+	font-size: 0.9rem;
+}
+.vid-dialog .vid-title { font-weight: 600; }
+.vid-dialog .vid-close {
+	background: none;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	color: var(--muted);
+	font: inherit;
+	padding: 4px 12px;
+	cursor: pointer;
+}
+.vid-dialog .vid-close:hover { border-color: var(--accent); color: #fff; }
 </style>
 </head>
 <body id="top">
@@ -422,6 +486,7 @@ footer .heart { color: var(--accent-bright); }
 					</svg>
 					<span data-i18n="sup_cta">Buy me a coffee ☕</span>
 				</a>
+				<a class="video-cta" href="media/videos/hub.mp4" data-video="hub" data-video-title="Noxpress Hub" data-i18n="video_hub">▶ Tour of the Noxpress hub</a>
 			</div>
 		</div>
 		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
@@ -433,6 +498,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
+		<a class="card-video" href="media/videos/revenue-splitter.mp4" data-video="revenue-splitter" data-video-title="Revenue Splitter" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.9.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<details class="more">
@@ -468,6 +534,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="store-pulse">
 		<h2><a href="#store-pulse">Store Pulse</a></h2>
+		<a class="card-video" href="media/videos/store-pulse.mp4" data-video="store-pulse" data-video-title="Store Pulse" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.5.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sp_desc">A store-health dashboard and a WordPress home-screen widget for WooCommerce managers: pending and completed orders, refunds, cancellations and stock at a glance. With Revenue Splitter active, it also shows the publisher's profit and what is owed to every other beneficiary for the period.</p>
 		<details class="more">
@@ -495,6 +562,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="smart-formatter">
 		<h2><a href="#smart-formatter">Smart Formatter</a></h2>
+		<a class="card-video" href="media/videos/smart-formatter.mp4" data-video="smart-formatter" data-video-title="Smart Formatter" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.4.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sf_desc">Bulk formatting for WooCommerce product texts — safely. Strip stray formatting, normalize whitespace or highlight quotes, parentheses and numbers across your whole catalogue, with preview, dry run and one-click undo for every run.</p>
 		<details class="more">
@@ -522,6 +590,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="theme-patcher">
 		<h2><a href="#theme-patcher">Theme Patcher</a></h2>
+		<a class="card-video" href="media/videos/theme-patcher.mp4" data-video="theme-patcher" data-video-title="Theme Patcher" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.4.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="tp_desc">Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility, price labels and a care &amp; safety product tab.</p>
 		<details class="more">
@@ -549,6 +618,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="shop-filters">
 		<h2><a href="#shop-filters">Shop Filters</a></h2>
+		<a class="card-video" href="media/videos/shop-filters.mp4" data-video="shop-filters" data-video-title="Shop Filters" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sh_desc">Lean product filters for classic WooCommerce themes: a real category tree, attribute filters with counts, a price slider, and value groups for messy attribute data.</p>
 		<details class="more">
@@ -572,6 +642,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="product-formats">
 		<h2><a href="#product-formats">Product Formats</a></h2>
+		<a class="card-video" href="media/videos/product-formats.mp4" data-video="product-formats" data-video-title="Product Formats" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="pf_desc">Links the products that are the same work in another format (print, e-book, audiobook, film, music) and shows an «Available formats» block with label, price and link on each product page.</p>
 		<details class="more">
@@ -595,6 +666,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="easy-withdrawal">
 		<h2><a href="#easy-withdrawal">Easy Withdrawal</a></h2>
+		<a class="card-video" href="media/videos/easy-withdrawal.mp4" data-video="easy-withdrawal" data-video-title="Easy Withdrawal" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="ew_desc">The online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673): a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.</p>
 		<details class="more">
@@ -618,6 +690,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="shipping-notes">
 		<h2><a href="#shipping-notes">Shipping Notes</a></h2>
+		<a class="card-video" href="media/videos/shipping-notes.mp4" data-video="shipping-notes" data-video-title="Shipping Notes" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sn_desc">Two messages for your customers, without third-party plugins: how much is left for free shipping, with a progress bar, in the cart, mini-cart and checkout, and how many business days delivery takes on the product page.</p>
 		<details class="more">
@@ -640,6 +713,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="book-preview">
 		<h2><a href="#book-preview">Book Preview</a></h2>
+		<a class="card-video" href="media/videos/book-preview.mp4" data-video="book-preview" data-video-title="Book Preview" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="bp_desc">A book sample on the product page: the server builds a separate PDF with only the pages you choose, and visitors read it in a full-screen viewer. The full PDF never reaches the browser.</p>
 		<details class="more">
@@ -663,6 +737,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="featured-creators">
 		<h2><a href="#featured-creators">Featured Creators</a></h2>
+		<a class="card-video" href="media/videos/featured-creators.mp4" data-video="featured-creators" data-video-title="Featured Creators" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="cr_desc">One page for every creator of your catalog (authors, illustrators, translators, musicians…), filled automatically with their products by role from your WooCommerce attributes, and their name turned into a link across the store.</p>
 		<details class="more">
@@ -686,6 +761,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="store-pickup">
 		<h2><a href="#store-pickup">Store Pickup</a></h2>
+		<a class="card-video" href="media/videos/store-pickup.mp4" data-video="store-pickup" data-video-title="Store Pickup" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="pk_desc">Store pickup as a WooCommerce shipping method, free or with your own cost, with a choice of store, address and opening hours right at checkout.</p>
 		<details class="more">
@@ -708,6 +784,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="hide-catalog">
 		<h2><a href="#hide-catalog">Hide Catalog</a></h2>
+		<a class="card-video" href="media/videos/hide-catalog.mp4" data-video="hide-catalog" data-video-title="Hide Catalog" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="hc_desc">Hide product categories and their products from the shop, other listings, search, related products, shortcodes and blocks, with one rule per category and without changing a single product.</p>
 		<details class="more">
@@ -730,6 +807,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="variation-picker">
 		<h2><a href="#variation-picker">Variation Picker</a></h2>
+		<a class="card-video" href="media/videos/variation-picker.mp4" data-video="variation-picker" data-video-title="Variation Picker" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="vp_desc">Swatches for WooCommerce variations: buttons, colors, two-tone colors, images or the variation’s own image, with a size guide and swatches on shop cards.</p>
 		<details class="more">
@@ -753,6 +831,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="greeklish-permalinks">
 		<h2><a href="#greeklish-permalinks">Greeklish Permalinks</a></h2>
+		<a class="card-video" href="media/videos/greeklish-permalinks.mp4" data-video="greeklish-permalinks" data-video-title="Greeklish Permalinks" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.1.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="gl_desc">Greek to Latin in new permalinks and, if you want, in uploaded file names, with on-demand bulk conversion of existing ones, redirects and undo. Works with or without WooCommerce.</p>
 		<details class="more">
@@ -776,6 +855,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="oros-connect">
 		<h2><a href="#oros-connect">orOS Connect</a></h2>
+		<a class="card-video" href="media/videos/oros-connect.mp4" data-video="oros-connect" data-video-title="orOS Connect" data-i18n="video_btn">▶ Video</a>
 		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="oc_desc">Connects your site to orOS, the free operating system in your browser, in modules you switch on one by one. The first one sends new newsletter subscribers to your list in orOS Newsletter. Works with or without WooCommerce.</p>
 		<details class="more">
@@ -880,6 +960,14 @@ footer .heart { color: var(--accent-bright); }
 		<a class="btn" id="dlSub" href="https://preview.mailerlite.io/forms/642133/197598403923805558/share" target="_blank" rel="noopener" data-i18n="dl_sub">✦ Subscribe to updates &amp; download</a>
 	</div>
 	<button type="button" class="dl-skip" id="dlSkip" data-i18n="dl_skip">Skip to download</button>
+</dialog>
+
+<dialog class="vid-dialog" id="vidDialog" aria-labelledby="vidTitle">
+	<video id="vidPlayer" controls playsinline preload="none"></video>
+	<div class="vid-bar">
+		<span class="vid-title" id="vidTitle"></span>
+		<button type="button" class="vid-close" id="vidClose" data-i18n="video_close">Close</button>
+	</div>
 </dialog>
 
 <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
@@ -1071,6 +1159,9 @@ footer .heart { color: var(--accent-bright); }
 		dl_sub: '✦ Subscribe to updates &amp; download',
 		dl_skip: 'Skip to download',
 		dl_close: 'Close',
+		video_btn: '▶ Video',
+		video_hub: '▶ Tour of the Noxpress hub',
+		video_close: 'Close',
 		spt_title: 'Free forever, and how to help',
 		ff_title: 'Free forever',
 		ff_desc: 'Every noxpress plugin that has been released for free stays free and open source (MIT). If paid add-ons ever exist, they will only bring new features as separate plugins; nothing you use today will be locked.',
@@ -1276,6 +1367,9 @@ footer .heart { color: var(--accent-bright); }
 		dl_sub: '✦ Εγγραφή για ενημερώσεις &amp; λήψη',
 		dl_skip: 'Παράλειψη, κατέβασέ το',
 		dl_close: 'Κλείσιμο',
+		video_btn: '▶ Βίντεο',
+		video_hub: '▶ Ξενάγηση στο hub του Noxpress',
+		video_close: 'Κλείσιμο',
 		spt_title: 'Δωρεάν για πάντα, και πώς να βοηθήσεις',
 		ff_title: 'Δωρεάν για πάντα',
 		ff_desc: 'Κάθε plugin του noxpress που κυκλοφόρησε δωρεάν μένει δωρεάν και ανοιχτού κώδικα (MIT). Αν ποτέ υπάρξουν πληρωμένα πρόσθετα, θα φέρνουν μόνο νέες λειτουργίες ως ξεχωριστά plugins· τίποτα από όσα χρησιμοποιείς σήμερα δεν θα κλειδωθεί.',
@@ -1400,6 +1494,45 @@ footer .heart { color: var(--accent-bright); }
 	}
 	window.addEventListener('hashchange', openFromHash);
 	openFromHash();
+})();
+(function () {
+	'use strict';
+	/* ------------------------------------------------------------------
+	 * Videos (Bible §13): every [data-video] link opens media/videos/<id>.mp4
+	 * in one shared <dialog>, with its poster. Nothing loads until the click
+	 * (preload none); closing stops playback and drops the source. The
+	 * player's own button gives full screen. Without JS / <dialog> the link
+	 * opens the MP4 itself.
+	 * ------------------------------------------------------------------ */
+	var dlg = document.getElementById('vidDialog');
+	var player = document.getElementById('vidPlayer');
+	if (!dlg || !player || typeof dlg.showModal !== 'function') { return; }
+	var title = document.getElementById('vidTitle');
+	function stop() {
+		player.pause();
+		player.removeAttribute('src');
+		player.removeAttribute('poster');
+		player.load();
+	}
+	var links = document.querySelectorAll('a[data-video]');
+	for (var i = 0; i < links.length; i++) {
+		links[i].addEventListener('click', function (e) {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { return; }
+			e.preventDefault();
+			var id = this.getAttribute('data-video');
+			title.textContent = this.getAttribute('data-video-title') || '';
+			player.poster = 'media/videos/' + id + '.webp';
+			player.src = 'media/videos/' + id + '.mp4';
+			dlg.showModal();
+			var p = player.play();
+			if (p && typeof p.catch === 'function') { p.catch(function () { /* autoplay blocked: controls stay */ }); }
+		});
+	}
+	document.getElementById('vidClose').addEventListener('click', function () { dlg.close(); });
+	dlg.addEventListener('click', function (e) {
+		if (e.target === dlg) { dlg.close(); }
+	});
+	dlg.addEventListener('close', stop);
 })();
 (function () {
 	var btn = document.querySelector('.back-to-top');

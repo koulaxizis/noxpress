@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -56,6 +56,9 @@ Only Store Pulse's own options, cached transients and each user's last choices o
 VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The totals differ only when the choices differ: Revenue Splitter counts completed and processing orders by order date, from its "sales start" date, while SP Sales counts the statuses and the date you choose.
 
 == Changelog ==
+
+= 1.6.1 =
+* Fixed: the publisher profit card says "Publisher profit (last month)" instead of "Publisher profit (period) (last month)".
 
 = 1.6.0 =
 * New: SP Sales page (Noxpress → SP Sales): sales per product or per variation for any period, with an on-screen preview and a CSV download. Filters for period, date type, order statuses, categories and products; options for variations, free lines, refunds and a totals row; choice of columns and sort order; CSV for Greek Excel (semicolon, decimal comma) or standard. Replaces third-party "sales by product" exporters.

@@ -2,7 +2,8 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.26 (2026-10-14). Νέο: Product Bundles στη σουίτα (§8, θέση μενού 160· §13, κωδικός `pb`· §16, Core 1.1.9)· `pbn_get_item_bundle()` και φίλτρο `pbn_text` (§6)· δικός μας τύπος προϊόντος και γραμμές παραγγελίας που φτιάχνει το plugin, με την έκπτωση ως διαφορά subtotal / total (§14.25).
+- **Έκδοση:** 1.27 (2026-10-14). Νέο: βίντεο παρουσίασης για κάθε plugin και για το hub, στο site και στο Ko-fi (§13).
+- **1.26** (2026-10-14): Product Bundles στη σουίτα (§8, θέση μενού 160· §13, κωδικός `pb`· §16, Core 1.1.9)· `pbn_get_item_bundle()` και φίλτρο `pbn_text` (§6)· δικός μας τύπος προϊόντος και γραμμές παραγγελίας που φτιάχνει το plugin, με την έκπτωση ως διαφορά subtotal / total (§14.25).
 - **1.25** (2026-10-14): compact κάρτες plugins στην αρχική του site, σε δύο στήλες, με «All features» που ανοίγει (§13).
 - **1.24** (2026-10-13): κείμενα επισκέπτη σε HTML (`wp_kses_post`) για μεγάλα κείμενα περιεχομένου, με placeholders που γεμίζουν στην έξοδο (§14.17)· εντολές WP-CLI (§13)· φίλτρα `tp_care_*` (§6), από την καρτέλα «Φροντίδα και ασφάλεια» του Theme Patcher 1.4.0.
 - **1.23** (2026-10-13): orOS Connect στη σουίτα (§8, θέση μενού 150· §13, κωδικός `oc`· §16, Core 1.1.8)· plugins με modules για ένα εξωτερικό σύστημα (§20)· φίλτρο `orc_text` και action `orc_newsletter_sent` (§6)· φόρμες που στέλνουν τον επισκέπτη κατευθείαν σε εξωτερική υπηρεσία (§20).
@@ -237,6 +238,12 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Μία κάρτα ανά plugin, με EN/EL strings `data-i18n` (`{p}_desc`, `{p}_li*`, `{p}_download`).
   - **Compact κάρτες (1.25):** οι κάρτες του `#plugins` μπαίνουν σε δύο στήλες (μία κάτω από 720px). Κλειστή, η κάρτα δείχνει όνομα, meta (έκδοση, πλατφόρμα, άδεια, badge), την περιγραφή κομμένη στις 3 γραμμές και τα κουμπιά Download / Source / Releases. Τα `{p}_li*` μπαίνουν μέσα σε `<details class="more">`, ανάμεσα στην περιγραφή και στα `.actions`, με `<summary>` από τα κοινά `more_show` / `more_hide` («All features» / «Fewer details», «Όλα τα χαρακτηριστικά» / «Λιγότερα»). Ανοιχτή, η περιγραφή φαίνεται ολόκληρη. Ένα link `#<plugin>` ανοίγει την κάρτα. Νέα κάρτα plugin ακολουθεί το ίδιο markup. Οι κάρτες του `#support` μένουν ολόκληρες.
   - Το link download δείχνει στο asset του release.
+  - **Βίντεο (1.27):**
+    - Κάθε κάρτα plugin έχει πάνω δεξιά το pill «▶ Video» (`.card-video`, `data-video="<id>"`, `data-video-title`, key `video_btn`). Το hub έχει το «▶ Tour of the Noxpress hub» (`.video-cta`, key `video_hub`) δίπλα στο κουμπί του Ko-fi.
+    - Όλα ανοίγουν ένα κοινό `<dialog id="vidDialog">` με `<video controls playsinline preload="none">`: τίποτα δεν κατεβαίνει πριν από το κλικ, το κλείσιμο σταματά το βίντεο και αφαιρεί την πηγή, το full screen είναι το κουμπί του ίδιου του player. Χωρίς JS, το link ανοίγει το MP4.
+    - Αρχεία στο `media/videos/`: `<id>.mp4` (720p H.264, faststart, AAC, περίπου 2 MB) και `<id>.webp` (poster 1280px, η κάρτα τίτλου). Η έκδοση για το Ko-fi (1080p, περίπου 4 MB) μένει στα project files και δεν μπαίνει ποτέ στο repo.
+    - Περιεχόμενο: μόνο αγγλικά, 40–58 δευτερόλεπτα, κάρτα τίτλου, πραγματικές οθόνες από τοπικό demo κατάστημα (ποτέ από site πελάτη), λεζάντες πάνω στην εικόνα χωρίς φωνή, κάρτα τέλους με noxpress.tech και Ko-fi. Μουσική: το «NULL JSFX demo loop» (MIT) από το repo null-jsfx.
+    - Νέο plugin παίρνει βίντεο με τον ίδιο τρόπο. Όταν αλλάζει αισθητά ένα plugin, το βίντεό του ξαναγράφεται. Το kit εγγραφής (Playwright, ffmpeg) μένει εκτός repo, στα project files (`notes/videos/kit/`).
   - Badge beta μέχρι να γίνει stable.
   - Κάτω από το tagline, η γραμμή «More than X downloads» (§17).
   - Footer σε δύο γραμμές: πρώτα η γραμμή του brand (`footer`), από κάτω τα credits (`credits`, EN/EL): «Designed with ♥ by Christos Koulaxizis. Assisted by Lumo. Audited by Claude.», με links σε koulaxizis.gr, lumo.proton.me και claude.ai. Η καρδιά είναι `♥` στο `--accent-bright`.

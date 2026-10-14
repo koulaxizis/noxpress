@@ -246,6 +246,19 @@ html.bpv-lock body {
 	color: #1d1e22 !important;
 }
 
+.bpv-dialog .bpv-end__old {
+	font-weight: 400 !important;
+	color: #6b6c75 !important;
+	text-decoration: line-through !important;
+	background: none !important;
+}
+
+.bpv-dialog .bpv-end__now {
+	color: #1d1e22 !important;
+	text-decoration: none !important;
+	background: none !important;
+}
+
 /* The buy button keeps the theme's button class; only spacing is ours. */
 .bpv-dialog .bpv-end .bpv-buy {
 	display: inline-block !important;

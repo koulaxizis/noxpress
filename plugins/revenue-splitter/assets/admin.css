@@ -304,9 +304,11 @@ table.widefat.rs-table {
 	color: #ff9a9a !important;
 }
 
-.rs-total-line { margin-top: 10px; font-size: 14px; color: #eae8fa; }
-.rs-total.ok { color: #8fe6ab; }
-.rs-total.bad { color: #ff9a9a; }
+/* The total sits under the dark table but on the white product postbox,
+ * so it uses light-background colours (was light text on white). */
+.rs-total-line { margin-top: 10px; font-size: 14px; color: #1d2327 !important; }
+.rs-total.ok { color: #00813a !important; }
+.rs-total.bad { color: #d63638 !important; }
 
 .rs-note.warning {
 	color: #f5d99a;

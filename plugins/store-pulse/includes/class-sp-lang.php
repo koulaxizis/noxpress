@@ -161,7 +161,6 @@ final class SP_Lang {
 		'Καλύτερες πωλήσεις (%s)'                          => 'Best sellers (%s)',
 
 		// --- Money cards (με Revenue Splitter) ---
-		'Κέρδος εκδότη (περίοδος)'                         => 'Publisher profit (period)',
 		'Καθαρό (μετά κρατήσεων)'                          => 'Net (after deductions)',
 		'ΣΥΝΟΛΑ'                                           => 'TOTALS',
 		'Δικαιούχος'                                       => 'Beneficiary',
