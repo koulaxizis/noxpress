@@ -3,6 +3,7 @@
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
 - **Έκδοση:** 1.25 (2026-10-14). Νέο: compact κάρτες plugins στην αρχική του site, σε δύο στήλες, με «All features» που ανοίγει (§13).
+- **1.24** (2026-10-13): κείμενα επισκέπτη σε HTML (`wp_kses_post`) για μεγάλα κείμενα περιεχομένου, με placeholders που γεμίζουν στην έξοδο (§14.17)· εντολές WP-CLI (§13)· φίλτρα `tp_care_*` (§6), από την καρτέλα «Φροντίδα και ασφάλεια» του Theme Patcher 1.4.0.
 - **1.23** (2026-10-13): orOS Connect στη σουίτα (§8, θέση μενού 150· §13, κωδικός `oc`· §16, Core 1.1.8)· plugins με modules για ένα εξωτερικό σύστημα (§20)· φίλτρο `orc_text` και action `orc_newsletter_sent` (§6)· φόρμες που στέλνουν τον επισκέπτη κατευθείαν σε εξωτερική υπηρεσία (§20).
 - **1.22** (2026-10-13): το αντίγραφο μιας μαζικής αλλαγής γράφεται ανά στοιχείο όταν τα στοιχεία εξαρτώνται το ένα από το άλλο, και μια αποτυχημένη εγγραφή αναιρεί ολόκληρη την εκτέλεση από τη σελίδα (§14.24), από το Greeklish Permalinks 1.1.0.
 - **1.21** (2026-10-13): συνταγή «Εξαγωγή CSV» (§5), από τις Πωλήσεις του Store Pulse 1.6.0· `RS_VAT::get_rate` στα δημόσια APIs του RS που διαβάζει το SP (§6)· κανόνας για εύρος ημερομηνιών στο `wc_get_orders` (§1.3), από τον Revenue Splitter 1.9.1.
@@ -105,6 +106,7 @@
 - `vpk_get_term_swatch( int|WP_Term $term ): ?array` (Variation Picker): η εμφάνιση μιας τιμής χαρακτηριστικού (`type`, `color`, `color2`, `image` ως URL, `label`), ή `null` όταν δεν έχει οριστεί τίποτα. Φίλτρο `vpk_text( string $text, string $key, string $lang )` για τα κείμενα του επισκέπτη. Τα διαβάζει όποιο plugin δείχνει τιμές χαρακτηριστικών (π.χ. χρωματιστές κουκκίδες στα φίλτρα του Shop Filters).
 - `glp_convert( string $text, string $context = 'plain' ): string` (Greeklish Permalinks): ελληνικά σε λατινικά με τις ρυθμίσεις του site. Context `slug` (κανόνες, μικρές λέξεις, πεζά· για πραγματικό slug περνά μετά από `sanitize_title()`), `file` (όνομα αρχείου, κρατά την κατάληξη) ή `plain`. Φίλτρο `glp_convert( string $latin, string $original, string $context )` για αλλαγές στο αποτέλεσμα. Τα διαβάζει όποιο plugin χρειάζεται λατινικά από ελληνικό κείμενο (π.χ. ονόματα αρχείων που φτιάχνει). Μετά από μαζική μετατροπή προϊόντων πυροδοτεί το `noxpress_products_changed`.
 - `orc_text( string $text, string $key, string $lang )` (orOS Connect): τα κείμενα της φόρμας εγγραφής και του κουτιού στο ταμείο (κλειδιά `title`, `intro`, `email`, `name`, `button`, `note`, `checkbox`). Action `orc_newsletter_sent( int $order_id, string $result )` μετά από κάθε προσπάθεια εγγραφής από το ταμείο (`ok`, `bad`, `gone`, `busy`, `off`, `error`, `network`, `skip`). Τα ακούει όποιο plugin θέλει να ξέρει ότι ένας πελάτης γράφτηκε στη λίστα.
+- `tp_care_tab_title( string $title, WC_Product $product, string $lang )`, `tp_care_resolved_profile( string $key, WC_Product $product, string $reason )`, `tp_care_manufacturer( string $key, WC_Product $product, array $profile )` και `tp_care_tab_html( string $html, WC_Product $product, array $resolved )` (Theme Patcher, καρτέλα «Φροντίδα και ασφάλεια»): ο τίτλος της καρτέλας, το κλειδί του προφίλ που βγήκε (κενό = χωρίς καρτέλα), το κλειδί του κατασκευαστή (π.χ. ανίχνευση Printful από κώδικα) και το τελικό HTML. Τα meta `_tp_care_profile`, `_tp_care_manufacturer`, `_tp_care_note` είναι στο REST (`show_in_rest`) για όσους μπορούν να επεξεργαστούν το προϊόν.
 - Plugin που **δεν** αλλάζει δεδομένα (π.χ. Theme Patcher, που αλλάζει μόνο την εμφάνιση) δεν πυροδοτεί τίποτα.
 
 ## §7 Footer
@@ -236,6 +238,7 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
   - Badge beta μέχρι να γίνει stable.
   - Κάτω από το tagline, η γραμμή «More than X downloads» (§17).
   - Footer σε δύο γραμμές: πρώτα η γραμμή του brand (`footer`), από κάτω τα credits (`credits`, EN/EL): «Designed with ♥ by Christos Koulaxizis. Assisted by Lumo. Audited by Claude.», με links σε koulaxizis.gr, lumo.proton.me και claude.ai. Η καρδιά είναι `♥` στο `--accent-bright`.
+- **Εντολές WP-CLI** (νέο, 1.24): `wp <slug> <ομάδα> <εντολή>` (π.χ. `wp theme-patcher care resolve <id>`), φορτώνονται μόνο όταν υπάρχει η σταθερά `WP_CLI`, και είναι μόνο ανάγνωσης εκτός αν ζητηθεί ρητά εγγραφή. Μεγάλες λίστες (`--all`) διαβάζονται σε σελίδες και δέχονται `--format` (`WP_CLI\Utils\format_items`).
 - **Έλεγχοι πριν από κάθε release:**
   - `php -l` σε όλα τα αρχεία και PHPCompatibilityWP με `testVersion 7.4-`.
   - Script που συγκρίνει τα msgids του κώδικα με το EN dict (καμία έλλειψη, κανένα αχρησιμοποίητο, κανένα διπλότυπο).
@@ -278,6 +281,8 @@ Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpre
     - Απλό κείμενο με όριο μήκους, `sanitize_text_field` στην αποθήκευση και `esc_html` στην έξοδο. Ένα φίλτρο (`{p}_…_text`) επιτρέπει αλλαγές από κώδικα (π.χ. WPML).
     - Ρυθμίσεις που δεν εξαρτώνται από το θέμα (π.χ. ετικέτες τιμής) αποθηκεύονται έξω από τα μπλοκ ανά θέμα και ισχύουν και σε block themes, όταν περνούν από φίλτρα του WooCommerce που τρέχουν σε κάθε θέμα.
     - Τιμές, παραγγελίες, emails, τιμολόγια, feeds και schema κρατούν πάντα την πραγματική τιμή: το κείμενο είναι μόνο για την προβολή.
+    - **Εξαίρεση HTML** (νέο, 1.24, από την καρτέλα «Φροντίδα και ασφάλεια» του Theme Patcher): μεγάλα κείμενα περιεχομένου (π.χ. οδηγίες φροντίδας) μπορεί να είναι HTML με `wp_kses_post` στην αποθήκευση και στην έξοδο, με όριο μήκους (κείμενο πάνω από το όριο απορρίπτεται, δεν κόβεται) και τον μικρό editor (`wp_editor` teeny, χωρίς πολυμέσα). Οι τίτλοι και οι σύντομες γραμμές μένουν απλό κείμενο.
+    - **Placeholders** (`{product_name}`, `{material}` κ.λπ.) γεμίζουν στην έξοδο, με `esc_html` στην τιμή. Η πρόταση (ως την τελεία) που έχει placeholder χωρίς τιμή φεύγει ολόκληρη, άγνωστα placeholders φεύγουν, και πολλές τιμές ενώνονται με «, ».
 18. **Βαριές βιβλιοθήκες στο front end** (νέο, από το Book Preview): η σελίδα φορτώνει μόνο ένα μικρό script· η βιβλιοθήκη (π.χ. ο viewer PDF.js, ~1 MB) φορτώνεται με `import()` στην πρώτη ενέργεια του επισκέπτη (κλικ), από τον φάκελο `assets/vendor/` του plugin (§10). Αρχεία ES module σερβίρονται με κατάληξη `.js`, γιατί πολλοί servers στέλνουν το `.mjs` με λάθος MIME type. Αν η φόρτωση αποτύχει, ο επισκέπτης βλέπει μήνυμα και το υπόλοιπο της σελίδας δεν επηρεάζεται.
 
 19. **Σελίδες δικού μας post type** (νέο, από το Featured Creators):
