@@ -1,0 +1,450 @@
+/**
+ * Product Bundles — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Variation Picker's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors pbn-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width (Bible §3).
+ *  - The product and order screens use WooCommerce's own light boxes;
+ *    only a few pbn-* rules there (bottom of the file).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.pbn-wrap {
+	--pbn-bg: #101218;
+	--pbn-panel: #14161d;
+	--pbn-panel-2: #1d2029;
+	--pbn-input: #1a1d26;
+	--pbn-border: #2e3240;
+	--pbn-border-input: #3a3f52;
+	--pbn-row-border: #23262f;
+	--pbn-stripe: #181b23;
+	--pbn-hover: #1e212c;
+	--pbn-text: #eae8fa;
+	--pbn-heading: #f6f4ff;
+	--pbn-muted: #b7b2d6;
+	--pbn-link: #beb1ff;
+	--pbn-link-hover: #d4c9ff;
+	--pbn-accent: #6d4aff;
+	--pbn-accent-hover: #8263ff;
+	--pbn-warn: #f5c97e;
+	--pbn-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.pbn-wrap {
+	color-scheme: dark;
+	background: var(--pbn-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--pbn-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.pbn-wrap h1,
+.pbn-wrap h2 {
+	color: var(--pbn-heading);
+}
+
+.pbn-wrap a { color: var(--pbn-link); }
+.pbn-wrap a:hover { color: var(--pbn-link-hover); }
+
+.pbn-wrap .pbn-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--pbn-muted);
+	border-bottom: 1px solid var(--pbn-border);
+	padding-bottom: 6px;
+}
+
+.pbn-wrap .description,
+.pbn-wrap p.description,
+.pbn-wrap .pbn-hint {
+	color: var(--pbn-muted) !important;
+}
+
+.pbn-zone {
+	background: var(--pbn-panel);
+	border: 1px solid var(--pbn-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.pbn-wrap input[type="text"],
+.pbn-wrap input[type="url"],
+.pbn-wrap input[type="number"],
+.pbn-wrap input[type="time"],
+.pbn-wrap input[type="date"],
+.pbn-wrap textarea,
+.pbn-wrap select {
+	background-color: var(--pbn-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--pbn-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.pbn-wrap input::placeholder,
+.pbn-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.pbn-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.pbn-wrap input[type="file"] {
+	color: var(--pbn-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.pbn-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.pbn-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.pbn-wrap input[type="checkbox"],
+.pbn-wrap input[type="radio"] {
+	accent-color: var(--pbn-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.pbn-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.pbn-wrap .button:hover:not(:disabled) {
+	border-color: var(--pbn-accent) !important;
+	color: #ffffff !important;
+}
+
+.pbn-wrap .button-primary {
+	background: var(--pbn-accent) !important;
+	border-color: var(--pbn-accent) !important;
+	color: #ffffff !important;
+}
+
+.pbn-wrap .button-primary:hover:not(:disabled) {
+	background: var(--pbn-accent-hover) !important;
+}
+
+.pbn-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.pbn-submit { margin-top: 20px; }
+.pbn-inline-form { display: inline; margin-right: 10px; }
+.pbn-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.pbn-table,
+table.widefat.pbn-table {
+	background: var(--pbn-panel) !important;
+	border: 1px solid var(--pbn-border) !important;
+	border-radius: 6px;
+	color: var(--pbn-text) !important;
+	margin-top: 14px !important;
+}
+
+.pbn-table thead th,
+.pbn-table thead td {
+	background: var(--pbn-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.pbn-table tbody td,
+.pbn-table tbody th {
+	background: var(--pbn-panel) !important;
+	color: var(--pbn-text) !important;
+	border-bottom: 1px solid var(--pbn-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.pbn-table tbody tr:nth-child(2n) td,
+.pbn-table tbody tr:nth-child(2n) th {
+	background: var(--pbn-stripe) !important;
+}
+
+.pbn-table tbody tr:hover td,
+.pbn-table tbody tr:hover th {
+	background: var(--pbn-hover) !important;
+}
+
+.pbn-table td,
+.pbn-table th {
+	padding: 12px 14px;
+}
+
+.pbn-table td code {
+	background: transparent !important;
+	color: var(--pbn-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.pbn-table .pbn-empty {
+	color: var(--pbn-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.pbn-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.pbn-footer a { color: #beb1ff; text-decoration: none; }
+.pbn-footer a:hover { text-decoration: underline; }
+
+.pbn-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.pbn-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.pbn-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.pbn-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.pbn-muted { color: var(--pbn-muted) !important; }
+.pbn-warn { color: var(--pbn-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.pbn-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (suite) ===== */
+.pbn-wrap .pbn-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--pbn-heading);
+}
+
+.pbn-status p { margin: 0 0 8px; }
+.pbn-status p:last-child { margin-bottom: 0; }
+.pbn-status code,
+.pbn-wrap .description code,
+.pbn-wrap .pbn-hint code {
+	background: var(--pbn-panel-2);
+	color: var(--pbn-muted);
+	border: 1px solid var(--pbn-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.pbn-suspended { margin: 8px 0 0; }
+.pbn-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.pbn-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--pbn-border);
+	background: var(--pbn-panel-2);
+	color: var(--pbn-text);
+	white-space: nowrap;
+}
+.pbn-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.pbn-badge--muted { color: var(--pbn-muted); }
+.pbn-badge--warn { border-color: #6b5a33; color: var(--pbn-warn); }
+.pbn-badge--danger { border-color: #6b3a3a; color: var(--pbn-danger); }
+
+/* Area fieldsets. */
+.pbn-area {
+	background: var(--pbn-panel);
+	border: 1px solid var(--pbn-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.pbn-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--pbn-heading);
+}
+.pbn-row { margin: 4px 0 8px; }
+
+.pbn-details > summary {
+	cursor: pointer;
+	color: var(--pbn-link);
+	margin: 4px 0;
+}
+.pbn-details[open] > summary { margin-bottom: 12px; }
+
+.pbn-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.pbn-wrap .pbn-label {
+	display: block;
+	font-weight: 600;
+	color: var(--pbn-heading);
+	margin: 8px 0 6px;
+}
+.pbn-grid .pbn-label:first-child { margin-top: 0; }
+
+.pbn-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.pbn-field > span:first-child {
+	min-width: 150px;
+	color: var(--pbn-text);
+}
+.pbn-wrap .pbn-hint { display: block; font-size: 12px; margin-top: 4px; }
+.pbn-wrap td .pbn-hint { display: inline; }
+.pbn-table td.pbn-warn { color: var(--pbn-warn) !important; }
+
+/* Tabs of the main page. */
+.pbn-wrap .pbn-tabs {
+	border-bottom: 1px solid var(--pbn-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.pbn-wrap .pbn-tabs .nav-tab {
+	background: var(--pbn-panel);
+	border-color: var(--pbn-border);
+	color: var(--pbn-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.pbn-wrap .pbn-tabs .nav-tab:hover { color: var(--pbn-link-hover); background: var(--pbn-hover); }
+.pbn-wrap .pbn-tabs .nav-tab-active,
+.pbn-wrap .pbn-tabs .nav-tab-active:hover {
+	background: var(--pbn-bg);
+	border-bottom-color: var(--pbn-bg);
+	color: var(--pbn-heading);
+}
+
+/* One input per line (removal rules). */
+.pbn-wrap .pbn-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.pbn-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--pbn-border);
+	border-radius: 6px;
+	background: var(--pbn-panel-2);
+}
+.pbn-scroll .pbn-field { margin-bottom: 4px; }
+
+/* ===== Settings fields ===== */
+
+.pbn-wrap .pbn-texts input[type="text"] { width: 100%; }
+.pbn-wrap .pbn-ok { color: #9fe0b5 !important; }
+
+/* ===== Order screen: "Bundles" box ===== */
+.pbn-order-box select,
+.pbn-order-box input[type="number"] { width: 100%; margin: 0 0 8px; }
+.pbn-order-box .pbn-choices label { display: block; font-weight: 600; margin: 4px 0 2px; }
+.pbn-order-box .pbn-msg { margin: 6px 0 0; }
+
+/* ===== Product screen: "Bundle contents" panel =====
+ * WooCommerce's options panel floats every label 150px to the left and
+ * shows .description even with [hidden]; the panel's own rows undo that. */
+
+#pbn_bundle_data [hidden] { display: none !important; }
+#pbn_bundle_data .pbn-items { padding: 0 12px 0 162px; }
+#pbn_bundle_data .pbn-empty { display: block; margin: 4px 12px 12px 162px; }
+#pbn_bundle_data .pbn-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 12px;
+	margin: 0 0 6px;
+	padding: 8px 10px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+}
+#pbn_bundle_data .pbn-row__handle { cursor: move; color: #8c8f94; letter-spacing: -3px; }
+#pbn_bundle_data .pbn-row__name { flex: 1 1 200px; min-width: 0; }
+#pbn_bundle_data .pbn-row label,
+#pbn_bundle_data .pbn-radios label {
+	float: none;
+	width: auto;
+	margin: 0;
+	padding: 0;
+}
+#pbn_bundle_data .pbn-row__qty { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+#pbn_bundle_data .pbn-row__qty input { width: 64px; float: none; }
+#pbn_bundle_data .pbn-row__remove { font-size: 20px; line-height: 1; color: #b32d2e; text-decoration: none; }
+#pbn_bundle_data .pbn-row__vars { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 4px 14px; padding-left: 18px; }
+#pbn_bundle_data .pbn-row__vars .description { flex: 1 1 100%; margin: 0; }
+#pbn_bundle_data .pbn-var { display: inline-flex; align-items: center; gap: 4px; }
+#pbn_bundle_data .pbn-var input,
+#pbn_bundle_data .pbn-radio input { float: none; width: auto; margin: 0 4px 0 0; }
+#pbn_bundle_data .pbn-radios { display: inline-flex; flex-direction: column; gap: 6px; }
+#pbn_bundle_data .pbn-radio { display: inline-flex; align-items: center; }
+#pbn_bundle_data .pbn-warn-inline { color: #996800; font-size: 12px; }
+#pbn_bundle_data .pbn-summary { margin: 0 12px 12px; padding: 10px 12px; background: #f6f7f7; border: 1px solid #dcdcde; border-radius: 4px; }
+#pbn_bundle_data .pbn-summary p { margin: 0 0 4px; }
+#pbn_bundle_data .pbn-summary .pbn-warn { color: #996800; font-weight: 600; }
+#pbn_bundle_data .pbn-row-ghost { height: 38px; margin: 0 0 6px; border: 1px dashed #c3c4c7; border-radius: 4px; }
