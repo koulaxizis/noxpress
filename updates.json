@@ -2,15 +2,15 @@
   "plugins": {
     "book-preview": {
       "beta": {
-        "changelog": "* Initial release.\n* Own pure-PHP PDF engine (classic and compressed cross-references, object streams, incremental updates, repair), unused images and fonts left out; qpdf and Ghostscript as automatic fallbacks.\n* Product box: PDF from downloadable files or the media library, page list with clear errors, create / delete, state, size and warnings.\n* Background rebuild when the PDF or the pages change.\n* Bulk creation per category with first N pages and skip K, in batches with a progress bar; samples screen with filters.\n* \"Read a sample\" button below the short description, below add to cart, by shortcode or block; classic themes, Astra hooks and block themes.\n* Full-screen PDF.js viewer (bundled, loaded on the first click) with lazy pages, zoom and an optional \"Keep reading\" card.\n* Greek and English visitor texts, test mode, BPV_DISABLE, backup / import, server check.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.2).",
-        "published": "2026-10-11",
+        "changelog": "* Fixed: on a product on sale, the \"Keep reading\" card shows the old price struck through next to the sale price, as the shop does.",
+        "published": "2026-10-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "945455b878c59ff6c179af1051e42a91b2f2e241df9948a5306ae5b7e9d69fd0",
-        "signature": "32SAwk2QXRuG4fIYOog5F65Fgn/N6GwHB+7A44H2/sntAq+F2dKwPUhqBj22kqcTX5wrLwfTEftz2plrwzTvBg==",
+        "sha256": "4d96a93764785cb6672d88ce5a4ff60ff8280a40633984cf4425eb9d02b147ac",
+        "signature": "RtaOm6UOTzHexObZsmMnsQE8FyECG7gtHD7nMQLsG1WZzujrY4pkqVZe7nGar1fD3gU6iR+kOg7E0b33oQ28DQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.0.0/book-preview.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.0.1/book-preview.zip"
       }
     },
     "easy-withdrawal": {
@@ -106,15 +106,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fixed: report periods now start and end at the exact local time. WooCommerce compared the old period bounds by day only, so an order placed late in the evening of the last day of a period (for example 23:50 on 31 December in Athens) could be counted in the next period.",
-        "published": "2026-10-13",
+        "changelog": "* Fixed: the tables in the beneficiary portal are readable on light themes such as Storefront. The theme's table colours turned the cells white with light text.\n* Fixed: the live split total under the product's beneficiaries is readable on the white product box.\n* Fixed: the internal regular-price stamp (_rs_reg_unit) no longer shows under each item on the order screen.",
+        "published": "2026-10-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "15d477d27878810bc423c8762194971e4756f680caf186eee3b1f9dc185b1633",
-        "signature": "wJQWFRjAHuJc8gbrPC5BiVTGd7GQsubiPgFduCc901SNJBlGWBNhrHIRl48zxXTmHuXKz6BhZNa7lClJj9dbAw==",
+        "sha256": "0bb0e3d4d69abdd3989def7b62579923db2ac63554604f5f8f218208b6a83e2a",
+        "signature": "eQpPfu9llUaWmVdpnnjFrGobS23vjZTOpoSmEdzGqydhISrBYmI3aNESSo0gTlUs1CbLoJ50RokTZsoy4s4iBA==",
         "tested_wp": "6.8",
-        "version": "1.9.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.1/revenue-splitter.zip"
+        "version": "1.9.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.2/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -182,15 +182,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: SP Sales page (Noxpress → SP Sales): sales per product or per variation for any period, with an on-screen preview and a CSV download. Filters for period, date type, order statuses, categories and products; options for variations, free lines, refunds and a totals row; choice of columns and sort order; CSV for Greek Excel (semicolon, decimal comma) or standard. Replaces third-party \"sales by product\" exporters.\n* New: with Revenue Splitter, VAT uses Revenue Splitter's rate for each product.\n* Changed: the dashboard's top sellers subtract refunds per order line (units included), so they match SP Sales. Before, a refund was spread over the whole order.\n* Fixed: the dashboard's periods start and end at the exact local time. WooCommerce compared the old bounds by day only, so refunds and cancellations from late in the evening could land in the next day's figures.",
-        "published": "2026-10-13",
+        "changelog": "* Fixed: the publisher profit card says \"Publisher profit (last month)\" instead of \"Publisher profit (period) (last month)\".",
+        "published": "2026-10-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "59a9f1285539a555628b7923305354daf911e35b066deb039f6c023e82768cf8",
-        "signature": "YnRYdE8uT+5Begsn//98R5u5RuBx0DtIh6mYpj9sgqSoLY6w858DfcGE+Is5U/WPmwX2tkjZefm+lZzmm4UeBA==",
+        "sha256": "7a0580d815df5620a340c5a73190a8d6c327d43527db3d79da0b2853b5981e25",
+        "signature": "5Rs09KffYqK0PwqfSoKGdT/1gzrL5mLflZmO087+PyovO7ldu1v1pY2vYJBerwv8v97GiNIkTtnBQ8NkU7aFDg==",
         "tested_wp": "6.8",
-        "version": "1.6.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.6.0/store-pulse.zip"
+        "version": "1.6.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.6.1/store-pulse.zip"
       }
     },
     "theme-patcher": {
