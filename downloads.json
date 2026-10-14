@@ -1,8 +1,8 @@
 {
-  "display": 25,
-  "total": 49,
+  "display": 50,
+  "total": 51,
   "offset": 5,
-  "updated": "2026-10-13",
+  "updated": "2026-10-14",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -158,11 +158,11 @@
     },
     "638119605": {
       "file": "nox-gl-1.1.0/greeklish-permalinks.zip",
-      "count": 0
+      "count": 1
     },
     "638132620": {
       "file": "nox-oc-1.0.0/oros-connect.zip",
-      "count": 0
+      "count": 1
     }
   }
 }
