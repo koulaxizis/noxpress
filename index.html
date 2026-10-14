@@ -595,7 +595,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="store-pickup">
 		<h2><a href="#store-pickup">Store Pickup</a></h2>
-		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="pk_desc">Store pickup as a WooCommerce shipping method, free or with your own cost, with a choice of store, address and opening hours right at checkout.</p>
 		<ul>
 			<li data-i18n="pk_li1">A normal shipping method for your zones, with its own name in Greek and English, cost (0 by default) and tax status; each zone offers all stores or only some</li>
@@ -603,10 +603,11 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="pk_li3">Store choice under the method in the classic checkout, required before ordering; a single store is chosen automatically</li>
 			<li data-i18n="pk_li4">The chosen store on the order, on the thank-you page, in My account and in every order email</li>
 			<li data-i18n="pk_li5">Optionally hides the shipping address while pickup is chosen; taxes follow WooCommerce’s local pickup rule</li>
+			<li data-i18n="pk_li7">No pickup for chosen shipping classes (e.g. print on demand), with a message in the cart; a [pkp_stores] list for any page; a «Pickup at» line in the admin new order email</li>
 			<li data-i18n="pk_li6">Safe by design: off until enabled, test mode for shop managers, PKP_DISABLE emergency switch; no cookies, no external calls; bilingual UI and shared «Noxpress» menu</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.0.0/store-pickup.zip" rel="nofollow noopener" data-i18n="pk_download">Download v1.0.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.1.0/store-pickup.zip" rel="nofollow noopener" data-i18n="pk_download">Download v1.1.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/store-pickup" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -888,8 +889,9 @@ footer .heart { color: var(--accent-bright); }
 		pk_li3: 'Store choice under the method in the classic checkout, required before ordering; a single store is chosen automatically',
 		pk_li4: 'The chosen store on the order, on the thank-you page, in My account and in every order email',
 		pk_li5: 'Optionally hides the shipping address while pickup is chosen; taxes follow WooCommerce’s local pickup rule',
+		pk_li7: 'No pickup for chosen shipping classes (e.g. print on demand), with a message in the cart; a [pkp_stores] list for any page; a «Pickup at» line in the admin new order email',
 		pk_li6: 'Safe by design: off until enabled, test mode for shop managers, PKP_DISABLE emergency switch; no cookies, no external calls; bilingual UI and shared «Noxpress» menu',
-		pk_download: 'Download v1.0.0 (.zip)',
+		pk_download: 'Download v1.1.0 (.zip)',
 		hc_desc: 'Hide product categories and their products from the shop, other listings, search, related products, shortcodes and blocks, with one rule per category and without changing a single product.',
 		hc_li1: 'Per category: hide its products from the shop page, other listings (categories, tags, attributes), search, related products / upsells / cross-sells, and product shortcodes and blocks — each switch on its own',
 		hc_li2: 'Subcategories included on request; a product in a visible category too stays hidden, or only when all its categories are hidden',
@@ -1082,8 +1084,9 @@ footer .heart { color: var(--accent-bright); }
 		pk_li3: 'Επιλογή καταστήματος κάτω από τη μέθοδο στο κλασικό ταμείο, υποχρεωτική πριν από την παραγγελία· με ένα κατάστημα επιλέγεται αυτόματα',
 		pk_li4: 'Το κατάστημα που διάλεξε ο πελάτης στην παραγγελία, στη σελίδα ευχαριστίας, στον λογαριασμό του και σε κάθε email παραγγελίας',
 		pk_li5: 'Προαιρετική απόκρυψη της διεύθυνσης αποστολής όταν επιλέγεται παραλαβή· οι φόροι ακολουθούν τον κανόνα τοπικής παραλαβής του WooCommerce',
+		pk_li7: 'Χωρίς παραλαβή για όσες κλάσεις αποστολής διαλέξεις (π.χ. εκτύπωση κατά παραγγελία), με μήνυμα στο καλάθι· λίστα [pkp_stores] για οποιαδήποτε σελίδα· γραμμή «Παραλαβή από» στο email νέας παραγγελίας του διαχειριστή',
 		pk_li6: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να ενεργοποιηθεί, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης PKP_DISABLE· χωρίς cookies και εξωτερικές κλήσεις· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		pk_download: 'Λήψη v1.0.0 (.zip)',
+		pk_download: 'Λήψη v1.1.0 (.zip)',
 		hc_desc: 'Απόκρυψη κατηγοριών προϊόντων και των προϊόντων τους από το shop, τις άλλες λίστες, την αναζήτηση, τα σχετικά προϊόντα, τα shortcodes και τα blocks, με έναν κανόνα ανά κατηγορία και χωρίς να αλλάξει κανένα προϊόν.',
 		hc_li1: 'Ανά κατηγορία: απόκρυψη των προϊόντων της από τη σελίδα shop, τις άλλες λίστες (κατηγορίες, ετικέτες, χαρακτηριστικά), την αναζήτηση, τα σχετικά / upsells / cross-sells και τα shortcodes και blocks προϊόντων, με χωριστό διακόπτη για το καθένα',
 		hc_li2: 'Με ή χωρίς τις υποκατηγορίες· ένα προϊόν που είναι και σε ορατή κατηγορία κρύβεται κι αυτό, ή μόνο όταν όλες οι κατηγορίες του είναι κρυφές',

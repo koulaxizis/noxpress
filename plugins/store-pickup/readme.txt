@@ -5,7 +5,7 @@ Tags: woocommerce, local pickup, store pickup, click and collect, shipping metho
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -32,6 +32,21 @@ Store pickup as a WooCommerce shipping method, free or with your own cost, with 
 * A "Pickup store" row under "Shipping" on the thank-you page, in My account and in every order email.
 * The shipping address is hidden on the order and in emails when it is not used.
 
+**No pickup for some products**
+
+* Products that never pass through your store (e.g. print-on-demand items shipped by the production partner) can turn pickup off: give them a WooCommerce shipping class (e.g. "Printful") and tick it in the rule. Variations follow the parent's class unless they have their own.
+* When the cart holds such a product, the pickup method is not offered and the cart and checkout totals say why, with your own text in Greek and English.
+* Off by default.
+
+**Store list on any page**
+
+* `[pkp_stores]` prints the active stores with address, hours, details and map link, so a "Pickup options" page or the FAQ always match the settings. `[pkp_stores ids="…"]` shows only some (the Tools tab lists the ids).
+* Prints nothing while the plugin is off; in test mode only shop managers see it.
+
+**For the shop**
+
+* A "Pickup at: <store>" line at the top of the admin New order email, so pickup orders stand out (can be turned off).
+
 **Classic and block checkout**
 
 * Built for the classic checkout (`[woocommerce_checkout]`). The Checkout block has no place for the store choice, so there the method is offered only when a single store is possible in the zone; that store goes on the order.
@@ -48,6 +63,7 @@ Store pickup as a WooCommerce shipping method, free or with your own cost, with 
 
 * `pkp_get_order_store( $order )`: the pickup store of an order (`id`, `name`, `address`, `details`, `map`) as saved at checkout, or `null`.
 * `pkp_text` ( string $text, string $key, string $lang ): change any customer text.
+* `pkp_pickup_allowed` ( bool $allowed, array $package ): whether a shipping package may get the pickup method.
 * The method id is `nox_store_pickup`.
 
 == Installation ==
@@ -60,6 +76,14 @@ Store pickup as a WooCommerce shipping method, free or with your own cost, with 
 6. Back in **Noxpress → Pickup**, test with test mode, then switch to **live**.
 
 == Frequently Asked Questions ==
+
+= How do I keep pickup off for print-on-demand products? =
+
+Create a shipping class in WooCommerce → Settings → Shipping → Classes (e.g. "Printful"), set it on those products, then in Noxpress → Pickup tick "No pickup" and that class. A cart with any such product no longer offers pickup and shows the "No pickup" message (Texts tab).
+
+= I used WooCommerce's "Local pickup" with one method per store. How do I move? =
+
+Add "Store pickup" to each zone, enter your stores in Noxpress → Pickup, test with test mode, then switch to live and disable the old "Local pickup" methods. Past orders keep the method they were placed with.
 
 = Why not WooCommerce's own "Local pickup"? =
 
@@ -74,6 +98,12 @@ The plugin does not change payments. To allow cash on delivery only for pickup, 
 The settings, the transients and the method's entries in your shipping zones are removed. The pickup store saved on past orders stays: it is part of the order record. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: "No pickup" rule: products of the chosen shipping classes (e.g. print on demand) remove the pickup method from the cart, with a message in the cart and checkout totals. Off by default. Filter `pkp_pickup_allowed`.
+* New: `[pkp_stores]` shortcode with the active stores (address, hours, details, map), optionally `ids="…"`.
+* New: "Pickup at: <store>" line at the top of the admin New order email (HTML and plain text), on by default.
+* New: texts for the "No pickup" message and the admin line (Greek / English); the backup includes the new settings.
 
 = 1.0.0 =
 * Initial release.

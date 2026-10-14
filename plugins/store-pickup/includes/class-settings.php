@@ -11,7 +11,14 @@
  *                  { id, name, address, details_el, details_en, map, active }
  *                  id: 4–16 [a-z0-9], made once and never changed, so the
  *                  per-zone choice of stores survives edits and reorders
- *  - t_heading / t_details / t_required / t_map   { el, en } texts
+ *  - no_pickup     rule (1.1.0): hide the method when the package holds a
+ *                  product of one of these shipping classes (e.g. print on
+ *                  demand sent by a partner): { on: bool (default false),
+ *                  classes: [ shipping class slugs ] }
+ *  - admin_line    "Pickup at: <store>" at the top of the admin New order
+ *                  email (1.1.0); default on
+ *  - t_heading / t_details / t_required / t_map / t_blocked / t_admin
+ *                  { el, en } texts
  *
  * Store names and addresses are the store's own data, typed once (no
  * translation); the hours / details have a Greek and an English value.
@@ -39,7 +46,12 @@ final class PKP_Settings {
 		't_details'  => 100,
 		't_required' => 200,
 		't_map'      => 50,
+		't_blocked'  => 300,
+		't_admin'    => 50,
 	);
+
+	/** Most shipping classes the no-pickup rule can name. */
+	const MAX_CLASSES = 20;
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -50,6 +62,11 @@ final class PKP_Settings {
 			'lang'         => 'auto',
 			'hide_address' => true,
 			'stores'       => array(),
+			'no_pickup'    => array(
+				'on'      => false,
+				'classes' => array(),
+			),
+			'admin_line'   => true,
 			't_heading'    => array(
 				'el' => 'Κατάστημα παραλαβής',
 				'en' => 'Pickup store',
@@ -65,6 +82,14 @@ final class PKP_Settings {
 			't_map'        => array(
 				'el' => 'Χάρτης',
 				'en' => 'Map',
+			),
+			't_blocked'    => array(
+				'el' => 'Τα προϊόντα που τυπώνονται κατά παραγγελία αποστέλλονται απευθείας από τον συνεργάτη παραγωγής, γι\' αυτό η παραλαβή από το κατάστημα δεν είναι διαθέσιμη για αυτή την παραγγελία.',
+				'en' => 'Print-on-demand products are shipped directly by our production partner, so store pickup is not available for this order.',
+			),
+			't_admin'      => array(
+				'el' => 'Παραλαβή από',
+				'en' => 'Pickup at',
 			),
 		);
 	}
@@ -96,6 +121,24 @@ final class PKP_Settings {
 		$s['mode']         = self::pick( $raw, 'mode', array( 'off', 'test', 'live' ), $d['mode'] );
 		$s['lang']         = self::pick( $raw, 'lang', array( 'auto', 'el', 'en' ), $d['lang'] );
 		$s['hide_address'] = isset( $raw['hide_address'] ) ? (bool) $raw['hide_address'] : $d['hide_address'];
+		$s['admin_line']   = isset( $raw['admin_line'] ) ? (bool) $raw['admin_line'] : $d['admin_line'];
+
+		$np             = isset( $raw['no_pickup'] ) && is_array( $raw['no_pickup'] ) ? $raw['no_pickup'] : array();
+		$s['no_pickup'] = array(
+			'on'      => ! empty( $np['on'] ),
+			'classes' => array(),
+		);
+		if ( isset( $np['classes'] ) && is_array( $np['classes'] ) ) {
+			foreach ( $np['classes'] as $slug ) {
+				$slug = is_string( $slug ) ? sanitize_title( $slug ) : '';
+				if ( '' !== $slug && strlen( $slug ) <= 200 && ! in_array( $slug, $s['no_pickup']['classes'], true ) ) {
+					$s['no_pickup']['classes'][] = $slug;
+				}
+				if ( count( $s['no_pickup']['classes'] ) >= self::MAX_CLASSES ) {
+					break;
+				}
+			}
+		}
 
 		$s['stores'] = array();
 		$seen        = array();
