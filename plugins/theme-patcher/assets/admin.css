@@ -1,5 +1,5 @@
 /**
- * Theme Patcher — admin.css (v1.1.1)
+ * Theme Patcher — admin.css (v1.4.0)
  *
  * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
  * the leading design; base rules mirror Smart Formatter's admin.css:
@@ -81,6 +81,7 @@
 /* ===== Form controls (hardening) ===== */
 .tp-wrap input[type="text"],
 .tp-wrap input[type="url"],
+.tp-wrap input[type="email"],
 .tp-wrap input[type="number"],
 .tp-wrap textarea,
 .tp-wrap select {
@@ -400,3 +401,27 @@ a.tp-kofi:hover {
 	background: var(--tp-panel-2);
 }
 .tp-scroll .tp-field { margin-bottom: 4px; }
+
+/* Care & Safety (1.4.0): the preview shows the visitor's light page, the
+   editors keep WordPress's own look. */
+.tp-care-preview {
+	background: #fff;
+	color: #1e1e1e;
+	border-radius: 6px;
+	padding: 16px 20px;
+	max-width: 760px;
+}
+.tp-care-preview h2,
+.tp-care-preview h3 { color: #1e1e1e; margin: 1.1em 0 .4em; }
+.tp-care-preview h2:first-child { margin-top: 0; }
+.tp-wrap .tp-care-preview a { color: #2271b1; }
+.tp-care-editor { max-width: 900px; margin-bottom: 8px; }
+.tp-wrap .tp-care-editor textarea.wp-editor-area { background: #fff !important; color: #1e1e1e !important; }
+.tp-wrap .tp-check.tp-inline { display: inline-flex; margin-right: 14px; }
+.tp-care-makers { overflow-x: auto; }
+.tp-care-makers input[type="text"],
+.tp-care-makers input[type="email"],
+.tp-care-makers input[type="url"],
+.tp-care-makers textarea { width: 100%; min-width: 120px; box-sizing: border-box; }
+.tp-care-makers td:first-child input { min-width: 100px; }
+.tp-wrap input.tp-care-color { width: 96px; }

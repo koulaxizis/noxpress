@@ -591,8 +591,8 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="theme-patcher">
 		<h2><a href="#theme-patcher">Theme Patcher</a></h2>
 		<a class="card-video" href="media/videos/theme-patcher.mp4" data-video="theme-patcher" data-video-title="Theme Patcher" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
-		<p data-i18n="tp_desc">Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility and price labels.</p>
+		<div class="meta">v1.4.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="tp_desc">Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility, price labels and a care &amp; safety product tab.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
 		<ul>
@@ -604,12 +604,13 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="tp_li6">Theme settings guard: page views can no longer overwrite what you set in the Customizer, fixed values for settings the theme resets (e.g. slider speed), theme files read from disk instead of over HTTP</li>
 			<li data-i18n="tp_li7">Accessibility: names for icon-only links and buttons, alt text for images; warning when block filter widgets are used on a classic theme</li>
 			<li data-i18n="tp_li10">Price labels: «Free» instead of 0,00 € in product pages, lists and cart lines; a label per category for products without a price (e.g. «Free listening»), in Greek and English, with any theme</li>
+			<li data-i18n="tp_li11">Care &amp; safety tab: care instructions, product safety, manufacturer and EU responsible person (GPSR) on product pages, chosen by product, product type or SKU prefix, with your own texts in Greek and English and a WP-CLI check</li>
 			<li data-i18n="tp_li8">Safe by design: off until enabled, test mode for shop managers, per-theme settings, theme detector and page probe, automatic pause after theme updates, TP_DISABLE emergency switch</li>
 			<li data-i18n="tp_li9">Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own</li>
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.3.0/theme-patcher.zip" rel="nofollow noopener" data-i18n="tp_download">Download v1.3.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.4.0/theme-patcher.zip" rel="nofollow noopener" data-i18n="tp_download">Download v1.4.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/theme-patcher" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -876,6 +877,28 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="product-bundles">
+		<h2><a href="#product-bundles">Product Bundles</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="pb_desc">Product bundles for WooCommerce: a «Bundle» product made of other products, with a bundle discount. In the cart and the order every product stays itself, with its own stock and VAT, so your sales reports stay right.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="pb_li1">New product type «Bundle» with its own page and URL: simple products or variations, a quantity each, and sizes the customer picks</li>
+			<li data-i18n="pb_li2">Discount per bundle as a percentage or a final price; price, stock status and weight come from the products inside, updated in the background</li>
+			<li data-i18n="pb_li3">Every product is its own cart and order line with its own stock, VAT and refunds, locked together as one bundle; classic and block cart and checkout</li>
+			<li data-i18n="pb_li4">The saving is recorded as a discount, so WooCommerce, Revenue Splitter and Store Pulse see each product at its own price, per beneficiary and per channel</li>
+			<li data-i18n="pb_li5">Bundles in manual orders from the order screen; convert an existing product into a bundle with a backup and undo</li>
+			<li data-i18n="pb_li6">Safe by design: off until enabled, test mode for managers, PBN_DISABLE emergency switch, out of stock while the plugin is off; no cookies, no tracking; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.0.0/product-bundles.zip" rel="nofollow noopener" data-i18n="pb_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/product-bundles" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="support">
@@ -1010,7 +1033,7 @@ footer .heart { color: var(--accent-bright); }
 		sf_li10: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
 		sf_li11: 'Optional: the short description becomes plain text whenever you save a product (handy when you paste from AI tools)',
 		sf_download: 'Download v1.4.0 (.zip)',
-		tp_desc: 'Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility and price labels.',
+		tp_desc: 'Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility, price labels and a care &amp; safety product tab.',
 		tp_li1: 'Product cards: price with the old price struck through, add-to-cart button, rating, sale badge for every product type (variable too), and other plugins\' card additions',
 		tp_li2: 'Every area on its own: shop / categories / search, related products, up-sells, cross-sells and each theme section with its own product query',
 		tp_li3: 'Card title lines and size, the right thumbnail size instead of full-size images, the theme\'s empty sale tags removed',
@@ -1019,9 +1042,10 @@ footer .heart { color: var(--accent-bright); }
 		tp_li6: 'Theme settings guard: page views can no longer overwrite what you set in the Customizer, fixed values for settings the theme resets (e.g. slider speed), theme files read from disk instead of over HTTP',
 		tp_li7: 'Accessibility: names for icon-only links and buttons, alt text for images; warning when block filter widgets are used on a classic theme',
 		tp_li10: 'Price labels: «Free» instead of 0,00 € in product pages, lists and cart lines; a label per category for products without a price (e.g. «Free listening»), in Greek and English, with any theme',
+		tp_li11: 'Care &amp; safety tab: care instructions, product safety, manufacturer and EU responsible person (GPSR) on product pages, chosen by product, product type or SKU prefix, with your own texts in Greek and English and a WP-CLI check',
 		tp_li8: 'Safe by design: off until enabled, test mode for shop managers, per-theme settings, theme detector and page probe, automatic pause after theme updates, TP_DISABLE emergency switch',
 		tp_li9: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
-		tp_download: 'Download v1.3.0 (.zip)',
+		tp_download: 'Download v1.4.0 (.zip)',
 		sh_desc: 'Lean product filters for classic WooCommerce themes: a real category tree, attribute filters with counts, a price slider, and value groups for messy attribute data.',
 		sh_li1: 'Category tree with open / close per parent and any depth; attribute filters with product counts; two-handle price slider without jQuery UI',
 		sh_li2: 'Value groups without touching products: e.g. 88 ages in 6 ranges or 350 colours in 12, with suggestions from ranges («6-18M», «3 Ετών+») and keywords',
@@ -1118,6 +1142,14 @@ footer .heart { color: var(--accent-bright); }
 		oc_li6: 'Coming next: stock changes to orOS Stock, receipt links from orOS Invoices, shop news in orOS Today',
 		oc_li7: 'Safe by design: every module off until enabled, test mode for managers, ORC_DISABLE emergency switch; no cookies, no tracking; bilingual UI and shared «Noxpress» menu',
 		oc_download: 'Download v1.0.0 (.zip)',
+		pb_desc: 'Product bundles for WooCommerce: a «Bundle» product made of other products, with a bundle discount. In the cart and the order every product stays itself, with its own stock and VAT, so your sales reports stay right.',
+		pb_li1: 'New product type «Bundle» with its own page and URL: simple products or variations, a quantity each, and sizes the customer picks',
+		pb_li2: 'Discount per bundle as a percentage or a final price; price, stock status and weight come from the products inside, updated in the background',
+		pb_li3: 'Every product is its own cart and order line with its own stock, VAT and refunds, locked together as one bundle; classic and block cart and checkout',
+		pb_li4: 'The saving is recorded as a discount, so WooCommerce, Revenue Splitter and Store Pulse see each product at its own price, per beneficiary and per channel',
+		pb_li5: 'Bundles in manual orders from the order screen; convert an existing product into a bundle with a backup and undo',
+		pb_li6: 'Safe by design: off until enabled, test mode for managers, PBN_DISABLE emergency switch, out of stock while the plugin is off; no cookies, no tracking; bilingual UI and shared «Noxpress» menu',
+		pb_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -1209,7 +1241,7 @@ footer .heart { color: var(--accent-bright); }
 		sf_li10: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
 		sf_li11: 'Προαιρετικά: η σύντομη περιγραφή γίνεται καθαρό κείμενο κάθε φορά που αποθηκεύεις προϊόν (χρήσιμο όταν επικολλάς από εργαλεία AI)',
 		sf_download: 'Λήψη v1.4.0 (.zip)',
-		tp_desc: 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: κάρτες προϊόντων, κείμενα, πλακίδια κατηγοριών, ρυθμίσεις θέματος, προσβασιμότητα και ετικέτες τιμής.',
+		tp_desc: 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: κάρτες προϊόντων, κείμενα, πλακίδια κατηγοριών, ρυθμίσεις θέματος, προσβασιμότητα, ετικέτες τιμής και καρτέλα προϊόντος «Φροντίδα και ασφάλεια».',
 		tp_li1: 'Κάρτες προϊόντων: τιμή με διαγραμμένη την παλιά, κουμπί καλαθιού, βαθμολογία, ένδειξη έκπτωσης για κάθε τύπο προϊόντος (και μεταβλητά) και ό,τι προσθέτουν άλλα plugins στην κάρτα',
 		tp_li2: 'Κάθε περιοχή ξεχωριστά: κατάστημα / κατηγορίες / αναζήτηση, σχετικά προϊόντα, up-sells, cross-sells και κάθε ενότητα του θέματος με δικό της query προϊόντων',
 		tp_li3: 'Γραμμές και μέγεθος τίτλου στην κάρτα, σωστό μέγεθος μικρογραφίας αντί για εικόνες πλήρους μεγέθους, αφαίρεση των κενών ετικετών έκπτωσης του θέματος',
@@ -1218,9 +1250,10 @@ footer .heart { color: var(--accent-bright); }
 		tp_li6: 'Προστασία ρυθμίσεων θέματος: οι προβολές σελίδων δεν πατάνε πια ό,τι ορίζεις στον Customizer, σταθερές τιμές για ρυθμίσεις που επαναφέρει το θέμα (π.χ. ταχύτητα slider), ανάγνωση αρχείων του θέματος από τον δίσκο αντί για HTTP',
 		tp_li7: 'Προσβασιμότητα: ονόματα σε συνδέσμους και κουμπιά με μόνο εικονίδιο, alt στις εικόνες· προειδοποίηση για φίλτρα τύπου block σε κλασικό θέμα',
 		tp_li10: 'Ετικέτες τιμής: «Δωρεάν» αντί για 0,00 € σε σελίδες προϊόντων, λίστες και γραμμές καλαθιού· ετικέτα ανά κατηγορία για προϊόντα χωρίς τιμή (π.χ. «Δωρεάν ακρόαση»), σε ελληνικά και αγγλικά, με οποιοδήποτε θέμα',
+		tp_li11: 'Καρτέλα «Φροντίδα και ασφάλεια»: οδηγίες φροντίδας, ασφάλεια προϊόντος, κατασκευαστής και υπεύθυνος στην ΕΕ (GPSR) στις σελίδες προϊόντων, ανά προϊόν, είδος ή πρόθεμα SKU, με δικά σου κείμενα σε ελληνικά και αγγλικά και έλεγχο από WP-CLI',
 		tp_li8: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, ρυθμίσεις ανά θέμα, ανιχνευτής θέματος και σάρωση σελίδας, αυτόματη αναστολή μετά από ενημέρωση θέματος, διακόπτης έκτακτης ανάγκης TP_DISABLE',
 		tp_li9: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
-		tp_download: 'Λήψη v1.3.0 (.zip)',
+		tp_download: 'Λήψη v1.4.0 (.zip)',
 		sh_desc: 'Λιτά φίλτρα προϊόντων για κλασικά θέματα WooCommerce: πραγματικό δέντρο κατηγοριών, φίλτρα χαρακτηριστικών με μετρητές, τιμή με slider και ομάδες τιμών για ακατάστατα χαρακτηριστικά.',
 		sh_li1: 'Δέντρο κατηγοριών με άνοιγμα / κλείσιμο ανά γονέα και όσα επίπεδα χρειάζεται· φίλτρα χαρακτηριστικών με μετρητές προϊόντων· slider τιμής με δύο λαβές χωρίς jQuery UI',
 		sh_li2: 'Ομάδες τιμών χωρίς αλλαγή στα προϊόντα: π.χ. 88 ηλικίες σε 6 εύρη ή 350 χρώματα σε 12, με προτάσεις από εύρη («6-18M», «3 Ετών+») και λέξεις-κλειδιά',
@@ -1317,6 +1350,14 @@ footer .heart { color: var(--accent-bright); }
 		oc_li6: 'Έρχονται: αλλαγές αποθέματος στο orOS Stock, σύνδεσμοι αποδείξεων από το orOS Invoices, νέα του καταστήματος στο Today του orOS',
 		oc_li7: 'Ασφαλές εκ σχεδιασμού: κάθε module κλειστό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για διαχειριστές, διακόπτης έκτακτης ανάγκης ORC_DISABLE· χωρίς cookies και tracking· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		oc_download: 'Λήψη v1.0.0 (.zip)',
+		pb_desc: 'Πακέτα προϊόντων για το WooCommerce: ένα προϊόν «Πακέτο» από άλλα προϊόντα, με έκπτωση πακέτου. Στο καλάθι και στην παραγγελία κάθε προϊόν μένει ο εαυτός του, με το δικό του απόθεμα και ΦΠΑ, ώστε οι αναφορές πωλήσεων να μένουν σωστές.',
+		pb_li1: 'Νέος τύπος προϊόντος «Πακέτο» με δική του σελίδα και URL: απλά προϊόντα ή παραλλαγές, ποσότητα για το καθένα, και μεγέθη που διαλέγει ο πελάτης',
+		pb_li2: 'Έκπτωση ανά πακέτο σε ποσοστό ή τελική τιμή· η τιμή, η διαθεσιμότητα και το βάρος έρχονται από τα προϊόντα και ενημερώνονται στο παρασκήνιο',
+		pb_li3: 'Κάθε προϊόν είναι δική του γραμμή στο καλάθι και στην παραγγελία, με δικό του απόθεμα, ΦΠΑ και επιστροφές, δεμένες μαζί ως ένα πακέτο· κλασικό και μπλοκ καλάθι και ταμείο',
+		pb_li4: 'Η εξοικονόμηση γράφεται ως έκπτωση, οπότε WooCommerce, Revenue Splitter και Store Pulse βλέπουν κάθε προϊόν στη δική του τιμή, ανά δικαιούχο και ανά κανάλι',
+		pb_li5: 'Πακέτα σε χειροκίνητες παραγγελίες από την οθόνη της παραγγελίας· μετατροπή υπάρχοντος προϊόντος σε πακέτο με αντίγραφο και αναίρεση',
+		pb_li6: 'Ασφαλές εκ σχεδιασμού: κλειστό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για διαχειριστές, διακόπτης έκτακτης ανάγκης PBN_DISABLE, εξαντλημένα πακέτα όσο το plugin είναι ανενεργό· χωρίς cookies και tracking· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		pb_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',

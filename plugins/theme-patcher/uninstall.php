@@ -1,15 +1,20 @@
 <?php
 /**
- * Theme Patcher — uninstall.php (v1.0.0)
+ * Theme Patcher — uninstall.php (v1.4.0)
  *
  * Full cleanup (nothing left after deactivate + delete):
  *  - Options: tp_settings (all themes), tp_cat_images (category image
- *    fallback map).
+ *    fallback map), tp_care (Care & Safety tab, 1.4.0).
+ *  - Product meta _tp_care_profile, _tp_care_manufacturer, _tp_care_note:
+ *    written by the shop manager per product, so they STAY (Bible §12,
+ *    content written by the user) unless "delete on uninstall" was ticked
+ *    in the settings (tp_care.delete_meta, read before the option goes).
  *  - Transients: tp_aui_msg_{uid} (PRG notices), tp_probe_{uid} (page
  *    probe reports), tp_scan_{hash} (theme detector cache), tp_fp_check
  *    (fingerprint check throttle).
- *  - Theme Patcher never writes to theme files, theme settings, products,
- *    categories or the filesystem: no other cleanup is needed.
+ *  - Apart from those product meta, Theme Patcher never writes to theme
+ *    files, theme settings, products, categories or the filesystem: no
+ *    other cleanup is needed.
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * The rs_lang user meta belongs to Revenue Splitter and is not touched.
@@ -24,8 +29,16 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 function tp_uninstall_site(): void {
 	global $wpdb;
 
+	$tp_care = json_decode( (string) get_option( 'tp_care', '' ), true );
+	if ( is_array( $tp_care ) && ! empty( $tp_care['delete_meta'] ) ) {
+		foreach ( array( '_tp_care_profile', '_tp_care_manufacturer', '_tp_care_note' ) as $tp_meta ) {
+			delete_post_meta_by_key( $tp_meta );
+		}
+	}
+
 	delete_option( 'tp_settings' );
 	delete_option( 'tp_cat_images' );
+	delete_option( 'tp_care' );
 
 	foreach ( array( 'tp_aui_msg_', 'tp_probe_', 'tp_scan_', 'tp_fp_check' ) as $tp_prefix ) {
 		// LIKE with escaped '_' (otherwise a wildcard).
@@ -59,7 +72,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $tp_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect' ) as $tp_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles' ) as $tp_slug ) {
 	if ( 'theme-patcher' !== $tp_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $tp_slug . '/' . $tp_slug . '.php' ) ) {
 		$tp_suite_left = true;
 		break;
