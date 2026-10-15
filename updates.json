@@ -80,15 +80,15 @@
     },
     "product-bundles": {
       "beta": {
-        "changelog": "* Initial release.\n* Product type \"Bundle\" with simple products, variations and customer choice of variation.\n* Every product inside as its own cart and order line, with locked quantities and the \"Bundle\" meta.\n* Bundle discount as a % or as a final price, shown as a discount (line subtotal / total) in WooCommerce, Revenue Splitter and Store Pulse.\n* Price, stock status and weight from the products inside, updated in the background (Action Scheduler).\n* Coupon policy for bundle lines, limit of bundles to sell.\n* \"Bundles\" box on the order screen; recalculation keeps the discount.\n* Convert an existing product into a bundle, with backup and undo.\n* Test mode, PBN_DISABLE, test mode while another bundles plugin is active, out of stock on deactivation.\n* Classic and block cart / checkout, HPOS compatible.\n* Editable Greek / English texts, export / import of settings and bundles.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.9).",
-        "published": "2026-10-14",
+        "changelog": "* Fixed: saving a bundle kept no record of the variations you ticked for a variable product, so the bundle page offered every variation of it. Bundles saved with 1.0.0 offer all variations until you tick them again and update the bundle.",
+        "published": "2026-10-15",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b22571c6b0cd7292c3d672b5564bc962d25f99a7eebf8c0f916280ffed56d160",
-        "signature": "VF2nE7ZMRdjlxrOZjDSZEdnmLDvnGxr8/9c0Tbf/qBVoWwJSnL7QbMjO1hZk+bM0kDzuj/rK8+lkOAIhBxL/Bg==",
+        "sha256": "8e3c9faf543079a570a508044ecb2a50c1efdab1877c7a8fc8bf6052b5890454",
+        "signature": "WblqyW6gmUS8EZTPRJhL3HqbHETvLE5cF3XGNFnmydXFVv4uAKDc4IMFLkPgqnLh9X4luw4BeMkNVqks8iGvCA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.0.0/product-bundles.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.0.1/product-bundles.zip"
       }
     },
     "product-formats": {
