@@ -10,8 +10,9 @@
  *  - stores            store ids offered in this zone (empty = every active
  *                      store)
  *
- * Offered only when the mode allows it (PKP_Settings::visible()) and at
- * least one active store is left for the zone. In Store API requests
+ * Offered only when the mode allows it (PKP_Settings::visible()), at
+ * least one active store is left for the zone and the no-pickup rule does
+ * not apply to the package (PKP_Checkout::pickup_allowed()). In Store API requests
  * (Cart / Checkout blocks) only when exactly one store is possible: the
  * blocks have no place for the choice (Bible §14.4 deviation, bootstrap).
  *
@@ -154,7 +155,7 @@ class PKP_Method extends WC_Shipping_Method {
 	 */
 	public function is_available( $package ) {
 		try {
-			$ok = PKP_Settings::visible() && $this->stores();
+			$ok = PKP_Settings::visible() && $this->stores() && PKP_Checkout::pickup_allowed( is_array( $package ) ? $package : array() );
 			if ( $ok && PKP_Checkout::is_rest() && count( $this->stores() ) > 1 ) {
 				$ok = false;
 			}

@@ -20,6 +20,12 @@
  *    hidden on the order and in emails (woocommerce_order_hide_shipping_address).
  *  - Taxes: the method counts as local pickup (woocommerce_local_pickup_methods),
  *    so WooCommerce may tax at the store's base address.
+ *  - No-pickup rule (1.1.0): a package with a product of one of the chosen
+ *    shipping classes gets no pickup rate (PKP_Method::is_available), and
+ *    the cart / checkout totals show why, when the zone offers pickup.
+ *    Filter pkp_pickup_allowed.
+ *  - Admin New order email (1.1.0): "Pickup at: <store>" above the order
+ *    details, so pickup orders stand out.
  *
  * Every callback is wrapped in try/catch (Bible §14.6): on an error the
  * plugin stops for the rest of the request and returns the original value.
@@ -44,6 +50,9 @@ final class PKP_Checkout {
 		add_filter( 'woocommerce_order_hide_shipping_address', array( __CLASS__, 'hide_address_methods' ) );
 		add_filter( 'woocommerce_local_pickup_methods', array( __CLASS__, 'local_pickup_methods' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_action( 'woocommerce_review_order_after_shipping', array( __CLASS__, 'render_blocked' ) );
+		add_action( 'woocommerce_cart_totals_after_shipping', array( __CLASS__, 'render_blocked' ) );
+		add_action( 'woocommerce_email_order_details', array( __CLASS__, 'admin_line' ), 5, 4 );
 	}
 
 	/** Records the error and switches the plugin off for this request. */
@@ -203,7 +212,7 @@ final class PKP_Checkout {
 	 * @param string $details Details in the wanted language.
 	 * @param string $cls     Class prefix.
 	 */
-	private static function store_html( array $st, string $details, string $cls ): string {
+	public static function store_html( array $st, string $details, string $cls ): string {
 		$out = '<span class="' . esc_attr( $cls ) . '__name">' . esc_html( $st['name'] ) . '</span>';
 		if ( '' !== $st['address'] ) {
 			$out .= '<span class="' . esc_attr( $cls ) . '__addr">' . esc_html( $st['address'] ) . '</span>';
@@ -380,18 +389,122 @@ final class PKP_Checkout {
 	}
 
 	/* =====================================================================
+	 * No-pickup rule
+	 * =================================================================== */
+
+	/**
+	 * True when a package may get the pickup rate: the rule is off, or none
+	 * of its products has one of the rule's shipping classes. Variations
+	 * without a class of their own use the parent's (WooCommerce does).
+	 *
+	 * @param array $package Shipping package (contents with 'data' => WC_Product).
+	 */
+	public static function pickup_allowed( array $package ): bool {
+		$allowed = true;
+		$rule    = PKP_Settings::get()['no_pickup'];
+		if ( $rule['on'] && $rule['classes'] && isset( $package['contents'] ) && is_array( $package['contents'] ) ) {
+			foreach ( $package['contents'] as $item ) {
+				$product = is_array( $item ) && isset( $item['data'] ) ? $item['data'] : null;
+				if ( $product instanceof WC_Product && in_array( (string) $product->get_shipping_class(), $rule['classes'], true ) ) {
+					$allowed = false;
+					break;
+				}
+			}
+		}
+		/**
+		 * Filters whether a shipping package may get the "Store pickup" rate.
+		 *
+		 * @param bool  $allowed False when the no-pickup rule applies.
+		 * @param array $package Shipping package.
+		 */
+		return (bool) apply_filters( 'pkp_pickup_allowed', $allowed, $package );
+	}
+
+	/** True when the zone of a package has an enabled pickup method with stores. */
+	private static function zone_offers_pickup( array $package ): bool {
+		$zone = WC_Shipping_Zones::get_zone_matching_package( $package );
+		foreach ( $zone->get_shipping_methods( true ) as $m ) {
+			if ( $m instanceof PKP_Method && $m->stores() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * woocommerce_review_order_after_shipping / woocommerce_cart_totals_after_shipping:
+	 * why pickup is missing, once, when the rule removed it from a package
+	 * whose zone offers it. Inside the totals table, so it refreshes with
+	 * the checkout AJAX like the rates.
+	 */
+	public static function render_blocked(): void {
+		if ( self::$broken || ! PKP_Settings::visible() || ! PKP_Settings::get()['no_pickup']['on'] || ! function_exists( 'WC' ) || ! WC()->shipping() ) {
+			return;
+		}
+		try {
+			foreach ( (array) WC()->shipping()->get_packages() as $package ) {
+				if ( is_array( $package ) && ! self::pickup_allowed( $package ) && self::zone_offers_pickup( $package ) ) {
+					$text = PKP_Settings::text( 't_blocked' );
+					if ( '' !== $text ) {
+						echo '<tr class="pkp-blocked"><td colspan="2"><p class="pkp-blocked__text">' . esc_html( $text ) . '</p></td></tr>';
+					}
+					return;
+				}
+			}
+		} catch ( \Throwable $e ) {
+			self::fail( $e );
+		}
+	}
+
+	/* =====================================================================
+	 * Admin email
+	 * =================================================================== */
+
+	/**
+	 * woocommerce_email_order_details (priority 5): "Pickup at: <store>" at
+	 * the top of the admin New order email.
+	 *
+	 * @param WC_Order      $order         Order.
+	 * @param bool          $sent_to_admin Sent to the admin.
+	 * @param bool          $plain_text    Plain text email.
+	 * @param WC_Email|null $email         Email.
+	 */
+	public static function admin_line( $order, $sent_to_admin = false, $plain_text = false, $email = null ): void {
+		if ( self::$broken || ! $sent_to_admin || ! $order instanceof WC_Order || ! PKP_Settings::get()['admin_line'] ) {
+			return;
+		}
+		if ( ! is_object( $email ) || ! isset( $email->id ) || 'new_order' !== $email->id ) {
+			return;
+		}
+		try {
+			$store = self::order_store( $order );
+			if ( null === $store ) {
+				return;
+			}
+			$line = PKP_Settings::text( 't_admin' ) . ': ' . $store['name'];
+			if ( $plain_text ) {
+				echo esc_html( $line ) . "\n\n";
+			} else {
+				echo '<p class="pkp-admin-line" style="font-size:1.15em;margin:0 0 16px;"><strong>' . esc_html( $line ) . '</strong></p>';
+			}
+		} catch ( \Throwable $e ) {
+			self::fail( $e );
+		}
+	}
+
+	/* =====================================================================
 	 * Assets (checkout page only, when the method can show)
 	 * =================================================================== */
 
 	public static function assets(): void {
-		if ( self::$broken || ! function_exists( 'is_checkout' ) || ! is_checkout() || is_order_received_page() || ! PKP_Settings::visible() ) {
+		if ( self::$broken || ! function_exists( 'is_checkout' ) || ! ( is_checkout() || is_cart() ) || is_order_received_page() || ! PKP_Settings::visible() ) {
 			return;
 		}
 		try {
 			wp_register_style( 'pkp-front', false, array(), PKP_VERSION );
 			wp_enqueue_style( 'pkp-front' );
 			wp_add_inline_style( 'pkp-front', self::css() );
-			if ( PKP_Settings::get()['hide_address'] ) {
+			if ( is_checkout() && PKP_Settings::get()['hide_address'] ) {
 				wp_enqueue_script( 'pkp-checkout', PKP_URL . 'assets/checkout.js', array( 'jquery' ), PKP_VERSION, true );
 			}
 		} catch ( \Throwable $e ) {
@@ -409,6 +522,8 @@ final class PKP_Checkout {
 			. '.pkp-stores .pkp-store__body{display:block!important;min-width:0!important;overflow-wrap:break-word;word-break:normal!important}'
 			. '.pkp-stores .pkp-store__name{display:block!important;font-weight:600!important}'
 			. '.pkp-stores .pkp-store__addr,.pkp-stores .pkp-store__det{display:block!important;font-size:.9em!important;opacity:.85}'
-			. '.pkp-stores .pkp-store__map{display:inline-block!important;font-size:.9em!important;margin-top:.15em!important}';
+			. '.pkp-stores .pkp-store__map{display:inline-block!important;font-size:.9em!important;margin-top:.15em!important}'
+			. '.pkp-blocked td{padding-top:.4em!important;padding-bottom:.4em!important}'
+			. '.pkp-blocked .pkp-blocked__text{margin:0!important;font-size:.9em!important;line-height:1.45!important;text-align:start!important;font-weight:400!important}';
 	}
 }

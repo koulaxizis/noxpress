@@ -4,11 +4,12 @@
  *
  * One page, submenu «Παραλαβή» of the shared "Noxpress" menu (admin_menu
  * priority 110), slug pkp-settings, with tabs:
- *  - stores  mode, shipping address hiding, which zones have the method,
- *            the store list (name, address, hours / details el/en, map
+ *  - stores  mode, shipping address hiding, admin email line, which zones
+ *            have the method, the no-pickup rule (shipping classes), the
+ *            store list (name, address, hours / details el/en, map
  *            link, active, order; add / delete)
  *  - texts   visitor text language and texts
- *  - tools   settings export / import, filter and API
+ *  - tools   settings export / import, shortcode, filters and API
  *
  * Every state change: POST on admin_init, slug + nonce + capability,
  * strict validation (PKP_Settings::sanitize), PRG with the message in the
@@ -205,6 +206,12 @@ final class PKP_Admin_UI {
 				self::mode_field( $s['mode'] );
 				?>
 				<label class="pkp-check pkp-mt-8"><input type="checkbox" name="pkp_hide_address" value="1" <?php checked( $s['hide_address'] ); ?> /> <?php esc_html_e( 'Απόκρυψη της διεύθυνσης αποστολής όταν ο πελάτης διαλέγει παραλαβή (ταμείο, παραγγελία, emails)', 'store-pickup' ); ?></label>
+				<label class="pkp-check"><input type="checkbox" name="pkp_admin_line" value="1" <?php checked( $s['admin_line'] ); ?> /> <?php esc_html_e( 'Γραμμή «Παραλαβή από: …» στην κορυφή του email «Νέα παραγγελία» του διαχειριστή', 'store-pickup' ); ?></label>
+			</div>
+
+			<h2 class="pkp-h2"><?php esc_html_e( 'Χωρίς παραλαβή', 'store-pickup' ); ?></h2>
+			<div class="pkp-zone">
+				<?php self::render_rule( $s['no_pickup'] ); ?>
 			</div>
 
 			<h2 class="pkp-h2"><?php esc_html_e( 'Ζώνες αποστολής', 'store-pickup' ); ?></h2>
@@ -245,6 +252,49 @@ final class PKP_Admin_UI {
 			?>
 			<p class="pkp-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'store-pickup' ); ?></button></p>
 		</form>
+		<?php
+	}
+
+	/**
+	 * The no-pickup rule: switch and shipping classes.
+	 *
+	 * @param array $rule { on, classes }.
+	 */
+	private static function render_rule( array $rule ): void {
+		$classes = array();
+		foreach ( (array) WC()->shipping()->get_shipping_classes() as $term ) {
+			if ( is_object( $term ) && isset( $term->slug, $term->name ) ) {
+				$classes[ (string) $term->slug ] = (string) $term->name;
+			}
+		}
+		?>
+		<label class="pkp-check"><input type="checkbox" name="pkp_np_on" value="1" <?php checked( $rule['on'] ); ?> /> <?php esc_html_e( 'Χωρίς παραλαβή όταν το καλάθι έχει προϊόν από αυτές τις κλάσεις αποστολής', 'store-pickup' ); ?></label>
+		<p class="description"><?php esc_html_e( 'Για προϊόντα που δεν περνούν από το κατάστημα, π.χ. όσα τυπώνονται κατά παραγγελία και τα στέλνει ο συνεργάτης παραγωγής. Ο πελάτης βλέπει το μήνυμα «Χωρίς παραλαβή» (καρτέλα Κείμενα) στο καλάθι και στο ταμείο. Οι παραλλαγές χωρίς δική τους κλάση ακολουθούν το γονικό προϊόν.', 'store-pickup' ); ?></p>
+		<?php
+		if ( ! $classes ) {
+			echo '<p class="pkp-warn">' . esc_html__( 'Το κατάστημα δεν έχει ακόμα κλάσεις αποστολής. Φτιάξε μία (π.χ. «Printful») και βάλ\' τη στα προϊόντα.', 'store-pickup' ) . '</p>';
+		} else {
+			echo '<div class="pkp-classes">';
+			foreach ( $classes as $slug => $name ) {
+				echo '<label class="pkp-check"><input type="checkbox" name="pkp_np_classes[]" value="' . esc_attr( $slug ) . '" ' . checked( in_array( $slug, $rule['classes'], true ), true, false ) . ' /> ' . esc_html( $name ) . ' <code>' . esc_html( $slug ) . '</code></label>';
+			}
+			echo '</div>';
+		}
+		foreach ( $rule['classes'] as $slug ) {
+			if ( ! isset( $classes[ $slug ] ) ) {
+				// A class that no longer exists stays saved, so a re-created class with the same slug keeps working.
+				echo '<input type="hidden" name="pkp_np_classes[]" value="' . esc_attr( $slug ) . '" />';
+				echo '<p class="pkp-warn">' . esc_html(
+					sprintf(
+						/* translators: %s: shipping class slug */
+						__( 'Η κλάση αποστολής «%s» δεν υπάρχει πια.', 'store-pickup' ),
+						$slug
+					)
+				) . '</p>';
+			}
+		}
+		?>
+		<p class="pkp-mt-8"><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Κλάσεις αποστολής του WooCommerce', 'store-pickup' ); ?></a></p>
 		<?php
 	}
 
@@ -311,6 +361,8 @@ final class PKP_Admin_UI {
 			't_details'  => __( 'Ετικέτα των ωρών στην παραγγελία (admin)', 'store-pickup' ),
 			't_required' => __( 'Σφάλμα όταν δεν επιλέχθηκε κατάστημα', 'store-pickup' ),
 			't_map'      => __( 'Σύνδεσμος χάρτη', 'store-pickup' ),
+			't_blocked'  => __( 'Χωρίς παραλαβή: μήνυμα στο καλάθι και στο ταμείο', 'store-pickup' ),
+			't_admin'    => __( 'Αρχή της γραμμής στο email του διαχειριστή («… : κατάστημα»)', 'store-pickup' ),
 		);
 		?>
 		<form method="post">
@@ -362,7 +414,22 @@ final class PKP_Admin_UI {
 				<button type="submit" name="pkp_import" value="1" class="button"><?php esc_html_e( 'Εισαγωγή ρυθμίσεων (JSON)', 'store-pickup' ); ?></button>
 			</form>
 			<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG . '&tab=tools&pkp_export=1' ), self::NONCE_BAK ) ); ?>"><?php esc_html_e( 'Εξαγωγή ρυθμίσεων (JSON)', 'store-pickup' ); ?></a>
-			<p class="description pkp-mt-8"><?php esc_html_e( 'Το backup έχει τα καταστήματα και τα κείμενα. Οι ρυθμίσεις της μεθόδου σε κάθε ζώνη (όνομα, κόστος, καταστήματα) μένουν στο WooCommerce.', 'store-pickup' ); ?></p>
+			<p class="description pkp-mt-8"><?php esc_html_e( 'Το backup έχει τα καταστήματα, τους κανόνες και τα κείμενα. Οι ρυθμίσεις της μεθόδου σε κάθε ζώνη (όνομα, κόστος, καταστήματα) μένουν στο WooCommerce.', 'store-pickup' ); ?></p>
+		</div>
+
+		<h2 class="pkp-h2"><?php esc_html_e( 'Shortcode', 'store-pickup' ); ?></h2>
+		<div class="pkp-zone">
+			<p><code>[pkp_stores]</code> <?php esc_html_e( 'τυπώνει τα ενεργά καταστήματα (όνομα, διεύθυνση, ώρες, χάρτης) σε μια σελίδα, π.χ. «Τρόποι παραλαβής» ή τις Συχνές ερωτήσεις. Με το ids δείχνει μόνο όσα θέλεις. Όσο η λειτουργία είναι ανενεργή δεν τυπώνει τίποτα, και στη λειτουργία δοκιμής φαίνεται μόνο στους διαχειριστές.', 'store-pickup' ); ?></p>
+			<?php
+			$stores = PKP_Settings::get()['stores'];
+			if ( $stores ) {
+				echo '<table class="widefat pkp-table"><thead><tr><th>' . esc_html__( 'Κατάστημα', 'store-pickup' ) . '</th><th>' . esc_html__( 'Shortcode', 'store-pickup' ) . '</th></tr></thead><tbody>';
+				foreach ( $stores as $st ) {
+					echo '<tr><td>' . esc_html( $st['name'] ) . ( $st['active'] ? '' : ' <span class="pkp-badge pkp-badge--muted">' . esc_html__( 'ανενεργό', 'store-pickup' ) . '</span>' ) . '</td><td><code>[pkp_stores ids="' . esc_html( $st['id'] ) . '"]</code></td></tr>';
+				}
+				echo '</tbody></table>';
+			}
+			?>
 		</div>
 
 		<h2 class="pkp-h2"><?php esc_html_e( 'Για προγραμματιστές', 'store-pickup' ); ?></h2>
@@ -371,6 +438,7 @@ final class PKP_Admin_UI {
 				<tbody>
 					<tr><td><code>pkp_get_order_store( $order )</code></td><td><?php esc_html_e( 'Το κατάστημα παραλαβής μιας παραγγελίας (id, όνομα, διεύθυνση, διευκρινίσεις, χάρτης), όπως αποθηκεύτηκε στο ταμείο, ή null.', 'store-pickup' ); ?></td></tr>
 					<tr><td><code>pkp_text</code></td><td><?php esc_html_e( 'Φίλτρο για τα κείμενα του πελάτη (π.χ. WPML).', 'store-pickup' ); ?></td></tr>
+					<tr><td><code>pkp_pickup_allowed( $allowed, $package )</code></td><td><?php esc_html_e( 'Φίλτρο: αν ένα πακέτο αποστολής μπορεί να πάρει την παραλαβή (false = κρύβεται η μέθοδος).', 'store-pickup' ); ?></td></tr>
 					<tr><td><code>nox_store_pickup</code></td><td><?php esc_html_e( 'Το id της μεθόδου αποστολής.', 'store-pickup' ); ?></td></tr>
 				</tbody>
 			</table>
@@ -456,6 +524,11 @@ final class PKP_Admin_UI {
 		$raw                 = PKP_Settings::get();
 		$raw['mode']         = sanitize_key( self::post( 'pkp_mode' ) );
 		$raw['hide_address'] = '1' === self::post( 'pkp_hide_address' );
+		$raw['admin_line']   = '1' === self::post( 'pkp_admin_line' );
+		$raw['no_pickup']    = array(
+			'on'      => '1' === self::post( 'pkp_np_on' ),
+			'classes' => self::post_array( 'pkp_np_classes' ),
+		);
 
 		$known = array();
 		foreach ( $raw['stores'] as $st ) {
@@ -510,6 +583,9 @@ final class PKP_Admin_UI {
 				$msgs[] = self::msg( 'warning', __( 'Ένας σύνδεσμος χάρτη δεν ήταν έγκυρη διεύθυνση http(s) και αγνοήθηκε.', 'store-pickup' ) );
 				break;
 			}
+		}
+		if ( $s['no_pickup']['on'] && ! $s['no_pickup']['classes'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Ο κανόνας «Χωρίς παραλαβή» είναι ενεργός χωρίς κλάση αποστολής, οπότε δεν κάνει τίποτα.', 'store-pickup' ) );
 		}
 		if ( count( $rows ) > PKP_Settings::MAX_STORES ) {
 			$msgs[] = self::msg( 'warning', __( 'Κρατήθηκαν μόνο τα πρώτα 20 καταστήματα.', 'store-pickup' ) );
