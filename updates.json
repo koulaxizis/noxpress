@@ -169,15 +169,15 @@
     },
     "store-pickup": {
       "beta": {
-        "changelog": "* Initial release.\n* Shipping method \"Store pickup\" for WooCommerce shipping zones, with Greek / English name, cost and tax status, and a choice of stores per zone.\n* Stores with name, address, Greek / English hours and details, map link, active flag and order.\n* Store choice under the method in the classic checkout, with validation; a single store is chosen automatically.\n* Store saved on the order's shipping line; \"Pickup store\" row on the thank-you page, in My account and in emails; public function `pkp_get_order_store()`.\n* Optional shipping address hiding (checkout form, order, emails); taxes as WooCommerce local pickup.\n* Checkout block: the method is offered only when a single store is possible.\n* Editable Greek / English texts, settings export / import.\n* Test mode, PKP_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.4).",
-        "published": "2026-10-11",
+        "changelog": "* New: \"No pickup\" rule: products of the chosen shipping classes (e.g. print on demand) remove the pickup method from the cart, with a message in the cart and checkout totals. Off by default. Filter `pkp_pickup_allowed`.\n* New: `[pkp_stores]` shortcode with the active stores (address, hours, details, map), optionally `ids=\"…\"`.\n* New: \"Pickup at: <store>\" line at the top of the admin New order email (HTML and plain text), on by default.\n* New: texts for the \"No pickup\" message and the admin line (Greek / English); the backup includes the new settings.",
+        "published": "2026-10-15",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8df45fde2b3c87fce6282ce2764a5b8f01c034cff7d0e592336765d6ca16014c",
-        "signature": "SuvUb8VYYdJ7n6zfSGB5+FfNUpeLK1fr92LVNxK7zHYZEaSG68R+QjIRC83gcenug7ktqIF91XAST0mzaH74AQ==",
+        "sha256": "f31d31571e77a1df26447cb2219aa05ee68107a750246348689e1d0acf187977",
+        "signature": "qZ06MmvV5+y0NWoaasq1tQTc4nFV/j7ofJ4h1CueXintjWXjQmVitlWssG5ulYf50iOZfotMXQPJ7APB2GaEBQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.0.0/store-pickup.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.1.0/store-pickup.zip"
       }
     },
     "store-pulse": {
