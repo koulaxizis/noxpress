@@ -307,7 +307,11 @@ final class PBN_Admin_Product {
 			$list[] = array(
 				'p' => isset( $r['p'] ) && is_scalar( $r['p'] ) ? absint( $r['p'] ) : 0,
 				'q' => isset( $r['q'] ) && is_scalar( $r['q'] ) ? absint( $r['q'] ) : 1,
-				'm' => 'fixed',
+				// 'choice' keeps the ticked variations through normalize_rows();
+				// validate_rows() then sets the real mode from the product type
+				// (1.0.1: with 'fixed' every save dropped them, so the bundle
+				// offered all variations).
+				'm' => 'choice',
 				'v' => isset( $r['v'] ) && is_array( $r['v'] ) ? array_map( 'absint', $r['v'] ) : array( -1 ),
 			);
 		}

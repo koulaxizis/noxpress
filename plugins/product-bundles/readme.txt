@@ -5,7 +5,7 @@ Tags: woocommerce, product bundles, bundle discount, kits, gift sets
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -74,6 +74,9 @@ Yes. The bundle form shows in the product page's "Add to Cart with Options" bloc
 The settings, the derived data on bundles and the background jobs are removed. The bundle contents and discounts and the conversion backups stay, so a new install finds them, unless "Delete … when the plugin is deleted" is ticked. The bundle meta on order lines is order history and always stays. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed: saving a bundle kept no record of the variations you ticked for a variable product, so the bundle page offered every variation of it. Bundles saved with 1.0.0 offer all variations until you tick them again and update the bundle.
 
 = 1.0.0 =
 * Initial release.
