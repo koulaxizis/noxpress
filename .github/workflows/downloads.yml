@@ -43,7 +43,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-[a-z]+-' --offset "$OFFSET")"
+          # nox-sb-*: Site Bridge is for personal use (Bible §21), not counted.
+          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-(?!sb-)[a-z]+-' --offset "$OFFSET")"
           echo "downloads.json: $result"
           if [ "$result" != changed ]; then
             exit 0
