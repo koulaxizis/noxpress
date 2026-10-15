@@ -3,7 +3,7 @@
  * Plugin Name:          Store Pickup
  * Plugin URI:           https://noxpress.tech
  * Description:          Παραλαβή από το κατάστημα ως μέθοδος αποστολής του WooCommerce, χωρίς μεταφορικά (ή με δικό σου κόστος), με επιλογή καταστήματος στο ταμείο. Για κάθε κατάστημα γράφεις όνομα, διεύθυνση, ώρες και διευκρινίσεις· το κατάστημα που διάλεξε ο πελάτης φαίνεται στην παραγγελία, στα emails και στον λογαριασμό του.
- * Version:              1.0.0
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -31,7 +31,9 @@
  *  - PKP_Checkout  → store choice under the method in the classic
  *                    checkout, validation, the store on the order's
  *                    shipping line, order totals rows (thank-you page,
- *                    My account, emails), shipping address hiding
+ *                    My account, emails), shipping address hiding,
+ *                    no-pickup rule by shipping class, admin email line
+ *  - PKP_Shortcode → [pkp_stores], the active stores as a list
  *  - PKP_Admin_UI  → menu, settings page (stores, texts, tools), backup,
  *                    footer
  *
@@ -43,7 +45,8 @@
  * on a visitor request is the order WooCommerce itself creates.
  *
  * Cooperation (Bible §6): fires nothing (it changes no product data).
- * Filter for others: pkp_text. Public API: pkp_get_order_store().
+ * Filters for others: pkp_text, pkp_pickup_allowed. Public API:
+ * pkp_get_order_store(). Shortcode: [pkp_stores].
  *
  * Deviations from the Bible (with reason):
  *  - §14.4 (never in AJAX or REST): the store choice is rendered in
@@ -59,7 +62,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PKP_VERSION', '1.0.0' );
+define( 'PKP_VERSION', '1.1.0' );
 define( 'PKP_FILE', __FILE__ );
 define( 'PKP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PKP_URL', plugin_dir_url( __FILE__ ) );
@@ -104,6 +107,11 @@ final class Store_Pickup {
 		require_once PKP_PATH . 'includes/class-settings.php';
 		require_once PKP_PATH . 'includes/class-method.php';
 		require_once PKP_PATH . 'includes/class-checkout.php';
+		require_once PKP_PATH . 'includes/class-shortcode.php';
+
+		// Registered even with PKP_DISABLE (it then prints nothing), so the
+		// tag never shows as raw text on a page.
+		PKP_Shortcode::init();
 
 		// Emergency switch (Bible §14): the method is not even registered,
 		// so WooCommerce skips its zone entries and checkout falls back to
