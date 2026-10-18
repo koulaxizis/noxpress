@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 72,
+  "total": 74,
   "offset": 5,
   "updated": "2026-10-18",
   "assets": {
@@ -226,10 +226,14 @@
     },
     "653265644": {
       "file": "nox-sn-1.1.1/shipping-notes.zip",
-      "count": 0
+      "count": 1
     },
     "653265865": {
       "file": "nox-po-1.0.1/pre-orders.zip",
+      "count": 1
+    },
+    "653288538": {
+      "file": "nox-ce-1.0.0/checkout-extras.zip",
       "count": 0
     }
   }
