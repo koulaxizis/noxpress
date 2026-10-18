@@ -1,0 +1,434 @@
+/**
+ * Wish Shelf — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Store Pickup's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors wsh-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.wsh-wrap {
+	--wsh-bg: #101218;
+	--wsh-panel: #14161d;
+	--wsh-panel-2: #1d2029;
+	--wsh-input: #1a1d26;
+	--wsh-border: #2e3240;
+	--wsh-border-input: #3a3f52;
+	--wsh-row-border: #23262f;
+	--wsh-stripe: #181b23;
+	--wsh-hover: #1e212c;
+	--wsh-text: #eae8fa;
+	--wsh-heading: #f6f4ff;
+	--wsh-muted: #b7b2d6;
+	--wsh-link: #beb1ff;
+	--wsh-link-hover: #d4c9ff;
+	--wsh-accent: #6d4aff;
+	--wsh-accent-hover: #8263ff;
+	--wsh-warn: #f5c97e;
+	--wsh-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.wsh-wrap {
+	color-scheme: dark;
+	background: var(--wsh-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--wsh-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.wsh-wrap h1,
+.wsh-wrap h2 {
+	color: var(--wsh-heading);
+}
+
+.wsh-wrap a { color: var(--wsh-link); }
+.wsh-wrap a:hover { color: var(--wsh-link-hover); }
+
+.wsh-wrap .wsh-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--wsh-muted);
+	border-bottom: 1px solid var(--wsh-border);
+	padding-bottom: 6px;
+}
+
+.wsh-wrap .description,
+.wsh-wrap p.description,
+.wsh-wrap .wsh-hint {
+	color: var(--wsh-muted) !important;
+}
+
+.wsh-zone {
+	background: var(--wsh-panel);
+	border: 1px solid var(--wsh-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.wsh-wrap input[type="text"],
+.wsh-wrap input[type="url"],
+.wsh-wrap input[type="number"],
+.wsh-wrap input[type="time"],
+.wsh-wrap input[type="date"],
+.wsh-wrap textarea,
+.wsh-wrap select {
+	background-color: var(--wsh-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--wsh-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.wsh-wrap input::placeholder,
+.wsh-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.wsh-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.wsh-wrap input[type="file"] {
+	color: var(--wsh-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.wsh-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.wsh-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.wsh-wrap input[type="checkbox"],
+.wsh-wrap input[type="radio"] {
+	accent-color: var(--wsh-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.wsh-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.wsh-wrap .button:hover:not(:disabled) {
+	border-color: var(--wsh-accent) !important;
+	color: #ffffff !important;
+}
+
+.wsh-wrap .button-primary {
+	background: var(--wsh-accent) !important;
+	border-color: var(--wsh-accent) !important;
+	color: #ffffff !important;
+}
+
+.wsh-wrap .button-primary:hover:not(:disabled) {
+	background: var(--wsh-accent-hover) !important;
+}
+
+.wsh-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.wsh-submit { margin-top: 20px; }
+.wsh-inline-form { display: inline; margin-right: 10px; }
+.wsh-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.wsh-table,
+table.widefat.wsh-table {
+	background: var(--wsh-panel) !important;
+	border: 1px solid var(--wsh-border) !important;
+	border-radius: 6px;
+	color: var(--wsh-text) !important;
+	margin-top: 14px !important;
+}
+
+.wsh-table thead th,
+.wsh-table thead td {
+	background: var(--wsh-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.wsh-table tbody td,
+.wsh-table tbody th {
+	background: var(--wsh-panel) !important;
+	color: var(--wsh-text) !important;
+	border-bottom: 1px solid var(--wsh-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.wsh-table tbody tr:nth-child(2n) td,
+.wsh-table tbody tr:nth-child(2n) th {
+	background: var(--wsh-stripe) !important;
+}
+
+.wsh-table tbody tr:hover td,
+.wsh-table tbody tr:hover th {
+	background: var(--wsh-hover) !important;
+}
+
+.wsh-table td,
+.wsh-table th {
+	padding: 12px 14px;
+}
+
+.wsh-table td code {
+	background: transparent !important;
+	color: var(--wsh-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.wsh-table .wsh-empty {
+	color: var(--wsh-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.wsh-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.wsh-footer a { color: #beb1ff; text-decoration: none; }
+.wsh-footer a:hover { text-decoration: underline; }
+
+.wsh-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.wsh-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.wsh-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.wsh-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.wsh-muted { color: var(--wsh-muted) !important; }
+.wsh-warn { color: var(--wsh-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.wsh-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.wsh-wrap .wsh-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--wsh-heading);
+}
+
+.wsh-status p { margin: 0 0 8px; }
+.wsh-status p:last-child { margin-bottom: 0; }
+.wsh-status code,
+.wsh-wrap .description code,
+.wsh-wrap .wsh-hint code {
+	background: var(--wsh-panel-2);
+	color: var(--wsh-muted);
+	border: 1px solid var(--wsh-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.wsh-suspended { margin: 8px 0 0; }
+.wsh-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.wsh-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--wsh-border);
+	background: var(--wsh-panel-2);
+	color: var(--wsh-text);
+	white-space: nowrap;
+}
+.wsh-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.wsh-badge--muted { color: var(--wsh-muted); }
+.wsh-badge--warn { border-color: #6b5a33; color: var(--wsh-warn); }
+.wsh-badge--danger { border-color: #6b3a3a; color: var(--wsh-danger); }
+
+/* Area fieldsets. */
+.wsh-area {
+	background: var(--wsh-panel);
+	border: 1px solid var(--wsh-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.wsh-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--wsh-heading);
+}
+.wsh-row { margin: 4px 0 8px; }
+
+.wsh-details > summary {
+	cursor: pointer;
+	color: var(--wsh-link);
+	margin: 4px 0;
+}
+.wsh-details[open] > summary { margin-bottom: 12px; }
+
+.wsh-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.wsh-wrap .wsh-label {
+	display: block;
+	font-weight: 600;
+	color: var(--wsh-heading);
+	margin: 8px 0 6px;
+}
+.wsh-grid .wsh-label:first-child { margin-top: 0; }
+
+.wsh-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.wsh-field > span:first-child {
+	min-width: 150px;
+	color: var(--wsh-text);
+}
+.wsh-wrap .wsh-hint { display: block; font-size: 12px; margin-top: 4px; }
+.wsh-wrap td .wsh-hint { display: inline; }
+.wsh-table td.wsh-warn { color: var(--wsh-warn) !important; }
+
+/* Tabs of the main page. */
+.wsh-wrap .wsh-tabs {
+	border-bottom: 1px solid var(--wsh-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.wsh-wrap .wsh-tabs .nav-tab {
+	background: var(--wsh-panel);
+	border-color: var(--wsh-border);
+	color: var(--wsh-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.wsh-wrap .wsh-tabs .nav-tab:hover { color: var(--wsh-link-hover); background: var(--wsh-hover); }
+.wsh-wrap .wsh-tabs .nav-tab-active,
+.wsh-wrap .wsh-tabs .nav-tab-active:hover {
+	background: var(--wsh-bg);
+	border-bottom-color: var(--wsh-bg);
+	color: var(--wsh-heading);
+}
+
+/* One input per line (removal rules). */
+.wsh-wrap .wsh-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.wsh-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--wsh-border);
+	border-radius: 6px;
+	background: var(--wsh-panel-2);
+}
+.wsh-scroll .wsh-field { margin-bottom: 4px; }
+
+/* ===== Wide inputs, texts table ===== */
+
+.wsh-wrap .wsh-wide { width: 100%; max-width: 640px; }
+.wsh-wrap .wsh-num { width: 90px; }
+.wsh-wrap .wsh-texts input[type="text"] { width: 100%; }
+
+/* ===== Wish Shelf ===== */
+
+.wsh-field--top { align-items: flex-start; }
+.wsh-cols {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+}
+.wsh-cols label { display: inline-flex; align-items: center; gap: 6px; }
+
+.wsh-kpis {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin: 0 0 16px;
+}
+.wsh-kpi {
+	min-width: 160px;
+	padding: 12px 16px;
+	background: var(--wsh-panel-2);
+	border: 1px solid var(--wsh-border);
+	border-radius: 8px;
+}
+.wsh-kpi__n {
+	display: block;
+	font-size: 26px;
+	font-weight: 600;
+	line-height: 1.2;
+	color: var(--wsh-heading);
+}
+.wsh-kpi__l { color: var(--wsh-muted); }
+.wsh-wrap .wsh-warn-t { color: var(--wsh-warn); }

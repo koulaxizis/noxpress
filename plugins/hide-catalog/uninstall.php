@@ -51,7 +51,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $hic_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'data-migrator' ) as $hic_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator' ) as $hic_slug ) {
 	if ( 'hide-catalog' !== $hic_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $hic_slug . '/' . $hic_slug . '.php' ) ) {
 		$hic_suite_left = true;
 		break;

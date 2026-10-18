@@ -76,7 +76,7 @@ final class SHN_Front {
 			add_action( 'wp', array( __CLASS__, 'setup_product' ) );
 		}
 
-		if ( 'off' !== $s['fs_mode'] || 'off' !== $s['dl_mode'] ) {
+		if ( 'off' !== $s['fs_mode'] || 'off' !== $s['dl_mode'] || 'off' !== $s['mx_mode'] ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		}
 	}
@@ -86,15 +86,15 @@ final class SHN_Front {
 	 * =================================================================== */
 
 	/**
-	 * Whether the visitor sees a part now: 'fs' (free shipping) or 'dl'
-	 * (delivery time).
+	 * Whether the visitor sees a part now: 'fs' (free shipping), 'dl'
+	 * (delivery time) or 'mx' (parcels).
 	 */
 	public static function visible( string $part ): bool {
 		if ( self::$broken || Shipping_Notes::killed() ) {
 			return false;
 		}
-		$mode = SHN_Settings::get()[ 'fs' === $part ? 'fs_mode' : 'dl_mode' ];
-		if ( 'off' === $mode || ! self::context_ok( 'fs' === $part ) ) {
+		$mode = SHN_Settings::get()[ $part . '_mode' ] ?? 'off';
+		if ( 'off' === $mode || ! self::context_ok( 'dl' !== $part ) ) {
 			return false;
 		}
 		if ( 'test' === $mode ) {
@@ -493,7 +493,8 @@ final class SHN_Front {
 			$body = $post ? (string) $post->post_content : '';
 
 			if ( ( $fs && ( $s['fs_minicart'] || $cart || $check || false !== strpos( $body, self::SC_FS ) || false !== strpos( $body, 'noxpress/free-shipping' ) ) )
-				|| ( $dl && ( $product || false !== strpos( $body, self::SC_DL ) || false !== strpos( $body, 'noxpress/delivery' ) ) ) ) {
+				|| ( $dl && ( $product || false !== strpos( $body, self::SC_DL ) || false !== strpos( $body, 'noxpress/delivery' ) ) )
+				|| ( ( $cart || $check || $product ) && self::visible( 'mx' ) ) ) {
 				self::css();
 			}
 
@@ -506,7 +507,7 @@ final class SHN_Front {
 		}
 	}
 
-	private static function css(): void {
+	public static function css(): void {
 		if ( self::$css ) {
 			return;
 		}

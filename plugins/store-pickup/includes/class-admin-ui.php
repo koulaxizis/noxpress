@@ -268,8 +268,10 @@ final class PKP_Admin_UI {
 			}
 		}
 		?>
-		<label class="pkp-check"><input type="checkbox" name="pkp_np_on" value="1" <?php checked( $rule['on'] ); ?> /> <?php esc_html_e( 'Χωρίς παραλαβή όταν το καλάθι έχει προϊόν από αυτές τις κλάσεις αποστολής', 'store-pickup' ); ?></label>
-		<p class="description"><?php esc_html_e( 'Για προϊόντα που δεν περνούν από το κατάστημα, π.χ. όσα τυπώνονται κατά παραγγελία και τα στέλνει ο συνεργάτης παραγωγής. Ο πελάτης βλέπει το μήνυμα «Χωρίς παραλαβή» (καρτέλα Κείμενα) στο καλάθι και στο ταμείο. Οι παραλλαγές χωρίς δική τους κλάση ακολουθούν το γονικό προϊόν.', 'store-pickup' ); ?></p>
+		<label class="pkp-check"><input type="checkbox" name="pkp_np_on" value="1" <?php checked( $rule['on'] ); ?> /> <?php esc_html_e( 'Χωρίς παραλαβή για προϊόντα που στέλνει συνεργάτης', 'store-pickup' ); ?></label>
+		<p class="description"><?php esc_html_e( 'Για προϊόντα που δεν περνούν από το κατάστημα, π.χ. όσα τυπώνονται κατά παραγγελία και τα στέλνει ο συνεργάτης παραγωγής. Ο κανόνας ισχύει ανά δέμα: σε μικτό καλάθι η παραλαβή μένει στο δέμα με τα δικά σου προϊόντα. Όταν κανένα δέμα δεν έχει παραλαβή, ο πελάτης βλέπει το μήνυμα «Χωρίς παραλαβή» (καρτέλα Κείμενα) στο καλάθι και στο ταμείο.', 'store-pickup' ); ?></p>
+		<label class="pkp-check"><input type="checkbox" name="pkp_np_printful" value="1" <?php checked( $rule['printful'] ); ?> /> <?php esc_html_e( 'Δέματα της Printful (το plugin της Printful χωρίζει τα προϊόντα της σε δικό τους δέμα)', 'store-pickup' ); ?></label>
+		<p class="description"><?php esc_html_e( 'Και δέματα με προϊόντα από αυτές τις κλάσεις αποστολής (οι παραλλαγές χωρίς δική τους κλάση ακολουθούν το γονικό προϊόν):', 'store-pickup' ); ?></p>
 		<?php
 		if ( ! $classes ) {
 			echo '<p class="pkp-warn">' . esc_html__( 'Το κατάστημα δεν έχει ακόμα κλάσεις αποστολής. Φτιάξε μία (π.χ. «Printful») και βάλ\' τη στα προϊόντα.', 'store-pickup' ) . '</p>';
@@ -526,8 +528,9 @@ final class PKP_Admin_UI {
 		$raw['hide_address'] = '1' === self::post( 'pkp_hide_address' );
 		$raw['admin_line']   = '1' === self::post( 'pkp_admin_line' );
 		$raw['no_pickup']    = array(
-			'on'      => '1' === self::post( 'pkp_np_on' ),
-			'classes' => self::post_array( 'pkp_np_classes' ),
+			'on'       => '1' === self::post( 'pkp_np_on' ),
+			'printful' => '1' === self::post( 'pkp_np_printful' ),
+			'classes'  => self::post_array( 'pkp_np_classes' ),
 		);
 
 		$known = array();
@@ -584,8 +587,8 @@ final class PKP_Admin_UI {
 				break;
 			}
 		}
-		if ( $s['no_pickup']['on'] && ! $s['no_pickup']['classes'] ) {
-			$msgs[] = self::msg( 'warning', __( 'Ο κανόνας «Χωρίς παραλαβή» είναι ενεργός χωρίς κλάση αποστολής, οπότε δεν κάνει τίποτα.', 'store-pickup' ) );
+		if ( $s['no_pickup']['on'] && ! $s['no_pickup']['classes'] && ! $s['no_pickup']['printful'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Ο κανόνας «Χωρίς παραλαβή» είναι ενεργός χωρίς δέματα της Printful και χωρίς κλάση αποστολής, οπότε δεν κάνει τίποτα.', 'store-pickup' ) );
 		}
 		if ( count( $rows ) > PKP_Settings::MAX_STORES ) {
 			$msgs[] = self::msg( 'warning', __( 'Κρατήθηκαν μόνο τα πρώτα 20 καταστήματα.', 'store-pickup' ) );

@@ -329,10 +329,48 @@ final class TP_Care_Admin {
 			</table>
 			</div>
 			<p class="description tp-mt-8"><?php esc_html_e( 'Το κλειδί (λατινικά, π.χ. printful) δεν αλλάζει μετά την αποθήκευση, γιατί το χρησιμοποιούν τα προϊόντα και τα προφίλ. Μετά την αποθήκευση εμφανίζονται δύο νέες κενές γραμμές.', 'theme-patcher' ); ?></p>
+			<?php self::render_class_makers(); ?>
 			<p class="tp-submit">
 				<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση κατασκευαστών', 'theme-patcher' ); ?></button>
 			</p>
 		</form>
+		<?php
+	}
+
+	/** Shipping class => manufacturer (e.g. every product of the class "printful" is made by Printful). */
+	private static function render_class_makers(): void {
+		$c       = TP_Care::get();
+		$classes = function_exists( 'WC' ) ? WC()->shipping()->get_shipping_classes() : array();
+		?>
+		<h4 class="tp-mt-8"><?php esc_html_e( 'Κατασκευαστής ανά κλάση αποστολής', 'theme-patcher' ); ?></h4>
+		<?php if ( ! $classes ) : ?>
+			<p class="description"><?php esc_html_e( 'Το κατάστημα δεν έχει κλάσεις αποστολής.', 'theme-patcher' ); ?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Κλάσεις αποστολής του WooCommerce', 'theme-patcher' ); ?></a></p>
+			<?php
+			foreach ( $c['class_makers'] as $slug => $mk ) {
+				echo '<input type="hidden" name="tp_care_class_makers[' . esc_attr( $slug ) . ']" value="' . esc_attr( $mk ) . '" />';
+			}
+			return;
+		endif;
+		?>
+		<table class="widefat striped tp-table tp-care-classes">
+			<thead><tr><th><?php esc_html_e( 'Κλάση αποστολής', 'theme-patcher' ); ?></th><th><?php esc_html_e( 'Κατασκευαστής', 'theme-patcher' ); ?></th></tr></thead>
+			<tbody>
+			<?php foreach ( $classes as $term ) : ?>
+				<?php $cur = isset( $c['class_makers'][ $term->slug ] ) ? $c['class_makers'][ $term->slug ] : ''; ?>
+				<tr>
+					<td><?php echo esc_html( $term->name ); ?> <code><?php echo esc_html( $term->slug ); ?></code></td>
+					<td><select name="tp_care_class_makers[<?php echo esc_attr( $term->slug ); ?>]">
+						<option value="" <?php selected( $cur, '' ); ?>><?php esc_html_e( '— από το προφίλ —', 'theme-patcher' ); ?></option>
+						<?php foreach ( $c['makers'] as $m ) : ?>
+							<option value="<?php echo esc_attr( $m['key'] ); ?>" <?php selected( $cur, $m['key'] ); ?>><?php echo esc_html( $m['name'] ); ?></option>
+						<?php endforeach; ?>
+					</select></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<p class="description tp-mt-8"><?php esc_html_e( 'Τα προϊόντα μιας κλάσης παίρνουν αυτόματα αυτόν τον κατασκευαστή (οι παραλλαγές ακολουθούν το γονικό). Ο κατασκευαστής που ορίζεις στο ίδιο το προϊόν μετράει πρώτος.', 'theme-patcher' ); ?></p>
 		<?php
 	}
 
@@ -754,7 +792,8 @@ final class TP_Care_Admin {
 			}
 			$makers[] = $m;
 		}
-		$c['makers'] = $makers;
+		$c['makers']       = $makers;
+		$c['class_makers'] = array_filter( self::posted( 'tp_care_class_makers' ), 'is_string' );
 		TP_Care::save( $c );
 
 		$saved = count( TP_Care::get()['makers'] );
@@ -824,7 +863,7 @@ final class TP_Care_Admin {
 		<p>
 			<label for="tp-care-maker"><strong><?php esc_html_e( 'Κατασκευαστής', 'theme-patcher' ); ?></strong></label><br />
 			<select id="tp-care-maker" name="tp_care_maker" style="width:100%">
-				<option value="" <?php selected( $maker, '' ); ?>><?php esc_html_e( 'Αυτόματο (από το προφίλ)', 'theme-patcher' ); ?></option>
+				<option value="" <?php selected( $maker, '' ); ?>><?php esc_html_e( 'Αυτόματο (κλάση αποστολής ή προφίλ)', 'theme-patcher' ); ?></option>
 				<?php foreach ( $c['makers'] as $m ) : ?>
 					<option value="<?php echo esc_attr( $m['key'] ); ?>" <?php selected( $maker, $m['key'] ); ?>><?php echo esc_html( $m['name'] ); ?></option>
 				<?php endforeach; ?>
