@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -100,6 +100,10 @@ The settings, the transients and the preparation days and release dates on produ
 The free shipping bar does. The parcel names, the "two parcels" message and the Greek partner labels are for the classic cart and checkout (`[woocommerce_cart]`, `[woocommerce_checkout]`); the order list on the thank-you page and in the emails works with both.
 
 == Changelog ==
+
+= 1.1.1 =
+* Changed: with Pre-Orders active, the product's "Available from" field gives way to the Pre-Orders release date (a short line in the Shipping tab). A date already saved stays and can still be edited or cleared.
+* Fixed: saving a product without the "Available from" field on the form no longer clears a saved date.
 
 = 1.1.0 =
 * New: Parcels tab for carts split into several shipping packages (e.g. by the Printful plugin): parcel names, a "two parcels" message with a coloured left border, the partner's rate labels and dates in Greek (display only), the parcel list in the order (thank-you page, My account, customer emails) and an optional product-page line. Off by default.

@@ -5,7 +5,7 @@ Tags: woocommerce, pre-order, preorder, release date, coming soon
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -102,6 +102,10 @@ Activate Pre-Orders: it stays in test mode while the other plugin is active. Mar
 The settings, the products' pre-order data and the scheduled jobs are removed, and the products sell as normal products. The pre-order rows on past orders stay: they are part of the order record. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed: the placeholder of "Text for this product" shows the store's release text in the visitor language (it was always Greek).
+* Changed: the "Format" column of Upcoming releases shows only when Product Formats is active.
 
 = 1.0.0 =
 * Initial release.

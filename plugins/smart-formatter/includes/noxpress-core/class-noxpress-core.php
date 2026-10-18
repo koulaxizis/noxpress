@@ -51,6 +51,7 @@ final class Noxpress_Core {
 		'Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».' => 'Publishing quotes for prospective authors: an amount per service and a total, with the rates hidden on the server and «I\'m interested» requests.',
 		'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.' => 'Pre-orders with a release date: badge and button in the store, the date in the cart and on the order, automatic release and emails.',
 		'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.' => 'Wishlist: a heart on products, guest lists without cookies, sharing and a report of the most wanted products.',
+		'Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.' => 'A gift option with a message at checkout, a message and products on the thank-you page, and a thank-you coupon for the next order.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -231,6 +232,11 @@ final class Noxpress_Core {
 				'name' => 'Wish Shelf',
 				'desc' => __( 'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.', 'noxpress' ),
 				'page' => 'wsh-settings',
+			),
+			'checkout-extras'   => array(
+				'name' => 'Checkout Extras',
+				'desc' => __( 'Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.', 'noxpress' ),
+				'page' => 'cke-settings',
 			),
 		);
 	}

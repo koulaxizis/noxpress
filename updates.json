@@ -13,6 +13,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.0.1/book-preview.zip"
       }
     },
+    "checkout-extras": {
+      "beta": {
+        "changelog": "* Initial release.\n* \"This is a gift\" at checkout (classic and block), with an optional, required or no message, an optional wrapping fee, three positions and a shippable-only rule.\n* Gift on the order: totals row, admin meta box, orders list column and \"Gifts only\" filter, admin New order email line; public function `cke_get_gift()`.\n* Thank-you page message (paid / awaiting payment) with placeholders, in its own box or in place of WooCommerce's line, and cross-sell, related or sale products with the theme's cards.\n* Thank-you coupon: issue rules, coupon properties, delivery in the order email or a separate WooCommerce email, copy button, reminder email, statistics, daily cleanup of expired unused coupons; filters `cke_coupon_args`, `cke_text`, action `cke_coupon_created`.\n* Editable Greek / English texts, settings export / import.\n* Test mode, CKE_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.13).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "25e23e9794ddee40656e2d6ebe0ba65e9cf182e97108dbebaff81f1c11b2184e",
+        "signature": "ejDBVnqiEBnmykcRCa0B4va+7BjnYz9BKCnFVaxF058PQV5K2+it5C5lh6cZzrgjCs4JxgGneB+tMIL7AB9hDA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.0.0/checkout-extras.zip"
+      }
+    },
     "easy-withdrawal": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
@@ -80,15 +93,15 @@
     },
     "pre-orders": {
       "beta": {
-        "changelog": "* Initial release.\n* Pre-order with a release date or \"Coming soon\" on simple products and variations, with an optional text per product; quick edit, bulk edit, list column and filter; \"Sale until release\".\n* Badge, \"Pre-order\" button and availability text, for classic and block themes; PreOrder structured data (WooCommerce and Rank Math).\n* Cart line note, three mixed-cart rules, release date saved on the order lines; orders list column and filter (HPOS and legacy).\n* Release day job (Action Scheduler) with `por_released`; \"Released\" and \"New release date\" emails (off by default); background update of open orders when the date changes.\n* Upcoming releases page with counts and CSV shipping list.\n* `[nox_preorders]` and the \"Pre-orders\" block.\n* Shipping Notes delivery estimate from the release date; Product Formats format column.\n* Public function `por_get_release()`, filters `por_is_preorder` and `por_text`.\n* Editable Greek / English texts, date format, settings export / import.\n* Test mode, rival plugin rule, POR_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.11).",
+        "changelog": "* Fixed: the placeholder of \"Text for this product\" shows the store's release text in the visitor language (it was always Greek).\n* Changed: the \"Format\" column of Upcoming releases shows only when Product Formats is active.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4fefaf3b12d737b544267e136da5ac36e5b83efd3e9a59564f3eb5c94df247fd",
-        "signature": "kb5f6rFRBx7bfvLZ/df4h+FZBylfIHTsC58iwVTUti4pRCuU7jx4GkemPFPc34oUwIUkD5imDI0vKuBHsXRmBw==",
+        "sha256": "a4fc06a63a7cffb142caf7fba82ab6dd76f41131f1d5334bc7cc7f079fdecf39",
+        "signature": "xqBxZtV/vOZ2k2p1LwkArO1+Nf/6VzzYv+TjIi++qgGCsrbvXxLHEVoAQ3jf708BjwtizpWGCaPGXP6VLLQECA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.0.0/pre-orders.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.0.1/pre-orders.zip"
       }
     },
     "product-bundles": {
@@ -156,15 +169,15 @@
     },
     "shipping-notes": {
       "beta": {
-        "changelog": "* New: Parcels tab for carts split into several shipping packages (e.g. by the Printful plugin): parcel names, a \"two parcels\" message with a coloured left border, the partner's rate labels and dates in Greek (display only), the parcel list in the order (thank-you page, My account, customer emails) and an optional product-page line. Off by default.\n* New: filters `shn_partner_package`, `shn_partner_rate`, `shn_partner_product`.",
+        "changelog": "* Changed: with Pre-Orders active, the product's \"Available from\" field gives way to the Pre-Orders release date (a short line in the Shipping tab). A date already saved stays and can still be edited or cleared.\n* Fixed: saving a product without the \"Available from\" field on the form no longer clears a saved date.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "720f23e71c70e4ce81635dfca21eb3e08df6407cac1fbb8e22faebdcddf0aa85",
-        "signature": "16QPuobwpcjotjGCp+TCJLN5SQtF/DNNM4zAJDiTzsaBetZENVjBkw4gGwh91b12bSN2VuqUoafjZZZDrHlrAA==",
+        "sha256": "212cf89bec68b2e1557f3f250ab1e8f320397f907575f47572947728401c830c",
+        "signature": "V0B/x/WuvPqdDLKZXhwiEkOwy/UQAJa+J/gxCRx2zMWXD3OMChHYE2abe6QU7i1DowkJ3DvMuOFzS20D7G6HDw==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.1.0/shipping-notes.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.1.1/shipping-notes.zip"
       }
     },
     "shop-filters": {
@@ -243,6 +256,19 @@
         "tested_wp": "7.1",
         "version": "1.0.0",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.0.0/variation-picker.zip"
+      }
+    },
+    "wish-shelf": {
+      "beta": {
+        "changelog": "* Initial release.\n* Heart on shop cards (before / after the button, over the image) and on the product page, classic and block themes; button, list and counter blocks and shortcodes.\n* Guest lists in localStorage (no cookies), merged into the account on sign-in, or sign-in required.\n* Saved variations, price-drop note, add to cart per row / all / selected, remove after adding, empty list.\n* Table or theme-card layout, My Account tab, menu counter.\n* Share links (guest ids or a private random key) with copy and the device share menu, noindex.\n* Report of the most wanted products with \"bought from a list\", CSV export, ♥ column in Products.\n* Import from WishSuite; test mode while another wishlist plugin is active.\n* Privacy export / erase, editable Greek / English texts, settings export / import.\n* Test mode, WSH_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.12).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "d5406ccf7b942bfe2702a2f365c00a870ff520707ef88b238aa11324eda204d4",
+        "signature": "M4Uk8RzJI+Y5qaLXX+pnS/hai/rxfkQaweCMV0UevnZuyakloTP1dgrMLPL9p0nCHAAeYWLzschcZw7Y4aAKDg==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.0.0/wish-shelf.zip"
       }
     }
   }
