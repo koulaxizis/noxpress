@@ -74,7 +74,7 @@ register_shutdown_function(
 
 require $nm_wpload;
 
-foreach ( array( 'util', 'zip-reader', 'db', 'dumper', 'replacer', 'importer', 'restorer', 'page' ) as $nm_c ) {
+foreach ( array( 'util', 'crypt', 'zip-reader', 'db', 'dumper', 'replacer', 'importer', 'restorer', 'page' ) as $nm_c ) {
 	require_once __DIR__ . '/engine/class-nm-' . $nm_c . '.php';
 }
 require_once __DIR__ . '/includes/class-lang.php';

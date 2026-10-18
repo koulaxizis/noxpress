@@ -235,6 +235,10 @@ final class NM_Admin_UI {
 			echo '<option value="' . esc_attr( (string) $p ) . '"' . selected( (int) $set['part_mb'], $p, false ) . '>' . esc_html( 0 === $p ? __( 'Ένα αρχείο', 'data-migrator' ) : NM_Util::size( $p * 1048576.0 ) ) . '</option>';
 		}
 		echo '</select> <label for="nm-note">' . esc_html__( 'Σημείωση', 'data-migrator' ) . '</label> <input type="text" id="nm-note" name="note" maxlength="120"></p>';
+		if ( $set['encrypt'] ) {
+			$ok = NM_Crypt::available() && in_array( NM_Settings::password_source(), array( 'const', 'option' ), true );
+			echo '<p class="' . ( $ok ? 'nm-ok' : 'nm-err' ) . '">' . esc_html( $ok ? __( 'Τα νέα αντίγραφα κρυπτογραφούνται (AES-256).', 'data-migrator' ) : __( 'Η κρυπτογράφηση είναι ενεργή αλλά ο κωδικός λείπει ή δεν διαβάζεται πια. Όρισέ τον ξανά στις Ρυθμίσεις.', 'data-migrator' ) ) . '</p>';
+		}
 		echo '<p><button type="submit" class="button button-primary"' . disabled( (bool) $running, true, false ) . '>' . esc_html__( 'Δημιουργία αντιγράφου', 'data-migrator' ) . '</button></p></form>';
 		echo '<div class="nm-run' . ( $running && 'backup' === $running['type'] ? ' is-on' : '' ) . '" id="nm-backup-run" data-job="' . esc_attr( $running && 'backup' === $running['type'] ? (string) $running['id'] : '' ) . '"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p><button type="button" class="button nm-cancel">' . esc_html__( 'Ακύρωση', 'data-migrator' ) . '</button></div>';
 		if ( $running && 'backup' !== $running['type'] ) {
@@ -389,6 +393,9 @@ final class NM_Admin_UI {
 		if ( ! empty( $m['sched'] ) ) {
 			echo '<br><span class="nm-badge">' . esc_html__( 'Προγραμματισμένο', 'data-migrator' ) . '</span>';
 		}
+		if ( ! empty( $m['enc'] ) ) {
+			echo '<br><span class="nm-badge">' . esc_html__( 'Κρυπτογραφημένο', 'data-migrator' ) . '</span>';
+		}
 		if ( ! empty( $m['note'] ) ) {
 			echo '<br><span class="description">' . esc_html( (string) $m['note'] ) . '</span>';
 		}
@@ -514,9 +521,10 @@ final class NM_Admin_UI {
 		$pick = self::q( 'backup' );
 		echo '<p><select id="nm-pick">';
 		foreach ( $all as $m ) {
-			echo '<option value="' . esc_attr( (string) $m['id'] ) . '"' . selected( $pick, (string) $m['id'], false ) . '>' . esc_html( self::when( (int) $m['created'] ) . ' · ' . (string) ( $m['home'] ?? '' ) . ' · ' . NM_Util::size( (float) ( $m['size'] ?? 0 ) ) . ( empty( $m['note'] ) ? '' : ' · ' . $m['note'] ) ) . '</option>';
+			echo '<option value="' . esc_attr( (string) $m['id'] ) . '" data-enc="' . ( empty( $m['enc'] ) ? '0' : '1' ) . '"' . selected( $pick, (string) $m['id'], false ) . '>' . esc_html( self::when( (int) $m['created'] ) . ' · ' . (string) ( $m['home'] ?? '' ) . ' · ' . NM_Util::size( (float) ( $m['size'] ?? 0 ) ) . ( empty( $m['note'] ) ? '' : ' · ' . $m['note'] ) . ( empty( $m['enc'] ) ? '' : ' · ' . __( 'Κρυπτογραφημένο', 'data-migrator' ) ) ) . '</option>';
 		}
 		echo '</select> <button type="button" class="button button-primary" id="nm-analyze-go">' . esc_html__( 'Ανάλυση', 'data-migrator' ) . '</button></p>';
+		echo '<p id="nm-pick-pw-row" hidden><label for="nm-pick-pw">' . esc_html__( 'Κωδικός του αντιγράφου', 'data-migrator' ) . '</label> <input type="password" id="nm-pick-pw" autocomplete="off" class="regular-text"> <span class="description">' . esc_html__( 'Κενό: ο κωδικός από τις Ρυθμίσεις.', 'data-migrator' ) . '</span></p>';
 		echo '<p class="description">' . esc_html__( 'Η ανάλυση δεν αλλάζει τίποτα: ελέγχει το αρχείο και τον server, μετρά τι θα αλλάξει και δείχνει το πλάνο πριν την επαναφορά.', 'data-migrator' ) . '</p>';
 		echo '<div class="nm-run" id="nm-analyze-run"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p></div></div>';
 	}
@@ -657,6 +665,8 @@ final class NM_Admin_UI {
 		echo '<label style="display:block"><input type="checkbox" name="keep" value="1"' . checked( $s['keep'], true, false ) . '> ' . esc_html__( 'Να μείνουν τα αντίγραφα όταν διαγραφεί το plugin', 'data-migrator' ) . '</label>';
 		echo '<p class="description">' . esc_html__( 'Από προεπιλογή σβήνονται: ένα ξεχασμένο αντίγραφο έχει όλη τη βάση του site.', 'data-migrator' ) . '</p></div>';
 
+		self::render_crypt( $s );
+
 		echo '<h2 class="nm-h2">' . esc_html__( 'Προγραμματισμένα αντίγραφα', 'data-migrator' ) . '</h2><div class="nm-zone">';
 		echo '<p><label for="nm-quota">' . esc_html__( 'Όριο χώρου (GB, 0 = χωρίς όριο)', 'data-migrator' ) . '</label> <input type="number" id="nm-quota" name="sched_quota" min="0" max="10000" value="' . esc_attr( (string) $s['sched_quota'] ) . '" style="width:90px"></p>';
 		echo '<p class="description">' . esc_html__( 'Για όλα τα προγραμματισμένα μαζί. Όταν το ξεπεράσουν, σβήνονται τα παλαιότερα προγραμματισμένα. Τα χειροκίνητα δεν σβήνονται ποτέ.', 'data-migrator' ) . '</p>';
@@ -692,9 +702,70 @@ final class NM_Admin_UI {
 		echo '<p><button class="button">' . esc_html__( 'Έλεγχος του φακέλου μέσω HTTP', 'data-migrator' ) . '</button></p></form>';
 	}
 
+	/** Settings: encryption (off by default). */
+	private static function render_crypt( array $s ): void {
+		$have = NM_Crypt::available();
+		$src  = NM_Settings::password_source();
+		echo '<h2 class="nm-h2">' . esc_html__( 'Κρυπτογράφηση', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		if ( ! $have ) {
+			echo '<p class="nm-warn">' . esc_html__( 'Δεν γίνεται σε αυτόν τον server: η PHP δεν έχει την επέκταση OpenSSL.', 'data-migrator' ) . '</p>';
+		}
+		echo '<label style="display:block"><input type="checkbox" name="encrypt" value="1"' . checked( $s['encrypt'], true, false ) . disabled( ! $have, true, false ) . '> ' . esc_html__( 'Κρυπτογράφηση των νέων αντιγράφων με κωδικό (AES-256)', 'data-migrator' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Για όλα τα νέα αντίγραφα, και τα προγραμματισμένα. Ανοίγουν με τον κωδικό στην επαναφορά, στον installer, στο 7-Zip, στο WinZip και στο Archive Utility του macOS. Τα ονόματα των αρχείων μέσα στο ZIP φαίνονται, τα περιεχόμενα όχι. Τα αντίγραφα γίνονται λίγο πιο αργά.', 'data-migrator' ) . '</p>';
+		echo '<p class="nm-warn"><strong>' . esc_html__( 'Αν χαθεί ο κωδικός, τα κρυπτογραφημένα αντίγραφα δεν ανοίγουν με κανέναν τρόπο. Κράτα τον σε password manager, έξω από αυτό το site.', 'data-migrator' ) . '</strong></p>';
+		if ( 'const' === $src ) {
+			echo '<p class="nm-ok">' . esc_html__( 'Ο κωδικός ορίζεται στο wp-config.php (NM_BACKUP_PASSWORD).', 'data-migrator' ) . '</p></div>';
+			return;
+		}
+		$state = array(
+			'option'     => array( 'nm-ok', __( 'Υπάρχει αποθηκευμένος κωδικός (κρυπτογραφημένος με τα κλειδιά του wp-config.php).', 'data-migrator' ) ),
+			'none'       => array( 'description', __( 'Δεν έχει οριστεί κωδικός.', 'data-migrator' ) ),
+			'unreadable' => array( 'nm-err', __( 'Ο αποθηκευμένος κωδικός δεν διαβάζεται πια (άλλαξαν τα κλειδιά του wp-config.php). Γράψε τον ξανά.', 'data-migrator' ) ),
+		);
+		echo '<p class="' . esc_attr( $state[ $src ][0] ) . '">' . esc_html( $state[ $src ][1] ) . '</p>';
+		echo '<p><label for="nm-pw">' . esc_html__( 'Νέος κωδικός', 'data-migrator' ) . '</label><br><input type="text" class="regular-text" id="nm-pw" name="nm_pw" minlength="' . esc_attr( (string) NM_Crypt::MIN ) . '" autocomplete="off" spellcheck="false"' . disabled( ! $have, true, false ) . '> <button type="button" class="button" id="nm-pw-gen"' . disabled( ! $have, true, false ) . '>' . esc_html__( 'Δημιουργία κωδικού', 'data-migrator' ) . '</button></p>';
+		echo '<p class="description">' . esc_html( sprintf( /* translators: %d: characters */ __( 'Τουλάχιστον %d χαρακτήρες. Κενό: μένει ο τωρινός. Ένας νέος κωδικός ισχύει για τα επόμενα αντίγραφα· τα παλιά ανοίγουν με τον κωδικό που είχαν.', 'data-migrator' ), NM_Crypt::MIN ) ) . '</p>';
+		echo '<label style="display:block"><input type="checkbox" name="pw_saved" value="1"> ' . esc_html__( 'Κράτησα τον νέο κωδικό σε ασφαλές μέρος', 'data-migrator' ) . '</label>';
+		if ( 'none' !== $src ) {
+			echo '<label style="display:block"><input type="checkbox" name="pw_forget" value="1"> ' . esc_html__( 'Να σβηστεί ο αποθηκευμένος κωδικός (η κρυπτογράφηση σταματά)', 'data-migrator' ) . '</label>';
+		}
+		echo '</div>';
+	}
+
 	/* =====================================================================
 	 * POST actions (PRG)
 	 * =================================================================== */
+
+	/**
+	 * The password fields of the settings form. Returns whether
+	 * encryption is on: never on without a password that can be read.
+	 */
+	private static function save_crypt( array &$msgs ): bool {
+		$want = '1' === self::post( 'encrypt' );
+		$src  = NM_Settings::password_source();
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in route(); a password is kept as typed.
+		$new = isset( $_POST['nm_pw'] ) && is_string( $_POST['nm_pw'] ) ? (string) wp_unslash( $_POST['nm_pw'] ) : '';
+		if ( 'const' !== $src && '' !== $new ) {
+			if ( strlen( $new ) < NM_Crypt::MIN || preg_match( '/[\x00-\x1f]/', $new ) ) {
+				$msgs[] = self::msg( 'error', sprintf( /* translators: %d: characters */ __( 'Ο κωδικός θέλει τουλάχιστον %d χαρακτήρες. Δεν αποθηκεύτηκε.', 'data-migrator' ), NM_Crypt::MIN ) );
+			} elseif ( '1' !== self::post( 'pw_saved' ) ) {
+				$msgs[] = self::msg( 'error', __( 'Τσέκαρε ότι κράτησες τον νέο κωδικό σε ασφαλές μέρος. Δεν αποθηκεύτηκε.', 'data-migrator' ) );
+			} elseif ( ! NM_Settings::set_password( $new ) ) {
+				$msgs[] = self::msg( 'error', __( 'Δεν γίνεται σε αυτόν τον server: η PHP δεν έχει την επέκταση OpenSSL.', 'data-migrator' ) );
+			} else {
+				$msgs[] = self::msg( 'success', 'option' === $src ? __( 'Ο νέος κωδικός αποθηκεύτηκε. Τα παλιά κρυπτογραφημένα αντίγραφα ανοίγουν με τον παλιό.', 'data-migrator' ) : __( 'Ο κωδικός αποθηκεύτηκε.', 'data-migrator' ) );
+			}
+		} elseif ( 'const' !== $src && '1' === self::post( 'pw_forget' ) ) {
+			NM_Settings::set_password( '' );
+			$want = false;
+		}
+		$src = NM_Settings::password_source();
+		if ( $want && ( ! NM_Crypt::available() || ! in_array( $src, array( 'const', 'option' ), true ) ) ) {
+			$msgs[] = self::msg( 'error', __( 'Η κρυπτογράφηση δεν ενεργοποιήθηκε: χρειάζεται κωδικός που διαβάζεται και η επέκταση OpenSSL της PHP.', 'data-migrator' ) );
+			$want   = false;
+		}
+		return $want;
+	}
 
 	private static function post( string $key ): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in route() / ajax_guard(); every caller validates or sanitizes the value for its own use.
@@ -773,6 +844,7 @@ final class NM_Admin_UI {
 				$s['keep']    = '1' === self::post( 'keep' );
 				$s['sched_quota'] = (int) self::post( 'sched_quota' );
 				$s['sched_mail']  = self::post( 'sched_mail' );
+				$s['encrypt']     = self::save_crypt( $msgs );
 				NM_Settings::save( $s );
 				if ( $changed ) {
 					NM_Storage::reset_cache();
@@ -1080,7 +1152,9 @@ final class NM_Admin_UI {
 
 	public static function ajax_analyze(): void {
 		self::ajax_guard();
-		$job = NM_Restore_Prep::analyze_start( self::post( 'id' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- ajax_guard(); a password is kept as typed.
+		$pw  = isset( $_POST['pw'] ) && is_string( $_POST['pw'] ) ? (string) wp_unslash( $_POST['pw'] ) : '';
+		$job = NM_Restore_Prep::analyze_start( self::post( 'id' ), $pw );
 		if ( is_wp_error( $job ) ) {
 			wp_send_json_error( array( 'text' => $job->get_error_message() ) );
 		}

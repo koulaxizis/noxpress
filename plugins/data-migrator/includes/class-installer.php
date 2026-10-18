@@ -17,7 +17,7 @@ final class NM_Installer {
 	const DAYS = 7;
 
 	/** Engine files inlined into the installer, in order. */
-	const PARTS = array( 'engine/class-nm-util.php', 'engine/class-nm-zip-reader.php', 'engine/class-nm-db.php', 'engine/class-nm-dumper.php', 'engine/class-nm-replacer.php', 'engine/class-nm-importer.php', 'engine/class-nm-restorer.php', 'engine/class-nm-page.php', 'includes/class-lang.php' );
+	const PARTS = array( 'engine/class-nm-util.php', 'engine/class-nm-crypt.php', 'engine/class-nm-zip-reader.php', 'engine/class-nm-db.php', 'engine/class-nm-dumper.php', 'engine/class-nm-replacer.php', 'engine/class-nm-importer.php', 'engine/class-nm-restorer.php', 'engine/class-nm-page.php', 'includes/class-lang.php' );
 
 	/** New key for a backup. @return string|WP_Error The key (shown once). */
 	public static function new_key( string $id ) {

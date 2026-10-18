@@ -12,6 +12,8 @@
  * - It writes wp-config.php from the backup's wp-config-sample.php with
  *   the database details you give and fresh salts (the old site's
  *   wp-config.php is never in a backup).
+ * - An encrypted backup asks for its password once; it is kept sealed
+ *   (AES-256-GCM, with a key from this file) in the installer's state.
  * - At the end it deletes the backup parts, its work folder, its state
  *   and itself.
  *
@@ -84,6 +86,7 @@ final class NM_Installer_App {
 			$this->save();
 		}
 		NM_Util::$lang = 'en' === $this->st['lang'] ? 'en' : 'el';
+		NM_Crypt::$key = hash( 'sha256', 'pw|' . NM_INST_KEYHASH . __FILE__, true );
 
 		if ( time() > NM_INST_EXPIRES ) {
 			$this->page_msg( NM_Util::t( 'Ο installer έληξε (ισχύει 7 ημέρες). Φτιάξε νέο από τη σελίδα «Αντίγραφα» του Data Migrator.' ) );
@@ -109,6 +112,10 @@ final class NM_Installer_App {
 		}
 		if ( 'start' === $do ) {
 			$this->start();
+			return;
+		}
+		if ( 'unlock' === $do ) {
+			$this->unlock();
 			return;
 		}
 		$job = $this->job();
@@ -169,7 +176,11 @@ final class NM_Installer_App {
 		return array_values( $found );
 	}
 
-	private function manifest( array $parts ) {
+	/** @var string Why manifest() found nothing: '', nopass, password, … */
+	private $merr = '';
+
+	private function manifest( array $parts, string $pw = '' ) {
+		$this->merr = '';
 		if ( ! $parts ) {
 			return null;
 		}
@@ -177,11 +188,39 @@ final class NM_Installer_App {
 		if ( ! $zr->open() ) {
 			return null;
 		}
+		$zr->set_password( '' !== $pw ? $pw : $this->password() );
 		$e = $zr->find( 'nm/manifest.json' );
 		$m = $e ? $zr->read( $e ) : false;
+		if ( false === $m && $e ) {
+			$this->merr = $zr->error;
+		}
 		$zr->close();
 		$j = is_string( $m ) ? json_decode( $m, true ) : null;
 		return is_array( $j ) && NM_INST_BACKUP === ( $j['id'] ?? '' ) ? $j : null;
+	}
+
+	/** The backup's password given on the unlock form, '' when none. */
+	private function password(): string {
+		$pw = empty( $this->st['pw'] ) ? null : NM_Crypt::unseal( (string) $this->st['pw'] );
+		return null === $pw ? '' : $pw;
+	}
+
+	/** Whether the manifest needs a password (encrypted, none or wrong given). */
+	private function locked(): bool {
+		return in_array( $this->merr, array( 'nopass', 'password', 'openssl' ), true );
+	}
+
+	private function unlock(): void {
+		$pw = isset( $_POST['pw'] ) && is_string( $_POST['pw'] ) ? $_POST['pw'] : ''; // phpcs:ignore
+		$m  = '' === $pw ? null : $this->manifest( $this->parts(), $pw );
+		if ( ! $m ) {
+			sleep( 1 );
+			$this->page_form( array( 'openssl' === $this->merr ? NM_Util::t( 'Το αντίγραφο είναι κρυπτογραφημένο και η PHP του server δεν έχει την επέκταση OpenSSL.' ) : NM_Util::t( 'Λάθος κωδικός για αυτό το αντίγραφο.' ) ) );
+			return;
+		}
+		$this->st['pw'] = NM_Crypt::seal( $pw );
+		$this->save();
+		header( 'Location: ' . $this->self_url, true, 303 );
 	}
 
 	private function job_file(): string {
@@ -364,6 +403,7 @@ final class NM_Installer_App {
 			'tag'      => substr( NM_Util::hex( 3 ), 0, 6 ),
 			'lang'     => NM_Util::$lang,
 			'archive'  => array( 'parts' => $this->parts() ),
+			'pw'       => (string) ( $this->st['pw'] ?? '' ),
 			'manifest' => array(
 				'prefix' => (string) $m['site']['prefix'],
 				'fks'    => (array) ( $m['fks'] ?? array() ),
@@ -569,6 +609,17 @@ final class NM_Installer_App {
 		echo $this->lang_links(); // phpcs:ignore
 		foreach ( $errors as $e ) {
 			echo '<p class="fail">' . NM_Page::h( $e ) . '</p>'; // phpcs:ignore
+		}
+		if ( ! $m && $this->locked() ) {
+			if ( 'openssl' === $this->merr ) {
+				echo '<p class="fail">' . NM_Page::h( NM_Util::t( 'Το αντίγραφο είναι κρυπτογραφημένο και η PHP του server δεν έχει την επέκταση OpenSSL.' ) ) . '</p>'; // phpcs:ignore
+				NM_Page::close();
+				return;
+			}
+			echo '<form method="post" action="' . NM_Page::h( $this->self_url ) . '"><input type="hidden" name="t" value="' . NM_Page::h( $this->csrf() ) . '"><input type="hidden" name="do" value="unlock">'; // phpcs:ignore
+			echo '<label for="pw">' . NM_Page::h( NM_Util::t( 'Το αντίγραφο είναι κρυπτογραφημένο. Γράψε τον κωδικό του.' ) ) . '</label><input type="password" id="pw" name="pw" autocomplete="off" autofocus> <button class="primary">' . NM_Page::h( NM_Util::t( 'Συνέχεια' ) ) . '</button></form>'; // phpcs:ignore
+			NM_Page::close();
+			return;
 		}
 		echo '<h2>' . NM_Page::h( NM_Util::t( 'Έλεγχος' ) ) . '</h2><ul>'; // phpcs:ignore
 		$fail = false;

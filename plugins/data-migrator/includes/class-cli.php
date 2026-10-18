@@ -97,6 +97,7 @@ final class NM_CLI {
 				'size'    => NM_Util::size( (float) ( $m['size'] ?? 0 ) ),
 				'home'    => $m['home'] ?? '',
 				'note'    => $m['note'] ?? '',
+				'enc'     => empty( $m['enc'] ) ? 'no' : 'yes',
 			);
 		}
 		$format = (string) ( $assoc['format'] ?? 'table' );
@@ -104,7 +105,7 @@ final class NM_CLI {
 			WP_CLI::log( implode( ' ', wp_list_pluck( $rows, 'id' ) ) );
 			return;
 		}
-		WP_CLI\Utils\format_items( $format, $rows, array( 'id', 'created', 'status', 'db', 'groups', 'parts', 'size', 'home', 'note' ) );
+		WP_CLI\Utils\format_items( $format, $rows, array( 'id', 'created', 'status', 'db', 'groups', 'parts', 'size', 'home', 'note', 'enc' ) );
 	}
 
 	/**
@@ -161,11 +162,15 @@ final class NM_CLI {
 	 * <id>
 	 * : Backup id.
 	 *
+	 * [--password=<password>]
+	 * : The password of an encrypted backup. Default: the one in
+	 *   Settings (or NM_BACKUP_PASSWORD).
+	 *
 	 * @param array $args  Positional.
 	 * @param array $assoc Options.
 	 */
 	public function verify( $args, $assoc ): void {
-		$an = $this->analyze( (string) $args[0] );
+		$an = $this->analyze( (string) $args[0], (string) ( $assoc['password'] ?? '' ) );
 		$this->print_checks( NM_Restore_Prep::checks( $an['result'] ) );
 		WP_CLI::success( 'The backup is readable.' );
 	}
@@ -206,6 +211,10 @@ final class NM_CLI {
 	 * [--salts]
 	 * : New security keys (everyone signs in again).
 	 *
+	 * [--password=<password>]
+	 * : The password of an encrypted backup. Default: the one in
+	 *   Settings (or NM_BACKUP_PASSWORD).
+	 *
 	 * [--dry-run]
 	 * : Analyse and show the plan only.
 	 *
@@ -216,7 +225,7 @@ final class NM_CLI {
 	 * @param array $assoc Options.
 	 */
 	public function restore( $args, $assoc ): void {
-		$an = $this->analyze( (string) $args[0] );
+		$an = $this->analyze( (string) $args[0], (string) ( $assoc['password'] ?? '' ) );
 		$o  = NM_Restore_Prep::defaults( $an['result'] );
 		if ( isset( $assoc['new-url'] ) ) {
 			$url = esc_url_raw( (string) $assoc['new-url'] );
@@ -449,11 +458,11 @@ final class NM_CLI {
 	}
 
 	/** Run the analysis of a backup. @return array The finished job. */
-	private function analyze( string $id ): array {
+	private function analyze( string $id, string $pw = '' ): array {
 		if ( ! preg_match( NM_Storage::ID_RE, $id ) ) {
 			WP_CLI::error( 'Invalid backup id.' );
 		}
-		$job = NM_Restore_Prep::analyze_start( $id );
+		$job = NM_Restore_Prep::analyze_start( $id, $pw );
 		if ( is_wp_error( $job ) ) {
 			WP_CLI::error( $job->get_error_message() );
 		}

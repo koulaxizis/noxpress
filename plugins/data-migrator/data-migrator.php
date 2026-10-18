@@ -3,7 +3,7 @@
  * Plugin Name:          Data Migrator
  * Plugin URI:           https://noxpress.tech
  * Description:          Πλήρες αντίγραφο ασφαλείας του WordPress / WooCommerce site (βάση, uploads, θέματα, plugins, core) και επαναφορά στον ίδιο ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις. Ανάλυση πριν την επαναφορά, αναίρεση με ένα κλικ, installer για άδειο server, WP-CLI. Χωρίς εξωτερικές υπηρεσίες.
- * Version:              1.1.0
+ * Version:              1.2.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -23,6 +23,7 @@
  *  - runner.php        → standalone restore runner (SHORTINIT, token)
  *  - engine/ (no WordPress calls; also inside runner.php and the installer)
  *    - NM_Util         → state files, locks, paths, log, translation
+ *    - NM_Crypt        → AES-256 entries (WinZip AE-2), sealed secrets
  *    - NM_Zip_Writer   → resumable streaming ZIP (ZIP64, parts)
  *    - NM_Zip_Reader   → central directory walk, CRC-checked extraction
  *    - NM_DB           → own mysqli connection
@@ -73,7 +74,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NM_VERSION', '1.1.0' );
+define( 'NM_VERSION', '1.2.0' );
 define( 'NM_FILE', __FILE__ );
 define( 'NM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NM_URL', plugin_dir_url( __FILE__ ) );
@@ -82,6 +83,7 @@ define( 'NM_URL', plugin_dir_url( __FILE__ ) );
 require_once NM_PATH . 'includes/noxpress-core/loader.php';
 
 require_once NM_PATH . 'engine/class-nm-util.php';
+require_once NM_PATH . 'engine/class-nm-crypt.php';
 require_once NM_PATH . 'engine/class-nm-zip-writer.php';
 require_once NM_PATH . 'engine/class-nm-zip-reader.php';
 require_once NM_PATH . 'engine/class-nm-db.php';

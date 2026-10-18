@@ -199,7 +199,20 @@ final class NM_Backup {
 			}
 		}
 
-		$id   = NM_Util::hex( 16 );
+		$id    = NM_Util::hex( 16 );
+		$enc   = ! empty( NM_Settings::get()['encrypt'] );
+		$pwchk = '';
+		if ( $enc ) {
+			// Never a silent fallback to an unencrypted backup.
+			if ( ! NM_Crypt::available() ) {
+				return new WP_Error( 'openssl', NM_Util::t( 'Η κρυπτογράφηση είναι ενεργή αλλά η PHP του server δεν έχει την επέκταση OpenSSL. Το αντίγραφο δεν ξεκίνησε.' ) );
+			}
+			$pw = NM_Settings::password();
+			if ( null === $pw ) {
+				return new WP_Error( 'password', NM_Util::t( 'Η κρυπτογράφηση είναι ενεργή αλλά ο κωδικός λείπει ή δεν διαβάζεται πια. Όρισέ τον ξανά στις Ρυθμίσεις. Το αντίγραφο δεν ξεκίνησε.' ) );
+			}
+			$pwchk = self::pwchk( $pw, $id );
+		}
 		$work = NM_Storage::sub( 'work' ) . '/' . $id;
 		if ( ! NM_Util::mkdirp( $work . '/db' ) ) {
 			return new WP_Error( 'work', NM_Util::t( 'Δεν δημιουργήθηκε ο φάκελος εργασίας.' ) );
@@ -227,6 +240,8 @@ final class NM_Backup {
 			'note'    => substr( sanitize_text_field( (string) ( $o['note'] ?? '' ) ), 0, 120 ),
 			'sched'   => isset( $o['sched'] ) && preg_match( '/^[a-f0-9]{8}$/', (string) $o['sched'] ) ? (string) $o['sched'] : '',
 			'dbsize'  => $dbsize,
+			'enc'     => $enc,
+			'pwchk'   => $pwchk,
 			'stem'    => ( '' === $host ? 'site' : $host ) . '-' . wp_date( 'Ymd-His' ) . '-' . $id,
 			'work'    => $work,
 			'ss'      => array(),
@@ -249,13 +264,14 @@ final class NM_Backup {
 				'scope'   => $scope,
 				'note'    => $job['note'],
 				'sched'   => $job['sched'],
+				'enc'     => $enc,
 				'parts'   => array(),
 				'job'     => $job['id'],
 				'home'    => home_url(),
 			)
 		);
 		NM_Util::$log_file = NM_Storage::log_file( $job['id'] );
-		NM_Util::log( 'backup ' . $id . ' started: scope ' . $scope . ', ' . count( $tables ) . ' tables, groups ' . implode( ',', $grps ) );
+		NM_Util::log( 'backup ' . $id . ' started: scope ' . $scope . ', ' . count( $tables ) . ' tables, groups ' . implode( ',', $grps ) . ( $enc ? ', encrypted' : '' ) );
 		return $job;
 	}
 
@@ -705,15 +721,38 @@ final class NM_Backup {
 		return $job['stem'] . ( $n > 1 ? '-part' . $n : '' ) . '.zip';
 	}
 
-	private static function writer( array $job, array $ss ): NM_Zip_Writer {
+	/** A password check stored in the job (PBKDF2, like the archive's own verifier). */
+	private static function pwchk( string $pw, string $id ): string {
+		return base64_encode( hash_pbkdf2( 'sha256', $pw, 'nm-check|' . $id, NM_Crypt::ROUNDS, 16, true ) );
+	}
+
+	/**
+	 * The writer of the current part, opened; null with $job['error'] set.
+	 * An encrypted job continues only with the password it started with.
+	 */
+	private static function writer( array &$job, array $ss ): ?NM_Zip_Writer {
 		$w = $ss['w'] ?? array();
 		if ( ! $w ) {
 			$w = array(
 				'path' => NM_Storage::sub( 'backups' ) . '/' . self::part_name( $job, (int) $ss['part'] ),
 				'cd'   => $job['work'] . '/cd-' . (int) $ss['part'] . '.bin',
+				'enc'  => ! empty( $job['enc'] ),
 			);
 		}
-		return new NM_Zip_Writer( $w );
+		$zw = new NM_Zip_Writer( $w );
+		if ( ! empty( $job['enc'] ) ) {
+			$pw = NM_Settings::password();
+			if ( null === $pw || ! NM_Crypt::available() || ! hash_equals( (string) $job['pwchk'], self::pwchk( $pw, (string) $job['backup'] ) ) ) {
+				$job['error'] = NM_Util::t( 'Ο κωδικός κρυπτογράφησης άλλαξε ή δεν διαβάζεται πια, οπότε το αντίγραφο σταμάτησε. Ξεκίνα νέο.' );
+				return null;
+			}
+			$zw->set_password( $pw );
+		}
+		if ( ! $zw->open() ) {
+			$job['error'] = NM_Util::t( 'Δεν γράφεται το αρχείο ZIP στον φάκελο των αντιγράφων.' );
+			return null;
+		}
+		return $zw;
 	}
 
 	private static function phase_zip( array &$job, float $deadline ): string {
@@ -740,8 +779,7 @@ final class NM_Backup {
 		}
 		$limit = (int) $job['part_mb'] * 1048576;
 		$zw    = self::writer( $job, $ss );
-		if ( ! $zw->open() ) {
-			$job['error'] = NM_Util::t( 'Δεν γράφεται το αρχείο ZIP στον φάκελο των αντιγράφων.' );
+		if ( ! $zw ) {
 			return 'error';
 		}
 		$path = NM_Storage::job_path( $job['id'] );
@@ -881,11 +919,33 @@ final class NM_Backup {
 		$zss      = (array) ( $job['zipss'] ?? array() );
 		$manifest = self::manifest( $job );
 		$zw       = self::writer( $job, $zss + array( 'part' => 1 ) );
-		if ( ! $zw->open() ) {
-			$job['error'] = NM_Util::t( 'Δεν γράφεται το αρχείο ZIP στον φάκελο των αντιγράφων.' );
+		if ( ! $zw ) {
 			return 'error';
 		}
-		if ( ! $zw->add_string( 'nm/manifest.json', (string) wp_json_encode( $manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) || ! $zw->finish() ) {
+		// An encrypted backup: a plain header, enough to register an
+		// uploaded copy and to ask for the password.
+		$head = empty( $job['enc'] ) || $zw->add_string(
+			'nm/encrypted.json',
+			(string) wp_json_encode(
+				array(
+					'format'    => 1,
+					'plugin'    => 'data-migrator',
+					'version'   => NM_VERSION,
+					'encrypted' => 'aes-256',
+					'id'        => $manifest['id'],
+					'created'   => $manifest['created'],
+					'scope'     => $manifest['scope'],
+					'db'        => $manifest['db'],
+					'groups'    => $manifest['groups'],
+					'home'      => $manifest['site']['home'],
+					'parts'     => $manifest['parts'],
+				),
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+			),
+			0,
+			true
+		);
+		if ( ! $head || ! $zw->add_string( 'nm/manifest.json', (string) wp_json_encode( $manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) || ! $zw->finish() ) {
 			$zw->close();
 			$job['error'] = NM_Util::t( 'Δεν γράφεται το αρχείο ZIP (χώρος στον δίσκο;).' );
 			return 'error';
@@ -907,6 +967,7 @@ final class NM_Backup {
 			'scope'     => $job['scope'],
 			'note'      => $job['note'],
 			'sched'     => (string) ( $job['sched'] ?? '' ),
+			'enc'       => ! empty( $job['enc'] ),
 			'job'       => $job['id'],
 			'home'      => home_url(),
 			'parts'     => $job['parts'],

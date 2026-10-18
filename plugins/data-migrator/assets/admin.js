@@ -212,10 +212,22 @@
 	var an = $( '#nm-analyze-go' );
 	if ( an ) {
 		var arun = $( '#nm-analyze-run' );
+		var pick = $( '#nm-pick' );
+		var pwrow = $( '#nm-pick-pw-row' );
+		// The password field only for encrypted backups.
+		var syncPw = function () {
+			var o = pick.options[ pick.selectedIndex ];
+			if ( pwrow ) {
+				pwrow.hidden = ! o || '1' !== o.getAttribute( 'data-enc' );
+			}
+		};
+		pick.addEventListener( 'change', syncPw );
+		syncPw();
 		an.addEventListener( 'click', function () {
 			an.disabled = true;
 			show( arun, 0, '…' );
-			post( 'analyze', { id: $( '#nm-pick' ).value } ).then( function ( d ) {
+			var pw = pwrow && ! pwrow.hidden ? $( '#nm-pick-pw' ).value : '';
+			post( 'analyze', { id: pick.value, pw: pw } ).then( function ( d ) {
 				run( d.job, arun, function ( r ) {
 					if ( 'done' === r.status && r.url ) {
 						window.location.href = r.url;
@@ -245,6 +257,33 @@
 		sel.addEventListener( 'change', sync );
 		sync();
 	} );
+
+	/* Settings: generate an encryption password -------------------- */
+
+	var gen = $( '#nm-pw-gen' );
+	if ( gen && window.crypto && window.crypto.getRandomValues ) {
+		gen.addEventListener( 'click', function () {
+			// 6 groups of 4 from 54 unambiguous characters (about 138 bits).
+			var abc = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+			var out = [];
+			var buf = new Uint32Array( 1 );
+			for ( var g = 0; g < 6; g++ ) {
+				var s = '';
+				while ( s.length < 4 ) {
+					window.crypto.getRandomValues( buf );
+					// Rejection sampling: no bias toward the first characters.
+					if ( buf[ 0 ] < Math.floor( 4294967296 / abc.length ) * abc.length ) {
+						s += abc.charAt( buf[ 0 ] % abc.length );
+					}
+				}
+				out.push( s );
+			}
+			var f = $( '#nm-pw' );
+			f.value = out.join( '-' );
+			f.focus();
+			f.select();
+		} );
+	}
 
 	/* Confirm dialogs on dangerous forms ----------------------------- */
 

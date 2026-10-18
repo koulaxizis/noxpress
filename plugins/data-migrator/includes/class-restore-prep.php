@@ -88,8 +88,14 @@ final class NM_Restore_Prep {
 		NM_Util::prepare_request();
 		$manifest = null;
 		$last     = '';
+		$enc      = false;
 		foreach ( $files as $f ) {
 			$m = self::read_manifest( (string) $f );
+			if ( ! is_array( $m ) ) {
+				// Encrypted: the plain header is enough to register it.
+				$m   = self::read_head( (string) $f );
+				$enc = is_array( $m );
+			}
 			if ( is_array( $m ) ) {
 				$manifest = $m;
 				$last     = (string) $f;
@@ -129,7 +135,8 @@ final class NM_Restore_Prep {
 			$parts[] = $found;
 		}
 		$parts[] = $last;
-		$host    = substr( preg_replace( '/[^a-z0-9.-]/', '-', strtolower( (string) wp_parse_url( (string) $manifest['site']['home'], PHP_URL_HOST ) ) ), 0, 60 );
+		$home    = (string) ( $enc ? $manifest['home'] : $manifest['site']['home'] );
+		$host    = substr( preg_replace( '/[^a-z0-9.-]/', '-', strtolower( (string) wp_parse_url( $home, PHP_URL_HOST ) ) ), 0, 60 );
 		$stamp   = gmdate( 'Ymd-His', (int) strtotime( (string) $manifest['created'] ) );
 		$stem    = ( '' === trim( $host, '.-' ) ? 'site' : trim( $host, '.-' ) ) . '-' . $stamp . '-' . $id;
 		$meta    = array();
@@ -147,25 +154,29 @@ final class NM_Restore_Prep {
 			);
 		}
 		self::discard( $upload );
-		NM_Storage::save_meta(
-			array(
-				'id'       => $id,
-				'created'  => (int) strtotime( (string) $manifest['created'] ),
-				'status'   => 'done',
-				'scope'    => (string) ( $manifest['scope'] ?? 'full' ),
-				'note'     => (string) ( $manifest['note'] ?? '' ),
-				'home'     => (string) $manifest['site']['home'],
-				'parts'    => $meta,
-				'size'     => array_sum( array_column( $meta, 'size' ) ),
-				'db'       => ! empty( $manifest['db'] ),
-				'groups'   => (array) ( $manifest['groups'] ?? array() ),
-				'files'    => (int) ( $manifest['files']['count'] ?? 0 ),
-				'tables'   => count( (array) ( $manifest['tables'] ?? array() ) ),
-				'wp'       => (string) ( $manifest['versions']['wp'] ?? '' ),
-				'flags'    => (array) ( $manifest['flags'] ?? array() ),
-				'uploaded' => time(),
-			)
+		$saved = array(
+			'id'       => $id,
+			'created'  => (int) strtotime( (string) $manifest['created'] ),
+			'status'   => 'done',
+			'scope'    => (string) ( $manifest['scope'] ?? 'full' ),
+			'note'     => (string) ( $manifest['note'] ?? '' ),
+			'home'     => $home,
+			'enc'      => $enc,
+			'parts'    => $meta,
+			'size'     => array_sum( array_column( $meta, 'size' ) ),
+			'db'       => ! empty( $manifest['db'] ),
+			'groups'   => (array) ( $manifest['groups'] ?? array() ),
+			'files'    => (int) ( $manifest['files']['count'] ?? 0 ),
+			'tables'   => count( (array) ( $manifest['tables'] ?? array() ) ),
+			'wp'       => (string) ( $manifest['versions']['wp'] ?? '' ),
+			'flags'    => (array) ( $manifest['flags'] ?? array() ),
+			'uploaded' => time(),
 		);
+		if ( $enc ) {
+			// Filled in from the manifest by the first analysis.
+			unset( $saved['wp'] );
+		}
+		NM_Storage::save_meta( $saved );
 		NM_Util::log( 'uploaded backup ' . $id . ' registered (' . count( $meta ) . ' part(s))' );
 		return $id;
 	}
@@ -177,17 +188,62 @@ final class NM_Restore_Prep {
 		}
 	}
 
-	/** nm/manifest.json of a part, or null. */
-	public static function read_manifest( string $file ) {
+	/** Why the last read_manifest() returned null: '', nopass, password, … */
+	public static $error = '';
+
+	/** nm/manifest.json of a part, or null (see $error). */
+	public static function read_manifest( string $file, string $pw = '' ) {
+		self::$error = '';
+		$zr          = new NM_Zip_Reader( $file );
+		if ( ! $zr->open() ) {
+			self::$error = 'open';
+			return null;
+		}
+		$zr->set_password( $pw );
+		$e = $zr->find( 'nm/manifest.json' );
+		$m = $e ? $zr->read( $e ) : false;
+		if ( false === $m ) {
+			self::$error = $e ? $zr->error : 'none';
+		}
+		$zr->close();
+		$j = is_string( $m ) ? json_decode( $m, true ) : null;
+		return ( is_array( $j ) && 'data-migrator' === ( $j['plugin'] ?? '' ) && isset( $j['site']['home'] ) ) ? $j : null;
+	}
+
+	/** nm/encrypted.json (the plain header of an encrypted backup), or null. */
+	public static function read_head( string $file ) {
 		$zr = new NM_Zip_Reader( $file );
 		if ( ! $zr->open() ) {
 			return null;
 		}
-		$e = $zr->find( 'nm/manifest.json' );
-		$m = $e ? $zr->read( $e ) : false;
+		$e = $zr->find( 'nm/encrypted.json' );
+		$m = $e && $e['aes'] < 0 ? $zr->read( $e ) : false;
 		$zr->close();
 		$j = is_string( $m ) ? json_decode( $m, true ) : null;
-		return ( is_array( $j ) && 'data-migrator' === ( $j['plugin'] ?? '' ) && isset( $j['site']['home'] ) ) ? $j : null;
+		return ( is_array( $j ) && 'data-migrator' === ( $j['plugin'] ?? '' ) && isset( $j['home'], $j['id'], $j['created'] ) && is_array( $j['parts'] ?? null ) ) ? $j : null;
+	}
+
+	/** The password of a job (sealed in its state), '' when none. */
+	public static function job_password( array $job ): string {
+		if ( empty( $job['pw'] ) ) {
+			return '';
+		}
+		$pw = NM_Crypt::unseal( (string) $job['pw'] );
+		return null === $pw ? '' : $pw;
+	}
+
+	/** Text for a reader error about the password. */
+	public static function pw_text( string $code ): string {
+		if ( 'nopass' === $code ) {
+			return NM_Util::t( 'Το αντίγραφο είναι κρυπτογραφημένο. Γράψε τον κωδικό του.' );
+		}
+		if ( 'password' === $code ) {
+			return NM_Util::t( 'Λάθος κωδικός για αυτό το αντίγραφο.' );
+		}
+		if ( 'openssl' === $code ) {
+			return NM_Util::t( 'Το αντίγραφο είναι κρυπτογραφημένο και η PHP του server δεν έχει την επέκταση OpenSSL.' );
+		}
+		return '';
 	}
 
 	/** Absolute part paths of a backup in order, or array(). */
@@ -207,8 +263,12 @@ final class NM_Restore_Prep {
 	 * Analysis job
 	 * ------------------------------------------------------------- */
 
-	/** @return array|WP_Error */
-	public static function analyze_start( string $id ) {
+	/**
+	 * $pw: the password of an encrypted backup; '' = the one in Settings.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function analyze_start( string $id, string $pw = '' ) {
 		$meta = NM_Storage::meta( $id );
 		if ( ! $meta || 'done' !== ( $meta['status'] ?? '' ) ) {
 			return new WP_Error( 'none', NM_Util::t( 'Το αντίγραφο δεν βρέθηκε ή δεν ολοκληρώθηκε.' ) );
@@ -218,6 +278,21 @@ final class NM_Restore_Prep {
 		}
 		if ( NM_Backup::running() ) {
 			return new WP_Error( 'busy', NM_Util::t( 'Τρέχει ήδη μια εργασία του Data Migrator. Περίμενε να τελειώσει ή ακύρωσέ την.' ) );
+		}
+		$sealed = '';
+		if ( ! empty( $meta['enc'] ) ) {
+			if ( ! NM_Crypt::available() ) {
+				return new WP_Error( 'openssl', self::pw_text( 'openssl' ) );
+			}
+			if ( '' === $pw ) {
+				$pw = (string) NM_Settings::password();
+			}
+			$parts = self::parts( $meta );
+			if ( '' === $pw || ! self::read_manifest( (string) end( $parts ), $pw ) ) {
+				$why = '' === $pw ? 'nopass' : self::$error;
+				return new WP_Error( 'password', '' !== self::pw_text( $why ) ? self::pw_text( $why ) : NM_Util::t( 'Το manifest του αρχείου δεν είναι έγκυρο.' ) );
+			}
+			$sealed = NM_Crypt::seal( $pw );
 		}
 		$hex  = NM_Util::hex( 16 );
 		$work = NM_Storage::sub( 'work' ) . '/a' . $hex;
@@ -233,6 +308,7 @@ final class NM_Restore_Prep {
 			'ss'      => array(),
 			'work'    => $work,
 			'result'  => array(),
+			'pw'      => $sealed,
 		);
 		NM_Storage::save_job( $job );
 		return $job;
@@ -327,10 +403,19 @@ final class NM_Restore_Prep {
 				$job['ss'] = array( 'i' => $i + 1 );
 				return 'more';
 			}
-			$manifest = self::read_manifest( end( $parts ) );
+			$manifest = self::read_manifest( end( $parts ), self::job_password( $job ) );
 			if ( ! $manifest ) {
-				$job['error'] = NM_Util::t( 'Το manifest του αρχείου δεν είναι έγκυρο.' );
+				$job['error'] = '' !== self::pw_text( self::$error ) ? self::pw_text( self::$error ) : NM_Util::t( 'Το manifest του αρχείου δεν είναι έγκυρο.' );
 				return 'error';
+			}
+			if ( ! empty( $meta['enc'] ) && ! isset( $meta['wp'] ) ) {
+				// An uploaded encrypted copy: the rest of its details.
+				$meta['note']   = (string) ( $manifest['note'] ?? '' );
+				$meta['files']  = (int) ( $manifest['files']['count'] ?? 0 );
+				$meta['tables'] = count( (array) ( $manifest['tables'] ?? array() ) );
+				$meta['wp']     = (string) ( $manifest['versions']['wp'] ?? '' );
+				$meta['flags']  = (array) ( $manifest['flags'] ?? array() );
+				NM_Storage::save_meta( $meta );
 			}
 			// Contents per group, root files and drop-ins.
 			$groups = array();
@@ -392,6 +477,7 @@ final class NM_Restore_Prep {
 				if ( ! $zr->open() ) {
 					return 'error';
 				}
+				$zr->set_password( self::job_password( $job ) );
 				$e = $zr->entry_at( (int) $ss['pos'], $next );
 				while ( $e ) {
 					if ( preg_match( '#^db/\d{5}\.sql$#', $e['name'] ) ) {
@@ -399,7 +485,7 @@ final class NM_Restore_Prep {
 						$r    = $zr->extract( $e, $job['work'] . '/db/' . substr( $e['name'], 3 ), $done, $deadline + 60 );
 						if ( 'done' !== $r ) {
 							$zr->close();
-							$job['error'] = NM_Util::tf( 'Το %1$s δεν βγήκε σωστά από το αρχείο (%2$s).', $e['name'], $r );
+							$job['error'] = '' !== self::pw_text( $r ) ? self::pw_text( $r ) : NM_Util::tf( 'Το %1$s δεν βγήκε σωστά από το αρχείο (%2$s).', $e['name'], $r );
 							return 'error';
 						}
 					}
@@ -737,6 +823,7 @@ final class NM_Restore_Prep {
 			'mode'       => '',
 			'tag'        => $tag,
 			'archive'    => array( 'parts' => $parts ),
+			'pw'         => (string) ( $an['pw'] ?? '' ),
 			'manifest'   => array(
 				'prefix'  => (string) $m['site']['prefix'],
 				'fks'     => (array) ( $m['fks'] ?? array() ),
