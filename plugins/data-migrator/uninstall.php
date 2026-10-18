@@ -1,6 +1,6 @@
 <?php
 /**
- * Data Migrator — uninstall.php (v1.1.0)
+ * Data Migrator — uninstall.php (v1.2.0)
  *
  * Deleted:
  *  - Every nm_* option (nm_settings, nm_crypt, nm_schedules, nm_state, nm_post_restore) and every
