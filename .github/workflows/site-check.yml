@@ -1,0 +1,23 @@
+# Ελέγχει ότι κάθε κάρτα του noxpress.tech δείχνει την έκδοση του header του
+# plugin (meta, link λήψης, `{p}_download` EN/EL) και έχει το βίντεό της
+# (Bible §13). Τρέχει σε κάθε PR που αγγίζει το site ή τα plugins.
+name: Site cards
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'plugins/**'
+      - 'media/videos/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check plugin cards
+        run: python3 .github/scripts/check-site-cards.py --personal 'site-bridge'
