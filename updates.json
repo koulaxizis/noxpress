@@ -28,15 +28,15 @@
     },
     "data-migrator": {
       "beta": {
-        "changelog": "* Rewritten from scratch (beta).\n* Resumable backup in short steps: streaming ZIP with ZIP64 and parts, paged SQL dump, manifest with checksums.\n* Restore and migration with analysis first, serialized-safe URL and path replacement, table prefix change, temporary tables and an atomic swap, staged files, undo and finalize.\n* Standalone restore runner with a one-time recovery code; installer for an empty server with a one-time key.\n* Post-restore cache, rewrite and WooCommerce lookup table rebuild.\n* Private storage folder with an HTTP self-test; WordPress core checksum check.\n* WP-CLI commands; Greek / English admin (Noxpress menu).",
+        "changelog": "* Scheduled backups (beta): database only or full, daily, weekly or monthly, in the background, with retention per schedule, a size limit for all scheduled backups, and an email when a run fails.\n* Backups stop and delete the unfinished archive when the free disk space falls under 256 MB; scheduled backups check the space before they write.\n* WP-CLI: `wp data-migrator schedule list|run`.\n* Fix: the Save button of DM Settings read \"Storage\" in English.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1d6a94995b66def8998994628a235dca70df27a9422dba4040db2a927c80fcdd",
-        "signature": "WEfAwPKtploqd/oM+YQI1LyaiA7gKmfhqHuVi/hT+hiM8dbYn/mjDvfqbK2Z5uIPkS2+1biScBSKh2MqfrcaAw==",
+        "sha256": "efeb54129fde7fd913ad14d73044ae8315cad3806e092cac99dcf96ad444091d",
+        "signature": "LYayFvbJ+3fJ3PTkRtpUweaBDF3UXw8HYdCVeFmfmvri1O2hpU7I3FuaqE0ePd0TsyiO36pU4K3WxtPRRDiiCA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.0.0/data-migrator.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.1.0/data-migrator.zip"
       }
     },
     "easy-withdrawal": {
