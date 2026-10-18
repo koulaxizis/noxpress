@@ -65,12 +65,22 @@ final class SHN_Fields {
 				),
 			)
 		);
+		$from = $id ? (string) get_post_meta( $id, SHN_Settings::META_FROM, true ) : '';
+		// With Pre-Orders active the release date lives in its own fields
+		// (shn_available_from is filled from them); our field stays only
+		// while a product still has a date of ours, so it can be cleared.
+		if ( '' === $from && function_exists( 'por_get_release' ) ) {
+			echo '<p class="form-field shn-from-por"><label>' . esc_html__( 'Διαθέσιμο από', 'shipping-notes' ) . '</label>'
+				. esc_html__( 'Από την ημερομηνία κυκλοφορίας του Pre-Orders (καρτέλα «Γενικά»).', 'shipping-notes' ) . '</p>';
+			echo '</div>';
+			return;
+		}
 		woocommerce_wp_text_input(
 			array(
 				'id'          => 'shn_available_from',
 				'label'       => __( 'Διαθέσιμο από', 'shipping-notes' ),
 				'type'        => 'date',
-				'value'       => $id ? (string) get_post_meta( $id, SHN_Settings::META_FROM, true ) : '',
+				'value'       => $from,
 				'desc_tip'    => true,
 				'description' => __( 'Shipping Notes: για προπαραγγελίες. Ο χρόνος παράδοσης μετράει από αυτή την ημερομηνία. Μετά από αυτήν το πεδίο δεν ισχύει πια.', 'shipping-notes' ),
 			)
@@ -89,7 +99,8 @@ final class SHN_Fields {
 		}
 		$min  = isset( $_POST['shn_prep_min'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['shn_prep_min'] ) ) : '';
 		$max  = isset( $_POST['shn_prep_max'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['shn_prep_max'] ) ) : '';
-		$from = isset( $_POST['shn_available_from'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['shn_available_from'] ) ) : '';
+		// null = the field was not on the form (Pre-Orders active): keep the date.
+		$from = isset( $_POST['shn_available_from'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['shn_available_from'] ) ) : null;
 		// phpcs:enable
 
 		$range = SHN_Delivery::meta_range( $min, $max );
@@ -101,6 +112,9 @@ final class SHN_Fields {
 			$product->update_meta_data( SHN_Settings::META_PREP_MAX, (string) $range[1] );
 		}
 
+		if ( null === $from ) {
+			return;
+		}
 		if ( self::valid_date( $from ) ) {
 			$product->update_meta_data( SHN_Settings::META_FROM, $from );
 		} else {

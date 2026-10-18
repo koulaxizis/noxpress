@@ -112,7 +112,7 @@ final class POR_Admin_Product {
 				'name'              => $name( 'por_text' ),
 				'label'             => __( 'Κείμενο για αυτό το προϊόν', 'pre-orders' ),
 				'value'             => $r['text'],
-				'placeholder'       => POR_Settings::get()['t_date']['el'],
+				'placeholder'       => POR_Settings::text( 't_date' ), // The store's text, in the visitor language.
 				'custom_attributes' => array( 'maxlength' => (string) POR_Product::TEXT_LEN ),
 				'desc_tip'          => ! $variation,
 				'description'       => __( 'Προαιρετικό. Αντί για το γενικό κείμενο διαθεσιμότητας· το {date} γίνεται η ημερομηνία.', 'pre-orders' ),
