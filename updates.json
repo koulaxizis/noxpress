@@ -247,15 +247,15 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: care tab, manufacturer by shipping class: products of a class get that manufacturer automatically (variations follow the parent). A manufacturer set on the product comes first, the profile's manufacturer last.",
+        "changelog": "* Fixed: the sale badge showed one percent less on prices shown without tax (e.g. \"Sale 24%\" for 12.00 → 9.00 with 24% VAT, a 25% discount). Shop prices without tax are kept to 6 decimals, and rounding down caught that last digit.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "cd437b5c871ec3a78426c4a89db3116fc47aaf8092235f66c84d2e052d6f142a",
-        "signature": "m8nmupAoLJYnOiS5aigzn+t9Sf14zqCzuFoqvMVValanbwHNSZOd7utjuENrnUkOQKx2HMxnbHuiOXZ4NZYUBw==",
+        "sha256": "f5428ddf541bd3fdced8619b71ec488983c5e51cd293ed781d8aff49f1d00476",
+        "signature": "hOjrx/OcylDj2LAEoqTVLqrDm2ITR9xUFxQfPnfzCksmF3p9ru1zeQtHzRyX7yxkOoFm6liVoFTiWpO3BkZzCQ==",
         "tested_wp": "6.8",
-        "version": "1.5.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.1/theme-patcher.zip"
+        "version": "1.5.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.2/theme-patcher.zip"
       }
     },
     "variation-picker": {
