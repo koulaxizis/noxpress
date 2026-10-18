@@ -19,7 +19,7 @@
 #   oc → oros-connect
 #   pb → product-bundles
 #   sb → site-bridge (προσωπική χρήση: release ναι, updates.json όχι)
-#   nm → data-migrator (μόνο με tag)
+#   nm → data-migrator
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
@@ -52,7 +52,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb'
+  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb nm'
   # Plugins για προσωπική χρήση (Bible §21): βγαίνουν ως release αλλά δεν
   # μπαίνουν στο updates.json, άρα κανένα site δεν τα βλέπει στο hub.
   PERSONAL: 'sb'
@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           ref=plugins/revenue-splitter/includes/noxpress-core
-          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge; do
+          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge data-migrator; do
             if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
               echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
               exit 1

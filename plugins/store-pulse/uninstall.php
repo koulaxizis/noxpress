@@ -94,7 +94,7 @@ delete_metadata( 'user', 0, $wpdb->get_blog_prefix() . 'sp_sales_last', '', true
 // ---------------------------------------------------------------------
 
 $sp_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles' ) as $sp_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'data-migrator' ) as $sp_slug ) {
 	if ( 'store-pulse' !== $sp_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $sp_slug . '/' . $sp_slug . '.php' ) ) {
 		$sp_suite_left = true;
 		break;
