@@ -93,15 +93,15 @@
     },
     "oros-connect": {
       "beta": {
-        "changelog": "* New module «Offers»: Publishing Quote requests for orOS to import as draft offers (REST orc/v1/offers), with the shop's WooCommerce REST keys or an Application Password; waiting requests and the last import in the admin.\n* Noxpress Core 1.1.11.",
+        "changelog": "* Fixed: the Offers status said \"(1 requests)\" for a single request; it now says \"(1 request)\" (\"(1 αίτημα)\" in Greek).",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f6b11c6fefee3255cf74402d450059d4d30ad592eee6fdb61d407f1d7c5a982e",
-        "signature": "aFT/GMg5S+7UE0y7OcrBK35xnRyOEifCxeCQ72fIkWTyUJLzRjp7QqO0K5iYwrJb4G1nGoD1WrvBE6CZ94haAA==",
+        "sha256": "e6a9d6694f7f9e634f09b8e505c9b9d1fe4c4d07a334907619dd759267d131da",
+        "signature": "26AYildouE9M149oDY0FOo9IgZEyUjPBsfHWo9bOhFRonjfN+Q/BO5QQuCRmPMGEA9NQm97of3AuoFGxNqKPCQ==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.1.0/oros-connect.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.1.1/oros-connect.zip"
       }
     },
     "pre-orders": {
@@ -247,15 +247,15 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* Fixed: the sale badge showed one percent less on prices shown without tax (e.g. \"Sale 24%\" for 12.00 → 9.00 with 24% VAT, a 25% discount). Shop prices without tax are kept to 6 decimals, and rounding down caught that last digit.",
+        "changelog": "* Fixed: on the Prices tab the per-category labels table was wider than the panel at 1280 px; text fields and selects in settings tables now shrink with their column.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f5428ddf541bd3fdced8619b71ec488983c5e51cd293ed781d8aff49f1d00476",
-        "signature": "hOjrx/OcylDj2LAEoqTVLqrDm2ITR9xUFxQfPnfzCksmF3p9ru1zeQtHzRyX7yxkOoFm6liVoFTiWpO3BkZzCQ==",
+        "sha256": "e6a2d7e382120c9a7182450aacae3af9a8bb7a40dd6801865115ef171d1d5f21",
+        "signature": "F28PO5OD15Riu8rbS0pGdyjpFU54m69g1vMqlNUjV9NlPrsShqhXh+Qsh938pUUYZ6lFWcLyGKdUs2cmTrvADA==",
         "tested_wp": "6.8",
-        "version": "1.5.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.2/theme-patcher.zip"
+        "version": "1.5.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.3/theme-patcher.zip"
       }
     },
     "variation-picker": {
