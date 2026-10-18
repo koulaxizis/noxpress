@@ -48,6 +48,7 @@ final class Noxpress_Core {
 		'Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.' => 'Greek to Latin in slugs and file names, with bulk conversion of existing ones.',
 		'Σύνδεση με το orOS σε modules: φόρμα εγγραφής και κουτάκι στο ταμείο για τη λίστα σου στο orOS Newsletter.' => 'Connects the site to orOS in modules: sign-up form and checkout checkbox for your list in orOS Newsletter.',
 		'Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.' => 'Product bundles: every product with its own stock and VAT, a bundle discount and correct sales reports.',
+		'Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».' => 'Publishing quotes for prospective authors: an amount per service and a total, with the rates hidden on the server and «I\'m interested» requests.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -122,7 +123,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, SBR 170, PBQ 180).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -213,6 +214,11 @@ final class Noxpress_Core {
 				'name' => 'Product Bundles',
 				'desc' => __( 'Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.', 'noxpress' ),
 				'page' => 'pbn-bundles',
+			),
+			'publishing-quote'  => array(
+				'name' => 'Publishing Quote',
+				'desc' => __( 'Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».', 'noxpress' ),
+				'page' => 'pbq-settings',
 			),
 		);
 	}
