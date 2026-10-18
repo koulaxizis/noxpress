@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 77,
+  "total": 78,
   "offset": 5,
   "updated": "2026-10-18",
   "assets": {
@@ -246,6 +246,10 @@
     },
     "653388788": {
       "file": "nox-nm-1.1.0/data-migrator.zip",
+      "count": 1
+    },
+    "653460520": {
+      "file": "nox-nm-1.2.0/data-migrator.zip",
       "count": 0
     }
   }
