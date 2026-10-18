@@ -1,0 +1,406 @@
+/**
+ * Wish Shelf — front.css (v1.0.0)
+ *
+ * Bible §14.13: theme rules with ids (e.g. "#main span { position:
+ * absolute }") beat class selectors, so a reset scoped to our own parts
+ * comes first, and our layout rules carry !important. The theme's product
+ * cards (cards layout) are never touched. Theme buttons and inputs (class
+ * "button", §14.16) keep their look; only float, width and position are
+ * reset. The heart takes the theme's text colour (currentColor); "on"
+ * fills it with --wsh-on.
+ */
+
+/* ===== Reset (scoped to our parts, never inside .wsh-cards) ===== */
+.wsh-root.wsh-list,
+.wsh-root .wsh-load,
+.wsh-root .woocommerce-notices-wrapper,
+.wsh-root.wsh-wrap,
+.wsh-root.wsh-wrap *,
+.wsh-root.wsh-count,
+.wsh-root.wsh-count *,
+.wsh-root.wsh-toast,
+.wsh-root.wsh-toast *,
+.wsh-root .wsh-title,
+.wsh-root .wsh-empty,
+.wsh-root .wsh-empty *,
+.wsh-root .wsh-form,
+.wsh-root .wsh-table,
+.wsh-root .wsh-table *,
+.wsh-root .wsh-actions,
+.wsh-root .wsh-actions *,
+.wsh-root .wsh-share,
+.wsh-root .wsh-share * {
+	float: none !important;
+	clear: none !important;
+	position: static !important;
+	top: auto !important;
+	right: auto !important;
+	bottom: auto !important;
+	left: auto !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	transform: none !important;
+	max-width: 100% !important;
+	outline-offset: 2px;
+}
+
+/* Text parts lose theme boxes; buttons and inputs keep the theme's look. */
+.wsh-root.wsh-list,
+.wsh-root .wsh-load,
+.wsh-root.wsh-wrap,
+.wsh-root.wsh-count,
+.wsh-root .wsh-count__n,
+.wsh-root .wsh-btn__t,
+.wsh-root .wsh-title,
+.wsh-root .wsh-empty,
+.wsh-root .wsh-empty a,
+.wsh-root .wsh-form,
+.wsh-root .wsh-table a,
+.wsh-root .wsh-table span,
+.wsh-root .wsh-table p,
+.wsh-root .wsh-table label,
+.wsh-root .wsh-table img,
+.wsh-root .wsh-actions,
+.wsh-root .wsh-share,
+.wsh-root .wsh-share__label {
+	background: none !important;
+	border: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	width: auto !important;
+	height: auto !important;
+	min-height: 0 !important;
+}
+.wsh-root .wsh-table .button,
+.wsh-root .wsh-actions .button,
+.wsh-root .wsh-table input,
+.wsh-root .wsh-share__url {
+	width: auto !important;
+	margin: 0 !important;
+}
+
+.wsh-root {
+	--wsh-on: #d63638;
+	--wsh-size: 18px;
+}
+
+/* ===== Button ===== */
+.wsh-root.wsh-wrap {
+	display: block !important;
+	position: relative !important;
+	z-index: 2;
+	margin: 8px 0 0 !important;
+	line-height: 1.2;
+}
+.wsh-root.wsh-wrap--single { margin: 12px 0 !important; }
+.wsh-root.wsh-wrap--list,
+.wsh-root.wsh-wrap--short { display: inline-block !important; margin: 0 !important; }
+
+.wsh-root .wsh-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px;
+	width: auto !important;
+	height: auto !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 4px 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: none !important;
+	color: inherit !important;
+	font: inherit;
+	font-size: 0.95em !important;
+	line-height: 1.2 !important;
+	cursor: pointer;
+	text-decoration: none !important;
+}
+.wsh-root .wsh-btn:hover .wsh-btn__t,
+.wsh-root .wsh-btn:focus-visible .wsh-btn__t { text-decoration: underline !important; }
+.wsh-root .wsh-btn__t { display: inline !important; color: inherit !important; }
+.wsh-root .wsh-btn--icon { padding: 4px !important; }
+
+.wsh-root .wsh-ico {
+	display: inline-block !important;
+	flex: none;
+	width: var(--wsh-size) !important;
+	height: var(--wsh-size) !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	fill: none !important;
+	stroke: currentColor !important;
+	stroke-width: 1.8;
+	vertical-align: middle;
+	transition: fill 0.15s ease, stroke 0.15s ease;
+}
+.wsh-root .wsh-btn.is-on .wsh-ico,
+.wsh-root .wsh-btn[aria-pressed="true"] .wsh-ico {
+	fill: var(--wsh-on) !important;
+	stroke: var(--wsh-on) !important;
+}
+
+/* Over the product image (shop cards). */
+ul.products li.product:has(> .wsh-wrap--over),
+.wc-block-product:has(> .wsh-wrap--over),
+.wp-block-post:has(> .wsh-wrap--over),
+li.product:has(.wsh-wrap--over) {
+	position: relative;
+}
+.wsh-root.wsh-wrap--over {
+	position: absolute !important;
+	top: 8px !important;
+	right: 8px !important;
+	left: auto !important;
+	z-index: 5;
+	margin: 0 !important;
+}
+.wsh-root.wsh-wrap--over .wsh-btn {
+	padding: 7px !important;
+	border-radius: 50% !important;
+	background: rgba(255, 255, 255, 0.92) !important;
+	color: #1e1e1e !important;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* ===== Counter ===== */
+.wsh-root.wsh-count {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 4px;
+	color: inherit;
+	text-decoration: none !important;
+	line-height: 1 !important;
+}
+.wsh-root .wsh-count__n {
+	display: inline-block !important;
+	min-width: 1.4em !important;
+	padding: 2px 5px !important;
+	border-radius: 999px !important;
+	background: #1e1e1e !important;
+	color: #fff !important;
+	font-size: 0.75em !important;
+	font-weight: 600;
+	line-height: 1.2 !important;
+	text-align: center !important;
+}
+.wsh-root.wsh-count.is-empty .wsh-count__n { opacity: 0.6; }
+
+/* ===== Toast ===== */
+.wsh-root.wsh-toast {
+	position: fixed !important;
+	left: 50% !important;
+	bottom: 20px !important;
+	top: auto !important;
+	z-index: 99999;
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 14px;
+	width: auto !important;
+	max-width: calc(100vw - 32px) !important;
+	margin: 0 !important;
+	padding: 12px 16px !important;
+	border: 0 !important;
+	border-radius: 8px !important;
+	background: #1e1e1e !important;
+	color: #fff !important;
+	font-size: 15px !important;
+	line-height: 1.4 !important;
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, 12px) !important;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.wsh-root.wsh-toast.is-open {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translate(-50%, 0) !important;
+}
+.wsh-root.wsh-toast span,
+.wsh-root.wsh-toast a {
+	display: inline !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	color: #fff !important;
+}
+.wsh-root.wsh-toast a {
+	font-weight: 600;
+	text-decoration: underline !important;
+}
+
+/* ===== List ===== */
+.wsh-root.wsh-list { display: block !important; margin: 0 0 24px !important; }
+.wsh-root .wsh-load { display: block !important; }
+.wsh-root .wsh-title { display: block !important; margin: 0 0 16px !important; }
+.wsh-root .wsh-empty { display: block !important; margin: 0 0 16px !important; }
+.wsh-root .wsh-form { display: block !important; }
+.wsh-root .wsh-load { min-height: 80px; }
+.wsh-root .wsh-load:empty {
+	background: linear-gradient(90deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.04));
+	border-radius: 6px;
+}
+
+.wsh-root .wsh-table {
+	display: table !important;
+	width: 100% !important;
+	border-collapse: collapse;
+}
+.wsh-root .wsh-table thead { display: table-header-group !important; }
+.wsh-root .wsh-table tbody { display: table-row-group !important; }
+.wsh-root .wsh-table tr { display: table-row !important; }
+.wsh-root .wsh-table th,
+.wsh-root .wsh-table td {
+	display: table-cell !important;
+	width: auto !important;
+	padding: 0.75em 0.6em !important;
+	vertical-align: middle !important;
+	text-align: left;
+}
+.wsh-root .wsh-c-sel { width: 2.2em !important; }
+.wsh-root .wsh-c-img { width: 72px !important; }
+.wsh-root .wsh-c-img a { display: block !important; }
+.wsh-root .wsh-c-img img {
+	display: block !important;
+	width: 64px !important;
+	max-width: 64px !important;
+	height: auto !important;
+}
+.wsh-root .wsh-c-name a { display: inline !important; }
+.wsh-root .wsh-c-qty input { width: 4.5em !important; max-width: 5em !important; }
+.wsh-root .wsh-c-rem { width: 2.5em !important; text-align: center !important; }
+.wsh-root .wsh-c-cart .button { white-space: nowrap; }
+.wsh-root .wsh-var,
+.wsh-root .wsh-drop {
+	display: block !important;
+	font-size: 0.85em;
+	opacity: 0.8;
+}
+.wsh-root .wsh-drop { color: #007017 !important; opacity: 1; }
+.wsh-root .wsh-c-stock .stock { display: block !important; margin: 0 !important; }
+
+.wsh-root .wsh-remove {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	width: 28px !important;
+	height: 28px !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 50% !important;
+	background: none !important;
+	color: inherit !important;
+	font-size: 20px !important;
+	line-height: 1 !important;
+	cursor: pointer;
+}
+.wsh-root .wsh-remove span { background: none !important; }
+.wsh-root .wsh-remove:hover { color: #b32d2e !important; }
+
+.wsh-root .wsh-sel {
+	display: inline-flex !important;
+	align-items: center;
+	cursor: pointer;
+}
+.wsh-root .wsh-sel input { margin: 0 !important; }
+
+.wsh-root .wsh-actions {
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 16px 0 !important;
+}
+.wsh-root .wsh-clear,
+.wsh-root .wsh-link {
+	display: inline !important;
+	width: auto !important;
+	height: auto !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	color: inherit !important;
+	font: inherit;
+	text-decoration: underline !important;
+	cursor: pointer;
+}
+.wsh-root .wsh-clear { margin-left: auto !important; }
+
+.wsh-root .wsh-share {
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 14px;
+	margin: 8px 0 0 !important;
+}
+.wsh-root .wsh-share__label { display: inline !important; font-weight: 600; }
+.wsh-root .wsh-share__url {
+	display: block !important;
+	flex: 1 1 260px;
+	min-width: 0 !important;
+}
+
+/* Block themes do not style tables: a light line between rows. */
+.wp-site-blocks .wsh-root .wsh-table tr.wsh-row td { border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+
+/* Small screens: one card per row, labels from data-title (also where
+   WooCommerce's small-screen table CSS is not loaded, e.g. block themes). */
+@media (max-width: 768px) {
+	.wsh-root .wsh-table,
+	.wsh-root .wsh-table tbody,
+	.wsh-root .wsh-table tr,
+	.wsh-root .wsh-table td { display: block !important; width: auto !important; }
+	.wsh-root .wsh-table thead { display: none !important; }
+	.wsh-root .wsh-table tr.wsh-row {
+		position: relative !important;
+		padding: 12px 40px 12px 0 !important;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+	}
+	.wsh-root .wsh-table td {
+		padding: 4px 0 !important;
+		border: 0 !important;
+		text-align: left !important;
+	}
+	.wsh-root .wsh-table td[data-title]::before {
+		content: attr(data-title) ": ";
+		font-weight: 600;
+	}
+	.wsh-root .wsh-table td.wsh-c-name::before { content: none; }
+	.wsh-root .wsh-table td.wsh-c-sel,
+	.wsh-root .wsh-table td.wsh-c-img {
+		display: inline-block !important;
+		vertical-align: middle !important;
+		margin-right: 8px !important;
+	}
+	.wsh-root .wsh-table td.wsh-c-sel:empty { display: none !important; }
+	.wsh-root .wsh-table td.wsh-c-rem {
+		position: absolute !important;
+		top: 8px !important;
+		right: 0 !important;
+		left: auto !important;
+		width: auto !important;
+	}
+	.wsh-root .wsh-c-img img { width: 48px !important; max-width: 48px !important; }
+	.wsh-root .wsh-clear { margin-left: 0 !important; }
+	.wsh-root .wsh-c-cart .button { white-space: normal; }
+}
+
+/* Last, and stronger than every display rule above. */
+.wsh-root [hidden][hidden],
+.wsh-root[hidden][hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+	.wsh-root .wsh-ico,
+	.wsh-root.wsh-toast { transition: none; }
+}

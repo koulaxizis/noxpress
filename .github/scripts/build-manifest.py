@@ -52,6 +52,7 @@ SLUGS = {
     'pb': 'product-bundles',
     'pq': 'publishing-quote',
     'po': 'pre-orders',
+    'ws': 'wish-shelf',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
