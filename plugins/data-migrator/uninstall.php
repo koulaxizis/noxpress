@@ -1,304 +1,167 @@
 <?php
 /**
- * Clean uninstall για το Noxpress Migrator.
+ * Data Migrator — uninstall.php (v1.0.0)
  *
- * Διαγράφει ΟΛΟΚΛΗΡΩΣ κάθε ίχνος του plugin:
- *  - Options: nm_max_volume_mb, nm_checkpoint, nm_last_manifest +
- *    ΟΛΟΙΣΤΙΚΉ sweep κάθε option που ξεκινάει από 'nm_' (future-proof).
- *  - User meta: nm_lang (ανά χρήστη).
- *  - Transients: _transient_nm_* / _transient_timeout_nm_*.
- *  - Uploads: ΣΤΑΘΕΡΟΙ φάκελοι staging 'noxpress-migrator-tmp*' και
- *    τυχόν προσωρινά logs 'noxpress-migrator-*.log' — ΠΟΤΕ εκτός
- *    uploads, ΠΟΤΕ χωρίς το prefix.
- *  - Plugin φάκελοι: leftover 'noxpress-migrator*' στο WP_PLUGIN_DIR
- *    (εκτός από τον εαυτό μας) — ίδιο sweep pattern με το Revenue
- *    Splitter 1.3.4-b, sympathy σto design του οικοσυστήματος.
+ * Deleted:
+ *  - Every nm_* option (nm_settings, nm_state, nm_post_restore) and every
+ *    nm_* transient (PRG notices, installer keys, restore tokens shown
+ *    once, the core checksum result).
+ *  - Temporary, snapshot and undo tables of unfinished restores
+ *    (nmt<6 hex>_…, nms<6 hex>_…, nmx<6 hex>_…). Deleting the plugin
+ *    finalizes any open restore.
+ *  - In the storage folder: jobs, work files, logs, unfinished uploads,
+ *    and the backups (parts and metadata, by strict file name patterns),
+ *    unless "Keep backups" is ticked in DM Settings. The folder itself
+ *    goes only when nothing else is left in it, so a custom folder that
+ *    holds other files is never emptied.
+ *  - Stage folders wp-content/nm-stage-<hex>/ (restores across disks).
+ *  - Multisite: every site ONCE (the main site included in the loop).
  *
- * ΣΗΜΑΝΤΙΚΟ: το script τρέχει ΕΞΩ από plugins_loaded — καμία κλήση σε
- * functions του plugin (classes, constants). Μόνο WP core APIs +
- * $wpdb με full guards.
- *
- * ΠΟΛΙΤΙΚΗ ΑΣΦΑΛΕΙΑΣ: τα εκEXPORTα migration archives (ZIP) που έχει
- * ήδη κατεβάσει ο admin ΔΕΝ είναι δουλειά του uninstall — φυσικά
- * βρίσκονται στον client, εκτός server. Ό,τι μείνει στο staging
- * (ημιτελή ZIP) είναι SCRAP: σβήνεται χωρίς ερώτηση. Αν ο admin
- * κάνει Delete, εννοεί DELETE.
+ * The rs_lang user meta belongs to Revenue Splitter and is not touched.
  */
 
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit;
-}
+defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-if ( ! current_user_can( 'activate_plugins' ) ) {
-	return;
-}
-
-/* =====================================================================
- * Helper: recursive rmdir με collector (ίδιο pattern με RS uninstall).
- * =================================================================== */
-
-if ( ! function_exists( 'nm_uninstall_rrmdir' ) ) {
-	/**
-	 * Recursive directory deletion. Συγκεντρώνει γεγονότα + πλήθος αρχείων.
-	 *
-	 * @param string $dir   Realpath του directory.
-	 * @param array  $log   Collector (by reference).
-	 * @param int    $files Counter αρχείων (by reference).
-	 * @return void
-	 */
-	function nm_uninstall_rrmdir( string $dir, array &$log, int &$files ): void {
-		$entries = scandir( $dir );
-		if ( false === $entries ) {
-			$log[] = '[FAIL] scandir: ' . $dir;
-			return;
+/** Delete a file or a folder tree, never outside $guard. */
+function nm_uninstall_rm( string $path, string $guard ): void {
+	$path  = rtrim( str_replace( '\\', '/', $path ), '/' );
+	$guard = rtrim( str_replace( '\\', '/', $guard ), '/' ) . '/';
+	if ( '/' === $guard || 0 !== strpos( $path . '/', $guard ) || $path . '/' === $guard ) {
+		return;
+	}
+	if ( is_link( $path ) || is_file( $path ) ) {
+		@unlink( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+		return;
+	}
+	if ( ! is_dir( $path ) ) {
+		return;
+	}
+	foreach ( (array) @scandir( $path ) as $item ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( '.' !== $item && '..' !== $item ) {
+			nm_uninstall_rm( $path . '/' . $item, $guard );
 		}
-		foreach ( $entries as $entry ) {
-			if ( '.' === $entry || '..' === $entry ) {
-				continue;
-			}
-			$path = $dir . '/' . $entry;
-			if ( is_link( $path ) ) {
-				@unlink( $path ); // symlink κόμβος: unlink, ποτέ recursion.
-				$files++;
-				continue;
-			}
-			if ( is_dir( $path ) ) {
-				nm_uninstall_rrmdir( $path, $log, $files );
-			} else {
-				@unlink( $path );
-				$files++;
+	}
+	@rmdir( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+}
+
+/** Our files in the storage folder. */
+function nm_uninstall_storage( string $dir, bool $keep ): void {
+	$dir = rtrim( str_replace( '\\', '/', $dir ), '/' );
+	if ( '' === $dir || ! is_dir( $dir ) ) {
+		return;
+	}
+	foreach ( array( 'jobs', 'work', 'logs', 'incoming' ) as $sub ) {
+		nm_uninstall_rm( $dir . '/' . $sub, $dir );
+	}
+	if ( ! $keep && is_dir( $dir . '/backups' ) ) {
+		foreach ( (array) @scandir( $dir . '/backups' ) as $f ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$f = (string) $f;
+			if ( preg_match( '/^[a-z0-9.-]{1,80}-\d{8}-\d{6}-[a-f0-9]{32}(-part\d{1,3})?\.zip$/', $f ) || preg_match( '/^[a-f0-9]{32}\.php(\.lock)?$/', $f ) || in_array( $f, array( 'index.php', '.htaccess', 'web.config' ), true ) ) {
+				@unlink( $dir . '/backups/' . $f ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
 			}
 		}
-		$log[] = ( @rmdir( $dir ) ? '[DELETED DIR] ' : '[FAILED DIR] ' ) . $dir;
+		@rmdir( $dir . '/backups' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 	}
-}
-
-/**
- * Τοπικό (safe) realpath wrapper: η 'string' return + '/nonexistent-guard'
- * => κανένα path traversal — περνάει πάντα από realpath containment.
- */
-if ( ! function_exists( 'nm_uninstall_realdir' ) ) {
-	function nm_uninstall_realdir( string $dir ): string {
-		$real = (string) realpath( $dir );
-		return ( '' !== $real && is_dir( $real ) ) ? rtrim( $real, '/' ) : '';
+	if ( is_dir( $dir . '/backups' ) ) {
+		return; // Kept backups keep their protected folder.
 	}
-}
-
-$log   = array();
-$files = 0;
-$swept = 0;
-
-/* =====================================================================
- * 1. Sweep leftover plugin folders (noxpress-migrator*) στο WP_PLUGIN_DIR.
- * =================================================================== */
-
-$plugins_dir = nm_uninstall_realdir( (string) WP_PLUGIN_DIR );
-$targets     = glob( trailingslashit( (string) WP_PLUGIN_DIR ) . 'noxpress-migrator*', GLOB_ONLYDIR );
-$self_dir    = basename( __DIR__ );
-
-foreach ( (array) $targets as $target ) {
-	$target = (string) $target;
-	$slug   = basename( $target );
-
-	// 1. Ποτέ ο εαυτός μας.
-	if ( $slug === $self_dir ) {
-		continue;
-	}
-	// 2. Symlink: skip με trace.
-	if ( is_link( $target ) ) {
-		$log[] = '[SKIPPED SYMLINK] ' . $target;
-		continue;
-	}
-	// 3. Realpath containment — ποτέ εκτός WP_PLUGIN_DIR.
-	$real = nm_uninstall_realdir( $target );
-	if ( '' === $real || '' === $plugins_dir
-		|| 0 !== strpos( $real . '/', $plugins_dir . '/' ) ) {
-		$log[] = '[SKIPPED ESCAPE] ' . $target;
-		continue;
-	}
-
-	$log[] = '[SWEEP START] ' . $real;
-	nm_uninstall_rrmdir( $real, $log, $files );
-	$log[] = '[SWEEP DONE] ' . $real;
-	$swept++;
-}
-
-/* =====================================================================
- * 2. Sweep staging + logs στο uploads (prefix NM_UPLOAD_PREFIX, εδώ
- *    hardcoded γιατί δεν ζούμε στο scope του plugin).
- *
- *    - noxpress-migrator-tmp*   → staging φάκελοι ημιτελών exports.
- *    - noxpress-migrator-*.log  → uninstall/operation logs.
- *    ΠΟΤΕ δεν σβήνουμε τίποτα χωρίς το prefix — το ίδιο το uploads
- *    μένει άθικτο.
- * =================================================================== */
-
-$upload_dir = wp_upload_dir();
-$uploads    = nm_uninstall_realdir( (string) ( is_array( $upload_dir ) ? ( $upload_dir['basedir'] ?? '' ) : '' ) );
-
-if ( '' !== $uploads ) {
-
-	$up_targets = array_merge(
-		(array) glob( $uploads . '/noxpress-migrator-tmp*', GLOB_ONLYDIR ),
-		(array) glob( $uploads . '/noxpress-migrator-*.log' )
-	);
-
-	foreach ( $up_targets as $target ) {
-		$target = (string) $target;
-
-		if ( is_link( $target ) ) {
-			$log[] = '[SKIPPED SYMLINK] ' . $target;
-			continue;
-		}
-
-		$real = is_dir( $target ) ? nm_uninstall_realdir( $target ) : (string) realpath( $target );
-
-		// Realpath containment μέσα στο uploads.
-		if ( '' === $real || 0 !== strpos( $real . '/', $uploads . '/' ) ) {
-			$log[] = '[SKIPPED ESCAPE] ' . $target;
-			continue;
-		}
-
-		if ( is_dir( $real ) ) {
-			$log[] = '[SWEEP START] ' . $real;
-			nm_uninstall_rrmdir( $real, $log, $files );
-			$log[] = '[SWEEP DONE] ' . $real;
-			$swept++;
-		} else {
-			if ( @unlink( $real ) ) {
-				$log[] = '[DELETED FILE] ' . $real;
-				$files++;
-			} else {
-				$log[] = '[FAILED FILE] ' . $real;
-			}
+	// Our protection files, only when they are ours.
+	$ours = array( 'index.php' => 'Silence is golden', '.htaccess' => 'Data Migrator: private folder', 'web.config' => 'deny users="*"' );
+	foreach ( $ours as $name => $mark ) {
+		$f = $dir . '/' . $name;
+		if ( is_file( $f ) && filesize( $f ) < 1024 && false !== strpos( (string) file_get_contents( $f ), $mark ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			@unlink( $f ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
 		}
 	}
-} else {
-	$log[] = '[INFO] Το wp_upload_dir() δεν ήταν διαθέσιμο —跳 sweeps του uploads.';
+	@rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- only when empty.
 }
 
-/* =====================================================================
- * 3. Log σε ΜΥΣΤΙΚΟ random filename + email στον admin — μηδέν ίχνη.
- *    (Ίδιο privacy-first pattern με RS: αν το mail φύγει, το file
- *    ΣΒΗΝΕΤΑΙ. Αν αποτύχει, μένει και γράφεται στο debug.log.)
- * =================================================================== */
+/** Clean one site. Names are hardcoded: the plugin classes are not loaded here. */
+function nm_uninstall_site(): void {
+	global $wpdb;
 
-$nm_logfile = '';
-$nm_lines   = array_merge(
-	array(
-		'=== Noxpress Migrator — uninstall sweep ===',
-		'Date: ' . gmdate( 'c' ),
-		'',
-	),
-	( empty( $log ) ? array( '[INFO] Δεν βρέθηκαν leftover φάκελοι/αρχεία noxpress-migrator*.' ) : $log ),
-	array(
-		'',
-		'Leftover folders/files swept: ' . $swept,
-		'Total files removed: ' . $files,
-		'',
-	)
-);
-$nm_body = implode( "\n", $nm_lines );
-
-if ( '' !== $uploads ) {
-	$random     = wp_generate_password( 24, false, false ); // alphanumeric, 24 chars.
-	$nm_logfile = $uploads . '/noxpress-migrator-' . $random . '.log';
-	@file_put_contents( $nm_logfile, $nm_body, LOCK_EX );
-}
-
-$nm_mail_sent = false;
-if ( function_exists( 'wp_mail' ) ) {
-	$nm_mail_sent = wp_mail(
-		(string) get_option( 'admin_email' ),
-		'Noxpress Migrator — uninstall sweep report',
-		$nm_body
-	);
-}
-
-if ( $nm_mail_sent ) {
-	if ( '' !== $nm_logfile && @unlink( $nm_logfile ) ) {
-		$nm_logfile = ''; // Σβήστηκε — μηδέν ίχνη στο disk.
+	$set = get_option( 'nm_settings', array() );
+	$set = is_array( $set ) ? $set : array();
+	if ( ! empty( $set['storage'] ) && is_string( $set['storage'] ) ) {
+		nm_uninstall_storage( $set['storage'], ! empty( $set['keep'] ) );
 	}
-	if ( function_exists( 'error_log' ) ) {
-		error_log( 'Noxpress Migrator uninstall sweep: ' . $swept . ' folder(s)/item(s), ' . $files . ' file(s). Report emailed to admin (file removed).' );
-	}
-} elseif ( function_exists( 'error_log' ) ) {
-	error_log( 'Noxpress Migrator uninstall sweep: ' . $swept . ' folder(s)/item(s), ' . $files . ' file(s). Mail FAILED — log kept at: ' . $nm_logfile );
-}
 
-/* =====================================================================
- * 4. Options — targeted list + wildcard sweep 'nm\_%'.
- *
- *    Why wildcard: το plugin προσθέτει options δυναμικά (checkpoints,
- *    manifests, μελλοντικές ρυθμίσεις waves 2+) — ένα targeted list
- *    μόνο του θα άφηνε ορφανά keys. Το escape '_' κρατά το PREFIX
- *    αυστηρό: 'nm_foo' ταιριάζει, 'nmfoo' ΔΕΝ ταιριάζει.
- * =================================================================== */
-
-global $wpdb;
-
-$nm_known_options = array(
-	'nm_max_volume_mb',
-	'nm_checkpoint',
-	'nm_last_manifest',
-);
-
-foreach ( $nm_known_options as $nm_opt ) {
-	delete_option( $nm_opt );
-}
-
-// Wildcard sweep — ταυτοποιούμε από τη βάση, μετά targeted delete.
-$nm_like_rows = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- εφάπαξ uninstall cleanup.
-	$wpdb->prepare(
-		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-		'nm\_%'
-	)
-);
-
-if ( is_array( $nm_like_rows ) ) {
-	foreach ( $nm_like_rows as $nm_opt_name ) {
-		delete_option( $nm_opt_name ); // Σβήνει row + το αντίστοιχο object cache entry.
-	}
-}
-
-/* =====================================================================
- * 5. User meta (nm_lang) — για ΟΛΟΥΣ τους χρήστες του site.
- * =================================================================== */
-
-delete_metadata( 'user', 0, 'nm_lang', '', true );
-
-/* =====================================================================
- * 6. Transients (_transient_nm_* — targeted SELECT + delete_option
- *    ανά όνομα, ώστε το WordPress να invalidate ΚΑΙ το persistent
- *    object cache (Redis/Memcached) χωρίς blanket wp_cache_flush()
- *    που καθάριζε ΟΛΟ το site — και άλλα sites σε multisite.
- * =================================================================== */
-
-$nm_transient_masks = array(
-	'_transient_nm_%',
-	'_transient_timeout_nm_%',
-);
-
-foreach ( $nm_transient_masks as $nm_mask ) {
-
-	$nm_names = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- εφάπαξ uninstall cleanup.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+	$wpdb->query(
 		$wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-			$nm_mask
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
+			$wpdb->esc_like( 'nm_' ) . '%',
+			$wpdb->esc_like( '_transient_nm_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_nm_' ) . '%'
 		)
 	);
+	// phpcs:enable
+	wp_cache_flush();
+}
 
-	if ( ! is_array( $nm_names ) ) {
-		continue;
+if ( is_multisite() ) {
+	foreach ( get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $nm_site_id ) {
+		switch_to_blog( (int) $nm_site_id );
+		nm_uninstall_site();
+		restore_current_blog();
 	}
+} else {
+	nm_uninstall_site();
+}
 
-	foreach ( $nm_names as $nm_name ) {
-		delete_option( $nm_name );
+// Tables of unfinished restores (one database for all sites).
+global $wpdb;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+$nm_tables = (array) $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', 'nm%' ) );
+foreach ( $nm_tables as $nm_table ) {
+	if ( preg_match( '/^nm[tsx][0-9a-f]{6}_[A-Za-z0-9_$]+$/', (string) $nm_table ) ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- name matched above.
+		$wpdb->query( 'DROP TABLE IF EXISTS `' . $nm_table . '`' );
 	}
 }
 
-/* =====================================================================
- * Done. Ούτε το object cache flush-άρθηκε blanket, ούτε αγγίχτηκε
- * Ο,ΤΙΔΗΠΟΤΕ εκτός του namespace 'nm_'/'noxpress-migrator-'. Αν κάτι
- * πήγε στραβά, το uninstall report email/logs το αποκαλύπτουν.
- * =================================================================== */
+// Stage folders of restores across disks.
+foreach ( (array) glob( rtrim( WP_CONTENT_DIR, '/\\' ) . '/nm-stage-*', GLOB_ONLYDIR ) as $nm_stage ) {
+	if ( preg_match( '/^nm-stage-[a-f0-9]{32}$/', basename( (string) $nm_stage ) ) ) {
+		nm_uninstall_rm( (string) $nm_stage, WP_CONTENT_DIR );
+	}
+}
+
+// ---------------------------------------------------------------------
+// Noxpress Core (Bible §16): the update channel, the cached version list
+// and the hub notices are shared by the suite. They are deleted only
+// when no other Noxpress plugin is installed (main file check).
+// ---------------------------------------------------------------------
+
+$nm_suite_left = false;
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'data-migrator' ) as $nm_slug ) {
+	if ( 'data-migrator' !== $nm_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $nm_slug . '/' . $nm_slug . '.php' ) ) {
+		$nm_suite_left = true;
+		break;
+	}
+}
+
+if ( ! $nm_suite_left ) {
+	delete_site_option( 'noxpress_channel' );
+	delete_site_option( 'noxpress_checked' );
+	delete_site_transient( 'noxpress_manifest' );
+	delete_metadata( 'user', 0, 'noxpress_hidden', '', true ); // Core 1.1.0: hidden other-channel notices.
+
+	$nm_sites = is_multisite() ? get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) : array( 0 );
+	foreach ( $nm_sites as $nm_site_id ) {
+		if ( $nm_site_id ) {
+			switch_to_blog( (int) $nm_site_id );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_noxpress_hub_msg_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_noxpress_hub_msg_' ) . '%'
+			)
+		);
+		if ( $nm_site_id ) {
+			restore_current_blog();
+		}
+	}
+}

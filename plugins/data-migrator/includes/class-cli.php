@@ -1,303 +1,449 @@
 <?php
 /**
- * NM_CLI — WP-CLI commands: wp nm <export|resume|status|abort|verify|reset>.
+ * NM_CLI — wp data-migrator … (Bible §13).
  *
- * Χρήση:
- *   wp nm export [--scope=everything|db|files] [--media-after=YYYY-MM-DD]
- *   wp nm resume
- *   wp nm status
- *   wp nm abort
- *   wp nm verify <manifest-path> [--mode=deep|quick]
- *   wp nm reset            (καθαρίζει export staging + verify state)
- *
- * Το CLI είναι ΛΕΠΤΟ wrapper: όλη η δουλειά γίνεται από τα ίδια
- * engines με το admin UI (NM_Files_Engine / NM_Verify). CTRL+C κατά
- * το export = παύση· το checkpoint είναι πάντα αποθηκευμένο στο τέλος
- * κάθε step (ΔΕΝ κάθε statement — file/table boundaries).
- *
- * Exit codes: 0 = OK, 1 = failure (για scripts/cron).
+ * The same jobs as the admin pages, stepped in one process with a long
+ * budget. Output is English (WP-CLI convention); messages from the
+ * engine follow the site's language.
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Backup, verify and restore the whole site.
+ */
 final class NM_CLI {
 
-	public static function init(): void {
-
-		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
-			return;
-		}
-
-		WP_CLI::add_command( 'nm', array( __CLASS__, 'dispatch' ), array(
-			'shortdesc' => 'Noxpress Migrator — export/import/verify site migrations.',
-		) );
-	}
-
 	/**
-	 * Dispatcher: wp nm <subcommand> [...args]
+	 * Create a backup.
 	 *
-	 * @param array $args       Positional args (πρώτο = subcommand).
-	 * @param array $assoc_args Flags (--scope=... κ.λπ.).
+	 * ## OPTIONS
+	 *
+	 * [--scope=<scope>]
+	 * : full, db or files.
+	 * ---
+	 * default: full
+	 * options:
+	 *   - full
+	 *   - db
+	 *   - files
+	 * ---
+	 *
+	 * [--part-mb=<mb>]
+	 * : Split into parts of this size (0 = one file). Default: the setting.
+	 *
+	 * [--note=<text>]
+	 * : A note shown in the list.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp data-migrator backup
+	 *     wp data-migrator backup --scope=db --note="before update"
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
 	 */
-	public static function dispatch( array $args, array $assoc_args ): void {
-
-		$sub = (string) ( $args[0] ?? '' );
-
-		switch ( $sub ) {
-			case 'export':
-				self::cmd_export( $assoc_args );
-				return;
-			case 'resume':
-				self::cmd_resume();
-				return;
-			case 'status':
-				self::cmd_status();
-				return;
-			case 'abort':
-				self::cmd_abort();
-				return;
-			case 'verify':
-				self::cmd_verify( $args, $assoc_args );
-				return;
-			case 'reset':
-				self::cmd_reset();
-				return;
-			default:
-				WP_CLI::error( 'Unknown subcommand: ' . $sub . ' — use export|resume|status|abort|verify|reset.' );
+	public function backup( $args, $assoc ): void {
+		$job = NM_Backup::start(
+			array(
+				'scope'   => (string) ( $assoc['scope'] ?? 'full' ),
+				'part_mb' => isset( $assoc['part-mb'] ) ? (int) $assoc['part-mb'] : (int) NM_Settings::get()['part_mb'],
+				'note'    => sanitize_text_field( (string) ( $assoc['note'] ?? '' ) ),
+			)
+		);
+		if ( is_wp_error( $job ) ) {
+			WP_CLI::error( $job->get_error_message() );
 		}
-	}
-
-	/* =====================================================================
-	 * wp nm export [--scope=...] [--media-after=...]
-	 * =================================================================== */
-
-	private static function cmd_export( array $assoc ): void {
-
-		$scope = (string) ( $assoc['scope'] ?? 'everything' );
-		if ( ! in_array( $scope, array( 'everything', 'db', 'files' ), true ) ) {
-			WP_CLI::error( 'Invalid --scope (everything|db|files): ' . $scope );
+		$p = $this->drive( (string) $job['id'], array( 'NM_Backup', 'step' ) );
+		if ( 'done' !== $p['status'] ) {
+			WP_CLI::error( (string) $p['text'] );
 		}
-
-		$after = (string) ( $assoc['media-after'] ?? '' );
-		if ( '' !== $after && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $after ) ) {
-			WP_CLI::error( 'Invalid --media-after (YYYY-MM-DD): ' . $after );
+		$m = NM_Storage::meta( (string) $p['id'] );
+		WP_CLI::success( sprintf( 'Backup %s: %d part(s), %s.', (string) $p['id'], count( (array) ( $m['parts'] ?? array() ) ), NM_Util::size( (float) ( $m['size'] ?? 0 ) ) ) );
+		foreach ( (array) ( $m['parts'] ?? array() ) as $part ) {
+			WP_CLI::log( NM_Storage::part_path( (string) $part['file'] ) );
 		}
-
-		WP_CLI::log( 'Starting export — scope: ' . $scope . ( '' !== $after ? ', media after: ' . $after : '' ) );
-
-		NM_Files_Engine::begin( $scope, $after );
-
-		self::stepping_loop();
-	}
-
-	/* =====================================================================
-	 * wp nm resume
-	 * =================================================================== */
-
-	private static function cmd_resume(): void {
-
-		$report = NM_Files_Engine::current_report();
-
-		if ( 'idle' === $report['status'] ) {
-			WP_CLI::error( 'Nothing to resume — no checkpoint found. Start with: wp nm export' );
-		}
-		if ( 'complete' === $report['status'] || 'packaged' === $report['status'] ) {
-			WP_CLI::success( 'Export is already complete — nothing to resume. Check: wp nm status' );
-			return;
-		}
-
-		WP_CLI::log( 'Resuming — last state: ' . $report['status'] );
-
-		self::stepping_loop();
 	}
 
 	/**
-	 * Κοινός βρόχος stepping μέχρι τερματική κατάσταση. Εκτυπώνει
-	 * one-line progress ανά step (CR-safe για logs).
+	 * List backups.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - json
+	 *   - csv
+	 *   - ids
+	 * ---
+	 *
+	 * @subcommand list
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
 	 */
-	private static function stepping_loop(): void {
-
-		$t0    = microtime( true );
-		$steps = 0;
-
-		while ( true ) {
-
-			$report = NM_Files_Engine::run_step();
-
-			if ( 'failed' === $report['status'] ) {
-				WP_CLI::error( 'Export FAILED: ' . ( $report['error'] ?? 'unknown error' ) . ' — run "wp nm resume" after fixing the cause.' );
-			}
-
-			$steps++;
-
-			$line = sprintf(
-				'[%3d] %-8s %-45s rows/items: %-9s pct: %5.1f%% (%s)',
-				$steps,
-				(string) $report['status'],
-				mb_substr( (string) $report['table'], 0, 45 ),
-				(string) $report['rows'],
-				(float) $report['pct'],
-				self::fmt_bytes( (int) $report['bytes'] )
+	public function list_( $args, $assoc ): void {
+		$rows = array();
+		foreach ( NM_Storage::all() as $m ) {
+			$rows[] = array(
+				'id'      => $m['id'],
+				'created' => gmdate( 'Y-m-d H:i', (int) $m['created'] ) . ' UTC',
+				'status'  => $m['status'] ?? '',
+				'db'      => empty( $m['db'] ) ? 'no' : 'yes',
+				'groups'  => implode( ',', (array) ( $m['groups'] ?? array() ) ),
+				'parts'   => count( (array) ( $m['parts'] ?? array() ) ),
+				'size'    => NM_Util::size( (float) ( $m['size'] ?? 0 ) ),
+				'home'    => $m['home'] ?? '',
+				'note'    => $m['note'] ?? '',
 			);
-			WP_CLI::log( $line );
-
-			if ( 'complete' === $report['status'] ) {
-				self::print_summary();
-				WP_CLI::success( 'Export complete in ' . round( microtime( true ) - $t0 ) . 's (' . $steps . ' steps).' );
-				return;
-			}
-
-			// Χωρίς flush/interval: το step() είναι ήδη budgeted (15s).
-			// Επαναλαμβάνουμε αμέσως εώς την τερματική κατάσταση.
 		}
-	}
-
-	/* =====================================================================
-	 * wp nm status
-	 * =================================================================== */
-
-	private static function cmd_status(): void {
-
-		$report = NM_Files_Engine::current_report();
-
-		WP_CLI::log( 'Status:    ' . (string) $report['status'] );
-		WP_CLI::log( 'Item:      ' . (string) ( $report['table'] ?: '—' ) );
-		WP_CLI::log( 'Rows/Items:' . number_format_i18n( (int) $report['rows'] ) . ' / ' . (int) $report['total_tables'] );
-		WP_CLI::log( 'Bytes:     ' . self::fmt_bytes( (int) $report['bytes'] ) );
-		WP_CLI::log( 'Progress:  ' . (float) $report['pct'] . '%' );
-
-		if ( ! empty( $report['error'] ) ) {
-			WP_CLI::log( 'Error:     ' . (string) $report['error'] );
-		}
-
-		// Packaged? δείξε volumes.
-		if ( 'complete' === $report['status'] && class_exists( 'NM_Files_Engine' ) ) {
-			self::print_summary();
-		}
-	}
-
-	/* =====================================================================
-	 * wp nm abort
-	 * =================================================================== */
-
-	private static function cmd_abort(): void {
-
-		NM_Files_Engine::abort();
-		WP_CLI::success( 'Aborted. Staging preserved for debugging — resume with: wp nm resume (or reset with: wp nm reset)' );
-	}
-
-	/* =====================================================================
-	 * wp nm verify <manifest-path> [--mode=deep|quick]
-	 * =================================================================== */
-
-	private static function cmd_verify( array $args, array $assoc ): void {
-
-		$path = (string) ( $args[1] ?? '' );
-		$mode = (string) ( $assoc['mode'] ?? 'deep' );
-
-		if ( '' === $path ) {
-			WP_CLI::error( 'Usage: wp nm verify <manifest-path> [--mode=deep|quick]' );
-		}
-
-		$begun = NM_Verify::begin( $path, $mode );
-		if ( ! $begun['ok'] ) {
-			WP_CLI::error( (string) ( $begun['error'] ?? 'Cannot start verification.' ) );
-		}
-
-		WP_CLI::log( 'Verifying — mode: ' . $mode );
-
-		$steps = 0;
-
-		while ( true ) {
-
-			$report = NM_Verify::step();
-
-			if ( 'failed' === $report['status'] ) {
-				WP_CLI::error( 'Verification FAILED: ' . ( $report['error'] ?? 'unknown' ) );
-			}
-
-			$steps++;
-			WP_CLI::log( sprintf( '[%3d] %-8s pct: %5.1f%%', $steps, (string) $report['status'], (float) $report['pct'] ) );
-
-			if ( 'done' === $report['status'] ) {
-
-				$r = NM_Verify::last_report();
-
-				WP_CLI::log( '' );
-				WP_CLI::log( 'Verdict: ' . (string) $r['verdict'] );
-				WP_CLI::log( 'Tables OK: ' . count( (array) $r['db_ok'] ) . ' | mismatched: ' . count( (array) $r['db_bad'] ) . ' | orphans: ' . count( (array) $r['orphan_tables'] ) );
-				WP_CLI::log( 'Files OK: ' . (int) $r['files_ok'] . ' | bad: ' . count( (array) $r['files_bad'] ) );
-
-				if ( ! empty( $r['db_bad'] ) ) {
-					foreach ( (array) $r['db_bad'] as $tbl => $m ) {
-						WP_CLI::warning( 'Table ' . $tbl . ': expected ' . $m['expected'] . ', got ' . $m['actual'] );
-					}
-				}
-				if ( ! empty( $r['files_bad'] ) ) {
-					foreach ( array_slice( (array) $r['files_bad'], 0, 20 ) as $fb ) {
-						WP_CLI::warning( 'File ' . $fb['path'] . ': ' . $fb['reason'] );
-					}
-				}
-
-				$is_ok = false !== strpos( (string) $r['verdict'], 'PERFECT' );
-				( $is_ok ? 'WP_CLI::success' : 'WP_CLI::error' )( (string) $r['verdict'] );
-				return;
-			}
-		}
-	}
-
-	/* =====================================================================
-	 * wp nm reset
-	 * =================================================================== */
-
-	private static function cmd_reset(): void {
-
-		// Νέο, καθαρό staging (wipe checkpoint + files).
-		NM_Export_Engine::start( true );
-		NM_Files_Engine::delete_package();
-
-		if ( class_exists( 'NM_Verify' ) ) {
-			NM_Verify::reset();
-		}
-
-		WP_CLI::success( 'Migration state cleared (checkpoint, staging, packages, verify state).' );
-	}
-
-	/* =====================================================================
-	 * Helpers
-	 * =================================================================== */
-
-	private static function print_summary(): void {
-
-		$sum = get_option( 'nm_last_manifest', array() );
-		$sum = is_array( $sum ) ? $sum : array();
-
-		if ( empty( $sum['volumes'] ) ) {
+		$format = (string) ( $assoc['format'] ?? 'table' );
+		if ( 'ids' === $format ) {
+			WP_CLI::log( implode( ' ', wp_list_pluck( $rows, 'id' ) ) );
 			return;
 		}
+		WP_CLI\Utils\format_items( $format, $rows, array( 'id', 'created', 'status', 'db', 'groups', 'parts', 'size', 'home', 'note' ) );
+	}
 
-		WP_CLI::log( '' );
-		WP_CLI::log( 'Package:' );
-
-		foreach ( (array) $sum['volumes'] as $v ) {
-			WP_CLI::log( sprintf(
-				'  %-40s %s',
-				(string) $v['file'],
-				self::fmt_bytes( (int) $v['bytes'] )
-			) );
+	/**
+	 * Add a backup made on another site (all its parts) to this site's
+	 * backups. The files are copied; the originals stay.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <file>...
+	 * : The backup's .zip file, or all its parts.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp data-migrator import ~/example-com-20261018-103845-*.zip
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function import( $args, $assoc ): void {
+		if ( count( $args ) > 99 ) {
+			WP_CLI::error( 'Too many files.' );
 		}
+		$dir = NM_Storage::sub( 'incoming' );
+		if ( '' === $dir ) {
+			WP_CLI::error( 'No writable storage folder.' );
+		}
+		$upload = NM_Util::hex( 16 );
+		$d      = $dir . '/' . $upload;
+		NM_Util::mkdirp( $d );
+		foreach ( array_values( $args ) as $i => $file ) {
+			$file = (string) $file;
+			if ( ! is_file( $file ) || ! preg_match( '/\.zip$/i', $file ) ) {
+				NM_Restore_Prep::discard( $upload );
+				WP_CLI::error( 'Not a .zip file: ' . $file );
+			}
+			if ( ! copy( $file, $d . '/' . sprintf( '%02d', $i ) . '.zip' ) ) {
+				NM_Restore_Prep::discard( $upload );
+				WP_CLI::error( 'Could not copy ' . $file );
+			}
+		}
+		$id = NM_Restore_Prep::upload_finish( $upload );
+		if ( is_wp_error( $id ) ) {
+			WP_CLI::error( $id->get_error_message() );
+		}
+		WP_CLI::success( 'Imported as backup ' . $id . '. Next: wp data-migrator restore ' . $id . ' --dry-run' );
+	}
 
-		if ( class_exists( 'NM_Files_Engine' ) ) {
-			foreach ( NM_Files_Engine::final_paths() as $p ) {
-				WP_CLI::log( '  path: ' . $p['full'] );
+	/**
+	 * Check a backup (CRC of every entry, SQL readable) and show the
+	 * restore plan for this site. Changes nothing.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : Backup id.
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function verify( $args, $assoc ): void {
+		$an = $this->analyze( (string) $args[0] );
+		$this->print_checks( NM_Restore_Prep::checks( $an['result'] ) );
+		WP_CLI::success( 'The backup is readable.' );
+	}
+
+	/**
+	 * Restore a backup on this site, optionally at another address.
+	 *
+	 * The database tables are swapped at once; replaced files and tables
+	 * are kept until `wp data-migrator finalize` (or undone with
+	 * `wp data-migrator undo`).
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : Backup id (see `wp data-migrator list`).
+	 *
+	 * [--new-url=<url>]
+	 * : The site's address after the restore. Default: this site's.
+	 *   (WP-CLI's own --url picks the site to run on, not this.)
+	 *
+	 * [--local]
+	 * : Also replace the local development addresses the analysis finds
+	 *   (e.g. http://localhost/site) with the new address.
+	 *
+	 * [--bare]
+	 * : Also replace the old bare domain (e.g. in emails like info@…).
+	 *
+	 * [--db-only]
+	 * : Restore the database only.
+	 *
+	 * [--files-only]
+	 * : Restore the files only.
+	 *
+	 * [--blog-public=<0|1>]
+	 * : Search engine visibility after the restore. Default: this site's
+	 *   when the address changes, the backup's otherwise.
+	 *
+	 * [--salts]
+	 * : New security keys (everyone signs in again).
+	 *
+	 * [--dry-run]
+	 * : Analyse and show the plan only.
+	 *
+	 * [--yes]
+	 * : Do not ask for confirmation.
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function restore( $args, $assoc ): void {
+		$an = $this->analyze( (string) $args[0] );
+		$o  = NM_Restore_Prep::defaults( $an['result'] );
+		if ( isset( $assoc['new-url'] ) ) {
+			$url = esc_url_raw( (string) $assoc['new-url'] );
+			if ( ! preg_match( '#^https?://[^/\s]+#i', $url ) ) {
+				WP_CLI::error( 'Invalid --new-url.' );
+			}
+			$o['home'] = $url;
+		}
+		if ( ! empty( $assoc['local'] ) ) {
+			$o['local'] = array_map( 'strval', array_keys( (array) ( $an['result']['local'] ?? array() ) ) );
+		}
+		$o['bare'] = ! empty( $assoc['bare'] );
+		if ( ! empty( $assoc['db-only'] ) && ! empty( $assoc['files-only'] ) ) {
+			WP_CLI::error( 'Use --db-only or --files-only, not both.' );
+		}
+		if ( ! empty( $assoc['db-only'] ) ) {
+			$o['groups']     = array();
+			$o['root_files'] = array();
+		}
+		if ( ! empty( $assoc['files-only'] ) ) {
+			$o['db'] = false;
+		}
+		if ( isset( $assoc['blog-public'] ) ) {
+			$o['blog_public'] = (int) (bool) $assoc['blog-public'];
+		}
+		$o['salts'] = ! empty( $assoc['salts'] );
+
+		$checks = NM_Restore_Prep::checks( $an['result'], $o );
+		$this->print_checks( $checks );
+		foreach ( (array) ( $an['result']['local'] ?? array() ) as $u => $n ) {
+			WP_CLI::log( sprintf( 'Local address %s (%d): %s', (string) $u, (int) $n, in_array( (string) $u, (array) $o['local'], true ) ? 'replaced' : 'kept (use --local to replace)' ) );
+		}
+		WP_CLI::log( sprintf( 'Address: %s → %s', (string) $an['result']['manifest']['site']['home'], untrailingslashit( (string) $o['home'] ) ) );
+		WP_CLI::log( 'Database: ' . ( $o['db'] ? 'yes' : 'no' ) . ' · files: ' . ( $o['groups'] ? implode( ', ', $o['groups'] ) : 'none' ) );
+		if ( ! empty( $assoc['dry-run'] ) ) {
+			WP_CLI::success( 'Dry run: nothing changed.' );
+			return;
+		}
+		WP_CLI::confirm( 'Replace this site with the backup?', $assoc );
+
+		$r = NM_Restore_Prep::start( (string) $an['id'], $o );
+		if ( is_wp_error( $r ) ) {
+			WP_CLI::error( $r->get_error_message() );
+		}
+		$out = $this->run_restore( (string) $r[0]['id'] );
+		if ( 'done' === $out ) {
+			WP_CLI::success( 'Restored. Check the site, then run `wp data-migrator finalize` (or `wp data-migrator undo`).' );
+			return;
+		}
+		$job = NM_Storage::job( (string) $r[0]['id'] );
+		$why = (string) ( $job['error'] ?? '' );
+		if ( 'rolledback' === $out ) {
+			WP_CLI::error( 'The restore failed and was undone: ' . $why );
+		}
+		WP_CLI::error( 'The restore failed before the site changed: ' . $why . ' Run `wp data-migrator finalize` to clean up.' );
+	}
+
+	/**
+	 * Undo the last restore (files and tables back as they were).
+	 *
+	 * [--yes]
+	 * : Do not ask for confirmation.
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function undo( $args, $assoc ): void {
+		$job = $this->last_restore();
+		WP_CLI::confirm( 'Put the site back as it was before the restore?', $assoc );
+		$r = NM_Restore_Prep::undo( (string) $job['id'] );
+		if ( is_wp_error( $r ) ) {
+			WP_CLI::error( $r->get_error_message() );
+		}
+		$out = $this->run_restore( (string) $job['id'] );
+		if ( 'rolledback' !== $out ) {
+			WP_CLI::error( 'Undo stopped: ' . (string) ( NM_Storage::job( (string) $job['id'] )['error'] ?? $out ) );
+		}
+		WP_CLI::success( 'Undone. Run `wp data-migrator finalize` to delete the undo data.' );
+	}
+
+	/**
+	 * Delete the undo data of the last restore (snapshots, replaced files).
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function finalize( $args, $assoc ): void {
+		$job = $this->last_restore();
+		if ( ! NM_Restore_Prep::finalize( (string) $job['id'] ) ) {
+			WP_CLI::error( 'Nothing to finalize.' );
+		}
+		WP_CLI::success( 'Finalized.' );
+	}
+
+	/**
+	 * Delete a backup.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : Backup id.
+	 *
+	 * [--yes]
+	 * : Do not ask for confirmation.
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function delete( $args, $assoc ): void {
+		$id = (string) $args[0];
+		if ( ! preg_match( NM_Storage::ID_RE, $id ) || ! NM_Storage::meta( $id ) ) {
+			WP_CLI::error( 'Backup not found.' );
+		}
+		WP_CLI::confirm( 'Delete backup ' . $id . '?', $assoc );
+		NM_Storage::delete( $id );
+		WP_CLI::success( 'Deleted.' );
+	}
+
+	/**
+	 * Check the storage folder and the WordPress core files.
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function check( $args, $assoc ): void {
+		$dir = NM_Storage::dir();
+		if ( '' === $dir ) {
+			WP_CLI::error( 'No writable storage folder.' );
+		}
+		WP_CLI::log( 'Storage: ' . $dir . ( NM_Storage::in_webroot( $dir ) ? ' (inside the web root, protected)' : ' (outside the web root)' ) );
+		WP_CLI::log( 'Web test: ' . NM_Storage::web_test() );
+		$c = NM_Integrity::summary( NM_Integrity::check( true ) );
+		WP_CLI::log( 'Core files: ' . (string) $c['status'] );
+		foreach ( array( 'changed', 'missing', 'extra' ) as $k ) {
+			foreach ( (array) $c[ $k ] as $f ) {
+				WP_CLI::log( '  ' . $k . ': ' . (string) $f );
 			}
 		}
 	}
 
-	private static function fmt_bytes( int $b ): string {
-		if ( $b < 1024 )          { return $b . ' B'; }
-		if ( $b < 1048576 )       { return round( $b / 1024, 1 ) . ' KB'; }
-		if ( $b < 1073741824 )    { return round( $b / 1048576, 1 ) . ' MB'; }
-		return round( $b / 1073741824, 2 ) . ' GB';
+	/* ---------------------------------------------------------------
+	 * Helpers
+	 * ------------------------------------------------------------- */
+
+	/** Step a job until it stops; prints progress. */
+	private function drive( string $job_id, callable $step ): array {
+		$last = '';
+		do {
+			$p = call_user_func( $step, $job_id );
+			$t = (string) ( $p['text'] ?? '' );
+			if ( $t !== $last ) {
+				WP_CLI::log( sprintf( '%3d%% %s', (int) ( $p['pct'] ?? 0 ), $t ) );
+				$last = $t;
+			}
+			if ( 'busy' === $p['status'] ) {
+				sleep( 2 );
+			}
+		} while ( in_array( $p['status'], array( 'running', 'busy' ), true ) );
+		return $p;
+	}
+
+	/** Run the analysis of a backup. @return array The finished job. */
+	private function analyze( string $id ): array {
+		if ( ! preg_match( NM_Storage::ID_RE, $id ) ) {
+			WP_CLI::error( 'Invalid backup id.' );
+		}
+		$job = NM_Restore_Prep::analyze_start( $id );
+		if ( is_wp_error( $job ) ) {
+			WP_CLI::error( $job->get_error_message() );
+		}
+		$p = $this->drive( (string) $job['id'], array( 'NM_Restore_Prep', 'step' ) );
+		if ( 'done' !== $p['status'] ) {
+			WP_CLI::error( (string) $p['text'] );
+		}
+		return (array) NM_Storage::job( (string) $job['id'] );
+	}
+
+	private function print_checks( array $checks ): void {
+		$fail = false;
+		foreach ( $checks as $c ) {
+			WP_CLI::log( str_pad( strtoupper( (string) $c[0] ), 5 ) . ' ' . (string) $c[1] );
+			$fail = $fail || 'fail' === $c[0];
+		}
+		if ( $fail ) {
+			WP_CLI::error( 'The restore cannot run on this server.' );
+		}
+	}
+
+	/** Run a restore or undo job in this process. */
+	private function run_restore( string $id ): string {
+		$path = NM_Storage::job_path( $id );
+		$lock = NM_Util::lock( $path . '.lock' );
+		if ( ! $lock ) {
+			WP_CLI::error( 'Another process is working on this restore.' );
+		}
+		$db = NM_Backup::db();
+		if ( ! $db ) {
+			WP_CLI::error( 'No database connection.' );
+		}
+		NM_Util::prepare_request();
+		NM_Util::$log_file = NM_Storage::log_file( $id );
+		$save              = static function ( $j ) use ( $path ) {
+			NM_Util::write_state( $path, $j );
+		};
+		$step = '';
+		do {
+			$job = NM_Util::read_state( $path );
+			$r   = new NM_Restorer( $job, $db, $save );
+			$out = $r->run( microtime( true ) + NM_Util::budget() );
+			$now = 'rolling-back' === $r->job['status'] ? 'rollback' : (string) $r->job['step'];
+			if ( $now !== $step ) {
+				WP_CLI::log( '… ' . $now );
+				$step = $now;
+			}
+		} while ( 'more' === $out );
+		$db->close();
+		NM_Util::unlock( $lock );
+		return $out;
+	}
+
+	private function last_restore(): array {
+		$st  = get_option( 'nm_state', array() );
+		$id  = is_array( $st ) ? (string) ( $st['last'] ?? '' ) : '';
+		$job = '' === $id ? null : NM_Storage::job( $id );
+		if ( ! $job || 'restore' !== $job['type'] ) {
+			WP_CLI::error( 'No restore found.' );
+		}
+		return $job;
 	}
 }

@@ -52,6 +52,7 @@ final class Noxpress_Core {
 		'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.' => 'Pre-orders with a release date: badge and button in the store, the date in the cart and on the order, automatic release and emails.',
 		'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.' => 'Wishlist: a heart on products, guest lists without cookies, sharing and a report of the most wanted products.',
 		'Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.' => 'A gift option with a message at checkout, a message and products on the thank-you page, and a thank-you coupon for the next order.',
+		'Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.' => 'Full backup and restore of the site, here or on another server, with a domain change and no manual fixes.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -126,7 +127,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, SBR 170, PBQ 180, POR 190, WSH 200).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, SBR 170, PBQ 180, POR 190, WSH 200, CKE 210, NM 220).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -134,7 +135,7 @@ final class Noxpress_Core {
 
 	/**
 	 * Suite plugins the hub and the updater handle, keyed by slug
-	 * (folder and main file name). Data Migrator joins once it is fixed.
+	 * (folder and main file name).
 	 */
 	public static function catalog(): array {
 		return array(
@@ -237,6 +238,11 @@ final class Noxpress_Core {
 				'name' => 'Checkout Extras',
 				'desc' => __( 'Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.', 'noxpress' ),
 				'page' => 'cke-settings',
+			),
+			'data-migrator'     => array(
+				'name' => 'Data Migrator',
+				'desc' => __( 'Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.', 'noxpress' ),
+				'page' => 'nm-backups',
 			),
 		);
 	}

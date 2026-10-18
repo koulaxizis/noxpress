@@ -1,853 +1,963 @@
 <?php
 /**
- * NM_Admin_UI — Admin pages: Dashboard, Ρυθμίσεις, progress UI, exports.
+ * NM_Admin_UI — menu, pages, AJAX steps and downloads (Bible §3–§8, §11).
  *
- * Security pattern (mirror από RS_Admin_UI):
- *  - GET exports/checkpoint = admin_init + TRIPLE gating (slug → nonce → cap)
- *  - POST state changes (settings) = nonce + capability + PRG (transient notices)
+ * Submenus of the shared "Noxpress" menu (admin_menu priority 220),
+ * capability manage_options:
+ *  - nm-backups   «Αντίγραφα»: new backup, list, downloads, installer,
+ *                 core check
+ *  - nm-restore   «Επαναφορά»: upload, analysis (dry run), plan, start;
+ *                 finalize / undo of the last restore
+ *  - nm-settings  «DM Ρυθμίσεις»: storage folder, parts, exclusions,
+ *                 keep backups on uninstall, language (without RS)
  *
- * v1.0.0: Στήσιμο admin page, progress polling, settings, exports.
+ * State changes: POST on admin_init (page + nonce + capability, PRG,
+ * message in the transient nm_aui_msg_{uid}). Long work: admin-ajax with
+ * check_ajax_referer + capability, every parameter whitelisted.
+ * Downloads: privileged GET (page + nonce + capability).
  */
 
 defined( 'ABSPATH' ) || exit;
 
 final class NM_Admin_UI {
 
-	const CAP    = 'manage_options';
-	const SLUG   = 'noxpress-migrator';
-	const OPTION_LANG = 'nm_lang';
+	const CAP         = 'manage_options';
+	const SLUG_MENU   = 'noxpress';
+	const NONCE       = 'nm_admin';
+	const NONCE_FIELD = 'nm_nonce';
+	const NONCE_AJAX  = 'nm_ajax';
+	const PAGES       = array( 'nm-backups', 'nm-restore', 'nm-settings' );
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
-		add_action( 'admin_init', array( __CLASS__, 'route_settings' ) );
-		add_action( 'admin_init', array( __CLASS__, 'route_actions' ) );
-		add_action( 'admin_init', array( __CLASS__, 'route_verify' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 220 );
+		add_action( 'admin_init', array( __CLASS__, 'route' ) );
+		add_action( 'admin_init', array( __CLASS__, 'download' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( NM_FILE ), array( __CLASS__, 'action_links' ) );
+		foreach ( array( 'backup_start', 'step', 'cancel', 'upload', 'upload_done', 'analyze' ) as $a ) {
+			add_action( 'wp_ajax_nm_' . $a, array( __CLASS__, 'ajax_' . $a ) );
+		}
 	}
 
 	/* =====================================================================
-	 * Menus / assets
+	 * Menu + assets
 	 * =================================================================== */
 
 	public static function admin_menu(): void {
-		add_menu_page(
-			__( 'Noxpress Migrator', 'noxpress-migrator' ),
-			__( 'Noxpress Migrator', 'noxpress-migrator' ),
-			self::CAP,
-			self::SLUG,
-			array( __CLASS__, 'render_dashboard' ),
-			'dashicons-upload'
-		);
-		add_submenu_page(
-			self::SLUG,
-			__( 'Migration', 'noxpress-migrator' ),
-			__( 'Migration', 'noxpress-migrator' ),
-			self::CAP,
-			self::SLUG,
-			array( __CLASS__, 'render_dashboard' )
-		);
-		add_submenu_page(
-			self::SLUG,
-			__( 'Settings', 'noxpress-migrator' ),
-			__( 'Settings', 'noxpress-migrator' ),
-			self::CAP,
-			self::SLUG . '-settings',
-			array( __CLASS__, 'render_settings' )
-		);
-		add_submenu_page(
-			self::SLUG,
-			__( 'Verify', 'noxpress-migrator' ),
-			__( 'Verify', 'noxpress-migrator' ),
-			self::CAP,
-			self::SLUG . '-verify',
-			array( __CLASS__, 'render_verify' )
-		);
+		// The shared top-level "Noxpress" is created by Noxpress Core (priority 5).
+		add_submenu_page( self::SLUG_MENU, __( 'Data Migrator: Αντίγραφα', 'data-migrator' ), __( 'Αντίγραφα', 'data-migrator' ), self::CAP, 'nm-backups', array( __CLASS__, 'render' ) );
+		add_submenu_page( self::SLUG_MENU, __( 'Data Migrator: Επαναφορά', 'data-migrator' ), __( 'Επαναφορά', 'data-migrator' ), self::CAP, 'nm-restore', array( __CLASS__, 'render' ) );
+		add_submenu_page( self::SLUG_MENU, __( 'Data Migrator: Ρυθμίσεις', 'data-migrator' ), __( 'DM Ρυθμίσεις', 'data-migrator' ), self::CAP, 'nm-settings', array( __CLASS__, 'render' ) );
 	}
 
-	public static function assets( string $hook ): void {
-		if ( false === strpos( $hook, 'noxpress-migrator' ) ) {
+	public static function action_links( $links ): array {
+		$links = is_array( $links ) ? $links : array();
+		array_unshift( $links, '<a href="' . esc_url( admin_url( 'admin.php?page=nm-backups' ) ) . '">' . esc_html__( 'Αντίγραφα', 'data-migrator' ) . '</a>' );
+		return $links;
+	}
+
+	private static function page(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
+		return isset( $_GET['page'] ) ? sanitize_key( wp_unslash( (string) $_GET['page'] ) ) : '';
+	}
+
+	private static function q( string $key ): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
+		return isset( $_GET[ $key ] ) && is_scalar( $_GET[ $key ] ) ? sanitize_text_field( wp_unslash( (string) $_GET[ $key ] ) ) : '';
+	}
+
+	public static function assets(): void {
+		if ( ! in_array( self::page(), self::PAGES, true ) ) {
 			return;
 		}
+		wp_enqueue_style( 'nm-admin', NM_URL . 'assets/admin.css', array(), NM_VERSION );
+		wp_enqueue_script( 'nm-admin', NM_URL . 'assets/admin.js', array(), NM_VERSION, true );
+		wp_localize_script(
+			'nm-admin',
+			'nmAdmin',
+			array(
+				'ajax'    => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( self::NONCE_AJAX ),
+				'chunk'   => self::chunk_size(),
+				'restore' => admin_url( 'admin.php?page=nm-restore' ),
+				'backups' => admin_url( 'admin.php?page=nm-backups' ),
+				'i18n'    => array(
+					'error'    => __( 'Σφάλμα σύνδεσης. Νέα προσπάθεια σε λίγα δευτερόλεπτα…', 'data-migrator' ),
+					'stopped'  => __( 'Η σύνδεση απέτυχε πολλές φορές. Ανανέωσε τη σελίδα: η εργασία συνεχίζει από εκεί που έμεινε.', 'data-migrator' ),
+					'cancel'   => __( 'Να ακυρωθεί η εργασία;', 'data-migrator' ),
+					'uploaded' => __( 'Ανέβηκε. Έλεγχος του αρχείου…', 'data-migrator' ),
+					'nofile'   => __( 'Διάλεξε πρώτα το αρχείο ή τα κομμάτια του αντιγράφου.', 'data-migrator' ),
+					'notzip'   => __( 'Μόνο αρχεία .zip του Data Migrator.', 'data-migrator' ),
+				),
+			)
+		);
+	}
 
-		$base = plugin_dir_url( NM_FILE );
-		wp_enqueue_style( 'nm-admin', $base . 'assets/admin.css', array(), filemtime( NM_PATH . 'assets/admin.css' ) );
-		wp_enqueue_script( 'nm-admin', $base . 'assets/admin.js', array( 'jquery' ), filemtime( NM_PATH . 'assets/admin.js' ), true );
-
-		wp_localize_script( 'nm-admin', 'nm_ajax', array(
-			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-			'nonce'         => wp_create_nonce( 'nm_progress' ),
-			'slug'          => self::SLUG,
-			'confirm_abort' => __( 'Are you sure?', 'noxpress-migrator' ),
-		) );
+	/** Upload chunk size: 2 MB, or less when the server allows less. */
+	private static function chunk_size(): int {
+		$max = min( NM_Util::ini_bytes( (string) ini_get( 'upload_max_filesize' ) ), NM_Util::ini_bytes( (string) ini_get( 'post_max_size' ) ) );
+		$c   = 2097152;
+		if ( $max > 0 ) {
+			$c = (int) min( $c, max( 262144, $max - 65536 ) );
+		}
+		return $c;
 	}
 
 	/* =====================================================================
-	 * Dashboard — migration progress
+	 * Pages
 	 * =================================================================== */
 
-	public static function render_dashboard(): void {
-
+	public static function render(): void {
 		if ( ! current_user_can( self::CAP ) ) {
-			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'data-migrator' ) );
 		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only checkpoint view.
-		$fresh = isset( $_GET['nm_fresh'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['nm_fresh'] ) );
-
-		if ( $fresh ) {
-			NM_Export_Engine::start( true );
-		}
-
-		// Πάντα το orchestrator — αυτό κανονίζει db/files/packaged.
-		if ( class_exists( 'NM_Files_Engine' ) ) {
-			$report = NM_Files_Engine::current_report();
+		$page   = self::page();
+		$titles = array(
+			'nm-backups'  => __( 'Data Migrator: Αντίγραφα', 'data-migrator' ),
+			'nm-restore'  => __( 'Data Migrator: Επαναφορά', 'data-migrator' ),
+			'nm-settings' => __( 'Data Migrator: Ρυθμίσεις', 'data-migrator' ),
+		);
+		echo '<div class="wrap nm-wrap"><h1>' . esc_html( $titles[ $page ] ?? 'Data Migrator' ) . '</h1>';
+		echo '<p class="description">' . esc_html__( 'Πλήρες αντίγραφο του site και επαναφορά εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.', 'data-migrator' ) . '</p>';
+		self::print_notices( self::take_msgs() );
+		self::storage_notice();
+		if ( 'nm-restore' === $page ) {
+			self::render_restore();
+		} elseif ( 'nm-settings' === $page ) {
+			self::render_settings();
 		} else {
-			$db     = NM_Export_Engine::start( false );
-			$report = $db->report();
+			self::render_backups();
 		}
-		$status = $report['status'];
-		?>
-		<div class="wrap nm-wrap">
-
-			<h1><?php esc_html_e( 'Noxpress Migrator — Migration', 'noxpress-migrator' ); ?></h1>
-
-			<?php
-			$notices = self::take_notices();
-			foreach ( $notices as $n ) :
-				?>
-				<div class="notice notice-<?php echo esc_attr( $n['type'] ); ?> is-dismissible inline"><p><?php echo esc_html( $n['text'] ); ?></p></div>
-				<?php
-			endforeach;
-			?>
-
-			<?php if ( 'idle' === $status || 'failed' === $status ) : ?>
-
-				<form method="post" class="nm-form">
-					<?php wp_nonce_field( 'nm_start', 'nm_start_nonce' ); ?>
-
-					<h2><?php esc_html_e( 'What to include', 'noxpress-migrator' ); ?></h2>
-
-					<label><input type="radio" name="nm_scope" value="everything" checked />
-						<?php esc_html_e( 'Everything (database + all files)', 'noxpress-migrator' ); ?></label><br />
-					<label><input type="radio" name="nm_scope" value="db" />
-						<?php esc_html_e( 'Database only', 'noxpress-migrator' ); ?></label><br />
-					<label><input type="radio" name="nm_scope" value="files" />
-						<?php esc_html_e( 'Files only', 'noxpress-migrator' ); ?></label>
-
-					<h2><?php esc_html_e( 'Options', 'noxpress-migrator' ); ?></h2>
-
-					<p><label><?php esc_html_e( 'Volume size (MB)', 'noxpress-migrator' ); ?>:
-					<input type="number" name="nm_volume_mb" min="50" max="4096" step="50" value="500" style="width:100px;" />
-					<span class="description"><?php esc_html_e( 'Split point for multi-volume archives.', 'noxpress-migrator' ); ?></span></label></p>
-
-					<h2><?php esc_html_e( 'Media newer than', 'noxpress-migrator' ); ?></h2>
-					<p>
-						<input type="date" name="nm_media_after" value="" />
-						<span class="description"><?php esc_html_e( 'Only uploads newer than this date (optional). Leave empty for no limit.', 'noxpress-migrator' ); ?></span>
-					</p>
-
-					<p>
-						<button type="submit" name="nm_start" value="1" class="button button-primary">
-							<?php esc_html_e( 'Start export', 'noxpress-migrator' ); ?>
-						</button>
-						<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'nm_fresh', '1', admin_url( 'admin.php?page=' . self::SLUG ) ), 'nm_fresh' ) ); ?>"
-						   class="button">
-							<?php esc_html_e( 'New export', 'noxpress-migrator' ); ?>
-						</a>
-					</p>
-				</form>
-
-			<?php else : ?>
-
-				<!-- PROGRESS UI -->
-				<div id="nm-progress-panel" data-autostart="1">
-					<h2><?php esc_html_e( 'Status', 'noxpress-migrator' ); ?></h2>
-
-					<div class="nm-kpis">
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Phase', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-phase"><?php echo esc_html( $report['status'] ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Table', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-table"><?php echo esc_html( $report['table'] ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Rows', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-rows"><?php echo esc_html( number_format_i18n( $report['rows'] ) ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Bytes', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-bytes"><?php echo esc_html( NM_Lang::fmt_bytes( $report['bytes'] ) ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Progress', 'noxpress-migrator' ); ?></span>
-							<strong><span id="nm-status-pct"><?php echo esc_html( (float) $report['pct'] ); ?></span>%</strong>
-						</div>
-					</div>
-
-					<div class="nm-progress-bar-wrap">
-						<div class="nm-progress-bar" id="nm-progress-fill" style="width:<?php echo esc_attr( (float) $report['pct'] ); ?>%;"></div>
-					</div>
-
-					<?php if ( ! empty( $report['error'] ) ) : ?>
-						<div class="notice notice-error inline">
-							<p><strong><?php esc_html_e( 'Error', 'noxpress-migrator' ); ?>:</strong> <?php echo esc_html( $report['error'] ); ?></p>
-						</div>
-					<?php endif; ?>
-
-					<p>
-						<button id="nm-abort-btn" class="button" onclick="nm_abort()"><?php esc_html_e( 'Abort', 'noxpress-migrator' ); ?></button>
-					</p>
-				</div>
-
-			<?php else : ?>
-
-				<!-- RUNNING / PAUSED -->
-				<div id="nm-progress-panel">
-					<h2><?php esc_html_e( 'Status', 'noxpress-migrator' ); ?></h2>
-
-					<div class="nm-kpis">
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Status', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-phase"><?php echo esc_html( $report['status'] ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Current item', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-table" style="font-size:14px;word-break:break-all;"><?php echo esc_html( $report['table'] ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Items', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-rows"><?php echo esc_html( number_format_i18n( (int) $report['rows'] ) ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Bytes', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-status-bytes"><?php echo esc_html( NM_Lang::fmt_bytes( $report['bytes'] ) ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Progress', 'noxpress-migrator' ); ?></span>
-							<strong><span id="nm-status-pct"><?php echo esc_html( (float) $report['pct'] ); ?></span>%</strong>
-						</div>
-					</div>
-
-					<div class="nm-progress-bar-wrap">
-						<div class="nm-progress-bar" id="nm-progress-fill" style="width:<?php echo esc_attr( (float) $report['pct'] ); ?>%;"></div>
-					</div>
-
-					<?php if ( ! empty( $report['error'] ) ) : ?>
-						<div class="notice notice-error inline">
-							<p><strong><?php esc_html_e( 'Error', 'noxpress-migrator' ); ?>:</strong> <?php echo esc_html( $report['error'] ); ?></p>
-						</div>
-					<?php endif; ?>
-
-					<p>
-						<button id="nm-abort-btn" class="button" onclick="nm_abort()"><?php esc_html_e( 'Abort', 'noxpress-migrator' ); ?></button>
-					</p>
-				</div>
-
-			<?php endif; ?>
-
-			<?php
-			// ---- PACKAGED: download panel (τελικά volumes) ----
-			if ( class_exists( 'NM_Files_Engine' )
-				&& 'packaged' === (string) json_decode( (string) get_option( 'nm_checkpoint', '' ), true )['phase'] ?? '' ) :
-
-				$paths = NM_Files_Engine::final_paths();
-				if ( ! empty( $paths ) ) :
-					?>
-					<h2><?php esc_html_e( 'Download package', 'noxpress-migrator' ); ?></h2>
-					<table class="widefat striped nm-vol-table">
-						<thead>
-							<tr>
-								<th><?php esc_html_e( 'File', 'noxpress-migrator' ); ?></th>
-								<th><?php esc_html_e( 'Size', 'noxpress-migrator' ); ?></th>
-								<th><?php esc_html_e( 'Actions', 'noxpress-migrator' ); ?></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ( $paths as $v ) : ?>
-								<tr>
-									<td><code><?php echo esc_html( $v['file'] ); ?></code></td>
-									<td><?php echo esc_html( NM_Lang::fmt_bytes( $v['bytes'] ) ); ?></td>
-									<td>
-										<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG . '&nm_download=' . rawurlencode( $v['file'] ) ), 'nm_download' ) ); ?>">
-											<?php esc_html_e( 'Download', 'noxpress-migrator' ); ?>
-										</a>
-									</td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-					<p style="margin-top:12px;">
-						<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG . '&nm_delete=1' ), 'nm_delete' ) ); ?>"
-						   onclick="return confirm('<?php echo esc_js( __( 'Delete the package permanently?', 'noxpress-migrator' ) ); ?>');">
-							<?php esc_html_e( 'Delete package', 'noxpress-migrator' ); ?>
-						</a>
-					</p>
-					<?php
-				endif;
-			endif;
-			?>
-
-			<?php self::footer(); ?>
-		</div>
-
-		<?php
+		self::footer();
+		echo '</div>';
 	}
 
-	/* =====================================================================
-	 * Settings
-	 * =================================================================== */
-
-	public static function render_settings(): void {
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-		}
-
-		$notices = self::take_notices();
-		$lang    = NM_Lang::get_choice();
-		$vol     = get_option( 'nm_max_volume_mb', '500' );
-		?>
-		<div class="wrap nm-wrap">
-
-			<h1><?php esc_html_e( 'Noxpress Migrator — Settings', 'noxpress-migrator' ); ?></h1>
-
-			<?php foreach ( $notices as $n ) : ?>
-				<div class="notice notice-<?php echo esc_attr( $n['type'] ); ?> is-dismissible inline"><p><?php echo esc_html( $n['text'] ); ?></p></div>
-			<?php endforeach; ?>
-
-			<form method="post">
-				<?php wp_nonce_field( 'nm_settings', 'nm_settings_nonce' ); ?>
-
-				<h2><?php esc_html_e( 'Display language', 'noxpress-migrator' ); ?></h2>
-				<p>
-					<select name="nm_lang">
-						<option value="auto"<?php selected( $lang, 'auto' ); ?>><?php esc_html_e( 'Automatic (WordPress)', 'noxpress-migrator' ); ?></option>
-						<option value="en"<?php selected( $lang, 'en' ); ?>>English</option>
-						<option value="el"<?php selected( $lang, 'el' ); ?>>Ελληνικά</option>
-					</select>
-					<span class="description"><?php esc_html_e( 'Per user (only affects you). If you have not picked one, the WordPress language is followed.', 'noxpress-migrator' ); ?></span>
-				</p>
-
-				<h2><?php esc_html_e( 'Volume size (MB)', 'noxpress-migrator' ); ?></h2>
-				<p>
-					<input type="number" name="nm_volume_mb" min="50" max="4096" step="50"
-						value="<?php echo esc_attr( $vol ); ?>" style="width:100px;" />
-					<span class="description"><?php esc_html_e( 'Split point for multi-volume archives.', 'noxpress-migrator' ); ?></span>
-				</p>
-
-				<p>
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'noxpress-migrator' ); ?></button>
-				</p>
-			</form>
-
-			<?php self::footer(); ?>
-		</div>
-		<?php
-	}
-
-	/* =====================================================================
-	 * Verify page
-	 * =================================================================== */
-
-	public static function render_verify(): void {
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-		}
-
-		$state  = ( class_exists( 'NM_Verify' ) ) ? NM_Verify::load_state() : null;
-		$report = ( class_exists( 'NM_Verify' ) ) ? NM_Verify::last_report() : array();
-
-		$notices = array();
-		$msg = get_transient( 'nm_verify_msg_' . get_current_user_id() );
-		if ( is_array( $msg ) ) {
-			delete_transient( 'nm_verify_msg_' . get_current_user_id() );
-			$notices[] = $msg;
-		}
-
-		?>
-		<div class="wrap nm-wrap">
-
-			<h1><?php esc_html_e( 'Noxpress Migrator — Verify', 'noxpress-migrator' ); ?></h1>
-
-			<?php foreach ( $notices as $n ) : ?>
-				<div class="notice notice-<?php echo esc_attr( $n['type'] ); ?> is-dismissible inline"><p><?php echo esc_html( $n['text'] ); ?></p></div>
-			<?php endforeach; ?>
-
-			<?php if ( null === $state && empty( $report ) ) : ?>
-
-				<!-- FORM: έναρξη verification -->
-				<form method="post" class="nm-form">
-					<?php wp_nonce_field( 'nm_verify', 'nm_verify_nonce' ); ?>
-
-					<h2><?php esc_html_e( 'Start Verification', 'noxpress-migrator' ); ?></h2>
-
-					<p><label><?php esc_html_e( 'Path to manifest.json (absolute path)', 'noxpress-migrator' ); ?>:</label>
-					<input type="text" name="nm_manifest_path" value="" style="width:100%;max-width:500px;" />
-					<span class="description"><?php esc_html_e( 'Leave empty to try auto-detection in uploads root.', 'noxpress-migrator' ); ?></span></p>
-
-					<p><label><?php esc_html_e( 'Verification mode', 'noxpress-migrator' ); ?>:</label>
-					<select name="nm_verify_mode">
-						<option value="deep"><?php esc_html_e( 'Deep (SHA-256 on every file — recommended)', 'noxpress-migrator' ); ?></option>
-						<option value="quick"><?php esc_html_e( 'Quick (existence + size only)', 'noxpress-migrator' ); ?></option>
-					</select></p>
-
-					<p>
-						<button type="submit" name="nm_verify_start" value="1" class="button button-primary">
-							<?php esc_html_e( 'Start Verification', 'noxpress-migrator' ); ?>
-						</button>
-					</p>
-				</form>
-
-			<?php elseif ( null !== $state ) : ?>
-
-				<!-- PROGRESS UI -->
-				<div id="nm-verify-progress" data-autostart="1">
-
-					<h2><?php esc_html_e( 'Verification in progress', 'noxpress-migrator' ); ?></h2>
-
-					<div class="nm-kpis">
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Phase', 'noxpress-migrator' ); ?></span>
-							<strong id="nm-verify-phase"><?php echo esc_html( (string) ( $state['phase'] ?? '?' ) ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Mode', 'noxpress-migrator' ); ?></span>
-							<strong><?php echo esc_html( (string) ( $state['mode'] ?? '?' ) ); ?></strong>
-						</div>
-						<div class="nm-kpi">
-							<span class="nm-kpi-label"><?php esc_html_e( 'Progress', 'noxpress-migrator' ); ?></span>
-							<strong><span id="nm-verify-pct">0</span>%</strong>
-						</div>
-					</div>
-
-					<div class="nm-progress-bar-wrap">
-						<div class="nm-progress-bar" id="nm-verify-fill" style="width:0%;"></div>
-					</div>
-				</div>
-
-			<?php else : ?>
-
-				<!-- FINAL REPORT -->
-				<h2><?php esc_html_e( 'Verification Results', 'noxpress-migrator' ); ?></h2>
-
-				<?php
-				$verdict = (string) ( $report['verdict'] ?? '?' );
-				$is_ok   = false !== strpos( $verdict, 'PERFECT' ) || false !== strpos( $verdict, 'DATA OK' );
-				?>
-				<p class="nm-verbatim">
-					<strong class="<?php echo $is_ok ? 'ok' : 'err'; ?>"><?php echo esc_html( $verdict ); ?></strong>
-				</p>
-
-				<?php if ( ! empty( $report['db_bad'] ) ) : ?>
-					<h3><?php esc_html_e( 'Database mismatches', 'noxpress-migrator' ); ?></h3>
-					<table class="widefat striped">
-						<thead>
-							<tr>
-								<th><?php esc_html_e( 'Table', 'noxpress-migrator' ); ?></th>
-								<th><?php esc_html_e( 'Expected rows', 'noxpress-migrator' ); ?></th>
-								<th><?php esc_html_e( 'Actual rows', 'noxpress-migrator' ); ?></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ( $report['db_bad'] as $tbl => $m ) : ?>
-								<tr>
-									<td><code><?php echo esc_html( (string) $tbl ); ?></code></td>
-									<td><?php echo esc_html( (string) $m['expected'] ); ?></td>
-									<td><?php echo esc_html( (string) $m['actual'] ); ?></td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-				<?php endif; ?>
-
-				<?php if ( ! empty( $report['orphan_tables'] ) ) : ?>
-					<h3><?php esc_html_e( 'Extra local tables (orphans)', 'noxpress-migrator' ); ?></h3>
-					<ul style="list-style:disc;padding-left:22px;">
-						<?php foreach ( $report['orphan_tables'] as $ot ) : ?>
-							<li><code><?php echo esc_html( (string) $ot ); ?></code></li>
-						<?php endforeach; ?>
-					</ul>
-				<?php endif; ?>
-
-				<?php if ( ! empty( $report['files_bad'] ) ) : ?>
-					<h3><?php esc_html_e( 'File mismatches', 'noxpress-migrator' ); ?></h3>
-					<table class="widefat striped">
-						<thead>
-							<tr>
-								<th><?php esc_html_e( 'File', 'noxpress-migrator' ); ?></th>
-								<th><?php esc_html_e( 'Issue', 'noxpress-migrator' ); ?></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ( $report['files_bad'] as $fb ) : ?>
-								<tr>
-									<td><code><?php echo esc_html( (string) $fb['path'] ); ?></code></td>
-									<td><?php echo esc_html( (string) $fb['reason'] ); ?></td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-				<?php endif; ?>
-
-				<p style="margin-top:24px;">
-					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=' . self::SLUG . '-verify&nm_verify_reset=1' ), 'nm_verify_reset' ) ); ?>">
-						<?php esc_html_e( 'Clear verification state', 'noxpress-migrator' ); ?>
-					</a>
-				</p>
-
-			<?php endif; ?>
-
-			<?php self::footer(); ?>
-		</div>
-		<?php
-	}
-
-	/* =====================================================================
-	 * Routes (admin_init — PRG)
-	 * =================================================================== */
-
-	public static function route_settings(): void {
-
-		if ( ! isset( $_POST['nm_settings_nonce'] ) ) {
+	/** Warnings about the storage folder. */
+	private static function storage_notice(): void {
+		if ( '' === NM_Storage::dir() ) {
+			echo '<div class="notice notice-error inline"><p>' . esc_html__( 'Δεν βρέθηκε φάκελος με δικαίωμα εγγραφής για τα αντίγραφα. Όρισε έναν στις Ρυθμίσεις.', 'data-migrator' ) . '</p></div>';
 			return;
 		}
-		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nm_settings_nonce'] ) ), 'nm_settings' ) ) {
-			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
+		$st = get_option( 'nm_state', array() );
+		$st = is_array( $st ) ? $st : array();
+		if ( empty( $st['web_time'] ) ) {
+			NM_Storage::web_test();
+			$st = (array) get_option( 'nm_state', array() );
 		}
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
+		if ( 'exposed' === ( $st['web'] ?? '' ) ) {
+			echo '<div class="notice notice-error inline"><p>' . esc_html__( 'Προσοχή: ο φάκελος των αντιγράφων κατεβαίνει από τον browser (ο server αγνοεί το .htaccess, π.χ. nginx). Όρισε φάκελο έξω από το web root στις Ρυθμίσεις ή ζήτησε από τον host να τον κλείσει (location … { deny all; }).', 'data-migrator' ) . '</p></div>';
 		}
-
-		$notices = array();
-
-		// ---- Language ----
-		$lang = isset( $_POST['nm_lang'] ) ? sanitize_key( wp_unslash( $_POST['nm_lang'] ) ) : 'auto';
-		if ( in_array( $lang, array( 'el', 'en', 'auto' ), true ) ) {
-			NM_Lang::set_lang( get_current_user_id(), $lang );
-		}
-
-		// ---- Volume size ----
-		$vol = isset( $_POST['nm_volume_mb'] ) ? absint( $_POST['nm_volume_mb'] ) : 500;
-		if ( $vol < 50 || $vol > 4096 ) {
-			$notices[] = array( 'type' => 'error', 'text' => __( 'Invalid volume size (50–4096).', 'noxpress-migrator' ) );
-		} else {
-			update_option( 'nm_max_volume_mb', (string) $vol );
-		}
-
-		if ( empty( $notices ) ) {
-			$notices[] = array( 'type' => 'success', 'text' => __( 'Settings saved.', 'noxpress-migrator' ) );
-		}
-
-		set_transient( 'nm_settings_msg_' . get_current_user_id(), $notices, 60 );
-		wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG . '-settings' ) );
-		exit;
 	}
-	
-		/* =====================================================================
-	 * Routes: Verify (POST start / GET reset)
-	 * =================================================================== */
 
-	public static function route_verify(): void {
+	private static function form_open( string $action, string $page, string $confirm = '' ): void {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin.php?page=' . $page ) ) . '"' . ( '' !== $confirm ? ' data-nm-confirm="' . esc_attr( $confirm ) . '"' : '' ) . '>';
+		wp_nonce_field( self::NONCE, self::NONCE_FIELD );
+		echo '<input type="hidden" name="nm_action" value="' . esc_attr( $action ) . '">';
+	}
 
-		// ---- POST: έναρξη verification ----
-		if ( isset( $_POST['nm_verify_start'] ) ) {
+	private static function when( int $ts ): string {
+		return $ts ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $ts ) : '—';
+	}
 
-			if ( ! isset( $_POST['nm_verify_nonce'] )
-				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nm_verify_nonce'] ) ), 'nm_verify' ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! current_user_can( self::CAP ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! class_exists( 'NM_Verify' ) ) {
-				wp_die( esc_html__( 'Verify module missing — partial plugin upload.', 'noxpress-migrator' ) );
-			}
+	/* ----- Αντίγραφα --------------------------------------------------- */
 
-			$path = isset( $_POST['nm_manifest_path'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['nm_manifest_path'] ) ) ) : '';
-			$mode = isset( $_POST['nm_verify_mode'] ) ? sanitize_key( wp_unslash( $_POST['nm_verify_mode'] ) ) : 'deep';
+	private static function group_labels(): array {
+		return array(
+			'core'       => __( 'Αρχεία του WordPress (core)', 'data-migrator' ),
+			'root'       => __( 'Άλλα αρχεία της ρίζας', 'data-migrator' ),
+			'uploads'    => __( 'Πολυμέσα (uploads)', 'data-migrator' ),
+			'themes'     => __( 'Θέματα', 'data-migrator' ),
+			'plugins'    => __( 'Plugins', 'data-migrator' ),
+			'mu-plugins' => __( 'Must-use plugins', 'data-migrator' ),
+			'languages'  => __( 'Μεταφράσεις', 'data-migrator' ),
+			'dropins'    => __( 'Drop-ins (object-cache.php κ.λπ.)', 'data-migrator' ),
+			'content'    => __( 'Λοιπά του wp-content', 'data-migrator' ),
+		);
+	}
 
-			if ( '' === $path ) {
-				// Φόρτωση από το uploads root αν είναι κενό.
-				$up = wp_upload_dir();
-				$manifest_file = rtrim( (string) $up['basedir'], '/' ) . '/noxpress-migration-manifest.json';
-				if ( is_readable( $manifest_file ) ) {
-					$path = $manifest_file;
+	private static function render_backups(): void {
+		global $wpdb;
+		$set     = NM_Settings::get();
+		$running = NM_Backup::running();
+		$labels  = self::group_labels();
+
+		echo '<h2 class="nm-h2">' . esc_html__( 'Νέο αντίγραφο', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<form id="nm-backup-form">';
+		$scopes = array(
+			'full'   => __( 'Πλήρες: βάση και όλα τα αρχεία', 'data-migrator' ),
+			'db'     => __( 'Μόνο η βάση δεδομένων', 'data-migrator' ),
+			'files'  => __( 'Μόνο τα αρχεία', 'data-migrator' ),
+			'custom' => __( 'Επιλογή', 'data-migrator' ),
+		);
+		foreach ( $scopes as $k => $l ) {
+			echo '<label style="display:block;margin:4px 0"><input type="radio" name="scope" value="' . esc_attr( $k ) . '"' . checked( 'full', $k, false ) . '> ' . esc_html( $l ) . '</label>';
+		}
+		echo '<div class="nm-custom" hidden><p class="nm-groups"><label><input type="checkbox" name="db" value="1" checked> ' . esc_html__( 'Βάση δεδομένων', 'data-migrator' ) . '</label>';
+		foreach ( NM_Backup::GROUPS as $g ) {
+			echo '<label><input type="checkbox" name="groups[]" value="' . esc_attr( $g ) . '" checked> ' . esc_html( $labels[ $g ] ) . '</label>';
+		}
+		echo '</p></div>';
+
+		// Other tables of the database and unknown root folders.
+		$db = NM_Backup::db();
+		if ( $db ) {
+			$other = array();
+			foreach ( NM_Dumper::list_tables( $db ) as $name => $t ) {
+				if ( 0 !== strpos( $name, $wpdb->prefix ) && 'table' === $t['type'] ) {
+					$other[ $name ] = $t;
 				}
 			}
+			$db->close();
+			if ( $other ) {
+				echo '<details><summary>' . esc_html( sprintf( /* translators: %d: number of tables */ __( 'Άλλοι πίνακες της βάσης, χωρίς το πρόθεμα του site (%d)', 'data-migrator' ), count( $other ) ) ) . '</summary><p class="description">' . esc_html__( 'Δεν είναι του WordPress. Μπαίνουν στο αντίγραφο μόνο αν τους τσεκάρεις.', 'data-migrator' ) . '</p><div class="nm-list">';
+				foreach ( $other as $name => $t ) {
+					echo '<label><input type="checkbox" name="extra_tables[]" value="' . esc_attr( $name ) . '"> <code>' . esc_html( $name ) . '</code> <span class="nm-muted">' . esc_html( NM_Util::size( (float) $t['size'] ) ) . '</span></label>';
+				}
+				echo '</div></details>';
+			}
+		}
+		$dirs = array();
+		foreach ( NM_Backup::root_items() as $n => $it ) {
+			if ( 'dir' === $it['type'] && in_array( $it['kind'], array( 'unknown', 'host' ), true ) ) {
+				$dirs[] = $n;
+			}
+		}
+		if ( $dirs ) {
+			echo '<details><summary>' . esc_html( sprintf( /* translators: %d: number of folders */ __( 'Άλλοι φάκελοι στη ρίζα του site (%d)', 'data-migrator' ), count( $dirs ) ) ) . '</summary><p class="description">' . esc_html__( 'Δεν είναι του WordPress (π.χ. άλλη εφαρμογή ή στατικά αρχεία). Μπαίνουν μόνο αν τους τσεκάρεις.', 'data-migrator' ) . '</p><div class="nm-list">';
+			foreach ( $dirs as $n ) {
+				echo '<label><input type="checkbox" name="root_dirs[]" value="' . esc_attr( $n ) . '"> <code>' . esc_html( $n ) . '/</code></label>';
+			}
+			echo '</div></details>';
+		}
 
-			if ( '' === $path ) {
-				self::add_notice( 'error', __( 'Please provide the manifest.json path (absolute path, e.g., /home/user/site/wp-content/uploads/.../manifest.json)', 'noxpress-migrator' ) );
+		echo '<p><label for="nm-part">' . esc_html__( 'Χωρισμός σε κομμάτια', 'data-migrator' ) . '</label> <select id="nm-part" name="part_mb">';
+		foreach ( NM_Settings::PARTS as $p ) {
+			echo '<option value="' . esc_attr( (string) $p ) . '"' . selected( (int) $set['part_mb'], $p, false ) . '>' . esc_html( 0 === $p ? __( 'Ένα αρχείο', 'data-migrator' ) : NM_Util::size( $p * 1048576.0 ) ) . '</option>';
+		}
+		echo '</select> <label for="nm-note">' . esc_html__( 'Σημείωση', 'data-migrator' ) . '</label> <input type="text" id="nm-note" name="note" maxlength="120"></p>';
+		echo '<p><button type="submit" class="button button-primary"' . disabled( (bool) $running, true, false ) . '>' . esc_html__( 'Δημιουργία αντιγράφου', 'data-migrator' ) . '</button></p></form>';
+		echo '<div class="nm-run' . ( $running && 'backup' === $running['type'] ? ' is-on' : '' ) . '" id="nm-backup-run" data-job="' . esc_attr( $running && 'backup' === $running['type'] ? (string) $running['id'] : '' ) . '"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p><button type="button" class="button nm-cancel">' . esc_html__( 'Ακύρωση', 'data-migrator' ) . '</button></div>';
+		if ( $running && 'backup' !== $running['type'] ) {
+			echo '<p class="nm-warn">' . esc_html__( 'Τρέχει ήδη μια εργασία του Data Migrator. Περίμενε να τελειώσει ή ακύρωσέ την.', 'data-migrator' ) . '</p>';
+		}
+		echo '</div>';
+
+		// Backups.
+		echo '<h2 class="nm-h2">' . esc_html__( 'Αποθηκευμένα αντίγραφα', 'data-migrator' ) . '</h2>';
+		$all = NM_Storage::all();
+		if ( ! $all ) {
+			echo '<p class="description">' . esc_html__( 'Δεν υπάρχει ακόμα αντίγραφο.', 'data-migrator' ) . '</p>';
+		} else {
+			echo '<table class="widefat nm-table"><thead><tr><th>' . esc_html__( 'Ημερομηνία', 'data-migrator' ) . '</th><th>' . esc_html__( 'Περιεχόμενο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Μέγεθος', 'data-migrator' ) . '</th><th>' . esc_html__( 'Site', 'data-migrator' ) . '</th><th>' . esc_html__( 'Ενέργειες', 'data-migrator' ) . '</th></tr></thead><tbody>';
+			foreach ( $all as $m ) {
+				self::backup_row( $m, $scopes );
+			}
+			echo '</tbody></table>';
+		}
+		echo '<p class="description">' . esc_html( sprintf( /* translators: 1: folder, 2: size */ __( 'Φάκελος: %1$s · Χώρος: %2$s', 'data-migrator' ), NM_Storage::dir(), NM_Util::size( NM_Storage::used() ) ) ) . '</p>';
+
+		// Core check.
+		echo '<h2 class="nm-h2">' . esc_html__( 'Έλεγχος αρχείων του WordPress', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		$c = get_transient( NM_Integrity::CACHE );
+		if ( is_array( $c ) ) {
+			self::integrity_html( $c );
+		} else {
+			echo '<p class="description">' . esc_html__( 'Συγκρίνει τα αρχεία του core με τα επίσημα checksums του WordPress.org (μία κλήση στο api.wordpress.org). Γίνεται και αυτόματα σε κάθε πλήρες αντίγραφο.', 'data-migrator' ) . '</p>';
+		}
+		self::form_open( 'integrity', 'nm-backups' );
+		echo '<button class="button">' . esc_html__( 'Έλεγχος τώρα', 'data-migrator' ) . '</button></form></div>';
+
+		// The key of a new installer, shown once.
+		$key = get_transient( 'nm_inst_key_' . get_current_user_id() );
+		if ( is_array( $key ) ) {
+			delete_transient( 'nm_inst_key_' . get_current_user_id() );
+		}
+		if ( is_array( $key ) && NM_Storage::meta( (string) $key['id'] ) ) {
+			$url = wp_nonce_url( admin_url( 'admin.php?page=nm-backups&nm_dl=installer&id=' . $key['id'] ), 'nm_dl_' . $key['id'] );
+			echo '<div class="notice notice-info inline"><p><strong>' . esc_html__( 'Κλειδί του installer (φαίνεται μόνο τώρα):', 'data-migrator' ) . '</strong></p><p class="nm-codebox">' . esc_html( (string) $key['key'] ) . '</p><p>' . esc_html__( 'Ανέβασε στον νέο server, στον φάκελο του site, το nm-installer.php και όλα τα κομμάτια του αντιγράφου. Άνοιξε το nm-installer.php στον browser και δώσε αυτό το κλειδί. Ισχύει 7 ημέρες.', 'data-migrator' ) . '</p><p><a class="button button-primary" href="' . esc_url( $url ) . '">' . esc_html__( 'Λήψη nm-installer.php', 'data-migrator' ) . '</a></p></div>';
+		}
+	}
+
+	private static function backup_row( array $m, array $scopes ): void {
+		$id      = (string) $m['id'];
+		$status  = (string) ( $m['status'] ?? '' );
+		$content = $scopes[ $m['scope'] ?? 'full' ] ?? '';
+		if ( 'done' === $status ) {
+			$content .= ' · ' . sprintf( /* translators: 1: files, 2: tables */ __( '%1$s αρχεία, %2$s πίνακες', 'data-migrator' ), number_format_i18n( (int) ( $m['files'] ?? 0 ) ), number_format_i18n( (int) ( $m['tables'] ?? 0 ) ) );
+		}
+		echo '<tr><td>' . esc_html( self::when( (int) $m['created'] ) );
+		if ( ! empty( $m['note'] ) ) {
+			echo '<br><span class="description">' . esc_html( (string) $m['note'] ) . '</span>';
+		}
+		echo '</td><td>' . esc_html( $content );
+		if ( 'running' === $status ) {
+			echo '<br><span class="nm-warn">' . esc_html__( 'Σε εξέλιξη', 'data-migrator' ) . '</span>';
+		} elseif ( 'failed' === $status ) {
+			echo '<br><span class="nm-err">' . esc_html( sprintf( /* translators: %s: error */ __( 'Απέτυχε: %s', 'data-migrator' ), (string) ( $m['error'] ?? '' ) ) ) . '</span>';
+		}
+		$flags = (array) ( $m['flags'] ?? array() );
+		$php   = array();
+		foreach ( $flags as $n => $it ) {
+			if ( ! empty( $it['php'] ) ) {
+				$php[] = $n;
+			}
+		}
+		if ( $php ) {
+			echo '<br><span class="nm-warn">' . esc_html( sprintf( /* translators: %s: file names */ __( 'Άγνωστα αρχεία PHP στη ρίζα: %s', 'data-migrator' ), implode( ', ', $php ) ) ) . '</span>';
+		}
+		if ( 'changed' === ( $m['integrity']['status'] ?? '' ) ) {
+			echo '<br><span class="nm-warn">' . esc_html__( 'Ο έλεγχος του core βρήκε διαφορές', 'data-migrator' ) . '</span>';
+		}
+		echo '</td><td>' . esc_html( NM_Util::size( (float) ( $m['size'] ?? 0 ) ) );
+		if ( count( (array) ( $m['parts'] ?? array() ) ) > 1 ) {
+			echo '<br><span class="description">' . esc_html( sprintf( /* translators: %d: parts */ __( '%d κομμάτια', 'data-migrator' ), count( (array) $m['parts'] ) ) ) . '</span>';
+		}
+		echo '</td><td>' . esc_html( (string) ( $m['home'] ?? '' ) ) . '</td><td class="nm-actions">';
+		if ( 'done' === $status ) {
+			foreach ( (array) $m['parts'] as $i => $p ) {
+				$url = wp_nonce_url( admin_url( 'admin.php?page=nm-backups&nm_dl=part&id=' . $id . '&n=' . $i ), 'nm_dl_' . $id );
+				echo '<a class="button" href="' . esc_url( $url ) . '">' . esc_html( count( (array) $m['parts'] ) > 1 ? sprintf( /* translators: %d: part number */ __( 'Λήψη %d', 'data-migrator' ), $i + 1 ) : __( 'Λήψη', 'data-migrator' ) ) . '</a>';
+			}
+			echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=nm-restore&backup=' . $id ) ) . '">' . esc_html__( 'Επαναφορά', 'data-migrator' ) . '</a>';
+			if ( ! empty( $m['db'] ) && in_array( 'core', (array) ( $m['groups'] ?? array() ), true ) ) {
+				self::form_open( 'installer', 'nm-backups' );
+				echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><button class="button" title="' . esc_attr__( 'Για επαναφορά σε άδειο server, χωρίς WordPress', 'data-migrator' ) . '">' . esc_html__( 'Installer', 'data-migrator' ) . '</button></form>';
+			}
+		}
+		if ( ! empty( $m['job'] ) && '' !== NM_Storage::log_file( (string) $m['job'] ) && is_file( NM_Storage::log_file( (string) $m['job'] ) ) ) {
+			$url = wp_nonce_url( admin_url( 'admin.php?page=nm-backups&nm_dl=log&id=' . $id ), 'nm_dl_' . $id );
+			echo '<a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Log', 'data-migrator' ) . '</a>';
+		}
+		if ( 'running' !== $status ) {
+			self::form_open( 'delete', 'nm-backups', __( 'Να διαγραφεί οριστικά αυτό το αντίγραφο;', 'data-migrator' ) );
+			echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><button class="button">' . esc_html__( 'Διαγραφή', 'data-migrator' ) . '</button></form>';
+		}
+		echo '</td></tr>';
+	}
+
+	private static function integrity_html( array $c ): void {
+		if ( 'ok' === $c['status'] ) {
+			echo '<p class="nm-ok">' . esc_html( sprintf( /* translators: 1: version, 2: date */ __( 'Τα αρχεία του WordPress %1$s είναι ίδια με τα επίσημα (%2$s).', 'data-migrator' ), (string) $c['version'], self::when( (int) $c['checked'] ) ) ) . '</p>';
+			return;
+		}
+		if ( 'unknown' === $c['status'] ) {
+			echo '<p class="nm-warn">' . esc_html__( 'Δεν έγινε έλεγχος: το api.wordpress.org δεν απάντησε ή δεν έχει checksums για αυτή την έκδοση.', 'data-migrator' ) . '</p>';
+			return;
+		}
+		echo '<p class="nm-warn">' . esc_html( sprintf( /* translators: %s: date */ __( 'Βρέθηκαν διαφορές (%s). Έλεγξε τα αρχεία πριν τα πάρεις σε άλλο server.', 'data-migrator' ), self::when( (int) $c['checked'] ) ) ) . '</p><ul>';
+		foreach ( array(
+			'changed' => __( 'Αλλαγμένα', 'data-migrator' ),
+			'missing' => __( 'Λείπουν', 'data-migrator' ),
+			'extra'   => __( 'Άγνωστα αρχεία στο wp-admin / wp-includes', 'data-migrator' ),
+		) as $k => $l ) {
+			if ( ! empty( $c[ $k ] ) ) {
+				echo '<li><strong>' . esc_html( $l ) . ':</strong> <code>' . esc_html( implode( '</code>, <code>', array_slice( (array) $c[ $k ], 0, 30 ) ) ) . '</code>' . ( count( (array) $c[ $k ] ) > 30 ? ' …' : '' ) . '</li>';
+			}
+		}
+		echo '</ul>';
+	}
+
+	/* ----- Επαναφορά --------------------------------------------------- */
+
+	private static function render_restore(): void {
+		$open = NM_Post_Restore::open_restore();
+		if ( $open ) {
+			echo '<h2 class="nm-h2">' . esc_html__( 'Τελευταία επαναφορά', 'data-migrator' ) . '</h2><div class="nm-zone">';
+			echo '<p>' . esc_html( sprintf( /* translators: %s: date */ __( 'Το site επαναφέρθηκε στις %s. Τα προηγούμενα αρχεία και πίνακες κρατήθηκαν για αναίρεση.', 'data-migrator' ), self::when( (int) ( $open['finished'] ?? $open['created'] ) ) ) ) . '</p>';
+			$st = get_option( 'nm_state', array() );
+			if ( is_array( $st ) && ! empty( $st['post']['done'] ) && (string) ( $st['post']['job'] ?? '' ) === (string) $open['id'] ) {
+				echo '<p class="description">' . esc_html( sprintf( /* translators: %s: list */ __( 'Μετά την επαναφορά: cache, permalinks και WooCommerce (%s).', 'data-migrator' ), implode( ', ', (array) $st['post']['done'] ) ) ) . '</p>';
+			}
+			echo '<p class="nm-actions">';
+			self::form_open( 'finalize', 'nm-restore', __( 'Να σβηστούν τα στοιχεία αναίρεσης; Μετά δεν γίνεται αναίρεση.', 'data-migrator' ) );
+			echo '<input type="hidden" name="job" value="' . esc_attr( (string) $open['id'] ) . '"><button class="button button-primary">' . esc_html__( 'Οριστικοποίηση', 'data-migrator' ) . '</button></form>';
+			self::form_open( 'undo', 'nm-restore', __( 'Να επιστρέψει το site όπως ήταν πριν την επαναφορά;', 'data-migrator' ) );
+			echo '<input type="hidden" name="job" value="' . esc_attr( (string) $open['id'] ) . '"><button class="button">' . esc_html__( 'Αναίρεση επαναφοράς', 'data-migrator' ) . '</button></form></p></div>';
+		}
+
+		// A runner start prepared in the last request (code shown once).
+		$go = get_transient( 'nm_go_' . get_current_user_id() );
+		if ( is_array( $go ) ) {
+			delete_transient( 'nm_go_' . get_current_user_id() );
+			self::render_go( $go );
+			return;
+		}
+
+		$analysis = self::q( 'analysis' );
+		if ( '' !== $analysis ) {
+			$an = NM_Storage::job( $analysis );
+			if ( $an && 'analyze' === $an['type'] && 'done' === $an['status'] ) {
+				self::render_plan( $an );
 				return;
 			}
-
-			$result = NM_Verify::begin( $path, $mode );
-
-			if ( ! $result['ok'] ) {
-				self::add_notice( 'error', $result['error'] ?? 'Unknown error.' );
-			} else {
-				self::add_notice( 'success', __( 'Verification started — polling...', 'noxpress-migrator' ) );
-				wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG . '-verify' ) );
-				exit;
-			}
 		}
 
-		// ---- GET: reset verification ----
-		if ( isset( $_GET['nm_verify_reset'] ) ) {
+		echo '<h2 class="nm-h2">' . esc_html__( 'Ανέβασμα αντιγράφου', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<p class="description">' . esc_html__( 'Ένα αντίγραφο του Data Migrator από αυτό ή άλλο site. Αν έχει κομμάτια, διάλεξέ τα όλα μαζί. Ανεβαίνει σε μικρά κομμάτια, οπότε το όριο upload του server δεν μετράει.', 'data-migrator' ) . '</p>';
+		echo '<p><input type="file" id="nm-upload-file" accept=".zip" multiple> <button type="button" class="button" id="nm-upload-go">' . esc_html__( 'Ανέβασμα', 'data-migrator' ) . '</button></p>';
+		echo '<div class="nm-run" id="nm-upload-run"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p></div></div>';
 
-			$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-			if ( ! wp_verify_nonce( $nonce, 'nm_verify_reset' ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
+		echo '<h2 class="nm-h2">' . esc_html__( 'Επιλογή αντιγράφου', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		$all = array_filter(
+			NM_Storage::all(),
+			static function ( $m ) {
+				return 'done' === ( $m['status'] ?? '' );
 			}
-			if ( ! current_user_can( self::CAP ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-
-			NM_Verify::reset();
-			self::add_notice( 'info', __( 'Verification state cleared.', 'noxpress-migrator' ) );
-			wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG . '-verify' ) );
-			exit;
+		);
+		if ( ! $all ) {
+			echo '<p class="description">' . esc_html__( 'Δεν υπάρχει ακόμα αντίγραφο.', 'data-migrator' ) . '</p></div>';
+			return;
 		}
+		$pick = self::q( 'backup' );
+		echo '<p><select id="nm-pick">';
+		foreach ( $all as $m ) {
+			echo '<option value="' . esc_attr( (string) $m['id'] ) . '"' . selected( $pick, (string) $m['id'], false ) . '>' . esc_html( self::when( (int) $m['created'] ) . ' · ' . (string) ( $m['home'] ?? '' ) . ' · ' . NM_Util::size( (float) ( $m['size'] ?? 0 ) ) . ( empty( $m['note'] ) ? '' : ' · ' . $m['note'] ) ) . '</option>';
+		}
+		echo '</select> <button type="button" class="button button-primary" id="nm-analyze-go">' . esc_html__( 'Ανάλυση', 'data-migrator' ) . '</button></p>';
+		echo '<p class="description">' . esc_html__( 'Η ανάλυση δεν αλλάζει τίποτα: ελέγχει το αρχείο και τον server, μετρά τι θα αλλάξει και δείχνει το πλάνο πριν την επαναφορά.', 'data-migrator' ) . '</p>';
+		echo '<div class="nm-run" id="nm-analyze-run"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p></div></div>';
 	}
 
-	/** Helper για notices (PRG pattern — transient με user_id). */
-	private static function add_notice( string $type, string $text ): void {
-		set_transient(
-			'nm_verify_msg_' . get_current_user_id(),
-			array( 'type' => $type, 'text' => $text ),
-			60
+	private static function render_plan( array $an ): void {
+		$res    = $an['result'];
+		$m      = $res['manifest'];
+		$d      = NM_Restore_Prep::defaults( $res );
+		$labels = self::group_labels();
+		$same   = NM_Restore_Prep::same_site( $m );
+
+		echo '<h2 class="nm-h2">' . esc_html__( 'Πλάνο επαναφοράς', 'data-migrator' ) . '</h2>';
+		echo '<div class="nm-zone"><p>' . esc_html( sprintf( /* translators: 1: site, 2: date, 3: WP version */ __( 'Αντίγραφο του %1$s από %2$s (WordPress %3$s).', 'data-migrator' ), (string) $m['site']['home'], self::when( (int) strtotime( (string) $m['created'] ) ), (string) $m['versions']['wp'] ) ) . '</p>';
+		if ( $same ) {
+			echo '<p class="description">' . esc_html__( 'Είναι αντίγραφο αυτού του site: επαναφορά χωρίς αλλαγή διευθύνσεων.', 'data-migrator' ) . '</p>';
+		} else {
+			echo '<p class="description">' . esc_html( sprintf( /* translators: %d: count */ __( 'Μεταφορά: η βάση έχει %d αναφορές στην παλιά διεύθυνση ή διαδρομή, που θα αλλάξουν.', 'data-migrator' ), (int) ( $res['repl'] ?? 0 ) ) ) . '</p>';
+		}
+		echo '<ul class="nm-checklist">';
+		foreach ( NM_Restore_Prep::checks( $res ) as $c ) {
+			$cls = array(
+				'ok'   => 'nm-ok',
+				'info' => 'nm-info',
+				'warn' => 'nm-warn',
+				'fail' => 'nm-err',
+			);
+			echo '<li class="' . esc_attr( $cls[ $c[0] ] ?? 'nm-info' ) . '">' . esc_html( $c[1] ) . '</li>';
+		}
+		echo '</ul></div>';
+
+		self::form_open( 'restore_start', 'nm-restore' );
+		echo '<input type="hidden" name="analysis" value="' . esc_attr( (string) $an['id'] ) . '">';
+
+		// Address.
+		echo '<h2 class="nm-h2">' . esc_html__( 'Διεύθυνση', 'data-migrator' ) . '</h2><div class="nm-zone nm-pairs">';
+		echo '<p><label for="nm-home">' . esc_html__( 'Διεύθυνση του site μετά την επαναφορά', 'data-migrator' ) . '</label><br><input type="url" class="nm-url" id="nm-home" name="home" value="' . esc_attr( $d['home'] ) . '"></p>';
+		echo '<p class="description">' . esc_html( sprintf( /* translators: %s: old URL */ __( 'Παλιά διεύθυνση: %s. Αλλάζουν και οι μορφές της: http / https, με και χωρίς www, //, JSON (\/) και URL-encoded, και η διαδρομή των αρχείων στον server. Το guid των άρθρων μένει ως έχει.', 'data-migrator' ), (string) $m['site']['home'] ) ) . '</p>';
+		if ( ! empty( $res['local'] ) ) {
+			echo '<p><strong>' . esc_html__( 'Διευθύνσεις τοπικής ανάπτυξης στη βάση', 'data-migrator' ) . '</strong></p>';
+			foreach ( (array) $res['local'] as $u => $n ) {
+				echo '<label style="display:block"><input type="checkbox" name="local[]" value="' . esc_attr( (string) $u ) . '"> <code>' . esc_html( (string) $u ) . '</code> → ' . esc_html__( 'νέα διεύθυνση', 'data-migrator' ) . ' <span class="description">(' . esc_html( sprintf( /* translators: %d: count */ _n( '%d εμφάνιση', '%d εμφανίσεις', (int) $n, 'data-migrator' ), (int) $n ) ) . ')</span></label>';
+			}
+			echo '<p class="description">' . esc_html__( 'Συνήθως είναι εικόνες ή ρυθμίσεις θέματος που έμειναν από την ανάπτυξη. Τσέκαρε όσες πρέπει να δείχνουν στο νέο site.', 'data-migrator' ) . '</p>';
+		}
+		if ( ! $same ) {
+			echo '<label style="display:block"><input type="checkbox" name="bare" value="1"> ' . esc_html( sprintf( /* translators: %s: old host */ __( 'Και το σκέτο domain %s (π.χ. σε emails όπως info@…)', 'data-migrator' ), NM_Util::bare_host( (string) $m['site']['home'] ) ) ) . '</label>';
+		}
+		echo '<p><label for="nm-extra">' . esc_html__( 'Επιπλέον αντικαταστάσεις, μία ανά γραμμή: παλιό => νέο', 'data-migrator' ) . '</label><br><textarea id="nm-extra" name="extra" rows="3"></textarea></p></div>';
+
+		// What.
+		echo '<h2 class="nm-h2">' . esc_html__( 'Τι επαναφέρεται', 'data-migrator' ) . '</h2><div class="nm-zone"><p class="nm-groups">';
+		if ( ! empty( $m['db'] ) ) {
+			echo '<label><input type="checkbox" name="db" value="1" checked> ' . esc_html( sprintf( /* translators: 1: tables, 2: rows */ __( 'Βάση δεδομένων (%1$d πίνακες, %2$s γραμμές)', 'data-migrator' ), count( (array) ( $res['tables'] ?? array() ) ), number_format_i18n( (int) ( $res['rows'] ?? 0 ) ) ) ) . '</label>';
+		}
+		foreach ( (array) $res['groups'] as $g => $info ) {
+			if ( 'root' === $g || ! isset( $labels[ $g ] ) ) {
+				continue;
+			}
+			echo '<label><input type="checkbox" name="groups[]" value="' . esc_attr( (string) $g ) . '"' . checked( in_array( $g, $d['groups'], true ), true, false ) . '> ' . esc_html( $labels[ $g ] ) . ' <span class="description">(' . esc_html( number_format_i18n( (int) $info['files'] ) . ', ' . NM_Util::size( (float) $info['bytes'] ) ) . ')</span></label>';
+		}
+		echo '</p>';
+		if ( ! empty( $res['dropins'] ) && ! $same ) {
+			echo '<p class="description">' . esc_html( sprintf( /* translators: %s: files */ __( 'Τα drop-ins (%s) μένουν έξω σε μεταφορά: συνδέονται με υπηρεσίες cache του παλιού server.', 'data-migrator' ), implode( ', ', (array) $res['dropins'] ) ) ) . '</p>';
+		}
+		if ( ! empty( $res['root'] ) ) {
+			echo '<input type="hidden" name="groups[]" value="root"><p><strong>' . esc_html__( 'Αρχεία και φάκελοι της ρίζας', 'data-migrator' ) . '</strong></p><div class="nm-list">';
+			$flags = (array) ( $m['flags'] ?? array() );
+			foreach ( (array) $res['root'] as $name => $size ) {
+				$base = rtrim( (string) $name, '/' );
+				$note = '';
+				if ( ! empty( $flags[ $base ]['php'] ) ) {
+					$note = ' <span class="nm-warn">' . esc_html__( 'άγνωστο PHP: έλεγξέ το πριν', 'data-migrator' ) . '</span>';
+				} elseif ( isset( $flags[ $base ] ) ) {
+					$note = ' <span class="description">' . esc_html__( 'δεν είναι του WordPress', 'data-migrator' ) . '</span>';
+				} elseif ( '.htaccess' === $base && ! $same ) {
+					$note = ' <span class="description">' . esc_html__( 'του παλιού server', 'data-migrator' ) . '</span>';
+				}
+				echo '<label><input type="checkbox" name="root_files[]" value="' . esc_attr( (string) $name ) . '"' . checked( in_array( (string) $name, $d['root_files'], true ), true, false ) . '> <code>' . esc_html( (string) $name ) . '</code>' . $note . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $note escaped above.
+			}
+			echo '</div>';
+		}
+		if ( ! empty( $res['tables'] ) ) {
+			echo '<details><summary>' . esc_html__( 'Επιλογή πινάκων', 'data-migrator' ) . '</summary><p class="description">' . esc_html__( 'Για επαναφορά μόνο μερικών πινάκων (π.χ. μόνο τις παραγγελίες). Ένας πίνακας που μένει έξω κρατά τα σημερινά του δεδομένα.', 'data-migrator' ) . '</p><input type="hidden" name="pick_tables" value="1"><div class="nm-list">';
+			foreach ( (array) $res['tables'] as $t ) {
+				echo '<label><input type="checkbox" name="tables[]" value="' . esc_attr( (string) $t ) . '" checked> <code>' . esc_html( (string) $t ) . '</code></label>';
+			}
+			echo '</div></details>';
+		}
+		echo '</div>';
+
+		// Options.
+		echo '<h2 class="nm-h2">' . esc_html__( 'Επιλογές', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<label style="display:block"><input type="checkbox" name="blog_public" value="1"' . checked( 1, (int) $d['blog_public'], false ) . '> ' . esc_html__( 'Ορατό στις μηχανές αναζήτησης', 'data-migrator' ) . '</label>';
+		echo '<label style="display:block"><input type="checkbox" name="salts" value="1"> ' . esc_html__( 'Νέα salts στο wp-config.php (αποσυνδέει όλους τους χρήστες· χρήσιμο μετά από παραβίαση)', 'data-migrator' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Το wp-config.php αυτού του site μένει ως έχει. Το Data Migrator δεν αντικαθίσταται ποτέ από το αντίγραφο.', 'data-migrator' ) . '</p></div>';
+
+		echo '<p><button class="button button-primary">' . esc_html__( 'Προετοιμασία επαναφοράς', 'data-migrator' ) . '</button> <a class="button" href="' . esc_url( admin_url( 'admin.php?page=nm-restore' ) ) . '">' . esc_html__( 'Άκυρο', 'data-migrator' ) . '</a></p></form>';
+	}
+
+	/** The recovery code and the button that opens the runner. */
+	private static function render_go( array $go ): void {
+		$undo = ! empty( $go['undo'] );
+		echo '<h2 class="nm-h2">' . esc_html( $undo ? __( 'Αναίρεση επαναφοράς', 'data-migrator' ) : __( 'Έναρξη επαναφοράς', 'data-migrator' ) ) . '</h2><div class="nm-zone">';
+		echo '<p><strong>' . esc_html__( 'Κωδικός ανάκτησης (φαίνεται μόνο τώρα, κράτησέ τον):', 'data-migrator' ) . '</strong></p><p class="nm-codebox">' . esc_html( implode( '-', str_split( (string) $go['token'], 8 ) ) ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Η επαναφορά τρέχει σε δική της σελίδα, έξω από τη διαχείριση, γιατί αλλάζει τη βάση και τους χρήστες. Αν η σελίδα κλείσει, άνοιξε τον παρακάτω σύνδεσμο και δώσε τον κωδικό: συνεχίζει από εκεί που έμεινε.', 'data-migrator' ) . '</p>';
+		echo '<p><code>' . esc_html( NM_URL . 'runner.php' ) . '</code> · <code>' . esc_html( (string) $go['job'] ) . '</code></p>';
+		if ( ! $undo ) {
+			echo '<p class="nm-warn">' . esc_html__( 'Μετά την επαναφορά οι χρήστες είναι αυτοί του αντιγράφου: συνδέεσαι με λογαριασμό του αντιγράφου.', 'data-migrator' ) . '</p>';
+		}
+		echo '<form method="post" action="' . esc_url( NM_URL . 'runner.php' ) . '"><input type="hidden" name="job" value="' . esc_attr( (string) $go['job'] ) . '"><input type="hidden" name="token" value="' . esc_attr( (string) $go['token'] ) . '"><input type="hidden" name="do" value="page">';
+		echo '<button class="button button-primary">' . esc_html( $undo ? __( 'Αναίρεση τώρα', 'data-migrator' ) : __( 'Έναρξη επαναφοράς', 'data-migrator' ) ) . '</button></form></div>';
+		echo '<details><summary>' . esc_html__( 'Αν η σελίδα κλείσει', 'data-migrator' ) . '</summary><form method="post" action="' . esc_url( NM_URL . 'runner.php' ) . '"><input type="hidden" name="job" value="' . esc_attr( (string) $go['job'] ) . '"><input type="hidden" name="do" value="page"><p><input type="text" name="token" placeholder="' . esc_attr__( 'Κωδικός ανάκτησης', 'data-migrator' ) . '" autocomplete="off"> <button class="button">' . esc_html__( 'Συνέχεια', 'data-migrator' ) . '</button></p></form></details>';
+	}
+
+	/* ----- Ρυθμίσεις --------------------------------------------------- */
+
+	private static function render_settings(): void {
+		$s  = NM_Settings::get();
+		$st = get_option( 'nm_state', array() );
+		$st = is_array( $st ) ? $st : array();
+		self::form_open( 'settings', 'nm-settings' );
+		echo '<h2 class="nm-h2">' . esc_html__( 'Αποθήκευση', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<p><label for="nm-storage">' . esc_html__( 'Φάκελος των αντιγράφων', 'data-migrator' ) . '</label><br><input type="text" class="nm-url" id="nm-storage" name="storage" value="' . esc_attr( NM_Storage::dir() ) . '"></p>';
+		echo '<p class="description">' . esc_html__( 'Καλύτερα έξω από το web root. Αν τον αλλάξεις, τα παλιά αντίγραφα μένουν στον παλιό φάκελο (μετέφερέ τα με το χέρι αν τα θέλεις).', 'data-migrator' ) . '</p>';
+		$web = array(
+			'safe'    => array( 'nm-ok', __( 'Ο φάκελος δεν κατεβαίνει από τον browser.', 'data-migrator' ) ),
+			'outside' => array( 'nm-ok', __( 'Ο φάκελος είναι έξω από το web root.', 'data-migrator' ) ),
+			'exposed' => array( 'nm-err', __( 'Ο φάκελος κατεβαίνει από τον browser!', 'data-migrator' ) ),
+			'unknown' => array( 'nm-warn', __( 'Ο έλεγχος δεν ολοκληρώθηκε (το site δεν απάντησε σε αίτημα προς τον εαυτό του).', 'data-migrator' ) ),
+		);
+		$w   = $web[ $st['web'] ?? 'unknown' ] ?? $web['unknown'];
+		echo '<p class="' . esc_attr( $w[0] ) . '">' . esc_html( $w[1] ) . ( empty( $st['web_time'] ) ? '' : ' <span class="description">(' . esc_html( self::when( (int) $st['web_time'] ) ) . ')</span>' ) . '</p>';
+		echo '<p><label for="nm-part-s">' . esc_html__( 'Χωρισμός σε κομμάτια (προεπιλογή)', 'data-migrator' ) . '</label> <select id="nm-part-s" name="part_mb">';
+		foreach ( NM_Settings::PARTS as $p ) {
+			echo '<option value="' . esc_attr( (string) $p ) . '"' . selected( (int) $s['part_mb'], $p, false ) . '>' . esc_html( 0 === $p ? __( 'Ένα αρχείο', 'data-migrator' ) : NM_Util::size( $p * 1048576.0 ) ) . '</option>';
+		}
+		echo '</select></p>';
+		echo '<label style="display:block"><input type="checkbox" name="keep" value="1"' . checked( $s['keep'], true, false ) . '> ' . esc_html__( 'Να μείνουν τα αντίγραφα όταν διαγραφεί το plugin', 'data-migrator' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Από προεπιλογή σβήνονται: ένα ξεχασμένο αντίγραφο έχει όλη τη βάση του site.', 'data-migrator' ) . '</p></div>';
+
+		echo '<h2 class="nm-h2">' . esc_html__( 'Εξαιρέσεις', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<p><textarea name="exclude" rows="5" style="width:100%;max-width:720px">' . esc_textarea( $s['exclude'] ) . '</textarea></p>';
+		echo '<p class="description">' . esc_html__( 'Μία ανά γραμμή. Χωρίς / ταιριάζει στο όνομα (π.χ. *.mp4), με / στη διαδρομή μέσα στην ομάδα (π.χ. uploads/2019/*). Πάντα έξω: cache, αντίγραφα άλλων plugins, .git, node_modules, *.log.', 'data-migrator' ) . '</p></div>';
+
+		if ( ! NM_Lang::rs_active() ) {
+			$cur = (string) get_user_meta( get_current_user_id(), 'rs_lang', true );
+			echo '<h2 class="nm-h2">' . esc_html__( 'Γλώσσα', 'data-migrator' ) . '</h2><div class="nm-zone">';
+			foreach ( array(
+				''   => __( 'Όπως η γλώσσα του λογαριασμού', 'data-migrator' ),
+				'el' => 'Ελληνικά',
+				'en' => 'English',
+			) as $k => $l ) {
+				echo '<label style="display:inline-block;margin-right:16px"><input type="radio" name="lang" value="' . esc_attr( $k ) . '"' . checked( in_array( $cur, array( 'el', 'en' ), true ) ? $cur : '', $k, false ) . '> ' . esc_html( $l ) . '</label>';
+			}
+			echo '<p class="description">' . esc_html__( 'Ισχύει για όλα τα plugins της σουίτας Noxpress.', 'data-migrator' ) . '</p></div>';
+		}
+		echo '<p><button class="button button-primary">' . esc_html__( 'Αποθήκευση', 'data-migrator' ) . '</button></p></form>';
+
+		self::form_open( 'web_test', 'nm-settings' );
+		echo '<p><button class="button">' . esc_html__( 'Έλεγχος του φακέλου μέσω HTTP', 'data-migrator' ) . '</button></p></form>';
+	}
+
+	/* =====================================================================
+	 * POST actions (PRG)
+	 * =================================================================== */
+
+	private static function post( string $key ): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in route() / ajax_guard(); every caller validates or sanitizes the value for its own use.
+		return isset( $_POST[ $key ] ) && is_scalar( $_POST[ $key ] ) ? trim( (string) wp_unslash( $_POST[ $key ] ) ) : '';
+	}
+
+	private static function post_list( string $key ): array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in route() / ajax_guard(); callers validate each item.
+		$v   = isset( $_POST[ $key ] ) && is_array( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : array();
+		$out = array();
+		foreach ( $v as $x ) {
+			if ( is_scalar( $x ) && strlen( (string) $x ) <= 255 ) {
+				$out[] = (string) $x;
+			}
+		}
+		return $out;
+	}
+
+	public static function route(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked right below.
+		if ( empty( $_POST['nm_action'] ) || ! in_array( self::page(), self::PAGES, true ) ) {
+			return;
+		}
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'data-migrator' ) );
+		}
+		check_admin_referer( self::NONCE, self::NONCE_FIELD );
+		$action = sanitize_key( self::post( 'nm_action' ) );
+		$page   = self::page();
+		$msgs   = array();
+		$extra  = '';
+
+		switch ( $action ) {
+			case 'integrity':
+				$c      = NM_Integrity::check( true );
+				$msgs[] = self::msg( 'ok' === $c['status'] ? 'success' : 'warning', 'ok' === $c['status'] ? __( 'Τα αρχεία του WordPress είναι ίδια με τα επίσημα.', 'data-migrator' ) : ( 'unknown' === $c['status'] ? __( 'Δεν έγινε έλεγχος: το api.wordpress.org δεν απάντησε ή δεν έχει checksums για αυτή την έκδοση.', 'data-migrator' ) : __( 'Βρέθηκαν διαφορές στα αρχεία του WordPress.', 'data-migrator' ) ) );
+				break;
+
+			case 'delete':
+				$id     = self::post( 'id' );
+				$ok     = preg_match( NM_Storage::ID_RE, $id ) && NM_Storage::delete( $id );
+				$msgs[] = self::msg( $ok ? 'success' : 'error', $ok ? __( 'Το αντίγραφο διαγράφηκε.', 'data-migrator' ) : __( 'Το αντίγραφο δεν βρέθηκε.', 'data-migrator' ) );
+				break;
+
+			case 'installer':
+				$id  = self::post( 'id' );
+				$key = preg_match( NM_Storage::ID_RE, $id ) ? NM_Installer::new_key( $id ) : new WP_Error( 'bad', __( 'Μη έγκυρο αίτημα.', 'data-migrator' ) );
+				if ( is_wp_error( $key ) ) {
+					$msgs[] = self::msg( 'error', $key->get_error_message() );
+				} else {
+					set_transient(
+						'nm_inst_key_' . get_current_user_id(),
+						array(
+							'id'  => $id,
+							'key' => $key,
+						),
+						300
+					);
+				}
+				break;
+
+			case 'settings':
+				$s       = NM_Settings::get();
+				$path    = self::post( 'storage' );
+				$changed = NM_Util::norm( $path ) !== NM_Storage::dir();
+				if ( $changed && '' !== $path ) {
+					if ( ! path_is_absolute( $path ) || false !== strpos( $path, '..' ) || ! NM_Util::mkdirp( $path ) || ! wp_is_writable( $path ) ) {
+						$msgs[] = self::msg( 'error', __( 'Ο φάκελος δεν δημιουργήθηκε ή δεν γράφεται. Οι υπόλοιπες ρυθμίσεις αποθηκεύτηκαν.', 'data-migrator' ) );
+						$changed = false;
+					} else {
+						$s['storage'] = $path;
+					}
+				}
+				$s['part_mb'] = (int) self::post( 'part_mb' );
+				$s['exclude'] = self::post( 'exclude' );
+				$s['keep']    = '1' === self::post( 'keep' );
+				NM_Settings::save( $s );
+				if ( $changed ) {
+					NM_Storage::reset_cache();
+					NM_Storage::web_test();
+				}
+				if ( ! NM_Lang::rs_active() ) {
+					$lang = self::post( 'lang' );
+					if ( in_array( $lang, array( 'el', 'en' ), true ) ) {
+						update_user_meta( get_current_user_id(), 'rs_lang', $lang );
+					} else {
+						delete_user_meta( get_current_user_id(), 'rs_lang' );
+					}
+					NM_Lang::reset();
+				}
+				$msgs[] = self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'data-migrator' ) );
+				break;
+
+			case 'web_test':
+				$r      = NM_Storage::web_test();
+				$msgs[] = self::msg( 'exposed' === $r ? 'error' : ( 'unknown' === $r ? 'warning' : 'success' ), 'exposed' === $r ? __( 'Ο φάκελος κατεβαίνει από τον browser!', 'data-migrator' ) : ( 'unknown' === $r ? __( 'Ο έλεγχος δεν ολοκληρώθηκε (το site δεν απάντησε σε αίτημα προς τον εαυτό του).', 'data-migrator' ) : __( 'Ο φάκελος δεν κατεβαίνει από τον browser.', 'data-migrator' ) ) );
+				break;
+
+			case 'restore_start':
+				$analysis = self::post( 'analysis' );
+				$home     = esc_url_raw( self::post( 'home' ) );
+				if ( ! preg_match( NM_Storage::JOB_RE, $analysis ) || ! preg_match( '#^https?://#', $home ) ) {
+					$msgs[] = self::msg( 'error', __( 'Η διεύθυνση του site δεν είναι έγκυρη.', 'data-migrator' ) );
+					$extra  = '&analysis=' . rawurlencode( $analysis );
+					break;
+				}
+				$o = array(
+					'db'          => '1' === self::post( 'db' ),
+					'groups'      => self::post_list( 'groups' ),
+					'root_files'  => self::post_list( 'root_files' ),
+					'home'        => $home,
+					'blog_public' => '1' === self::post( 'blog_public' ) ? 1 : 0,
+					'salts'       => '1' === self::post( 'salts' ),
+					'bare'        => '1' === self::post( 'bare' ),
+					'local'       => array_values(
+						array_filter(
+							self::post_list( 'local' ),
+							static function ( $u ) {
+								return (bool) preg_match( '#^https?://(localhost|127\.0\.0\.1)(:\d+)?(/[A-Za-z0-9._~-]+)?$#', $u );
+							}
+						)
+					),
+					'extra'       => substr( self::post( 'extra' ), 0, 4000 ),
+				);
+				if ( '1' === self::post( 'pick_tables' ) ) {
+					$o['tables'] = self::post_list( 'tables' );
+				}
+				if ( ! $o['db'] && ! array_diff( $o['groups'], array( 'root' ) ) && ! $o['root_files'] ) {
+					$msgs[] = self::msg( 'error', __( 'Διάλεξε τουλάχιστον τη βάση ή μία ομάδα αρχείων.', 'data-migrator' ) );
+					$extra  = '&analysis=' . rawurlencode( $analysis );
+					break;
+				}
+				$r = NM_Restore_Prep::start( $analysis, $o );
+				if ( is_wp_error( $r ) ) {
+					$msgs[] = self::msg( 'error', $r->get_error_message() );
+					$extra  = '&analysis=' . rawurlencode( $analysis );
+					break;
+				}
+				set_transient(
+					'nm_go_' . get_current_user_id(),
+					array(
+						'job'   => $r[0]['id'],
+						'token' => $r[1],
+					),
+					600
+				);
+				break;
+
+			case 'finalize':
+				$ok     = NM_Restore_Prep::finalize( self::post( 'job' ) );
+				$msgs[] = self::msg( $ok ? 'success' : 'error', $ok ? __( 'Οριστικοποιήθηκε: τα στοιχεία αναίρεσης σβήστηκαν.', 'data-migrator' ) : __( 'Δεν υπάρχει επαναφορά για οριστικοποίηση.', 'data-migrator' ) );
+				break;
+
+			case 'undo':
+				$r = NM_Restore_Prep::undo( self::post( 'job' ) );
+				if ( is_wp_error( $r ) ) {
+					$msgs[] = self::msg( 'error', $r->get_error_message() );
+				} else {
+					set_transient(
+						'nm_go_' . get_current_user_id(),
+						array(
+							'job'   => $r[0]['id'],
+							'token' => $r[1],
+							'undo'  => 1,
+						),
+						600
+					);
+				}
+				break;
+		}
+		self::redirect( $page, $msgs, $extra );
+	}
+
+	private static function msg( string $type, string $text ): array {
+		return array(
+			'type' => $type,
+			'text' => $text,
 		);
 	}
-	
-		/* =====================================================================
-	 * Routes: nm_start (POST) / nm_delete + nm_download (GET, nonce)
-	 * =================================================================== */
 
-	public static function route_actions(): void {
-
-		// ---- POST: έναρξη νέου export ----
-		if ( isset( $_POST['nm_start'] ) ) {
-
-			if ( ! isset( $_POST['nm_start_nonce'] )
-				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nm_start_nonce'] ) ), 'nm_start' ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! current_user_can( self::CAP ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! class_exists( 'NM_Files_Engine' ) ) {
-				wp_die( esc_html__( 'Files engine missing — partial plugin upload.', 'noxpress-migrator' ) );
-			}
-
-			$scope = isset( $_POST['nm_scope'] ) ? sanitize_key( wp_unslash( $_POST['nm_scope'] ) ) : 'everything';
-			$after = isset( $_POST['nm_media_after'] ) ? sanitize_text_field( wp_unslash( $_POST['nm_media_after'] ) ) : '';
-
-			if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $after ) ) {
-				$after = '';
-			}
-
-			NM_Files_Engine::begin( $scope, $after );
-
-			wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG ) );
-			exit;
-		}
-
-		// ---- GET: διαγραφή πακέτου ----
-		if ( isset( $_GET['nm_delete'] ) ) {
-
-			$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-			if ( ! wp_verify_nonce( $nonce, 'nm_delete' ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! current_user_can( self::CAP ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-
-			if ( class_exists( 'NM_Files_Engine' ) ) {
-				NM_Files_Engine::delete_package();
-			}
-
-			wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG ) );
-			exit;
-		}
-
-		// ---- GET: streaming download τόμου ----
-		if ( isset( $_GET['nm_download'] ) ) {
-
-			$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-			if ( ! wp_verify_nonce( $nonce, 'nm_download' ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! current_user_can( self::CAP ) ) {
-				wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress-migrator' ) );
-			}
-			if ( ! class_exists( 'NM_Files_Engine' ) ) {
-				wp_die( esc_html__( 'Files engine missing — partial plugin upload.', 'noxpress-migrator' ) );
-			}
-
-			$name  = isset( $_GET['nm_download'] ) ? sanitize_file_name( wp_unslash( $_GET['nm_download'] ) ) : '';
-			$paths = NM_Files_Engine::final_paths();
-
-			// Whitelist match — το όνομα ΠΡΕΠΕΙ να είναι ένα από τα
-			// πραγματικά volumes του nm_last_manifest (κανένα path
-			// traversal: δεν παίρνουμε ποτέ path από το request, μόνο
-			// όνομα που συγκρίνεται με τη λίστα).
-			$hit = null;
-			foreach ( $paths as $v ) {
-				if ( $v['file'] === $name ) {
-					$hit = $v;
-					break;
-				}
-			}
-
-			if ( null === $hit || ! is_readable( $hit['full'] ) ) {
-				wp_die( esc_html__( 'Το αρχείο δεν βρέθηκε.', 'noxpress-migrator' ) );
-			}
-
-			// Read-back verification ΠΡΙΝ το streaming — αν το staging
-			// έχει φαγωθεί από οτιδήποτε, το πιάνουμε ΕΔΩ.
-			$ver = NM_Files_Engine::verify_volumes();
-			if ( true !== $ver ) {
-				wp_die( esc_html__( 'Checksum mismatch — το αρχείο δεν είναι αξιόπιστο. Ξεκίνα νέο export.', 'noxpress-migrator' ) );
-			}
-
-			nocache_headers();
-			header( 'Content-Type: application/zip' );
-			header( 'Content-Disposition: attachment; filename="' . $hit['file'] . '"' );
-			header( 'Content-Length: ' . (string) $hit['bytes'] );
-			header( 'X-Content-Type-Options: nosniff' );
-
-			// Streaming download — 4 MiB chunks, ποτέ readfile() σε
-			// gigabyte αρχεία (μνήμη) ούτε fpassthru χωρίς bounds.
-			$src = @fopen( $hit['full'], 'rb' );
-			if ( false === $src ) {
-				wp_die( esc_html__( 'Το αρχείο δεν μπορεί να διαβαστεί.', 'noxpress-migrator' ) );
-			}
-
-			while ( ! feof( $src ) ) {
-				$chunk = fread( $src, 4194304 );
-				if ( false === $chunk ) {
-					break;
-				}
-				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput -- binary stream.
-				flush();
-			}
-
-			fclose( $src );
-			exit;
-		}
+	private static function redirect( string $page, array $msgs, string $extra = '' ): void {
+		set_transient( 'nm_aui_msg_' . get_current_user_id(), $msgs, 60 );
+		wp_safe_redirect( admin_url( 'admin.php?page=' . $page . $extra ) );
+		exit;
 	}
 
-	/* =====================================================================
-	 * Ajax handlers (progress step + abort)
-	 * =================================================================== */
-
-	public static function ajax_step(): void {
-
-		check_ajax_referer( 'nm_progress', 'nonce' );
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
-		}
-
-		// Το orchestrator κρίνει φάση: db → files → packaged.
-		if ( class_exists( 'NM_Files_Engine' ) ) {
-			wp_send_json( NM_Files_Engine::run_step() );
-		}
-
-		$db = NM_Export_Engine::start( false );
-		wp_send_json( $db->step() );
-	}
-
-	public static function ajax_abort(): void {
-
-		check_ajax_referer( 'nm_progress', 'nonce' );
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
-		}
-
-		if ( class_exists( 'NM_Files_Engine' ) ) {
-			NM_Files_Engine::abort();
-			wp_send_json_success();
-		}
-
-		$db = NM_Export_Engine::start( false );
-		$db->abort();
-		wp_send_json_success();
-	}
-
-	/** Read-only status (χωρίς stepping) — για symptom-refresh του UI. */
-	public static function ajax_status(): void {
-
-		check_ajax_referer( 'nm_progress', 'nonce' );
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
-		}
-
-		if ( class_exists( 'NM_Files_Engine' ) ) {
-			wp_send_json( NM_Files_Engine::current_report() );
-		}
-
-		$db = NM_Export_Engine::start( false );
-		wp_send_json( $db->report() );
-	}
-
-	/* =====================================================================
-	 * Helpers
-	 * =================================================================== */
-
-	private static function take_notices(): array {
-		$raw = get_transient( 'nm_settings_msg_' . get_current_user_id() );
-		if ( is_array( $raw ) && ! empty( $raw ) ) {
-			delete_transient( 'nm_settings_msg_' . get_current_user_id() );
+	private static function take_msgs(): array {
+		$raw = get_transient( 'nm_aui_msg_' . get_current_user_id() );
+		if ( is_array( $raw ) && $raw ) {
+			delete_transient( 'nm_aui_msg_' . get_current_user_id() );
 			return $raw;
 		}
 		return array();
 	}
 
+	private static function print_notices( array $notices ): void {
+		foreach ( $notices as $n ) {
+			if ( ! is_array( $n ) || ! isset( $n['type'], $n['text'] ) ) {
+				continue;
+			}
+			$type = in_array( $n['type'], array( 'success', 'warning', 'error', 'info' ), true ) ? $n['type'] : 'info';
+			echo '<div class="notice notice-' . esc_attr( $type ) . ' is-dismissible inline"><p>' . esc_html( (string) $n['text'] ) . '</p></div>';
+		}
+	}
+
+	/* =====================================================================
+	 * Downloads (privileged GET)
+	 * =================================================================== */
+
+	public static function download(): void {
+		$what = self::q( 'nm_dl' );
+		if ( '' === $what || 'nm-backups' !== self::page() ) {
+			return;
+		}
+		$id = self::q( 'id' );
+		if ( ! current_user_can( self::CAP ) || ! preg_match( NM_Storage::ID_RE, $id ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'data-migrator' ) );
+		}
+		check_admin_referer( 'nm_dl_' . $id );
+		$meta = NM_Storage::meta( $id );
+		if ( ! $meta ) {
+			wp_die( esc_html__( 'Το αντίγραφο δεν βρέθηκε.', 'data-migrator' ) );
+		}
+		if ( 'installer' === $what ) {
+			$src = NM_Installer::build( $id );
+			if ( '' === $src ) {
+				wp_die( esc_html__( 'Το κλειδί του installer έληξε. Φτιάξε νέο installer.', 'data-migrator' ) );
+			}
+			self::send_headers( 'nm-installer.php', strlen( $src ), 'application/octet-stream' );
+			echo $src; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a file download.
+			exit;
+		}
+		if ( 'log' === $what ) {
+			$f = NM_Storage::log_file( (string) ( $meta['job'] ?? '' ) );
+			if ( '' === $f || ! is_file( $f ) ) {
+				wp_die( esc_html__( 'Το αντίγραφο δεν βρέθηκε.', 'data-migrator' ) );
+			}
+			self::send_headers( 'data-migrator-' . $id . '.log', (int) filesize( $f ), 'text/plain; charset=utf-8' );
+			readfile( $f ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+			exit;
+		}
+		$n     = (int) self::q( 'n' );
+		$parts = (array) ( $meta['parts'] ?? array() );
+		$path  = isset( $parts[ $n ] ) ? NM_Storage::part_path( (string) $parts[ $n ]['file'] ) : '';
+		if ( '' === $path || ! is_file( $path ) ) {
+			wp_die( esc_html__( 'Το αντίγραφο δεν βρέθηκε.', 'data-migrator' ) );
+		}
+		NM_Util::prepare_request();
+		while ( ob_get_level() ) {
+			ob_end_clean();
+		}
+		self::send_headers( basename( $path ), (int) filesize( $path ), 'application/zip' );
+		$fh = fopen( $path, 'rb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		while ( $fh && ! feof( $fh ) ) {
+			echo fread( $fh, 1048576 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_operations_fread -- a file download.
+			flush();
+		}
+		if ( $fh ) {
+			fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		}
+		exit;
+	}
+
+	private static function send_headers( string $name, int $size, string $type ): void {
+		nocache_headers();
+		header( 'Content-Type: ' . $type );
+		header( 'Content-Disposition: attachment; filename="' . str_replace( '"', '', $name ) . '"' );
+		header( 'Content-Length: ' . $size );
+		header( 'X-Content-Type-Options: nosniff' );
+	}
+
+	/* =====================================================================
+	 * AJAX
+	 * =================================================================== */
+
+	private static function ajax_guard(): void {
+		check_ajax_referer( self::NONCE_AJAX, 'nonce' );
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_send_json_error( array( 'text' => __( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'data-migrator' ) ), 403 );
+		}
+	}
+
+	public static function ajax_backup_start(): void {
+		self::ajax_guard();
+		$o = array(
+			'scope'        => sanitize_key( self::post( 'scope' ) ),
+			'db'           => '1' === self::post( 'db' ),
+			'groups'       => array_map( 'sanitize_key', self::post_list( 'groups' ) ),
+			'extra_tables' => self::post_list( 'extra_tables' ),
+			'root_dirs'    => self::post_list( 'root_dirs' ),
+			'part_mb'      => (int) self::post( 'part_mb' ),
+			'note'         => self::post( 'note' ),
+		);
+		$job = NM_Backup::start( $o );
+		if ( is_wp_error( $job ) ) {
+			wp_send_json_error( array( 'text' => $job->get_error_message() ) );
+		}
+		wp_send_json_success( array( 'job' => $job['id'] ) );
+	}
+
+	public static function ajax_step(): void {
+		self::ajax_guard();
+		$job = self::post( 'job' );
+		if ( ! preg_match( NM_Storage::JOB_RE, $job ) ) {
+			wp_send_json_error( array( 'text' => __( 'Μη έγκυρο αίτημα.', 'data-migrator' ) ) );
+		}
+		$r = 'a' === $job[0] ? NM_Restore_Prep::step( $job ) : NM_Backup::step( $job );
+		if ( 'a' === $job[0] && 'done' === $r['status'] ) {
+			$r['url'] = admin_url( 'admin.php?page=nm-restore&analysis=' . $job );
+		}
+		wp_send_json_success( $r );
+	}
+
+	public static function ajax_cancel(): void {
+		self::ajax_guard();
+		$job = self::post( 'job' );
+		$ok  = preg_match( NM_Storage::JOB_RE, $job ) && NM_Backup::cancel( $job );
+		wp_send_json_success( array( 'ok' => $ok ) );
+	}
+
+	public static function ajax_upload(): void {
+		self::ajax_guard();
+		$file = isset( $_FILES['chunk']['tmp_name'] ) && is_string( $_FILES['chunk']['tmp_name'] ) ? $_FILES['chunk']['tmp_name'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- ajax_guard(); a temp path checked with is_uploaded_file().
+		if ( '' === $file || ! is_uploaded_file( $file ) ) {
+			wp_send_json_error( array( 'text' => __( 'Το κομμάτι δεν έφτασε στον server.', 'data-migrator' ) ) );
+		}
+		$r = NM_Restore_Prep::upload_chunk( self::post( 'upload' ), (int) self::post( 'index' ), (int) self::post( 'offset' ), (int) self::post( 'total' ), $file );
+		if ( is_wp_error( $r ) ) {
+			wp_send_json_error( array( 'text' => $r->get_error_message() ) );
+		}
+		wp_send_json_success( array( 'size' => $r ) );
+	}
+
+	public static function ajax_upload_done(): void {
+		self::ajax_guard();
+		$r = NM_Restore_Prep::upload_finish( self::post( 'upload' ) );
+		if ( is_wp_error( $r ) ) {
+			wp_send_json_error( array( 'text' => $r->get_error_message() ) );
+		}
+		wp_send_json_success( array( 'id' => $r ) );
+	}
+
+	public static function ajax_analyze(): void {
+		self::ajax_guard();
+		$job = NM_Restore_Prep::analyze_start( self::post( 'id' ) );
+		if ( is_wp_error( $job ) ) {
+			wp_send_json_error( array( 'text' => $job->get_error_message() ) );
+		}
+		wp_send_json_success( array( 'job' => $job['id'] ) );
+	}
+
+	/* =====================================================================
+	 * Footer (Bible §7 — identical pattern)
+	 * =================================================================== */
+
 	private static function footer(): void {
 		?>
-		<hr style="margin-top:24px;" />
 		<p class="nm-footer">
 			<?php
 			printf(
-				/* translators: %s: creator */
-				esc_html__( 'Made with <3 by %s', 'noxpress-migrator' ),
+				/* translators: %s: author name */
+				esc_html__( 'Made with ❤ by %s', 'data-migrator' ),
 				'<a href="https://koulaxizis.gr" target="_blank" rel="noopener noreferrer">Christos Koulaxizis</a>'
 			);
 			?>
 			<span class="nm-muted"> · </span>
 			<a href="https://glarolykoi.net" target="_blank" rel="noopener noreferrer">glarolykoi.net</a>
 			<span class="nm-muted"> · </span>
-			<?php esc_html_e( 'More plugins at', 'noxpress-migrator' ); ?>
+			<?php esc_html_e( 'More plugins at', 'data-migrator' ); ?>
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
+		</p>
+		<p class="nm-footer-cta">
+			<a class="nm-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'data-migrator' ); ?>
+			</a>
+			<a class="nm-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>">
+				<?php esc_html_e( 'Noxpress Dashboard', 'data-migrator' ); ?>
+			</a>
 		</p>
 		<?php
 	}
-
-	/** AJAX handler για το Verify stepping. */
-	public static function ajax_verify_step(): void {
-
-		check_ajax_referer( 'nm_progress', 'nonce' );
-
-		if ( ! current_user_can( self::CAP ) ) {
-			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
-		}
-
-		if ( class_exists( 'NM_Verify' ) ) {
-			wp_send_json( NM_Verify::step() );
-		}
-
-		wp_send_json_error( array( 'message' => 'Verify module not found.' ) );
-	}
 }
-
-// Hook ajax handlers (must happen after plugins_loaded)
-add_action( 'wp_ajax_nm_progress_step', array( 'NM_Admin_UI', 'ajax_step' ) );
-add_action( 'wp_ajax_nm_abort',         array( 'NM_Admin_UI', 'ajax_abort' ) );
-add_action( 'wp_ajax_nm_status',         array( 'NM_Admin_UI', 'ajax_status' ) );
-add_action( 'wp_ajax_nm_verify_step',    array( 'NM_Admin_UI', 'ajax_verify_step' ) );
