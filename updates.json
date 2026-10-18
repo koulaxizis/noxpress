@@ -78,6 +78,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.0.0/oros-connect.zip"
       }
     },
+    "pre-orders": {
+      "beta": {
+        "changelog": "* Initial release.\n* Pre-order with a release date or \"Coming soon\" on simple products and variations, with an optional text per product; quick edit, bulk edit, list column and filter; \"Sale until release\".\n* Badge, \"Pre-order\" button and availability text, for classic and block themes; PreOrder structured data (WooCommerce and Rank Math).\n* Cart line note, three mixed-cart rules, release date saved on the order lines; orders list column and filter (HPOS and legacy).\n* Release day job (Action Scheduler) with `por_released`; \"Released\" and \"New release date\" emails (off by default); background update of open orders when the date changes.\n* Upcoming releases page with counts and CSV shipping list.\n* `[nox_preorders]` and the \"Pre-orders\" block.\n* Shipping Notes delivery estimate from the release date; Product Formats format column.\n* Public function `por_get_release()`, filters `por_is_preorder` and `por_text`.\n* Editable Greek / English texts, date format, settings export / import.\n* Test mode, rival plugin rule, POR_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.11).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "4fefaf3b12d737b544267e136da5ac36e5b83efd3e9a59564f3eb5c94df247fd",
+        "signature": "kb5f6rFRBx7bfvLZ/df4h+FZBylfIHTsC58iwVTUti4pRCuU7jx4GkemPFPc34oUwIUkD5imDI0vKuBHsXRmBw==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.0.0/pre-orders.zip"
+      }
+    },
     "product-bundles": {
       "beta": {
         "changelog": "* Fixed: saving a bundle kept no record of the variations you ticked for a variable product, so the bundle page offered every variation of it. Bundles saved with 1.0.0 offer all variations until you tick them again and update the bundle.",
