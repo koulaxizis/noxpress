@@ -1,15 +1,15 @@
 === orOS Connect ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: oros, newsletter, signup form, woocommerce, checkout
+Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Connects your site to orOS (useoros.online). Modules you switch on one by one; the first one sends new newsletter subscribers to your list in orOS Newsletter.
+Connects your site to orOS (useoros.online). Modules you switch on one by one: newsletter sign-ups to orOS Newsletter, and Publishing Quote requests as draft offers in orOS.
 
 == Description ==
 
@@ -26,6 +26,13 @@ Every module is off after activation. A module that is off loads no code.
 * WooCommerce: an unticked "I want to receive the newsletter" checkbox at checkout, in the classic checkout and the Checkout block (WooCommerce 8.9+). When the order is paid, the billing email and name are sent to your orOS list in the background, with retries, an order note and a send log. The consent (time and text) stays in the order.
 * Checkout sign-ups can skip the confirmation email (the default) or get one too (double opt-in). Skipping it needs a shop key that orOS will check; until orOS supports it, everyone gets the confirmation email.
 
+**Offers module** (1.1.0)
+
+* The «I'm interested» requests of Publishing Quote become draft offers in orOS: while orOS is open, it collects the new requests, makes a draft offer and a contact from each and marks the request «In orOS». The offer goes to the author only when you send it from orOS.
+* Each offer carries the lines the author saw (typesetting already inside), the total, VAT and validity; the full breakdown goes in as an internal note that is never sent to the author.
+* orOS connects with the WooCommerce REST keys it already has for the shop (a read key reads; marking needs read/write), or, without WooCommerce, with an Application Password of an administrator. Only managers can read the requests.
+* Until orOS imports them, the requests stay in Publishing Quote → Requests and arrive by email: nothing is lost if orOS is closed.
+
 **Coming next**
 
 * Stock ledger: every stock change of the shop in orOS Stock, and changes from orOS as differences.
@@ -36,7 +43,7 @@ Every module is off after activation. A module that is off loads no code.
 
 * Works with or without WooCommerce (without it: the sign-up form only).
 * Test mode by default: only managers see the form and the checkbox until you switch to live.
-* `define( 'ORC_DISABLE', true );` in wp-config.php stops the forms, the checkbox and every send.
+* `define( 'ORC_DISABLE', true );` in wp-config.php stops the forms, the checkbox, every send and the offers routes.
 * Server requests only with `wp_safe_remote_post`, no redirects followed. No cookies, no tracking.
 * Suggested text for your privacy policy (Settings → Privacy).
 * Settings export / import (without the shop key).
@@ -45,6 +52,7 @@ Every module is off after activation. A module that is off loads no code.
 **For developers**
 
 * `orc_text` filter ( string $text, string $key, string $lang ): change a visitor text (keys title, intro, email, name, button, note, checkbox).
+* REST `GET /wp-json/orc/v1/offers` (state=new|contact|oros|closed|all, limit, page), `GET /wp-json/orc/v1/offers/<id>` and `POST /wp-json/orc/v1/offers/<id>` ( { state, note } ), managers only.
 * `orc_newsletter_sent` action ( int $order_id, string $result ): after each checkout sign-up attempt (`ok`, `bad`, `gone`, `busy`, `off`, `error`, `network`).
 
 == Installation ==
@@ -68,9 +76,13 @@ Until orOS can check the shop key, it cannot tell a checkout sign-up from the pu
 
 = What happens on uninstall? =
 
-The settings, the send log, queued sends and the transients are removed. The newsletter consent stays in the orders, as the shop's record, and goes with each order. The shared Noxpress options stay while another Noxpress plugin is installed.
+The settings, the send log, queued sends, the last offers import and the transients are removed. The Publishing Quote requests belong to Publishing Quote and stay. The newsletter consent stays in the orders, as the shop's record, and goes with each order. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New module «Offers»: Publishing Quote requests for orOS to import as draft offers (REST orc/v1/offers), with the shop's WooCommerce REST keys or an Application Password; waiting requests and the last import in the admin.
+* Noxpress Core 1.1.10.
 
 = 1.0.0 =
 * Initial release, with modules switched on one by one.
