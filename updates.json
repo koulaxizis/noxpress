@@ -26,6 +26,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.0.0/checkout-extras.zip"
       }
     },
+    "data-migrator": {
+      "beta": {
+        "changelog": "* Rewritten from scratch (beta).\n* Resumable backup in short steps: streaming ZIP with ZIP64 and parts, paged SQL dump, manifest with checksums.\n* Restore and migration with analysis first, serialized-safe URL and path replacement, table prefix change, temporary tables and an atomic swap, staged files, undo and finalize.\n* Standalone restore runner with a one-time recovery code; installer for an empty server with a one-time key.\n* Post-restore cache, rewrite and WooCommerce lookup table rebuild.\n* Private storage folder with an HTTP self-test; WordPress core checksum check.\n* WP-CLI commands; Greek / English admin (Noxpress menu).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "1d6a94995b66def8998994628a235dca70df27a9422dba4040db2a927c80fcdd",
+        "signature": "WEfAwPKtploqd/oM+YQI1LyaiA7gKmfhqHuVi/hT+hiM8dbYn/mjDvfqbK2Z5uIPkS2+1biScBSKh2MqfrcaAw==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.0.0/data-migrator.zip"
+      }
+    },
     "easy-withdrawal": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
