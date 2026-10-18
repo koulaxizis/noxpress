@@ -9,6 +9,8 @@
  *  - delivery  delivery time: mode, product-page zone, transit days per
  *              method, preparation, cut-off, working days, holidays, look,
  *              texts; "add Greek public holidays"
+ *  - parcels   carts in several packages (1.1.0): partner signals, parcel
+ *              names, notice, partner rate labels, order list, product hint
  *  - preview   what a cart of X in zone Y shows; the estimate of a product
  *              with today's dates (read-only GET)
  *  - tools     settings export / import, shortcodes and blocks
@@ -44,6 +46,7 @@ final class SHN_Admin_UI {
 		return array(
 			'free'     => __( 'Δωρεάν αποστολή', 'shipping-notes' ),
 			'delivery' => __( 'Χρόνος παράδοσης', 'shipping-notes' ),
+			'parcels'  => __( 'Δέματα', 'shipping-notes' ),
 			'preview'  => __( 'Προεπισκόπηση', 'shipping-notes' ),
 			'tools'    => __( 'Εργαλεία', 'shipping-notes' ),
 		);
@@ -134,6 +137,9 @@ final class SHN_Admin_UI {
 			switch ( $tab ) {
 				case 'delivery':
 					self::render_delivery();
+					break;
+				case 'parcels':
+					self::render_parcels();
 					break;
 				case 'preview':
 					self::render_preview();
@@ -607,6 +613,119 @@ final class SHN_Admin_UI {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Tab: parcels
+	 * ------------------------------------------------------------------- */
+
+	private static function render_parcels(): void {
+		$s       = SHN_Settings::get();
+		$classes = array();
+		foreach ( (array) WC()->shipping()->get_shipping_classes() as $term ) {
+			if ( is_object( $term ) && isset( $term->slug, $term->name ) ) {
+				$classes[ (string) $term->slug ] = (string) $term->name;
+			}
+		}
+		$map = $s['mx_map'];
+		$blank = min( 3, max( 0, SHN_Settings::MAX_MAP - count( $map ) ) );
+		for ( $i = 0; $i < $blank; $i++ ) {
+			$map[] = array(
+				'from' => '',
+				'el'   => '',
+				'en'   => '',
+			);
+		}
+		?>
+		<p class="description shn-mt-8"><?php esc_html_e( 'Όταν ένα plugin, π.χ. της Printful, χωρίζει το καλάθι σε δέμα του συνεργάτη και δέμα του καταστήματος, το WooCommerce δείχνει δύο «Αποστολές» με δύο χρεώσεις χωρίς εξήγηση. Εδώ δίνεις όνομα στα δέματα, ένα μήνυμα που εξηγεί τις δύο χρεώσεις, ελληνικές ετικέτες για τις τιμές του συνεργάτη και τη λίστα των δεμάτων στην παραγγελία.', 'shipping-notes' ); ?></p>
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="shn_action" value="save_parcels" />
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Λειτουργία', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone"><?php self::mode_field( 'shn_mx_mode', $s['mx_mode'] ); ?></div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Δέματα του συνεργάτη', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<?php self::checkbox( 'shn_mx_printful', $s['mx_printful'], __( 'Το δέμα που φτιάχνει το plugin της Printful', 'shipping-notes' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Και δέματα με προϊόντα από αυτές τις κλάσεις αποστολής. Οι ίδιες κλάσεις δείχνουν ποια προϊόντα παίρνουν την ένδειξη στη σελίδα προϊόντος.', 'shipping-notes' ); ?></p>
+				<?php
+				if ( ! $classes ) {
+					echo '<p class="shn-warn">' . esc_html__( 'Το κατάστημα δεν έχει κλάσεις αποστολής.', 'shipping-notes' ) . '</p>';
+				}
+				foreach ( $classes as $slug => $name ) {
+					echo '<label class="shn-check"><input type="checkbox" name="shn_mx_classes[]" value="' . esc_attr( $slug ) . '" ' . checked( in_array( $slug, $s['mx_classes'], true ), true, false ) . ' /> ' . esc_html( $name ) . ' <code>' . esc_html( $slug ) . '</code></label>';
+				}
+				foreach ( $s['mx_classes'] as $slug ) {
+					if ( ! isset( $classes[ $slug ] ) ) {
+						echo '<input type="hidden" name="shn_mx_classes[]" value="' . esc_attr( $slug ) . '" />';
+						/* translators: %s: shipping class slug */
+						echo '<p class="shn-warn">' . esc_html( sprintf( __( 'Η κλάση αποστολής «%s» δεν υπάρχει πια.', 'shipping-notes' ), $slug ) ) . '</p>';
+					}
+				}
+				?>
+				<p class="shn-mt-8"><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Κλάσεις αποστολής του WooCommerce', 'shipping-notes' ); ?></a></p>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Τι εμφανίζεται', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<?php
+				self::checkbox( 'shn_mx_names', $s['mx_names'], __( 'Ονόματα δεμάτων στο καλάθι και στο ταμείο («Δέμα 1 · …»), όταν υπάρχουν πάνω από ένα δέματα', 'shipping-notes' ) );
+				self::checkbox( 'shn_mx_notice', $s['mx_notice'], __( 'Μήνυμα «δύο δέματα» πάνω από τις γραμμές αποστολής, όταν δέμα του συνεργάτη και δέμα του καταστήματος έρχονται μαζί', 'shipping-notes' ) );
+				?>
+				<p class="shn-field"><span><?php esc_html_e( 'Χρώμα αριστερού περιγράμματος', 'shipping-notes' ); ?></span>
+					<input type="text" class="shn-color" name="shn_mx_color" value="<?php echo esc_attr( $s['mx_color'] ); ?>" placeholder="#dd183b" maxlength="7" />
+					<span class="shn-hint"><?php esc_html_e( 'Κενό = το χρώμα του κειμένου του θέματος.', 'shipping-notes' ); ?></span>
+				</p>
+				<?php
+				self::checkbox( 'shn_mx_labels', $s['mx_labels'], __( 'Ετικέτες των τιμών του συνεργάτη στη γλώσσα του επισκέπτη (πίνακας παρακάτω)', 'shipping-notes' ) );
+				self::checkbox( 'shn_mx_dates', $s['mx_dates'], __( 'Ημερομηνίες στα ελληνικά («Oct 20–22» → «20–22 Οκτ»)', 'shipping-notes' ) );
+				self::checkbox( 'shn_mx_order', $s['mx_order'], __( 'Λίστα δεμάτων στη σελίδα ευχαριστώ, στο My account και στα emails του πελάτη', 'shipping-notes' ) );
+				self::checkbox( 'shn_mx_hint', $s['mx_hint'], __( 'Ένδειξη κάτω από την τιμή στα προϊόντα του συνεργάτη (με τις κλάσεις αποστολής)', 'shipping-notes' ) );
+				?>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Ετικέτες των τιμών του συνεργάτη', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<table class="widefat striped shn-table shn-texts"><thead><tr><th><?php esc_html_e( 'Κείμενο του συνεργάτη', 'shipping-notes' ); ?></th><th><?php esc_html_e( 'Ελληνικά', 'shipping-notes' ); ?></th><th><?php esc_html_e( 'English', 'shipping-notes' ); ?></th></tr></thead><tbody>
+				<?php foreach ( $map as $i => $row ) : ?>
+					<tr>
+						<td><input type="text" name="shn_mx_map[<?php echo (int) $i; ?>][from]" value="<?php echo esc_attr( $row['from'] ); ?>" maxlength="60" placeholder="Flat Rate" /></td>
+						<td><input type="text" name="shn_mx_map[<?php echo (int) $i; ?>][el]" value="<?php echo esc_attr( $row['el'] ); ?>" maxlength="100" /></td>
+						<td><input type="text" name="shn_mx_map[<?php echo (int) $i; ?>][en]" value="<?php echo esc_attr( $row['en'] ); ?>" maxlength="100" /></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody></table>
+				<p class="description shn-mt-8"><?php esc_html_e( 'Ολόκληρες λέξεις, χωρίς διάκριση πεζών και κεφαλαίων. Κενή στήλη = η ετικέτα μένει όπως τη στέλνει ο συνεργάτης. Αλλάζει μόνο ό,τι βλέπει ο πελάτης: η παραγγελία κρατά την ετικέτα του συνεργάτη, για να τη διαβάζει σωστά όταν παίρνει την παραγγελία. Για να αδειάσει μια γραμμή, σβήσε το πρώτο πεδίο.', 'shipping-notes' ); ?></p>
+				<table class="widefat striped shn-table shn-mt-8"><thead><tr><th><?php esc_html_e( 'Παράδειγμα', 'shipping-notes' ); ?></th><th><?php esc_html_e( 'Ελληνικά', 'shipping-notes' ); ?></th><th><?php esc_html_e( 'English', 'shipping-notes' ); ?></th></tr></thead><tbody>
+				<?php foreach ( array( 'Flat Rate (Estimated delivery: Oct 20–22)', 'Express (Estimated delivery: Oct 30–Nov 2)' ) as $sample ) : ?>
+					<tr><td><?php echo esc_html( $sample ); ?></td><td><?php echo esc_html( SHN_Parcels::translate( $sample, 'el' ) ); ?></td><td><?php echo esc_html( SHN_Parcels::translate( $sample, 'en' ) ); ?></td></tr>
+				<?php endforeach; ?>
+				</tbody></table>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Κείμενα', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<?php
+				self::lang_field( $s['lang'] );
+				self::texts_table(
+					$s,
+					array(
+						'mx_t_partner' => __( 'Δέμα του συνεργάτη', 'shipping-notes' ),
+						'mx_t_own'     => __( 'Δέμα του καταστήματος', 'shipping-notes' ),
+						'mx_t_notice'  => __( 'Μήνυμα «δύο δέματα»', 'shipping-notes' ),
+						'mx_t_order'   => __( 'Τίτλος στην παραγγελία', 'shipping-notes' ),
+						'mx_t_hint'    => __( 'Ένδειξη στη σελίδα προϊόντος', 'shipping-notes' ),
+						'mx_t_eta'     => __( '«Estimated delivery» στις ετικέτες', 'shipping-notes' ),
+					)
+				);
+				?>
+				<p class="description"><?php esc_html_e( 'Placeholders: {n} αριθμός δέματος, {count} πλήθος δεμάτων.', 'shipping-notes' ); ?></p>
+			</div>
+
+			<p class="shn-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'shipping-notes' ); ?></button></p>
+		</form>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Tab: tools
 	 * ------------------------------------------------------------------- */
 
@@ -630,7 +749,7 @@ final class SHN_Admin_UI {
 					<tr><td><code>[nox_free_shipping]</code></td><td><?php esc_html_e( 'Το μήνυμα δωρεάν αποστολής για το καλάθι του επισκέπτη, οπουδήποτε. Ανανεώνεται μαζί με το καλάθι.', 'shipping-notes' ); ?></td></tr>
 					<tr><td><code>[nox_delivery]</code> · <code>[nox_delivery id="123"]</code></td><td><?php esc_html_e( 'Ο χρόνος παράδοσης του τρέχοντος ή ενός συγκεκριμένου προϊόντος.', 'shipping-notes' ); ?></td></tr>
 					<tr><td><?php esc_html_e( 'Μπλοκ', 'shipping-notes' ); ?></td><td><?php esc_html_e( '«Δωρεάν αποστολή (Shipping Notes)» και «Χρόνος παράδοσης (Shipping Notes)», στην ομάδα WooCommerce του editor.', 'shipping-notes' ); ?></td></tr>
-					<tr><td><?php esc_html_e( 'Φίλτρα', 'shipping-notes' ); ?></td><td><code>shn_text</code> · <code>shn_threshold</code> · <code>shn_available_from</code></td></tr>
+					<tr><td><?php esc_html_e( 'Φίλτρα', 'shipping-notes' ); ?></td><td><code>shn_text</code> · <code>shn_threshold</code> · <code>shn_available_from</code> · <code>shn_partner_package</code> · <code>shn_partner_rate</code> · <code>shn_partner_product</code></td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -676,6 +795,9 @@ final class SHN_Admin_UI {
 				break;
 			case 'greek_holidays':
 				self::redirect( 'delivery', self::do_greek_holidays() );
+				break;
+			case 'save_parcels':
+				self::redirect( 'parcels', self::do_save_parcels() );
 				break;
 			default:
 				self::redirect( 'free', array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'shipping-notes' ) ) ) );
@@ -814,6 +936,33 @@ final class SHN_Admin_UI {
 		}
 		if ( 'off' !== $s['dl_mode'] && ! SHN_Delivery::methods() ) {
 			$msgs[] = self::msg( 'warning', __( 'Η ζώνη της σελίδας προϊόντος δεν έχει μέθοδο με ημέρες μεταφοράς: ο χρόνος παράδοσης δεν εμφανίζεται.', 'shipping-notes' ) );
+		}
+		return $msgs;
+	}
+
+	private static function do_save_parcels(): array {
+		$raw            = SHN_Settings::get();
+		$raw['lang']    = sanitize_key( self::post( 'shn_lang' ) );
+		$raw['mx_mode'] = sanitize_key( self::post( 'shn_mx_mode' ) );
+		foreach ( array( 'mx_printful', 'mx_names', 'mx_notice', 'mx_labels', 'mx_dates', 'mx_order', 'mx_hint' ) as $k ) {
+			$raw[ $k ] = '1' === self::post( 'shn_' . $k );
+		}
+		$raw['mx_classes'] = self::post_array( 'shn_mx_classes' );
+		$raw['mx_color']   = self::post( 'shn_mx_color' );
+		$raw['mx_map']     = array_values( self::post_array( 'shn_mx_map' ) );
+		$raw               = self::posted_texts( $raw, array( 'mx_t_partner', 'mx_t_own', 'mx_t_notice', 'mx_t_order', 'mx_t_hint', 'mx_t_eta' ) );
+
+		SHN_Settings::save( $raw );
+		$s    = SHN_Settings::get();
+		$msgs = array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'shipping-notes' ) ) );
+		if ( '' !== trim( self::post( 'shn_mx_color' ) ) && '' === $s['mx_color'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Το χρώμα θέλει μορφή #rrggbb: αγνοήθηκε.', 'shipping-notes' ) );
+		}
+		if ( 'off' !== $s['mx_mode'] && ! $s['mx_printful'] && ! $s['mx_classes'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Δεν διάλεξες ούτε τα δέματα της Printful ούτε κλάση αποστολής: κανένα δέμα δεν θεωρείται του συνεργάτη.', 'shipping-notes' ) );
+		}
+		if ( 'off' !== $s['mx_mode'] && $s['mx_hint'] && ! $s['mx_classes'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Η ένδειξη στη σελίδα προϊόντος θέλει κλάση αποστολής: δεν εμφανίζεται.', 'shipping-notes' ) );
 		}
 		return $msgs;
 	}

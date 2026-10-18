@@ -116,8 +116,10 @@ final class PKP_Lang {
 		// 1.1.0: no-pickup rule, admin email line, shortcode.
 		'Γραμμή «Παραλαβή από: …» στην κορυφή του email «Νέα παραγγελία» του διαχειριστή' => 'A "Pickup at: …" line at the top of the admin New order email',
 		'Χωρίς παραλαβή'                                            => 'No pickup',
-		'Χωρίς παραλαβή όταν το καλάθι έχει προϊόν από αυτές τις κλάσεις αποστολής' => 'No pickup when the cart holds a product of these shipping classes',
-		'Για προϊόντα που δεν περνούν από το κατάστημα, π.χ. όσα τυπώνονται κατά παραγγελία και τα στέλνει ο συνεργάτης παραγωγής. Ο πελάτης βλέπει το μήνυμα «Χωρίς παραλαβή» (καρτέλα Κείμενα) στο καλάθι και στο ταμείο. Οι παραλλαγές χωρίς δική τους κλάση ακολουθούν το γονικό προϊόν.' => 'For products that never pass through the store, e.g. print-on-demand items shipped by the production partner. The customer sees the "No pickup" message (Texts tab) in the cart and at checkout. Variations without a class of their own follow the parent product.',
+		'Χωρίς παραλαβή για προϊόντα που στέλνει συνεργάτης' => 'No pickup for products a partner ships',
+		'Για προϊόντα που δεν περνούν από το κατάστημα, π.χ. όσα τυπώνονται κατά παραγγελία και τα στέλνει ο συνεργάτης παραγωγής. Ο κανόνας ισχύει ανά δέμα: σε μικτό καλάθι η παραλαβή μένει στο δέμα με τα δικά σου προϊόντα. Όταν κανένα δέμα δεν έχει παραλαβή, ο πελάτης βλέπει το μήνυμα «Χωρίς παραλαβή» (καρτέλα Κείμενα) στο καλάθι και στο ταμείο.' => 'For products that never pass through the store, e.g. print-on-demand items shipped by the production partner. The rule works per parcel: in a mixed cart, pickup stays in the parcel with your own products. When no parcel has pickup, the customer sees the "No pickup" message (Texts tab) in the cart and at checkout.',
+		'Δέματα της Printful (το plugin της Printful χωρίζει τα προϊόντα της σε δικό τους δέμα)' => 'Printful parcels (the Printful plugin puts its products in a parcel of their own)',
+		'Και δέματα με προϊόντα από αυτές τις κλάσεις αποστολής (οι παραλλαγές χωρίς δική τους κλάση ακολουθούν το γονικό προϊόν):' => 'Also parcels with products of these shipping classes (variations without a class of their own follow the parent product):',
 		'Το κατάστημα δεν έχει ακόμα κλάσεις αποστολής. Φτιάξε μία (π.χ. «Printful») και βάλ\' τη στα προϊόντα.' => 'The store has no shipping classes yet. Create one (e.g. "Printful") and set it on the products.',
 		'Η κλάση αποστολής «%s» δεν υπάρχει πια.'                   => 'The shipping class "%s" no longer exists.',
 		'Κλάσεις αποστολής του WooCommerce'                         => 'WooCommerce shipping classes',
@@ -128,7 +130,7 @@ final class PKP_Lang {
 		'Κατάστημα'                                                 => 'Store',
 		'ανενεργό'                                                  => 'inactive',
 		'Φίλτρο: αν ένα πακέτο αποστολής μπορεί να πάρει την παραλαβή (false = κρύβεται η μέθοδος).' => 'Filter: whether a shipping package may get pickup (false = the method is hidden).',
-		'Ο κανόνας «Χωρίς παραλαβή» είναι ενεργός χωρίς κλάση αποστολής, οπότε δεν κάνει τίποτα.' => 'The "No pickup" rule is on without a shipping class, so it does nothing.',
+		'Ο κανόνας «Χωρίς παραλαβή» είναι ενεργός χωρίς δέματα της Printful και χωρίς κλάση αποστολής, οπότε δεν κάνει τίποτα.' => 'The "No pickup" rule is on without Printful parcels and without a shipping class, so it does nothing.',
 	);
 
 	public static function init(): void {

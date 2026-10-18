@@ -1,6 +1,6 @@
 <?php
 /**
- * Shipping Notes — uninstall.php (v1.0.0)
+ * Shipping Notes — uninstall.php (v1.1.0)
  *
  * Deleted:
  *  - Option shn_settings.
@@ -9,8 +9,9 @@
  *  - Product category meta shn_prep_min, shn_prep_max.
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
- * Nothing is stored in orders. The rs_lang user meta belongs to Revenue
- * Splitter and is not touched.
+ * Kept: the parcel name on shipping lines of orders (meta shn_parcel,
+ * 1.1.0): it is part of the order record (Bible §12). The rs_lang user
+ * meta belongs to Revenue Splitter and is not touched.
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
