@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, price labels, gpsr
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -66,7 +66,7 @@ Many classic themes draw product cards, category tiles and texts with their own 
 * **Product tab "Care and safety"** on the product page: care instructions, product safety, the manufacturer and the EU responsible person (GPSR), plus a link to your terms. It works with any theme that uses WooCommerce's product tabs (classic themes, block themes and accordion layouts alike).
 * **Care profiles:** five ready profiles (clothing, hats, mugs, small accessories, home) with Greek texts you can edit, an optional English version, and your own profiles. Texts may use simple HTML and the placeholders `{product_name}`, `{material}` and `{method}`; a sentence whose placeholder has no value is left out.
 * **Which profile:** chosen on the product, else by the product type attribute (e.g. `pa_eidos`), else by SKU prefix, else no tab. External, grouped and virtual products (e.g. e-books, music) and products no profile matches (e.g. books) get no tab unless a profile is set on the product; "None" on a product hides the tab.
-* **Manufacturers and EU responsible person:** a list of manufacturers with address and contact, a default manufacturer per profile, and the person responsible in the EU. Empty sections are not shown.
+* **Manufacturers and EU responsible person:** a list of manufacturers with address and contact, a manufacturer per shipping class (e.g. every product of the class "printful" is made by Printful), a default manufacturer per profile, and the person responsible in the EU. Empty sections are not shown.
 * **Product box:** profile, manufacturer and an extra safety note per product, also in the REST API (`_tp_care_profile`, `_tp_care_manufacturer`, `_tp_care_note`).
 * **Preview** by product ID (which profile, why, and the HTML), and `wp theme-patcher care resolve <id>` or `--all` in WP-CLI.
 * Off until enabled, with its own switch; follows the Theme Patcher switch and test mode. Product data stays on uninstall unless you tick "delete" in Settings.
@@ -129,6 +129,9 @@ The plugin's own options (`tp_settings`, `tp_cat_images`, `tp_care`) and transie
 Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is off. Use the Preview with the product ID to see which profile it gets and why, then clear the page cache (e.g. WP Rocket).
 
 == Changelog ==
+
+= 1.4.1 =
+* New: care tab, manufacturer by shipping class: products of a class get that manufacturer automatically (variations follow the parent). A manufacturer set on the product comes first, the profile's manufacturer last.
 
 = 1.4.0 =
 * New: "Care and safety" product tab (GPSR): care instructions, product safety, manufacturer, EU responsible person and a terms link, from care profiles chosen per product, by product type attribute or by SKU prefix. Off until enabled.

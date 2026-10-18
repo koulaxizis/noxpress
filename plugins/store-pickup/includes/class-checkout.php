@@ -402,7 +402,9 @@ final class PKP_Checkout {
 	public static function pickup_allowed( array $package ): bool {
 		$allowed = true;
 		$rule    = PKP_Settings::get()['no_pickup'];
-		if ( $rule['on'] && $rule['classes'] && isset( $package['contents'] ) && is_array( $package['contents'] ) ) {
+		if ( $rule['on'] && $rule['printful'] && ! empty( $package['printful'] ) ) {
+			$allowed = false; // The package the Printful plugin split off: sent by the partner.
+		} elseif ( $rule['on'] && $rule['classes'] && isset( $package['contents'] ) && is_array( $package['contents'] ) ) {
 			foreach ( $package['contents'] as $item ) {
 				$product = is_array( $item ) && isset( $item['data'] ) ? $item['data'] : null;
 				if ( $product instanceof WC_Product && in_array( (string) $product->get_shipping_class(), $rule['classes'], true ) ) {
@@ -431,25 +433,42 @@ final class PKP_Checkout {
 		return false;
 	}
 
+	/** True when a calculated package offers the pickup rate. */
+	private static function has_pickup_rate( array $package ): bool {
+		foreach ( isset( $package['rates'] ) && is_array( $package['rates'] ) ? $package['rates'] : array() as $rate ) {
+			if ( $rate instanceof WC_Shipping_Rate && PKP_Method::ID === $rate->get_method_id() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * woocommerce_review_order_after_shipping / woocommerce_cart_totals_after_shipping:
 	 * why pickup is missing, once, when the rule removed it from a package
-	 * whose zone offers it. Inside the totals table, so it refreshes with
-	 * the checkout AJAX like the rates.
+	 * whose zone offers it and no other package of the cart offers it. In
+	 * a mixed cart (partner parcel + own parcel) pickup stays in the own
+	 * parcel, so there is nothing to explain. Inside the totals table, so
+	 * it refreshes with the checkout AJAX like the rates.
 	 */
 	public static function render_blocked(): void {
 		if ( self::$broken || ! PKP_Settings::visible() || ! PKP_Settings::get()['no_pickup']['on'] || ! function_exists( 'WC' ) || ! WC()->shipping() ) {
 			return;
 		}
 		try {
-			foreach ( (array) WC()->shipping()->get_packages() as $package ) {
-				if ( is_array( $package ) && ! self::pickup_allowed( $package ) && self::zone_offers_pickup( $package ) ) {
-					$text = PKP_Settings::text( 't_blocked' );
-					if ( '' !== $text ) {
-						echo '<tr class="pkp-blocked"><td colspan="2"><p class="pkp-blocked__text">' . esc_html( $text ) . '</p></td></tr>';
-					}
+			$packages = array_filter( (array) WC()->shipping()->get_packages(), 'is_array' );
+			$blocked  = false;
+			foreach ( $packages as $package ) {
+				if ( self::has_pickup_rate( $package ) ) {
 					return;
 				}
+				if ( ! $blocked && ! self::pickup_allowed( $package ) && self::zone_offers_pickup( $package ) ) {
+					$blocked = true;
+				}
+			}
+			$text = $blocked ? PKP_Settings::text( 't_blocked' ) : '';
+			if ( '' !== $text ) {
+				echo '<tr class="pkp-blocked"><td colspan="2"><p class="pkp-blocked__text">' . esc_html( $text ) . '</p></td></tr>';
 			}
 		} catch ( \Throwable $e ) {
 			self::fail( $e );
