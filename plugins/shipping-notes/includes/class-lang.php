@@ -32,6 +32,7 @@ final class SHN_Lang {
 		'Προετοιμασία έως (εργάσιμες)'                              => 'Preparation to (business days)',
 		'Διαθέσιμο από'                                             => 'Available from',
 		'Shipping Notes: για προπαραγγελίες. Ο χρόνος παράδοσης μετράει από αυτή την ημερομηνία. Μετά από αυτήν το πεδίο δεν ισχύει πια.' => 'Shipping Notes: for pre-orders. The delivery time counts from this date. After it, the field no longer applies.',
+		'Από την ημερομηνία κυκλοφορίας του Pre-Orders (καρτέλα «Γενικά»).' => 'From the Pre-Orders release date (General tab).',
 		'Χρόνος προετοιμασίας (Shipping Notes)'                     => 'Preparation time (Shipping Notes)',
 		'Από'                                                       => 'From',
 		'Έως'                                                       => 'To',

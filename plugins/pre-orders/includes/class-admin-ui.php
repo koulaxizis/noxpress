@@ -330,10 +330,11 @@ final class POR_Admin_UI {
 			return;
 		endif;
 		?>
+		<?php $pf = function_exists( 'pfm_get_work' ); // The format column only with Product Formats. ?>
 		<table class="widefat por-table">
 			<thead><tr>
 				<th><?php esc_html_e( 'Προϊόν', 'pre-orders' ); ?></th>
-				<th><?php esc_html_e( 'Μορφή', 'pre-orders' ); ?></th>
+				<?php if ( $pf ) : ?><th><?php esc_html_e( 'Μορφή', 'pre-orders' ); ?></th><?php endif; ?>
 				<th><?php esc_html_e( 'Κυκλοφορία', 'pre-orders' ); ?></th>
 				<th class="por-num-col"><?php esc_html_e( 'Παραγγελίες', 'pre-orders' ); ?></th>
 				<th class="por-num-col"><?php esc_html_e( 'Τεμάχια', 'pre-orders' ); ?></th>
@@ -361,7 +362,7 @@ final class POR_Admin_UI {
 				?>
 				<tr>
 					<td><a href="<?php echo esc_url( $it['edit'] ); ?>"><?php echo esc_html( $it['name'] ); ?></a></td>
-					<td><?php echo esc_html( self::format_of( $it['parent'] ) ); ?></td>
+					<?php if ( $pf ) : ?><td><?php echo esc_html( self::format_of( $it['parent'] ) ); ?></td><?php endif; ?>
 					<td><?php echo esc_html( $date ); ?></td>
 					<td class="por-num-col"><a href="<?php echo esc_url( self::orders_url( $it['id'] ) ); ?>"><?php echo (int) count( $orders ); ?></a></td>
 					<td class="por-num-col"><?php echo (int) $qty; ?></td>
