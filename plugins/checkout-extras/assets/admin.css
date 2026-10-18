@@ -1,0 +1,444 @@
+/**
+ * Checkout Extras — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors cke-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.cke-wrap {
+	--cke-bg: #101218;
+	--cke-panel: #14161d;
+	--cke-panel-2: #1d2029;
+	--cke-input: #1a1d26;
+	--cke-border: #2e3240;
+	--cke-border-input: #3a3f52;
+	--cke-row-border: #23262f;
+	--cke-stripe: #181b23;
+	--cke-hover: #1e212c;
+	--cke-text: #eae8fa;
+	--cke-heading: #f6f4ff;
+	--cke-muted: #b7b2d6;
+	--cke-link: #beb1ff;
+	--cke-link-hover: #d4c9ff;
+	--cke-accent: #6d4aff;
+	--cke-accent-hover: #8263ff;
+	--cke-warn: #f5c97e;
+	--cke-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.cke-wrap {
+	color-scheme: dark;
+	background: var(--cke-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--cke-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.cke-wrap h1,
+.cke-wrap h2 {
+	color: var(--cke-heading);
+}
+
+.cke-wrap a { color: var(--cke-link); }
+.cke-wrap a:hover { color: var(--cke-link-hover); }
+
+.cke-wrap .cke-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--cke-muted);
+	border-bottom: 1px solid var(--cke-border);
+	padding-bottom: 6px;
+}
+
+.cke-wrap .description,
+.cke-wrap p.description,
+.cke-wrap .cke-hint {
+	color: var(--cke-muted) !important;
+}
+
+.cke-zone {
+	background: var(--cke-panel);
+	border: 1px solid var(--cke-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.cke-wrap input[type="text"],
+.cke-wrap input[type="url"],
+.cke-wrap input[type="number"],
+.cke-wrap input[type="time"],
+.cke-wrap input[type="date"],
+.cke-wrap textarea,
+.cke-wrap select {
+	background-color: var(--cke-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--cke-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.cke-wrap input::placeholder,
+.cke-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.cke-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.cke-wrap input[type="file"] {
+	color: var(--cke-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.cke-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.cke-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.cke-wrap input[type="checkbox"],
+.cke-wrap input[type="radio"] {
+	accent-color: var(--cke-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.cke-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.cke-wrap .button:hover:not(:disabled) {
+	border-color: var(--cke-accent) !important;
+	color: #ffffff !important;
+}
+
+.cke-wrap .button-primary {
+	background: var(--cke-accent) !important;
+	border-color: var(--cke-accent) !important;
+	color: #ffffff !important;
+}
+
+.cke-wrap .button-primary:hover:not(:disabled) {
+	background: var(--cke-accent-hover) !important;
+}
+
+.cke-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.cke-submit { margin-top: 20px; }
+.cke-inline-form { display: inline; margin-right: 10px; }
+.cke-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.cke-table,
+table.widefat.cke-table {
+	background: var(--cke-panel) !important;
+	border: 1px solid var(--cke-border) !important;
+	border-radius: 6px;
+	color: var(--cke-text) !important;
+	margin-top: 14px !important;
+}
+
+.cke-table thead th,
+.cke-table thead td {
+	background: var(--cke-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.cke-table tbody td,
+.cke-table tbody th {
+	background: var(--cke-panel) !important;
+	color: var(--cke-text) !important;
+	border-bottom: 1px solid var(--cke-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.cke-table tbody tr:nth-child(2n) td,
+.cke-table tbody tr:nth-child(2n) th {
+	background: var(--cke-stripe) !important;
+}
+
+.cke-table tbody tr:hover td,
+.cke-table tbody tr:hover th {
+	background: var(--cke-hover) !important;
+}
+
+.cke-table td,
+.cke-table th {
+	padding: 12px 14px;
+}
+
+.cke-table td code {
+	background: transparent !important;
+	color: var(--cke-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.cke-table .cke-empty {
+	color: var(--cke-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.cke-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.cke-footer a { color: #beb1ff; text-decoration: none; }
+.cke-footer a:hover { text-decoration: underline; }
+
+.cke-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.cke-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.cke-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.cke-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.cke-muted { color: var(--cke-muted) !important; }
+.cke-warn { color: var(--cke-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.cke-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.cke-wrap .cke-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--cke-heading);
+}
+
+.cke-status p { margin: 0 0 8px; }
+.cke-status p:last-child { margin-bottom: 0; }
+.cke-status code,
+.cke-wrap .description code,
+.cke-wrap .cke-hint code {
+	background: var(--cke-panel-2);
+	color: var(--cke-muted);
+	border: 1px solid var(--cke-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.cke-suspended { margin: 8px 0 0; }
+.cke-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.cke-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--cke-border);
+	background: var(--cke-panel-2);
+	color: var(--cke-text);
+	white-space: nowrap;
+}
+.cke-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.cke-badge--muted { color: var(--cke-muted); }
+.cke-badge--warn { border-color: #6b5a33; color: var(--cke-warn); }
+.cke-badge--danger { border-color: #6b3a3a; color: var(--cke-danger); }
+
+/* Area fieldsets. */
+.cke-area {
+	background: var(--cke-panel);
+	border: 1px solid var(--cke-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.cke-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--cke-heading);
+}
+.cke-row { margin: 4px 0 8px; }
+
+.cke-details > summary {
+	cursor: pointer;
+	color: var(--cke-link);
+	margin: 4px 0;
+}
+.cke-details[open] > summary { margin-bottom: 12px; }
+
+.cke-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.cke-wrap .cke-label {
+	display: block;
+	font-weight: 600;
+	color: var(--cke-heading);
+	margin: 8px 0 6px;
+}
+.cke-grid .cke-label:first-child { margin-top: 0; }
+
+.cke-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.cke-field > span:first-child {
+	min-width: 150px;
+	color: var(--cke-text);
+}
+.cke-wrap .cke-hint { display: block; font-size: 12px; margin-top: 4px; }
+.cke-wrap td .cke-hint { display: inline; }
+.cke-table td.cke-warn { color: var(--cke-warn) !important; }
+
+/* Tabs of the main page. */
+.cke-wrap .cke-tabs {
+	border-bottom: 1px solid var(--cke-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.cke-wrap .cke-tabs .nav-tab {
+	background: var(--cke-panel);
+	border-color: var(--cke-border);
+	color: var(--cke-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.cke-wrap .cke-tabs .nav-tab:hover { color: var(--cke-link-hover); background: var(--cke-hover); }
+.cke-wrap .cke-tabs .nav-tab-active,
+.cke-wrap .cke-tabs .nav-tab-active:hover {
+	background: var(--cke-bg);
+	border-bottom-color: var(--cke-bg);
+	color: var(--cke-heading);
+}
+
+/* One input per line (removal rules). */
+.cke-wrap .cke-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.cke-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--cke-border);
+	border-radius: 6px;
+	background: var(--cke-panel-2);
+}
+.cke-scroll .cke-field { margin-bottom: 4px; }
+
+/* ===== Fields ===== */
+
+.cke-wrap .cke-wide { width: 100%; max-width: 640px; }
+.cke-wrap .cke-num { width: 90px; }
+.cke-wrap .cke-texts input[type="text"],
+.cke-wrap .cke-texts textarea { width: 100%; }
+.cke-wrap .cke-texts textarea { min-height: 64px; }
+
+.cke-wrap .cke-texts td:first-child { width: 280px; }
+
+/* ===== KPI cards (Bible §5 — recipe of Store Pulse) ===== */
+.cke-wrap .cke-grid-kpi {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin: 16px 0 24px;
+}
+.cke-wrap .cke-card {
+	background: #17191f !important;
+	border: 1px solid #2e3240;
+	border-left: 3px solid #6d4aff;
+	border-radius: 6px;
+	padding: 16px 20px;
+	box-sizing: border-box;
+}
+.cke-wrap .cke-card-label {
+	color: #b7b2d6 !important;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 6px;
+}
+.cke-wrap .cke-card-value {
+	color: #f6f4ff !important;
+	font-size: 22px;
+	font-weight: 400;
+	line-height: 1.25;
+	font-variant-numeric: tabular-nums;
+}
+.cke-wrap .cke-card-sub {
+	color: #b7b2d6;
+	font-size: 12px;
+	margin-top: 8px;
+}
+.cke-wrap .cke-period { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 8px; }
+.cke-wrap .cke-ids { width: 100%; max-width: 520px; }
+.cke-wrap .cke-statuses { display: flex; flex-wrap: wrap; gap: 4px 18px; }
