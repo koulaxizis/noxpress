@@ -104,6 +104,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.1.0/product-formats.zip"
       }
     },
+    "publishing-quote": {
+      "beta": {
+        "changelog": "* Initial release.\n* Server-side quote for editing, cover design, illustration, printing and extras (fixed, per item, per copy, per word, on request), with sizes, papers, bindings and finishes as templates, tiers, minimums, VAT per service and rounding per line.\n* Hidden typesetting fee spread inside the services and shown as «Included»; prices with or without VAT; per-copy price and validity date.\n* Block, shortcode and widget; works without JavaScript and with page caches.\n* «I'm interested» requests with email to the owner, acknowledgement to the visitor, states, notes, CSV export, retention, privacy exporter and eraser, and an API for other plugins.\n* Test / live / off mode, PBQ_DISABLE, test bench with the full breakdown, editable Greek and English texts, settings export / import.\n* Works without WooCommerce. Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.10).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "49f41632f27fe951546bdf0ff98d7fea19b450328c802ee49bf6da8b07c40c8e",
+        "signature": "8jaLJlphq3wgWlmbyUpc/mkhanQTYVou1Yo+hCRc0CxXyD8i8YbPTC16EoD/dhJ6OW4vIaOUjRrEoizuLMehBg==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.0.0/publishing-quote.zip"
+      }
+    },
     "revenue-splitter": {
       "beta": {
         "changelog": "* Fixed: the tables in the beneficiary portal are readable on light themes such as Storefront. The theme's table colours turned the cells white with light text.\n* Fixed: the live split total under the product's beneficiaries is readable on the white product box.\n* Fixed: the internal regular-price stamp (_rs_reg_unit) no longer shows under each item on the order screen.",
@@ -130,15 +143,15 @@
     },
     "shipping-notes": {
       "beta": {
-        "changelog": "* Initial release.\n* Free shipping progress bar in the classic cart, mini-cart and checkout and in the Cart and Checkout blocks; threshold from the WooCommerce shipping zones or fixed.\n* Delivery time on the product page per shipping method, with preparation days per store, category and product, backorders, pre-orders, cut-off time, Saturday delivery and holidays (Greek holidays button).\n* Optional dates and cut-off countdown computed in the browser for page-cache safety.\n* Shortcodes `[nox_free_shipping]`, `[nox_delivery]` and two blocks.\n* Editable Greek / English texts, preview tab, settings export / import.\n* Test mode, SHN_DISABLE, HPOS and Cart / Checkout blocks compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.1).",
-        "published": "2026-10-11",
+        "changelog": "* New: Parcels tab for carts split into several shipping packages (e.g. by the Printful plugin): parcel names, a \"two parcels\" message with a coloured left border, the partner's rate labels and dates in Greek (display only), the parcel list in the order (thank-you page, My account, customer emails) and an optional product-page line. Off by default.\n* New: filters `shn_partner_package`, `shn_partner_rate`, `shn_partner_product`.",
+        "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "06b4bdd58719afecdfa0aa3e276ef39d2d35e6a80409e309e5ce833e783155b9",
-        "signature": "hYF9QH+DfN6065Ya6vmOOBDQrIadowOmSEn9UsGsLz7zpsR61gloqPxYlJuLbO9NsDJMkvkyI4YzSVmo0caxDQ==",
+        "sha256": "720f23e71c70e4ce81635dfca21eb3e08df6407cac1fbb8e22faebdcddf0aa85",
+        "signature": "16QPuobwpcjotjGCp+TCJLN5SQtF/DNNM4zAJDiTzsaBetZENVjBkw4gGwh91b12bSN2VuqUoafjZZZDrHlrAA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.0.0/shipping-notes.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.1.0/shipping-notes.zip"
       }
     },
     "shop-filters": {
@@ -169,15 +182,15 @@
     },
     "store-pickup": {
       "beta": {
-        "changelog": "* New: \"No pickup\" rule: products of the chosen shipping classes (e.g. print on demand) remove the pickup method from the cart, with a message in the cart and checkout totals. Off by default. Filter `pkp_pickup_allowed`.\n* New: `[pkp_stores]` shortcode with the active stores (address, hours, details, map), optionally `ids=\"…\"`.\n* New: \"Pickup at: <store>\" line at the top of the admin New order email (HTML and plain text), on by default.\n* New: texts for the \"No pickup\" message and the admin line (Greek / English); the backup includes the new settings.",
-        "published": "2026-10-15",
+        "changelog": "* New: the \"No pickup\" rule also reads the parcel the Printful plugin makes (\"Printful parcels\", on by default), so print-on-demand items need no shipping class.\n* Change: the rule works per parcel. In a mixed cart the parcel with your own products keeps pickup, and the \"No pickup\" message shows only when no parcel can be picked up. New default message text.",
+        "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f31d31571e77a1df26447cb2219aa05ee68107a750246348689e1d0acf187977",
-        "signature": "qZ06MmvV5+y0NWoaasq1tQTc4nFV/j7ofJ4h1CueXintjWXjQmVitlWssG5ulYf50iOZfotMXQPJ7APB2GaEBQ==",
+        "sha256": "8bb55b3bd643662f678d834ee18e5d2194c0d30de59bc0ce77a66fd3b60d1871",
+        "signature": "/w/dys/nfArL3lBSBLOl+bkC/7KSNDKUBO2WH+OLP1v5TwQdyJW9QDxKCWfx/zyqmOb0jF3xy/sr0lcetDUuDw==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.1.0/store-pickup.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.1.1/store-pickup.zip"
       }
     },
     "store-pulse": {
@@ -195,15 +208,15 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: sale badge text for the whole site (Prices tab): a template such as \"Sale {percent}\" with `{percent}` and `{amount}`, an \"up to\" text for variable and grouped products with different discounts, a fallback text, an optional product page text, a minimum percentage and rounding (down by default). Greek and English. Off until enabled.\n* New: it covers WooCommerce's sale badge in classic themes (`woocommerce_sale_flash`), the Product Sale Badge block (`woocommerce_sale_badge_text`, WooCommerce 10.0+) and the badge of Theme Patcher's own card slot. The theme's badge element and classes are kept.\n* New: one-click import of the sale texts of Customizer for WooCommerce, with a reminder while that plugin is still active.\n* New: filter `tp_sale_badge_text`. The sale badge settings are included in the settings backup.",
+        "changelog": "* New: care tab, manufacturer by shipping class: products of a class get that manufacturer automatically (variations follow the parent). A manufacturer set on the product comes first, the profile's manufacturer last.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "043758d84eeb80b7a270636f453ad0615518a9ed7d4c8c8803e2b9bffd0dee32",
-        "signature": "r1ZOXFKU4do810cMmxZhtkPoJTr6zGwKyHl9NT/99a5eCb9Kp70Wmq/O/C3rHjlrf5tySmN1rrwi7Q9ybJiUDQ==",
+        "sha256": "cd437b5c871ec3a78426c4a89db3116fc47aaf8092235f66c84d2e052d6f142a",
+        "signature": "m8nmupAoLJYnOiS5aigzn+t9Sf14zqCzuFoqvMVValanbwHNSZOd7utjuENrnUkOQKx2HMxnbHuiOXZ4NZYUBw==",
         "tested_wp": "6.8",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.0/theme-patcher.zip"
+        "version": "1.5.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.1/theme-patcher.zip"
       }
     },
     "variation-picker": {

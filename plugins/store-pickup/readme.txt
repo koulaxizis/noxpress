@@ -5,7 +5,7 @@ Tags: woocommerce, local pickup, store pickup, click and collect, shipping metho
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -34,8 +34,8 @@ Store pickup as a WooCommerce shipping method, free or with your own cost, with 
 
 **No pickup for some products**
 
-* Products that never pass through your store (e.g. print-on-demand items shipped by the production partner) can turn pickup off: give them a WooCommerce shipping class (e.g. "Printful") and tick it in the rule. Variations follow the parent's class unless they have their own.
-* When the cart holds such a product, the pickup method is not offered and the cart and checkout totals say why, with your own text in Greek and English.
+* Products that never pass through your store (e.g. print-on-demand items shipped by the production partner) can turn pickup off. With the Printful plugin nothing else is needed: it puts its products in a parcel of their own, and that parcel gets no pickup. Otherwise give the products a WooCommerce shipping class (e.g. "Printful") and tick it in the rule. Variations follow the parent's class unless they have their own.
+* The rule works per parcel: in a mixed cart, the parcel with your own products keeps pickup. When no parcel can be picked up, the cart and checkout totals say why, with your own text in Greek and English.
 * Off by default.
 
 **Store list on any page**
@@ -79,7 +79,7 @@ Store pickup as a WooCommerce shipping method, free or with your own cost, with 
 
 = How do I keep pickup off for print-on-demand products? =
 
-Create a shipping class in WooCommerce → Settings → Shipping → Classes (e.g. "Printful"), set it on those products, then in Noxpress → Pickup tick "No pickup" and that class. A cart with any such product no longer offers pickup and shows the "No pickup" message (Texts tab).
+With the Printful plugin, tick "No pickup" and "Printful parcels" in Noxpress → Pickup: the parcel Printful makes gets no pickup, and the parcel with your own products keeps it. Without it, create a shipping class in WooCommerce → Settings → Shipping → Classes (e.g. "Printful"), set it on those products and tick that class too. When no parcel can be picked up, the cart shows the "No pickup" message (Texts tab).
 
 = I used WooCommerce's "Local pickup" with one method per store. How do I move? =
 
@@ -98,6 +98,10 @@ The plugin does not change payments. To allow cash on delivery only for pickup, 
 The settings, the transients and the method's entries in your shipping zones are removed. The pickup store saved on past orders stays: it is part of the order record. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.1 =
+* New: the "No pickup" rule also reads the parcel the Printful plugin makes ("Printful parcels", on by default), so print-on-demand items need no shipping class.
+* Change: the rule works per parcel. In a mixed cart the parcel with your own products keeps pickup, and the "No pickup" message shows only when no parcel can be picked up. New default message text.
 
 = 1.1.0 =
 * New: "No pickup" rule: products of the chosen shipping classes (e.g. print on demand) remove the pickup method from the cart, with a message in the cart and checkout totals. Off by default. Filter `pkp_pickup_allowed`.

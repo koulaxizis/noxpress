@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 64,
+  "total": 65,
   "offset": 5,
   "updated": "2026-10-18",
   "assets": {
@@ -194,6 +194,10 @@
     },
     "653165530": {
       "file": "nox-tp-1.5.0/theme-patcher.zip",
+      "count": 1
+    },
+    "653211292": {
+      "file": "nox-pq-1.0.0/publishing-quote.zip",
       "count": 0
     }
   }

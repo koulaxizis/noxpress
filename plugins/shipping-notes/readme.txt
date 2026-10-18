@@ -1,11 +1,11 @@
 === Shipping Notes ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, free shipping, progress bar, delivery time, estimated delivery
+Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -28,6 +28,14 @@ Two messages for your customers: how much is left for free shipping (with a prog
 * Pre-orders: an "available from" date on the product. Delivery counts from that date.
 * Business-day calendar: dispatch days, a cut-off time for same-day dispatch, Saturday delivery per method, and a holiday list. One button adds the Greek public holidays, including the movable ones of Orthodox Easter, computed locally.
 * Optional dates instead of days ("Delivery Tue 13/10 – Thu 15/10") and an "Order within 3 h 20 min to ship today" line. Dates and the countdown are computed in the visitor's browser in the store's timezone, so pages served from a page cache stay correct.
+
+**Parcels (mixed carts)**
+
+* When a plugin such as Printful splits the cart into a parcel from the production partner and a parcel from your store, WooCommerce shows two "Shipping" rows with two charges and no explanation. Shipping Notes names them ("Parcel 1 · Made to order (from our production partner)", "Parcel 2 · From our store") and shows a short "two parcels" message above the shipping rows of the classic cart and checkout.
+* The partner's rate labels in Greek: "Flat Rate (Estimated delivery: Oct 20–22)" becomes "Τυπική αποστολή (Εκτιμώμενη παράδοση: 20–22 Οκτ)", also across months ("30 Οκτ – 2 Νοε"). The word list is editable. Only what the customer sees changes: the order keeps the partner's own label, so the partner's order import is not affected.
+* The order lists its parcels, each with its method and cost, on the thank-you page, in My account and in the customer emails (HTML and plain text). Each shipping line keeps its parcel name, visible in the admin order screen.
+* Optional line under the price of partner products ("Printed to order · ships separately from the other products").
+* Partner parcels are recognised from the Printful plugin's own parcel, or from the WooCommerce shipping classes you choose. Off by default, with its own test mode.
 
 **Placement**
 
@@ -53,6 +61,7 @@ Two messages for your customers: how much is left for free shipping (with a prog
 * `shn_threshold` ( float $threshold, WC_Shipping_Zone $zone ): change the free shipping threshold.
 * `shn_available_from` ( string $date, WC_Product $product ): a release date (`YYYY-MM-DD`) for pre-order plugins.
 * `shn_text` ( string $text, string $key, string $lang ): change any customer text.
+* `shn_partner_package` ( bool $partner, array $package ), `shn_partner_rate` ( bool $partner, string $method_id ) and `shn_partner_product` ( bool $partner, WC_Product $product ): which parcels, rates and products belong to the partner.
 * The cart data is also available to Store API clients under the `shipping-notes` extension key (read-only).
 
 == Installation ==
@@ -84,9 +93,17 @@ No. The message rides along WooCommerce's own fragment and Store API responses.
 
 = What happens on uninstall? =
 
-The settings, the transients and the preparation days and release dates on products and categories are removed. The shared Noxpress options stay while another Noxpress plugin is installed.
+The settings, the transients and the preparation days and release dates on products and categories are removed. The parcel name saved on the shipping lines of past orders stays: it is part of the order record. The shared Noxpress options stay while another Noxpress plugin is installed.
+
+= Does it work with the Checkout block? =
+
+The free shipping bar does. The parcel names, the "two parcels" message and the Greek partner labels are for the classic cart and checkout (`[woocommerce_cart]`, `[woocommerce_checkout]`); the order list on the thank-you page and in the emails works with both.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Parcels tab for carts split into several shipping packages (e.g. by the Printful plugin): parcel names, a "two parcels" message with a coloured left border, the partner's rate labels and dates in Greek (display only), the parcel list in the order (thank-you page, My account, customer emails) and an optional product-page line. Off by default.
+* New: filters `shn_partner_package`, `shn_partner_rate`, `shn_partner_product`.
 
 = 1.0.0 =
 * Initial release.
