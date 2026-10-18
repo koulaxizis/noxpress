@@ -115,4 +115,4 @@ The settings, the products' pre-order data and the scheduled jobs are removed, a
 * Public function `por_get_release()`, filters `por_is_preorder` and `por_text`.
 * Editable Greek / English texts, date format, settings export / import.
 * Test mode, rival plugin rule, POR_DISABLE, HPOS compatible.
-* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.10).
+* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.11).

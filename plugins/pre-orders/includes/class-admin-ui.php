@@ -3,7 +3,7 @@
  * POR_Admin_UI — menu, plugin page, PRG routes, CSV, backup (Bible §3–§8, §11).
  *
  * One page, submenu «Προπαραγγελίες» of the shared "Noxpress" menu
- * (admin_menu priority 180), slug por-settings, with tabs:
+ * (admin_menu priority 190), slug por-settings, with tabs:
  *  - upcoming  the products on pre-order: format (Product Formats, when
  *              active), release date, open orders, units, revenue, a link
  *              to the orders list filtered for the product, and the CSV
@@ -37,7 +37,7 @@ final class POR_Admin_UI {
 	const MAX_ROWS    = 200;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 180 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 190 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_csv' ) );

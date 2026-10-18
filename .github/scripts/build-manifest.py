@@ -50,6 +50,7 @@ SLUGS = {
     'gl': 'greeklish-permalinks',
     'oc': 'oros-connect',
     'pb': 'product-bundles',
+    'pq': 'publishing-quote',
     'po': 'pre-orders',
     'nm': 'data-migrator',
 }

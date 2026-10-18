@@ -1,0 +1,67 @@
+/**
+ * Publishing Quote — front.css (v1.0.0). The calculator; loaded only where
+ * it shows (Bible §14.9). A scoped reset first (Bible §14.13), so theme
+ * rules with ids cannot break the layout; inputs and buttons keep the
+ * theme's look and only get laid out here.
+ */
+.pbq div, .pbq p, .pbq span, .pbq small, .pbq label, .pbq fieldset, .pbq legend,
+.pbq table, .pbq tbody, .pbq tfoot, .pbq tr, .pbq th, .pbq td, .pbq details, .pbq summary {
+	float: none !important;
+	box-shadow: none !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+}
+.pbq fieldset, .pbq table, .pbq tr, .pbq th, .pbq td {
+	background: transparent !important;
+}
+.pbq { position: relative; margin: 0 0 1.5em; }
+.pbq .pbq-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+.pbq .pbq-title, .pbq .pbq-intro { margin: 0 0 .75em; }
+.pbq .pbq-form { margin: 0; }
+.pbq .pbq-sec {
+	margin: 0 0 1em !important;
+	padding: .75em 1em 1em !important;
+	border: 1px solid rgba(127, 127, 127, .35) !important;
+	border-radius: 6px;
+	min-width: 0;
+}
+.pbq .pbq-sec legend { display: block !important; float: none !important; padding: 0 .35em !important; margin: 0 !important; font-weight: 600; border: 0 !important; width: auto !important; }
+.pbq .pbq-field { margin: .6em 0 0 !important; padding: 0 !important; }
+.pbq .pbq-label { display: block !important; width: auto !important; margin: 0 0 .25em !important; font-weight: 600; }
+.pbq .pbq-label.is-error, .pbq .pbq-check.is-error { color: #b32d2e; }
+.pbq [aria-invalid="true"] { outline: 2px solid #b32d2e; outline-offset: 1px; }
+.pbq .pbq-field input[type="number"],
+.pbq .pbq-field input[type="text"],
+.pbq .pbq-field input[type="email"],
+.pbq .pbq-field input[type="tel"],
+.pbq .pbq-field select,
+.pbq .pbq-field textarea { width: 100%; max-width: 28em; box-sizing: border-box; margin: 0; }
+.pbq .pbq-check { display: flex !important; width: auto !important; gap: .5em; align-items: flex-start; margin: .45em 0 0 !important; padding: 0 !important; font-weight: normal; cursor: pointer; }
+.pbq .pbq-check input { width: auto !important; margin: .2em 0 0 !important; flex: 0 0 auto; }
+.pbq .pbq-radios { display: flex !important; flex-wrap: wrap; gap: 0 1.25em; }
+.pbq .pbq-sub { margin: 0 0 0 1.6em !important; }
+.pbq .pbq-extra { margin: .2em 0 !important; }
+.pbq .pbq-desc { display: block; margin: .1em 0 0 1.6em !important; opacity: .8; }
+.pbq .pbq-actions { margin: .5em 0 0 !important; }
+.pbq button, .pbq .button { float: none !important; }
+.pbq [hidden] { display: none !important; }
+.pbq.is-busy .pbq-result { opacity: .55; transition: opacity .15s; }
+.pbq .pbq-result { margin: 1em 0 0 !important; }
+.pbq .pbq-result__title { margin: 0 0 .4em !important; }
+.pbq .pbq-table { width: 100%; max-width: 34em; border-collapse: collapse !important; margin: 0 0 .5em !important; border: 0 !important; }
+.pbq .pbq-table th, .pbq .pbq-table td { padding: .45em .25em !important; border: 0 !important; border-bottom: 1px solid rgba(127, 127, 127, .25) !important; text-align: left; font-weight: normal; vertical-align: top; }
+.pbq .pbq-table td { text-align: right; white-space: nowrap; }
+.pbq .pbq-table tr.is-included td { font-style: italic; }
+.pbq .pbq-table tr.is-sub th, .pbq .pbq-table tr.is-sub td { opacity: .8; font-size: .92em; }
+.pbq .pbq-table tr.is-total th, .pbq .pbq-table tr.is-total td { font-weight: 700; font-size: 1.1em; border-bottom-width: 2px !important; }
+.pbq .pbq-note { margin: .25em 0 0 !important; opacity: .85; }
+.pbq .pbq-msg { margin: .5em 0 !important; padding: .6em .8em !important; border-left: 4px solid rgba(127, 127, 127, .5) !important; }
+.pbq .pbq-msg--err { border-left-color: #b32d2e !important; }
+.pbq .pbq-msg--ok { border-left-color: #2e7d32 !important; }
+.pbq .pbq-interest { margin: 1em 0 0 !important; }
+.pbq .pbq-interest > summary { display: inline-block; color: inherit !important; list-style: none; cursor: pointer; }
+.pbq .pbq-interest > summary::-webkit-details-marker { display: none; }
+.pbq .pbq-contact { margin: .75em 0 0 !important; position: relative; }
+/* Themes that do not style inputs (e.g. block themes): no specificity, so
+   any input rule of the theme wins. */
+:where(.pbq .pbq-field) input, :where(.pbq .pbq-field) select, :where(.pbq .pbq-field) textarea { font: inherit; padding: .45em .6em; }

@@ -104,6 +104,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.1.0/product-formats.zip"
       }
     },
+    "publishing-quote": {
+      "beta": {
+        "changelog": "* Initial release.\n* Server-side quote for editing, cover design, illustration, printing and extras (fixed, per item, per copy, per word, on request), with sizes, papers, bindings and finishes as templates, tiers, minimums, VAT per service and rounding per line.\n* Hidden typesetting fee spread inside the services and shown as «Included»; prices with or without VAT; per-copy price and validity date.\n* Block, shortcode and widget; works without JavaScript and with page caches.\n* «I'm interested» requests with email to the owner, acknowledgement to the visitor, states, notes, CSV export, retention, privacy exporter and eraser, and an API for other plugins.\n* Test / live / off mode, PBQ_DISABLE, test bench with the full breakdown, editable Greek and English texts, settings export / import.\n* Works without WooCommerce. Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.10).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "49f41632f27fe951546bdf0ff98d7fea19b450328c802ee49bf6da8b07c40c8e",
+        "signature": "8jaLJlphq3wgWlmbyUpc/mkhanQTYVou1Yo+hCRc0CxXyD8i8YbPTC16EoD/dhJ6OW4vIaOUjRrEoizuLMehBg==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.0.0/publishing-quote.zip"
+      }
+    },
     "revenue-splitter": {
       "beta": {
         "changelog": "* Fixed: the tables in the beneficiary portal are readable on light themes such as Storefront. The theme's table colours turned the cells white with light text.\n* Fixed: the live split total under the product's beneficiaries is readable on the white product box.\n* Fixed: the internal regular-price stamp (_rs_reg_unit) no longer shows under each item on the order screen.",

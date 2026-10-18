@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "publishing-quote/calculator",
+	"title": "Publishing quote",
+	"category": "widgets",
+	"icon": "calculator",
+	"description": "Publishing cost calculator for authors. Prices and texts: Noxpress → Publishing Quote.",
+	"keywords": [ "quote", "calculator", "publishing", "book", "cost" ],
+	"textdomain": "publishing-quote",
+	"attributes": {
+		"showTitle": { "type": "boolean", "default": true }
+	},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true, "padding": true }
+	},
+	"editorScript": "file:./index.js"
+}
