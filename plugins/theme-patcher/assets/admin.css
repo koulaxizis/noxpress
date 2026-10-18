@@ -192,6 +192,15 @@ table.widefat.tp-table {
 	vertical-align: top;
 }
 
+/* Text fields and selects in table cells shrink with the column, so wide
+   tables (e.g. Prices → per-category labels) stay inside the panel at 1280 px. */
+.tp-table td input.regular-text,
+.tp-table td select {
+	width: 100%;
+	max-width: 25em;
+	box-sizing: border-box;
+}
+
 .tp-table tbody tr:nth-child(2n) td,
 .tp-table tbody tr:nth-child(2n) th {
 	background: var(--tp-stripe) !important;

@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -79,6 +79,9 @@ Until orOS can check the shop key, it cannot tell a checkout sign-up from the pu
 The settings, the send log, queued sends, the last offers import and the transients are removed. The Publishing Quote requests belong to Publishing Quote and stay. The newsletter consent stays in the orders, as the shop's record, and goes with each order. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fixed: the Offers status said "(1 requests)" for a single request; it now says "(1 request)" ("(1 αίτημα)" in Greek).
 
 = 1.1.0 =
 * New module «Offers»: Publishing Quote requests for orOS to import as draft offers (REST orc/v1/offers), with the shop's WooCommerce REST keys or an Application Password; waiting requests and the last import in the admin.

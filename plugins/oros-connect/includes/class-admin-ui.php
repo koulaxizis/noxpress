@@ -417,8 +417,11 @@ final class ORC_Admin_UI {
 				<?php
 				echo esc_html(
 					$seen
-						/* translators: 1: date and time, 2: number of requests */
-						? sprintf( __( 'Τελευταία φορά που τα πήρε το orOS: %1$s (%2$d αιτήματα).', 'oros-connect' ), wp_date( $fmt, $seen['t'] ), $seen['n'] )
+						? ( 1 === (int) $seen['n']
+							/* translators: %s: date and time */
+							? sprintf( __( 'Τελευταία φορά που τα πήρε το orOS: %s (1 αίτημα).', 'oros-connect' ), wp_date( $fmt, $seen['t'] ) )
+							/* translators: 1: date and time, 2: number of requests */
+							: sprintf( __( 'Τελευταία φορά που τα πήρε το orOS: %1$s (%2$d αιτήματα).', 'oros-connect' ), wp_date( $fmt, $seen['t'] ), $seen['n'] ) )
 						: __( 'Το orOS δεν έχει πάρει ακόμα αιτήματα.', 'oros-connect' )
 				);
 				?>

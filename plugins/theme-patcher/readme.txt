@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, price labels, sale badge
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -138,6 +138,9 @@ The plugin's own options (`tp_settings`, `tp_cat_images`, `tp_care`) and transie
 Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is off. Use the Preview with the product ID to see which profile it gets and why, then clear the page cache (e.g. WP Rocket).
 
 == Changelog ==
+
+= 1.5.3 =
+* Fixed: on the Prices tab the per-category labels table was wider than the panel at 1280 px; text fields and selects in settings tables now shrink with their column.
 
 = 1.5.2 =
 * Fixed: the sale badge showed one percent less on prices shown without tax (e.g. "Sale 24%" for 12.00 → 9.00 with 24% VAT, a 25% discount). Shop prices without tax are kept to 6 decimals, and rounding down caught that last digit.
