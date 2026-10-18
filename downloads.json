@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 75,
+  "total": 77,
   "offset": 5,
   "updated": "2026-10-18",
   "assets": {
@@ -238,10 +238,14 @@
     },
     "653321309": {
       "file": "nox-ws-1.1.0/wish-shelf.zip",
-      "count": 0
+      "count": 1
     },
     "653335671": {
       "file": "nox-nm-1.0.0/data-migrator.zip",
+      "count": 1
+    },
+    "653388788": {
+      "file": "nox-nm-1.1.0/data-migrator.zip",
       "count": 0
     }
   }
