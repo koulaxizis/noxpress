@@ -256,6 +256,39 @@ final class WSH_Account {
 					),
 				);
 			}
+			foreach ( WSH_Store::lists( (int) $user->ID ) as $l ) {
+				$row = array(
+					array(
+						'name'  => 'List',
+						'value' => $l['name'],
+					),
+				);
+				if ( '' !== $l['token'] ) {
+					$row[] = array(
+						'name'  => 'Share link',
+						'value' => WSH_List::share_url( $l['token'] ),
+					);
+				}
+				$data[] = array(
+					'group_id'    => 'wish-shelf',
+					'group_label' => 'Wishlist',
+					'item_id'     => 'wsh-list-' . $l['id'],
+					'data'        => $row,
+				);
+			}
+			if ( WSH_Alerts::opted_in( (int) $user->ID ) ) {
+				$data[] = array(
+					'group_id'    => 'wish-shelf',
+					'group_label' => 'Wishlist',
+					'item_id'     => 'wsh-alerts',
+					'data'        => array(
+						array(
+							'name'  => 'Email alerts',
+							'value' => 'Yes',
+						),
+					),
+				);
+			}
 			$token = WSH_Store::token( (int) $user->ID );
 			if ( '' !== $token ) {
 				$data[] = array(
@@ -290,6 +323,13 @@ final class WSH_Account {
 				WSH_Store::token_off( (int) $user->ID );
 				$removed = true;
 			}
+			foreach ( WSH_Store::lists( (int) $user->ID ) as $l ) {
+				$removed = WSH_Store::list_delete( (int) $user->ID, $l['id'] ) || $removed;
+			}
+			if ( WSH_Alerts::opted_in( (int) $user->ID ) ) {
+				WSH_Alerts::set_optin( (int) $user->ID, false );
+				$removed = true;
+			}
 		}
 		return array(
 			'items_removed'  => $removed,
@@ -308,6 +348,7 @@ final class WSH_Account {
 			'Wish Shelf',
 			wp_kses_post(
 				'<p>' . __( 'Όταν προσθέτετε ένα προϊόν στη λίστα επιθυμιών χωρίς να έχετε συνδεθεί, η λίστα αποθηκεύεται μόνο στον browser σας (localStorage) και δεν στέλνεται στο κατάστημα. Όταν είστε συνδεδεμένοι, αποθηκεύουμε στον λογαριασμό σας τα προϊόντα της λίστας, την ημερομηνία και την τιμή τη στιγμή της προσθήκης, για να σας δείχνουμε αν έπεσε η τιμή. Αν κοινοποιήσετε τη λίστα, όποιος έχει τον σύνδεσμο βλέπει τα προϊόντα της, όχι το όνομά σας. Μπορείτε να αδειάσετε τη λίστα ή να σταματήσετε την κοινοποίηση όποτε θέλετε.', 'wish-shelf' ) . '</p>'
+				. '<p>' . __( 'Αν ζητήσετε ειδοποιήσεις, σας στέλνουμε email στη διεύθυνση του λογαριασμού σας όταν ένα προϊόν της λίστας σας πέσει σε τιμή ή ξαναμπεί σε απόθεμα. Μπορείτε να τις σταματήσετε από τη λίστα σας ή από τον σύνδεσμο σε κάθε email.', 'wish-shelf' ) . '</p>'
 			)
 		);
 	}

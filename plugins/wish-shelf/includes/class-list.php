@@ -5,10 +5,13 @@
  * "bought from a list" marks on orders.
  *
  * Three views:
- *  - own     a signed-in customer's list, rendered on the server;
+ *  - own     a signed-in customer's list, rendered on the server; with
+ *            named lists (1.1.0) one list at a time (?wsh_list=<id>), with
+ *            tabs, create / rename / delete, "Move" per row and the email
+ *            alerts opt-in (WSH_Alerts);
  *  - guest   a placeholder that front.js fills from the browser's list
  *            through the read-only WSH_Ajax::render endpoint;
- *  - shared  ?wsh=<token> (a customer's shared list) or ?wsh=12,45-91
+ *  - shared  ?wsh=<token> (a customer's shared list, main or named) or ?wsh=12,45-91
  *            (a guest's link with the ids in it): read-only, noindex.
  *
  * Page caches: the guest view is the same HTML for every guest, so the
@@ -24,6 +27,17 @@ final class WSH_List {
 
 	/** Keys in a share link or a request: "12" or "12-91". */
 	const MAX_KEYS = 200;
+
+	/**
+	 * The own view being rendered: { list (id), lists (all_lists()) }; lists
+	 * is empty when named lists are off.
+	 *
+	 * @var array
+	 */
+	private static $own = array(
+		'list'  => 0,
+		'lists' => array(),
+	);
 
 	public static function init(): void {
 		add_action( 'template_redirect', array( __CLASS__, 'headers' ), 5 );
@@ -138,14 +152,14 @@ final class WSH_List {
 				return '';
 			}
 			WSH_Front::assets();
-			$notices = self::notices();
+			$notices = self::notices() . WSH_Alerts::unsub_note();
 			$param   = self::share_param();
 			if ( '' !== $param ) {
 				return $notices . self::render_shared( $param );
 			}
 			$uid = get_current_user_id();
 			if ( $uid ) {
-				return $notices . self::render( self::own_rows( $uid ), 'own' );
+				return $notices . self::render_own( $uid );
 			}
 			if ( 'login' === WSH_Settings::get()['guests'] ) {
 				return $notices . self::login_box();
@@ -178,7 +192,7 @@ final class WSH_List {
 				return;
 			}
 			WSH_Front::assets();
-			echo self::render( self::own_rows( $uid ), 'own' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in render().
+			echo self::render_own( $uid ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in render_own().
 		} catch ( \Throwable $e ) {
 			WSH_Front::fail();
 		}
@@ -205,10 +219,19 @@ final class WSH_List {
 			return self::empty_box();
 		}
 		$rows = array();
+		$name = '';
 		if ( 1 === preg_match( '/^[A-Za-z0-9]{20}$/', $param ) ) {
-			$uid = WSH_Store::token_user( $param );
-			if ( $uid ) {
-				foreach ( WSH_Store::items( $uid ) as $it ) {
+			$owner = WSH_Store::token_owner( $param );
+			// Named lists off: the main link shows everything, named links nothing.
+			if ( $owner && ( self::lists_on() || 0 === $owner[1] ) ) {
+				if ( $owner[1] > 0 ) {
+					foreach ( WSH_Store::lists( $owner[0] ) as $l ) {
+						if ( $l['id'] === $owner[1] ) {
+							$name = $l['name'];
+						}
+					}
+				}
+				foreach ( WSH_Store::items( $owner[0], self::lists_on() ? $owner[1] : null ) as $it ) {
 					$rows[] = array(
 						'p'     => $it['p'],
 						'v'     => $it['v'],
@@ -220,7 +243,10 @@ final class WSH_List {
 		} else {
 			$rows = self::rows_from_keys( self::parse_keys( $param ) );
 		}
-		return self::render( $rows, 'shared' );
+		self::$own['name'] = $name;
+		$html              = self::render( $rows, 'shared' );
+		self::$own['name'] = '';
+		return $html;
 	}
 
 	/**
@@ -241,8 +267,85 @@ final class WSH_List {
 		return $rows;
 	}
 
-	private static function own_rows( int $uid ): array {
-		return WSH_Store::items( $uid );
+	/** Named lists are on (setting). */
+	public static function lists_on(): bool {
+		return (bool) WSH_Settings::get()['lists'];
+	}
+
+	/**
+	 * The list of this request (?wsh_list=), when it is the customer's; else 0.
+	 *
+	 * @param int $uid User id.
+	 */
+	private static function current_list( int $uid ): int {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only choice of view.
+		$id = isset( $_GET['wsh_list'] ) && is_string( $_GET['wsh_list'] ) ? absint( $_GET['wsh_list'] ) : 0;
+		return ( $id && self::lists_on() && WSH_Store::owns_list( $uid, $id ) ) ? $id : 0;
+	}
+
+	/**
+	 * A signed-in customer's own view (one list at a time when named lists are on).
+	 *
+	 * @param int $uid User id.
+	 */
+	private static function render_own( int $uid ): string {
+		if ( ! self::lists_on() ) {
+			self::$own = array(
+				'list'  => 0,
+				'lists' => array(),
+			);
+			return self::render( WSH_Store::items( $uid ), 'own' ) . WSH_Alerts::optin_box( $uid );
+		}
+		$list      = self::current_list( $uid );
+		self::$own = array(
+			'list'  => $list,
+			'lists' => WSH_Store::all_lists( $uid ),
+		);
+		$html      = self::lists_bar( $uid ) . self::render( WSH_Store::items( $uid, $list ), 'own' ) . WSH_Alerts::optin_box( $uid );
+		self::$own = array(
+			'list'  => 0,
+			'lists' => array(),
+		);
+		return $html;
+	}
+
+	/** URL of one of the customer's lists on this page. */
+	private static function list_link( int $id ): string {
+		$url = remove_query_arg( array( 'wsh_list', 'wsh_done' ) );
+		return $id ? add_query_arg( 'wsh_list', $id, $url ) : $url;
+	}
+
+	/**
+	 * Tabs of the customer's lists, and the forms to create / rename / delete.
+	 *
+	 * @param int $uid User id.
+	 */
+	private static function lists_bar( int $uid ): string {
+		$cur   = self::$own['list'];
+		$lists = self::$own['lists'];
+		$h     = '<div class="wsh-root wsh-lists" data-wsh-lists><nav class="wsh-lists__tabs" aria-label="' . esc_attr( WSH_Settings::text( 't_title' ) ) . '"><ul>';
+		foreach ( $lists as $l ) {
+			$on = $l['id'] === $cur;
+			$h .= '<li' . ( $on ? ' class="is-current"' : '' ) . '><a href="' . esc_url( self::list_link( $l['id'] ) ) . '"' . ( $on ? ' aria-current="page"' : '' ) . '>' . esc_html( $l['name'] ) . ' <span class="wsh-lists__n">' . (int) $l['count'] . '</span></a></li>';
+		}
+		$h .= '</ul></nav>';
+
+		$form = '<form method="post" class="wsh-lists__form" action="' . esc_url( remove_query_arg( 'wsh_done' ) ) . '">' . wp_nonce_field( self::NONCE, 'wsh_nonce', false, false ) . '<input type="hidden" name="wsh_form" value="1" /><input type="hidden" name="wsh_list_id" value="' . (int) $cur . '" />';
+		$h   .= '<details class="wsh-lists__manage"><summary>' . esc_html( WSH_Settings::text( 't_new_list' ) ) . ( $cur ? ' · ' . esc_html( WSH_Settings::text( 't_rename' ) ) : '' ) . '</summary>';
+		if ( count( $lists ) - 1 < WSH_Store::max_lists() ) {
+			$h .= $form . '<label class="wsh-lists__field"><span>' . esc_html( WSH_Settings::text( 't_list_name' ) ) . '</span><input type="text" name="wsh_list_name" maxlength="' . (int) WSH_Store::NAME_LEN . '" required /></label><button type="submit" name="wsh_list_op" value="create" class="' . esc_attr( self::btn_class( 'wsh-list-create' ) ) . '">' . esc_html( WSH_Settings::text( 't_create' ) ) . '</button></form>';
+		}
+		if ( $cur ) {
+			$name = '';
+			foreach ( $lists as $l ) {
+				if ( $l['id'] === $cur ) {
+					$name = $l['name'];
+				}
+			}
+			$h .= $form . '<label class="wsh-lists__field"><span>' . esc_html( WSH_Settings::text( 't_list_name' ) ) . '</span><input type="text" name="wsh_list_name" value="' . esc_attr( $name ) . '" maxlength="' . (int) WSH_Store::NAME_LEN . '" required /></label><button type="submit" name="wsh_list_op" value="rename" class="' . esc_attr( self::btn_class( 'wsh-list-rename' ) ) . '">' . esc_html( WSH_Settings::text( 't_rename' ) ) . '</button>';
+			$h .= '<button type="submit" name="wsh_list_op" value="delete" class="wsh-clear" data-wsh-del-list formnovalidate>' . esc_html( WSH_Settings::text( 't_del_list' ) ) . '</button></form>';
+		}
+		return $h . '</details></div>';
 	}
 
 	private static function empty_box(): string {
@@ -318,7 +421,11 @@ final class WSH_List {
 	public static function render( array $rows, string $mode ): string {
 		$s     = WSH_Settings::get();
 		$items = self::resolve( $rows );
-		$title = 'shared' === $mode ? '<h2 class="wsh-title">' . esc_html( WSH_Settings::text( 't_shared' ) ) . '</h2>' : '';
+		$title = '';
+		if ( 'shared' === $mode ) {
+			$sub   = ! empty( self::$own['name'] ) ? ': ' . self::$own['name'] : '';
+			$title = '<h2 class="wsh-title">' . esc_html( WSH_Settings::text( 't_shared' ) . $sub ) . '</h2>';
+		}
 		if ( ! $items ) {
 			return '<div class="wsh-root wsh-list wsh-list--' . esc_attr( $mode ) . '" data-wsh-mode="' . esc_attr( $mode ) . '">' . $title . '<p class="wsh-empty">' . esc_html( WSH_Settings::text( 't_empty' ) ) . '</p></div>';
 		}
@@ -330,6 +437,9 @@ final class WSH_List {
 		$html .= '<form method="post" class="wsh-form" action="' . esc_url( self::form_action() ) . '">';
 		$html .= wp_nonce_field( self::NONCE, 'wsh_nonce', false, false );
 		$html .= '<input type="hidden" name="wsh_form" value="1" />';
+		if ( 'own' === $mode ) {
+			$html .= '<input type="hidden" name="wsh_list_id" value="' . (int) self::$own['list'] . '" />';
+		}
 		foreach ( $items as $it ) {
 			$html .= '<input type="hidden" name="wsh_keys[]" value="' . esc_attr( $it['key'] ) . '" />';
 		}
@@ -439,6 +549,9 @@ final class WSH_List {
 				$name .= '<span class="wsh-var">' . esc_html( wp_strip_all_tags( $attrs ) ) . '</span>';
 			}
 		}
+		if ( 'own' === $mode ) {
+			$name .= self::move_control( $key );
+		}
 		$h .= '<td class="wsh-c-name" data-title="' . esc_attr( WSH_Settings::text( 't_product' ) ) . '">' . $name . '</td>';
 
 		if ( $c['price'] ) {
@@ -488,6 +601,25 @@ final class WSH_List {
 			$h    .= '<td class="wsh-c-rem"><button type="submit" name="wsh_remove" value="' . esc_attr( $key ) . '" class="wsh-remove" data-wsh-remove="' . esc_attr( $key ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '"><span aria-hidden="true">&times;</span></button></td>';
 		}
 		return $h . '</tr>';
+	}
+
+	/**
+	 * "Move to another list" for a row of the own view (named lists only).
+	 *
+	 * @param string $key Item key.
+	 */
+	private static function move_control( string $key ): string {
+		$lists = self::$own['lists'];
+		if ( count( $lists ) < 2 ) {
+			return '';
+		}
+		$h = '<span class="wsh-move"><select name="wsh_to[' . esc_attr( $key ) . ']" aria-label="' . esc_attr( WSH_Settings::text( 't_move' ) ) . '">';
+		foreach ( $lists as $l ) {
+			if ( $l['id'] !== self::$own['list'] ) {
+				$h .= '<option value="' . (int) $l['id'] . '">' . esc_html( $l['name'] ) . '</option>';
+			}
+		}
+		return $h . '</select><button type="submit" name="wsh_move" value="' . esc_attr( $key ) . '" class="wsh-link">' . esc_html( WSH_Settings::text( 't_move' ) ) . '</button></span>';
 	}
 
 	/**
@@ -586,10 +718,11 @@ final class WSH_List {
 	 * @param string $mode 'own' | 'guest'.
 	 */
 	private static function share_bar( string $mode ): string {
-		$h = '<div class="wsh-share" data-wsh-share-bar>';
-		$h .= '<span class="wsh-share__label">' . esc_html( WSH_Settings::text( 't_share' ) ) . '</span>';
+		$list = 'own' === $mode ? (int) self::$own['list'] : 0;
+		$h    = '<div class="wsh-share" data-wsh-share-bar data-wsh-list="' . $list . '">';
+		$h   .= '<span class="wsh-share__label">' . esc_html( WSH_Settings::text( 't_share' ) ) . '</span>';
 		if ( 'own' === $mode ) {
-			$token = WSH_Store::token( get_current_user_id() );
+			$token = WSH_Store::token( get_current_user_id(), $list );
 			$url   = '' !== $token ? self::share_url( $token ) : '';
 			$h    .= '<input type="text" class="wsh-share__url" readonly value="' . esc_attr( $url ) . '" data-wsh-share-url' . ( '' === $url ? ' hidden' : '' ) . ' aria-label="' . esc_attr( WSH_Settings::text( 't_share' ) ) . '" />';
 			$h    .= '<button type="button" class="wsh-link" data-wsh-copy' . ( '' === $url ? ' hidden' : '' ) . '>' . esc_html( WSH_Settings::text( 't_copy' ) ) . '</button>';
@@ -629,6 +762,51 @@ final class WSH_List {
 			$uid  = get_current_user_id();
 			$keys = isset( $_POST['wsh_keys'] ) && is_array( $_POST['wsh_keys'] ) ? self::parse_keys( array_map( 'strval', wp_unslash( $_POST['wsh_keys'] ) ) ) : array();
 			$done = array();
+			// The list of the form (named lists); null = every list.
+			$list = null;
+			if ( $uid && self::lists_on() ) {
+				$list = isset( $_POST['wsh_list_id'] ) && is_scalar( $_POST['wsh_list_id'] ) ? absint( $_POST['wsh_list_id'] ) : 0;
+				$list = WSH_Store::owns_list( $uid, $list ) ? $list : 0;
+			}
+
+			// Email alerts opt-in (signed-in customers).
+			if ( $uid && isset( $_POST['wsh_alerts_save'] ) ) {
+				if ( WSH_Store::rate_ok( $uid ) ) {
+					WSH_Alerts::set_optin( $uid, ! empty( $_POST['wsh_alerts'] ) );
+				}
+				self::back( array() );
+			}
+
+			// Named lists: create, rename, delete.
+			if ( $uid && null !== $list && isset( $_POST['wsh_list_op'] ) && is_string( $_POST['wsh_list_op'] ) ) {
+				$op   = sanitize_key( wp_unslash( $_POST['wsh_list_op'] ) );
+				$name = isset( $_POST['wsh_list_name'] ) && is_string( $_POST['wsh_list_name'] ) ? wp_unslash( $_POST['wsh_list_name'] ) : '';
+				$to   = $list;
+				if ( WSH_Store::rate_ok( $uid ) ) {
+					if ( 'create' === $op ) {
+						$new = WSH_Store::list_create( $uid, $name );
+						$to  = $new ? $new : $list;
+					} elseif ( 'rename' === $op ) {
+						WSH_Store::list_rename( $uid, $list, $name );
+					} elseif ( 'delete' === $op && WSH_Store::list_delete( $uid, $list ) ) {
+						$to = 0;
+					}
+				}
+				self::redirect( self::back_url( $to ) );
+			}
+
+			// Move an item to another of the customer's lists.
+			if ( $uid && null !== $list && isset( $_POST['wsh_move'] ) && is_string( $_POST['wsh_move'] ) ) {
+				$pair = self::parse_keys( array( wp_unslash( $_POST['wsh_move'] ) ) );
+				$tos  = isset( $_POST['wsh_to'] ) && is_array( $_POST['wsh_to'] ) ? wp_unslash( $_POST['wsh_to'] ) : array();
+				if ( $pair && WSH_Store::rate_ok( $uid ) ) {
+					$k = self::key( $pair[0][0], $pair[0][1] );
+					if ( isset( $tos[ $k ] ) && is_scalar( $tos[ $k ] ) ) {
+						WSH_Store::move( $uid, $pair[0][0], $pair[0][1], absint( $tos[ $k ] ) );
+					}
+				}
+				self::back( array() );
+			}
 
 			if ( isset( $_POST['wsh_remove'] ) && is_string( $_POST['wsh_remove'] ) ) {
 				$pair = self::parse_keys( array( wp_unslash( $_POST['wsh_remove'] ) ) );
@@ -643,7 +821,7 @@ final class WSH_List {
 
 			if ( isset( $_POST['wsh_clear'] ) ) {
 				if ( $uid && WSH_Store::rate_ok( $uid ) ) {
-					WSH_Store::clear( $uid );
+					WSH_Store::clear( $uid, $list );
 				}
 				foreach ( $keys as $pv ) {
 					$done[] = self::key( $pv[0], $pv[1] );
@@ -721,6 +899,16 @@ final class WSH_List {
 	 * @param string[] $done Keys.
 	 */
 	private static function back( array $done ): void {
+		$url = self::back_url( null );
+		self::redirect( $done ? add_query_arg( 'wsh_done', rawurlencode( implode( ',', $done ) ), $url ) : $url );
+	}
+
+	/**
+	 * The page of the form, without wsh_done; with ?wsh_list= set when $list is given.
+	 *
+	 * @param int|null $list List to show (0 = main), or null to keep the referer's.
+	 */
+	private static function back_url( ?int $list ): string {
 		$url = wp_get_referer();
 		if ( ! $url ) {
 			$url = WSH_Settings::list_url();
@@ -729,7 +917,10 @@ final class WSH_List {
 			$url = home_url( '/' );
 		}
 		$url = remove_query_arg( 'wsh_done', $url );
-		self::redirect( $done ? add_query_arg( 'wsh_done', rawurlencode( implode( ',', $done ) ), $url ) : $url );
+		if ( null !== $list ) {
+			$url = $list ? add_query_arg( 'wsh_list', $list, $url ) : remove_query_arg( 'wsh_list', $url );
+		}
+		return $url;
 	}
 
 	/**

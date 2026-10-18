@@ -20,6 +20,11 @@
  *  - menu           theme menu location for the counter ('' = none)
  *  - count_zero     show the counter at 0
  *  - share          share links
+ *  - lists          named lists for signed-in customers (1.1.0)
+ *  - alert_price    email alerts: price drops (1.1.0; the email itself is
+ *                   on / off in WooCommerce → Settings → Emails)
+ *  - alert_drop     smallest drop that sends an alert, in % (1–90)
+ *  - alert_stock    email alerts: back in stock
  *  - lang, t_*      visitor texts
  *  - delete_data    delete the customers' lists on uninstall
  */
@@ -63,6 +68,21 @@ final class WSH_Settings {
 		't_share_off'  => 60,
 		't_skipped'    => 160,
 		't_shared'     => 60,
+		't_default'    => 60,
+		't_new_list'   => 60,
+		't_list_name'  => 60,
+		't_create'     => 40,
+		't_rename'     => 40,
+		't_del_list'   => 60,
+		't_conf_list'  => 120,
+		't_move'       => 40,
+		't_alerts'     => 200,
+		't_save'       => 40,
+		't_unsub'      => 160,
+		't_mail_intro' => 200,
+		't_mail_drop'  => 160,
+		't_mail_stock' => 160,
+		't_mail_off'   => 80,
 	);
 
 	/** @var array|null Per-request cache. */
@@ -101,6 +121,10 @@ final class WSH_Settings {
 			'menu'         => '',
 			'count_zero'   => false,
 			'share'        => true,
+			'lists'        => false,
+			'alert_price'  => true,
+			'alert_drop'   => 5,
+			'alert_stock'  => true,
 			'lang'         => 'auto',
 			't_add'        => array(
 				'el' => 'Λίστα επιθυμιών',
@@ -214,6 +238,66 @@ final class WSH_Settings {
 				'el' => 'Κοινή λίστα επιθυμιών',
 				'en' => 'Shared wishlist',
 			),
+			't_default'    => array(
+				'el' => 'Η λίστα μου',
+				'en' => 'My wishlist',
+			),
+			't_new_list'   => array(
+				'el' => 'Νέα λίστα',
+				'en' => 'New list',
+			),
+			't_list_name'  => array(
+				'el' => 'Όνομα λίστας',
+				'en' => 'List name',
+			),
+			't_create'     => array(
+				'el' => 'Δημιουργία',
+				'en' => 'Create',
+			),
+			't_rename'     => array(
+				'el' => 'Μετονομασία',
+				'en' => 'Rename',
+			),
+			't_del_list'   => array(
+				'el' => 'Διαγραφή λίστας',
+				'en' => 'Delete list',
+			),
+			't_conf_list'  => array(
+				'el' => 'Να διαγραφεί η λίστα μαζί με τα προϊόντα της;',
+				'en' => 'Delete this list and its products?',
+			),
+			't_move'       => array(
+				'el' => 'Μετακίνηση',
+				'en' => 'Move',
+			),
+			't_alerts'     => array(
+				'el' => 'Στείλτε μου email όταν πέφτει η τιμή ή όταν ξαναμπαίνει σε απόθεμα ένα προϊόν της λίστας μου.',
+				'en' => 'Email me when a product in my wishlist drops in price or is back in stock.',
+			),
+			't_save'       => array(
+				'el' => 'Αποθήκευση',
+				'en' => 'Save',
+			),
+			't_unsub'      => array(
+				'el' => 'Δεν θα λαμβάνετε πια emails για τη λίστα επιθυμιών σας.',
+				'en' => 'You will no longer receive emails about your wishlist.',
+			),
+			't_mail_intro' => array(
+				'el' => 'Νέα για προϊόντα της λίστας επιθυμιών σας:',
+				'en' => 'News about products in your wishlist:',
+			),
+			't_mail_drop'  => array(
+				'el' => 'Η τιμή έπεσε από {old} σε {new}.',
+				'en' => 'The price dropped from {old} to {new}.',
+			),
+			't_mail_stock' => array(
+				'el' => 'Είναι ξανά σε απόθεμα.',
+				'en' => 'It is back in stock.',
+			),
+			't_mail_off'   => array(
+				'el' => 'Διακοπή αυτών των emails',
+				'en' => 'Stop these emails',
+			),
 			'delete_data'  => false,
 		);
 	}
@@ -272,9 +356,10 @@ final class WSH_Settings {
 			$s['cols'][ $c ] = isset( $cols[ $c ] ) ? (bool) $cols[ $c ] : $d['cols'][ $c ];
 		}
 
-		foreach ( array( 'toast', 'price_drop', 'bulk', 'remove_after', 'account', 'count_zero', 'share', 'delete_data' ) as $k ) {
+		foreach ( array( 'toast', 'price_drop', 'bulk', 'remove_after', 'account', 'count_zero', 'share', 'lists', 'alert_price', 'alert_stock', 'delete_data' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
+		$s['alert_drop'] = isset( $raw['alert_drop'] ) && is_numeric( $raw['alert_drop'] ) ? max( 1, min( 90, (int) $raw['alert_drop'] ) ) : $d['alert_drop'];
 
 		$ep            = isset( $raw['endpoint'] ) && is_string( $raw['endpoint'] ) ? sanitize_title( $raw['endpoint'] ) : '';
 		$s['endpoint'] = ( '' !== $ep && strlen( $ep ) <= 40 && 1 === preg_match( '/^[a-z0-9\-]+$/', $ep ) ) ? $ep : $d['endpoint'];

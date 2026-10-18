@@ -5,11 +5,11 @@ Tags: woocommerce, wishlist, wish list, save for later, favorites
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-A wishlist for WooCommerce: a heart on shop cards and product pages, guest lists without cookies, variations, price-drop notes, add all to cart, share links, a My Account tab and a report of what customers want.
+A wishlist for WooCommerce: a heart on shop cards and product pages, guest lists without cookies, named lists, price-drop and back-in-stock emails, add all to cart, share links, a My Account tab and a report of what customers want.
 
 == Description ==
 
@@ -36,6 +36,18 @@ A wishlist for WooCommerce: a heart on shop cards and product pages, guest lists
 * Optionally remove products from the list once they go to the cart.
 * A counter in a theme menu, as a block or with `[nox_wishlist_count]`.
 
+**Named lists**
+
+* Signed-in customers make named lists ("Gifts", "For me"), up to 10, besides their main list. Off by default.
+* Tabs on the list page; create, rename and delete a list; "Move" a product to another list. Every form works without JavaScript.
+* The heart puts a product in the main list and is on while the product is in any list. Each list has its own share link.
+
+**Email alerts**
+
+* "The price dropped" (at least the % you set, 5 % by default) and "Back in stock", for signed-in customers who tick the box under their list.
+* One WooCommerce email ("Wishlist: price drop or back in stock", off by default), with the store's email template and a template the theme can override.
+* Checked once a day in the background (Action Scheduler), one email per customer with all the news; the same news is never sent twice. Every email has a stop link that works without signing in.
+
 **Sharing**
 
 * Guests share a link with the products in the address. Signed-in customers create a private link with a random key, and can replace or stop it. The customer's name never shows.
@@ -48,7 +60,7 @@ A wishlist for WooCommerce: a heart on shop cards and product pages, guest lists
 
 **Moving from another plugin**
 
-* Tools › Import copies the signed-in customers' lists from WishSuite, without duplicates and without changing its data.
+* Tools › Import copies the signed-in customers' lists from WishSuite, YITH WooCommerce Wishlist or TI WooCommerce Wishlist, without duplicates and without changing their data. Named lists of YITH and TI become named lists.
 * While another wishlist plugin is active (WishSuite, YITH, TI, Addonify, WPC, WebToffee), Wish Shelf stays in test mode so visitors never see two buttons.
 
 **Safe by design**
@@ -62,10 +74,11 @@ A wishlist for WooCommerce: a heart on shop cards and product pages, guest lists
 
 **For developers**
 
-* `wsh_get_items( $user_id )`: a signed-in customer's list (`product_id`, `variation_id`, `added`).
+* `wsh_get_items( $user_id )`: a signed-in customer's items in all their lists (`product_id`, `variation_id`, `added`, `list_id`).
 * `wsh_product_count( $product_id )`: in how many customers' lists a product is.
 * Actions `wsh_item_added` and `wsh_item_removed` ( int $user_id, int $product_id, int $variation_id ).
-* Filters `wsh_text` ( string $text, string $key, string $lang ) and `wsh_max_items` ( int $max ).
+* Filters `wsh_text` ( string $text, string $key, string $lang ), `wsh_max_items` ( int $max, per customer ) and `wsh_max_lists` ( int $max ).
+* Email template `emails/wsh-alert.php` (and `emails/plain/wsh-alert.php`), overridable in `yourtheme/woocommerce/emails/`.
 
 == Installation ==
 
@@ -86,11 +99,23 @@ A guest's list never leaves their browser, so the store cannot see it. "Bought f
 
 No. The list is in that browser only. Signing in keeps it in the account, on every device.
 
+= Who gets the alert emails? =
+
+Only signed-in customers who ticked "Email me …" under their list, while the email is on in WooCommerce → Settings → Emails and the wishlist is live. Each email has a link to stop them.
+
 = Does it work with page caches? =
 
 Yes. The heart is the same HTML for everyone and the guest list page loads its products after the page. The list of a signed-in customer and shared lists are never cached.
 
 == Changelog ==
+
+= 1.1.0 =
+* Named lists for signed-in customers (setting, off by default): tabs, create, rename, delete, move between lists, a share link per list. Filter wsh_max_lists.
+* Email alerts for price drops and products back in stock: customer opt-in, a WooCommerce email (off by default), a daily background check in batches, one email per customer, a stop link without sign-in.
+* Import from YITH WooCommerce Wishlist and TI WooCommerce Wishlist (their named lists too).
+* wsh_get_items() also returns list_id.
+* The tables upgrade on the first request after an update.
+* Uninstall also removes the alert opt-ins, the email settings, the queued checks and (with "Delete the lists …") the named lists.
 
 = 1.0.0 =
 * Initial release.
