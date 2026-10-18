@@ -244,6 +244,19 @@
         "version": "1.0.0",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.0.0/variation-picker.zip"
       }
+    },
+    "wish-shelf": {
+      "beta": {
+        "changelog": "* Initial release.\n* Heart on shop cards (before / after the button, over the image) and on the product page, classic and block themes; button, list and counter blocks and shortcodes.\n* Guest lists in localStorage (no cookies), merged into the account on sign-in, or sign-in required.\n* Saved variations, price-drop note, add to cart per row / all / selected, remove after adding, empty list.\n* Table or theme-card layout, My Account tab, menu counter.\n* Share links (guest ids or a private random key) with copy and the device share menu, noindex.\n* Report of the most wanted products with \"bought from a list\", CSV export, ♥ column in Products.\n* Import from WishSuite; test mode while another wishlist plugin is active.\n* Privacy export / erase, editable Greek / English texts, settings export / import.\n* Test mode, WSH_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.12).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "d5406ccf7b942bfe2702a2f365c00a870ff520707ef88b238aa11324eda204d4",
+        "signature": "M4Uk8RzJI+Y5qaLXX+pnS/hai/rxfkQaweCMV0UevnZuyakloTP1dgrMLPL9p0nCHAAeYWLzschcZw7Y4aAKDg==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.0.0/wish-shelf.zip"
+      }
     }
   }
 }
