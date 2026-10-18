@@ -82,7 +82,7 @@ The settings, the send log, queued sends, the last offers import and the transie
 
 = 1.1.0 =
 * New module «Offers»: Publishing Quote requests for orOS to import as draft offers (REST orc/v1/offers), with the shop's WooCommerce REST keys or an Application Password; waiting requests and the last import in the admin.
-* Noxpress Core 1.1.10.
+* Noxpress Core 1.1.11.
 
 = 1.0.0 =
 * Initial release, with modules switched on one by one.
