@@ -230,6 +230,22 @@
 		} );
 	}
 
+	/* Schedules: show the day fields of the chosen frequency ---------- */
+
+	Array.prototype.forEach.call( document.querySelectorAll( '.nm-sched-form' ), function ( f ) {
+		var sel = $( 'select[name="freq"]', f );
+		if ( ! sel ) {
+			return;
+		}
+		var sync = function () {
+			Array.prototype.forEach.call( f.querySelectorAll( '[data-freq]' ), function ( el ) {
+				el.hidden = el.getAttribute( 'data-freq' ) !== sel.value;
+			} );
+		};
+		sel.addEventListener( 'change', sync );
+		sync();
+	} );
+
 	/* Confirm dialogs on dangerous forms ----------------------------- */
 
 	document.addEventListener( 'submit', function ( e ) {

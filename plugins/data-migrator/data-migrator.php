@@ -3,7 +3,7 @@
  * Plugin Name:          Data Migrator
  * Plugin URI:           https://noxpress.tech
  * Description:          Πλήρες αντίγραφο ασφαλείας του WordPress / WooCommerce site (βάση, uploads, θέματα, plugins, core) και επαναφορά στον ίδιο ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις. Ανάλυση πριν την επαναφορά, αναίρεση με ένα κλικ, installer για άδειο server, WP-CLI. Χωρίς εξωτερικές υπηρεσίες.
- * Version:              1.0.0
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -38,6 +38,7 @@
  *    - NM_Storage      → private storage folder, backups, jobs, logs
  *    - NM_Integrity    → core checksums (api.wordpress.org)
  *    - NM_Backup       → backup job (scan, db, zip, manifest)
+ *    - NM_Schedule     → scheduled backups (events, background steps, retention)
  *    - NM_Restore_Prep → upload, analysis (dry run), plan, restore jobs
  *    - NM_Post_Restore → first request after a restore (cache, rewrite, WC)
  *    - NM_Installer    → builds the installer with a one-time key
@@ -53,7 +54,9 @@
  *    users, the plugins and maybe WordPress itself. They accept POST only,
  *    with a 128-bit one-time token whose sha256 is stored (runner) or a
  *    one-time key with lockout after 5 failures and a 7-day expiry
- *    (installer).
+ *    (installer). The scheduler's loopback (admin-ajax nm_sched_kick,
+ *    no login) checks a random 128-bit token that changes with every run;
+ *    all it can do is advance the scheduled backup already running.
  *  - §12 (no .htaccess in our folders): the backup folder gets a deny
  *    .htaccess on purpose. If the host refuses the directive the folder
  *    answers 500, which for backups is as safe as a deny; a self-test
@@ -70,7 +73,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NM_VERSION', '1.0.0' );
+define( 'NM_VERSION', '1.1.0' );
 define( 'NM_FILE', __FILE__ );
 define( 'NM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NM_URL', plugin_dir_url( __FILE__ ) );
@@ -91,6 +94,7 @@ require_once NM_PATH . 'includes/class-settings.php';
 require_once NM_PATH . 'includes/class-storage.php';
 require_once NM_PATH . 'includes/class-integrity.php';
 require_once NM_PATH . 'includes/class-backup.php';
+require_once NM_PATH . 'includes/class-schedule.php';
 require_once NM_PATH . 'includes/class-restore-prep.php';
 require_once NM_PATH . 'includes/class-post-restore.php';
 require_once NM_PATH . 'includes/class-installer.php';
@@ -113,6 +117,7 @@ final class Data_Migrator {
 		}
 
 		NM_Post_Restore::init();
+		NM_Schedule::init();
 
 		if ( is_admin() ) {
 			require_once NM_PATH . 'includes/class-admin-ui.php';
@@ -132,11 +137,13 @@ final class Data_Migrator {
 	}
 
 	/**
-	 * Deactivation: stop running backups and analyses. A restore is left
+	 * Deactivation: stop running backups and analyses, and remove the
+	 * schedule events (admin_init puts them back on reactivation). A restore is left
 	 * alone: runner.php does not need the plugin to be active, and it
 	 * keeps .maintenance and the undo data under its own control.
 	 */
 	public static function deactivate(): void {
+		NM_Schedule::clear_all();
 		$base = (string) NM_Settings::get()['storage'];
 		if ( '' === $base || ! is_dir( $base . '/jobs' ) ) {
 			return;

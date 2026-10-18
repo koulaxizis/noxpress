@@ -5,7 +5,7 @@ Tags: backup, restore, migration, clone, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -22,6 +22,15 @@ Full backup of a WordPress / WooCommerce site and restore on the same or another
 * Caches, other backup plugins' folders, logs and its own folder stay out by default; your own exclusion patterns in DM Settings.
 * A manifest inside each archive: site address, table prefix, versions of PHP, WordPress, the database server and WooCommerce, the active plugins and theme. A CRC for every file inside the ZIP and a sha256 for every part.
 * Optional check of the WordPress core files against the official checksums (api.wordpress.org), and a warning for unknown PHP files in the site's root.
+
+**Scheduled backups**
+
+* Up to three schedules: database only or full, every day, week or month, at a time in the site's time zone (a quiet hour, 03:00 by default).
+* They run in the background, without an open browser: short steps of at most 10 seconds, one after the other, through WP-Cron or the Action Scheduler of WooCommerce. A visit-free site needs a real cron job; the page says so when a run is late.
+* They never take the site down: one job at a time (a manual backup or a restore makes the schedule wait), a free-space check before the archive is written, and a hard stop that deletes the unfinished backup when the free disk space falls under 256 MB.
+* Retention: the last N backups of each schedule and a size limit for all scheduled backups together (5 GB by default). Manual backups are never deleted, and a failed run never removes the last good backup.
+* The backups stay in the same private folder with the others: download them from the list with one click. If the folder turns out to be downloadable, the schedules pause.
+* An email to the site's administrator when a run fails or is skipped (or after every run). Text and a link to the admin only, never the backup.
 
 **Restore and migration**
 
@@ -52,6 +61,7 @@ Full backup of a WordPress / WooCommerce site and restore on the same or another
 * `wp data-migrator import <file>...`, `list`, `verify <id>`, `delete <id>`, `check`
 * `wp data-migrator restore <id> [--new-url=<url>] [--local] [--bare] [--db-only|--files-only] [--blog-public=<0|1>] [--salts] [--dry-run] [--yes]`
 * `wp data-migrator undo`, `wp data-migrator finalize`
+* `wp data-migrator schedule list`, `wp data-migrator schedule run <id>`
 
 == Installation ==
 
@@ -64,6 +74,10 @@ Full backup of a WordPress / WooCommerce site and restore on the same or another
 = Does it work without WooCommerce? =
 
 Yes. It backs up and restores any single-site WordPress. The WooCommerce steps run only when WooCommerce is active.
+
+= The scheduled backup did not run on time. =
+
+WP-Cron runs only when someone visits the site. On a quiet site ask the host for a real cron job that calls `wp-cron.php` every 5 minutes. On hosts that block requests from the site to itself, the backup still advances, one step per minute.
 
 = Multisite? =
 
@@ -82,6 +96,12 @@ Press **Undo** on the Restore page (or `wp data-migrator undo`). The site goes b
 Settings, jobs, work files, logs and any undo data are deleted. The backups are deleted too, unless "Keep backups" is ticked in DM Settings. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* Scheduled backups (beta): database only or full, daily, weekly or monthly, in the background, with retention per schedule, a size limit for all scheduled backups, and an email when a run fails.
+* Backups stop and delete the unfinished archive when the free disk space falls under 256 MB; scheduled backups check the space before they write.
+* WP-CLI: `wp data-migrator schedule list|run`.
+* Fix: the Save button of DM Settings read "Storage" in English.
 
 = 1.0.0 =
 * Rewritten from scratch (beta).

@@ -242,6 +242,8 @@ final class NM_Admin_UI {
 		}
 		echo '</div>';
 
+		self::render_schedules( $scopes );
+
 		// Backups.
 		echo '<h2 class="nm-h2">' . esc_html__( 'Αποθηκευμένα αντίγραφα', 'data-migrator' ) . '</h2>';
 		$all = NM_Storage::all();
@@ -278,6 +280,104 @@ final class NM_Admin_UI {
 		}
 	}
 
+	/* ----- Πρόγραμμα ---------------------------------------------------- */
+
+	private static function render_schedules( array $scopes ): void {
+		$all = NM_Schedule::all();
+		$set = NM_Settings::get();
+		echo '<h2 class="nm-h2">' . esc_html__( 'Πρόγραμμα αντιγράφων', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<p class="description">' . esc_html__( 'Αντίγραφα που γίνονται μόνα τους, στο παρασκήνιο, σε μικρά βήματα που δεν βαραίνουν το site. Μένουν στον ίδιο φάκελο με τα υπόλοιπα: κατέβασέ τα από τη λίστα, ώστε να έχεις αντίγραφο και έξω από τον server.', 'data-migrator' ) . '</p>';
+
+		$late = false;
+		foreach ( $all as $sc ) {
+			if ( $sc['on'] && $sc['next'] > 0 && $sc['next'] < time() - HOUR_IN_SECONDS ) {
+				$late = true;
+			}
+		}
+		if ( $late && ! NM_Schedule::job() ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Ένα πρόγραμμα δεν έτρεξε στην ώρα του. Το WP-Cron τρέχει μόνο όταν το site έχει επισκέψεις· σε ήσυχα sites ζήτησε από τον host πραγματικό cron, π.χ. κάθε 5 λεπτά:', 'data-migrator' ) . '</p><p><code>*/5 * * * * wget -q -O /dev/null ' . esc_html( site_url( 'wp-cron.php?doing_wp_cron' ) ) . '</code></p></div>';
+		}
+
+		if ( $all ) {
+			echo '<table class="widefat nm-table"><thead><tr><th>' . esc_html__( 'Περιεχόμενο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Πότε', 'data-migrator' ) . '</th><th>' . esc_html__( 'Επόμενο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Τελευταίο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Ενέργειες', 'data-migrator' ) . '</th></tr></thead><tbody>';
+			foreach ( $all as $sc ) {
+				echo '<tr><td>' . esc_html( $scopes[ $sc['scope'] ] ?? '' ) . '<br><span class="description">' . esc_html( sprintf( /* translators: %d: number of backups */ _n( 'Κρατά το τελευταίο %d', 'Κρατά τα τελευταία %d', (int) $sc['keep'], 'data-migrator' ), (int) $sc['keep'] ) ) . '</span></td>';
+				echo '<td>' . esc_html( NM_Schedule::label( $sc ) ) . '</td>';
+				echo '<td>' . ( $sc['on'] ? esc_html( self::when( (int) $sc['next'] ) ) : '<span class="nm-warn">' . esc_html__( 'Σε παύση', 'data-migrator' ) . '</span>' ) . '</td><td>';
+				$last = (array) $sc['last'];
+				if ( empty( $last['time'] ) ) {
+					echo '—';
+				} else {
+					$cls = array(
+						'done'    => 'nm-ok',
+						'failed'  => 'nm-err',
+						'skipped' => 'nm-warn',
+					);
+					$lbl = array(
+						'done'    => __( 'Έγινε', 'data-migrator' ),
+						'failed'  => __( 'Απέτυχε', 'data-migrator' ),
+						'skipped' => __( 'Παραλείφθηκε', 'data-migrator' ),
+					);
+					echo '<span class="' . esc_attr( $cls[ $last['status'] ] ?? '' ) . '">' . esc_html( ( $lbl[ $last['status'] ] ?? '' ) . ' · ' . self::when( (int) $last['time'] ) ) . '</span>';
+					if ( 'done' !== $last['status'] && '' !== (string) $last['msg'] ) {
+						echo '<br><span class="description">' . esc_html( (string) $last['msg'] ) . '</span>';
+					}
+				}
+				echo '</td><td class="nm-actions">';
+				self::form_open( 'sched_run', 'nm-backups' );
+				echo '<input type="hidden" name="id" value="' . esc_attr( $sc['id'] ) . '"><button class="button">' . esc_html__( 'Τρέξε τώρα', 'data-migrator' ) . '</button></form>';
+				self::form_open( 'sched_delete', 'nm-backups', __( 'Να διαγραφεί το πρόγραμμα; Τα αντίγραφα που έχει κάνει μένουν.', 'data-migrator' ) );
+				echo '<input type="hidden" name="id" value="' . esc_attr( $sc['id'] ) . '"><button class="button">' . esc_html__( 'Διαγραφή', 'data-migrator' ) . '</button></form>';
+				echo '</td></tr><tr class="nm-sched-edit"><td colspan="5"><details><summary>' . esc_html__( 'Αλλαγή', 'data-migrator' ) . '</summary>';
+				self::schedule_form( $sc );
+				echo '</details></td></tr>';
+			}
+			echo '</tbody></table>';
+		}
+		if ( count( $all ) < NM_Schedule::MAX ) {
+			echo '<details class="nm-sched-new"' . ( $all ? '' : ' open' ) . '><summary>' . esc_html__( 'Νέο πρόγραμμα', 'data-migrator' ) . '</summary>';
+			self::schedule_form( NM_Schedule::defaults() );
+			echo '</details>';
+		}
+		$quota = (int) $set['sched_quota'];
+		echo '<p class="description">' . esc_html( $quota > 0 ? sprintf( /* translators: %s: size */ __( 'Όριο χώρου για όλα τα προγραμματισμένα αντίγραφα: %s. Όταν το ξεπεράσουν, σβήνονται τα παλαιότερα προγραμματισμένα (ποτέ τα χειροκίνητα, ποτέ το νεότερο κάθε προγράμματος). Αλλάζει στις Ρυθμίσεις.', 'data-migrator' ), NM_Util::size( $quota * 1073741824.0 ) ) : __( 'Χωρίς όριο χώρου για τα προγραμματισμένα αντίγραφα (Ρυθμίσεις).', 'data-migrator' ) ) . '</p>';
+		echo '</div>';
+	}
+
+	private static function schedule_form( array $sc ): void {
+		$new = '' === (string) $sc['id'];
+		self::form_open( 'sched_save', 'nm-backups' );
+		echo '<div class="nm-sched-form">';
+		if ( ! $new ) {
+			echo '<input type="hidden" name="id" value="' . esc_attr( $sc['id'] ) . '">';
+		}
+		echo '<p>';
+		foreach ( array(
+			'db'   => __( 'Μόνο η βάση δεδομένων', 'data-migrator' ),
+			'full' => __( 'Πλήρες: βάση και όλα τα αρχεία', 'data-migrator' ),
+		) as $k => $l ) {
+			echo '<label style="margin-right:16px"><input type="radio" name="scope" value="' . esc_attr( $k ) . '"' . checked( $sc['scope'], $k, false ) . '> ' . esc_html( $l ) . '</label>';
+		}
+		echo '</p><p><label>' . esc_html__( 'Συχνότητα', 'data-migrator' ) . ' <select name="freq">';
+		foreach ( array(
+			'daily'   => __( 'Κάθε μέρα', 'data-migrator' ),
+			'weekly'  => __( 'Κάθε εβδομάδα', 'data-migrator' ),
+			'monthly' => __( 'Κάθε μήνα', 'data-migrator' ),
+		) as $k => $l ) {
+			echo '<option value="' . esc_attr( $k ) . '"' . selected( $sc['freq'], $k, false ) . '>' . esc_html( $l ) . '</option>';
+		}
+		echo '</select></label> <label data-freq="weekly">' . esc_html__( 'Ημέρα', 'data-migrator' ) . ' <select name="dow">';
+		foreach ( NM_Schedule::days() as $d => $name ) {
+			echo '<option value="' . esc_attr( (string) $d ) . '"' . selected( (int) $sc['dow'], $d, false ) . '>' . esc_html( $name ) . '</option>';
+		}
+		echo '</select></label> <label data-freq="monthly">' . esc_html__( 'Ημέρα του μήνα', 'data-migrator' ) . ' <input type="number" name="dom" min="1" max="28" value="' . esc_attr( (string) $sc['dom'] ) . '" style="width:64px"></label>';
+		echo ' <label>' . esc_html__( 'Ώρα', 'data-migrator' ) . ' <input type="time" name="time" value="' . esc_attr( $sc['time'] ) . '"></label>';
+		echo ' <label>' . esc_html__( 'Πόσα να κρατά', 'data-migrator' ) . ' <input type="number" name="keep" min="1" max="60" value="' . esc_attr( (string) $sc['keep'] ) . '" style="width:64px"></label></p>';
+		echo '<p class="description">' . esc_html( sprintf( /* translators: %s: time zone */ __( 'Ζώνη ώρας του site: %s. Προτείνεται ώρα με λίγη κίνηση. Για τα πλήρη αντίγραφα αρκούν συνήθως 4, για τη βάση 7.', 'data-migrator' ), wp_timezone_string() ) ) . '</p>';
+		echo '<p><label><input type="checkbox" name="on" value="1"' . checked( (bool) $sc['on'], true, false ) . '> ' . esc_html__( 'Ενεργό', 'data-migrator' ) . '</label></p>';
+		echo '<p><button class="button button-primary">' . esc_html( $new ? __( 'Προσθήκη προγράμματος', 'data-migrator' ) : __( 'Αποθήκευση', 'data-migrator' ) ) . '</button></p></div></form>';
+	}
+
 	private static function backup_row( array $m, array $scopes ): void {
 		$id      = (string) $m['id'];
 		$status  = (string) ( $m['status'] ?? '' );
@@ -286,6 +386,9 @@ final class NM_Admin_UI {
 			$content .= ' · ' . sprintf( /* translators: 1: files, 2: tables */ __( '%1$s αρχεία, %2$s πίνακες', 'data-migrator' ), number_format_i18n( (int) ( $m['files'] ?? 0 ) ), number_format_i18n( (int) ( $m['tables'] ?? 0 ) ) );
 		}
 		echo '<tr><td>' . esc_html( self::when( (int) $m['created'] ) );
+		if ( ! empty( $m['sched'] ) ) {
+			echo '<br><span class="nm-badge">' . esc_html__( 'Προγραμματισμένο', 'data-migrator' ) . '</span>';
+		}
 		if ( ! empty( $m['note'] ) ) {
 			echo '<br><span class="description">' . esc_html( (string) $m['note'] ) . '</span>';
 		}
@@ -535,7 +638,7 @@ final class NM_Admin_UI {
 		$st = get_option( 'nm_state', array() );
 		$st = is_array( $st ) ? $st : array();
 		self::form_open( 'settings', 'nm-settings' );
-		echo '<h2 class="nm-h2">' . esc_html__( 'Αποθήκευση', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<h2 class="nm-h2">' . esc_html__( 'Χώρος αποθήκευσης', 'data-migrator' ) . '</h2><div class="nm-zone">';
 		echo '<p><label for="nm-storage">' . esc_html__( 'Φάκελος των αντιγράφων', 'data-migrator' ) . '</label><br><input type="text" class="nm-url" id="nm-storage" name="storage" value="' . esc_attr( NM_Storage::dir() ) . '"></p>';
 		echo '<p class="description">' . esc_html__( 'Καλύτερα έξω από το web root. Αν τον αλλάξεις, τα παλιά αντίγραφα μένουν στον παλιό φάκελο (μετέφερέ τα με το χέρι αν τα θέλεις).', 'data-migrator' ) . '</p>';
 		$web = array(
@@ -553,6 +656,19 @@ final class NM_Admin_UI {
 		echo '</select></p>';
 		echo '<label style="display:block"><input type="checkbox" name="keep" value="1"' . checked( $s['keep'], true, false ) . '> ' . esc_html__( 'Να μείνουν τα αντίγραφα όταν διαγραφεί το plugin', 'data-migrator' ) . '</label>';
 		echo '<p class="description">' . esc_html__( 'Από προεπιλογή σβήνονται: ένα ξεχασμένο αντίγραφο έχει όλη τη βάση του site.', 'data-migrator' ) . '</p></div>';
+
+		echo '<h2 class="nm-h2">' . esc_html__( 'Προγραμματισμένα αντίγραφα', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<p><label for="nm-quota">' . esc_html__( 'Όριο χώρου (GB, 0 = χωρίς όριο)', 'data-migrator' ) . '</label> <input type="number" id="nm-quota" name="sched_quota" min="0" max="10000" value="' . esc_attr( (string) $s['sched_quota'] ) . '" style="width:90px"></p>';
+		echo '<p class="description">' . esc_html__( 'Για όλα τα προγραμματισμένα μαζί. Όταν το ξεπεράσουν, σβήνονται τα παλαιότερα προγραμματισμένα. Τα χειροκίνητα δεν σβήνονται ποτέ.', 'data-migrator' ) . '</p>';
+		echo '<p><label for="nm-mail">' . esc_html__( 'Email στον διαχειριστή', 'data-migrator' ) . '</label> <select id="nm-mail" name="sched_mail">';
+		foreach ( array(
+			'fail' => __( 'Μόνο όταν κάτι δεν πάει καλά', 'data-migrator' ),
+			'all'  => __( 'Μετά από κάθε αντίγραφο', 'data-migrator' ),
+			'none' => __( 'Ποτέ', 'data-migrator' ),
+		) as $k => $l ) {
+			echo '<option value="' . esc_attr( $k ) . '"' . selected( $s['sched_mail'], $k, false ) . '>' . esc_html( $l ) . '</option>';
+		}
+		echo '</select></p><p class="description">' . esc_html( sprintf( /* translators: %s: email address */ __( 'Στο %s (Ρυθμίσεις › Γενικά). Μόνο κείμενο και σύνδεσμος προς αυτή τη σελίδα, ποτέ το ίδιο το αντίγραφο.', 'data-migrator' ), (string) get_option( 'admin_email' ) ) ) . '</p></div>';
 
 		echo '<h2 class="nm-h2">' . esc_html__( 'Εξαιρέσεις', 'data-migrator' ) . '</h2><div class="nm-zone">';
 		echo '<p><textarea name="exclude" rows="5" style="width:100%;max-width:720px">' . esc_textarea( $s['exclude'] ) . '</textarea></p>';
@@ -655,6 +771,8 @@ final class NM_Admin_UI {
 				$s['part_mb'] = (int) self::post( 'part_mb' );
 				$s['exclude'] = self::post( 'exclude' );
 				$s['keep']    = '1' === self::post( 'keep' );
+				$s['sched_quota'] = (int) self::post( 'sched_quota' );
+				$s['sched_mail']  = self::post( 'sched_mail' );
 				NM_Settings::save( $s );
 				if ( $changed ) {
 					NM_Storage::reset_cache();
@@ -670,6 +788,45 @@ final class NM_Admin_UI {
 					NM_Lang::reset();
 				}
 				$msgs[] = self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'data-migrator' ) );
+				break;
+
+			case 'sched_save':
+				$id = self::post( 'id' );
+				if ( '' === $id && count( NM_Schedule::all() ) >= NM_Schedule::MAX ) {
+					$msgs[] = self::msg( 'error', __( 'Μη έγκυρο αίτημα.', 'data-migrator' ) );
+					break;
+				}
+				if ( '' !== $id && ! isset( NM_Schedule::all()[ $id ] ) ) {
+					$msgs[] = self::msg( 'error', __( 'Το πρόγραμμα δεν βρέθηκε.', 'data-migrator' ) );
+					break;
+				}
+				$sc     = NM_Schedule::put(
+					array(
+						'id'    => $id,
+						'on'    => '1' === self::post( 'on' ),
+						'scope' => self::post( 'scope' ),
+						'freq'  => self::post( 'freq' ),
+						'time'  => self::post( 'time' ),
+						'dow'   => (int) self::post( 'dow' ),
+						'dom'   => (int) self::post( 'dom' ),
+						'keep'  => (int) self::post( 'keep' ),
+					)
+				);
+				$msgs[] = self::msg( 'success', $sc['on'] ? sprintf( /* translators: %s: date and time */ __( 'Το πρόγραμμα αποθηκεύτηκε. Επόμενο αντίγραφο: %s.', 'data-migrator' ), self::when( (int) $sc['next'] ) ) : __( 'Το πρόγραμμα αποθηκεύτηκε σε παύση.', 'data-migrator' ) );
+				if ( 'exposed' === NM_Storage::web_test() ) {
+					$msgs[] = self::msg( 'error', __( 'Ο φάκελος των αντιγράφων κατεβαίνει από τον browser, γι\' αυτό τα προγραμματισμένα αντίγραφα σταμάτησαν. Όρισε φάκελο έξω από το web root στις Ρυθμίσεις.', 'data-migrator' ) );
+				}
+				break;
+
+			case 'sched_delete':
+				$ok     = NM_Schedule::remove( self::post( 'id' ) );
+				$msgs[] = self::msg( $ok ? 'success' : 'error', $ok ? __( 'Το πρόγραμμα διαγράφηκε. Τα αντίγραφά του έμειναν στη λίστα.', 'data-migrator' ) : __( 'Το πρόγραμμα δεν βρέθηκε.', 'data-migrator' ) );
+				break;
+
+			case 'sched_run':
+				$sc = NM_Schedule::all()[ self::post( 'id' ) ] ?? null;
+				$r  = $sc ? NM_Schedule::start( $sc, true ) : new WP_Error( 'gone', __( 'Το πρόγραμμα δεν βρέθηκε.', 'data-migrator' ) );
+				$msgs[] = self::msg( is_wp_error( $r ) ? 'error' : 'success', is_wp_error( $r ) ? $r->get_error_message() : __( 'Το αντίγραφο ξεκίνησε στο παρασκήνιο. Η σελίδα δείχνει την πρόοδο· μπορείς και να την κλείσεις.', 'data-migrator' ) );
 				break;
 
 			case 'web_test':

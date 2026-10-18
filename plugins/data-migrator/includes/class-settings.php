@@ -6,6 +6,8 @@
  *  part_mb     split archives into parts of this size (0 = one file)
  *  exclude     user exclusion patterns, one per line
  *  keep        keep the backups when the plugin is deleted (default no)
+ *  sched_quota size limit of all scheduled backups in GB (0 = none)
+ *  sched_mail  email the admin about scheduled runs: fail | all | none
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,7 +24,9 @@ final class NM_Settings {
 			'storage' => '',
 			'part_mb' => 0,
 			'exclude' => '',
-			'keep'    => false,
+			'keep'        => false,
+			'sched_quota' => 5,
+			'sched_mail'  => 'fail',
 		);
 	}
 
@@ -56,6 +60,9 @@ final class NM_Settings {
 		}
 		$out['exclude'] = implode( "\n", array_slice( array_unique( $lines ), 0, 100 ) );
 		$out['keep']    = ! empty( $v['keep'] );
+
+		$out['sched_quota'] = max( 0, min( 10000, (int) ( $v['sched_quota'] ?? $d['sched_quota'] ) ) );
+		$out['sched_mail']  = in_array( $v['sched_mail'] ?? '', array( 'fail', 'all', 'none' ), true ) ? $v['sched_mail'] : $d['sched_mail'];
 		return $out;
 	}
 
