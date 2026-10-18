@@ -48,6 +48,7 @@ final class Noxpress_Core {
 		'Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.' => 'Greek to Latin in slugs and file names, with bulk conversion of existing ones.',
 		'Σύνδεση με το orOS σε modules: φόρμα εγγραφής και κουτάκι στο ταμείο για τη λίστα σου στο orOS Newsletter.' => 'Connects the site to orOS in modules: sign-up form and checkout checkbox for your list in orOS Newsletter.',
 		'Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.' => 'Product bundles: every product with its own stock and VAT, a bundle discount and correct sales reports.',
+		'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.' => 'Pre-orders with a release date: badge and button in the store, the date in the cart and on the order, automatic release and emails.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -122,7 +123,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, POR 180).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -213,6 +214,11 @@ final class Noxpress_Core {
 				'name' => 'Product Bundles',
 				'desc' => __( 'Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.', 'noxpress' ),
 				'page' => 'pbn-bundles',
+			),
+			'pre-orders'        => array(
+				'name' => 'Pre-Orders',
+				'desc' => __( 'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.', 'noxpress' ),
+				'page' => 'por-settings',
 			),
 		);
 	}

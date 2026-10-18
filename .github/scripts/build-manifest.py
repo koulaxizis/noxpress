@@ -50,6 +50,7 @@ SLUGS = {
     'gl': 'greeklish-permalinks',
     'oc': 'oros-connect',
     'pb': 'product-bundles',
+    'po': 'pre-orders',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

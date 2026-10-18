@@ -66,7 +66,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $ewd_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles' ) as $ewd_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'pre-orders' ) as $ewd_slug ) {
 	if ( 'easy-withdrawal' !== $ewd_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $ewd_slug . '/' . $ewd_slug . '.php' ) ) {
 		$ewd_suite_left = true;
 		break;
