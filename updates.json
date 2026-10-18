@@ -67,15 +67,15 @@
     },
     "oros-connect": {
       "beta": {
-        "changelog": "* Initial release, with modules switched on one by one.\n* Newsletter module: sign-up form (block, shortcode, widget) that posts to the list's orOS sign-up address, connection check, Greek and English texts.\n* Unticked checkout checkbox (classic and block checkout); paid orders sent to orOS in the background with retries, order notes and a send log; consent kept in the order; optional confirmation for checkout sign-ups and a shop key that signs them.\n* Test / live / off mode, ORC_DISABLE, privacy policy text, settings export / import.\n* Works without WooCommerce. Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.8).",
-        "published": "2026-10-13",
+        "changelog": "* New module «Offers»: Publishing Quote requests for orOS to import as draft offers (REST orc/v1/offers), with the shop's WooCommerce REST keys or an Application Password; waiting requests and the last import in the admin.\n* Noxpress Core 1.1.11.",
+        "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b7d4e91ab725b4c2d1199baec3de43bdad899f18518874d03f3163ce62530c8d",
-        "signature": "lhkq366BSBcbSGKkVxnANwATu579++w0v7rP/RGxIBOYtC81Q844f/Ymy363YWSSTPzw6A9eOqd8r7nxN7IODg==",
+        "sha256": "f6b11c6fefee3255cf74402d450059d4d30ad592eee6fdb61d407f1d7c5a982e",
+        "signature": "aFT/GMg5S+7UE0y7OcrBK35xnRyOEifCxeCQ72fIkWTyUJLzRjp7QqO0K5iYwrJb4G1nGoD1WrvBE6CZ94haAA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.0.0/oros-connect.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.1.0/oros-connect.zip"
       }
     },
     "pre-orders": {
