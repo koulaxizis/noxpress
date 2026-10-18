@@ -260,15 +260,15 @@
     },
     "wish-shelf": {
       "beta": {
-        "changelog": "* Initial release.\n* Heart on shop cards (before / after the button, over the image) and on the product page, classic and block themes; button, list and counter blocks and shortcodes.\n* Guest lists in localStorage (no cookies), merged into the account on sign-in, or sign-in required.\n* Saved variations, price-drop note, add to cart per row / all / selected, remove after adding, empty list.\n* Table or theme-card layout, My Account tab, menu counter.\n* Share links (guest ids or a private random key) with copy and the device share menu, noindex.\n* Report of the most wanted products with \"bought from a list\", CSV export, ♥ column in Products.\n* Import from WishSuite; test mode while another wishlist plugin is active.\n* Privacy export / erase, editable Greek / English texts, settings export / import.\n* Test mode, WSH_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.12).",
+        "changelog": "* Named lists for signed-in customers (setting, off by default): tabs, create, rename, delete, move between lists, a share link per list. Filter wsh_max_lists.\n* Email alerts for price drops and products back in stock: customer opt-in, a WooCommerce email (off by default), a daily background check in batches, one email per customer, a stop link without sign-in.\n* Import from YITH WooCommerce Wishlist and TI WooCommerce Wishlist (their named lists too).\n* wsh_get_items() also returns list_id.\n* The tables upgrade on the first request after an update.\n* Uninstall also removes the alert opt-ins, the email settings, the queued checks and (with \"Delete the lists …\") the named lists.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d5406ccf7b942bfe2702a2f365c00a870ff520707ef88b238aa11324eda204d4",
-        "signature": "M4Uk8RzJI+Y5qaLXX+pnS/hai/rxfkQaweCMV0UevnZuyakloTP1dgrMLPL9p0nCHAAeYWLzschcZw7Y4aAKDg==",
+        "sha256": "902e21a7ea4b4561230db85eefe517dcbc468435bd904838b28d0913ab8f9668",
+        "signature": "ur4FvvRdXJpRZccmVRT9TlJi2OccTCrhxG8rRUeV5OLQ4FMhlGp+XuvRQvMHMs7DfTOIVMfKUeg8v+BnUe40AQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.0.0/wish-shelf.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.1.0/wish-shelf.zip"
       }
     }
   }
