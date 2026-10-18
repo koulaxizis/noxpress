@@ -1,18 +1,23 @@
 <?php
 /**
- * Wish Shelf — uninstall.php (v1.0.0)
+ * Wish Shelf — uninstall.php (v1.1.0)
  *
  * Deleted:
  *  - Options wsh_settings, wsh_db (schema version; a new install runs
  *    dbDelta again, which keeps a kept table), wsh_flush.
- *  - Transients wsh_aui_msg_{uid} (PRG notices) and wsh_rl_{uid} (rate limit).
+ *  - Transients wsh_aui_msg_{uid} (PRG notices), wsh_rl_{uid} (rate limit)
+ *    wsh_upgrading (schema upgrade lock) and wsh_alerts_chk (hourly check
+ *    of the alerts job).
+ *  - Email alerts: the settings of the email (option
+ *    woocommerce_wsh_alert_settings), the customers' opt-in (user meta
+ *    wsh_alerts) and the queued jobs (Action Scheduler hook wsh_alerts_run).
  *  - User option wsh_csv (remembered CSV format).
  *  - Product meta _wsh_count, _wsh_bought (derived counters).
  *  - Order line meta _wsh_from and the order flag _wsh_counted (posts and
  *    HPOS tables).
  *  - Only when "Delete the customers' lists …" is ticked in Tools
- *    (delete_data): the table {prefix}wsh_items and the share keys (user
- *    meta wsh_share).
+ *    (delete_data): the tables {prefix}wsh_items and {prefix}wsh_lists
+ *    (named lists) and the share keys (user meta wsh_share).
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * Kept on purpose (Bible §12, content the customers made): without that
@@ -35,9 +40,13 @@ function wsh_uninstall_site(): void {
 	delete_option( 'wsh_settings' );
 	delete_option( 'wsh_db' );
 	delete_option( 'wsh_flush' );
+	delete_option( 'woocommerce_wsh_alert_settings' );
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'wsh_alerts_run' );
+	}
 
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery -- one-off uninstall cleanup.
-	foreach ( array( 'wsh_aui_msg_', 'wsh_rl_' ) as $wsh_t ) {
+	foreach ( array( 'wsh_aui_msg_', 'wsh_rl_', 'wsh_upgrading', 'wsh_alerts_chk' ) as $wsh_t ) {
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
@@ -47,6 +56,7 @@ function wsh_uninstall_site(): void {
 		);
 	}
 	delete_metadata( 'user', 0, $wpdb->get_blog_prefix() . 'wsh_csv', '', true );
+	delete_metadata( 'user', 0, 'wsh_alerts', '', true );
 	foreach ( array( '_wsh_count', '_wsh_bought', '_wsh_counted' ) as $wsh_key ) {
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $wsh_key ) );
 	}
@@ -61,6 +71,7 @@ function wsh_uninstall_site(): void {
 
 	if ( $wsh_all ) {
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wsh_items" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wsh_lists" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
 		delete_metadata( 'user', 0, 'wsh_share', '', true );
 	}
 	// phpcs:enable

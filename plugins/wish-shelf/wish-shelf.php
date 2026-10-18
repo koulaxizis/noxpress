@@ -3,7 +3,7 @@
  * Plugin Name:          Wish Shelf
  * Plugin URI:           https://noxpress.tech
  * Description:          Λίστα επιθυμιών για το WooCommerce: καρδούλα στις κάρτες και στη σελίδα προϊόντος, λίστα για επισκέπτες χωρίς cookies, παραλλαγές, «η τιμή έπεσε», καλάθι για όλα με ένα κλικ, κοινοποίηση με σύνδεσμο, καρτέλα στον λογαριασμό, αναφορά για το τι θέλουν οι πελάτες και εισαγωγή από το WishSuite.
- * Version:              1.0.0
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -32,7 +32,10 @@
  *                     (remove, add to cart), "bought from a list"
  *  - WSH_Ajax       → wc-ajax endpoints wsh_sync and wsh_render
  *  - WSH_Account    → My Account tab, shortcodes, blocks, privacy tools
- *  - WSH_Import     → other wishlist plugins: detection, WishSuite import
+ *  - WSH_Alerts     → email alerts (price drop, back in stock): opt-in,
+ *                     daily Action Scheduler job, WSH_Email_Alert (WC_Email)
+ *  - WSH_Import     → other wishlist plugins: detection, import from
+ *                     WishSuite, YITH and TI
  *  - WSH_Report     → ♥ column in Products, report, CSV
  *  - WSH_Admin_UI   → menu, settings page (general, list, texts, report,
  *                     tools), backup, footer
@@ -63,6 +66,8 @@
  *    ids, item limit, rate limit). "Add to cart" from a list stores a mark
  *    in WooCommerce's own session, copied to the order line, so the report
  *    can count what was bought from a list.
+ *  - §14.5, alerts: the daily job of WSH_Alerts writes the alert state of
+ *    the items (alert_price, was_out) from cron, never from a visitor.
  *  - §12 (clean uninstall): customers' lists and share links stay after
  *    uninstall unless "Delete the lists …" is ticked in Tools (content the
  *    customers made). Settings, counters and marks always go.
@@ -70,7 +75,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WSH_VERSION', '1.0.0' );
+define( 'WSH_VERSION', '1.1.0' );
 define( 'WSH_FILE', __FILE__ );
 define( 'WSH_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WSH_URL', plugin_dir_url( __FILE__ ) );
@@ -132,11 +137,15 @@ final class Wish_Shelf {
 		require_once WSH_PATH . 'includes/class-list.php';
 		require_once WSH_PATH . 'includes/class-ajax.php';
 		require_once WSH_PATH . 'includes/class-account.php';
+		require_once WSH_PATH . 'includes/class-alerts.php';
 
 		// Shortcodes and blocks always exist (they print nothing while off),
 		// so a page never shows a raw [nox_wishlist].
 		WSH_Account::shortcodes();
 		WSH_Account::privacy();
+		// The email class, the daily job and the unsubscribe link; the job
+		// itself checks mode, WSH_DISABLE and the email switch.
+		WSH_Alerts::init();
 
 		// Emergency switch (Bible §14): no front-end hook at all.
 		if ( ! self::killed() ) {
@@ -146,12 +155,14 @@ final class Wish_Shelf {
 			WSH_Ajax::init();
 		}
 
+		// Table changes of an update arrive without activation: before any query.
+		add_action( 'init', array( __CLASS__, 'upgrade' ), 1 );
+
 		if ( is_admin() ) {
 			require_once WSH_PATH . 'includes/class-report.php';
 			require_once WSH_PATH . 'includes/class-admin-ui.php';
 			WSH_Report::init();
 			WSH_Admin_UI::init();
-			add_action( 'admin_init', array( __CLASS__, 'upgrade' ) );
 		}
 	}
 
@@ -160,11 +171,17 @@ final class Wish_Shelf {
 		return defined( 'WSH_DISABLE' ) && WSH_DISABLE;
 	}
 
-	/** Creates / upgrades the table when the schema version differs (updates without activation). */
+	/**
+	 * Creates / upgrades the tables when the schema version differs (updates
+	 * without activation). One request does it; the lock keeps others out.
+	 */
 	public static function upgrade(): void {
-		if ( ! WSH_Store::ready() && current_user_can( 'activate_plugins' ) ) {
-			WSH_Store::install();
+		if ( WSH_Store::ready() || get_transient( 'wsh_upgrading' ) ) {
+			return;
 		}
+		set_transient( 'wsh_upgrading', 1, MINUTE_IN_SECONDS );
+		WSH_Store::install();
+		delete_transient( 'wsh_upgrading' );
 	}
 
 	public static function missing_woo_notice(): void {
@@ -181,7 +198,7 @@ final class Wish_Shelf {
  * A signed-in customer's wishlist (public API, Bible §6).
  *
  * @param int $user_id User id (0 = the current user).
- * @return array[] Each { product_id, variation_id, added (GMT 'Y-m-d H:i:s') }, newest first.
+ * @return array[] Each { product_id, variation_id, added (GMT 'Y-m-d H:i:s'), list_id (0 = main list; 1.1.0) }, newest first.
  */
 function wsh_get_items( int $user_id = 0 ): array {
 	if ( ! class_exists( 'WSH_Store' ) ) {
@@ -194,6 +211,7 @@ function wsh_get_items( int $user_id = 0 ): array {
 			'product_id'   => (int) $it['p'],
 			'variation_id' => (int) $it['v'],
 			'added'        => (string) $it['added'],
+			'list_id'      => (int) $it['list'],
 		);
 	}
 	return $out;

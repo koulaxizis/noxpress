@@ -1,5 +1,5 @@
 /**
- * Wish Shelf — front.css (v1.0.0)
+ * Wish Shelf — front.css (v1.1.0)
  *
  * Bible §14.13: theme rules with ids (e.g. "#main span { position:
  * absolute }") beat class selectors, so a reset scoped to our own parts
@@ -29,7 +29,12 @@
 .wsh-root .wsh-actions,
 .wsh-root .wsh-actions *,
 .wsh-root .wsh-share,
-.wsh-root .wsh-share * {
+.wsh-root .wsh-share *,
+.wsh-root.wsh-lists,
+.wsh-root.wsh-lists *,
+.wsh-root.wsh-alerts,
+.wsh-root.wsh-alerts *,
+.wsh-root.wsh-note {
 	float: none !important;
 	clear: none !important;
 	position: static !important;
@@ -64,7 +69,20 @@
 .wsh-root .wsh-table img,
 .wsh-root .wsh-actions,
 .wsh-root .wsh-share,
-.wsh-root .wsh-share__label {
+.wsh-root .wsh-share__label,
+.wsh-root.wsh-lists,
+.wsh-root.wsh-lists ul,
+.wsh-root.wsh-lists li,
+.wsh-root.wsh-lists a,
+.wsh-root.wsh-lists span,
+.wsh-root.wsh-lists details,
+.wsh-root.wsh-lists summary,
+.wsh-root.wsh-lists form,
+.wsh-root.wsh-lists label,
+.wsh-root.wsh-alerts,
+.wsh-root.wsh-alerts label,
+.wsh-root.wsh-alerts span,
+.wsh-root.wsh-note {
 	background: none !important;
 	border: 0 !important;
 	margin: 0 !important;
@@ -350,6 +368,62 @@ li.product:has(.wsh-wrap--over) {
 	flex: 1 1 260px;
 	min-width: 0 !important;
 }
+
+/* ===== Named lists (1.1.0) ===== */
+.wsh-root.wsh-lists { display: block !important; margin: 0 0 16px !important; }
+.wsh-root .wsh-lists__tabs ul {
+	display: flex !important;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	list-style: none !important;
+}
+.wsh-root .wsh-lists__tabs li { display: block !important; list-style: none !important; }
+.wsh-root .wsh-lists__tabs li::before,
+.wsh-root .wsh-lists__tabs li::marker { content: none !important; }
+.wsh-root .wsh-lists__tabs a {
+	display: inline-block !important;
+	padding: 2px 0 !important;
+	border-bottom: 2px solid transparent !important;
+	color: inherit !important;
+	text-decoration: none !important;
+}
+.wsh-root .wsh-lists__tabs .is-current a { border-bottom-color: currentColor !important; font-weight: 600; }
+.wsh-root .wsh-lists__n { display: inline !important; opacity: 0.6; font-size: 0.85em; }
+.wsh-root .wsh-lists__manage { display: block !important; margin: 10px 0 0 !important; }
+.wsh-root .wsh-lists__manage summary { display: list-item !important; cursor: pointer; text-decoration: underline; }
+.wsh-root .wsh-lists__form {
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 8px 12px;
+	margin: 10px 0 0 !important;
+}
+.wsh-root .wsh-lists__field { display: flex !important; flex-direction: column; gap: 4px; }
+.wsh-root .wsh-lists__field input { width: 16em !important; max-width: 100% !important; margin: 0 !important; }
+.wsh-root .wsh-lists__form .button { margin: 0 !important; }
+.wsh-root .wsh-lists__form .wsh-clear { margin-left: 0 !important; }
+.wsh-root .wsh-move {
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin: 6px 0 0 !important;
+	font-size: 0.9em;
+}
+.wsh-root .wsh-move select { width: auto !important; max-width: 12em !important; margin: 0 !important; font-size: inherit; }
+
+/* ===== Email alerts opt-in (1.1.0) ===== */
+.wsh-root.wsh-alerts {
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 14px;
+	margin: 0 0 24px !important;
+}
+.wsh-root .wsh-alerts__opt { align-items: flex-start !important; gap: 8px; text-align: left !important; }
+.wsh-root .wsh-alerts__opt input { flex: 0 0 auto; margin: 0.25em 0 0 !important; width: auto !important; }
+.wsh-root .wsh-alerts__opt span { display: inline !important; flex: 1 1 auto; }
+.wsh-root.wsh-note { display: block !important; margin: 0 0 16px !important; font-weight: 600; }
 
 /* Block themes do not style tables: a light line between rows. */
 .wp-site-blocks .wsh-root .wsh-table tr.wsh-row td { border-bottom: 1px solid rgba(0, 0, 0, 0.08); }

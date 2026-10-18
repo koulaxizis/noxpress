@@ -399,7 +399,7 @@
 		}
 		var to = btn.getAttribute( 'data-wsh-token' );
 		btn.disabled = true;
-		sync( { op: 'share', to: to }, function ( data ) {
+		sync( { op: 'share', to: to, list: bar.getAttribute( 'data-wsh-list' ) || '0' }, function ( data ) {
 			btn.disabled = false;
 			var url = typeof data.share === 'string' ? data.share : '';
 			var input = bar.querySelector( '[data-wsh-share-url]' );
@@ -440,6 +440,13 @@
 			e.preventDefault();
 			e.stopPropagation();
 			onButton( btn );
+			return;
+		}
+		var dl = t.closest( '[data-wsh-del-list]' );
+		if ( dl ) {
+			if ( ! window.confirm( T.confirmList ) ) {
+				e.preventDefault();
+			}
 			return;
 		}
 		var root = t.closest( '.wsh-list' );

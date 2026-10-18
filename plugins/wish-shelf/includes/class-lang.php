@@ -8,7 +8,9 @@
  * through as they are), anything else → English.
  *
  * The texts visitors see are store settings with a Greek and an English
- * value (Bible §14.17, WSH_Settings::text()), not msgids.
+ * value (Bible §14.17, WSH_Settings::text()), not msgids. The alert email
+ * is built in the visitor language of the plugin, forced with with_lang()
+ * while the email is built (Bible §14.27).
  *
  * Always loaded (even without WooCommerce) so the "WooCommerce missing"
  * admin notice is translated too.
@@ -24,6 +26,9 @@ final class WSH_Lang {
 
 	/** Per-request cache: 'el' | 'en'. */
 	private static $lang = null;
+
+	/** Forced language while an email is built ('' = none). */
+	private static $force = '';
 
 	private static $dict = array(
 		'Το Wish Shelf χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Wish Shelf requires WooCommerce to be active — the plugin stays inactive until it is activated.',
@@ -148,9 +153,6 @@ final class WSH_Lang {
 		'Excel ελληνικά (; και κόμμα)'                                => 'Excel Greek (; and comma)',
 		'Τυπικό CSV (, και τελεία)'                                   => 'Standard CSV (, and dot)',
 		'Εξαγωγή CSV'                                                 => 'Export CSV',
-		'Εισαγωγή από WishSuite'                                      => 'Import from WishSuite',
-		'Αντιγράφει τις λίστες των συνδεδεμένων πελατών από το WishSuite, χωρίς διπλά και χωρίς να αλλάξει τα δεδομένα του. Οι λίστες επισκεπτών του WishSuite είναι στους browsers τους και δεν μεταφέρονται.' => 'Copies the signed-in customers\' lists from WishSuite, without duplicates and without changing its data. WishSuite\'s guest lists are in the guests\' browsers and cannot be moved.',
-		'Δεν βρέθηκε πίνακας του WishSuite σε αυτό το site.'          => 'No WishSuite table was found on this site.',
 		'Βρέθηκαν %1$d προϊόντα σε λίστες %2$d πελατών.'              => 'Found %1$d products in the lists of %2$d customers.',
 		'Εισαγωγή'                                                    => 'Import',
 		'Backup ρυθμίσεων'                                            => 'Settings backup',
@@ -164,7 +166,6 @@ final class WSH_Lang {
 		'Η λίστα ενός συνδεδεμένου πελάτη: προϊόν, παραλλαγή, ημερομηνία, τιμή κατά την προσθήκη.' => 'A signed-in customer\'s list: product, variation, date, price when added.',
 		'Σε πόσες λίστες πελατών είναι ένα προϊόν.'                   => 'In how many customers\' lists a product is.',
 		'Actions όταν αλλάζει η λίστα ενός συνδεδεμένου πελάτη ( $user_id, $product_id, $variation_id ).' => 'Actions when a signed-in customer\'s list changes ( $user_id, $product_id, $variation_id ).',
-		'Φίλτρα για τα κείμενα του πελάτη (π.χ. WPML) και το όριο προϊόντων ανά λίστα (200).' => 'Filters for the customer texts (e.g. WPML) and the item limit per list (200).',
 		'Shortcodes για τη λίστα, το κουμπί και τον μετρητή (και ως blocks).' => 'Shortcodes for the list, the button and the counter (also as blocks).',
 		'Σταθερά στο wp-config.php: σταματά κάθε αλλαγή στο front end.' => 'Constant in wp-config.php: stops every front-end change.',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                                 => 'Settings saved.',
@@ -183,6 +184,45 @@ final class WSH_Lang {
 		'Noxpress Dashboard'                                          => 'Noxpress Dashboard',
 		'Σε λίστες επιθυμιών'                                         => 'In wishlists',
 		'ID'                                                          => 'ID',
+		'Γεια σας %s,' => 'Hello %s,',
+		'Αν ζητήσετε ειδοποιήσεις, σας στέλνουμε email στη διεύθυνση του λογαριασμού σας όταν ένα προϊόν της λίστας σας πέσει σε τιμή ή ξαναμπεί σε απόθεμα. Μπορείτε να τις σταματήσετε από τη λίστα σας ή από τον σύνδεσμο σε κάθε email.' => 'If you ask for alerts, we email the address of your account when a product in your list drops in price or is back in stock. You can stop them from your list or with the link in every email.',
+		'Πολλές λίστες' => 'Multiple lists',
+		'Οι συνδεδεμένοι πελάτες φτιάχνουν λίστες με όνομα (π.χ. «Δώρα»)' => 'Signed-in customers make named lists (e.g. "Gifts")',
+		'Η καρδιά βάζει το προϊόν στη βασική λίστα· στη σελίδα της λίστας ο πελάτης φτιάχνει έως %d ακόμα λίστες, τις μετονομάζει ή τις διαγράφει, μετακινεί προϊόντα και κοινοποιεί την καθεμία χωριστά. Κάθε προϊόν είναι σε μία λίστα. Οι επισκέπτες κρατούν μία λίστα. Αν το κλείσεις, ο πελάτης βλέπει όλα τα προϊόντα του σε μία λίστα.' => 'The heart puts the product in the main list; on the list page the customer makes up to %d more lists, renames or deletes them, moves products and shares each one on its own. Each product is in one list. Guests keep one list. If you turn this off, the customer sees all their products in one list.',
+		'Ειδοποιήσεις με email' => 'Email alerts',
+		'Το email είναι κλειστό. Άνοιξέ το στο WooCommerce → Ρυθμίσεις → Emails → «Λίστα επιθυμιών: πτώση τιμής ή ξανά σε απόθεμα».' => 'The email is off. Turn it on in WooCommerce → Settings → Emails → "Wishlist: price drop or back in stock".',
+		'Άνοιγμα' => 'Open',
+		'Τα emails φεύγουν μόνο όταν η λειτουργία είναι «Ενεργό για όλους».' => 'Emails go out only when the mode is "On for everyone".',
+		'Ενεργές. Πελάτες που τις ζήτησαν: %d.' => 'On. Customers who asked for them: %d.',
+		'Θέμα και κείμενο του email' => 'Email subject and text',
+		'Όταν πέφτει η τιμή' => 'When the price drops',
+		'Ελάχιστη πτώση (%)' => 'Smallest drop (%)',
+		'Όταν ξαναμπαίνει σε απόθεμα' => 'When it is back in stock',
+		'Μόνο για συνδεδεμένους πελάτες που τσέκαραν το κουτάκι κάτω από τη λίστα τους (ατσέκαρτο από προεπιλογή). Ο έλεγχος γίνεται μία φορά την ημέρα στο παρασκήνιο, με ένα email ανά πελάτη για όλα τα νέα του, και η ίδια είδηση δεν ξαναστέλνεται. Κάθε email έχει σύνδεσμο διακοπής που δουλεύει χωρίς σύνδεση.' => 'Only for signed-in customers who ticked the box under their list (unticked by default). The check runs once a day in the background, with one email per customer for all their news, and the same news is never sent twice. Every email has a stop link that works without signing in.',
+		'Πολλές λίστες: όνομα της βασικής λίστας' => 'Multiple lists: name of the main list',
+		'Πολλές λίστες: «Νέα λίστα»' => 'Multiple lists: "New list"',
+		'Πολλές λίστες: «Όνομα λίστας»' => 'Multiple lists: "List name"',
+		'Πολλές λίστες: «Δημιουργία»' => 'Multiple lists: "Create"',
+		'Πολλές λίστες: «Μετονομασία»' => 'Multiple lists: "Rename"',
+		'Πολλές λίστες: «Διαγραφή λίστας»' => 'Multiple lists: "Delete list"',
+		'Πολλές λίστες: επιβεβαίωση διαγραφής' => 'Multiple lists: delete confirmation',
+		'Πολλές λίστες: «Μετακίνηση»' => 'Multiple lists: "Move"',
+		'Emails: κουτάκι κάτω από τη λίστα' => 'Emails: box under the list',
+		'Emails: «Αποθήκευση»' => 'Emails: "Save"',
+		'Emails: μήνυμα μετά τη διακοπή' => 'Emails: message after stopping',
+		'Email: εισαγωγή' => 'Email: intro',
+		'Email: πτώση τιμής ({old}, {new})' => 'Email: price drop ({old}, {new})',
+		'Email: ξανά σε απόθεμα' => 'Email: back in stock',
+		'Email: σύνδεσμος διακοπής' => 'Email: stop link',
+		'Εισαγωγή από άλλο plugin' => 'Import from another plugin',
+		'Αντιγράφει τις λίστες των συνδεδεμένων πελατών, χωρίς διπλά και χωρίς να αλλάξει τα δεδομένα του άλλου plugin. Οι λίστες των επισκεπτών του δεν μεταφέρονται. Με ανοιχτές τις «Πολλές λίστες», οι λίστες με όνομα του YITH και του TI γίνονται λίστες με το ίδιο όνομα· αλλιώς όλα πηγαίνουν στη βασική λίστα.' => 'Copies the signed-in customers\' lists, without duplicates and without changing the other plugin\'s data. Its guest lists are not moved. With "Multiple lists" on, named lists of YITH and TI become lists with the same name; otherwise everything goes to the main list.',
+		'Δεν βρέθηκαν πίνακες του WishSuite, του YITH ή του TI σε αυτό το site.' => 'No WishSuite, YITH or TI tables were found on this site.',
+		'Φίλτρα για τα κείμενα του πελάτη (π.χ. WPML), το όριο προϊόντων ανά πελάτη (200) και το όριο λιστών με όνομα (10).' => 'Filters for the customer texts (e.g. WPML), the item limit per customer (200) and the named list limit (10).',
+		'Template του email ειδοποίησης· το θέμα το αντικαθιστά στο yourtheme/woocommerce/emails/.' => 'Template of the alert email; the theme overrides it in yourtheme/woocommerce/emails/.',
+		'Λίστα επιθυμιών: πτώση τιμής ή ξανά σε απόθεμα' => 'Wishlist: price drop or back in stock',
+		'Στέλνεται μία φορά την ημέρα το πολύ στους πελάτες που το ζήτησαν κάτω από τη λίστα τους, όταν ένα προϊόν της λίστας τους έπεσε σε τιμή ή ξαναμπήκε σε απόθεμα (Noxpress → Λίστα επιθυμιών → Λίστα).' => 'Sent at most once a day to customers who asked for it under their list, when a product in their list dropped in price or is back in stock (Noxpress → Wishlist → List).',
+		'Νέα από τη λίστα επιθυμιών σας: {product}' => 'News from your wishlist: {product}',
+		'Νέα από τη λίστα επιθυμιών σας' => 'News from your wishlist',
 	);
 
 	public static function init(): void {
@@ -196,6 +236,9 @@ final class WSH_Lang {
 
 	/** 'el' | 'en' for the current user (admin screens). */
 	public static function lang(): string {
+		if ( '' !== self::$force ) {
+			return self::$force;
+		}
 		if ( null !== self::$lang ) {
 			return self::$lang;
 		}
@@ -212,6 +255,23 @@ final class WSH_Lang {
 			self::$lang = $lang;
 		}
 		return $lang;
+	}
+
+	/**
+	 * Run $fn with the language forced to $lang ('el' | 'en'), then restore.
+	 *
+	 * @param string   $lang Language.
+	 * @param callable $fn   Callback.
+	 * @return mixed The callback's result.
+	 */
+	public static function with_lang( string $lang, callable $fn ) {
+		$prev        = self::$force;
+		self::$force = ( 'en' === $lang ) ? 'en' : 'el';
+		try {
+			return $fn();
+		} finally {
+			self::$force = $prev;
+		}
 	}
 
 	/** gettext_wish-shelf filter. */
