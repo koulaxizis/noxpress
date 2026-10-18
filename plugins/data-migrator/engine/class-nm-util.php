@@ -23,6 +23,9 @@ final class NM_Util {
 	/** Current log file (absolute path) or ''. */
 	public static $log_file = '';
 
+	/** Upper limit of budget() in seconds; 0 = none (background steps set it). */
+	public static $cap = 0.0;
+
 	/* ---------------------------------------------------------------
 	 * Translation
 	 * ------------------------------------------------------------- */
@@ -207,6 +210,11 @@ final class NM_Util {
 
 	/** Seconds one request may work: 20, or half of max_execution_time. */
 	public static function budget(): float {
+		$b = self::raw_budget();
+		return self::$cap > 0 ? min( $b, (float) self::$cap ) : $b;
+	}
+
+	private static function raw_budget(): float {
 		// NM_BUDGET in wp-config.php: seconds per request, for hosts whose
 		// proxy cuts requests sooner than PHP's own limit says.
 		if ( defined( 'NM_BUDGET' ) && is_numeric( NM_BUDGET ) ) {

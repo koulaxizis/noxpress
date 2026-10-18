@@ -170,6 +170,7 @@ final class NM_Backup {
 		}
 		$tables = array();
 		$views  = array();
+		$dbsize = 0.0;
 		if ( $dbc ) {
 			global $wpdb;
 			$all   = NM_Dumper::list_tables( $dbc );
@@ -184,6 +185,7 @@ final class NM_Backup {
 					continue;
 				}
 				$tables[] = $name;
+				$dbsize  += (float) $t['size'];
 			}
 			$dbc->close();
 		}
@@ -223,6 +225,8 @@ final class NM_Backup {
 			'root'    => $root_dirs,
 			'part_mb' => $part,
 			'note'    => substr( sanitize_text_field( (string) ( $o['note'] ?? '' ) ), 0, 120 ),
+			'sched'   => isset( $o['sched'] ) && preg_match( '/^[a-f0-9]{8}$/', (string) $o['sched'] ) ? (string) $o['sched'] : '',
+			'dbsize'  => $dbsize,
 			'stem'    => ( '' === $host ? 'site' : $host ) . '-' . wp_date( 'Ymd-His' ) . '-' . $id,
 			'work'    => $work,
 			'ss'      => array(),
@@ -244,6 +248,7 @@ final class NM_Backup {
 				'status'  => 'running',
 				'scope'   => $scope,
 				'note'    => $job['note'],
+				'sched'   => $job['sched'],
 				'parts'   => array(),
 				'job'     => $job['id'],
 				'home'    => home_url(),
@@ -298,6 +303,12 @@ final class NM_Backup {
 		$deadline          = microtime( true ) + NM_Util::budget();
 		try {
 			while ( 'running' === $job['status'] && microtime( true ) < $deadline ) {
+				if ( in_array( $job['phase'], array( 'db', 'zip', 'finish' ), true ) && self::low_disk() ) {
+					self::disk_error( $job );
+					self::fail( $job );
+					NM_Storage::save_job( $job );
+					break;
+				}
 				switch ( $job['phase'] ) {
 					case 'scan':
 						$r = self::phase_scan( $job, $deadline );
@@ -353,17 +364,38 @@ final class NM_Backup {
 		NM_Util::rrmdir( (string) $job['work'], NM_Storage::sub( 'work' ) );
 	}
 
-	/** Cancel a running job. */
-	public static function cancel( string $job_id ): bool {
+	/**
+	 * Cancel a running job. With $why it ends as failed with that reason
+	 * (the scheduler stopping a job that no longer moves).
+	 */
+	public static function cancel( string $job_id, string $why = '' ): bool {
 		$job = NM_Storage::job( $job_id );
 		if ( ! $job || 'backup' !== $job['type'] || 'running' !== $job['status'] ) {
 			return false;
 		}
-		$job['error'] = NM_Util::t( 'Ακυρώθηκε.' );
+		$job['error'] = '' === $why ? NM_Util::t( 'Ακυρώθηκε.' ) : $why;
 		self::fail( $job );
-		$job['status'] = 'cancelled';
+		$job['status'] = '' === $why ? 'cancelled' : 'failed';
 		NM_Storage::save_job( $job );
 		return true;
+	}
+
+	/**
+	 * Free space left on the disk of the backups folder must not fall
+	 * under this (bytes): a full disk takes the site down with it
+	 * (database writes, sessions, uploads fail).
+	 */
+	const RESERVE = 268435456;
+
+	/** True when writing more would eat into the reserve. */
+	private static function low_disk(): bool {
+		$free = NM_Util::free_space( NM_Storage::dir() );
+		return $free >= 0 && $free < self::RESERVE;
+	}
+
+	private static function disk_error( array &$job ): string {
+		$job['error'] = NM_Util::tf( 'Σταμάτησε: ο ελεύθερος χώρος στον δίσκο έπεσε κάτω από %s. Το μισό αντίγραφο διαγράφηκε, για να συνεχίσει να δουλεύει το site.', NM_Util::size( (float) self::RESERVE ) );
+		return 'error';
 	}
 
 	public static function progress( array $job ): array {
@@ -578,6 +610,12 @@ final class NM_Backup {
 		}
 		NM_Util::log( 'scan: ' . $job['stats']['files'] . ' files, ' . NM_Util::size( (float) $job['stats']['bytes'] ) );
 		$free = NM_Util::free_space( NM_Storage::dir() );
+		// Scheduled runs nobody watches: skip when it would not fit.
+		$need = (float) $job['stats']['bytes'] + (float) ( $job['dbsize'] ?? 0 ) + self::RESERVE;
+		if ( ! empty( $job['sched'] ) && $free >= 0 && $free < $need ) {
+			$job['error'] = NM_Util::tf( 'Ο ελεύθερος χώρος (%1$s) δεν φτάνει για το αντίγραφο (περίπου %2$s μαζί με ένα περιθώριο για το site). Δεν ξεκίνησε.', NM_Util::size( $free ), NM_Util::size( $need ) );
+			return 'error';
+		}
 		if ( $free >= 0 && $free < (float) $job['stats']['bytes'] * 1.05 + 52428800 ) {
 			$job['warn'][] = NM_Util::tf( 'Ο ελεύθερος χώρος (%1$s) μπορεί να μη φτάσει για το αντίγραφο (έως %2$s).', NM_Util::size( $free ), NM_Util::size( (float) $job['stats']['bytes'] ) );
 		}
@@ -731,6 +769,10 @@ final class NM_Backup {
 			$job['ss'] = $ss;
 			NM_Util::write_state( $path, $job );
 			@unlink( $c ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			if ( self::low_disk() ) {
+				$zw->close();
+				return self::disk_error( $job );
+			}
 			if ( microtime( true ) >= $deadline ) {
 				$zw->close();
 				return 'more';
@@ -787,6 +829,11 @@ final class NM_Backup {
 				$job['ss'] = $ss;
 				NM_Util::write_state( $path, $job );
 				$last = microtime( true );
+				if ( self::low_disk() ) {
+					fclose( $lh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+					$zw->close();
+					return self::disk_error( $job );
+				}
 			}
 			if ( microtime( true ) >= $deadline ) {
 				break;
@@ -859,6 +906,7 @@ final class NM_Backup {
 			'status'    => 'done',
 			'scope'     => $job['scope'],
 			'note'      => $job['note'],
+			'sched'     => (string) ( $job['sched'] ?? '' ),
 			'job'       => $job['id'],
 			'home'      => home_url(),
 			'parts'     => $job['parts'],

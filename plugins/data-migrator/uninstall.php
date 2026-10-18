@@ -1,9 +1,9 @@
 <?php
 /**
- * Data Migrator — uninstall.php (v1.0.0)
+ * Data Migrator — uninstall.php (v1.1.0)
  *
  * Deleted:
- *  - Every nm_* option (nm_settings, nm_state, nm_post_restore) and every
+ *  - Every nm_* option (nm_settings, nm_schedules, nm_state, nm_post_restore) and every
  *    nm_* transient (PRG notices, installer keys, restore tokens shown
  *    once, the core checksum result).
  *  - Temporary, snapshot and undo tables of unfinished restores
@@ -15,6 +15,8 @@
  *    goes only when nothing else is left in it, so a custom folder that
  *    holds other files is never emptied.
  *  - Stage folders wp-content/nm-stage-<hex>/ (restores across disks).
+ *  - The schedule events nm_sched_tick / nm_sched_step, in Action
+ *    Scheduler (group data-migrator) and in WP-Cron.
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * The rs_lang user meta belongs to Revenue Splitter and is not touched.
@@ -107,6 +109,22 @@ if ( is_multisite() ) {
 	}
 } else {
 	nm_uninstall_site();
+}
+
+// Scheduled backup events (Action Scheduler and WP-Cron, Bible §12).
+if ( function_exists( 'as_unschedule_all_actions' ) ) {
+	as_unschedule_all_actions( '', array(), 'data-migrator' );
+}
+if ( is_multisite() ) {
+	foreach ( get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $nm_site_id ) {
+		switch_to_blog( (int) $nm_site_id );
+		wp_clear_scheduled_hook( 'nm_sched_tick' );
+		wp_clear_scheduled_hook( 'nm_sched_step' );
+		restore_current_blog();
+	}
+} else {
+	wp_clear_scheduled_hook( 'nm_sched_tick' );
+	wp_clear_scheduled_hook( 'nm_sched_step' );
 }
 
 // Tables of unfinished restores (one database for all sites).

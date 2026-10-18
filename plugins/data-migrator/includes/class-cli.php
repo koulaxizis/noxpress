@@ -357,6 +357,76 @@ final class NM_CLI {
 		}
 	}
 
+	/**
+	 * Scheduled backups: list them, or run one now in this process.
+	 *
+	 * The schedules themselves are set on the Backups page.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <action>
+	 * : list or run.
+	 * ---
+	 * options:
+	 *   - list
+	 *   - run
+	 * ---
+	 *
+	 * [<id>]
+	 * : The schedule id (run).
+	 *
+	 * [--format=<format>]
+	 * : Output format (list).
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - json
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp data-migrator schedule list
+	 *     wp data-migrator schedule run 3fa9c2d1
+	 *
+	 * @param array $args  Positional.
+	 * @param array $assoc Options.
+	 */
+	public function schedule( $args, $assoc ): void {
+		$all = NM_Schedule::all();
+		if ( 'run' === ( $args[0] ?? '' ) ) {
+			$sc = $all[ (string) ( $args[1] ?? '' ) ] ?? null;
+			if ( ! $sc ) {
+				WP_CLI::error( 'Schedule not found. See: wp data-migrator schedule list' );
+			}
+			$r = NM_Schedule::start( $sc, true );
+			if ( is_wp_error( $r ) ) {
+				WP_CLI::error( $r->get_error_message() );
+			}
+			$job = NM_Schedule::job();
+			$p   = $this->drive( (string) $job['id'], array( 'NM_Backup', 'step' ) );
+			NM_Schedule::step(); // Retention, last run, email.
+			if ( 'done' !== $p['status'] ) {
+				WP_CLI::error( (string) $p['text'] );
+			}
+			WP_CLI::success( sprintf( 'Backup %s.', (string) $p['id'] ) );
+			return;
+		}
+		$rows = array();
+		foreach ( $all as $sc ) {
+			$rows[] = array(
+				'id'    => $sc['id'],
+				'on'    => $sc['on'] ? 'yes' : 'no',
+				'scope' => $sc['scope'],
+				'when'  => $sc['freq'] . ' ' . $sc['time'] . ( 'weekly' === $sc['freq'] ? ' day ' . $sc['dow'] : ( 'monthly' === $sc['freq'] ? ' day ' . $sc['dom'] : '' ) ),
+				'keep'  => $sc['keep'],
+				'next'  => $sc['on'] && $sc['next'] ? wp_date( 'Y-m-d H:i', (int) $sc['next'] ) : '',
+				'last'  => empty( $sc['last']['time'] ) ? '' : $sc['last']['status'] . ' ' . wp_date( 'Y-m-d H:i', (int) $sc['last']['time'] ),
+			);
+		}
+		WP_CLI\Utils\format_items( (string) ( $assoc['format'] ?? 'table' ), $rows, array( 'id', 'on', 'scope', 'when', 'keep', 'next', 'last' ) );
+	}
+
 	/* ---------------------------------------------------------------
 	 * Helpers
 	 * ------------------------------------------------------------- */
