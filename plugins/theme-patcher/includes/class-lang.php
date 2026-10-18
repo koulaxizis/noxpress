@@ -323,6 +323,28 @@ final class TP_Lang {
 		'Κάθε κατηγορία μπαίνει σε έναν μόνο κανόνα: οι επαναλήψεις αγνοήθηκαν.' => 'Each category can be in one rule only: the repeats were ignored.',
 		'Αν το site έχει cache σελίδων (π.χ. WP Rocket), καθάρισέ το για να δουν οι επισκέπτες τις αλλαγές.' => 'If the site has a page cache (e.g. WP Rocket), clear it so visitors see the changes.',
 
+		// Tab: prices, sale badge (1.5.0).
+		'Ένδειξη έκπτωσης' => 'Sale badge',
+		'Δικό μου κείμενο στην ένδειξη έκπτωσης, σε όλο το site' => 'My own sale badge text, across the site',
+		'Λίστες καταστήματος και κατηγοριών, σχετικά προϊόντα, σελίδα προϊόντος, το μπλοκ «Product Sale Badge» και οι κάρτες που διορθώνει το Theme Patcher. Θέματα που φτιάχνουν δική τους ένδειξη χωρίς το WooCommerce κρατούν τη δική τους.' => 'Shop and category lists, related products, the product page, the "Product Sale Badge" block and the cards Theme Patcher fixes. Themes that build their own badge without WooCommerce keep theirs.',
+		'Μεταβλητές: {percent} = ποσοστό (π.χ. 20%), {amount} = ποσό έκπτωσης (π.χ. 4,00 €), όπως δείχνει το κατάστημα τις τιμές. Τα variable και grouped προϊόντα δείχνουν τη μεγαλύτερη έκπτωση.' => 'Placeholders: {percent} = percentage (e.g. 20%), {amount} = amount saved (e.g. €4.00), as the store shows prices. Variable and grouped products show their largest discount.',
+		'Διαφορετικά ποσοστά (variable, grouped)' => 'Different percentages (variable, grouped)',
+		'Χωρίς ποσοστό' => 'No percentage',
+		'Σελίδα προϊόντος (κενό = ίδιο με τις λίστες)' => 'Product page (empty = same as the lists)',
+		'«Χωρίς ποσοστό»: όταν δεν βγαίνει ποσοστό (π.χ. κανονική τιμή 0) ή όταν είναι κάτω από το ελάχιστο. Κενό = μένει η ένδειξη του θέματος.' => '"No percentage": when there is no percentage (e.g. a regular price of 0) or it is below the minimum. Empty = the theme\'s badge stays.',
+		'Στρογγυλοποίηση ποσοστού' => 'Percentage rounding',
+		'Προς τα κάτω (ποτέ μεγαλύτερο από το πραγματικό)' => 'Down (never more than the real discount)',
+		'Στον πλησιέστερο ακέραιο' => 'To the nearest whole number',
+		'Ελάχιστο ποσοστό (%)' => 'Minimum percentage (%)',
+		'Παράδειγμα με τις αποθηκευμένες ρυθμίσεις, για 20,00 € → 15,90 € (έκπτωση 20,5%%): %s' => 'Example with the saved settings, for €20.00 → €15.90 (a 20.5%% discount): %s',
+		'Το Customizer for WooCommerce είναι ακόμη ενεργό. Το κείμενο του Theme Patcher υπερισχύει· αν το Customizer δεν κάνει τίποτε άλλο στο site, απενεργοποίησέ το.' => 'Customizer for WooCommerce is still active. Theme Patcher\'s text wins; if Customizer does nothing else on the site, deactivate it.',
+		'Βρέθηκε κείμενο ένδειξης έκπτωσης από το Customizer for WooCommerce: %s' => 'Found a sale badge text from Customizer for WooCommerce: %s',
+		'Εισαγωγή' => 'Import',
+		'Γεμίζει τα κείμενα και ενεργοποιεί την ένδειξη. Οι ρυθμίσεις του Customizer δεν αλλάζουν.' => 'Fills in the texts and turns the badge on. Customizer\'s settings do not change.',
+		'Δεν βρέθηκε κείμενο ένδειξης έκπτωσης από το Customizer for WooCommerce.' => 'No sale badge text from Customizer for WooCommerce was found.',
+		'Τα κείμενα του Customizer for WooCommerce εισήχθησαν και η ένδειξη έκπτωσης ενεργοποιήθηκε.' => 'The texts of Customizer for WooCommerce were imported and the sale badge was turned on.',
+		'Έλεγξε τη σελίδα και μετά απενεργοποίησε το Customizer for WooCommerce, αν δεν κάνει τίποτε άλλο στο site.' => 'Check the page, then deactivate Customizer for WooCommerce if it does nothing else on the site.',
+
 		// Care & Safety tab (1.4.0).
 		'Τίτλος καρτέλας' => 'Tab title',
 		'Επικεφαλίδα φροντίδας' => 'Care heading',

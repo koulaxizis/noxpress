@@ -195,15 +195,15 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: \"Care and safety\" product tab (GPSR): care instructions, product safety, manufacturer, EU responsible person and a terms link, from care profiles chosen per product, by product type attribute or by SKU prefix. Off until enabled.\n* New: Care tab in the settings: profiles with an editor and Greek / English texts, placeholders `{product_name}`, `{material}`, `{method}`, manufacturers, EU responsible person, visitor texts, terms link and anchor, link colour, preview, restore defaults.\n* New: product box (profile, manufacturer, safety note); the three product fields are in the REST API for users who can edit the product.\n* New: `wp theme-patcher care resolve <id>` and `--all` (read only).\n* New: filters `tp_care_tab_title`, `tp_care_resolved_profile`, `tp_care_manufacturer`, `tp_care_tab_html`.\n* New: the backup includes the care settings; Settings can delete the care data from products on uninstall (off by default).",
-        "published": "2026-10-14",
+        "changelog": "* New: sale badge text for the whole site (Prices tab): a template such as \"Sale {percent}\" with `{percent}` and `{amount}`, an \"up to\" text for variable and grouped products with different discounts, a fallback text, an optional product page text, a minimum percentage and rounding (down by default). Greek and English. Off until enabled.\n* New: it covers WooCommerce's sale badge in classic themes (`woocommerce_sale_flash`), the Product Sale Badge block (`woocommerce_sale_badge_text`, WooCommerce 10.0+) and the badge of Theme Patcher's own card slot. The theme's badge element and classes are kept.\n* New: one-click import of the sale texts of Customizer for WooCommerce, with a reminder while that plugin is still active.\n* New: filter `tp_sale_badge_text`. The sale badge settings are included in the settings backup.",
+        "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0ad9c4b5a50dae9480014fc252e11bf5199eca7ee91edcd09ce5d751d4de0170",
-        "signature": "j9QIIoNBRDACOCWbdyqJThFDneqBTOnFZ7G7og6HdJ1ePunrD6eIKgvRcpJtoikefUwnbtzjGHnodfRDrZByAQ==",
+        "sha256": "043758d84eeb80b7a270636f453ad0615518a9ed7d4c8c8803e2b9bffd0dee32",
+        "signature": "r1ZOXFKU4do810cMmxZhtkPoJTr6zGwKyHl9NT/99a5eCb9Kp70Wmq/O/C3rHjlrf5tySmN1rrwi7Q9ybJiUDQ==",
         "tested_wp": "6.8",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.4.0/theme-patcher.zip"
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.0/theme-patcher.zip"
       }
     },
     "variation-picker": {

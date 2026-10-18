@@ -12,7 +12,16 @@
  *      "empty": bool, "empty_text": { "el", "en" },
  *      "rules": [ { "cat": term id, "children": bool, "el": str, "en": str } ],
  *      "map":   { "<term id>": rule index },   derived from rules on save (§14.10)
- *      "lang":  "auto"|"el"|"en"
+ *      "lang":  "auto"|"el"|"en"      also the language of the sale badge texts
+ *    },
+ *    "sale": {                          sale badge text, for the whole store (not per theme)
+ *      "on": bool,
+ *      "text":     { "el", "en" },      template: {percent}, {amount}
+ *      "upto":     { "el", "en" },      variable / grouped with different discounts
+ *      "fallback": { "el", "en" },      no percentage (or below "min"); '' = theme's badge
+ *      "single":   { "el", "en" },      product page; '' = same as "text"
+ *      "round":    "floor"|"round",
+ *      "min":      int 0–99             below this percentage the fallback text shows
  *    },
  *    "themes": {
  *      "<stylesheet>": {
@@ -81,6 +90,7 @@ final class TP_Settings {
 			'enabled'   => false,
 			'test_mode' => true,
 			'prices'    => self::prices_defaults(),
+			'sale'      => self::sale_defaults(),
 			'themes'    => array(),
 		);
 	}
@@ -101,6 +111,30 @@ final class TP_Settings {
 			'rules'      => array(),
 			'map'        => array(),
 			'lang'       => 'auto',
+		);
+	}
+
+	public static function sale_defaults(): array {
+		return array(
+			'on'       => false,
+			'text'     => array(
+				'el' => 'Έκπτωση {percent}',
+				'en' => 'Sale {percent}',
+			),
+			'upto'     => array(
+				'el' => 'Έως {percent}',
+				'en' => 'Up to {percent}',
+			),
+			'fallback' => array(
+				'el' => 'Προσφορά',
+				'en' => 'Sale',
+			),
+			'single'   => array(
+				'el' => '',
+				'en' => '',
+			),
+			'round'    => 'floor',
+			'min'      => 0,
 		);
 	}
 
@@ -180,6 +214,11 @@ final class TP_Settings {
 	/** Price label settings (store-wide). */
 	public static function prices(): array {
 		return self::get()['prices'];
+	}
+
+	/** Sale badge settings (store-wide). */
+	public static function sale(): array {
+		return self::get()['sale'];
 	}
 
 	/** Active theme key (child theme stylesheet when a child is active). */
@@ -273,6 +312,9 @@ final class TP_Settings {
 
 		if ( isset( $raw['prices'] ) && is_array( $raw['prices'] ) ) {
 			$out['prices'] = self::sanitize_prices( $raw['prices'] );
+		}
+		if ( isset( $raw['sale'] ) && is_array( $raw['sale'] ) ) {
+			$out['sale'] = self::sanitize_sale( $raw['sale'] );
 		}
 
 		if ( isset( $raw['themes'] ) && is_array( $raw['themes'] ) ) {
@@ -408,6 +450,39 @@ final class TP_Settings {
 			if ( $tid > 0 && $idx >= 0 && $idx < $n ) {
 				$out['map'][ $tid ] = $idx;
 			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Sale badge. Texts are plain text templates (same limits as the price
+	 * labels); the placeholders are filled on output. An empty main or
+	 * "up to" text falls back to the default, so the badge never goes blank
+	 * by mistake; an empty fallback or product page text is a choice.
+	 */
+	public static function sanitize_sale( array $raw ): array {
+		$def = self::sale_defaults();
+		$out = $def;
+
+		$out['on']    = ! empty( $raw['on'] );
+		$out['round'] = isset( $raw['round'] ) && 'round' === $raw['round'] ? 'round' : 'floor';
+		$out['min']   = isset( $raw['min'] ) && is_numeric( $raw['min'] ) ? max( 0, min( 99, (int) $raw['min'] ) ) : 0;
+
+		foreach ( array( 'text', 'upto', 'fallback', 'single' ) as $key ) {
+			// A missing text (older data, partial import) keeps its default; a posted empty one is a choice.
+			$pair = isset( $raw[ $key ] ) && is_array( $raw[ $key ] ) ? $raw[ $key ] : $def[ $key ];
+			$el   = self::valid_label( isset( $pair['el'] ) ? $pair['el'] : '' );
+			$en   = self::valid_label( isset( $pair['en'] ) ? $pair['en'] : '' );
+			if ( ( 'text' === $key || 'upto' === $key ) && '' === $el ) {
+				$el = '' !== $en ? $en : $def[ $key ]['el'];
+			}
+			if ( '' === $el && '' !== $en ) {
+				$el = $en;
+			}
+			$out[ $key ] = array(
+				'el' => $el,
+				'en' => $en,
+			);
 		}
 		return $out;
 	}
