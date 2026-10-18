@@ -64,7 +64,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $orc_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf' ) as $orc_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras' ) as $orc_slug ) {
 	if ( 'oros-connect' !== $orc_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $orc_slug . '/' . $orc_slug . '.php' ) ) {
 		$orc_suite_left = true;
 		break;
