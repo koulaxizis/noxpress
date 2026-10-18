@@ -2,7 +2,7 @@
 /**
  * NM_Admin_UI — menu, pages, AJAX steps and downloads (Bible §3–§8, §11).
  *
- * Submenus of the shared "Noxpress" menu (admin_menu priority 190),
+ * Submenus of the shared "Noxpress" menu (admin_menu priority 220),
  * capability manage_options:
  *  - nm-backups   «Αντίγραφα»: new backup, list, downloads, installer,
  *                 core check
@@ -29,7 +29,7 @@ final class NM_Admin_UI {
 	const PAGES       = array( 'nm-backups', 'nm-restore', 'nm-settings' );
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 190 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 220 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'download' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );

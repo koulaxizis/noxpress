@@ -4,7 +4,7 @@
  *
  * rs_lang (user meta) decides: 'el' | 'en' | ''/'auto'. Revenue Splitter
  * writes it; when RS is not active, DM Settings shows the same switch
- * and writes the same meta (Bible §9, 1.32), so the choice stays one for
+ * and writes the same meta (Bible §9, 1.39), so the choice stays one for
  * the whole suite. Without a choice the user's locale decides: el* →
  * Greek (msgids as they are), anything else → English.
  *

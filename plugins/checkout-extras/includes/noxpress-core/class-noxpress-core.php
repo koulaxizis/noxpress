@@ -135,7 +135,7 @@ final class Noxpress_Core {
 
 	/**
 	 * Suite plugins the hub and the updater handle, keyed by slug
-	 * (folder and main file name). Data Migrator joins once it is fixed.
+	 * (folder and main file name).
 	 */
 	public static function catalog(): array {
 		return array(
