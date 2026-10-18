@@ -591,7 +591,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="theme-patcher">
 		<h2><a href="#theme-patcher">Theme Patcher</a></h2>
 		<a class="card-video" href="media/videos/theme-patcher.mp4" data-video="theme-patcher" data-video-title="Theme Patcher" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.4.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.5.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="tp_desc">Fixes classic WooCommerce themes without a child theme and without touching theme files: product cards, texts, category tiles, theme settings, accessibility, price labels and a care &amp; safety product tab.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -604,13 +604,14 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="tp_li6">Theme settings guard: page views can no longer overwrite what you set in the Customizer, fixed values for settings the theme resets (e.g. slider speed), theme files read from disk instead of over HTTP</li>
 			<li data-i18n="tp_li7">Accessibility: names for icon-only links and buttons, alt text for images; warning when block filter widgets are used on a classic theme</li>
 			<li data-i18n="tp_li10">Price labels: «Free» instead of 0,00 € in product pages, lists and cart lines; a label per category for products without a price (e.g. «Free listening»), in Greek and English, with any theme</li>
+			<li data-i18n="tp_li12">Sale badge text for the whole site: «Sale {percent}», «Up to {percent}» for variations with different discounts, the amount saved, a product page text and a minimum percentage, with any theme; one-click import from Customizer for WooCommerce</li>
 			<li data-i18n="tp_li11">Care &amp; safety tab: care instructions, product safety, manufacturer and EU responsible person (GPSR) on product pages, chosen by product, product type or SKU prefix, with your own texts in Greek and English and a WP-CLI check</li>
 			<li data-i18n="tp_li8">Safe by design: off until enabled, test mode for shop managers, per-theme settings, theme detector and page probe, automatic pause after theme updates, TP_DISABLE emergency switch</li>
 			<li data-i18n="tp_li9">Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own</li>
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.4.0/theme-patcher.zip" rel="nofollow noopener" data-i18n="tp_download">Download v1.4.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.0/theme-patcher.zip" rel="nofollow noopener" data-i18n="tp_download">Download v1.5.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/theme-patcher" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1044,10 +1045,11 @@ footer .heart { color: var(--accent-bright); }
 		tp_li6: 'Theme settings guard: page views can no longer overwrite what you set in the Customizer, fixed values for settings the theme resets (e.g. slider speed), theme files read from disk instead of over HTTP',
 		tp_li7: 'Accessibility: names for icon-only links and buttons, alt text for images; warning when block filter widgets are used on a classic theme',
 		tp_li10: 'Price labels: «Free» instead of 0,00 € in product pages, lists and cart lines; a label per category for products without a price (e.g. «Free listening»), in Greek and English, with any theme',
+		tp_li12: 'Sale badge text for the whole site: «Sale {percent}», «Up to {percent}» for variations with different discounts, the amount saved, a product page text and a minimum percentage, with any theme; one-click import from Customizer for WooCommerce',
 		tp_li11: 'Care &amp; safety tab: care instructions, product safety, manufacturer and EU responsible person (GPSR) on product pages, chosen by product, product type or SKU prefix, with your own texts in Greek and English and a WP-CLI check',
 		tp_li8: 'Safe by design: off until enabled, test mode for shop managers, per-theme settings, theme detector and page probe, automatic pause after theme updates, TP_DISABLE emergency switch',
 		tp_li9: 'Bilingual UI (Ελληνικά / English), shared «Noxpress» menu and dark theme; works on its own',
-		tp_download: 'Download v1.4.0 (.zip)',
+		tp_download: 'Download v1.5.0 (.zip)',
 		sh_desc: 'Lean product filters for classic WooCommerce themes: a real category tree, attribute filters with counts, a price slider, and value groups for messy attribute data.',
 		sh_li1: 'Category tree with open / close per parent and any depth; attribute filters with product counts; two-handle price slider without jQuery UI',
 		sh_li2: 'Value groups without touching products: e.g. 88 ages in 6 ranges or 350 colours in 12, with suggestions from ranges («6-18M», «3 Ετών+») and keywords',
@@ -1253,10 +1255,11 @@ footer .heart { color: var(--accent-bright); }
 		tp_li6: 'Προστασία ρυθμίσεων θέματος: οι προβολές σελίδων δεν πατάνε πια ό,τι ορίζεις στον Customizer, σταθερές τιμές για ρυθμίσεις που επαναφέρει το θέμα (π.χ. ταχύτητα slider), ανάγνωση αρχείων του θέματος από τον δίσκο αντί για HTTP',
 		tp_li7: 'Προσβασιμότητα: ονόματα σε συνδέσμους και κουμπιά με μόνο εικονίδιο, alt στις εικόνες· προειδοποίηση για φίλτρα τύπου block σε κλασικό θέμα',
 		tp_li10: 'Ετικέτες τιμής: «Δωρεάν» αντί για 0,00 € σε σελίδες προϊόντων, λίστες και γραμμές καλαθιού· ετικέτα ανά κατηγορία για προϊόντα χωρίς τιμή (π.χ. «Δωρεάν ακρόαση»), σε ελληνικά και αγγλικά, με οποιοδήποτε θέμα',
+		tp_li12: 'Κείμενο ένδειξης έκπτωσης για όλο το site: «Έκπτωση {percent}», «Έως {percent}» για παραλλαγές με διαφορετική έκπτωση, ποσό έκπτωσης, κείμενο για τη σελίδα προϊόντος και ελάχιστο ποσοστό, με οποιοδήποτε θέμα· εισαγωγή με ένα κλικ από το Customizer for WooCommerce',
 		tp_li11: 'Καρτέλα «Φροντίδα και ασφάλεια»: οδηγίες φροντίδας, ασφάλεια προϊόντος, κατασκευαστής και υπεύθυνος στην ΕΕ (GPSR) στις σελίδες προϊόντων, ανά προϊόν, είδος ή πρόθεμα SKU, με δικά σου κείμενα σε ελληνικά και αγγλικά και έλεγχο από WP-CLI',
 		tp_li8: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, ρυθμίσεις ανά θέμα, ανιχνευτής θέματος και σάρωση σελίδας, αυτόματη αναστολή μετά από ενημέρωση θέματος, διακόπτης έκτακτης ανάγκης TP_DISABLE',
 		tp_li9: 'Δίγλωσσο UI (Ελληνικά / English), κοινό μενού «Noxpress» και σκούρο θέμα· λειτουργεί αυτόνομα',
-		tp_download: 'Λήψη v1.4.0 (.zip)',
+		tp_download: 'Λήψη v1.5.0 (.zip)',
 		sh_desc: 'Λιτά φίλτρα προϊόντων για κλασικά θέματα WooCommerce: πραγματικό δέντρο κατηγοριών, φίλτρα χαρακτηριστικών με μετρητές, τιμή με slider και ομάδες τιμών για ακατάστατα χαρακτηριστικά.',
 		sh_li1: 'Δέντρο κατηγοριών με άνοιγμα / κλείσιμο ανά γονέα και όσα επίπεδα χρειάζεται· φίλτρα χαρακτηριστικών με μετρητές προϊόντων· slider τιμής με δύο λαβές χωρίς jQuery UI',
 		sh_li2: 'Ομάδες τιμών χωρίς αλλαγή στα προϊόντα: π.χ. 88 ηλικίες σε 6 εύρη ή 350 χρώματα σε 12, με προτάσεις από εύρη («6-18M», «3 Ετών+») και λέξεις-κλειδιά',
