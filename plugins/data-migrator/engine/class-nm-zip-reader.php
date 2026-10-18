@@ -6,7 +6,9 @@
  * The central directory is walked from a byte position, so a caller can
  * stop after any entry and continue in the next request. Extraction of a
  * stored entry can also stop halfway and continue from the same byte.
- * Every extracted entry is checked against its CRC-32.
+ * Every extracted entry is checked against its CRC-32, or, for AES
+ * entries (WinZip AE-1 / AE-2, NM_Crypt), against its HMAC. Errors
+ * 'nopass' and 'password' mean a missing or wrong password.
  */
 
 defined( 'ABSPATH' ) || defined( 'NM_STANDALONE' ) || exit;
@@ -19,6 +21,8 @@ final class NM_Zip_Reader {
 	private $fh = null;
 	/** @var string */
 	private $path;
+	/** @var string */
+	private $pw = '';
 
 	public $cd_off  = 0;
 	public $cd_size = 0;
@@ -81,6 +85,10 @@ final class NM_Zip_Reader {
 		return true;
 	}
 
+	public function set_password( string $password ): void {
+		$this->pw = $password;
+	}
+
 	public function close(): void {
 		if ( $this->fh ) {
 			fclose( $this->fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
@@ -113,11 +121,20 @@ final class NM_Zip_Reader {
 		$csize = (int) $h['csize'];
 		$usize = (int) $h['usize'];
 		$lho   = (int) $h['lho'];
+		$aes  = -1;
+		$aesv = 0;
+		$st   = 0;
 		// ZIP64 extended information: only the fields that overflowed.
 		$p = 0;
 		while ( $p + 4 <= strlen( $extra ) ) {
 			$x = unpack( 'vid/vlen', substr( $extra, $p, 4 ) );
-			if ( 0x0001 === $x['id'] ) {
+			if ( 0x9901 === $x['id'] && 7 === $x['len'] ) {
+				// WinZip AES: vendor version, 'AE', strength, real method.
+				$a    = unpack( 'vv/A2id/Cs/vm', substr( $extra, $p + 4, 7 ) );
+				$aes  = (int) $a['m'];
+				$aesv = (int) $a['v'];
+				$st   = (int) $a['s'];
+			} elseif ( 0x0001 === $x['id'] ) {
 				$f = substr( $extra, $p + 4, (int) $x['len'] );
 				$q = 0;
 				if ( 0xFFFFFFFF === $usize ) {
@@ -131,7 +148,6 @@ final class NM_Zip_Reader {
 				if ( 0xFFFFFFFF === $lho ) {
 					$lho = (int) unpack( 'P', substr( $f, $q, 8 ) )[1];
 				}
-				break;
 			}
 			$p += 4 + (int) $x['len'];
 		}
@@ -144,7 +160,20 @@ final class NM_Zip_Reader {
 			'usize'  => $usize,
 			'lho'    => $lho,
 			'flags'  => (int) $h['flags'],
+			// Real method of an AES entry (-1: not AES); only 256-bit is read.
+			'aes'    => 99 === (int) $h['method'] && 3 === $st ? $aes : -1,
+			'aesv'   => $aesv,
 		);
+	}
+
+	/** Whether an entry is encrypted (AES or the old ZipCrypto). */
+	public static function encrypted( array $e ): bool {
+		return (bool) ( $e['flags'] & 1 );
+	}
+
+	/** Size of the plain data before compression in the archive. */
+	private static function data_size( array $e ): int {
+		return $e['aes'] >= 0 ? $e['csize'] - NM_Crypt::OVERHEAD : $e['csize'];
 	}
 
 	/** All entries (only for small archives or tests). */
@@ -187,27 +216,52 @@ final class NM_Zip_Reader {
 		return $e['lho'] + 30 + (int) $h['nlen'] + (int) $h['elen'];
 	}
 
-	/** The whole entry as a string (small entries: manifest, SQL chunks). */
+	/**
+	 * The whole entry as a string (small entries: manifest, SQL chunks),
+	 * or false with $this->error set.
+	 */
 	public function read( array $e ) {
-		if ( $e['usize'] > 268435456 || ( 0 !== $e['method'] && 8 !== $e['method'] ) || ( $e['flags'] & 1 ) ) {
+		$this->error = '';
+		$meth        = $e['aes'] >= 0 ? $e['aes'] : $e['method'];
+		if ( $e['usize'] > 268435456 || ( 0 !== $meth && 8 !== $meth ) || ( self::encrypted( $e ) && $e['aes'] < 0 ) ) {
+			$this->error = 'method';
+			return false;
+		}
+		if ( $e['aes'] >= 0 && '' === $this->pw ) {
+			$this->error = 'nopass';
 			return false;
 		}
 		$at = $this->data_offset( $e );
 		if ( $at < 0 ) {
+			$this->error = 'read';
 			return false;
 		}
 		fseek( $this->fh, $at );
 		$data = $e['csize'] > 0 ? (string) fread( $this->fh, $e['csize'] ) : '';
 		if ( strlen( $data ) !== $e['csize'] ) {
+			$this->error = 'read';
 			return false;
 		}
-		if ( 8 === $e['method'] ) {
+		if ( $e['aes'] >= 0 ) {
+			if ( ! NM_Crypt::available() ) {
+				$this->error = 'openssl';
+				return false;
+			}
+			$data = NM_Crypt::decrypt( $this->pw, $data );
+			if ( is_array( $data ) ) {
+				$this->error = $data[0];
+				return false;
+			}
+		}
+		if ( 8 === $meth ) {
 			$data = @gzinflate( $data ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			if ( false === $data ) {
 				return false;
 			}
 		}
-		if ( strlen( $data ) !== $e['usize'] || ( crc32( $data ) & 0xFFFFFFFF ) !== ( $e['crc'] & 0xFFFFFFFF ) ) {
+		$crc_ok = ( $e['aes'] >= 0 && 2 === $e['aesv'] ) || ( crc32( $data ) & 0xFFFFFFFF ) === ( $e['crc'] & 0xFFFFFFFF );
+		if ( strlen( $data ) !== $e['usize'] || ! $crc_ok ) {
+			$this->error = 'crc';
 			return false;
 		}
 		return $data;
@@ -220,7 +274,10 @@ final class NM_Zip_Reader {
 	 * 'method').
 	 */
 	public function extract( array $e, string $dest, int &$done, float $deadline ): string {
-		if ( ( 0 !== $e['method'] && 8 !== $e['method'] ) || ( $e['flags'] & 1 ) ) {
+		if ( $e['aes'] >= 0 ) {
+			return $this->extract_aes( $e, $dest, $done, $deadline );
+		}
+		if ( ( 0 !== $e['method'] && 8 !== $e['method'] ) || self::encrypted( $e ) ) {
 			return 'method';
 		}
 		$at = $this->data_offset( $e );
@@ -290,5 +347,90 @@ final class NM_Zip_Reader {
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		$done = $total;
 		return ( $total === $e['usize'] && hexdec( hash_final( $hash ) ) === ( $e['crc'] & 0xFFFFFFFF ) ) ? 'done' : 'crc';
+	}
+
+	/**
+	 * extract() for an AES entry. Stored data is decrypted in pieces and
+	 * can pause; the MAC is checked at the end over the encrypted bytes
+	 * (read again from the archive, as the CRC is for plain entries).
+	 */
+	private function extract_aes( array $e, string $dest, int &$done, float $deadline ): string {
+		if ( 0 !== $e['aes'] && 8 !== $e['aes'] ) {
+			return 'method';
+		}
+		if ( '' === $this->pw ) {
+			return 'nopass';
+		}
+		if ( ! NM_Crypt::available() ) {
+			return 'openssl';
+		}
+		if ( 8 === $e['aes'] ) {
+			// Deflated entries are small (the writer deflates up to 4 MB).
+			$data = $this->read( $e );
+			if ( false === $data ) {
+				return '' !== $this->error ? $this->error : 'read';
+			}
+			$done = 0;
+			if ( false === @file_put_contents( $dest, $data ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				return 'write';
+			}
+			$done = strlen( $data );
+			return 'done';
+		}
+		$at = $this->data_offset( $e );
+		if ( $at < 0 || self::data_size( $e ) !== $e['usize'] ) {
+			return 'read';
+		}
+		fseek( $this->fh, $at );
+		$head = (string) fread( $this->fh, NM_Crypt::SALT + 2 );
+		if ( strlen( $head ) !== NM_Crypt::SALT + 2 ) {
+			return 'read';
+		}
+		list( $ek, $mk, $pv ) = NM_Crypt::derive( $this->pw, substr( $head, 0, NM_Crypt::SALT ) );
+		if ( ! hash_equals( $pv, substr( $head, NM_Crypt::SALT ) ) ) {
+			return 'password';
+		}
+		$ct  = $at + NM_Crypt::SALT + 2;
+		$out = @fopen( $dest, $done > 0 ? 'r+b' : 'wb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( ! $out ) {
+			return 'write';
+		}
+		if ( $done > 0 ) {
+			ftruncate( $out, $done );
+			fseek( $out, $done );
+		}
+		fseek( $this->fh, $ct + $done );
+		while ( $done < $e['usize'] ) {
+			$buf = fread( $this->fh, (int) min( self::CHUNK, $e['usize'] - $done ) );
+			if ( false === $buf || '' === $buf ) {
+				fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+				return 'read';
+			}
+			$plain = NM_Crypt::ctr( $ek, $buf, $done );
+			if ( fwrite( $out, $plain ) !== strlen( $plain ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+				fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+				return 'write';
+			}
+			$done += strlen( $buf );
+			if ( $done < $e['usize'] && microtime( true ) >= $deadline ) {
+				fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+				return 'paused';
+			}
+		}
+		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		$mac = NM_Crypt::mac_file( $mk, $this->fh, $ct, $e['usize'] );
+		fseek( $this->fh, $ct + $e['usize'] );
+		$want = (string) fread( $this->fh, NM_Crypt::MAC );
+		if ( false === $mac || ! hash_equals( $want, $mac ) ) {
+			@unlink( $dest ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			return 'crc';
+		}
+		if ( 1 === $e['aesv'] ) {
+			$crc = @hash_file( 'crc32b', $dest ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			if ( false === $crc || hexdec( $crc ) !== ( $e['crc'] & 0xFFFFFFFF ) ) {
+				return 'crc';
+			}
+		}
+		return 'done';
 	}
 }

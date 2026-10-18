@@ -23,6 +23,7 @@
  *  - runner.php        → standalone restore runner (SHORTINIT, token)
  *  - engine/ (no WordPress calls; also inside runner.php and the installer)
  *    - NM_Util         → state files, locks, paths, log, translation
+ *    - NM_Crypt        → AES-256 entries (WinZip AE-2), sealed secrets
  *    - NM_Zip_Writer   → resumable streaming ZIP (ZIP64, parts)
  *    - NM_Zip_Reader   → central directory walk, CRC-checked extraction
  *    - NM_DB           → own mysqli connection
@@ -82,6 +83,7 @@ define( 'NM_URL', plugin_dir_url( __FILE__ ) );
 require_once NM_PATH . 'includes/noxpress-core/loader.php';
 
 require_once NM_PATH . 'engine/class-nm-util.php';
+require_once NM_PATH . 'engine/class-nm-crypt.php';
 require_once NM_PATH . 'engine/class-nm-zip-writer.php';
 require_once NM_PATH . 'engine/class-nm-zip-reader.php';
 require_once NM_PATH . 'engine/class-nm-db.php';

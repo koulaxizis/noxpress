@@ -189,12 +189,21 @@ final class NM_Restorer {
 		$dbdir = (string) $this->job['work']['db'];
 		$list  = (string) $this->job['work']['list'];
 		$want_db = ! empty( $this->job['options']['db'] );
+		// An encrypted backup: the password, sealed in the job.
+		$pw = '';
+		if ( ! empty( $this->job['pw'] ) ) {
+			$pw = NM_Crypt::unseal( (string) $this->job['pw'] );
+			if ( null === $pw ) {
+				return $this->fail( NM_Util::t( 'Ο κωδικός του κρυπτογραφημένου αντιγράφου δεν διαβάζεται σε αυτή την εργασία. Ξεκίνα την επαναφορά από την αρχή.' ) );
+			}
+		}
 
 		while ( $ss['part'] < count( $parts ) ) {
 			$zr = new NM_Zip_Reader( (string) $parts[ $ss['part'] ] );
 			if ( ! $zr->open() ) {
 				return $this->fail( NM_Util::tf( 'Το αρχείο %s δεν διαβάζεται ως ZIP.', basename( (string) $parts[ $ss['part'] ] ) ) );
 			}
+			$zr->set_password( $pw );
 			$lh = @fopen( $list, 'ab' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 			$e  = $zr->entry_at( (int) $ss['pos'], $next );
 			while ( $e ) {
@@ -225,6 +234,9 @@ final class NM_Restorer {
 					}
 					if ( 'done' !== $r ) {
 						$zr->close();
+						if ( in_array( $r, array( 'nopass', 'password' ), true ) ) {
+							return $this->fail( NM_Util::t( 'Λάθος κωδικός για αυτό το αντίγραφο.' ) );
+						}
 						return $this->fail( NM_Util::tf( 'Το %1$s δεν βγήκε σωστά από το αρχείο (%2$s).', $name, $r ) );
 					}
 					if ( isset( $m[1] ) && 0 === strpos( $name, 'files/' ) && $lh ) {
@@ -255,6 +267,8 @@ final class NM_Restorer {
 		}
 		$this->job['report']['files_staged'] = (int) $ss['files'];
 		$this->job['report']['bytes']        = (int) $ss['bytes'];
+		// Everything is out of the archive: the password is not needed any more.
+		unset( $this->job['pw'] );
 		return 'next';
 	}
 
