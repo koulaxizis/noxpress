@@ -275,14 +275,15 @@ final class TP_Sale {
 	/**
 	 * Shown percentage, 0 when there is no discount. Rounded down by default
 	 * (never more than the real discount), or to the nearest whole number.
-	 * The value is first rounded to 6 decimals, so 20% stored as
-	 * 19.9999999 by floating point still shows 20%.
+	 * The value is first rounded to 4 decimals, so 25% that comes out as
+	 * 24.999998 still shows 25%: prices with tax are only kept to 6
+	 * decimals (12.00 → 9.677419 at 24% VAT), which shifts the 6th decimal.
 	 */
 	public static function percent( float $regular, float $price ): int {
 		if ( $regular <= 0 || $price < 0 || $price >= $regular ) {
 			return 0;
 		}
-		$raw = round( ( $regular - $price ) / $regular * 100, 6 );
+		$raw = round( ( $regular - $price ) / $regular * 100, 4 );
 		return (int) ( 'round' === TP_Settings::sale()['round'] ? round( $raw ) : floor( $raw ) );
 	}
 
