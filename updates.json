@@ -28,15 +28,15 @@
     },
     "data-migrator": {
       "beta": {
-        "changelog": "* Scheduled backups (beta): database only or full, daily, weekly or monthly, in the background, with retention per schedule, a size limit for all scheduled backups, and an email when a run fails.\n* Backups stop and delete the unfinished archive when the free disk space falls under 256 MB; scheduled backups check the space before they write.\n* WP-CLI: `wp data-migrator schedule list|run`.\n* Fix: the Save button of DM Settings read \"Storage\" in English.",
+        "changelog": "* Optional backup encryption (beta), off by default: AES-256 (WinZip AE-2), readable by 7-Zip, WinZip and macOS, with a password stored sealed or set in wp-config.php (`NM_BACKUP_PASSWORD`), and a password generator.\n* Encrypted backups in the analysis, the restore, the installer and WP-CLI (`--password`); uploaded encrypted backups register without the password.\n* `wp data-migrator list` shows whether a backup is encrypted.",
         "published": "2026-10-18",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "efeb54129fde7fd913ad14d73044ae8315cad3806e092cac99dcf96ad444091d",
-        "signature": "LYayFvbJ+3fJ3PTkRtpUweaBDF3UXw8HYdCVeFmfmvri1O2hpU7I3FuaqE0ePd0TsyiO36pU4K3WxtPRRDiiCA==",
+        "sha256": "a9279c055f5d7b4cd39bbd6a99bb1f1d00c3aef0da74a282c7e380ff5e8a154d",
+        "signature": "iou22Mx00kbtYNmoAGR1FMhnWUyU1s0NhWhuQpbm8udp1vMYf35QiNDtnfQ32zwsqn7kaVF47DZWvD2ZzJ8zCg==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.1.0/data-migrator.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.2.0/data-migrator.zip"
       }
     },
     "easy-withdrawal": {
