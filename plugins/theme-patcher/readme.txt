@@ -1,11 +1,11 @@
 === Theme Patcher ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, theme compatibility, product cards, price labels, gpsr
+Tags: woocommerce, theme compatibility, product cards, price labels, sale badge
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -60,6 +60,15 @@ Many classic themes draw product cards, category tiles and texts with their own 
 * **Products without a price** (they cannot be bought, e.g. music to listen to): a label where the price would be, per category ("Free listening", "Free viewing"…), with subcategories, the first matching rule winning, and a general text for the rest.
 * **Language:** automatic (site language), Greek or English.
 * Store-wide, with any theme (block themes too). Orders, emails, the thank-you page, My Account, invoices, product feeds and the price schema keep the real price. The Cart and Checkout blocks draw prices with JavaScript and keep 0,00 €; the Prices tab says so when they are in use.
+
+**Sale badge**
+
+* **Your own text** instead of WooCommerce's "Sale!" across the site: "Sale {percent}" becomes "Sale 20%". `{amount}` shows the money saved (e.g. €4.00), with or without tax as the store shows prices.
+* **"Up to" text** for variable and grouped products whose discounts differ ("Up to 30%"); they always show their largest discount.
+* **Fallback text** when there is no percentage or it is below a minimum you set, and an optional text for the product page.
+* **Rounding:** down by default, so the badge never shows more than the real discount (20.5% → 20%), or to the nearest whole number.
+* **Where:** shop and category lists, related products, the product page, the "Product Sale Badge" block (WooCommerce 10.0+, left alone when the block is set to show a percentage or an amount) and the cards Theme Patcher fixes. The theme's own badge element is kept; only its text changes. Themes that build their own badge without WooCommerce keep theirs.
+* **Import from Customizer for WooCommerce** with one click; its `{percent}` means the same. Texts in Greek and English with the language of the price labels; developers can change a text with the `tp_sale_badge_text` filter.
 
 **Care & safety tab**
 
@@ -129,6 +138,12 @@ The plugin's own options (`tp_settings`, `tp_cat_images`, `tp_care`) and transie
 Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is off. Use the Preview with the product ID to see which profile it gets and why, then clear the page cache (e.g. WP Rocket).
 
 == Changelog ==
+
+= 1.5.0 =
+* New: sale badge text for the whole site (Prices tab): a template such as "Sale {percent}" with `{percent}` and `{amount}`, an "up to" text for variable and grouped products with different discounts, a fallback text, an optional product page text, a minimum percentage and rounding (down by default). Greek and English. Off until enabled.
+* New: it covers WooCommerce's sale badge in classic themes (`woocommerce_sale_flash`), the Product Sale Badge block (`woocommerce_sale_badge_text`, WooCommerce 10.0+) and the badge of Theme Patcher's own card slot. The theme's badge element and classes are kept.
+* New: one-click import of the sale texts of Customizer for WooCommerce, with a reminder while that plugin is still active.
+* New: filter `tp_sale_badge_text`. The sale badge settings are included in the settings backup.
 
 = 1.4.0 =
 * New: "Care and safety" product tab (GPSR): care instructions, product safety, manufacturer, EU responsible person and a terms link, from care profiles chosen per product, by product type attribute or by SKU prefix. Off until enabled.
