@@ -1098,6 +1098,8 @@ final class TP_Admin_UI {
 				?>
 			</p>
 
+			<?php self::render_sale_fields(); ?>
+
 			<h3 class="tp-h3"><?php esc_html_e( 'Γλώσσα των ετικετών', 'theme-patcher' ); ?></h3>
 			<div class="tp-zone">
 				<select name="tp_prices[lang]">
@@ -1111,6 +1113,114 @@ final class TP_Admin_UI {
 			<p class="tp-submit">
 				<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ετικετών', 'theme-patcher' ); ?></button>
 			</p>
+		</form>
+		<?php
+		self::render_sale_import();
+	}
+
+	/** Sale badge section of the prices form (store-wide, TP_Sale). */
+	private static function render_sale_fields(): void {
+		$s    = TP_Settings::sale();
+		$max  = (string) TP_Settings::MAX_LABEL_LEN;
+		$rows = array(
+			'text'     => array( __( 'Κείμενο', 'theme-patcher' ), 'Έκπτωση {percent}', 'Sale {percent}' ),
+			'upto'     => array( __( 'Διαφορετικά ποσοστά (variable, grouped)', 'theme-patcher' ), 'Έως {percent}', 'Up to {percent}' ),
+			'fallback' => array( __( 'Χωρίς ποσοστό', 'theme-patcher' ), 'Προσφορά', 'Sale' ),
+			'single'   => array( __( 'Σελίδα προϊόντος (κενό = ίδιο με τις λίστες)', 'theme-patcher' ), '', '' ),
+		);
+		$roundings = array(
+			'floor' => __( 'Προς τα κάτω (ποτέ μεγαλύτερο από το πραγματικό)', 'theme-patcher' ),
+			'round' => __( 'Στον πλησιέστερο ακέραιο', 'theme-patcher' ),
+		);
+		// Example: 20,00 € → 15,90 € is a 20.5% discount, so the rounding shows.
+		$pct     = TP_Sale::percent( 20.0, 15.9 );
+		$samples = array();
+		foreach ( array( 'el', 'en' ) as $lang ) {
+			$tpl = '' !== $s['text'][ $lang ] ? $s['text'][ $lang ] : $s['text']['el'];
+			$up  = '' !== $s['upto'][ $lang ] ? $s['upto'][ $lang ] : $s['upto']['el'];
+			$samples[] = TP_Sale::fill( $tpl, $pct, 4.1 ) . ' / ' . TP_Sale::fill( $up, $pct, 4.1 );
+		}
+		?>
+		<h3 class="tp-h3"><?php esc_html_e( 'Ένδειξη έκπτωσης', 'theme-patcher' ); ?></h3>
+		<div class="tp-zone">
+			<label class="tp-check">
+				<input type="checkbox" name="tp_sale[on]" value="1" <?php checked( $s['on'] ); ?> />
+				<?php esc_html_e( 'Δικό μου κείμενο στην ένδειξη έκπτωσης, σε όλο το site', 'theme-patcher' ); ?>
+			</label>
+			<span class="tp-hint"><?php esc_html_e( 'Λίστες καταστήματος και κατηγοριών, σχετικά προϊόντα, σελίδα προϊόντος, το μπλοκ «Product Sale Badge» και οι κάρτες που διορθώνει το Theme Patcher. Θέματα που φτιάχνουν δική τους ένδειξη χωρίς το WooCommerce κρατούν τη δική τους.', 'theme-patcher' ); ?></span>
+			<span class="tp-hint"><?php esc_html_e( 'Μεταβλητές: {percent} = ποσοστό (π.χ. 20%), {amount} = ποσό έκπτωσης (π.χ. 4,00 €), όπως δείχνει το κατάστημα τις τιμές. Τα variable και grouped προϊόντα δείχνουν τη μεγαλύτερη έκπτωση.', 'theme-patcher' ); ?></span>
+			<table class="widefat striped tp-table tp-mt-8">
+				<thead>
+					<tr>
+						<th></th>
+						<th><?php esc_html_e( 'Ελληνικά', 'theme-patcher' ); ?></th>
+						<th><?php esc_html_e( 'English', 'theme-patcher' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $rows as $key => $row ) : ?>
+						<tr>
+							<td><?php echo esc_html( $row[0] ); ?></td>
+							<td><input type="text" class="regular-text" name="<?php echo esc_attr( 'tp_sale[' . $key . '][el]' ); ?>" value="<?php echo esc_attr( $s[ $key ]['el'] ); ?>" maxlength="<?php echo esc_attr( $max ); ?>" placeholder="<?php echo esc_attr( $row[1] ); ?>" /></td>
+							<td><input type="text" class="regular-text" name="<?php echo esc_attr( 'tp_sale[' . $key . '][en]' ); ?>" value="<?php echo esc_attr( $s[ $key ]['en'] ); ?>" maxlength="<?php echo esc_attr( $max ); ?>" placeholder="<?php echo esc_attr( $row[2] ); ?>" /></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<span class="tp-hint"><?php esc_html_e( '«Χωρίς ποσοστό»: όταν δεν βγαίνει ποσοστό (π.χ. κανονική τιμή 0) ή όταν είναι κάτω από το ελάχιστο. Κενό = μένει η ένδειξη του θέματος.', 'theme-patcher' ); ?></span>
+			<div class="tp-row">
+				<label class="tp-field">
+					<span><?php esc_html_e( 'Στρογγυλοποίηση ποσοστού', 'theme-patcher' ); ?></span>
+					<select name="tp_sale[round]">
+						<?php foreach ( $roundings as $k => $label ) : ?>
+							<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $s['round'], $k ); ?>><?php echo esc_html( $label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+				<label class="tp-field">
+					<span><?php esc_html_e( 'Ελάχιστο ποσοστό (%)', 'theme-patcher' ); ?></span>
+					<input type="number" min="0" max="99" class="small-text" name="tp_sale[min]" value="<?php echo (int) $s['min']; ?>" />
+				</label>
+			</div>
+			<p class="description">
+				<?php
+				printf(
+					/* translators: %s: example badge texts in Greek and English */
+					esc_html__( 'Παράδειγμα με τις αποθηκευμένες ρυθμίσεις, για 20,00 € → 15,90 € (έκπτωση 20,5%%): %s', 'theme-patcher' ),
+					'<code>' . esc_html( implode( ' · ', $samples ) ) . '</code>' // phpcs:ignore WordPress.Security.EscapeOutput -- escaped above.
+				);
+				?>
+			</p>
+			<?php if ( $s['on'] && TP_Sale::customizer_active() ) : ?>
+				<p class="tp-warn"><?php esc_html_e( 'Το Customizer for WooCommerce είναι ακόμη ενεργό. Το κείμενο του Theme Patcher υπερισχύει· αν το Customizer δεν κάνει τίποτε άλλο στο site, απενεργοποίησέ το.', 'theme-patcher' ); ?></p>
+			<?php endif; ?>
+		</div>
+
+		<?php
+	}
+
+	/** Import of the sale texts of Customizer for WooCommerce (its option is only read). */
+	private static function render_sale_import(): void {
+		$c = TP_Sale::customizer_texts();
+		if ( '' === $c['loop'] && '' === $c['single'] ) {
+			return;
+		}
+		?>
+		<form method="post" class="tp-mt-8">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="tp_action" value="sale_import" />
+			<?php self::tab_field( 'prices' ); ?>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: the sale text found in Customizer for WooCommerce */
+					esc_html__( 'Βρέθηκε κείμενο ένδειξης έκπτωσης από το Customizer for WooCommerce: %s', 'theme-patcher' ),
+					'<code>' . esc_html( '' !== $c['loop'] ? $c['loop'] : $c['single'] ) . '</code>' // phpcs:ignore WordPress.Security.EscapeOutput -- escaped above.
+				);
+				?>
+				<button type="submit" class="button"><?php esc_html_e( 'Εισαγωγή', 'theme-patcher' ); ?></button>
+			</p>
+			<span class="tp-hint"><?php esc_html_e( 'Γεμίζει τα κείμενα και ενεργοποιεί την ένδειξη. Οι ρυθμίσεις του Customizer δεν αλλάζουν.', 'theme-patcher' ); ?></span>
 		</form>
 		<?php
 	}
@@ -1428,6 +1538,9 @@ final class TP_Admin_UI {
 			case 'save_prices':
 				$msgs = self::do_save_prices();
 				break;
+			case 'sale_import':
+				$msgs = self::do_sale_import();
+				break;
 			case 'rebuild_cats':
 				/* translators: %d: number of categories */
 				$msgs = array( self::msg( 'success', sprintf( __( 'Επιλέχθηκε εικόνα προϊόντος για %d κατηγορίες.', 'theme-patcher' ), TP_Categories::rebuild() ) ) );
@@ -1445,8 +1558,8 @@ final class TP_Admin_UI {
 		}
 
 		$s     = TP_Settings::get();
-		$saves = 0 === strpos( $action, 'save_' ) || 0 === strpos( $action, 'care_save_' );
-		if ( $saves && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() || TP_Care::get()['enabled'] ) ) {
+		$saves = 0 === strpos( $action, 'save_' ) || 0 === strpos( $action, 'care_save_' ) || 'sale_import' === $action;
+		if ( $saves && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() || TP_Settings::sale()['on'] || TP_Care::get()['enabled'] ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Το Theme Patcher είναι ακόμη ανενεργό: δοκίμασε με τη σάρωση σελίδας και ενεργοποίησέ το από τις Ρυθμίσεις.', 'theme-patcher' ) );
 		}
 
@@ -1667,6 +1780,7 @@ final class TP_Admin_UI {
 
 		$s           = TP_Settings::get();
 		$s['prices'] = $clean;
+		$s['sale']   = TP_Settings::sanitize_sale( self::posted_array( 'tp_sale' ) );
 		TP_Settings::save( $s );
 
 		$msgs = array( self::msg( 'success', __( 'Οι ετικέτες τιμής αποθηκεύτηκαν.', 'theme-patcher' ) ) );
@@ -1675,6 +1789,40 @@ final class TP_Admin_UI {
 		}
 		if ( count( $clean['rules'] ) + $blank < count( $keyed ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Κάθε κατηγορία μπαίνει σε έναν μόνο κανόνα: οι επαναλήψεις αγνοήθηκαν.', 'theme-patcher' ) );
+		}
+		$msgs[] = self::msg( 'info', __( 'Αν το site έχει cache σελίδων (π.χ. WP Rocket), καθάρισέ το για να δουν οι επισκέπτες τις αλλαγές.', 'theme-patcher' ) );
+		return $msgs;
+	}
+
+	/**
+	 * Copy the sale texts of Customizer for WooCommerce. Its {percent}
+	 * means the same ("20%"). The text goes into the Greek field and the
+	 * English one is emptied, so every visitor sees it, as before.
+	 */
+	private static function do_sale_import(): array {
+		$c = TP_Sale::customizer_texts();
+		if ( '' === $c['loop'] && '' === $c['single'] ) {
+			return array( self::msg( 'error', __( 'Δεν βρέθηκε κείμενο ένδειξης έκπτωσης από το Customizer for WooCommerce.', 'theme-patcher' ) ) );
+		}
+		$loop = '' !== $c['loop'] ? $c['loop'] : $c['single'];
+
+		$s                 = TP_Settings::get();
+		$sale              = $s['sale'];
+		$sale['on']        = true;
+		$sale['text']      = array(
+			'el' => $loop,
+			'en' => '',
+		);
+		$sale['single']    = array(
+			'el' => '' !== $c['single'] && $c['single'] !== $loop ? $c['single'] : '',
+			'en' => '',
+		);
+		$s['sale'] = TP_Settings::sanitize_sale( $sale );
+		TP_Settings::save( $s );
+
+		$msgs = array( self::msg( 'success', __( 'Τα κείμενα του Customizer for WooCommerce εισήχθησαν και η ένδειξη έκπτωσης ενεργοποιήθηκε.', 'theme-patcher' ) ) );
+		if ( TP_Sale::customizer_active() ) {
+			$msgs[] = self::msg( 'info', __( 'Έλεγξε τη σελίδα και μετά απενεργοποίησε το Customizer for WooCommerce, αν δεν κάνει τίποτε άλλο στο site.', 'theme-patcher' ) );
 		}
 		$msgs[] = self::msg( 'info', __( 'Αν το site έχει cache σελίδων (π.χ. WP Rocket), καθάρισέ το για να δουν οι επισκέπτες τις αλλαγές.', 'theme-patcher' ) );
 		return $msgs;
