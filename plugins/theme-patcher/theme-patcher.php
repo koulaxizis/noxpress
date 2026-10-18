@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Theme Patcher
  * Plugin URI:           https://noxpress.tech
- * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή), καρτέλα «Φροντίδα και ασφάλεια» στη σελίδα προϊόντος. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
- * Version:              1.4.1
+ * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή), κείμενο ένδειξης έκπτωσης για όλο το site («Έκπτωση 20%»), καρτέλα «Φροντίδα και ασφάλεια» στη σελίδα προϊόντος. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
+ * Version:              1.5.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -38,6 +38,8 @@
  *  - TP_Categories   → category image fallback, category lists
  *  - TP_Prices       → price labels ("Free" for price 0, per-category
  *                      labels for products without a price)
+ *  - TP_Sale          → sale badge text for the whole store ("Sale
+ *                      {percent}", "up to", fallback, product page text)
  *  - TP_Care         → "Care & Safety" product tab (care / safety texts
  *                      per product type, manufacturer, EU responsible
  *                      person), product meta, resolution
@@ -54,9 +56,10 @@
  *
  * Deviation (Bible §14.4): the price labels also run on AJAX requests,
  * because WooCommerce refreshes the cart, the mini cart and the checkout
- * over AJAX. They never run on admin screens, REST (the Store API
+ * over AJAX; the sale badge text too, for quick views and product lists
+ * loaded over AJAX. They never run on admin screens, REST (the Store API
  * included), feeds, cron, CLI or XML-RPC, and they work on block themes
- * too (WooCommerce's price blocks call get_price_html() on the server).
+ * too (WooCommerce's price and sale badge blocks render on the server).
  *
  * Deviation (Bible §14.17): the profile texts of the Care & Safety tab are
  * HTML (wp_kses_post), not plain text, because they are content (care
@@ -72,7 +75,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TP_VERSION', '1.4.1' );
+define( 'TP_VERSION', '1.5.1' );
 define( 'TP_FILE', __FILE__ );
 define( 'TP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TP_URL', plugin_dir_url( __FILE__ ) );
@@ -122,6 +125,7 @@ final class Theme_Patcher {
 		require_once TP_PATH . 'includes/class-theme.php';
 		require_once TP_PATH . 'includes/class-categories.php';
 		require_once TP_PATH . 'includes/class-prices.php';
+		require_once TP_PATH . 'includes/class-sale.php';
 		require_once TP_PATH . 'includes/class-care.php';
 
 		TP_Detector::init();
@@ -134,6 +138,7 @@ final class Theme_Patcher {
 			TP_Replace::init();
 			TP_Page::init();
 			TP_Prices::init();
+			TP_Sale::init();
 		}
 		// Product meta registration always; front-end hooks only without TP_DISABLE.
 		TP_Care::init();

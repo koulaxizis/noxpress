@@ -183,7 +183,9 @@ final class TP_Render {
 		if ( $pct <= 0 ) {
 			return '';
 		}
-		return '<span class="tp-badge onsale">' . esc_html( '-' . $pct . '%' ) . '</span>';
+		// The store-wide sale badge text (TP_Sale), when it is on, replaces "-20%".
+		$text = TP_Sale::slot_text( $product );
+		return '<span class="tp-badge onsale">' . esc_html( '' !== $text ? $text : '-' . $pct . '%' ) . '</span>';
 	}
 
 	/** CSS class of an area: tp-slot--shop, tp-slot--file-1a2b3c4d. */
