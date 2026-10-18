@@ -35,6 +35,24 @@
  *  - dl_cutoff_line    "order within …" line before the cut-off
  *  - dl_t_* texts      est, item, title, one, many, dates, item_dates,
  *                      cutoff, preorder — each { el, en }
+ *
+ * Parcels (mx_*, 1.1.0): carts split into several shipping packages, e.g.
+ * by the Printful plugin (print on demand, sent by the partner):
+ *  - mx_mode           'off' (default) | 'test' | 'live'
+ *  - mx_printful       the package the Printful plugin made
+ *                      ($package['printful']) is a partner parcel
+ *  - mx_classes        shipping class slugs of partner products (also the
+ *                      signal of the product-page hint)
+ *  - mx_names          names for the parcels ("Parcel 1 · …")
+ *  - mx_notice         "two parcels" notice above the shipping rows;
+ *                      mx_color its left border (#hex, '' = text colour)
+ *  - mx_labels         translate the partner's rate labels: mx_map rows
+ *                      { from, el, en } (whole words, case-insensitive),
+ *                      mx_dates English month dates → Greek
+ *  - mx_order          parcel list in the order (thank-you page, My
+ *                      account, customer emails)
+ *  - mx_hint           product-page line under the price (off)
+ *  - mx_t_* texts      partner, own, notice, order, hint, eta — each { el, en }
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -69,7 +87,17 @@ final class SHN_Settings {
 		'dl_t_item_dates' => 200,
 		'dl_t_cutoff'     => 200,
 		'dl_t_preorder'   => 200,
+		'mx_t_partner'    => 150,
+		'mx_t_own'        => 150,
+		'mx_t_notice'     => 600,
+		'mx_t_order'      => 150,
+		'mx_t_hint'       => 200,
+		'mx_t_eta'        => 60,
 	);
+
+	/** Most shipping classes and label map rows of the parcels part. */
+	const MAX_CLASSES = 20;
+	const MAX_MAP     = 20;
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -156,6 +184,58 @@ final class SHN_Settings {
 				'el' => 'Διαθέσιμο από {available}. Παράδοση σε {days} από την κυκλοφορία.',
 				'en' => 'Available from {available}. Delivery in {days} after release.',
 			),
+
+			'mx_mode'           => 'off',
+			'mx_printful'       => true,
+			'mx_classes'        => array(),
+			'mx_names'          => true,
+			'mx_notice'         => true,
+			'mx_color'          => '',
+			'mx_labels'         => true,
+			'mx_map'            => array(
+				array(
+					'from' => 'Flat Rate',
+					'el'   => 'Τυπική αποστολή',
+					'en'   => 'Standard shipping',
+				),
+				array(
+					'from' => 'Standard',
+					'el'   => 'Τυπική αποστολή',
+					'en'   => '',
+				),
+				array(
+					'from' => 'Express',
+					'el'   => 'Ταχεία αποστολή',
+					'en'   => '',
+				),
+			),
+			'mx_dates'          => true,
+			'mx_order'          => true,
+			'mx_hint'           => false,
+			'mx_t_partner'      => array(
+				'el' => 'Δέμα {n} · Προϊόντα κατά παραγγελία (από τον συνεργάτη παραγωγής)',
+				'en' => 'Parcel {n} · Made to order (from our production partner)',
+			),
+			'mx_t_own'          => array(
+				'el' => 'Δέμα {n} · Από το κατάστημά μας',
+				'en' => 'Parcel {n} · From our store',
+			),
+			'mx_t_notice'       => array(
+				'el' => 'Η παραγγελία σας θα σταλεί σε δύο ξεχωριστά δέματα: τα ρούχα και αξεσουάρ που τυπώνονται κατά παραγγελία έρχονται απευθείας από τον συνεργάτη παραγωγής, με δικά τους μεταφορικά και χρόνο παράδοσης· τα υπόλοιπα προϊόντα αποστέλλονται από εμάς μέσα σε 2 εργάσιμες. Γι\' αυτό βλέπετε δύο χρεώσεις αποστολής.',
+				'en' => 'Your order will be sent in two separate parcels: the clothes and accessories printed to order come directly from our production partner, with their own shipping cost and delivery time; the other products are sent by us within 2 business days. That is why you see two shipping charges.',
+			),
+			'mx_t_order'        => array(
+				'el' => 'Η παραγγελία σας έρχεται σε {count} δέματα',
+				'en' => 'Your order comes in {count} parcels',
+			),
+			'mx_t_hint'         => array(
+				'el' => 'Τυπώνεται κατά παραγγελία · αποστέλλεται χωριστά από τα υπόλοιπα προϊόντα.',
+				'en' => 'Printed to order · ships separately from the other products.',
+			),
+			'mx_t_eta'          => array(
+				'el' => 'Εκτιμώμενη παράδοση',
+				'en' => 'Estimated delivery',
+			),
 		);
 	}
 
@@ -229,7 +309,7 @@ final class SHN_Settings {
 				if ( null === $min && null === $max ) {
 					continue; // Not configured: the method is left out of the estimate.
 				}
-				list( $min, $max )        = self::range( null === $min ? $max : $min, null === $max ? $min : $max );
+				list( $min, $max )       = self::range( null === $min ? $max : $min, null === $max ? $min : $max );
 				$s['dl_methods'][ $iid ] = array(
 					'min' => $min,
 					'max' => $max,
@@ -258,11 +338,45 @@ final class SHN_Settings {
 
 		$s['dl_holidays'] = self::holidays( $raw['dl_holidays'] ?? array() );
 
+		// Parcels.
+		$s['mx_mode'] = self::pick( $raw, 'mx_mode', array( 'off', 'test', 'live' ), $d['mx_mode'] );
+		foreach ( array( 'mx_printful', 'mx_names', 'mx_notice', 'mx_labels', 'mx_dates', 'mx_order', 'mx_hint' ) as $k ) {
+			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
+		}
+		$color           = isset( $raw['mx_color'] ) && is_string( $raw['mx_color'] ) ? sanitize_hex_color( trim( $raw['mx_color'] ) ) : '';
+		$s['mx_color']   = is_string( $color ) ? $color : '';
+		$s['mx_classes'] = array();
+		if ( isset( $raw['mx_classes'] ) && is_array( $raw['mx_classes'] ) ) {
+			foreach ( $raw['mx_classes'] as $slug ) {
+				$slug = is_string( $slug ) ? sanitize_title( $slug ) : '';
+				if ( '' !== $slug && strlen( $slug ) <= 200 && ! in_array( $slug, $s['mx_classes'], true ) && count( $s['mx_classes'] ) < self::MAX_CLASSES ) {
+					$s['mx_classes'][] = $slug;
+				}
+			}
+		}
+		$s['mx_map'] = $d['mx_map'];
+		if ( isset( $raw['mx_map'] ) && is_array( $raw['mx_map'] ) ) {
+			$s['mx_map'] = array();
+			foreach ( $raw['mx_map'] as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$row = array(
+					'from' => isset( $row['from'] ) && is_string( $row['from'] ) ? mb_substr( trim( sanitize_text_field( $row['from'] ) ), 0, 60 ) : '',
+					'el'   => isset( $row['el'] ) && is_string( $row['el'] ) ? mb_substr( trim( sanitize_text_field( $row['el'] ) ), 0, 100 ) : '',
+					'en'   => isset( $row['en'] ) && is_string( $row['en'] ) ? mb_substr( trim( sanitize_text_field( $row['en'] ) ), 0, 100 ) : '',
+				);
+				if ( '' !== $row['from'] && ( '' !== $row['el'] || '' !== $row['en'] ) && count( $s['mx_map'] ) < self::MAX_MAP ) {
+					$s['mx_map'][] = $row;
+				}
+			}
+		}
+
 		// Texts (Bible §14.17): plain text, length limit, empty English → Greek.
 		foreach ( self::TEXTS as $k => $len ) {
 			$s[ $k ] = array();
 			foreach ( array( 'el', 'en' ) as $l ) {
-				$v           = isset( $raw[ $k ][ $l ] ) && is_string( $raw[ $k ][ $l ] ) ? trim( sanitize_text_field( $raw[ $k ][ $l ] ) ) : null;
+				$v             = isset( $raw[ $k ][ $l ] ) && is_string( $raw[ $k ][ $l ] ) ? trim( sanitize_text_field( $raw[ $k ][ $l ] ) ) : null;
 				$s[ $k ][ $l ] = null === $v ? $d[ $k ][ $l ] : mb_substr( $v, 0, $len );
 			}
 			if ( '' === $s[ $k ]['el'] ) {
@@ -375,11 +489,12 @@ final class SHN_Settings {
 	/**
 	 * A visitor text in the visitor language (empty English → Greek).
 	 *
-	 * @param string $key A key of TEXTS.
+	 * @param string      $key  A key of TEXTS.
+	 * @param string|null $lang 'el' | 'en', or null for the visitor language.
 	 */
-	public static function text( string $key ): string {
+	public static function text( string $key, ?string $lang = null ): string {
 		$s    = self::get();
-		$lang = self::lang();
+		$lang = 'el' === $lang || 'en' === $lang ? $lang : self::lang();
 		$pair = isset( $s[ $key ] ) && is_array( $s[ $key ] ) ? $s[ $key ] : array(
 			'el' => '',
 			'en' => '',

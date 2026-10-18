@@ -1,7 +1,8 @@
 /**
- * Shipping Notes — front.css (v1.0.0)
+ * Shipping Notes — front.css (v1.1.0)
  *
- * Scoped to .shn-fs (free-shipping bar) and .shn-dl (delivery time).
+ * Scoped to .shn-fs (free-shipping bar), .shn-dl (delivery time) and
+ * .shn-mx / .shn-mx-hint / .shn-parcels-order (parcels, 1.1.0).
  * Layout properties carry !important so theme rules with an id (e.g.
  * "#sidebar span { float: right; background: … }", which outrank any
  * class selector) cannot rearrange them (Bible §14, rule 13). Colours and
@@ -97,3 +98,41 @@
 @media (prefers-reduced-motion: reduce) {
 	.shn-fs .shn-fs__bar .shn-fs__fill { transition: none; }
 }
+
+/* ===== Parcels (1.1.0) ===== */
+
+.shn-mx-row td { padding-top: .5em; padding-bottom: .5em; }
+
+.shn-mx {
+	display: block !important;
+	float: none !important;
+	position: static !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+	padding: .75em 1em !important;
+	border: 0 !important;
+	border-left: 4px solid var(--shn-mx-color, currentColor) !important;
+	background: rgba(127, 127, 127, .08) !important;
+	text-align: start;
+	line-height: 1.45 !important;
+	font-weight: normal;
+}
+
+.shn-mx .shn-mx__text {
+	margin: 0 !important;
+	padding: 0 !important;
+	color: inherit !important;
+	font-size: .95em;
+}
+
+.shn-mx-hint {
+	display: block !important;
+	float: none !important;
+	clear: both !important;
+	margin: .25em 0 1em !important;
+	font-size: .9em;
+	opacity: .85;
+}
+
+.shn-parcels-order { margin: 0 0 2em; }
+.shn-parcels-order__cost { text-align: end; white-space: nowrap; }

@@ -14,6 +14,7 @@
  *                    "types": [ term slugs ], "sku": [ prefixes ],
  *                    "maker": manufacturer key | "", "enabled": bool } ],
  *    "makers":   [ { "key", "name", "address", "email", "url", "eu" } ],
+ *    "class_makers": { shipping class slug: manufacturer key },
  *    "eu":       { "name", "email" },       global EU responsible person
  *    "texts":    { "<id>": {el,en} },       headings and the terms line
  *    "terms_url": url | "",  "anchor": str,  "color": "#hex" | "",
@@ -22,7 +23,8 @@
  *
  * Product meta (set in the product's side box or over REST):
  *  _tp_care_profile       '' = automatic, 'none' = no tab, else a profile key
- *  _tp_care_manufacturer  '' = the profile's manufacturer, 'none', else a key
+ *  _tp_care_manufacturer  '' = automatic (shipping class map, else the
+ *                         profile's manufacturer), 'none', else a key
  *  _tp_care_note          extra safety note (HTML, wp_kses_post)
  *
  * Resolution ("automatic"): the product's own profile wins; otherwise the
@@ -65,6 +67,7 @@ final class TP_Care {
 	const MAX_MAKERS   = 30;
 	const MAX_TYPES    = 50;
 	const MAX_SKU      = 20;
+	const MAX_CLASSES  = 20;
 	const MAX_HTML_LEN = 5000;
 	const MAX_NOTE_LEN = 2000;
 	const MAX_LINE_LEN = 200;
@@ -99,19 +102,20 @@ final class TP_Care {
 
 	public static function defaults(): array {
 		return array(
-			'enabled'     => false,
-			'attrs'       => self::default_attrs(),
-			'profiles'    => self::default_profiles(),
-			'makers'      => self::default_makers(),
-			'eu'          => array(
+			'enabled'      => false,
+			'attrs'        => self::default_attrs(),
+			'profiles'     => self::default_profiles(),
+			'makers'       => self::default_makers(),
+			'class_makers' => array(),
+			'eu'           => array(
 				'name'  => '',
 				'email' => '',
 			),
-			'texts'       => self::default_texts(),
-			'terms_url'   => '',
-			'anchor'      => 'gpsr',
-			'color'       => '',
-			'delete_meta' => false,
+			'texts'        => self::default_texts(),
+			'terms_url'    => '',
+			'anchor'       => 'gpsr',
+			'color'        => '',
+			'delete_meta'  => false,
 		);
 	}
 
@@ -332,6 +336,23 @@ final class TP_Care {
 				$seen[ $clean['key'] ] = true;
 				$out['makers'][]       = $clean;
 				if ( count( $out['makers'] ) >= self::MAX_MAKERS ) {
+					break;
+				}
+			}
+		}
+
+		// Shipping class => manufacturer, only for manufacturers that exist.
+		$out['class_makers'] = array();
+		if ( isset( $raw['class_makers'] ) && is_array( $raw['class_makers'] ) ) {
+			$keys = array_column( $out['makers'], 'key' );
+			foreach ( $raw['class_makers'] as $class => $mk ) {
+				$class = sanitize_title( (string) $class );
+				$mk    = self::valid_key( is_scalar( $mk ) ? (string) $mk : '' );
+				if ( '' === $class || ! in_array( $mk, $keys, true ) ) {
+					continue;
+				}
+				$out['class_makers'][ $class ] = $mk;
+				if ( count( $out['class_makers'] ) >= self::MAX_CLASSES ) {
 					break;
 				}
 			}
@@ -618,7 +639,8 @@ final class TP_Care {
 		if ( null !== $profile ) {
 			$mk = self::valid_choice( (string) get_post_meta( $id, self::META_MAKER, true ) );
 			if ( '' === $mk ) {
-				$mk = $profile['maker'];
+				$class = (string) $product->get_shipping_class();
+				$mk    = '' !== $class && isset( $c['class_makers'][ $class ] ) ? $c['class_makers'][ $class ] : $profile['maker'];
 			}
 			/**
 			 * Filters the manufacturer key for a product ('' or 'none' = no manufacturer).

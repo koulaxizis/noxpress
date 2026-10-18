@@ -13,8 +13,10 @@
  *                  per-zone choice of stores survives edits and reorders
  *  - no_pickup     rule (1.1.0): hide the method when the package holds a
  *                  product of one of these shipping classes (e.g. print on
- *                  demand sent by a partner): { on: bool (default false),
- *                  classes: [ shipping class slugs ] }
+ *                  demand sent by a partner), or (1.1.1) when it is the
+ *                  package the Printful plugin made ($package['printful']):
+ *                  { on: bool (default false), printful: bool (default
+ *                  true), classes: [ shipping class slugs ] }
  *  - admin_line    "Pickup at: <store>" at the top of the admin New order
  *                  email (1.1.0); default on
  *  - t_heading / t_details / t_required / t_map / t_blocked / t_admin
@@ -63,8 +65,9 @@ final class PKP_Settings {
 			'hide_address' => true,
 			'stores'       => array(),
 			'no_pickup'    => array(
-				'on'      => false,
-				'classes' => array(),
+				'on'       => false,
+				'printful' => true,
+				'classes'  => array(),
 			),
 			'admin_line'   => true,
 			't_heading'    => array(
@@ -84,8 +87,8 @@ final class PKP_Settings {
 				'en' => 'Map',
 			),
 			't_blocked'    => array(
-				'el' => 'Τα προϊόντα που τυπώνονται κατά παραγγελία αποστέλλονται απευθείας από τον συνεργάτη παραγωγής, γι\' αυτό η παραλαβή από το κατάστημα δεν είναι διαθέσιμη για αυτή την παραγγελία.',
-				'en' => 'Print-on-demand products are shipped directly by our production partner, so store pickup is not available for this order.',
+				'el' => 'Τα προϊόντα που τυπώνονται κατά παραγγελία αποστέλλονται απευθείας από τον συνεργάτη παραγωγής, γι\' αυτό η παραλαβή από το κατάστημα δεν είναι διαθέσιμη γι\' αυτά.',
+				'en' => 'Print-on-demand products are shipped directly by our production partner, so store pickup is not available for them.',
 			),
 			't_admin'      => array(
 				'el' => 'Παραλαβή από',
@@ -125,8 +128,9 @@ final class PKP_Settings {
 
 		$np             = isset( $raw['no_pickup'] ) && is_array( $raw['no_pickup'] ) ? $raw['no_pickup'] : array();
 		$s['no_pickup'] = array(
-			'on'      => ! empty( $np['on'] ),
-			'classes' => array(),
+			'on'       => ! empty( $np['on'] ),
+			'printful' => isset( $np['printful'] ) ? (bool) $np['printful'] : $d['no_pickup']['printful'],
+			'classes'  => array(),
 		);
 		if ( isset( $np['classes'] ) && is_array( $np['classes'] ) ) {
 			foreach ( $np['classes'] as $slug ) {
