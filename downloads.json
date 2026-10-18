@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 74,
+  "total": 75,
   "offset": 5,
   "updated": "2026-10-18",
   "assets": {
@@ -234,6 +234,10 @@
     },
     "653288538": {
       "file": "nox-ce-1.0.0/checkout-extras.zip",
+      "count": 1
+    },
+    "653321309": {
+      "file": "nox-ws-1.1.0/wish-shelf.zip",
       "count": 0
     }
   }

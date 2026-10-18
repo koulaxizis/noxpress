@@ -3,7 +3,10 @@
  * WSH_Ajax — the two wc-ajax endpoints of front.js.
  *
  *  - wsh_sync   (POST) a signed-in customer's own list: add, remove, clear,
- *               merge (the browser's list after sign-in), share (new / off).
+ *               merge (the browser's list after sign-in), share (new / off,
+ *               per list). The heart works on every list of the customer:
+ *               add puts the product in the main list, remove takes it out
+ *               of the list it is in.
  *               Nonce wsh_sync, whitelist of operations and ids, limits on
  *               items and requests (Bible §14.28).
  *  - wsh_render (GET)  the HTML of a guest's list from the ids in the
@@ -90,14 +93,15 @@ final class WSH_Ajax {
 					$result = (string) $added;
 					break;
 				case 'share':
-					if ( ! WSH_Settings::get()['share'] ) {
+					$list = WSH_List::lists_on() ? absint( self::post( 'list' ) ) : 0;
+					if ( ! WSH_Settings::get()['share'] || ! WSH_Store::owns_list( $uid, $list ) ) {
 						wp_send_json_error( array( 'code' => 'off' ), 403 );
 					}
 					if ( 'off' === self::post( 'to' ) ) {
-						WSH_Store::token_off( $uid );
+						WSH_Store::token_off( $uid, $list );
 						$share = '';
 					} else {
-						$share = WSH_List::share_url( WSH_Store::new_token( $uid ) );
+						$share = WSH_List::share_url( WSH_Store::new_token( $uid, $list ) );
 					}
 					$result = 'share';
 					break;

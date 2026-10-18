@@ -380,6 +380,32 @@ final class WSH_Admin_UI {
 				<p class="description"><?php esc_html_e( 'Επισκέπτες: σύνδεσμος με τα προϊόντα μέσα στη διεύθυνση. Συνδεδεμένοι πελάτες: σύνδεσμος με τυχαίο κλειδί, ιδιωτικός μέχρι να τον φτιάξουν, με «Νέος σύνδεσμος» που ακυρώνει τον παλιό. Το όνομα του πελάτη δεν φαίνεται. Κανένα script κοινωνικών δικτύων: αντιγραφή συνδέσμου και το μενού κοινοποίησης της συσκευής. Οι σελίδες κοινοποίησης έχουν noindex.', 'wish-shelf' ); ?></p>
 			</div>
 
+			<h2 class="wsh-h2"><?php esc_html_e( 'Πολλές λίστες', 'wish-shelf' ); ?></h2>
+			<div class="wsh-zone">
+				<?php echo self::check( 'wsh_lists', $s['lists'], __( 'Οι συνδεδεμένοι πελάτες φτιάχνουν λίστες με όνομα (π.χ. «Δώρα»)', 'wish-shelf' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<p class="description"><?php echo esc_html( sprintf( /* translators: %d: max lists */ __( 'Η καρδιά βάζει το προϊόν στη βασική λίστα· στη σελίδα της λίστας ο πελάτης φτιάχνει έως %d ακόμα λίστες, τις μετονομάζει ή τις διαγράφει, μετακινεί προϊόντα και κοινοποιεί την καθεμία χωριστά. Κάθε προϊόν είναι σε μία λίστα. Οι επισκέπτες κρατούν μία λίστα. Αν το κλείσεις, ο πελάτης βλέπει όλα τα προϊόντα του σε μία λίστα.', 'wish-shelf' ), WSH_Store::max_lists() ) ); ?></p>
+			</div>
+
+			<h2 class="wsh-h2"><?php esc_html_e( 'Ειδοποιήσεις με email', 'wish-shelf' ); ?></h2>
+			<div class="wsh-zone">
+				<?php
+				$wc_url = admin_url( 'admin.php?page=wc-settings&tab=email&section=wsh_email_alert' );
+				if ( ! WSH_Alerts::email_on() ) {
+					echo '<p class="wsh-warn">' . esc_html__( 'Το email είναι κλειστό. Άνοιξέ το στο WooCommerce → Ρυθμίσεις → Emails → «Λίστα επιθυμιών: πτώση τιμής ή ξανά σε απόθεμα».', 'wish-shelf' ) . ' <a href="' . esc_url( $wc_url ) . '">' . esc_html__( 'Άνοιγμα', 'wish-shelf' ) . '</a></p>';
+				} elseif ( 'live' !== WSH_Settings::mode() ) {
+					echo '<p class="wsh-warn">' . esc_html__( 'Τα emails φεύγουν μόνο όταν η λειτουργία είναι «Ενεργό για όλους».', 'wish-shelf' ) . '</p>';
+				} else {
+					echo '<p>' . esc_html( sprintf( /* translators: %d: customers */ __( 'Ενεργές. Πελάτες που τις ζήτησαν: %d.', 'wish-shelf' ), WSH_Alerts::optin_count() ) ) . ' <a href="' . esc_url( $wc_url ) . '">' . esc_html__( 'Θέμα και κείμενο του email', 'wish-shelf' ) . '</a></p>';
+				}
+				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in check().
+				echo self::check( 'wsh_alert_price', $s['alert_price'], __( 'Όταν πέφτει η τιμή', 'wish-shelf' ) );
+				// phpcs:enable
+				?>
+				<p class="wsh-field"><span><?php esc_html_e( 'Ελάχιστη πτώση (%)', 'wish-shelf' ); ?></span><input type="number" name="wsh_alert_drop" value="<?php echo (int) $s['alert_drop']; ?>" min="1" max="90" step="1" class="small-text" /></p>
+				<?php echo self::check( 'wsh_alert_stock', $s['alert_stock'], __( 'Όταν ξαναμπαίνει σε απόθεμα', 'wish-shelf' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<p class="description"><?php esc_html_e( 'Μόνο για συνδεδεμένους πελάτες που τσέκαραν το κουτάκι κάτω από τη λίστα τους (ατσέκαρτο από προεπιλογή). Ο έλεγχος γίνεται μία φορά την ημέρα στο παρασκήνιο, με ένα email ανά πελάτη για όλα τα νέα του, και η ίδια είδηση δεν ξαναστέλνεται. Κάθε email έχει σύνδεσμο διακοπής που δουλεύει χωρίς σύνδεση.', 'wish-shelf' ); ?></p>
+			</div>
+
 			<p class="wsh-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'wish-shelf' ); ?></button></p>
 		</form>
 		<?php
@@ -419,6 +445,21 @@ final class WSH_Admin_UI {
 			't_share_off' => __( 'Διακοπή κοινοποίησης', 'wish-shelf' ),
 			't_skipped'   => __( 'Προϊόντα που δεν μπήκαν στο καλάθι', 'wish-shelf' ),
 			't_shared'    => __( 'Τίτλος κοινής λίστας', 'wish-shelf' ),
+			't_default'   => __( 'Πολλές λίστες: όνομα της βασικής λίστας', 'wish-shelf' ),
+			't_new_list'  => __( 'Πολλές λίστες: «Νέα λίστα»', 'wish-shelf' ),
+			't_list_name' => __( 'Πολλές λίστες: «Όνομα λίστας»', 'wish-shelf' ),
+			't_create'    => __( 'Πολλές λίστες: «Δημιουργία»', 'wish-shelf' ),
+			't_rename'    => __( 'Πολλές λίστες: «Μετονομασία»', 'wish-shelf' ),
+			't_del_list'  => __( 'Πολλές λίστες: «Διαγραφή λίστας»', 'wish-shelf' ),
+			't_conf_list' => __( 'Πολλές λίστες: επιβεβαίωση διαγραφής', 'wish-shelf' ),
+			't_move'      => __( 'Πολλές λίστες: «Μετακίνηση»', 'wish-shelf' ),
+			't_alerts'    => __( 'Emails: κουτάκι κάτω από τη λίστα', 'wish-shelf' ),
+			't_save'      => __( 'Emails: «Αποθήκευση»', 'wish-shelf' ),
+			't_unsub'     => __( 'Emails: μήνυμα μετά τη διακοπή', 'wish-shelf' ),
+			't_mail_intro' => __( 'Email: εισαγωγή', 'wish-shelf' ),
+			't_mail_drop' => __( 'Email: πτώση τιμής ({old}, {new})', 'wish-shelf' ),
+			't_mail_stock' => __( 'Email: ξανά σε απόθεμα', 'wish-shelf' ),
+			't_mail_off'  => __( 'Email: σύνδεσμος διακοπής', 'wish-shelf' ),
 		);
 	}
 
@@ -528,22 +569,34 @@ final class WSH_Admin_UI {
 	 * ------------------------------------------------------------------- */
 
 	private static function render_tools(): void {
-		$s   = WSH_Settings::get();
-		$pre = WSH_Import::preview();
+		$s = WSH_Settings::get();
 		?>
-		<h2 class="wsh-h2"><?php esc_html_e( 'Εισαγωγή από WishSuite', 'wish-shelf' ); ?></h2>
+		<h2 class="wsh-h2"><?php esc_html_e( 'Εισαγωγή από άλλο plugin', 'wish-shelf' ); ?></h2>
 		<div class="wsh-zone">
-			<p class="description"><?php esc_html_e( 'Αντιγράφει τις λίστες των συνδεδεμένων πελατών από το WishSuite, χωρίς διπλά και χωρίς να αλλάξει τα δεδομένα του. Οι λίστες επισκεπτών του WishSuite είναι στους browsers τους και δεν μεταφέρονται.', 'wish-shelf' ); ?></p>
-			<?php if ( ! $pre['table'] ) : ?>
-				<p><?php esc_html_e( 'Δεν βρέθηκε πίνακας του WishSuite σε αυτό το site.', 'wish-shelf' ); ?></p>
-			<?php else : ?>
-				<p><?php echo esc_html( sprintf( /* translators: 1: rows, 2: customers */ __( 'Βρέθηκαν %1$d προϊόντα σε λίστες %2$d πελατών.', 'wish-shelf' ), $pre['rows'], $pre['users'] ) ); ?></p>
-				<form method="post" class="wsh-inline-form">
+			<p class="description"><?php esc_html_e( 'Αντιγράφει τις λίστες των συνδεδεμένων πελατών, χωρίς διπλά και χωρίς να αλλάξει τα δεδομένα του άλλου plugin. Οι λίστες των επισκεπτών του δεν μεταφέρονται. Με ανοιχτές τις «Πολλές λίστες», οι λίστες με όνομα του YITH και του TI γίνονται λίστες με το ίδιο όνομα· αλλιώς όλα πηγαίνουν στη βασική λίστα.', 'wish-shelf' ); ?></p>
+			<?php
+			$found = false;
+			foreach ( WSH_Import::SOURCES as $src => $def ) {
+				$pre = WSH_Import::preview( $src );
+				if ( ! $pre['table'] ) {
+					continue;
+				}
+				$found = true;
+				?>
+				<form method="post" class="wsh-inline-form wsh-mt-8">
 					<?php self::nonce_field(); ?>
-					<input type="hidden" name="wsh_action" value="import_wishsuite" />
+					<input type="hidden" name="wsh_action" value="import" />
+					<input type="hidden" name="wsh_src" value="<?php echo esc_attr( $src ); ?>" />
+					<strong><?php echo esc_html( $def[0] ); ?></strong>
+					<span><?php echo esc_html( sprintf( /* translators: 1: rows, 2: customers */ __( 'Βρέθηκαν %1$d προϊόντα σε λίστες %2$d πελατών.', 'wish-shelf' ), $pre['rows'], $pre['users'] ) ); ?></span>
 					<button type="submit" class="button"><?php esc_html_e( 'Εισαγωγή', 'wish-shelf' ); ?></button>
 				</form>
-			<?php endif; ?>
+				<?php
+			}
+			if ( ! $found ) {
+				echo '<p>' . esc_html__( 'Δεν βρέθηκαν πίνακες του WishSuite, του YITH ή του TI σε αυτό το site.', 'wish-shelf' ) . '</p>';
+			}
+			?>
 		</div>
 
 		<h2 class="wsh-h2"><?php esc_html_e( 'Backup ρυθμίσεων', 'wish-shelf' ); ?></h2>
@@ -575,7 +628,8 @@ final class WSH_Admin_UI {
 					<tr><td><code>wsh_get_items( $user_id )</code></td><td><?php esc_html_e( 'Η λίστα ενός συνδεδεμένου πελάτη: προϊόν, παραλλαγή, ημερομηνία, τιμή κατά την προσθήκη.', 'wish-shelf' ); ?></td></tr>
 					<tr><td><code>wsh_product_count( $product_id )</code></td><td><?php esc_html_e( 'Σε πόσες λίστες πελατών είναι ένα προϊόν.', 'wish-shelf' ); ?></td></tr>
 					<tr><td><code>wsh_item_added</code>, <code>wsh_item_removed</code></td><td><?php esc_html_e( 'Actions όταν αλλάζει η λίστα ενός συνδεδεμένου πελάτη ( $user_id, $product_id, $variation_id ).', 'wish-shelf' ); ?></td></tr>
-					<tr><td><code>wsh_text</code>, <code>wsh_max_items</code></td><td><?php esc_html_e( 'Φίλτρα για τα κείμενα του πελάτη (π.χ. WPML) και το όριο προϊόντων ανά λίστα (200).', 'wish-shelf' ); ?></td></tr>
+					<tr><td><code>wsh_text</code>, <code>wsh_max_items</code>, <code>wsh_max_lists</code></td><td><?php esc_html_e( 'Φίλτρα για τα κείμενα του πελάτη (π.χ. WPML), το όριο προϊόντων ανά πελάτη (200) και το όριο λιστών με όνομα (10).', 'wish-shelf' ); ?></td></tr>
+					<tr><td><code>emails/wsh-alert.php</code></td><td><?php esc_html_e( 'Template του email ειδοποίησης· το θέμα το αντικαθιστά στο yourtheme/woocommerce/emails/.', 'wish-shelf' ); ?></td></tr>
 					<tr><td><code>[nox_wishlist]</code>, <code>[nox_wishlist_button id=""]</code>, <code>[nox_wishlist_count]</code></td><td><?php esc_html_e( 'Shortcodes για τη λίστα, το κουμπί και τον μετρητή (και ως blocks).', 'wish-shelf' ); ?></td></tr>
 					<tr><td><code>WSH_DISABLE</code></td><td><?php esc_html_e( 'Σταθερά στο wp-config.php: σταματά κάθε αλλαγή στο front end.', 'wish-shelf' ); ?></td></tr>
 				</tbody>
@@ -618,10 +672,13 @@ final class WSH_Admin_UI {
 		switch ( sanitize_key( wp_unslash( $_POST['wsh_action'] ) ) ) {
 			case 'save_general':
 				self::do_save_general();
+				WSH_Alerts::schedule();
 				self::redirect( 'general', $saved );
 				break;
 			case 'save_list':
-				self::redirect( 'list', self::do_save_list() );
+				$msgs = self::do_save_list();
+				WSH_Alerts::schedule();
+				self::redirect( 'list', $msgs );
 				break;
 			case 'save_texts':
 				self::do_save_texts();
@@ -633,8 +690,12 @@ final class WSH_Admin_UI {
 				WSH_Settings::save( $s );
 				self::redirect( 'tools', $saved );
 				break;
-			case 'import_wishsuite':
-				$r = WSH_Import::import_wishsuite();
+			case 'import':
+				$src = sanitize_key( self::post( 'wsh_src' ) );
+				if ( ! isset( WSH_Import::SOURCES[ $src ] ) ) {
+					self::redirect( 'tools', array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'wish-shelf' ) ) ) );
+				}
+				$r = WSH_Import::import( $src );
 				self::redirect(
 					'tools',
 					array(
@@ -705,9 +766,10 @@ final class WSH_Admin_UI {
 		foreach ( WSH_Settings::COLS as $c ) {
 			$s['cols'][ $c ] = isset( $cols[ $c ] ) && '1' === $cols[ $c ];
 		}
-		foreach ( array( 'price_drop', 'bulk', 'remove_after', 'account', 'count_zero', 'share' ) as $k ) {
+		foreach ( array( 'price_drop', 'bulk', 'remove_after', 'account', 'count_zero', 'share', 'lists', 'alert_price', 'alert_stock' ) as $k ) {
 			$s[ $k ] = '1' === self::post( 'wsh_' . $k );
 		}
+		$s['alert_drop'] = (int) self::post( 'wsh_alert_drop' );
 		$s['endpoint'] = self::post( 'wsh_endpoint' );
 		$s['menu']     = self::post( 'wsh_menu' );
 		if ( '' !== $s['menu'] && ! isset( get_registered_nav_menus()[ $s['menu'] ] ) ) {
