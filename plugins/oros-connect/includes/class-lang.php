@@ -159,6 +159,7 @@ final class ORC_Lang {
 		'Η εισαγωγή αιτημάτων ως προσφορές ετοιμάζεται στο orOS. Μέχρι τότε τα αιτήματα μένουν στο Publishing Quote → Αιτήματα και έρχονται με email.' => 'Importing requests as offers is being prepared in orOS. Until then the requests stay in Publishing Quote → Requests and arrive by email.',
 		'Κατάσταση' => 'Status',
 		'Νέα αιτήματα που περιμένουν το orOS: %d' => 'New requests waiting for orOS: %d',
+		'Τελευταία φορά που τα πήρε το orOS: %s (1 αίτημα).' => 'Last collected by orOS: %s (1 request).',
 		'Τελευταία φορά που τα πήρε το orOS: %1$s (%2$d αιτήματα).' => 'Last collected by orOS: %1$s (%2$d requests).',
 		'Το orOS δεν έχει πάρει ακόμα αιτήματα.' => 'orOS has not collected any requests yet.',
 		'Όλα τα αιτήματα' => 'All requests',
