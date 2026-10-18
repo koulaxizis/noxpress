@@ -13,6 +13,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.0.1/book-preview.zip"
       }
     },
+    "checkout-extras": {
+      "beta": {
+        "changelog": "* Initial release.\n* \"This is a gift\" at checkout (classic and block), with an optional, required or no message, an optional wrapping fee, three positions and a shippable-only rule.\n* Gift on the order: totals row, admin meta box, orders list column and \"Gifts only\" filter, admin New order email line; public function `cke_get_gift()`.\n* Thank-you page message (paid / awaiting payment) with placeholders, in its own box or in place of WooCommerce's line, and cross-sell, related or sale products with the theme's cards.\n* Thank-you coupon: issue rules, coupon properties, delivery in the order email or a separate WooCommerce email, copy button, reminder email, statistics, daily cleanup of expired unused coupons; filters `cke_coupon_args`, `cke_text`, action `cke_coupon_created`.\n* Editable Greek / English texts, settings export / import.\n* Test mode, CKE_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.13).",
+        "published": "2026-10-18",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "25e23e9794ddee40656e2d6ebe0ba65e9cf182e97108dbebaff81f1c11b2184e",
+        "signature": "ejDBVnqiEBnmykcRCa0B4va+7BjnYz9BKCnFVaxF058PQV5K2+it5C5lh6cZzrgjCs4JxgGneB+tMIL7AB9hDA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.0.0/checkout-extras.zip"
+      }
+    },
     "easy-withdrawal": {
       "beta": {
         "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
