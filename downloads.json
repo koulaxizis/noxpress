@@ -1,6 +1,6 @@
 {
   "display": 50,
-  "total": 65,
+  "total": 66,
   "offset": 5,
   "updated": "2026-10-18",
   "assets": {
@@ -198,7 +198,7 @@
     },
     "653211292": {
       "file": "nox-pq-1.0.0/publishing-quote.zip",
-      "count": 0
+      "count": 1
     },
     "653222117": {
       "file": "nox-tp-1.5.1/theme-patcher.zip",
@@ -214,6 +214,14 @@
     },
     "653225362": {
       "file": "nox-po-1.0.0/pre-orders.zip",
+      "count": 0
+    },
+    "653230408": {
+      "file": "nox-oc-1.1.0/oros-connect.zip",
+      "count": 0
+    },
+    "653240190": {
+      "file": "nox-ws-1.0.0/wish-shelf.zip",
       "count": 0
     }
   }

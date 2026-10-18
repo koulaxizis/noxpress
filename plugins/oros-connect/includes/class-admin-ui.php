@@ -8,6 +8,8 @@
  *  - modules     mode (test / live / off), visitor language, module switches
  *  - newsletter  orOS sign-up address + connection check, form texts,
  *                checkout consent, shop key, send log
+ *  - offers      module «Προσφορές»: what orOS needs to pull the requests of
+ *                Publishing Quote, waiting requests, last pull
  *  - tools       settings backup, clear the log, developers
  *
  * Every state change: POST on admin_init (slug + nonce + capability, PRG,
@@ -39,6 +41,7 @@ final class ORC_Admin_UI {
 		return array(
 			'modules'    => __( 'Modules', 'oros-connect' ),
 			'newsletter' => __( 'Newsletter', 'oros-connect' ),
+			'offers'     => __( 'Προσφορές', 'oros-connect' ),
 			'tools'      => __( 'Εργαλεία', 'oros-connect' ),
 		);
 	}
@@ -140,6 +143,9 @@ final class ORC_Admin_UI {
 				case 'newsletter':
 					self::render_newsletter();
 					break;
+				case 'offers':
+					self::render_offers();
+					break;
 				case 'tools':
 					self::render_tools();
 					break;
@@ -191,6 +197,14 @@ final class ORC_Admin_UI {
 					</h3>
 					<p><?php esc_html_e( 'Φόρμα εγγραφής (μπλοκ, shortcode, widget) και κουτάκι στο ταμείο, που στέλνουν νέους συνδρομητές στη λίστα σου στο orOS Newsletter.', 'oros-connect' ); ?></p>
 					<?php self::checkbox( 'orc_mod_newsletter', $s['mods']['newsletter'], __( 'Ενεργοποίηση', 'oros-connect' ) ); ?>
+				</div>
+				<div class="orc-mod">
+					<h3>
+						<?php esc_html_e( 'Προσφορές', 'oros-connect' ); ?>
+						<?php echo $s['mods']['offers'] ? self::badge( __( 'Ενεργό', 'oros-connect' ), 'ok' ) : self::badge( __( 'Κλειστό', 'oros-connect' ), 'muted' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?>
+					</h3>
+					<p><?php esc_html_e( 'Τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Το orOS τα παίρνει όταν είναι ανοιχτό, και η προσφορά φεύγει μόνο όταν τη στείλεις εσύ.', 'oros-connect' ); ?></p>
+					<?php self::checkbox( 'orc_mod_offers', $s['mods']['offers'], __( 'Ενεργοποίηση', 'oros-connect' ) ); ?>
 				</div>
 				<?php
 				$soon = array(
@@ -353,6 +367,69 @@ final class ORC_Admin_UI {
 		<?php
 	}
 
+	private static function render_offers(): void {
+		$s   = ORC_Settings::get();
+		$fmt = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+		if ( ! $s['mods']['offers'] ) {
+			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Το module Προσφορές είναι κλειστό: το orOS δεν μπορεί να πάρει τίποτα μέχρι να το ενεργοποιήσεις στα Modules.', 'oros-connect' ) . '</p></div>';
+		}
+		$source = function_exists( 'pbq_get_requests' );
+		if ( ! $source ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Το Publishing Quote δεν είναι ενεργό. Οι Προσφορές παίρνουν τα αιτήματα «Ενδιαφέρομαι» από αυτό.', 'oros-connect' ) . '</p></div>';
+		}
+		?>
+		<h2 class="orc-h2"><?php esc_html_e( 'Πώς δουλεύει', 'oros-connect' ); ?></h2>
+		<div class="orc-zone">
+			<ol>
+				<li><?php esc_html_e( 'Ο επισκέπτης πατά «Ενδιαφέρομαι» στο Publishing Quote. Το αίτημα μένει στο site και σου έρχεται email.', 'oros-connect' ); ?></li>
+				<li><?php esc_html_e( 'Όταν ανοίγεις το orOS, παίρνει τα νέα αιτήματα, φτιάχνει από το καθένα πρόχειρη προσφορά και επαφή, και τα μαρκάρει «Στο orOS».', 'oros-connect' ); ?></li>
+				<li><?php esc_html_e( 'Ελέγχεις την προσφορά στο orOS και τη στέλνεις εσύ. Η ανάλυση μπαίνει ως εσωτερική σημείωση και δεν φεύγει ποτέ προς τον πελάτη.', 'oros-connect' ); ?></li>
+			</ol>
+		</div>
+
+		<h2 class="orc-h2"><?php esc_html_e( 'Σύνδεση με το orOS', 'oros-connect' ); ?></h2>
+		<div class="orc-zone">
+			<span class="orc-label"><?php esc_html_e( 'Διεύθυνση του site', 'oros-connect' ); ?></span>
+			<code class="orc-wide"><?php echo esc_html( rest_url( 'orc/v1/offers' ) ); ?></code>
+			<?php if ( Oros_Connect::woo() ) : ?>
+				<p class="description orc-mt-8"><?php esc_html_e( 'Το orOS χρησιμοποιεί τα κλειδιά WooCommerce REST που ήδη έχει για το κατάστημα (Stock → WooCommerce). Με κλειδί «Ανάγνωση» μόνο διαβάζει· για να μαρκάρει τα αιτήματα «Στο orOS» χρειάζεται «Ανάγνωση/Εγγραφή».', 'oros-connect' ); ?>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ); ?>"><?php esc_html_e( 'Κλειδιά REST', 'oros-connect' ); ?></a></p>
+			<?php else : ?>
+				<p class="description orc-mt-8"><?php esc_html_e( 'Χωρίς WooCommerce, το orOS συνδέεται με ένα Application Password ενός διαχειριστή (Χρήστες → Προφίλ → Application Passwords).', 'oros-connect' ); ?>
+					<a href="<?php echo esc_url( admin_url( 'profile.php#application-passwords-section' ) ); ?>"><?php esc_html_e( 'Application Passwords', 'oros-connect' ); ?></a></p>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'Η εισαγωγή αιτημάτων ως προσφορές ετοιμάζεται στο orOS. Μέχρι τότε τα αιτήματα μένουν στο Publishing Quote → Αιτήματα και έρχονται με email.', 'oros-connect' ); ?></p>
+		</div>
+
+		<h2 class="orc-h2"><?php esc_html_e( 'Κατάσταση', 'oros-connect' ); ?></h2>
+		<div class="orc-zone">
+			<?php
+			$seen = class_exists( 'ORC_Offers' ) ? ORC_Offers::last_seen() : array();
+			$wait = $source ? count( pbq_get_requests( array( 'state' => 'new', 'limit' => 500 ) ) ) : 0;
+			?>
+			<p>
+				<?php
+				/* translators: %d: number of requests */
+				echo esc_html( sprintf( __( 'Νέα αιτήματα που περιμένουν το orOS: %d', 'oros-connect' ), $wait ) );
+				?>
+			</p>
+			<p>
+				<?php
+				echo esc_html(
+					$seen
+						/* translators: 1: date and time, 2: number of requests */
+						? sprintf( __( 'Τελευταία φορά που τα πήρε το orOS: %1$s (%2$d αιτήματα).', 'oros-connect' ), wp_date( $fmt, $seen['t'] ), $seen['n'] )
+						: __( 'Το orOS δεν έχει πάρει ακόμα αιτήματα.', 'oros-connect' )
+				);
+				?>
+			</p>
+			<?php if ( $source ) : ?>
+				<p><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=pbq-settings&tab=requests' ) ); ?>"><?php esc_html_e( 'Όλα τα αιτήματα', 'oros-connect' ); ?></a></p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
 	private static function render_tools(): void {
 		?>
 		<h2 class="orc-h2"><?php esc_html_e( 'Backup ρυθμίσεων', 'oros-connect' ); ?></h2>
@@ -383,7 +460,9 @@ final class ORC_Admin_UI {
 					<tr><td><code>[oros_newsletter title="yes|no" name="yes|no"]</code></td><td><?php esc_html_e( 'Η φόρμα εγγραφής.', 'oros-connect' ); ?></td></tr>
 					<tr><td><code>orc_text</code> <?php esc_html_e( '(φίλτρο)', 'oros-connect' ); ?></td><td><?php esc_html_e( 'Αλλάζει ένα κείμενο του επισκέπτη: ( $text, $key, $lang ).', 'oros-connect' ); ?></td></tr>
 					<tr><td><code>orc_newsletter_sent</code> <?php esc_html_e( '(action)', 'oros-connect' ); ?></td><td><?php esc_html_e( 'Μετά από κάθε αποστολή από το ταμείο: ( $order_id, $result ).', 'oros-connect' ); ?></td></tr>
-					<tr><td><code>ORC_DISABLE</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά τις φόρμες, το κουτάκι στο ταμείο και τις αποστολές.', 'oros-connect' ); ?></td></tr>
+					<tr><td><code>GET /wp-json/orc/v1/offers</code></td><td><?php esc_html_e( 'Τα αιτήματα του Publishing Quote για το orOS (state=new|contact|oros|closed|all, limit, page). Μόνο για διαχειριστές.', 'oros-connect' ); ?></td></tr>
+					<tr><td><code>POST /wp-json/orc/v1/offers/&lt;id&gt;</code></td><td><?php esc_html_e( 'Αλλάζει την κατάσταση ενός αιτήματος: { state, note }.', 'oros-connect' ); ?></td></tr>
+					<tr><td><code>ORC_DISABLE</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά τις φόρμες, το κουτάκι στο ταμείο, τις αποστολές και τις Προσφορές.', 'oros-connect' ); ?></td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -420,6 +499,7 @@ final class ORC_Admin_UI {
 			case 'save_modules':
 				$s                       = ORC_Settings::get();
 				$s['mods']['newsletter'] = '1' === self::post( 'orc_mod_newsletter' );
+				$s['mods']['offers']     = '1' === self::post( 'orc_mod_offers' );
 				$s['mode']               = sanitize_key( self::post( 'orc_mode' ) );
 				$s['lang']               = sanitize_key( self::post( 'orc_lang' ) );
 				ORC_Settings::save( $s );

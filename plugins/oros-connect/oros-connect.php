@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          orOS Connect
  * Plugin URI:           https://noxpress.tech
- * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.0.0
+ * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter· και οι Προσφορές: τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Δουλεύει με ή χωρίς WooCommerce.
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -21,8 +21,9 @@
  * A plugin with modules (Bible §20): everything orOS-related lives here,
  * each module is off until switched on, and a module that is off loads no
  * code at all. orOS is a static system in the browser: nothing here can
- * write into it. The site only hands data to orOS's own channels (today
- * the relay's public sign-up form), and orOS pulls it when it is open.
+ * write into it. The site only hands data to orOS's own channels (the
+ * relay's public sign-up form), or keeps it for orOS to pull while it is
+ * open (the offers endpoint).
  *
  * Dispatch map:
  *  - oros-connect.php → bootstrap only (constants, requires, init wiring)
@@ -34,7 +35,10 @@
  *  - ORC_Newsletter → module "newsletter": form (shortcode, block, widget),
  *                     checkout consent (classic and block checkout), the
  *                     send queue (Action Scheduler), order screen line
- *  - ORC_Admin_UI   → menu, modules, Newsletter settings, tools, footer
+ *  - ORC_Offers     → module "offers": REST orc/v1/offers that orOS pulls
+ *                     (Publishing Quote requests → draft offers), with the
+ *                     shop's WooCommerce REST keys or an Application Password
+ *  - ORC_Admin_UI   → menu, modules, Newsletter and Offers settings, tools
  *
  * Deviations from the Bible (with reason):
  *  - §1.2 (WooCommerce required): the Newsletter form works on any
@@ -49,6 +53,8 @@
  *  - §12 (nothing left after uninstall): the consent stays in the order
  *    meta: it is the shop's record of the customer's consent (as Easy
  *    Withdrawal's statements). Settings, the log and queued sends go.
+ *  - §14.4 (no REST): the offers routes are the purpose of the Offers
+ *    module; they answer only to authenticated managers.
  *
  * Front end (Bible §14): off until a module is switched on; test mode by
  * default (only managers see the form and the checkbox); ORC_DISABLE in
@@ -60,7 +66,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ORC_VERSION', '1.0.0' );
+define( 'ORC_VERSION', '1.1.0' );
 define( 'ORC_FILE', __FILE__ );
 define( 'ORC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ORC_URL', plugin_dir_url( __FILE__ ) );
@@ -104,6 +110,11 @@ final class Oros_Connect {
 		if ( ORC_Settings::module( 'newsletter' ) ) {
 			require_once ORC_PATH . 'includes/class-newsletter.php';
 			ORC_Newsletter::init();
+		}
+
+		if ( ORC_Settings::module( 'offers' ) ) {
+			require_once ORC_PATH . 'includes/class-offers.php';
+			ORC_Offers::init();
 		}
 
 		if ( is_admin() ) {

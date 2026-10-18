@@ -50,6 +50,7 @@ final class Noxpress_Core {
 		'Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.' => 'Product bundles: every product with its own stock and VAT, a bundle discount and correct sales reports.',
 		'Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».' => 'Publishing quotes for prospective authors: an amount per service and a total, with the rates hidden on the server and «I\'m interested» requests.',
 		'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.' => 'Pre-orders with a release date: badge and button in the store, the date in the cart and on the order, automatic release and emails.',
+		'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.' => 'Wishlist: a heart on products, guest lists without cookies, sharing and a report of the most wanted products.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -124,7 +125,7 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
-			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, SBR 170, PBQ 180, POR 190).
+			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, SBR 170, PBQ 180, POR 190, WSH 200).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 		}
@@ -225,6 +226,11 @@ final class Noxpress_Core {
 				'name' => 'Pre-Orders',
 				'desc' => __( 'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.', 'noxpress' ),
 				'page' => 'por-settings',
+			),
+			'wish-shelf'        => array(
+				'name' => 'Wish Shelf',
+				'desc' => __( 'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.', 'noxpress' ),
+				'page' => 'wsh-settings',
 			),
 		);
 	}

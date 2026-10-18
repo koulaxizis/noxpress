@@ -1,9 +1,10 @@
 <?php
 /**
- * orOS Connect — uninstall.php (v1.0.0)
+ * orOS Connect — uninstall.php (v1.1.0)
  *
  * Deleted:
- *  - Options orc_settings, orc_nl_log (send log).
+ *  - Options orc_settings, orc_nl_log (send log), orc_of_seen (last pull
+ *    of the Offers module).
  *  - Transients orc_aui_msg_{uid} (PRG notices).
  *  - Queued checkout sign-ups (Action Scheduler group oros-connect, and
  *    the WP-Cron fallback hook orc_nl_send).
@@ -26,6 +27,7 @@ function orc_uninstall_site(): void {
 
 	delete_option( 'orc_settings' );
 	delete_option( 'orc_nl_log' );
+	delete_option( 'orc_of_seen' );
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
@@ -62,7 +64,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $orc_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders' ) as $orc_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf' ) as $orc_slug ) {
 	if ( 'oros-connect' !== $orc_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $orc_slug . '/' . $orc_slug . '.php' ) ) {
 		$orc_suite_left = true;
 		break;

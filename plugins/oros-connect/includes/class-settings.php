@@ -29,7 +29,7 @@ final class ORC_Settings {
 	const OPT = 'orc_settings';
 
 	/** Modules of this version. Future ones (stock, receipt, inbox) join here. */
-	const MODULES = array( 'newsletter' );
+	const MODULES = array( 'newsletter', 'offers' );
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
