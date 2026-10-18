@@ -1,0 +1,409 @@
+/**
+ * Pre-Orders — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors por-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.por-wrap {
+	--por-bg: #101218;
+	--por-panel: #14161d;
+	--por-panel-2: #1d2029;
+	--por-input: #1a1d26;
+	--por-border: #2e3240;
+	--por-border-input: #3a3f52;
+	--por-row-border: #23262f;
+	--por-stripe: #181b23;
+	--por-hover: #1e212c;
+	--por-text: #eae8fa;
+	--por-heading: #f6f4ff;
+	--por-muted: #b7b2d6;
+	--por-link: #beb1ff;
+	--por-link-hover: #d4c9ff;
+	--por-accent: #6d4aff;
+	--por-accent-hover: #8263ff;
+	--por-warn: #f5c97e;
+	--por-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.por-wrap {
+	color-scheme: dark;
+	background: var(--por-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--por-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.por-wrap h1,
+.por-wrap h2 {
+	color: var(--por-heading);
+}
+
+.por-wrap a { color: var(--por-link); }
+.por-wrap a:hover { color: var(--por-link-hover); }
+
+.por-wrap .por-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--por-muted);
+	border-bottom: 1px solid var(--por-border);
+	padding-bottom: 6px;
+}
+
+.por-wrap .description,
+.por-wrap p.description,
+.por-wrap .por-hint {
+	color: var(--por-muted) !important;
+}
+
+.por-zone {
+	background: var(--por-panel);
+	border: 1px solid var(--por-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.por-wrap input[type="text"],
+.por-wrap input[type="url"],
+.por-wrap input[type="number"],
+.por-wrap input[type="time"],
+.por-wrap input[type="date"],
+.por-wrap textarea,
+.por-wrap select {
+	background-color: var(--por-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--por-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.por-wrap input::placeholder,
+.por-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.por-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.por-wrap input[type="file"] {
+	color: var(--por-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.por-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.por-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.por-wrap input[type="checkbox"],
+.por-wrap input[type="radio"] {
+	accent-color: var(--por-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.por-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.por-wrap .button:hover:not(:disabled) {
+	border-color: var(--por-accent) !important;
+	color: #ffffff !important;
+}
+
+.por-wrap .button-primary {
+	background: var(--por-accent) !important;
+	border-color: var(--por-accent) !important;
+	color: #ffffff !important;
+}
+
+.por-wrap .button-primary:hover:not(:disabled) {
+	background: var(--por-accent-hover) !important;
+}
+
+.por-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.por-submit { margin-top: 20px; }
+.por-inline-form { display: inline; margin-right: 10px; }
+.por-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.por-table,
+table.widefat.por-table {
+	background: var(--por-panel) !important;
+	border: 1px solid var(--por-border) !important;
+	border-radius: 6px;
+	color: var(--por-text) !important;
+	margin-top: 14px !important;
+}
+
+.por-table thead th,
+.por-table thead td {
+	background: var(--por-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.por-table tbody td,
+.por-table tbody th {
+	background: var(--por-panel) !important;
+	color: var(--por-text) !important;
+	border-bottom: 1px solid var(--por-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.por-table tbody tr:nth-child(2n) td,
+.por-table tbody tr:nth-child(2n) th {
+	background: var(--por-stripe) !important;
+}
+
+.por-table tbody tr:hover td,
+.por-table tbody tr:hover th {
+	background: var(--por-hover) !important;
+}
+
+.por-table td,
+.por-table th {
+	padding: 12px 14px;
+}
+
+.por-table td code {
+	background: transparent !important;
+	color: var(--por-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.por-table .por-empty {
+	color: var(--por-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.por-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.por-footer a { color: #beb1ff; text-decoration: none; }
+.por-footer a:hover { text-decoration: underline; }
+
+.por-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.por-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.por-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.por-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.por-muted { color: var(--por-muted) !important; }
+.por-warn { color: var(--por-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.por-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.por-wrap .por-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--por-heading);
+}
+
+.por-status p { margin: 0 0 8px; }
+.por-status p:last-child { margin-bottom: 0; }
+.por-status code,
+.por-wrap .description code,
+.por-wrap .por-hint code {
+	background: var(--por-panel-2);
+	color: var(--por-muted);
+	border: 1px solid var(--por-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.por-suspended { margin: 8px 0 0; }
+.por-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.por-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--por-border);
+	background: var(--por-panel-2);
+	color: var(--por-text);
+	white-space: nowrap;
+}
+.por-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.por-badge--muted { color: var(--por-muted); }
+.por-badge--warn { border-color: #6b5a33; color: var(--por-warn); }
+.por-badge--danger { border-color: #6b3a3a; color: var(--por-danger); }
+
+/* Area fieldsets. */
+.por-area {
+	background: var(--por-panel);
+	border: 1px solid var(--por-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.por-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--por-heading);
+}
+.por-row { margin: 4px 0 8px; }
+
+.por-details > summary {
+	cursor: pointer;
+	color: var(--por-link);
+	margin: 4px 0;
+}
+.por-details[open] > summary { margin-bottom: 12px; }
+
+.por-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.por-wrap .por-label {
+	display: block;
+	font-weight: 600;
+	color: var(--por-heading);
+	margin: 8px 0 6px;
+}
+.por-grid .por-label:first-child { margin-top: 0; }
+
+.por-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.por-field > span:first-child {
+	min-width: 150px;
+	color: var(--por-text);
+}
+.por-wrap .por-hint { display: block; font-size: 12px; margin-top: 4px; }
+.por-wrap td .por-hint { display: inline; }
+.por-table td.por-warn { color: var(--por-warn) !important; }
+
+/* Tabs of the main page. */
+.por-wrap .por-tabs {
+	border-bottom: 1px solid var(--por-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.por-wrap .por-tabs .nav-tab {
+	background: var(--por-panel);
+	border-color: var(--por-border);
+	color: var(--por-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.por-wrap .por-tabs .nav-tab:hover { color: var(--por-link-hover); background: var(--por-hover); }
+.por-wrap .por-tabs .nav-tab-active,
+.por-wrap .por-tabs .nav-tab-active:hover {
+	background: var(--por-bg);
+	border-bottom-color: var(--por-bg);
+	color: var(--por-heading);
+}
+
+/* One input per line (removal rules). */
+.por-wrap .por-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.por-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--por-border);
+	border-radius: 6px;
+	background: var(--por-panel-2);
+}
+.por-scroll .por-field { margin-bottom: 4px; }
+
+/* ===== Shipping Notes ===== */
+
+.por-wrap .por-wide { width: 100%; max-width: 640px; }
+.por-wrap .por-num { width: 90px; }
+.por-wrap .por-texts input[type="text"] { width: 100%; }
+
+/* ===== Pre-Orders ===== */
+.por-wrap .por-texts td:first-child { width: 280px; }
+.por-wrap .por-texts textarea { width: 100%; min-height: 64px; }
+.por-wrap .por-short { width: 140px; }
+.por-wrap .por-table .por-num-col { text-align: right; white-space: nowrap; }
+.por-wrap .por-field .description { margin-left: 8px; }
+.por-wrap .por-zone .por-check + .description { margin-top: 8px; }

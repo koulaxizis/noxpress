@@ -51,6 +51,7 @@ SLUGS = {
     'oc': 'oros-connect',
     'pb': 'product-bundles',
     'pq': 'publishing-quote',
+    'po': 'pre-orders',
     'nm': 'data-migrator',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
