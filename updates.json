@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* The cover from the publisher's page (schema.org image or og:image), only when it is larger than the catalogue's; setting, on by default.\n* \"Sync now\" in the product box also keeps the page address typed there, without saving the product first.\n* Weight and dimensions without trailing zeros (\"600 g\", not \"600.000\").",
+        "changelog": "* Labelled publisher price: on pages that also list other books (the author's other titles, \"readers also bought\"), the price after this book's title is taken, not the first one on the page; when the prices cannot be told apart, none is taken.\n* Publisher cover: when the page links the same picture as a file of its own (a gallery link around a resized image), that full-size file is used.",
         "published": "2026-10-19",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1667f5d1540d11e2651bc37f0fc65125ea68eed79431156a7c28a77a8141347c",
-        "signature": "vB0kkWW+Ujz7giKXDGB6GartEUV+r1GbI/O9nt0P5nWlgtujYO9/hLUx1TJE8ItSoOU0GBlNjrVzFQxQsjXmCA==",
+        "sha256": "17a4bd82fa767f5823d66e3df14da44505ad9111b683b089e8550753a4eba1c7",
+        "signature": "qv0ck2v5NxTUMKuy1dDZneiYD0P4PXH4eUJEngnlXir6HI5MOpfAjlHAiQMF/W7pnIzEA2RCFysMxf1ctZnDCg==",
         "tested_wp": "7.1",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.4.0/book-feed.zip"
+        "version": "1.4.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.4.1/book-feed.zip"
       }
     },
     "book-preview": {
