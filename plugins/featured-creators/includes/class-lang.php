@@ -65,7 +65,7 @@ final class CRT_Lang {
 		'Site, μουσικές υπηρεσίες, κοινωνικά δίκτυα. Η υπηρεσία αναγνωρίζεται από τη διεύθυνση (Spotify, YouTube, Instagram…)· η ετικέτα είναι προαιρετική.' => 'Website, music services, social networks. The service is recognised from the address (Spotify, YouTube, Instagram…); the label is optional.',
 		'Ετικέτα (προαιρετική)' => 'Label (optional)',
 		'Προσθήκη' => 'Add',
-		'Στη σελίδα εμφανίζονται σε τρεις λίστες, νεότερο πρώτο. Τα βίντεο είναι σύνδεσμοι (χωρίς ενσωμάτωση, άρα χωρίς cookies τρίτων), με προαιρετική εικόνα από τη βιβλιοθήκη πολυμέσων.' => 'Shown on the page in three lists, newest first. Videos are links (no embeds, so no third-party cookies), with an optional image from the media library.',
+		'Στη σελίδα εμφανίζονται σε τρεις λίστες, νεότερο πρώτα. Τα βίντεο είναι σύνδεσμοι (χωρίς ενσωμάτωση, άρα χωρίς cookies τρίτων), με προαιρετική εικόνα από τη βιβλιοθήκη πολυμέσων.' => 'Shown on the page in three lists, newest first. Videos are links (no embeds, so no third-party cookies), with an optional image from the media library.',
 		'Συνέντευξη' => 'Interview',
 		'Βίντεο' => 'Video',
 		'Κριτική / αναφορά' => 'Review / mention',
