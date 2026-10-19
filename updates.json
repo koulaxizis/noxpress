@@ -1,5 +1,18 @@
 {
   "plugins": {
+    "book-feed": {
+      "beta": {
+        "changelog": "* Initial release.\n* Bookpoint / OSDEL Solr web service: search (title, contributor, ISBN, publisher with autocomplete, years, kind), https first, sealed password, redacted errors.\n* Import into simple or external products: descriptions, ISBN (GTIN, SKU), cover and back cover into the media library, attributes per field and per contributor role, categories, tax class from the VAT rate, weight and dimensions.\n* Same-ISBN detection with \"Link\", and \"Update from the catalogue\" / \"Unlink\" on the product.\n* Daily background sync: price and availability always; other fields until edited by hand (field locks); titles that leave the catalogue go out of stock or to draft; mass-disappearance guard.\n* Rules per publisher that import new titles as drafts.\n* Fixed book price warning on save.\n* Mapping tables built from the values seen in the catalogue.\n* History with CSV export, settings backup, WP-CLI, clean uninstall.",
+        "published": "2026-10-19",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "2cba4802daad9f6909d1d82b4e20e7d20f70f4cbd8457dcb2b56257e54c8c0b2",
+        "signature": "QxXPjVNkum5sn1xtlnV5XtaYZ0wZChyb491nFiLYIpNuE4w6u9ECIbR3ihY8StU8vTD30NVc+NSIbHEAYXsBCA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.0.0/book-feed.zip"
+      }
+    },
     "book-preview": {
       "beta": {
         "changelog": "* Fixed: on a product on sale, the \"Keep reading\" card shows the old price struck through next to the sale price, as the shop does.",
