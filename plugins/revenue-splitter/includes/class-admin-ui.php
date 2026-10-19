@@ -2210,7 +2210,8 @@ final class RS_Admin_UI {
 							continue;
 						}
 
-						update_post_meta( $pid, $key, (string) $row['value'] );
+						// v1.9.3 FIX: update_post_meta() unslashes, so slash the raw value to keep its backslashes.
+						update_post_meta( $pid, $key, wp_slash( (string) $row['value'] ) );
 						$applied++;
 						continue;
 					}
@@ -2223,7 +2224,8 @@ final class RS_Admin_UI {
 						continue;
 					}
 
-					update_post_meta( $pid, $key, (string) $row['value'] );
+					// v1.9.3 FIX: update_post_meta() unslashes, so slash the raw value to keep its backslashes.
+					update_post_meta( $pid, $key, wp_slash( (string) $row['value'] ) );
 					$applied++;
 				}
 
