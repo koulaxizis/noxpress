@@ -5,7 +5,7 @@ Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -25,6 +25,7 @@ One page for every creator of your catalog (authors, illustrators, translators, 
 **Matching**
 
 * You choose which global attributes (`pa_…`) are creator roles, and their order.
+* A role can match without a section of its own on the creator page (e.g. typesetting with sixty products): it still counts for the roles line, the links and the schema.
 * A creator gets every term with the same slug in every role automatically (the key defaults to the page slug).
 * Manual fixes on the creator screen: exclude a term (homonyms), add extra terms from any role (pseudonyms, other spellings) with a search box.
 * A term belongs to one creator only: manual beats automatic, and two equal claims are a conflict, shown in the admin, until you resolve it.
@@ -34,6 +35,7 @@ One page for every creator of your catalog (authors, illustrators, translators, 
 
 * Names in the "Additional information" tab become links to the creator page, for public creators only. All other rows stay exactly as WooCommerce prints them.
 * A creator box under the product description (or after the tabs): photo, role, two lines of biography and a link, for the roles you tick, up to a maximum number of cards.
+* A creator tab on the product, for the roles you tick: photo, short biography, links and the three newest interviews, videos or reviews, with a link to the creator page. The title follows the creator and the role: «Ο συγγραφέας», «Η εικονογράφος», «Συγγραφέας» (no article), «Οι συγγραφείς» for several authors, «Οι δημιουργοί» for mixed roles.
 * An index of creators with a role filter (plain links that also work with page caches, and without reload with JavaScript) and A–Z order by a "sort name" (e.g. surname first). Greek and Latin names are sorted with accents ignored.
 * Shortcodes `[nox_creators]` (or `[nox_creators role="pa_…"]`) and `[nox_creator_box]` (or `[nox_creator_box id="123"]`), and the blocks "Creators", "Creator box" and "Creator page".
 
@@ -64,7 +66,8 @@ One page for every creator of your catalog (authors, illustrators, translators, 
 **For developers**
 
 * `crt_get_creators( int $product_id ): array` — the public creators of a product: `id`, `name`, `url`, `roles` (attribute taxonomies).
-* `crt_text` ( string $text, string $key, string $lang ): change any visitor text. Role texts use the keys `h:pa_…` (section title) and `l:pa_…` (role name).
+* REST: `/wp/v2/nox-creators` with `context=edit` reads and writes the creator's own meta (`_crt_roles_text`, `_crt_sort_name`, `_crt_gender`, `_crt_links`, `_crt_press`, `_crt_key`, `_crt_extra`, `_crt_exclude`; lists as JSON strings) for users who may edit the creator, with the same validation as the edit screen.
+* `crt_text` ( string $text, string $key, string $lang ): change any visitor text. Role texts use the keys `h:pa_…` (section title), `l:pa_…` (role name) and `p:pa_…` (role name in the plural).
 * `crt_creator_changed` ( int $creator_id, int[] $product_ids ): fired when the products of a creator change, e.g. for page caches. The plugin already calls `clean_post_cache()` for them.
 
 == Installation ==
@@ -89,7 +92,7 @@ Give each creator a different key, or exclude the term on one creator and add it
 
 = Can I keep my existing hand-made author pages? =
 
-In 1.0.0 you create the creators from the terms and copy what you need. A tool that converts hand-made pages and keeps or redirects their URLs is planned for 1.1.0.
+Create the creators from the terms and copy what you need. Since 1.1.0 the creator's meta can also be written through REST, so a script can fill creators from existing pages. A tool in the admin that converts hand-made pages and keeps or redirects their URLs is planned.
 
 = The page sticks to my theme's header. =
 
@@ -104,6 +107,13 @@ Yes. The index filter uses plain links, and when the products of a creator chang
 Settings, notices and the term ownership meta are deleted. Creators are kept by default, because they are content you wrote; tick "Delete the creators" on the **Tools** tab before deleting the plugin to remove them too. Photos always stay in the media library. Products and attributes are never touched.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: creator tab on the product, for the roles ticked "In the tab" (Pages and products → On the product, with its WooCommerce priority). Photo, short biography, links, the three newest press items and a link to the creator page; only published creators; no tab when the product has none.
+* New: tab title by the creator's gender (new field "Article in the tab title": «Ο», «Η» or none) and the role, or the role in the plural for several creators of the same role; five editable visitor texts.
+* New: role name in the plural (Roles tab).
+* New: "Section on the page" per role: a role can match and show in the roles line without listing its products on the creator page.
+* New: the creator's own meta in REST (edit context, edit_post capability), validated like the edit screen.
 
 = 1.0.0 =
 * First release (beta).

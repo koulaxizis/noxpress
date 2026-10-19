@@ -3,7 +3,7 @@
  * Plugin Name:          Featured Creators
  * Plugin URI:           https://noxpress.tech
  * Description:          Μία σελίδα για κάθε δημιουργό του καταλόγου (συγγραφέα, εικονογράφο, μουσικό, σκηνοθέτη…) που συγκεντρώνει αυτόματα τα προϊόντα του ανά ρόλο από τα χαρακτηριστικά του WooCommerce. Σύνδεσμοι από τα «Επιπλέον πληροφορίες», πλαίσιο δημιουργού στο προϊόν, ευρετήριο με φίλτρο ρόλου και schema Person / ProfilePage.
- * Version:              1.0.0
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -27,14 +27,16 @@
  *  - CRT_Settings  → the crt_settings option, strict validation, roles,
  *                    visitor texts (el/en, filter crt_text)
  *  - CRT_CPT       → the nox_creator post type and its meta (photo = the
- *                    featured image, biography = the content)
+ *                    featured image, biography = the content); the meta the
+ *                    store writes is in REST (edit context) since 1.1.0
  *  - CRT_Match     → creator ↔ attribute terms: same slug in every role
  *                    taxonomy, extra terms, exclusions, conflicts; writes
  *                    the term meta crt_creator and the creator stats on
  *                    save (Bible §14.10); purges the products' caches
  *  - CRT_Front     → creator page (classic template / block template),
- *                    links in "Additional information", creator box on the
- *                    product, index [nox_creators], blocks, assets
+ *                    links in "Additional information", creator box and
+ *                    creator tab on the product, index [nox_creators],
+ *                    blocks, assets
  *  - CRT_Schema    → Person + ProfilePage, Book / MusicAlbum / Movie /
  *                    Audiobook roles on products (Rank Math graph or our
  *                    own JSON-LD)
@@ -65,7 +67,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CRT_VERSION', '1.0.0' );
+define( 'CRT_VERSION', '1.1.0' );
 define( 'CRT_FILE', __FILE__ );
 define( 'CRT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CRT_URL', plugin_dir_url( __FILE__ ) );
