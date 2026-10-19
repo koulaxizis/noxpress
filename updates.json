@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* A page on the publisher's site per product (Book Feed box), for publishers without an address per ISBN.\n* Publisher price from the page's text after a label (\"Τιμή εκδότη\" by default, editable), read first.\n* Contributor names as \"Name Surname\" instead of the catalogue's \"Surname, Name\" (setting).\n* \"Read the price\" in Tools accepts a page address.",
+        "changelog": "* The cover from the publisher's page (schema.org image or og:image), only when it is larger than the catalogue's; setting, on by default.\n* \"Sync now\" in the product box also keeps the page address typed there, without saving the product first.\n* Weight and dimensions without trailing zeros (\"600 g\", not \"600.000\").",
         "published": "2026-10-19",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "71974bdd036f6cd54f5f65ebc45fbb525876b1ea8345549de21b584aade1b4ef",
-        "signature": "WtCaam8OzKhkbwXrsiXPNEw3lCDyMDaGMBi8Hcu7Y2Dov8Yldx3yJBz5KvvvlFXCrGQQZaUN/ytkl0/C0C2+AQ==",
+        "sha256": "1667f5d1540d11e2651bc37f0fc65125ea68eed79431156a7c28a77a8141347c",
+        "signature": "vB0kkWW+Ujz7giKXDGB6GartEUV+r1GbI/O9nt0P5nWlgtujYO9/hLUx1TJE8ItSoOU0GBlNjrVzFQxQsjXmCA==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.3.0/book-feed.zip"
+        "version": "1.4.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.4.0/book-feed.zip"
       }
     },
     "book-preview": {
