@@ -166,7 +166,7 @@ final class BKF_Pub_Price {
 			return null;
 		}
 		$body = (string) wp_remote_retrieve_body( $res );
-		$p    = self::parse( $body, $r['isbn_digits'] );
+		$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
 		$img  = self::image( $body, $r['isbn_digits'] );
 		if ( null === $p ) {
 			$why = __( 'Δεν βρέθηκε τιμή για αυτό το ISBN στη σελίδα του εκδότη.', 'book-feed' );
@@ -176,9 +176,10 @@ final class BKF_Pub_Price {
 
 	/**
 	 * The price on a product page for this ISBN, or null. $labels: the
-	 * words before a price in the text (null = the settings').
+	 * words before a price in the text (null = the settings'); $title: the
+	 * book's title, to pick its own labelled price among others (1.4.1).
 	 */
-	public static function parse( string $html, string $isbn_digits, ?array $labels = null ): ?float {
+	public static function parse( string $html, string $isbn_digits, ?array $labels = null, string $title = '' ): ?float {
 		// 0. Store API (JSON list of products).
 		$t = ltrim( $html );
 		if ( '' !== $t && '[' === $t[0] ) {
@@ -189,9 +190,15 @@ final class BKF_Pub_Price {
 		if ( self::other_book( $html, $isbn_digits ) ) {
 			return null;
 		}
-		$p = self::labelled( self::text( $html ), null === $labels ? BKF_Settings::get()['pub_labels'] : $labels );
+		$why = '';
+		$p   = self::labelled( self::text( $html ), null === $labels ? BKF_Settings::get()['pub_labels'] : $labels, $title, $why );
 		if ( null !== $p ) {
 			return $p;
+		}
+		if ( 'ambiguous' === $why ) {
+			// Labelled prices of several books (lists of related titles):
+			// the structured price is as likely to be another book's.
+			return null;
 		}
 		// 1. JSON-LD.
 		if ( preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $m ) ) {
@@ -298,23 +305,58 @@ final class BKF_Pub_Price {
 	}
 
 	/**
-	 * The first number after a label ("Τιμή εκδότη: 24,40 €", "Τιμή εκδότη
+	 * The number after a label ("Τιμή εκδότη: 24,40 €", "Τιμή εκδότη
 	 * (με ΦΠΑ) 24,40"), at most 20 other characters between, or null.
+	 *
+	 * Pages often list other books with the same label (the author's
+	 * other titles, "readers also bought"), and the book's own price may
+	 * be only in such a list (1.4.1, Dioptra). So, in order:
+	 *  1. the label within 150 characters after this book's title, with
+ *     no number between (an ISBN or a year means another part of the
+ *     page);
+	 *  2. else the label's number when every labelled number on the page
+	 *     is the same;
+	 *  3. else nothing, and $why = 'ambiguous'.
 	 */
-	private static function labelled( string $text, array $labels ): ?float {
+	private static function labelled( string $text, array $labels, string $title = '', ?string &$why = null ): ?float {
+		$why  = '';
+		$flat = self::fold( $text );
+		$t    = trim( self::fold( $title ) );
 		foreach ( $labels as $label ) {
 			if ( ! is_string( $label ) || '' === trim( $label ) ) {
 				continue;
 			}
-			$re = '/' . preg_quote( trim( $label ), '/' ) . '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)/iu';
-			if ( preg_match( $re, $text, $m ) ) {
+			$l   = preg_quote( self::fold( trim( $label ) ), '/' );
+			$num = '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)';
+			if ( mb_strlen( $t ) >= 3 && preg_match( '/' . preg_quote( $t, '/' ) . '(?:(?!' . $l . ')[^\d]){0,150}?' . $l . $num . '/isu', $flat, $m ) ) {
 				$p = self::num( $m[1] );
 				if ( null !== $p ) {
 					return $p;
 				}
 			}
+			if ( preg_match_all( '/' . $l . $num . '/iu', $flat, $mm ) ) {
+				$seen = array_values( array_unique( array_filter( array_map( array( __CLASS__, 'num' ), $mm[1] ) ) ) );
+				if ( 1 === count( $seen ) ) {
+					return $seen[0];
+				}
+				if ( count( $seen ) > 1 ) {
+					$why = 'ambiguous';
+				}
+			}
 		}
 		return null;
+	}
+
+	/** Lower case without accents, for matching titles and labels. */
+	private static function fold( string $s ): string {
+		if ( class_exists( 'Normalizer' ) ) {
+			$n = Normalizer::normalize( $s, Normalizer::FORM_D );
+			if ( is_string( $n ) ) {
+				$s = (string) preg_replace( '/\p{Mn}+/u', '', $n );
+			}
+		}
+		$s = function_exists( 'mb_strtolower' ) ? mb_strtolower( $s, 'UTF-8' ) : strtolower( $s );
+		return str_replace( 'ς', 'σ', $s );
 	}
 
 	/** The regular price in a Store API product list. */

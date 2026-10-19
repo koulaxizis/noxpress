@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -41,7 +41,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * Catalogue prices are often old. For each publisher you list, the plugin reads the price from the book's page on the publisher's site (schema.org structured data, a WooCommerce Store API answer, Open Graph or microdata) and uses it instead, on import and on every sync. While the publisher's shop runs a sale, its list price is taken.
 * A page that names another ISBN is ignored. A price below half or above double the catalogue's is not used. When the page cannot be read, a price read in the last 7 days still counts, else the catalogue's. Every change goes to the history; one look per title per day.
 * Publishers whose addresses do not carry the ISBN: put the book's page in the Book Feed box of the product; the price is read from there.
-* Pages without structured data: the first number after words such as "Τιμή εκδότη" (setting, one per line) is taken, before any other price on the page, since the publisher's e-shop often shows its own discounted price.
+* Pages without structured data: the first number after words such as "Τιμή εκδότη" (setting, one per line) is taken, before any other price on the page, since the publisher's e-shop often shows its own discounted price. When the page also lists other books with the same words, only the price right after this book's title counts; if none can be told apart, no price is taken from the page.
 * Covers: the catalogue gives one small image. When the publisher's page has a cover (schema.org image or og:image) with more pixels than the product's, it takes its place; a smaller one is deleted again and not downloaded every day (setting, on by default).
 * "Read the price" in Tools tries one ISBN (and, optionally, a page address) without changing anything.
 
@@ -94,6 +94,9 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.4.1 =
+* Labelled publisher price: on pages that also list other books (the author's other titles, "readers also bought"), the price after this book's title is taken, not the first one on the page; when the prices cannot be told apart, none is taken.
 
 = 1.4.0 =
 * The cover from the publisher's page (schema.org image or og:image), only when it is larger than the catalogue's; setting, on by default.
