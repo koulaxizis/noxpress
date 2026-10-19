@@ -30,6 +30,10 @@
  *    pub_prices       pub_id => { name, url }: the book's page on the
  *                     publisher's site ({isbn}, {isbn13}, {title}); its
  *                     price replaces the catalogue's (BKF_Pub_Price)
+ *    pub_labels       words that stand before the publisher's price in a
+ *                     page's text ("Τιμή εκδότη"), read when the page has
+ *                     no structured price
+ *    names            as_is | first_last: "Norbury, James" → "James Norbury"
  *    tax              VAT rate (string) => tax class slug ('' = standard)
  *    stock            availability text => instock | onbackorder | outofstock
  *    gone             what happens to a title that leaves the feed:
@@ -73,6 +77,7 @@ final class BKF_Settings {
 	const MAX_ORDER  = 40;
 	const MAX_PUB    = 100;
 	const MAX_RENAME = 200;
+	const MAX_LABELS = 10;
 
 	/** Fields kept in sync besides price and availability. */
 	const SYNC_FIELDS = array( 'title', 'desc', 'short', 'image', 'attrs', 'dims', 'tax' );
@@ -120,6 +125,8 @@ final class BKF_Settings {
 			'img_alt'         => '{title}',
 			'img_name'        => '{title}-{isbn}',
 			'pub_prices'      => array(),
+			'pub_labels'      => array( 'Τιμή εκδότη' ),
+			'names'           => 'as_is',
 			'tax'             => array(),
 			'stock'           => array(),
 			'gone'            => 'outofstock',
@@ -248,6 +255,14 @@ final class BKF_Settings {
 				'url'  => $url,
 			);
 		}
+		$out['pub_labels'] = array();
+		foreach ( ( isset( $v['pub_labels'] ) && is_array( $v['pub_labels'] ) ? $v['pub_labels'] : $d['pub_labels'] ) as $label ) {
+			$label = self::text( $label, 60 );
+			if ( '' !== $label && ! in_array( $label, $out['pub_labels'], true ) && count( $out['pub_labels'] ) < self::MAX_LABELS ) {
+				$out['pub_labels'][] = $label;
+			}
+		}
+		$out['names'] = in_array( $v['names'] ?? '', array( 'as_is', 'first_last' ), true ) ? $v['names'] : $d['names'];
 		foreach ( array( 'img_alt', 'img_name' ) as $k ) {
 			$t         = self::text( $v[ $k ] ?? '', 200 );
 			$out[ $k ] = '' !== $t ? $t : $d[ $k ];
@@ -367,6 +382,23 @@ final class BKF_Settings {
 	}
 
 	/** A feed value as the store writes it: the rename table, else as is ('' = drop). */
+	/** A page address for one product: http(s), no placeholders needed. */
+	public static function page_url_ok( string $url ): bool {
+		return strlen( $url ) <= 300 && (bool) preg_match( '#^https?://[^/\s{}]+#i', $url );
+	}
+
+	/**
+	 * A contributor's name as the store writes it: "Norbury, James" becomes
+	 * "James Norbury" when the settings say so (names: first_last).
+	 * Only a single comma between two parts is turned.
+	 */
+	public static function person( string $name ): string {
+		if ( 'first_last' !== self::get()['names'] || ! preg_match( '/^([^,]+),\s*([^,]+)$/u', $name, $m ) ) {
+			return $name;
+		}
+		return trim( $m[2] ) . ' ' . trim( $m[1] );
+	}
+
 	public static function renamed( string $v ): string {
 		$s = self::get();
 		return array_key_exists( $v, $s['rename'] ) ? $s['rename'][ $v ] : $v;

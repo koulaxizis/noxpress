@@ -6,6 +6,8 @@
  * address in the settings (bkf_settings.pub_prices: pub_id => template
  * with {isbn}, {isbn13}, {title}), the product page is read and its price
  * takes the place of the catalogue's, automatically (Chris, 2026-10-19).
+ * A product can name its own page instead (_bkf_pub_url, in the Book Feed
+ * box): sites whose addresses do not carry the ISBN (1.3.0).
  *
  * Where the price comes from, in order (first one found wins):
  *  0. A WooCommerce Store API answer (/wp-json/wc/store/v1/products?
@@ -16,6 +18,9 @@
  *     the shop runs a sale), else offers.price / lowPrice.
  *  2. <meta property="product:price:amount"> (Open Graph).
  *  3. itemprop="price" content="…" (microdata).
+ *  4. The page's text: a number right after one of the words in the
+ *     settings (pub_labels, "Τιμή εκδότη"). Read before 1–3 when found,
+ *     since those often carry the shop's own (discounted) price.
  * When the page names an ISBN / GTIN of its own and it is not this
  * title's, nothing is taken (a search page that landed on another book).
  *
@@ -39,8 +44,11 @@ final class BKF_Pub_Price {
 	const MAX_BODY = 2097152;
 	const TIMEOUT  = 8;
 
-	/** Template for a record's publisher, or ''. */
+	/** The product's own page, else the template for the record's publisher, or ''. */
 	public static function template( array $r ): string {
+		if ( isset( $r['pub_url'] ) && is_string( $r['pub_url'] ) && BKF_Settings::page_url_ok( $r['pub_url'] ) ) {
+			return $r['pub_url'];
+		}
 		$s = BKF_Settings::get();
 		return ( '' !== $r['pub_id'] && isset( $s['pub_prices'][ $r['pub_id'] ] ) ) ? $s['pub_prices'][ $r['pub_id'] ]['url'] : '';
 	}
@@ -137,13 +145,24 @@ final class BKF_Pub_Price {
 		return $p;
 	}
 
-	/** The price on a product page for this ISBN, or null. */
-	public static function parse( string $html, string $isbn_digits ): ?float {
+	/**
+	 * The price on a product page for this ISBN, or null. $labels: the
+	 * words before a price in the text (null = the settings').
+	 */
+	public static function parse( string $html, string $isbn_digits, ?array $labels = null ): ?float {
 		// 0. Store API (JSON list of products).
 		$t = ltrim( $html );
 		if ( '' !== $t && '[' === $t[0] ) {
 			$list = json_decode( $t, true );
 			return is_array( $list ) ? self::store_api( $list, $isbn_digits ) : null;
+		}
+		// 4 first: a labelled price is the publisher's list price.
+		if ( self::other_book( $html, $isbn_digits ) ) {
+			return null;
+		}
+		$p = self::labelled( self::text( $html ), null === $labels ? BKF_Settings::get()['pub_labels'] : $labels );
+		if ( null !== $p ) {
+			return $p;
 		}
 		// 1. JSON-LD.
 		if ( preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $m ) ) {
@@ -167,14 +186,6 @@ final class BKF_Pub_Price {
 				}
 			}
 		}
-		// The page names other ISBNs only: not ours.
-		if ( preg_match_all( '/97[89][\d\-\s]{10,16}/', wp_strip_all_tags( $html ), $mm ) ) {
-			$seen = array_unique( array_map( array( 'BKF_Record', 'isbn_digits' ), $mm[0] ) );
-			$seen = array_filter( $seen );
-			if ( $seen && ! in_array( $isbn_digits, $seen, true ) ) {
-				return null;
-			}
-		}
 		// 2. Open Graph product price.
 		if ( preg_match( '#<meta[^>]+property=["\'](?:product|og):price:amount["\'][^>]+content=["\']([\d.,]+)["\']#i', $html, $m ) || preg_match( '#<meta[^>]+content=["\']([\d.,]+)["\'][^>]+property=["\'](?:product|og):price:amount["\']#i', $html, $m ) ) {
 			return self::num( $m[1] );
@@ -182,6 +193,41 @@ final class BKF_Pub_Price {
 		// 3. Microdata.
 		if ( preg_match( '#itemprop=["\']price["\'][^>]*content=["\']([\d.,]+)["\']#i', $html, $m ) || preg_match( '#content=["\']([\d.,]+)["\'][^>]*itemprop=["\']price["\']#i', $html, $m ) ) {
 			return self::num( $m[1] );
+		}
+		return null;
+	}
+
+	/** The visible text of a page, one space between words. */
+	private static function text( string $html ): string {
+		$t = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		return trim( (string) preg_replace( '/[\s\x{00a0}]+/u', ' ', $t ) );
+	}
+
+	/** True when the page (scripts included) names ISBNs and none is this title's. */
+	private static function other_book( string $html, string $isbn_digits ): bool {
+		if ( ! preg_match_all( '/97[89][\d\-\s]{10,16}/', preg_replace( '/<[^>]*>/', ' ', $html ), $mm ) ) {
+			return false;
+		}
+		$seen = array_filter( array_unique( array_map( array( 'BKF_Record', 'isbn_digits' ), array_map( 'trim', $mm[0] ) ) ) );
+		return $seen && ! in_array( $isbn_digits, $seen, true );
+	}
+
+	/**
+	 * The first number after a label ("Τιμή εκδότη: 24,40 €", "Τιμή εκδότη
+	 * (με ΦΠΑ) 24,40"), at most 20 other characters between, or null.
+	 */
+	private static function labelled( string $text, array $labels ): ?float {
+		foreach ( $labels as $label ) {
+			if ( ! is_string( $label ) || '' === trim( $label ) ) {
+				continue;
+			}
+			$re = '/' . preg_quote( trim( $label ), '/' ) . '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)/iu';
+			if ( preg_match( $re, $text, $m ) ) {
+				$p = self::num( $m[1] );
+				if ( null !== $p ) {
+					return $p;
+				}
+			}
 		}
 		return null;
 	}
