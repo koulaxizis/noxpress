@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Labelled publisher price: on pages that also list other books (the author's other titles, \"readers also bought\"), the price after this book's title is taken, not the first one on the page; when the prices cannot be told apart, none is taken.\n* Publisher cover: when the page links the same picture as a file of its own (a gallery link around a resized image), that full-size file is used.",
+        "changelog": "* Labelled publisher price: a small number between the title and the price (a series number) no longer hides it; a price, a year or an ISBN still does.\n* When the publisher's page answers but has no price for the book, the catalogue price is used at once and the old publisher price is dropped. The last good price still covers a page that cannot be read.",
         "published": "2026-10-19",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "17a4bd82fa767f5823d66e3df14da44505ad9111b683b089e8550753a4eba1c7",
-        "signature": "qv0ck2v5NxTUMKuy1dDZneiYD0P4PXH4eUJEngnlXir6HI5MOpfAjlHAiQMF/W7pnIzEA2RCFysMxf1ctZnDCg==",
+        "sha256": "a128cc2aaa652fa5fcab6d82a30dac34851f0aa071c356ac8459de7421f0a5dd",
+        "signature": "NUn1nqTQKFwHUeMGo41P7nc82oIfm8GfJF1kjGNTruZocpxp/qgMoWqYaIvRTkoOg74bIRJkXTb3Ql5+SWWzDQ==",
         "tested_wp": "7.1",
-        "version": "1.4.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.4.1/book-feed.zip"
+        "version": "1.4.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.4.2/book-feed.zip"
       }
     },
     "book-preview": {
