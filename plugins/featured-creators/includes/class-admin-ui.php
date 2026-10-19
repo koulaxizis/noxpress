@@ -353,8 +353,11 @@ final class CRT_Admin_UI {
 					<th><?php esc_html_e( 'Χαρακτηριστικό', 'featured-creators' ); ?></th>
 					<th><?php esc_html_e( 'Τίτλος ενότητας (el / en)', 'featured-creators' ); ?></th>
 					<th><?php esc_html_e( 'Όνομα ρόλου (el / en)', 'featured-creators' ); ?></th>
+					<th><?php esc_html_e( 'Πληθυντικός (el / en)', 'featured-creators' ); ?></th>
 					<th><?php esc_html_e( 'Schema', 'featured-creators' ); ?></th>
+					<th><?php esc_html_e( 'Ενότητα στη σελίδα', 'featured-creators' ); ?></th>
 					<th><?php esc_html_e( 'Στο πλαίσιο', 'featured-creators' ); ?></th>
+					<th><?php esc_html_e( 'Στην καρτέλα', 'featured-creators' ); ?></th>
 				</tr></thead>
 				<tbody data-crt-sortable>
 				<?php
@@ -367,18 +370,22 @@ final class CRT_Admin_UI {
 					echo '<td><strong>' . esc_html( $label ) . '</strong><br /><code>' . esc_html( $tax ) . '</code></td>';
 					echo '<td><input type="text" name="' . esc_attr( $n ) . '[h_el]" value="' . esc_attr( $r['h_el'] ) . '" placeholder="' . esc_attr( $label ) . '" maxlength="80" /><input type="text" name="' . esc_attr( $n ) . '[h_en]" value="' . esc_attr( $r['h_en'] ) . '" maxlength="80" /></td>';
 					echo '<td><input type="text" name="' . esc_attr( $n ) . '[l_el]" value="' . esc_attr( $r['l_el'] ) . '" placeholder="' . esc_attr( $label ) . '" maxlength="80" /><input type="text" name="' . esc_attr( $n ) . '[l_en]" value="' . esc_attr( $r['l_en'] ) . '" maxlength="80" /></td>';
+					echo '<td><input type="text" name="' . esc_attr( $n ) . '[p_el]" value="' . esc_attr( $r['p_el'] ) . '" placeholder="' . esc_attr( $label ) . '" maxlength="80" /><input type="text" name="' . esc_attr( $n ) . '[p_en]" value="' . esc_attr( $r['p_en'] ) . '" maxlength="80" /></td>';
 					echo '<td><select name="' . esc_attr( $n ) . '[schema]">';
 					foreach ( self::props() as $k => $pl ) {
 						echo '<option value="' . esc_attr( $k ) . '" ' . selected( $r['schema'], $k, false ) . '>' . esc_html( $pl ) . '</option>';
 					}
 					echo '</select></td>';
+					echo '<td><input type="checkbox" name="' . esc_attr( $n ) . '[section]" value="1" ' . checked( ! empty( $r['section'] ), true, false ) . ' /></td>';
 					echo '<td><input type="checkbox" name="' . esc_attr( $n ) . '[box]" value="1" ' . checked( ! empty( $r['box'] ), true, false ) . ' /></td>';
+					echo '<td><input type="checkbox" name="' . esc_attr( $n ) . '[tab]" value="1" ' . checked( ! empty( $r['tab'] ), true, false ) . ' /></td>';
 					echo '</tr>';
 				}
 				?>
 				</tbody>
 			</table>
 			<p class="description crt-mt-8"><?php esc_html_e( 'Τίτλος ενότητας: π.χ. «Βιβλία ως συγγραφέας» στη σελίδα του δημιουργού. Όνομα ρόλου: π.χ. «Συγγραφέας», στο πλαίσιο του προϊόντος, στο ευρετήριο και στις ιδιότητες. Κενό = το όνομα του χαρακτηριστικού· κενό αγγλικό = το ελληνικό.', 'featured-creators' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Πληθυντικός: π.χ. «Συγγραφείς», στον τίτλο της καρτέλας όταν ένα προϊόν έχει πολλούς δημιουργούς του ίδιου ρόλου. Ενότητα στη σελίδα: χωρίς τικ, ο ρόλος μετράει για το ταίριασμα και τις ιδιότητες, αλλά τα προϊόντα του δεν εμφανίζονται στη σελίδα του δημιουργού (π.χ. σελιδοποίηση).', 'featured-creators' ); ?></p>
 			<?php endif; ?>
 		</div>
 
@@ -466,6 +473,11 @@ final class CRT_Admin_UI {
 			<p class="crt-field"><span><?php esc_html_e( 'Μέγιστος αριθμός καρτών', 'featured-creators' ); ?></span>
 				<input type="number" class="crt-num" name="crt_box_max" value="<?php echo (int) $s['box_max']; ?>" min="1" max="12" /></p>
 			<p class="description"><?php esc_html_e( 'Στο πλαίσιο μπαίνουν μόνο οι ρόλοι με τικ «Στο πλαίσιο» (καρτέλα Ρόλοι). Χωρίς καρτέλα «Περιγραφή» (κενή περιγραφή), το πλαίσιο μπαίνει μετά τις καρτέλες.', 'featured-creators' ); ?></p>
+			<?php self::checkbox( 'crt_tab', $s['tab'], __( 'Καρτέλα δημιουργού στο προϊόν (φωτογραφία, βιογραφικό, σύνδεσμοι, τα τρία πιο πρόσφατα δημοσιεύματα)', 'featured-creators' ) ); ?>
+			<p class="crt-field"><span><?php esc_html_e( 'Θέση καρτέλας', 'featured-creators' ); ?></span>
+				<input type="number" class="crt-num" name="crt_tab_priority" value="<?php echo (int) $s['tab_priority']; ?>" min="1" max="200" />
+				<span class="crt-hint"><?php esc_html_e( 'Προτεραιότητα του WooCommerce: Περιγραφή 10, Επιπλέον πληροφορίες 20, Αξιολογήσεις 30.', 'featured-creators' ); ?></span></p>
+			<p class="description"><?php esc_html_e( 'Στην καρτέλα μπαίνουν μόνο οι δημοσιευμένοι δημιουργοί των ρόλων με τικ «Στην καρτέλα». Προϊόν χωρίς τέτοιον δημιουργό δεν παίρνει καρτέλα.', 'featured-creators' ); ?></p>
 		</div>
 
 		<h2 class="crt-h2"><?php esc_html_e( 'Ευρετήριο', 'featured-creators' ); ?></h2>
@@ -500,6 +512,11 @@ final class CRT_Admin_UI {
 			't_videos'     => __( 'Τίτλος λίστας βίντεο', 'featured-creators' ),
 			't_reviews'    => __( 'Τίτλος λίστας κριτικών', 'featured-creators' ),
 			't_box'        => __( 'Τίτλος πλαισίου στο προϊόν', 'featured-creators' ),
+			't_tab_m'      => __( 'Τίτλος καρτέλας: ένας δημιουργός, «Ο» ({role} = ρόλος)', 'featured-creators' ),
+			't_tab_f'      => __( 'Τίτλος καρτέλας: μία δημιουργός, «Η» ({role} = ρόλος)', 'featured-creators' ),
+			't_tab_n'      => __( 'Τίτλος καρτέλας: ένας δημιουργός χωρίς άρθρο ({role} = ρόλος)', 'featured-creators' ),
+			't_tab_many'   => __( 'Τίτλος καρτέλας: πολλοί, ίδιος ρόλος ({roles} = πληθυντικός)', 'featured-creators' ),
+			't_tab_mixed'  => __( 'Τίτλος καρτέλας: πολλοί, διαφορετικοί ρόλοι', 'featured-creators' ),
 			't_more'       => __( 'Σύνδεσμος «όλα τα έργα»', 'featured-creators' ),
 			't_all'        => __( 'Φίλτρο ευρετηρίου «όλοι»', 'featured-creators' ),
 			't_formats'    => __( 'Μορφές ενός έργου ({n} = πλήθος)', 'featured-creators' ),
@@ -822,6 +839,8 @@ final class CRT_Admin_UI {
 				$raw['box']          = '1' === self::post( 'crt_box' );
 				$raw['box_pos']      = sanitize_key( self::post( 'crt_box_pos' ) );
 				$raw['box_max']      = (int) self::post( 'crt_box_max' );
+				$raw['tab']          = '1' === self::post( 'crt_tab' );
+				$raw['tab_priority'] = (int) self::post( 'crt_tab_priority' );
 				$raw['index_page']   = (int) self::post( 'crt_index_page' );
 				break;
 			case 'save_texts':
@@ -893,13 +912,17 @@ final class CRT_Admin_UI {
 			}
 			$r     = $rows[ $tax ];
 			$out[] = array(
-				'tax'    => $tax,
-				'h_el'   => isset( $r['h_el'] ) && is_string( $r['h_el'] ) ? $r['h_el'] : '',
-				'h_en'   => isset( $r['h_en'] ) && is_string( $r['h_en'] ) ? $r['h_en'] : '',
-				'l_el'   => isset( $r['l_el'] ) && is_string( $r['l_el'] ) ? $r['l_el'] : '',
-				'l_en'   => isset( $r['l_en'] ) && is_string( $r['l_en'] ) ? $r['l_en'] : '',
-				'schema' => isset( $r['schema'] ) && is_string( $r['schema'] ) ? $r['schema'] : 'contributor',
-				'box'    => ! empty( $r['box'] ),
+				'tax'     => $tax,
+				'h_el'    => isset( $r['h_el'] ) && is_string( $r['h_el'] ) ? $r['h_el'] : '',
+				'h_en'    => isset( $r['h_en'] ) && is_string( $r['h_en'] ) ? $r['h_en'] : '',
+				'l_el'    => isset( $r['l_el'] ) && is_string( $r['l_el'] ) ? $r['l_el'] : '',
+				'l_en'    => isset( $r['l_en'] ) && is_string( $r['l_en'] ) ? $r['l_en'] : '',
+				'p_el'    => isset( $r['p_el'] ) && is_string( $r['p_el'] ) ? $r['p_el'] : '',
+				'p_en'    => isset( $r['p_en'] ) && is_string( $r['p_en'] ) ? $r['p_en'] : '',
+				'schema'  => isset( $r['schema'] ) && is_string( $r['schema'] ) ? $r['schema'] : 'contributor',
+				'box'     => ! empty( $r['box'] ),
+				'tab'     => ! empty( $r['tab'] ),
+				'section' => ! empty( $r['section'] ),
 			);
 		}
 		return $out;
