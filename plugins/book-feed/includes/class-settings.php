@@ -13,10 +13,20 @@
  *    images           download the cover into the media library
  *    back_cover       the back cover goes to the gallery
  *    targets          field => '' (skip) | local | pa_* (global attribute)
- *                     | brand (publisher only)
+ *                     | brand (publisher only); genre = the feed's
+ *                     categories as attribute values
  *    roles            contributor role => target (as above, no brand)
+ *    order            attribute names (as on the product) in the order
+ *                     they should appear; the others follow
+ *    rename           feed value => store value ('' drops the value), for
+ *                     publisher, form, kind, genre, language, series, tags
  *    cats             feed category => product_cat id
+ *    cat_parents      also add the parents of the mapped categories
  *    default_cat      product_cat id for titles without a mapped category
+ *    tags             '' | class (subjects and keywords) | cats: product
+ *                     tags on import, at most tags_max
+ *    img_alt          cover alt text template, img_name file name template:
+ *                     {title} {subtitle} {authors} {publisher} {isbn}
  *    tax              VAT rate (string) => tax class slug ('' = standard)
  *    stock            availability text => instock | onbackorder | outofstock
  *    gone             what happens to a title that leaves the feed:
@@ -32,7 +42,7 @@
  *      url, button, max, last }. New titles always come in as drafts.
  *
  *  bkf_seen (autoload off): values met in the feed (kinds, availability,
- *    roles, categories, VAT rates, price types, forms), so the mapping
+ *    roles, categories, VAT rates, price types, forms, subjects), so the mapping
  *    tables list real values instead of guesses.
  *
  * The password: the constant BKF_PASSWORD in wp-config.php, else the
@@ -49,16 +59,22 @@ final class BKF_Settings {
 	const SEEN   = 'bkf_seen';
 	const PASS   = 'bkf_pass';
 
-	const DEFAULT_URL = 'http://ws.bookpoint.gr/solr/index.php';
+	const DEFAULT_URL = 'https://ws.bookpoint.gr/solr/index.php';
 
 	/** Fields that can map to an attribute. */
-	const TARGET_KEYS = array( 'publisher', 'year', 'pages', 'language', 'series', 'form', 'isbn', 'kind', 'subtitle' );
+	const TARGET_KEYS = array( 'publisher', 'year', 'pages', 'language', 'series', 'form', 'isbn', 'kind', 'genre', 'subtitle' );
+
+	/** Placeholders of the image templates. */
+	const IMG_TAGS = array( '{title}', '{subtitle}', '{authors}', '{publisher}', '{isbn}' );
+
+	const MAX_ORDER  = 40;
+	const MAX_RENAME = 200;
 
 	/** Fields kept in sync besides price and availability. */
 	const SYNC_FIELDS = array( 'title', 'desc', 'short', 'image', 'attrs', 'dims', 'tax' );
 
 	/** Seen-value lists and their caps. */
-	const SEEN_KEYS = array( 'kind', 'status', 'role', 'cat', 'vat', 'ptype', 'form' );
+	const SEEN_KEYS = array( 'kind', 'status', 'role', 'cat', 'vat', 'ptype', 'form', 'class' );
 	const SEEN_MAX  = 200;
 
 	const MAX_RULES = 50;
@@ -86,11 +102,19 @@ final class BKF_Settings {
 				'form'      => 'local',
 				'isbn'      => 'local',
 				'kind'      => '',
+				'genre'     => '',
 				'subtitle'  => 'local',
 			),
 			'roles'           => array(),
+			'order'           => array(),
+			'rename'          => array(),
 			'cats'            => array(),
+			'cat_parents'     => false,
 			'default_cat'     => 0,
+			'tags'            => '',
+			'tags_max'        => 10,
+			'img_alt'         => '{title}',
+			'img_name'        => '{title}-{isbn}',
 			'tax'             => array(),
 			'stock'           => array(),
 			'gone'            => 'outofstock',
@@ -178,6 +202,22 @@ final class BKF_Settings {
 			}
 		}
 
+		$out['order'] = array();
+		foreach ( ( isset( $v['order'] ) && is_array( $v['order'] ) ? $v['order'] : array() ) as $name ) {
+			$name = self::text( $name, 100 );
+			if ( '' !== $name && ! in_array( $name, $out['order'], true ) && count( $out['order'] ) < self::MAX_ORDER ) {
+				$out['order'][] = $name;
+			}
+		}
+
+		$out['rename'] = array();
+		foreach ( ( isset( $v['rename'] ) && is_array( $v['rename'] ) ? $v['rename'] : array() ) as $from => $to ) {
+			$from = self::text( $from, 150 );
+			if ( '' !== $from && count( $out['rename'] ) < self::MAX_RENAME ) {
+				$out['rename'][ $from ] = self::text( $to, 150 );
+			}
+		}
+
 		$out['cats'] = array();
 		foreach ( ( isset( $v['cats'] ) && is_array( $v['cats'] ) ? $v['cats'] : array() ) as $cat => $term ) {
 			$cat  = self::text( $cat, 120 );
@@ -188,6 +228,13 @@ final class BKF_Settings {
 		}
 		$dc                 = (int) ( $v['default_cat'] ?? 0 );
 		$out['default_cat'] = ( $dc > 0 && term_exists( $dc, 'product_cat' ) ) ? $dc : 0;
+		$out['cat_parents'] = ! empty( $v['cat_parents'] );
+		$out['tags']        = in_array( $v['tags'] ?? '', array( '', 'class', 'cats' ), true ) ? $v['tags'] : $d['tags'];
+		$out['tags_max']    = max( 1, min( 50, (int) ( $v['tags_max'] ?? $d['tags_max'] ) ) );
+		foreach ( array( 'img_alt', 'img_name' ) as $k ) {
+			$t         = self::text( $v[ $k ] ?? '', 200 );
+			$out[ $k ] = '' !== $t ? $t : $d[ $k ];
+		}
 
 		$classes    = self::tax_classes();
 		$out['tax'] = array();
@@ -295,6 +342,37 @@ final class BKF_Settings {
 	public static function role_target( string $role ): string {
 		$s = self::get();
 		return isset( $s['roles'][ $role ] ) ? $s['roles'][ $role ] : 'local';
+	}
+
+	/** A feed value as the store writes it: the rename table, else as is ('' = drop). */
+	public static function renamed( string $v ): string {
+		$s = self::get();
+		return array_key_exists( $v, $s['rename'] ) ? $s['rename'][ $v ] : $v;
+	}
+
+	/** The rename table as text, one "from = to" per line. */
+	public static function rename_text( array $map ): string {
+		$out = array();
+		foreach ( $map as $from => $to ) {
+			$out[] = $from . ' = ' . $to;
+		}
+		return implode( "\n", $out );
+	}
+
+	/** Rename table from text: "from = to" per line ("from =" drops the value). */
+	public static function parse_rename( string $text ): array {
+		$out = array();
+		foreach ( preg_split( '/\R/u', $text ) as $line ) {
+			$pos = strpos( $line, '=' );
+			if ( false === $pos ) {
+				continue;
+			}
+			$from = trim( substr( $line, 0, $pos ) );
+			if ( '' !== $from ) {
+				$out[ $from ] = trim( substr( $line, $pos + 1 ) );
+			}
+		}
+		return $out;
 	}
 
 	/* ---------------------------------------------------------------------
