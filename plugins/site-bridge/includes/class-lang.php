@@ -82,6 +82,7 @@ final class SBR_Lang {
 		'Κλειστό'                                                     => 'Closed',
 		'Τα εργαλεία εγγραφής και διαχείρισης δουλεύουν μόνο όσο είναι ανοιχτό, και μόνο αν το επιτρέπει το επίπεδο πιο κάτω. Κλείνει μόνο του.' => 'Write and admin tools work only while it is open, and only if the level below allows them. It closes by itself.',
 		'Άνοιγμα για %d λεπτά'                                        => 'Open for %d minutes',
+		'Άνοιγμα για %d ώρες'                                         => 'Open for %d hours',
 		'Κλείσιμο τώρα'                                               => 'Close now',
 		'Επίπεδο'                                                     => 'Level',
 		'Κανένα εργαλείο δεν δουλεύει.'                               => 'No tool works.',
