@@ -50,7 +50,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $hms_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections' ) as $hms_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed' ) as $hms_slug ) {
 	if ( 'home-sections' !== $hms_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $hms_slug . '/' . $hms_slug . '.php' ) ) {
 		$hms_suite_left = true;
 		break;

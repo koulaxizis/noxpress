@@ -25,6 +25,7 @@
 #   ce → checkout-extras
 #   nm → data-migrator
 #   hs → home-sections
+#   bf → book-feed
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
@@ -57,7 +58,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs'
+  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs bf'
   # Plugins για προσωπική χρήση (Bible §21): βγαίνουν ως release αλλά δεν
   # μπαίνουν στο updates.json, άρα κανένα site δεν τα βλέπει στο hub.
   PERSONAL: 'sb'
@@ -82,7 +83,7 @@ jobs:
         run: |
           set -euo pipefail
           ref=plugins/revenue-splitter/includes/noxpress-core
-          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge publishing-quote pre-orders wish-shelf checkout-extras data-migrator home-sections; do
+          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge publishing-quote pre-orders wish-shelf checkout-extras data-migrator home-sections book-feed; do
             if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
               echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
               exit 1
@@ -120,6 +121,7 @@ jobs:
               pq) echo publishing-quote ;;
               nm) echo data-migrator ;;
               hs) echo home-sections ;;
+              bf) echo book-feed ;;
               *) return 1 ;;
             esac
           }
@@ -148,6 +150,7 @@ jobs:
               pq) echo "Publishing Quote" ;;
               nm) echo "Data Migrator" ;;
               hs) echo "Home Sections" ;;
+              bf) echo "Book Feed" ;;
             esac
           }
           header_version() {
