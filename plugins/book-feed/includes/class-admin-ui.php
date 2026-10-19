@@ -544,9 +544,13 @@ final class BKF_Admin_UI {
 			'form'      => __( 'Μορφή (δέσιμο)', 'book-feed' ),
 			'isbn'      => 'ISBN',
 			'kind'      => __( 'Είδος (βιβλίο, ebook, audiobook)', 'book-feed' ),
+			'genre'     => __( 'Κατηγορίες του καταλόγου (π.χ. ως «Είδος»)', 'book-feed' ),
 			'subtitle'  => __( 'Υπότιτλος (όταν μπαίνει σε χαρακτηριστικό)', 'book-feed' ),
 		);
-		$roles = array_values( array_unique( array_merge( $seen['role'], array_keys( $s['roles'] ) ) ) );
+		// Combined roles ("A, B") are split per role since 1.1.0.
+		$roles = array_values( array_unique( array_filter( array_merge( $seen['role'], array_keys( $s['roles'] ) ), static function ( $r ) {
+			return false === strpos( $r, ',' );
+		} ) ) );
 		$cats  = array_values( array_unique( array_merge( $seen['cat'], array_keys( $s['cats'] ) ) ) );
 		$vats  = array_values( array_unique( array_merge( $seen['vat'], array_keys( $s['tax'] ) ) ) );
 		$stat  = array_values( array_unique( array_merge( array( 'Κυκλοφορεί' ), $seen['status'], array_keys( $s['stock'] ) ) ) );
@@ -580,7 +584,9 @@ final class BKF_Admin_UI {
 				</p>
 				<p class="bkf-hint"><?php esc_html_e( 'Ο κωδικός φυλάγεται κρυπτογραφημένος με τα κλειδιά του wp-config.php και δεν εμφανίζεται ποτέ. Εναλλακτικά: define( \'BKF_PASSWORD\', \'…\' ); στο wp-config.php.', 'book-feed' ); ?></p>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[https]" value="1" <?php checked( $s['https'] ); ?> /> <?php esc_html_e( 'Δοκιμή πρώτα με https', 'book-feed' ); ?></label>
-				<p class="bkf-warn"><?php esc_html_e( 'Ο οδηγός της υπηρεσίας δίνει μόνο http: εκεί ο κωδικός ταξιδεύει χωρίς κρυπτογράφηση σε κάθε αίτημα. Ρώτησε τον ΟΣΔΕΛ αν υπάρχει https.', 'book-feed' ); ?></p>
+				<?php if ( 'http' === BKF_Client::scheme() ) : ?>
+					<p class="bkf-warn"><?php esc_html_e( 'Η σύνδεση γίνεται με http: ο κωδικός ταξιδεύει χωρίς κρυπτογράφηση σε κάθε αίτημα. Γράψε τη διεύθυνση με https:// αν η υπηρεσία το δέχεται.', 'book-feed' ); ?></p>
+				<?php endif; ?>
 				<p><button type="submit" name="bkf_test" value="1" class="button"><?php esc_html_e( 'Αποθήκευση και δοκιμή σύνδεσης', 'book-feed' ); ?></button></p>
 			</div>
 
@@ -614,6 +620,15 @@ final class BKF_Admin_UI {
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[descriptions]" value="1" <?php checked( $s['descriptions'] ); ?> /> <?php esc_html_e( 'Περιγραφή και σύντομη περιγραφή από τον κατάλογο', 'book-feed' ); ?></label>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[images]" value="1" <?php checked( $s['images'] ); ?> /> <?php esc_html_e( 'Κατέβασμα του εξωφύλλου στη βιβλιοθήκη πολυμέσων', 'book-feed' ); ?></label>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[back_cover]" value="1" <?php checked( $s['back_cover'] ); ?> /> <?php esc_html_e( 'Και το οπισθόφυλλο, στη συλλογή εικόνων', 'book-feed' ); ?></label>
+				<div class="bkf-grid bkf-mt-8">
+					<p class="bkf-field"><span><?php esc_html_e( 'Όνομα αρχείου του εξωφύλλου', 'book-feed' ); ?></span>
+						<input type="text" class="bkf-wide-input" name="bkf_s[img_name]" value="<?php echo esc_attr( $s['img_name'] ); ?>" />
+					</p>
+					<p class="bkf-field"><span><?php esc_html_e( 'Εναλλακτικό κείμενο (alt) του εξωφύλλου', 'book-feed' ); ?></span>
+						<input type="text" class="bkf-wide-input" name="bkf_s[img_alt]" value="<?php echo esc_attr( $s['img_alt'] ); ?>" />
+					</p>
+				</div>
+				<p class="bkf-hint"><?php echo esc_html( sprintf( /* translators: %s: placeholders */ __( 'Μπορείς να γράψεις: %s. Το όνομα αρχείου γίνεται greeklish με παύλες.', 'book-feed' ), implode( ' ', BKF_Settings::IMG_TAGS ) ) ); ?></p>
 				<p class="bkf-hint"><?php esc_html_e( 'Πριν δημοσιεύσεις περιγραφές και εξώφυλλα, βεβαιώσου ότι το επιτρέπει η σύμβασή σου με τον ΟΣΔΕΛ.', 'book-feed' ); ?></p>
 			</div>
 
@@ -627,6 +642,25 @@ final class BKF_Admin_UI {
 					</tbody>
 				</table>
 				<p class="bkf-hint"><?php esc_html_e( 'Ένα χαρακτηριστικό του καταστήματος (pa_) φιλτράρεται στο Shop Filters και στα widgets. Τα «χαρακτηριστικά μόνο του προϊόντος» φαίνονται στην καρτέλα «Επιπλέον πληροφορίες».', 'book-feed' ); ?></p>
+				<p class="bkf-field bkf-mt-8"><span><?php esc_html_e( 'Σειρά των χαρακτηριστικών στο προϊόν', 'book-feed' ); ?></span>
+					<textarea name="bkf_s[order_text]" rows="6" class="bkf-wide-input"><?php echo esc_textarea( implode( "\n", $s['order'] ) ); ?></textarea>
+				</p>
+				<p class="bkf-hint"><?php esc_html_e( 'Ένα όνομα ανά γραμμή, όπως φαίνεται στο προϊόν (π.χ. ISBN, Συγγραφείς, Έτος έκδοσης). Όσα δεν γράψεις μπαίνουν μετά. Κενό: ISBN, συντελεστές, κατηγορίες, είδος, έτος, σελίδες, μορφή, γλώσσα, σειρά, εκδότης.', 'book-feed' ); ?></p>
+			</div>
+
+			<h2 class="bkf-h2"><?php esc_html_e( 'Μετονομασία τιμών', 'book-feed' ); ?></h2>
+			<div class="bkf-zone">
+				<textarea name="bkf_s[rename_text]" rows="6" class="bkf-wide-input"><?php echo esc_textarea( BKF_Settings::rename_text( $s['rename'] ) ); ?></textarea>
+				<p class="bkf-hint"><?php esc_html_e( 'Μία ανά γραμμή: «τιμή του καταλόγου = τιμή του καταστήματος», π.χ. «Μαλακό εξώφυλλο = Χαρτόδετο». Με κενό δεξιά, η τιμή παραλείπεται. Ισχύει για εκδότη, μορφή, είδος, κατηγορίες ως χαρακτηριστικό, γλώσσα, σειρά και ετικέτες.', 'book-feed' ); ?></p>
+				<?php
+				$vals = array_values( array_unique( array_filter( array_merge( $seen['form'], $seen['kind'] ) ) ) );
+				if ( $vals ) :
+					?>
+					<p class="bkf-hint"><?php echo esc_html( sprintf( /* translators: %s: values */ __( 'Μορφές και είδη που έχουν φανεί: %s', 'book-feed' ), implode( ', ', $vals ) ) ); ?></p>
+				<?php endif; ?>
+				<?php if ( $seen['class'] ) : ?>
+					<p class="bkf-hint"><?php echo esc_html( sprintf( /* translators: %s: values */ __( 'Θέματα και λέξεις-κλειδιά που έχουν φανεί: %s', 'book-feed' ), implode( ', ', array_slice( $seen['class'], 0, 60 ) ) ) ); ?></p>
+				<?php endif; ?>
 			</div>
 
 			<h2 class="bkf-h2"><?php esc_html_e( 'Ρόλοι συντελεστών', 'book-feed' ); ?></h2>
@@ -655,7 +689,25 @@ final class BKF_Admin_UI {
 					<?php endforeach; ?>
 					</tbody></table>
 				<?php endif; ?>
+				<label class="bkf-check bkf-mt-8"><input type="checkbox" name="bkf_s[cat_parents]" value="1" <?php checked( $s['cat_parents'] ); ?> /> <?php esc_html_e( 'Και οι γονικές κατηγορίες της κατηγορίας που αντιστοιχίστηκε', 'book-feed' ); ?></label>
 				<p class="bkf-hint"><?php esc_html_e( 'Η κατηγορία μπαίνει μόνο στην εισαγωγή. Ένας κανόνας με δική του κατηγορία κερδίζει την αντιστοίχιση. Για χρόνο αποστολής ειδικά για αυτούς τους τίτλους, όρισε ημέρες προετοιμασίας στην κατηγορία τους από το Shipping Notes.', 'book-feed' ); ?></p>
+			</div>
+
+			<h2 class="bkf-h2"><?php esc_html_e( 'Ετικέτες', 'book-feed' ); ?></h2>
+			<div class="bkf-zone">
+				<div class="bkf-grid">
+					<p class="bkf-field"><span><?php esc_html_e( 'Ετικέτες προϊόντος από', 'book-feed' ); ?></span>
+						<select name="bkf_s[tags]">
+							<option value="" <?php selected( $s['tags'], '' ); ?>><?php esc_html_e( 'Καμία ετικέτα', 'book-feed' ); ?></option>
+							<option value="class" <?php selected( $s['tags'], 'class' ); ?>><?php esc_html_e( 'Θέματα και λέξεις-κλειδιά του καταλόγου', 'book-feed' ); ?></option>
+							<option value="cats" <?php selected( $s['tags'], 'cats' ); ?>><?php esc_html_e( 'Κατηγορίες του καταλόγου', 'book-feed' ); ?></option>
+						</select>
+					</p>
+					<p class="bkf-field"><span><?php esc_html_e( 'Το πολύ', 'book-feed' ); ?></span>
+						<input type="number" min="1" max="50" name="bkf_s[tags_max]" value="<?php echo esc_attr( (string) $s['tags_max'] ); ?>" />
+					</p>
+				</div>
+				<p class="bkf-hint"><?php esc_html_e( 'Οι ετικέτες μπαίνουν μόνο στην εισαγωγή· μετά είναι δικές σου.', 'book-feed' ); ?></p>
 			</div>
 
 			<h2 class="bkf-h2"><?php esc_html_e( 'ΦΠΑ', 'book-feed' ); ?></h2>
@@ -895,10 +947,12 @@ final class BKF_Admin_UI {
 		}
 		$new['stock']  = self::pairs( $in, 'stock_names', 'stock_to' );
 		$new['fields'] = isset( $in['fields'] ) && is_array( $in['fields'] ) ? $in['fields'] : array();
-		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'sync_on', 'delete_products' ) as $b ) {
+		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'cat_parents', 'sync_on', 'delete_products' ) as $b ) {
 			$new[ $b ] = ! empty( $in[ $b ] );
 		}
-		unset( $new['role_names'], $new['role_targets'], $new['cat_names'], $new['cat_terms'], $new['vat_rates'], $new['vat_classes'], $new['stock_names'], $new['stock_to'] );
+		$new['order']  = isset( $in['order_text'] ) && is_string( $in['order_text'] ) ? preg_split( '/\R/u', $in['order_text'] ) : array();
+		$new['rename'] = isset( $in['rename_text'] ) && is_string( $in['rename_text'] ) ? BKF_Settings::parse_rename( $in['rename_text'] ) : array();
+		unset( $new['order_text'], $new['rename_text'], $new['role_names'], $new['role_targets'], $new['cat_names'], $new['cat_terms'], $new['vat_rates'], $new['vat_classes'], $new['stock_names'], $new['stock_to'] );
 
 		$msgs = array();
 		if ( isset( $in['url'] ) && is_string( $in['url'] ) && '' !== trim( $in['url'] ) && BKF_Settings::clean( $new )['url'] !== esc_url_raw( trim( $in['url'] ) ) ) {

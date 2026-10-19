@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -24,7 +24,9 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 
 * Title (with the subtitle in the title, in an attribute or nowhere), description and short description, ISBN as GTIN and SKU, the cover (and optionally the back cover) downloaded into the media library, weight and dimensions, tax class from the VAT rate.
 * Publisher, contributors per role, year, pages, language, series, binding and kind as attributes: store attributes (pa_, filterable in Shop Filters and widgets), attributes of the product only, or skipped. The publisher can also be a brand.
-* Catalogue categories map to store categories. A product-only "display" mode makes an external product with a button to another site (`{isbn}`, `{isbn13}`, `{title}` in the address).
+* Catalogue categories map to store categories, optionally with their parent categories; they can also become an attribute (e.g. a "Genre" attribute). Subjects and keywords (or the categories) can become product tags.
+* Fit the products to the store's own structure: the order of the attributes on the product, renamed values ("Soft cover = Paperback", or dropped), and templates for the cover's file name and alt text (`{title}`, `{subtitle}`, `{authors}`, `{publisher}`, `{isbn}`).
+* A product-only "display" mode makes an external product with a button to another site (`{isbn}`, `{isbn13}`, `{title}` in the address).
 
 **Daily sync**
 
@@ -83,6 +85,16 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* Order of the attributes on the product, by name; the default order now starts with the ISBN.
+* Value renames for publisher, format, kind, categories, language, series and tags (an empty right side drops the value).
+* Catalogue categories as an attribute (e.g. "Genre"), and the parent categories of a mapped category.
+* Product tags on import from the catalogue's subjects and keywords, or from its categories, with a limit.
+* Templates for the cover's file name and alt text.
+* A contributor with a combined role ("Author, Illustration") counts for each role.
+* The default address is https; the http warning shows only when the connection really uses http.
+* Subjects and keywords seen in the catalogue are listed under the value renames.
 
 = 1.0.0 =
 * Initial release.

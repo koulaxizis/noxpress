@@ -99,10 +99,14 @@ final class BKF_Record {
 		$roles    = self::many( $d['contr_role'] ?? array(), 60, 80 );
 		$contribs = array();
 		foreach ( $names as $i => $name ) {
-			$contribs[] = array(
-				'name' => $name,
-				'role' => isset( $roles[ $i ] ) ? $roles[ $i ] : '',
-			);
+			// "Συγγραφέας, Εικονογράφηση": one person, two roles.
+			$parts = isset( $roles[ $i ] ) ? array_values( array_filter( array_map( 'trim', explode( ',', $roles[ $i ] ) ), 'strlen' ) ) : array();
+			foreach ( $parts ? $parts : array( '' ) as $role ) {
+				$contribs[] = array(
+					'name' => $name,
+					'role' => $role,
+				);
+			}
 		}
 
 		$valid = self::time( $d['price_valid_until'] ?? '' );
@@ -135,6 +139,8 @@ final class BKF_Record {
 			'short'       => BKF_Settings::text( self::one( $d['short_descr'] ?? '' ), 2000 ),
 			'cats'        => self::many( $d['category'] ?? array(), 20, 120 ),
 			'cat_main'    => BKF_Settings::text( self::one( $d['category_main'] ?? '' ), 120 ),
+			'class'       => self::many( $d['classification'] ?? array(), 50, 120 ),
+			'class_main'  => BKF_Settings::text( self::one( $d['classification_main'] ?? '' ), 120 ),
 			'contribs'    => $contribs,
 			'language'    => self::many( $d['language'] ?? array(), 10, 60 ),
 			'pages'       => (int) self::num( $d['pages'] ?? '', 0, 100000 ),
@@ -166,6 +172,9 @@ final class BKF_Record {
 			}
 			foreach ( $r['contribs'] as $c ) {
 				$out['role'][] = $c['role'];
+			}
+			foreach ( $r['class'] as $c ) {
+				$out['class'][] = $c;
 			}
 		}
 		return $out;

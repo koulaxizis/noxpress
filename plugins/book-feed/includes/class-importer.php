@@ -11,8 +11,8 @@
  *              dimensions, and tax class follow it only while they are
  *              still what the plugin wrote (a hash per field in
  *              _bkf_hash). A field edited by hand is locked and left as
- *              it is. Categories, brand, SKU / GTIN and the slug are set
- *              on import only.
+ *              it is. Categories, tags, brand, SKU / GTIN and the slug
+ *              are set on import only.
  *  link()      marks an existing product as this title: the feed changes
  *              nothing on it (not even the price) until "Update from the
  *              feed" (take_over) is used once.
@@ -243,6 +243,7 @@ final class BKF_Importer {
 		}
 
 		self::brand( $pid, $r );
+		self::tags( $pid, $r );
 		self::store_hashes( $p, $all );
 		return $pid;
 	}
@@ -510,13 +511,20 @@ final class BKF_Importer {
 		if ( ! $ids && $s['default_cat'] ) {
 			$ids = array( (int) $s['default_cat'] );
 		}
+		if ( $s['cat_parents'] ) {
+			$all = array();
+			foreach ( $ids as $id ) {
+				$all = array_merge( $all, array_reverse( array_map( 'intval', get_ancestors( $id, 'product_cat', 'taxonomy' ) ) ), array( $id ) );
+			}
+			$ids = array_values( array_unique( $all ) );
+		}
 		return $ids;
 	}
 
 	/** The publisher as a brand (import only, when set so). */
 	private static function brand( int $pid, array $r ): void {
 		$s    = BKF_Settings::get();
-		$name = '' !== $r['pub_name'] ? $r['pub_name'] : $r['imprint'];
+		$name = self::publisher( $r );
 		if ( 'brand' !== $s['targets']['publisher'] || '' === $name || ! taxonomy_exists( 'product_brand' ) ) {
 			return;
 		}
@@ -526,7 +534,121 @@ final class BKF_Importer {
 		}
 	}
 
-	/** Term id by name in a taxonomy, created when missing; 0 on failure. */
+	/** The publisher's name as the store writes it. */
+	public static function publisher( array $r ): string {
+		return BKF_Settings::renamed( '' !== $r['pub_name'] ? $r['pub_name'] : $r['imprint'] );
+	}
+
+	/** Values through the rename table, empty and dropped ones out, no duplicates. */
+	public static function renamed( array $values ): array {
+		$out = array();
+		foreach ( $values as $v ) {
+			$v = BKF_Settings::renamed( (string) $v );
+			if ( '' !== $v && ! in_array( $v, $out, true ) ) {
+				$out[] = $v;
+			}
+		}
+		return $out;
+	}
+
+	/** The feed's categories, main one first. */
+	public static function genres( array $r ): array {
+		return self::renamed( array_merge( array( $r['cat_main'] ), $r['cats'] ) );
+	}
+
+	/** Names of the authors: the contributors whose role reads "author", else those of the first role. */
+	public static function authors( array $r ): array {
+		$by_role = array();
+		foreach ( $r['contribs'] as $c ) {
+			$by_role[ $c['role'] ][] = $c['name'];
+		}
+		foreach ( $by_role as $role => $names ) {
+			if ( preg_match( '/συγγραφ|author|writer/iu', (string) $role ) ) {
+				return $names;
+			}
+		}
+		return $by_role ? reset( $by_role ) : array();
+	}
+
+	/** Product tags on import (when set so). */
+	private static function tags( int $pid, array $r ): void {
+		$s = BKF_Settings::get();
+		if ( '' === $s['tags'] ) {
+			return;
+		}
+		$names = 'cats' === $s['tags'] ? self::genres( $r ) : self::renamed( array_merge( array( $r['class_main'] ), $r['class'] ) );
+		$ids   = array();
+		foreach ( array_slice( $names, 0, $s['tags_max'] ) as $name ) {
+			$id = self::term( $name, 'product_tag' );
+			if ( $id ) {
+				$ids[] = $id;
+			}
+		}
+		if ( $ids ) {
+			wp_set_object_terms( $pid, $ids, 'product_tag', false );
+		}
+	}
+
+	/** An image template filled in from the record. */
+	public static function fill( string $tpl, array $r ): string {
+		$vals = array(
+			$r['title'],
+			$r['subtitle'],
+			implode( ', ', self::authors( $r ) ),
+			self::publisher( $r ),
+			$r['isbn'],
+		);
+		$out = str_replace( BKF_Settings::IMG_TAGS, $vals, $tpl );
+		// Separators left over by empty placeholders.
+		$out = preg_replace( '/\s*(«\s*»|"\s*")\s*/u', ' ', $out );
+		$out = preg_replace( '/(\s*[,\-]\s*){2,}/u', '$1', $out );
+		$out = preg_replace( '/\s+([.,;:!?»)])/u', '$1', preg_replace( '/\s+/u', ' ', $out ) );
+		return trim( $out, " ,-\t" );
+	}
+
+	/** Greek in Latin letters for file names (when Greeklish Permalinks is not there). */
+	public static function latin( string $text ): string {
+		$text = BKF_Client::fold( $text );
+		$text = strtr(
+			$text,
+			array(
+				'ου' => 'ou',
+				'αυ' => 'av',
+				'ευ' => 'ev',
+				'μπ' => 'mp',
+				'ντ' => 'nt',
+				'γκ' => 'gk',
+				'α'  => 'a',
+				'β'  => 'v',
+				'γ'  => 'g',
+				'δ'  => 'd',
+				'ε'  => 'e',
+				'ζ'  => 'z',
+				'η'  => 'i',
+				'θ'  => 'th',
+				'ι'  => 'i',
+				'κ'  => 'k',
+				'λ'  => 'l',
+				'μ'  => 'm',
+				'ν'  => 'n',
+				'ξ'  => 'x',
+				'ο'  => 'o',
+				'π'  => 'p',
+				'ρ'  => 'r',
+				'σ'  => 's',
+				'ς'  => 's',
+				'τ'  => 't',
+				'υ'  => 'y',
+				'φ'  => 'f',
+				'χ'  => 'ch',
+				'ψ'  => 'ps',
+				'ω'  => 'o',
+			)
+		);
+		return remove_accents( $text );
+	}
+
+		/** Term id by name in a taxonomy, created when missing; 0 on failure. */
 	private static function term( string $name, string $tax ): int {
 		$t = get_term_by( 'name', $name, $tax );
 		if ( $t ) {
@@ -552,6 +674,7 @@ final class BKF_Importer {
 			'form'      => array( 'Μορφή', 'Format' ),
 			'isbn'      => array( 'ISBN', 'ISBN' ),
 			'kind'      => array( 'Είδος', 'Kind' ),
+			'genre'     => array( 'Κατηγορία', 'Category' ),
 			'subtitle'  => array( 'Υπότιτλος', 'Subtitle' ),
 			'contrib'   => array( 'Συντελεστές', 'Contributors' ),
 		);
@@ -579,7 +702,8 @@ final class BKF_Importer {
 			$items[ $key ]['values'] = array_values( array_unique( array_merge( $items[ $key ]['values'], $values ) ) );
 		};
 
-		// Contributors first, in the feed's order of roles.
+		// ISBN first, then contributors in the feed's order of roles.
+		$add( $t['isbn'], self::label( 'isbn' ), array( $r['isbn'] ) );
 		$by_role = array();
 		foreach ( $r['contribs'] as $c ) {
 			$by_role[ $c['role'] ][] = $c['name'];
@@ -591,15 +715,50 @@ final class BKF_Importer {
 		if ( 'attr' === $s['subtitle'] ) {
 			$add( $t['subtitle'], self::label( 'subtitle' ), array( $r['subtitle'] ) );
 		}
-		$add( $t['publisher'], self::label( 'publisher' ), array( '' !== $r['pub_name'] ? $r['pub_name'] : $r['imprint'] ) );
-		$add( $t['form'], self::label( 'form' ), array( $r['form'] ) );
-		$add( $t['kind'], self::label( 'kind' ), array( $r['kind'] ) );
+		$add( $t['genre'], self::label( 'genre' ), self::genres( $r ) );
+		$add( $t['kind'], self::label( 'kind' ), self::renamed( array( $r['kind'] ) ) );
 		$add( $t['year'], self::label( 'year' ), array( $r['year'] > 0 ? (string) $r['year'] : '' ) );
 		$add( $t['pages'], self::label( 'pages' ), array( $r['pages'] > 0 ? (string) $r['pages'] : '' ) );
-		$add( $t['language'], self::label( 'language' ), $r['language'] );
-		$add( $t['series'], self::label( 'series' ), array( '' !== $r['series'] ? $r['series'] . ( '' !== $r['series_no'] ? ' #' . $r['series_no'] : '' ) : '' ) );
-		$add( $t['isbn'], self::label( 'isbn' ), array( $r['isbn'] ) );
+		$add( $t['form'], self::label( 'form' ), self::renamed( array( $r['form'] ) ) );
+		$add( $t['language'], self::label( 'language' ), self::renamed( $r['language'] ) );
+		$series = self::renamed( array( $r['series'] ) );
+		$add( $t['series'], self::label( 'series' ), $series ? array( $series[0] . ( '' !== $r['series_no'] ? ' #' . $r['series_no'] : '' ) ) : array() );
+		$add( $t['publisher'], self::label( 'publisher' ), array( self::publisher( $r ) ) );
+		return self::ordered( $items );
+	}
+
+	/**
+	 * Items in the order the settings give, by the name the attribute has
+	 * on the product; unlisted ones keep their place after the listed.
+	 */
+	private static function ordered( array $items ): array {
+		$order = array();
+		foreach ( BKF_Settings::get()['order'] as $i => $name ) {
+			$order[ self::fold( $name ) ] = $i;
+		}
+		if ( ! $order ) {
+			return $items;
+		}
+		$n    = count( $order );
+		$keys = array();
+		$i    = 0;
+		foreach ( $items as $k => $item ) {
+			$name       = 'local' === $item['target'] ? $item['label'] : wc_attribute_label( $item['target'] );
+			$f          = self::fold( $name );
+			$keys[ $k ] = array( isset( $order[ $f ] ) ? $order[ $f ] : $n, $i++ );
+		}
+		uksort(
+			$items,
+			static function ( $a, $b ) use ( $keys ) {
+				return $keys[ $a ] <=> $keys[ $b ];
+			}
+		);
 		return $items;
+	}
+
+	/** Lower case, no accents (Greek too): for comparing names typed by hand. */
+	private static function fold( string $s ): string {
+		return remove_accents( BKF_Client::fold( trim( $s ) ) );
 	}
 
 	/** Replaces our attributes on the product, keeping every other one. */
@@ -773,12 +932,14 @@ final class BKF_Importer {
 			return 0;
 		}
 
-		$base = function_exists( 'glp_convert' ) ? glp_convert( $r['title'], 'slug' ) : remove_accents( $r['title'] );
+		$s    = BKF_Settings::get();
+		$name = self::fill( $s['img_name'], $r );
+		$base = function_exists( 'glp_convert' ) ? glp_convert( $name, 'slug' ) : self::latin( $name );
 		$base = sanitize_title( $base );
 		if ( '' === $base || false !== strpos( $base, '%' ) ) {
-			$base = 'book';
+			$base = 'book' . ( '' !== $r['isbn_digits'] ? '-' . $r['isbn_digits'] : '' );
 		}
-		$base = substr( $base, 0, 60 ) . ( '' !== $r['isbn_digits'] ? '-' . $r['isbn_digits'] : '' ) . $suffix;
+		$base = rtrim( substr( $base, 0, 120 ), '-' ) . $suffix;
 
 		$file = array(
 			'name'     => sanitize_file_name( $base . '.' . $exts[ $mime ] ),
@@ -790,7 +951,8 @@ final class BKF_Importer {
 			BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'image' ), $att->get_error_message() );
 			return 0;
 		}
-		update_post_meta( $att, '_wp_attachment_image_alt', $r['title'] );
+		$alt = self::fill( $s['img_alt'], $r );
+		update_post_meta( $att, '_wp_attachment_image_alt', '' !== $alt ? $alt : $r['title'] );
 		update_post_meta( $att, '_bkf_cover_src', $url );
 		return (int) $att;
 	}
