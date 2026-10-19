@@ -2,7 +2,8 @@
 /**
  * CRT_Metabox — the creator edit screen.
  *
- *  - «Στοιχεία»: roles text, sort name, links (repeater).
+ *  - «Στοιχεία»: roles text, sort name, gender (product tab title), links
+ *    (repeater).
  *  - «Συνεντεύξεις, βίντεο, κριτικές»: one list, each row with a type
  *    (repeater; videos may have a local image).
  *  - «Ταίριασμα με χαρακτηριστικά»: the matching key, the terms found
@@ -73,6 +74,20 @@ final class CRT_Metabox {
 			<input type="text" id="crt-sort" name="crt_sort" maxlength="120" value="<?php echo esc_attr( (string) get_post_meta( $post->ID, CRT_CPT::M_SORT, true ) ); ?>" placeholder="<?php echo esc_attr( $post->post_title ); ?>" />
 			<p class="description"><?php esc_html_e( 'Για τη σειρά στο ευρετήριο, π.χ. «Κουλαξίζης Χρήστος». Κενό = το όνομα όπως γράφεται.', 'featured-creators' ); ?></p>
 
+			<label class="crt-label" for="crt-gender"><?php esc_html_e( 'Άρθρο στον τίτλο της καρτέλας', 'featured-creators' ); ?></label>
+			<select id="crt-gender" name="crt_gender">
+				<?php
+				foreach ( array(
+					''  => __( 'Χωρίς άρθρο («Συγγραφέας»)', 'featured-creators' ),
+					'm' => __( 'Ο («Ο συγγραφέας»)', 'featured-creators' ),
+					'f' => __( 'Η («Η συγγραφέας»)', 'featured-creators' ),
+				) as $k => $label ) {
+					echo '<option value="' . esc_attr( $k ) . '" ' . selected( CRT_CPT::gender( $post->ID ), $k, false ) . '>' . esc_html( $label ) . '</option>';
+				}
+				?>
+			</select>
+			<p class="description"><?php esc_html_e( 'Για την καρτέλα δημιουργού στο προϊόν, όταν το προϊόν έχει μόνο αυτόν τον δημιουργό.', 'featured-creators' ); ?></p>
+
 			<span class="crt-label"><?php esc_html_e( 'Σύνδεσμοι', 'featured-creators' ); ?></span>
 			<div class="crt-rows" data-crt-rows="links">
 				<?php
@@ -126,7 +141,7 @@ final class CRT_Metabox {
 				?>
 			</template>
 			<button type="button" class="button" data-crt-add="press">+ <?php esc_html_e( 'Προσθήκη', 'featured-creators' ); ?></button>
-			<p class="description"><?php esc_html_e( 'Στη σελίδα εμφανίζονται σε τρεις λίστες, νεότερο πρώτα. Τα βίντεο είναι σύνδεσμοι (χωρίς ενσωμάτωση, άρα χωρίς cookies τρίτων), με προαιρετική εικόνα από τη βιβλιοθήκη πολυμέσων.', 'featured-creators' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Στη σελίδα εμφανίζονται σε τρεις λίστες, νεότερο πρώτο. Τα βίντεο είναι σύνδεσμοι (χωρίς ενσωμάτωση, άρα χωρίς cookies τρίτων), με προαιρετική εικόνα από τη βιβλιοθήκη πολυμέσων.', 'featured-creators' ); ?></p>
 		</div>
 		<?php
 	}
@@ -283,6 +298,9 @@ final class CRT_Metabox {
 
 		$sort = isset( $_POST['crt_sort'] ) && is_string( $_POST['crt_sort'] ) ? CRT_Settings::clip( sanitize_text_field( wp_unslash( $_POST['crt_sort'] ) ), 120 ) : '';
 		self::set_or_delete( (int) $post_id, CRT_CPT::M_SORT, $sort );
+
+		$gender = isset( $_POST['crt_gender'] ) && is_string( $_POST['crt_gender'] ) ? CRT_CPT::rest_gender( sanitize_key( wp_unslash( $_POST['crt_gender'] ) ) ) : '';
+		self::set_or_delete( (int) $post_id, CRT_CPT::M_GENDER, $gender );
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized by CRT_CPT::sanitize_links().
 		$links = isset( $_POST['crt_links'] ) && is_array( $_POST['crt_links'] ) ? wp_unslash( $_POST['crt_links'] ) : array();
