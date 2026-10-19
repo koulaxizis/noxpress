@@ -1,6 +1,6 @@
 {
   "display": 100,
-  "total": 102,
+  "total": 104,
   "offset": 5,
   "updated": "2026-10-19",
   "assets": {
@@ -290,6 +290,10 @@
     },
     "657355833": {
       "file": "nox-bf-1.4.0/book-feed.zip",
+      "count": 2
+    },
+    "657394925": {
+      "file": "nox-bf-1.4.1/book-feed.zip",
       "count": 0
     }
   }
