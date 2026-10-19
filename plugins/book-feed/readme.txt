@@ -97,6 +97,7 @@ The settings, the history, the password, the scheduled actions and the plugin's 
 
 = 1.4.1 =
 * Labelled publisher price: on pages that also list other books (the author's other titles, "readers also bought"), the price after this book's title is taken, not the first one on the page; when the prices cannot be told apart, none is taken.
+* Publisher cover: when the page links the same picture as a file of its own (a gallery link around a resized image), that full-size file is used.
 
 = 1.4.0 =
 * The cover from the publisher's page (schema.org image or og:image), only when it is larger than the catalogue's; setting, on by default.

@@ -235,9 +235,17 @@ final class BKF_Pub_Price {
 
 	/**
 	 * The cover on a product page for this ISBN: the JSON-LD Product
-	 * image, else og:image; an absolute http(s) address or ''.
+	 * image, else og:image; an absolute http(s) address or ''. When the
+	 * page links the same picture as a file of its own (a gallery link
+	 * around a resized image), that file is taken instead (1.4.1).
 	 */
 	public static function image( string $html, string $isbn_digits ): string {
+		$u = self::found_image( $html, $isbn_digits );
+		return '' !== $u ? self::full_size( $html, $u ) : '';
+	}
+
+	/** The image the page names for the book (JSON-LD, else og:image), or ''. */
+	private static function found_image( string $html, string $isbn_digits ): string {
 		$t = ltrim( $html );
 		if ( '' === $t || '[' === $t[0] || self::other_book( $html, $isbn_digits ) ) {
 			return '';
@@ -275,6 +283,31 @@ final class BKF_Pub_Price {
 			}
 		}
 		return '';
+	}
+
+	/**
+	 * A link on the page to the same picture as $u without the resize
+	 * marks ("/w640/", "-600x600"), e.g. <a href="/files/products/x.jpg">
+	 * around <img src="/mediastream/w600/files/products/x.jpg.jpg">.
+	 */
+	private static function full_size( string $html, string $u ): string {
+		$path = (string) wp_parse_url( $u, PHP_URL_PATH );
+		$stem = preg_replace( '/(\.(?:jpe?g|png|gif|webp))+$/i', '', basename( $path ) );
+		$stem = preg_replace( '/-\d{2,5}x\d{2,5}$/', '', (string) $stem );
+		if ( strlen( (string) $stem ) < 4 ) {
+			return $u;
+		}
+		$re = '#<a\s[^>]*href=["\']([^"\']*/' . preg_quote( $stem, '#' ) . '\.(?:jpe?g|png|webp))["\']#i';
+		if ( ! preg_match( $re, $html, $m ) ) {
+			return $u;
+		}
+		$link = html_entity_decode( $m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		if ( '/' === substr( $link, 0, 1 ) && '/' !== substr( $link, 1, 1 ) ) {
+			$host = wp_parse_url( $u, PHP_URL_SCHEME ) . '://' . wp_parse_url( $u, PHP_URL_HOST );
+			$link = $host . $link;
+		}
+		$full = self::abs_url( $link );
+		return '' !== $full ? $full : $u;
 	}
 
 	/** An absolute http(s) address (or "//host/…"), else ''. */
