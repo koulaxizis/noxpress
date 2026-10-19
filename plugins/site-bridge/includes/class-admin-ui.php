@@ -311,6 +311,16 @@ final class SBR_Admin_UI {
 		return $out;
 	}
 
+	/** A write window length for buttons and lists: "30 λεπτά", "3 ώρες". */
+	private static function window_length( int $m ): string {
+		if ( $m > 60 ) {
+			/* translators: %d: hours */
+			return sprintf( __( '%d ώρες', 'site-bridge' ), intdiv( $m, 60 ) );
+		}
+		/* translators: %d: minutes */
+		return sprintf( __( '%d λεπτά', 'site-bridge' ), $m );
+	}
+
 	/* ----- Access (Site role) ----- */
 
 	private static function render_access(): void {
@@ -338,13 +348,8 @@ final class SBR_Admin_UI {
 					<?php self::form_open( 'window_open' ); ?>
 						<input type="hidden" name="sbr_minutes" value="<?php echo (int) $m; ?>">
 						<button type="submit" class="button"><?php
-							if ( $m > 60 ) {
-								/* translators: %d: hours */
-								echo esc_html( sprintf( __( 'Άνοιγμα για %d ώρες', 'site-bridge' ), intdiv( $m, 60 ) ) );
-							} else {
-								/* translators: %d: minutes */
-								echo esc_html( sprintf( __( 'Άνοιγμα για %d λεπτά', 'site-bridge' ), $m ) );
-							}
+							/* translators: %s: length, e.g. "30 minutes" */
+							echo esc_html( sprintf( __( 'Άνοιγμα για %s', 'site-bridge' ), self::window_length( $m ) ) );
 						?></button>
 					</form>
 				<?php endforeach; ?>
@@ -472,7 +477,16 @@ final class SBR_Admin_UI {
 				}
 				if ( ! empty( $site['self'] ) || ! empty( $st['remote_window'] ) ) {
 					self::form_open( $w > time() ? 'site_window_close' : 'site_window_open', 'sbr-inline-form' );
-					echo '<input type="hidden" name="sbr_site_id" value="' . esc_attr( $id ) . '"><button type="submit" class="button">' . ( $w > time() ? esc_html__( 'Κλείσιμο παραθύρου', 'site-bridge' ) : esc_html__( 'Παράθυρο 30 λεπτά', 'site-bridge' ) ) . '</button></form>';
+					echo '<input type="hidden" name="sbr_site_id" value="' . esc_attr( $id ) . '">';
+					if ( $w > time() ) {
+						echo '<button type="submit" class="button">' . esc_html__( 'Κλείσιμο παραθύρου', 'site-bridge' ) . '</button></form>';
+					} else {
+						echo '<select name="sbr_minutes" aria-label="' . esc_attr__( 'Διάρκεια παραθύρου', 'site-bridge' ) . '">';
+						foreach ( SBR_Settings::WINDOW_MINUTES as $m ) {
+							echo '<option value="' . (int) $m . '"' . selected( 30, $m, false ) . '>' . esc_html( self::window_length( $m ) ) . '</option>';
+						}
+						echo '</select> <button type="submit" class="button">' . esc_html__( 'Άνοιγμα παραθύρου', 'site-bridge' ) . '</button></form>';
+					}
 				}
 				if ( empty( $site['self'] ) ) {
 					self::form_open( 'site_remove', 'sbr-inline-form' );
@@ -780,8 +794,10 @@ final class SBR_Admin_UI {
 				if ( 'site_refresh' === $act ) {
 					$r = SBR_Hub::status( $sites[ $id ] );
 				} else {
-					$r = SBR_Hub::window( $sites[ $id ], 'site_window_open' === $act ? 30 : 0 );
-					self::audit( $act, array( 'site' => $id ) );
+					$min = (int) self::post( 'sbr_minutes' );
+					$min = in_array( $min, SBR_Settings::WINDOW_MINUTES, true ) ? $min : 30;
+					$r   = SBR_Hub::window( $sites[ $id ], 'site_window_open' === $act ? $min : 0 );
+					self::audit( $act, 'site_window_open' === $act ? array( 'site' => $id, 'minutes' => $min ) : array( 'site' => $id ) );
 				}
 				self::redirect( 'sites', array( is_wp_error( $r ) ? self::msg( 'error', $r->get_error_message() ) : self::msg( 'success', __( 'Έγινε.', 'site-bridge' ) ) ) );
 				break;

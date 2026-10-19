@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -74,6 +74,10 @@ The secret key is sealed with the salts, so a new key pair is made and a notice 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: the Hub's Sites list opens a site's write window for 15, 30 or 60 minutes, 3 or 5 hours (was 30 minutes only). Sites still on 1.0.0 open 30 minutes for 3 and 5 hours; update them too.
+* Fix: after opening or closing a remote site's window, the Sites list shows the new state at once (it waited for "Check").
 
 = 1.1.0 =
 * New: 3 and 5 hour write windows, next to 15, 30 and 60 minutes.
