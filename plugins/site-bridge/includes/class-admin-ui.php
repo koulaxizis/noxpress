@@ -338,8 +338,13 @@ final class SBR_Admin_UI {
 					<?php self::form_open( 'window_open' ); ?>
 						<input type="hidden" name="sbr_minutes" value="<?php echo (int) $m; ?>">
 						<button type="submit" class="button"><?php
-							/* translators: %d: minutes */
-							echo esc_html( sprintf( __( 'Άνοιγμα για %d λεπτά', 'site-bridge' ), $m ) );
+							if ( $m > 60 ) {
+								/* translators: %d: hours */
+								echo esc_html( sprintf( __( 'Άνοιγμα για %d ώρες', 'site-bridge' ), intdiv( $m, 60 ) ) );
+							} else {
+								/* translators: %d: minutes */
+								echo esc_html( sprintf( __( 'Άνοιγμα για %d λεπτά', 'site-bridge' ), $m ) );
+							}
 						?></button>
 					</form>
 				<?php endforeach; ?>
