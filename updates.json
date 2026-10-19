@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Initial release.\n* Bookpoint / OSDEL Solr web service: search (title, contributor, ISBN, publisher with autocomplete, years, kind), https first, sealed password, redacted errors.\n* Import into simple or external products: descriptions, ISBN (GTIN, SKU), cover and back cover into the media library, attributes per field and per contributor role, categories, tax class from the VAT rate, weight and dimensions.\n* Same-ISBN detection with \"Link\", and \"Update from the catalogue\" / \"Unlink\" on the product.\n* Daily background sync: price and availability always; other fields until edited by hand (field locks); titles that leave the catalogue go out of stock or to draft; mass-disappearance guard.\n* Rules per publisher that import new titles as drafts.\n* Fixed book price warning on save.\n* Mapping tables built from the values seen in the catalogue.\n* History with CSV export, settings backup, WP-CLI, clean uninstall.",
+        "changelog": "* Order of the attributes on the product, by name; the default order now starts with the ISBN.\n* Value renames for publisher, format, kind, categories, language, series and tags (an empty right side drops the value).\n* Catalogue categories as an attribute (e.g. \"Genre\"), and the parent categories of a mapped category.\n* Product tags on import from the catalogue's subjects and keywords, or from its categories, with a limit.\n* Templates for the cover's file name and alt text.\n* A contributor with a combined role (\"Author, Illustration\") counts for each role.\n* The default address is https; the http warning shows only when the connection really uses http.\n* Subjects and keywords seen in the catalogue are listed under the value renames.",
         "published": "2026-10-19",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2cba4802daad9f6909d1d82b4e20e7d20f70f4cbd8457dcb2b56257e54c8c0b2",
-        "signature": "QxXPjVNkum5sn1xtlnV5XtaYZ0wZChyb491nFiLYIpNuE4w6u9ECIbR3ihY8StU8vTD30NVc+NSIbHEAYXsBCA==",
+        "sha256": "88d76f28fae68b7c1153ea968e14ce32aa8970bd715ff1c34d66784edac3334c",
+        "signature": "HPfDPaJIlNzbp/wr7gv+jQ/okVG6p5EnVKyuhSAAbJOKCLlYN5PJ0t09um0OrrlZ2YANzyjrZV0k3T9My6umBw==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.0.0/book-feed.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.1.0/book-feed.zip"
       }
     },
     "book-preview": {
