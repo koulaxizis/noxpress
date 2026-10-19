@@ -360,7 +360,12 @@
 				x.disabled = true;
 			} );
 			msg.textContent = '…';
-			postRetry( 'bkf_product', { pid: box.getAttribute( 'data-bkf-pid' ), op: op }, function () {
+			var args = { pid: box.getAttribute( 'data-bkf-pid' ), op: op };
+			var page = box.querySelector( '#bkf-pub-url' );
+			if ( page && 'unlink' !== op ) {
+				args.pub_url = page.value;
+			}
+			postRetry( 'bkf_product', args, function () {
 				msg.textContent = t.busy;
 			} )
 				.then( function ( d ) {

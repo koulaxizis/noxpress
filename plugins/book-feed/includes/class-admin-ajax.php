@@ -274,6 +274,12 @@ final class BKF_Admin_Ajax {
 			wp_send_json_success( array( 'message' => __( 'Το προϊόν αποσυνδέθηκε από τον κατάλογο.', 'book-feed' ) ) );
 		}
 
+		// The page typed in the box counts even before the product form is saved (1.4.0).
+		$page = self::post( 'pub_url' );
+		if ( is_string( $page ) && 'unlink' !== $op ) {
+			self::store_pub_url( $pid, $page );
+		}
+
 		if ( function_exists( 'wc_set_time_limit' ) ) {
 			wc_set_time_limit( 120 );
 		}
@@ -708,7 +714,7 @@ final class BKF_Admin_Ajax {
 				<label for="bkf-pub-url"><?php esc_html_e( 'Σελίδα στο site του εκδότη', 'book-feed' ); ?></label>
 				<?php wp_nonce_field( 'bkf_box_' . $pid, 'bkf_box_nonce' ); ?>
 				<input type="url" id="bkf-pub-url" class="widefat" name="bkf_pub_url" maxlength="300" placeholder="https://…" value="<?php echo esc_attr( (string) get_post_meta( $pid, '_bkf_pub_url', true ) ); ?>" />
-				<span class="bkf-muted"><?php esc_html_e( 'Για εκδότες που δεν έχουν σελίδα ανά ISBN. Η τιμή διαβάζεται από εδώ σε κάθε συγχρονισμό· αποθήκευσε το προϊόν και πάτα «Συγχρονισμός τώρα».', 'book-feed' ); ?></span>
+				<span class="bkf-muted"><?php esc_html_e( 'Για εκδότες που δεν έχουν σελίδα ανά ISBN. Η τιμή και το εξώφυλλο διαβάζονται από εδώ σε κάθε συγχρονισμό· ο «Συγχρονισμός τώρα» κρατάει και τη διεύθυνση.', 'book-feed' ); ?></span>
 			</p>
 			<?php if ( $linked ) : ?>
 				<p class="bkf-small"><?php esc_html_e( 'Υπήρχε ήδη στο κατάστημα: ο κατάλογος δεν αλλάζει τα πεδία του, ούτε τιμή και διαθεσιμότητα, μέχρι να πατήσεις «Ενημέρωση από τον κατάλογο».', 'book-feed' ); ?></p>
@@ -744,7 +750,12 @@ final class BKF_Admin_Ajax {
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['bkf_box_nonce'] ) ), 'bkf_box_' . $pid ) || ! current_user_can( BKF_Admin_UI::CAP ) || ! current_user_can( 'edit_post', $pid ) ) {
 			return;
 		}
-		$url = BKF_Settings::text( esc_url_raw( wp_unslash( $_POST['bkf_pub_url'] ), array( 'http', 'https' ) ), 300 );
+		self::store_pub_url( $pid, wp_unslash( $_POST['bkf_pub_url'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cleaned in store_pub_url().
+	}
+
+	/** Keeps a product's page on the publisher's site; a bad or empty address removes it. */
+	private static function store_pub_url( int $pid, string $raw ): void {
+		$url = BKF_Settings::text( esc_url_raw( $raw, array( 'http', 'https' ) ), 300 );
 		if ( '' !== $url && BKF_Settings::page_url_ok( $url ) ) {
 			update_post_meta( $pid, '_bkf_pub_url', $url );
 		} else {

@@ -33,7 +33,12 @@
  *  - One request per title per day: the result (price or "none") is kept
  *    in a transient per ISBN, so imports and the sync share it.
  *
- * Everything read from the page is hostile: only numbers come out.
+ * The same page also gives the book's cover (1.4.0): og:image or the
+ * JSON-LD Product image, an absolute http(s) address. The importer takes
+ * it only when it is larger than the catalogue's (cover()).
+ *
+ * Everything read from the page is hostile: only numbers and one image
+ * address come out.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -72,20 +77,9 @@ final class BKF_Pub_Price {
 	 */
 	public static function price( array $r, ?string &$why = null, bool $fresh = false ): ?float {
 		$why = '';
-		$url = self::url( self::template( $r ), $r );
-		if ( '' === $url ) {
+		$got = self::page( $r, $fresh );
+		if ( null === $got ) {
 			return null;
-		}
-		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
-		$got = $fresh ? false : get_transient( $key );
-		if ( ! is_array( $got ) ) {
-			$why = '';
-			$p   = self::fetch( $url, $r, $why );
-			$got = array(
-				'p'   => $p,
-				'why' => $why,
-			);
-			set_transient( $key, $got, self::TTL );
 		}
 		$p   = isset( $got['p'] ) && is_numeric( $got['p'] ) ? (float) $got['p'] : null;
 		$why = isset( $got['why'] ) && is_string( $got['why'] ) ? $got['why'] : '';
@@ -98,6 +92,38 @@ final class BKF_Pub_Price {
 			return null;
 		}
 		return $p;
+	}
+
+	/** The cover address on the publisher's page for a record, or ''. */
+	public static function cover( array $r ): string {
+		$got = self::page( $r );
+		return null !== $got && isset( $got['img'] ) && is_string( $got['img'] ) ? $got['img'] : '';
+	}
+
+	/**
+	 * What the publisher's page gave for a record (price, reason, image),
+	 * read once a day and kept in a transient; null without a page.
+	 */
+	private static function page( array $r, bool $fresh = false ): ?array {
+		$url = self::url( self::template( $r ), $r );
+		if ( '' === $url ) {
+			return null;
+		}
+		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
+		$got = $fresh ? false : get_transient( $key );
+		// Entries from before 1.4.0 have no image: read the page again.
+		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) ) {
+			$why = '';
+			$img = '';
+			$p   = self::fetch( $url, $r, $why, $img );
+			$got = array(
+				'p'   => $p,
+				'why' => $why,
+				'img' => $img,
+			);
+			set_transient( $key, $got, self::TTL );
+		}
+		return $got;
 	}
 
 	/** A price for messages: "12,50" in the store's format. */
@@ -116,8 +142,9 @@ final class BKF_Pub_Price {
 		return $p >= $feed / 2 && $p <= $feed * 2;
 	}
 
-	/** Reads the page; the price or null (reason in $why). */
-	public static function fetch( string $url, array $r, ?string &$why = null ): ?float {
+	/** Reads the page; the price or null (reason in $why, cover address in $img). */
+	public static function fetch( string $url, array $r, ?string &$why = null, ?string &$img = null ): ?float {
+		$img = '';
 		$res = wp_safe_remote_get(
 			$url,
 			array(
@@ -138,7 +165,9 @@ final class BKF_Pub_Price {
 			$why = sprintf( __( 'Η σελίδα του εκδότη απάντησε %d.', 'book-feed' ), $code );
 			return null;
 		}
-		$p = self::parse( (string) wp_remote_retrieve_body( $res ), $r['isbn_digits'] );
+		$body = (string) wp_remote_retrieve_body( $res );
+		$p    = self::parse( $body, $r['isbn_digits'] );
+		$img  = self::image( $body, $r['isbn_digits'] );
 		if ( null === $p ) {
 			$why = __( 'Δεν βρέθηκε τιμή για αυτό το ISBN στη σελίδα του εκδότη.', 'book-feed' );
 		}
@@ -195,6 +224,62 @@ final class BKF_Pub_Price {
 			return self::num( $m[1] );
 		}
 		return null;
+	}
+
+	/**
+	 * The cover on a product page for this ISBN: the JSON-LD Product
+	 * image, else og:image; an absolute http(s) address or ''.
+	 */
+	public static function image( string $html, string $isbn_digits ): string {
+		$t = ltrim( $html );
+		if ( '' === $t || '[' === $t[0] || self::other_book( $html, $isbn_digits ) ) {
+			return '';
+		}
+		if ( preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $m ) ) {
+			foreach ( $m[1] as $json ) {
+				$data = json_decode( trim( $json ), true );
+				if ( ! is_array( $data ) ) {
+					continue;
+				}
+				foreach ( self::products( $data ) as $prod ) {
+					$ids = self::ids( $prod );
+					if ( $ids && ! in_array( $isbn_digits, $ids, true ) ) {
+						continue;
+					}
+					$img = $prod['image'] ?? null;
+					if ( is_array( $img ) ) {
+						$img = isset( $img[0] ) ? $img[0] : $img;
+						$img = is_array( $img ) ? ( $img['contentUrl'] ?? ( $img['url'] ?? null ) ) : $img;
+					}
+					$u = is_string( $img ) ? self::abs_url( $img ) : '';
+					if ( '' !== $u ) {
+						return $u;
+					}
+				}
+			}
+		}
+		foreach ( array( 'og:image:secure_url', 'og:image' ) as $prop ) {
+			$q = preg_quote( $prop, '#' );
+			if ( preg_match( '#<meta[^>]+property=["\']' . $q . '["\'][^>]+content=["\']([^"\']+)["\']#i', $html, $mm ) || preg_match( '#<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']' . $q . '["\']#i', $html, $mm ) ) {
+				$u = self::abs_url( $mm[1] );
+				if ( '' !== $u ) {
+					return $u;
+				}
+			}
+		}
+		return '';
+	}
+
+	/** An absolute http(s) address (or "//host/…"), else ''. */
+	private static function abs_url( string $u ): string {
+		$u = trim( html_entity_decode( $u, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		if ( 0 === strpos( $u, '//' ) ) {
+			$u = 'https:' . $u;
+		}
+		if ( strlen( $u ) > 1000 || ! preg_match( '#^https?://[^/\s"\'<>]+/\S*$#i', $u ) ) {
+			return '';
+		}
+		return esc_url_raw( $u, array( 'http', 'https' ) );
 	}
 
 	/** The visible text of a page, one space between words. */

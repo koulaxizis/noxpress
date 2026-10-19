@@ -620,6 +620,7 @@ final class BKF_Admin_UI {
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[descriptions]" value="1" <?php checked( $s['descriptions'] ); ?> /> <?php esc_html_e( 'Περιγραφή και σύντομη περιγραφή από τον κατάλογο', 'book-feed' ); ?></label>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[images]" value="1" <?php checked( $s['images'] ); ?> /> <?php esc_html_e( 'Κατέβασμα του εξωφύλλου στη βιβλιοθήκη πολυμέσων', 'book-feed' ); ?></label>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[back_cover]" value="1" <?php checked( $s['back_cover'] ); ?> /> <?php esc_html_e( 'Και το οπισθόφυλλο, στη συλλογή εικόνων', 'book-feed' ); ?></label>
+				<label class="bkf-check"><input type="checkbox" name="bkf_s[pub_cover]" value="1" <?php checked( $s['pub_cover'] ); ?> /> <?php esc_html_e( 'Το εξώφυλλο από τη σελίδα του εκδότη, όταν είναι μεγαλύτερο από του καταλόγου', 'book-feed' ); ?></label>
 				<div class="bkf-grid bkf-mt-8">
 					<p class="bkf-field"><span><?php esc_html_e( 'Όνομα αρχείου του εξωφύλλου', 'book-feed' ); ?></span>
 						<input type="text" class="bkf-wide-input" name="bkf_s[img_name]" value="<?php echo esc_attr( $s['img_name'] ); ?>" />
@@ -1007,7 +1008,7 @@ final class BKF_Admin_UI {
 		}
 		$new['stock']  = self::pairs( $in, 'stock_names', 'stock_to' );
 		$new['fields'] = isset( $in['fields'] ) && is_array( $in['fields'] ) ? $in['fields'] : array();
-		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'cat_parents', 'sync_on', 'delete_products' ) as $b ) {
+		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'pub_cover', 'cat_parents', 'sync_on', 'delete_products' ) as $b ) {
 			$new[ $b ] = ! empty( $in[ $b ] );
 		}
 		$new['pub_prices'] = array();

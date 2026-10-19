@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -42,6 +42,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * A page that names another ISBN is ignored. A price below half or above double the catalogue's is not used. When the page cannot be read, a price read in the last 7 days still counts, else the catalogue's. Every change goes to the history; one look per title per day.
 * Publishers whose addresses do not carry the ISBN: put the book's page in the Book Feed box of the product; the price is read from there.
 * Pages without structured data: the first number after words such as "Τιμή εκδότη" (setting, one per line) is taken, before any other price on the page, since the publisher's e-shop often shows its own discounted price.
+* Covers: the catalogue gives one small image. When the publisher's page has a cover (schema.org image or og:image) with more pixels than the product's, it takes its place; a smaller one is deleted again and not downloaded every day (setting, on by default).
 * "Read the price" in Tools tries one ISBN (and, optionally, a page address) without changing anything.
 
 **Fixed book price**
@@ -93,6 +94,11 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.4.0 =
+* The cover from the publisher's page (schema.org image or og:image), only when it is larger than the catalogue's; setting, on by default.
+* "Sync now" in the product box also keeps the page address typed there, without saving the product first.
+* Weight and dimensions without trailing zeros ("600 g", not "600.000").
 
 = 1.3.0 =
 * A page on the publisher's site per product (Book Feed box), for publishers without an address per ISBN.
