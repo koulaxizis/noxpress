@@ -757,6 +757,39 @@ final class BKF_Admin_UI {
 				<p class="bkf-hint"><?php esc_html_e( 'Μια τιμή διαθεσιμότητας που δεν έχει αντιστοιχιστεί κάνει τον τίτλο «Εξαντλημένο», ώστε να μην πουλάς κάτι που ίσως δεν υπάρχει. Οι νέες τιμές εμφανίζονται εδώ μόλις τις δει το plugin.', 'book-feed' ); ?></p>
 			</div>
 
+			<h2 class="bkf-h2"><?php esc_html_e( 'Τιμές από τα sites των εκδοτών', 'book-feed' ); ?></h2>
+			<div class="bkf-zone">
+				<p class="bkf-hint"><?php esc_html_e( 'Για κάθε εκδότη εδώ, το plugin διαβάζει την τιμή από τη σελίδα του βιβλίου στο site του (δομημένα δεδομένα schema.org, όπως τα δίνει κάθε WooCommerce) και τη βάζει αντί για την τιμή του καταλόγου, στην εισαγωγή και σε κάθε συγχρονισμό. Αν η σελίδα δεν διαβάζεται ή η τιμή απέχει πάνω από το διπλάσιο ή κάτω από το μισό της τιμής του καταλόγου, μένει η τιμή του καταλόγου. Κάθε αλλαγή γράφεται στο ιστορικό.', 'book-feed' ); ?></p>
+				<?php
+				$pp   = array_values(
+					array_map(
+						static function ( $id, $row ) {
+							return array( 'pub_id' => $id ) + $row;
+						},
+						array_keys( $s['pub_prices'] ),
+						$s['pub_prices']
+					)
+				);
+				$pp[] = array(
+					'pub_id' => '',
+					'name'   => '',
+					'url'    => '',
+				);
+				foreach ( $pp as $i => $row ) :
+					?>
+					<fieldset class="bkf-pp-row bkf-grid">
+						<p class="bkf-field bkf-pub-wrap"><span><?php esc_html_e( 'Εκδότης', 'book-feed' ); ?></span>
+							<input type="text" class="bkf-pub-name" name="bkf_s[pp][<?php echo (int) $i; ?>][name]" value="<?php echo esc_attr( $row['name'] ); ?>" autocomplete="off" placeholder="<?php esc_attr_e( 'Γράψε 3 γράμματα…', 'book-feed' ); ?>" />
+							<input type="hidden" class="bkf-pub-id" name="bkf_s[pp][<?php echo (int) $i; ?>][pub_id]" value="<?php echo esc_attr( $row['pub_id'] ); ?>" />
+						</p>
+						<p class="bkf-field"><span><?php esc_html_e( 'Σελίδα του βιβλίου στο site του εκδότη', 'book-feed' ); ?></span>
+							<input type="url" class="bkf-wide-input" name="bkf_s[pp][<?php echo (int) $i; ?>][url]" value="<?php echo esc_attr( $row['url'] ); ?>" placeholder="https://…/wp-json/wc/store/v1/products?search={isbn13}" />
+						</p>
+					</fieldset>
+				<?php endforeach; ?>
+				<p class="bkf-hint"><?php esc_html_e( 'Γράψε {isbn} (με παύλες, όπως το δίνει ο κατάλογος) ή {isbn13} (μόνο ψηφία) εκεί που μπαίνει το ISBN. Σε site WooCommerce: https://site/wp-json/wc/store/v1/products?search={isbn13} ή η σελίδα του προϊόντος. Άδεια διεύθυνση αφαιρεί τον εκδότη. Δοκίμασε ένα ISBN από τα Εργαλεία.', 'book-feed' ); ?></p>
+			</div>
+
 			<h2 class="bkf-h2"><?php esc_html_e( 'Συγχρονισμός', 'book-feed' ); ?></h2>
 			<div class="bkf-zone">
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[sync_on]" value="1" <?php checked( $s['sync_on'] ); ?> /> <?php esc_html_e( 'Καθημερινός συγχρονισμός', 'book-feed' ); ?></label>
@@ -816,6 +849,17 @@ final class BKF_Admin_UI {
 			</form>
 			<a class="button" href="<?php echo esc_url( wp_nonce_url( self::url( 'tools', array( 'bkf_export' => 1 ) ), self::NONCE_BAK ) ); ?>"><?php esc_html_e( 'Εξαγωγή ρυθμίσεων (JSON)', 'book-feed' ); ?></a>
 			<p class="description bkf-mt-8"><?php esc_html_e( 'Ρυθμίσεις και κανόνες, χωρίς τον κωδικό. Κατηγορίες και χαρακτηριστικά δείχνονται με το id ή το slug τους: σε άλλο site κρατιούνται μόνο όσα υπάρχουν εκεί.', 'book-feed' ); ?></p>
+		</div>
+
+		<h2 class="bkf-h2"><?php esc_html_e( 'Δοκιμή τιμής εκδότη', 'book-feed' ); ?></h2>
+		<div class="bkf-zone">
+			<form method="post" class="bkf-inline-form">
+				<?php self::nonce_field(); ?>
+				<input type="hidden" name="bkf_action" value="pp_test" />
+				<input type="text" name="bkf_pp_isbn" placeholder="978-…" pattern="[0-9Xx\- ]{10,20}" required />
+				<button type="submit" class="button"><?php esc_html_e( 'Διάβασε την τιμή', 'book-feed' ); ?></button>
+			</form>
+			<p class="description bkf-mt-8"><?php esc_html_e( 'Βρίσκει τον τίτλο στον κατάλογο, ανοίγει τη σελίδα του εκδότη από τις Ρυθμίσεις και δείχνει τι τιμή διαβάζει. Δεν αλλάζει κανένα προϊόν.', 'book-feed' ); ?></p>
 		</div>
 
 		<h2 class="bkf-h2"><?php esc_html_e( 'Για προγραμματιστές', 'book-feed' ); ?></h2>
@@ -882,6 +926,9 @@ final class BKF_Admin_UI {
 				BKF_Sync::cancel();
 				self::redirect( $back, array( self::msg( 'success', __( 'Ο συγχρονισμός σταμάτησε.', 'book-feed' ) ) ) );
 				break;
+			case 'pp_test':
+				self::redirect( 'tools', array( self::pp_test() ) );
+				break;
 			case 'clear_log':
 				BKF_Log::clear();
 				self::redirect( 'log', array( self::msg( 'success', __( 'Το ιστορικό καθαρίστηκε.', 'book-feed' ) ) ) );
@@ -927,7 +974,8 @@ final class BKF_Admin_UI {
 	}
 
 	private static function do_save_settings(): array {
-		$in  = self::post_array( 'bkf_s' );
+		$bad_pp = array();
+		$in     = self::post_array( 'bkf_s' );
 		$cur = BKF_Settings::get();
 		$new = $in;
 
@@ -950,11 +998,32 @@ final class BKF_Admin_UI {
 		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'cat_parents', 'sync_on', 'delete_products' ) as $b ) {
 			$new[ $b ] = ! empty( $in[ $b ] );
 		}
+		$new['pub_prices'] = array();
+		foreach ( isset( $in['pp'] ) && is_array( $in['pp'] ) ? $in['pp'] : array() as $row ) {
+			if ( is_array( $row ) && ! empty( $row['pub_id'] ) && is_string( $row['pub_id'] ) ) {
+				$url = isset( $row['url'] ) && is_string( $row['url'] ) ? trim( $row['url'] ) : '';
+				if ( '' === $url ) {
+					continue;
+				}
+				if ( ! BKF_Settings::pub_url_ok( $url ) ) {
+					$bad_pp[] = (string) ( $row['name'] ?? $row['pub_id'] );
+					continue;
+				}
+				$new['pub_prices'][ $row['pub_id'] ] = array(
+					'name' => (string) ( $row['name'] ?? '' ),
+					'url'  => $url,
+				);
+			}
+		}
 		$new['order']  = isset( $in['order_text'] ) && is_string( $in['order_text'] ) ? preg_split( '/\R/u', $in['order_text'] ) : array();
 		$new['rename'] = isset( $in['rename_text'] ) && is_string( $in['rename_text'] ) ? BKF_Settings::parse_rename( $in['rename_text'] ) : array();
-		unset( $new['order_text'], $new['rename_text'], $new['role_names'], $new['role_targets'], $new['cat_names'], $new['cat_terms'], $new['vat_rates'], $new['vat_classes'], $new['stock_names'], $new['stock_to'] );
+		unset( $new['pp'], $new['order_text'], $new['rename_text'], $new['role_names'], $new['role_targets'], $new['cat_names'], $new['cat_terms'], $new['vat_rates'], $new['vat_classes'], $new['stock_names'], $new['stock_to'] );
 
 		$msgs = array();
+		if ( $bad_pp ) {
+			/* translators: %s: publishers */
+			$msgs[] = self::msg( 'warning', sprintf( __( 'Δεν κρατήθηκε η σελίδα για: %s. Χρειάζεται http(s):// και {isbn} ή {isbn13}.', 'book-feed' ), implode( ', ', $bad_pp ) ) );
+		}
 		if ( isset( $in['url'] ) && is_string( $in['url'] ) && '' !== trim( $in['url'] ) && BKF_Settings::clean( $new )['url'] !== esc_url_raw( trim( $in['url'] ) ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Η διεύθυνση δεν είναι έγκυρη (http ή https, χωρίς παραμέτρους): κρατήθηκε η προεπιλογή.', 'book-feed' ) );
 		}
@@ -988,6 +1057,45 @@ final class BKF_Admin_UI {
 	}
 
 	/** One small request: the number of books the account sees. */
+	/** Reads the publisher's price for one ISBN, changing nothing. */
+	private static function pp_test(): array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route().
+		$isbn = isset( $_POST['bkf_pp_isbn'] ) && is_string( $_POST['bkf_pp_isbn'] ) ? BKF_Record::isbn_digits( sanitize_text_field( wp_unslash( $_POST['bkf_pp_isbn'] ) ) ) : '';
+		if ( '' === $isbn ) {
+			return self::msg( 'error', __( 'Γράψε ένα έγκυρο ISBN.', 'book-feed' ) );
+		}
+		$res = BKF_Client::query(
+			array(
+				'q'    => BKF_Client::book_query( array( 'isbn' => $isbn ) ),
+				'fl'   => BKF_Client::BOOK_FIELDS,
+				'rows' => 1,
+			)
+		);
+		if ( is_wp_error( $res ) ) {
+			/* translators: %s: error */
+			return self::msg( 'error', sprintf( __( 'Η σύνδεση απέτυχε: %s', 'book-feed' ), $res->get_error_message() ) );
+		}
+		$recs = BKF_Record::from_docs( $res['docs'] );
+		if ( ! $recs ) {
+			return self::msg( 'error', __( 'Ο τίτλος δεν βρέθηκε στην υπηρεσία.', 'book-feed' ) );
+		}
+		$r   = $recs[0];
+		$url = BKF_Pub_Price::url( BKF_Pub_Price::template( $r ), $r );
+		if ( '' === $url ) {
+			/* translators: %s: publisher */
+			return self::msg( 'warning', sprintf( __( 'Δεν έχει οριστεί σελίδα για τον εκδότη «%s» στις Ρυθμίσεις.', 'book-feed' ), '' !== $r['pub_name'] ? $r['pub_name'] : $r['imprint'] ) );
+		}
+		$why = '';
+		$p   = BKF_Pub_Price::price( $r, $why, true );
+		$cat = null === $r['price'] ? '—' : BKF_Pub_Price::money( (float) $r['price'] );
+		if ( null === $p ) {
+			/* translators: 1: title, 2: catalogue price, 3: reason, 4: address */
+			return self::msg( 'warning', sprintf( __( '«%1$s»: μένει η τιμή του καταλόγου (%2$s). %3$s Σελίδα: %4$s', 'book-feed' ), $r['title'], $cat, $why, $url ) );
+		}
+		/* translators: 1: title, 2: catalogue price, 3: publisher price, 4: address */
+		return self::msg( 'success', sprintf( __( '«%1$s»: κατάλογος %2$s, εκδότης %3$s. Σελίδα: %4$s', 'book-feed' ), $r['title'], $cat, BKF_Pub_Price::money( (float) $p ), $url ) );
+	}
+
 	private static function test_connection(): array {
 		delete_transient( BKF_Client::SCHEME_TR );
 		$r = BKF_Client::query(

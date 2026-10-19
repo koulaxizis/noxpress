@@ -69,18 +69,20 @@ function bkf_uninstall_site(): void {
 	}
 	delete_transient( 'bkf_scheme' );
 
-	foreach ( array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail' ) as $bkf_key ) {
+	foreach ( array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note' ) as $bkf_key ) {
 		delete_post_meta_by_key( $bkf_key );
 	}
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 			$wpdb->esc_like( '_transient_bkf_aui_msg_' ) . '%',
 			$wpdb->esc_like( '_transient_timeout_bkf_aui_msg_' ) . '%',
 			$wpdb->esc_like( '_transient_bkf_guard_' ) . '%',
-			$wpdb->esc_like( '_transient_timeout_bkf_guard_' ) . '%'
+			$wpdb->esc_like( '_transient_timeout_bkf_guard_' ) . '%',
+			$wpdb->esc_like( '_transient_bkf_pp_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_bkf_pp_' ) . '%'
 		)
 	);
 
