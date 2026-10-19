@@ -57,6 +57,7 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 
 = 1.9.3 =
 * Fixed: saving a product's beneficiaries stored Greek names as "u0393u039b..." in `_rs_split`, because the JSON escapes lost their backslashes. Names are now stored as real UTF-8, and saving a product once repairs an older damaged value.
+* Fixed: restoring a JSON backup no longer strips the backslashes from product overrides and free-copy reasons, so beneficiary names with Greek letters or quotes come back intact.
 
 = 1.9.2 =
 * Fixed: the tables in the beneficiary portal are readable on light themes such as Storefront. The theme's table colours turned the cells white with light text.
