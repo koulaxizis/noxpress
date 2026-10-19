@@ -53,6 +53,7 @@ final class Noxpress_Core {
 		'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.' => 'Wishlist: a heart on products, guest lists without cookies, sharing and a report of the most wanted products.',
 		'Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.' => 'A gift option with a message at checkout, a message and products on the thank-you page, and a thank-you coupon for the next order.',
 		'Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.' => 'Full backup and restore of the site, here or on another server, with a domain change and no manual fixes.',
+		'Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.' => 'Product sections with the [products] shortcode: marker classes that leave out products, categories or pre-orders and filter by a word in the title.',
 
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
@@ -243,6 +244,11 @@ final class Noxpress_Core {
 				'name' => 'Data Migrator',
 				'desc' => __( 'Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.', 'noxpress' ),
 				'page' => 'nm-backups',
+			),
+			'home-sections'     => array(
+				'name' => 'Home Sections',
+				'desc' => __( 'Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.', 'noxpress' ),
+				'page' => 'hms-settings',
 			),
 		);
 	}

@@ -1020,6 +1020,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="home-sections">
+		<h2><a href="#home-sections">Home Sections</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="hs_desc">Smarter [products] shortcodes for your homepage and any page: write a marker class in the shortcode and the section leaves out products, categories or pre-orders, or keeps only products with a word in their title. Products are not changed.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="hs_li1">Built-in markers with no setup: leave out a product (e.g. the one the hero already shows) or a category with its subcategories, leave out pre-orders, keep only products with a word in the title</li>
+			<li data-i18n="hs_li2">Presets: your own marker names that combine categories, pre-orders, a title phrase and product IDs; change a preset once and every section that uses it follows</li>
+			<li data-i18n="hs_li3">Optional alias prefix, so pages that already use their own classes need no change</li>
+			<li data-i18n="hs_li4">Shortcode test on the settings page: the products a shortcode returns and how each of its classes is read</li>
+			<li data-i18n="hs_li5">Safe by design: shortcodes without a marker give exactly the same output, nothing is written to products, HMS_DISABLE emergency switch; no cookies, no tracking; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.0.0/home-sections.zip" rel="nofollow noopener" data-i18n="hs_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/home-sections" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="support">
@@ -1316,6 +1337,13 @@ footer .heart { color: var(--accent-bright); }
 		nm_li5: 'One-file installer for an empty server, with a one-time key; WP-CLI commands for backup, import, restore and undo',
 		nm_li6: 'Safe by design: backups kept outside the web root when possible, an HTTP self-test of the folder, optional AES-256 encryption with a password (it opens in 7-Zip too), administrators only; no cookies, no tracking; bilingual UI and shared «Noxpress» menu',
 		nm_download: 'Download v1.2.0 (.zip)',
+		hs_desc: 'Smarter [products] shortcodes for your homepage and any page: write a marker class in the shortcode and the section leaves out products, categories or pre-orders, or keeps only products with a word in their title. Products are not changed.',
+		hs_li1: 'Built-in markers with no setup: leave out a product (e.g. the one the hero already shows) or a category with its subcategories, leave out pre-orders, keep only products with a word in the title',
+		hs_li2: 'Presets: your own marker names that combine categories, pre-orders, a title phrase and product IDs; change a preset once and every section that uses it follows',
+		hs_li3: 'Optional alias prefix, so pages that already use their own classes need no change',
+		hs_li4: 'Shortcode test on the settings page: the products a shortcode returns and how each of its classes is read',
+		hs_li5: 'Safe by design: shortcodes without a marker give exactly the same output, nothing is written to products, HMS_DISABLE emergency switch; no cookies, no tracking; bilingual UI and shared «Noxpress» menu',
+		hs_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -1569,6 +1597,13 @@ footer .heart { color: var(--accent-bright); }
 		nm_li5: 'Installer ενός αρχείου για άδειο server, με κλειδί μίας χρήσης· εντολές WP-CLI για αντίγραφο, εισαγωγή, επαναφορά και αναίρεση',
 		nm_li6: 'Ασφαλές εκ σχεδιασμού: αντίγραφα έξω από το web root όπου γίνεται, έλεγχος του φακέλου μέσω HTTP, προαιρετική κρυπτογράφηση AES-256 με κωδικό (ανοίγει και με 7-Zip), μόνο για διαχειριστές· χωρίς cookies και tracking· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		nm_download: 'Λήψη v1.2.0 (.zip)',
+		hs_desc: 'Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: γράφεις ένα marker class στο shortcode και η ενότητα αφήνει έξω προϊόντα, κατηγορίες ή προπαραγγελίες, ή κρατά μόνο προϊόντα με μια λέξη στον τίτλο. Τα προϊόντα δεν αλλάζουν.',
+		hs_li1: 'Έτοιμοι markers χωρίς ρύθμιση: εξαίρεση προϊόντος (π.χ. αυτού που δείχνει ήδη το hero) ή κατηγορίας μαζί με τις υποκατηγορίες της, εξαίρεση προπαραγγελιών, μόνο προϊόντα με μια λέξη στον τίτλο',
+		hs_li2: 'Presets: δικά σου ονόματα markers που συνδυάζουν κατηγορίες, προπαραγγελίες, φράση στον τίτλο και IDs προϊόντων· αλλάζεις ένα preset μία φορά και ακολουθεί κάθε ενότητα που το χρησιμοποιεί',
+		hs_li3: 'Προαιρετικό πρόθεμα alias, ώστε σελίδες που ήδη έχουν δικά τους classes να μη χρειάζονται αλλαγή',
+		hs_li4: 'Δοκιμή shortcode στη σελίδα ρυθμίσεων: ποια προϊόντα επιστρέφει ένα shortcode και πώς διαβάζεται κάθε class του',
+		hs_li5: 'Ασφαλές εκ σχεδιασμού: shortcodes χωρίς marker δίνουν ακριβώς την ίδια έξοδο, τίποτα δεν γράφεται στα προϊόντα, διακόπτης HMS_DISABLE· χωρίς cookies και tracking· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		hs_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
