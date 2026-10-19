@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -94,6 +94,10 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.4.2 =
+* Labelled publisher price: a small number between the title and the price (a series number) no longer hides it; a price, a year or an ISBN still does.
+* When the publisher's page answers but has no price for the book, the catalogue price is used at once and the old publisher price is dropped. The last good price still covers a page that cannot be read.
 
 = 1.4.1 =
 * Labelled publisher price: on pages that also list other books (the author's other titles, "readers also bought"), the price after this book's title is taken, not the first one on the page; when the prices cannot be told apart, none is taken.
