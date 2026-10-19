@@ -3,7 +3,7 @@
  * Plugin Name:          Book Feed
  * Plugin URI:           https://noxpress.tech
  * Description:          Τίτλοι άλλων εκδοτικών από κατάλογο βιβλίων (Bookpoint / ΟΣΔΕΛ) ως προϊόντα WooCommerce: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη, καθημερινός συγχρονισμός τιμής και διαθεσιμότητας, κλείδωμα όσων διορθώνεις με το χέρι.
- * Version:              1.2.0
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -29,8 +29,9 @@
  *  - BKF_Client      → the Bookpoint web service (Solr): query building,
  *                      https first, redacted errors
  *  - BKF_Record      → one feed document, validated and normalised
- *  - BKF_Pub_Price   → the price on the publisher's own site (JSON-LD,
- *                      Store API, Open Graph, microdata), plausibility
+ *  - BKF_Pub_Price   → the price on the publisher's own site (labelled
+ *                      text, JSON-LD, Store API, Open Graph, microdata),
+ *                      plausibility
  *  - BKF_Importer    → record → WooCommerce product (create, update with
  *                      field locks, link, unlink, cover images)
  *  - BKF_Sync        → the background job (Action Scheduler): linked
@@ -63,7 +64,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BKF_VERSION', '1.2.0' );
+define( 'BKF_VERSION', '1.3.0' );
 define( 'BKF_FILE', __FILE__ );
 define( 'BKF_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BKF_URL', plugin_dir_url( __FILE__ ) );

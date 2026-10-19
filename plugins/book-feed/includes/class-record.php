@@ -99,6 +99,7 @@ final class BKF_Record {
 		$roles    = self::many( $d['contr_role'] ?? array(), 60, 80 );
 		$contribs = array();
 		foreach ( $names as $i => $name ) {
+			$name = BKF_Settings::person( $name );
 			// "Συγγραφέας, Εικονογράφηση": one person, two roles.
 			$parts = isset( $roles[ $i ] ) ? array_values( array_filter( array_map( 'trim', explode( ',', $roles[ $i ] ) ), 'strlen' ) ) : array();
 			foreach ( $parts ? $parts : array( '' ) as $role ) {

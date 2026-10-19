@@ -25,6 +25,7 @@
  *  _bkf_rule, _bkf_linked, _bkf_gone, _bkf_gone_status, _bkf_cover_src,
  *  _bkf_back_src, _bkf_feed_price, _bkf_ptype, _bkf_fixed_until,
  *  _bkf_locked, _bkf_img_fail (image addresses that failed once),
+ *  _bkf_pub_url (this product's page on the publisher's site, 1.3.0),
  *  _bkf_pub_price / _bkf_pub_at / _bkf_pub_note (the publisher's own
  *  price, when it was read, why it was not used; BKF_Pub_Price).
  * Price: the publisher's page when one is set up for the publisher and
@@ -278,6 +279,8 @@ final class BKF_Importer {
 			return array();
 		}
 
+		$r['pub_url'] = (string) get_post_meta( $pid, '_bkf_pub_url', true );
+
 		$r        = self::with_pub_price( $r, $pid );
 		$hash     = self::hashes( $pid );
 		$external = $p->is_type( 'external' );
@@ -388,7 +391,7 @@ final class BKF_Importer {
 
 	/** Every product meta key of the plugin. */
 	public static function meta_keys(): array {
-		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note' );
+		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url' );
 	}
 
 	/** A title that left the feed. */

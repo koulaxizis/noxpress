@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -40,7 +40,9 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 
 * Catalogue prices are often old. For each publisher you list, the plugin reads the price from the book's page on the publisher's site (schema.org structured data, a WooCommerce Store API answer, Open Graph or microdata) and uses it instead, on import and on every sync. While the publisher's shop runs a sale, its list price is taken.
 * A page that names another ISBN is ignored. A price below half or above double the catalogue's is not used. When the page cannot be read, a price read in the last 7 days still counts, else the catalogue's. Every change goes to the history; one look per title per day.
-* "Read the price" in Tools tries one ISBN without changing anything.
+* Publishers whose addresses do not carry the ISBN: put the book's page in the Book Feed box of the product; the price is read from there.
+* Pages without structured data: the first number after words such as "Τιμή εκδότη" (setting, one per line) is taken, before any other price on the page, since the publisher's e-shop often shows its own discounted price.
+* "Read the price" in Tools tries one ISBN (and, optionally, a page address) without changing anything.
 
 **Fixed book price**
 
@@ -91,6 +93,12 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.3.0 =
+* A page on the publisher's site per product (Book Feed box), for publishers without an address per ISBN.
+* Publisher price from the page's text after a label ("Τιμή εκδότη" by default, editable), read first.
+* Contributor names as "Name Surname" instead of the catalogue's "Surname, Name" (setting).
+* "Read the price" in Tools accepts a page address.
 
 = 1.2.0 =
 * Prices from the publishers' own sites: a page address per publisher ({isbn}, {isbn13}, {title}); the price found there replaces the catalogue's automatically, with plausibility checks and history lines.

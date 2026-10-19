@@ -34,6 +34,7 @@ final class BKF_Admin_Ajax {
 		add_action( 'wp_ajax_bkf_product', array( __CLASS__, 'ajax_product' ) );
 		add_action( 'wp_ajax_bkf_job', array( __CLASS__, 'ajax_job' ) );
 		add_action( 'add_meta_boxes_product', array( __CLASS__, 'add_box' ) );
+		add_action( 'woocommerce_process_product_meta', array( __CLASS__, 'save_box' ) );
 	}
 
 	/* =====================================================================
@@ -703,6 +704,12 @@ final class BKF_Admin_Ajax {
 				}
 				?>
 			</p>
+			<p class="bkf-small">
+				<label for="bkf-pub-url"><?php esc_html_e( 'Σελίδα στο site του εκδότη', 'book-feed' ); ?></label>
+				<?php wp_nonce_field( 'bkf_box_' . $pid, 'bkf_box_nonce' ); ?>
+				<input type="url" id="bkf-pub-url" class="widefat" name="bkf_pub_url" maxlength="300" placeholder="https://…" value="<?php echo esc_attr( (string) get_post_meta( $pid, '_bkf_pub_url', true ) ); ?>" />
+				<span class="bkf-muted"><?php esc_html_e( 'Για εκδότες που δεν έχουν σελίδα ανά ISBN. Η τιμή διαβάζεται από εδώ σε κάθε συγχρονισμό· αποθήκευσε το προϊόν και πάτα «Συγχρονισμός τώρα».', 'book-feed' ); ?></span>
+			</p>
 			<?php if ( $linked ) : ?>
 				<p class="bkf-small"><?php esc_html_e( 'Υπήρχε ήδη στο κατάστημα: ο κατάλογος δεν αλλάζει τα πεδία του, ούτε τιμή και διαθεσιμότητα, μέχρι να πατήσεις «Ενημέρωση από τον κατάλογο».', 'book-feed' ); ?></p>
 			<?php elseif ( $locked ) : ?>
@@ -726,5 +733,22 @@ final class BKF_Admin_Ajax {
 			<p class="bkf-small bkf-box-msg" aria-live="polite"></p>
 		</div>
 		<?php
+	}
+
+	/** Saves the product's page on the publisher's site (product form). */
+	public static function save_box( $post_id ): void {
+		$pid = (int) $post_id;
+		if ( ! isset( $_POST['bkf_box_nonce'], $_POST['bkf_pub_url'] ) || ! is_string( $_POST['bkf_box_nonce'] ) || ! is_string( $_POST['bkf_pub_url'] ) ) {
+			return;
+		}
+		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['bkf_box_nonce'] ) ), 'bkf_box_' . $pid ) || ! current_user_can( BKF_Admin_UI::CAP ) || ! current_user_can( 'edit_post', $pid ) ) {
+			return;
+		}
+		$url = BKF_Settings::text( esc_url_raw( wp_unslash( $_POST['bkf_pub_url'] ), array( 'http', 'https' ) ), 300 );
+		if ( '' !== $url && BKF_Settings::page_url_ok( $url ) ) {
+			update_post_meta( $pid, '_bkf_pub_url', $url );
+		} else {
+			delete_post_meta( $pid, '_bkf_pub_url' );
+		}
 	}
 }
