@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -22,7 +22,7 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 **Each site decides**
 
 * Level per site: off, read, write or admin. New sites start at read.
-* Write and admin tools only run while the site's **write window** is open (15, 30 or 60 minutes, opened by the site's owner in WP admin; the Hub may open it only when the site allows that, off by default).
+* Write and admin tools only run while the site's **write window** is open (15, 30 or 60 minutes, 3 or 5 hours, opened by the site's owner in WP admin; the Hub may open it only when the site allows that, off by default).
 * Tools run as an administrator chosen on the site, so WordPress's own permissions and hooks apply.
 * Personal data (email, phone, address, postcode, IP) is masked by default; secrets (passwords, keys, tokens, salts) are always returned as `***`.
 * Optional IP lists for the site endpoint and the MCP endpoint.
@@ -74,6 +74,9 @@ The secret key is sealed with the salts, so a new key pair is made and a notice 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: 3 and 5 hour write windows, next to 15, 30 and 60 minutes.
 
 = 1.0.0 =
 * Initial release (beta).

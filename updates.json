@@ -91,6 +91,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.0/hide-catalog.zip"
       }
     },
+    "home-sections": {
+      "beta": {
+        "changelog": "* Initial release.\n* Built-in markers for the [products] shortcode: hs-exclude-{ID}, hs-exclude-cat-{slug}, hs-no-preorders (PRENA and Pre-Orders), hs-title-{word}.\n* Presets: named markers that combine categories to leave out, no pre-orders, a title phrase and product IDs.\n* Optional alias prefix for the built-in markers.\n* Shortcode test on the settings page: the products a shortcode returns and how each class is read.\n* HMS_DISABLE, page cache clearing on save, clean uninstall.",
+        "published": "2026-10-19",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "8eb6448a6fc3d569ff0dbeed69e98e6b80bd2e8ee817c5cd3cb74d71d1fe0af8",
+        "signature": "i5QjEiiMjl1SOJIvi2Bd+BwMT6IhOe2bYw7bCzlYiqe8wBQXEmIPWVxZo9alrJKpNqdtN8Qg4jMsv4mZUlhVBA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.0.0/home-sections.zip"
+      }
+    },
     "oros-connect": {
       "beta": {
         "changelog": "* Fixed: the Offers status said \"(1 requests)\" for a single request; it now says \"(1 request)\" (\"(1 αίτημα)\" in Greek).",

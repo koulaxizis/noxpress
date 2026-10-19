@@ -1,0 +1,444 @@
+/**
+ * Home Sections — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors hms-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.hms-wrap {
+	--hms-bg: #101218;
+	--hms-panel: #14161d;
+	--hms-panel-2: #1d2029;
+	--hms-input: #1a1d26;
+	--hms-border: #2e3240;
+	--hms-border-input: #3a3f52;
+	--hms-row-border: #23262f;
+	--hms-stripe: #181b23;
+	--hms-hover: #1e212c;
+	--hms-text: #eae8fa;
+	--hms-heading: #f6f4ff;
+	--hms-muted: #b7b2d6;
+	--hms-link: #beb1ff;
+	--hms-link-hover: #d4c9ff;
+	--hms-accent: #6d4aff;
+	--hms-accent-hover: #8263ff;
+	--hms-warn: #f5c97e;
+	--hms-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.hms-wrap {
+	color-scheme: dark;
+	background: var(--hms-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--hms-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.hms-wrap h1,
+.hms-wrap h2 {
+	color: var(--hms-heading);
+}
+
+.hms-wrap a { color: var(--hms-link); }
+.hms-wrap a:hover { color: var(--hms-link-hover); }
+
+.hms-wrap .hms-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--hms-muted);
+	border-bottom: 1px solid var(--hms-border);
+	padding-bottom: 6px;
+}
+
+.hms-wrap .description,
+.hms-wrap p.description,
+.hms-wrap .hms-hint {
+	color: var(--hms-muted) !important;
+}
+
+.hms-zone {
+	background: var(--hms-panel);
+	border: 1px solid var(--hms-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.hms-wrap input[type="text"],
+.hms-wrap input[type="url"],
+.hms-wrap input[type="number"],
+.hms-wrap input[type="time"],
+.hms-wrap input[type="date"],
+.hms-wrap textarea,
+.hms-wrap select {
+	background-color: var(--hms-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--hms-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.hms-wrap input::placeholder,
+.hms-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.hms-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.hms-wrap input[type="file"] {
+	color: var(--hms-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.hms-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.hms-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.hms-wrap input[type="checkbox"],
+.hms-wrap input[type="radio"] {
+	accent-color: var(--hms-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.hms-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.hms-wrap .button:hover:not(:disabled) {
+	border-color: var(--hms-accent) !important;
+	color: #ffffff !important;
+}
+
+.hms-wrap .button-primary {
+	background: var(--hms-accent) !important;
+	border-color: var(--hms-accent) !important;
+	color: #ffffff !important;
+}
+
+.hms-wrap .button-primary:hover:not(:disabled) {
+	background: var(--hms-accent-hover) !important;
+}
+
+.hms-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.hms-submit { margin-top: 20px; }
+.hms-inline-form { display: inline; margin-right: 10px; }
+.hms-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.hms-table,
+table.widefat.hms-table {
+	background: var(--hms-panel) !important;
+	border: 1px solid var(--hms-border) !important;
+	border-radius: 6px;
+	color: var(--hms-text) !important;
+	margin-top: 14px !important;
+}
+
+.hms-table thead th,
+.hms-table thead td {
+	background: var(--hms-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.hms-table tbody td,
+.hms-table tbody th {
+	background: var(--hms-panel) !important;
+	color: var(--hms-text) !important;
+	border-bottom: 1px solid var(--hms-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.hms-table tbody tr:nth-child(2n) td,
+.hms-table tbody tr:nth-child(2n) th {
+	background: var(--hms-stripe) !important;
+}
+
+.hms-table tbody tr:hover td,
+.hms-table tbody tr:hover th {
+	background: var(--hms-hover) !important;
+}
+
+.hms-table td,
+.hms-table th {
+	padding: 12px 14px;
+}
+
+.hms-table td code {
+	background: transparent !important;
+	color: var(--hms-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.hms-table .hms-empty {
+	color: var(--hms-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.hms-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.hms-footer a { color: #beb1ff; text-decoration: none; }
+.hms-footer a:hover { text-decoration: underline; }
+
+.hms-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.hms-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.hms-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.hms-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.hms-muted { color: var(--hms-muted) !important; }
+.hms-warn { color: var(--hms-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.hms-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.hms-wrap .hms-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--hms-heading);
+}
+
+.hms-status p { margin: 0 0 8px; }
+.hms-status p:last-child { margin-bottom: 0; }
+.hms-status code,
+.hms-wrap .description code,
+.hms-wrap .hms-hint code {
+	background: var(--hms-panel-2);
+	color: var(--hms-muted);
+	border: 1px solid var(--hms-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.hms-suspended { margin: 8px 0 0; }
+.hms-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.hms-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--hms-border);
+	background: var(--hms-panel-2);
+	color: var(--hms-text);
+	white-space: nowrap;
+}
+.hms-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.hms-badge--muted { color: var(--hms-muted); }
+.hms-badge--warn { border-color: #6b5a33; color: var(--hms-warn); }
+.hms-badge--danger { border-color: #6b3a3a; color: var(--hms-danger); }
+
+/* Area fieldsets. */
+.hms-area {
+	background: var(--hms-panel);
+	border: 1px solid var(--hms-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.hms-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--hms-heading);
+}
+.hms-row { margin: 4px 0 8px; }
+
+.hms-details > summary {
+	cursor: pointer;
+	color: var(--hms-link);
+	margin: 4px 0;
+}
+.hms-details[open] > summary { margin-bottom: 12px; }
+
+.hms-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.hms-wrap .hms-label {
+	display: block;
+	font-weight: 600;
+	color: var(--hms-heading);
+	margin: 8px 0 6px;
+}
+.hms-grid .hms-label:first-child { margin-top: 0; }
+
+.hms-field {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.hms-field > span:first-child {
+	min-width: 150px;
+	color: var(--hms-text);
+}
+.hms-wrap .hms-hint { display: block; font-size: 12px; margin-top: 4px; }
+.hms-wrap td .hms-hint { display: inline; }
+.hms-table td.hms-warn { color: var(--hms-warn) !important; }
+
+/* Tabs of the main page. */
+.hms-wrap .hms-tabs {
+	border-bottom: 1px solid var(--hms-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.hms-wrap .hms-tabs .nav-tab {
+	background: var(--hms-panel);
+	border-color: var(--hms-border);
+	color: var(--hms-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.hms-wrap .hms-tabs .nav-tab:hover { color: var(--hms-link-hover); background: var(--hms-hover); }
+.hms-wrap .hms-tabs .nav-tab-active,
+.hms-wrap .hms-tabs .nav-tab-active:hover {
+	background: var(--hms-bg);
+	border-bottom-color: var(--hms-bg);
+	color: var(--hms-heading);
+}
+
+/* One input per line (removal rules). */
+.hms-wrap .hms-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.hms-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--hms-border);
+	border-radius: 6px;
+	background: var(--hms-panel-2);
+}
+.hms-scroll .hms-field { margin-bottom: 4px; }
+
+/* ===== Fields ===== */
+
+.hms-wrap .hms-wide { width: 100%; max-width: 640px; }
+.hms-wrap .hms-num { width: 90px; }
+.hms-wrap .hms-texts input[type="text"] { width: 100%; }
+
+/* ===== Preset cards ===== */
+.hms-wrap .hms-preset-card {
+	min-width: 0; /* fieldsets default to min-content and overflow narrow screens */
+	margin: 12px 0 0;
+	padding: 12px 18px 10px;
+}
+.hms-wrap .hms-preset-card legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--hms-heading);
+}
+.hms-wrap .hms-preset-card--new { border-style: dashed; }
+.hms-wrap .hms-preset-card--new legend { color: var(--hms-muted); }
+.hms-wrap .hms-preset-card .hms-label { margin: 0; }
+.hms-wrap .hms-preset-card .hms-label .hms-wide {
+	display: block;
+	width: 100%;
+	max-width: none;
+	margin-top: 6px;
+	font-weight: 400;
+}
+.hms-wrap .hms-preset-card textarea { min-height: 64px; }
+.hms-wrap .hms-preset-card .hms-badge { white-space: normal; max-width: 100%; }
+.hms-wrap .hms-preset-card select,
+.hms-wrap input[type="file"] { max-width: 100%; }
+.hms-wrap .hms-texts td:first-child { width: 280px; }
+
+/* ===== Shortcode test ===== */
+.hms-wrap .hms-code { width: 100%; max-width: none; font-family: Consolas, Monaco, monospace; }
+.hms-wrap .hms-preset-card select[multiple] { min-width: 260px; min-height: 140px; }
+.hms-wrap .hms-result { margin: 10px 0 0; }
+.hms-wrap .hms-result li { margin: 0 0 4px; }
+
+@media (max-width: 600px) {
+	.hms-wrap { padding: 20px 16px; }
+	.hms-wrap .hms-preset-card select[multiple] { min-width: 0; width: 100%; }
+	/* Two-column tables stack: marker (or name) above its text. */
+	.hms-wrap .hms-table td { display: block; width: auto !important; }
+	.hms-wrap .hms-table td:first-child { border-bottom: 0 !important; padding-bottom: 0 !important; }
+	.hms-wrap .hms-table code { white-space: nowrap; }
+}
