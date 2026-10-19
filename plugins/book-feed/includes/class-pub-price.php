@@ -166,7 +166,7 @@ final class BKF_Pub_Price {
 			return null;
 		}
 		$body = (string) wp_remote_retrieve_body( $res );
-		$p    = self::parse( $body, $r['isbn_digits'] );
+		$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
 		$img  = self::image( $body, $r['isbn_digits'] );
 		if ( null === $p ) {
 			$why = __( 'Δεν βρέθηκε τιμή για αυτό το ISBN στη σελίδα του εκδότη.', 'book-feed' );
@@ -176,9 +176,10 @@ final class BKF_Pub_Price {
 
 	/**
 	 * The price on a product page for this ISBN, or null. $labels: the
-	 * words before a price in the text (null = the settings').
+	 * words before a price in the text (null = the settings'); $title: the
+	 * book's title, to pick its own labelled price among others (1.4.1).
 	 */
-	public static function parse( string $html, string $isbn_digits, ?array $labels = null ): ?float {
+	public static function parse( string $html, string $isbn_digits, ?array $labels = null, string $title = '' ): ?float {
 		// 0. Store API (JSON list of products).
 		$t = ltrim( $html );
 		if ( '' !== $t && '[' === $t[0] ) {
@@ -189,9 +190,15 @@ final class BKF_Pub_Price {
 		if ( self::other_book( $html, $isbn_digits ) ) {
 			return null;
 		}
-		$p = self::labelled( self::text( $html ), null === $labels ? BKF_Settings::get()['pub_labels'] : $labels );
+		$why = '';
+		$p   = self::labelled( self::text( $html ), null === $labels ? BKF_Settings::get()['pub_labels'] : $labels, $title, $why );
 		if ( null !== $p ) {
 			return $p;
+		}
+		if ( 'ambiguous' === $why ) {
+			// Labelled prices of several books (lists of related titles):
+			// the structured price is as likely to be another book's.
+			return null;
 		}
 		// 1. JSON-LD.
 		if ( preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $m ) ) {
@@ -228,9 +235,17 @@ final class BKF_Pub_Price {
 
 	/**
 	 * The cover on a product page for this ISBN: the JSON-LD Product
-	 * image, else og:image; an absolute http(s) address or ''.
+	 * image, else og:image; an absolute http(s) address or ''. When the
+	 * page links the same picture as a file of its own (a gallery link
+	 * around a resized image), that file is taken instead (1.4.1).
 	 */
 	public static function image( string $html, string $isbn_digits ): string {
+		$u = self::found_image( $html, $isbn_digits );
+		return '' !== $u ? self::full_size( $html, $u ) : '';
+	}
+
+	/** The image the page names for the book (JSON-LD, else og:image), or ''. */
+	private static function found_image( string $html, string $isbn_digits ): string {
 		$t = ltrim( $html );
 		if ( '' === $t || '[' === $t[0] || self::other_book( $html, $isbn_digits ) ) {
 			return '';
@@ -270,6 +285,31 @@ final class BKF_Pub_Price {
 		return '';
 	}
 
+	/**
+	 * A link on the page to the same picture as $u without the resize
+	 * marks ("/w640/", "-600x600"), e.g. <a href="/files/products/x.jpg">
+	 * around <img src="/mediastream/w600/files/products/x.jpg.jpg">.
+	 */
+	private static function full_size( string $html, string $u ): string {
+		$path = (string) wp_parse_url( $u, PHP_URL_PATH );
+		$stem = preg_replace( '/(\.(?:jpe?g|png|gif|webp))+$/i', '', basename( $path ) );
+		$stem = preg_replace( '/-\d{2,5}x\d{2,5}$/', '', (string) $stem );
+		if ( strlen( (string) $stem ) < 4 ) {
+			return $u;
+		}
+		$re = '#<a\s[^>]*href=["\']([^"\']*/' . preg_quote( $stem, '#' ) . '\.(?:jpe?g|png|webp))["\']#i';
+		if ( ! preg_match( $re, $html, $m ) ) {
+			return $u;
+		}
+		$link = html_entity_decode( $m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		if ( '/' === substr( $link, 0, 1 ) && '/' !== substr( $link, 1, 1 ) ) {
+			$host = wp_parse_url( $u, PHP_URL_SCHEME ) . '://' . wp_parse_url( $u, PHP_URL_HOST );
+			$link = $host . $link;
+		}
+		$full = self::abs_url( $link );
+		return '' !== $full ? $full : $u;
+	}
+
 	/** An absolute http(s) address (or "//host/…"), else ''. */
 	private static function abs_url( string $u ): string {
 		$u = trim( html_entity_decode( $u, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
@@ -298,23 +338,58 @@ final class BKF_Pub_Price {
 	}
 
 	/**
-	 * The first number after a label ("Τιμή εκδότη: 24,40 €", "Τιμή εκδότη
+	 * The number after a label ("Τιμή εκδότη: 24,40 €", "Τιμή εκδότη
 	 * (με ΦΠΑ) 24,40"), at most 20 other characters between, or null.
+	 *
+	 * Pages often list other books with the same label (the author's
+	 * other titles, "readers also bought"), and the book's own price may
+	 * be only in such a list (1.4.1, Dioptra). So, in order:
+	 *  1. the label within 150 characters after this book's title, with
+ *     no number between (an ISBN or a year means another part of the
+ *     page);
+	 *  2. else the label's number when every labelled number on the page
+	 *     is the same;
+	 *  3. else nothing, and $why = 'ambiguous'.
 	 */
-	private static function labelled( string $text, array $labels ): ?float {
+	private static function labelled( string $text, array $labels, string $title = '', ?string &$why = null ): ?float {
+		$why  = '';
+		$flat = self::fold( $text );
+		$t    = trim( self::fold( $title ) );
 		foreach ( $labels as $label ) {
 			if ( ! is_string( $label ) || '' === trim( $label ) ) {
 				continue;
 			}
-			$re = '/' . preg_quote( trim( $label ), '/' ) . '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)/iu';
-			if ( preg_match( $re, $text, $m ) ) {
+			$l   = preg_quote( self::fold( trim( $label ) ), '/' );
+			$num = '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)';
+			if ( mb_strlen( $t ) >= 3 && preg_match( '/' . preg_quote( $t, '/' ) . '(?:(?!' . $l . ')[^\d]){0,150}?' . $l . $num . '/isu', $flat, $m ) ) {
 				$p = self::num( $m[1] );
 				if ( null !== $p ) {
 					return $p;
 				}
 			}
+			if ( preg_match_all( '/' . $l . $num . '/iu', $flat, $mm ) ) {
+				$seen = array_values( array_unique( array_filter( array_map( array( __CLASS__, 'num' ), $mm[1] ) ) ) );
+				if ( 1 === count( $seen ) ) {
+					return $seen[0];
+				}
+				if ( count( $seen ) > 1 ) {
+					$why = 'ambiguous';
+				}
+			}
 		}
 		return null;
+	}
+
+	/** Lower case without accents, for matching titles and labels. */
+	private static function fold( string $s ): string {
+		if ( class_exists( 'Normalizer' ) ) {
+			$n = Normalizer::normalize( $s, Normalizer::FORM_D );
+			if ( is_string( $n ) ) {
+				$s = (string) preg_replace( '/\p{Mn}+/u', '', $n );
+			}
+		}
+		$s = function_exists( 'mb_strtolower' ) ? mb_strtolower( $s, 'UTF-8' ) : strtolower( $s );
+		return str_replace( 'ς', 'σ', $s );
 	}
 
 	/** The regular price in a Store API product list. */
