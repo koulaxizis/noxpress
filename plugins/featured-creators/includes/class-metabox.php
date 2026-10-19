@@ -141,7 +141,7 @@ final class CRT_Metabox {
 				?>
 			</template>
 			<button type="button" class="button" data-crt-add="press">+ <?php esc_html_e( 'Προσθήκη', 'featured-creators' ); ?></button>
-			<p class="description"><?php esc_html_e( 'Στη σελίδα εμφανίζονται σε τρεις λίστες, νεότερο πρώτο. Τα βίντεο είναι σύνδεσμοι (χωρίς ενσωμάτωση, άρα χωρίς cookies τρίτων), με προαιρετική εικόνα από τη βιβλιοθήκη πολυμέσων.', 'featured-creators' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Στη σελίδα εμφανίζονται σε τρεις λίστες, νεότερο πρώτα. Τα βίντεο είναι σύνδεσμοι (χωρίς ενσωμάτωση, άρα χωρίς cookies τρίτων), με προαιρετική εικόνα από τη βιβλιοθήκη πολυμέσων.', 'featured-creators' ); ?></p>
 		</div>
 		<?php
 	}
