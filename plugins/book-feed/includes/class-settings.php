@@ -12,6 +12,8 @@
  *    descriptions     import description and short description
  *    images           download the cover into the media library
  *    back_cover       the back cover goes to the gallery
+ *    pub_cover        take the cover from the publisher's page when it
+ *                     is larger than the catalogue's (1.4.0)
  *    targets          field => '' (skip) | local | pa_* (global attribute)
  *                     | brand (publisher only); genre = the feed's
  *                     categories as attribute values
@@ -102,6 +104,7 @@ final class BKF_Settings {
 			'descriptions'    => true,
 			'images'          => true,
 			'back_cover'      => false,
+			'pub_cover'       => true,
 			'targets'         => array(
 				'publisher' => 'local',
 				'year'      => 'local',
@@ -199,6 +202,7 @@ final class BKF_Settings {
 		$out['descriptions'] = ! empty( $v['descriptions'] );
 		$out['images']       = ! empty( $v['images'] );
 		$out['back_cover']   = ! empty( $v['back_cover'] );
+		$out['pub_cover']    = ! empty( $v['pub_cover'] );
 
 		$out['targets'] = array();
 		$t              = isset( $v['targets'] ) && is_array( $v['targets'] ) ? $v['targets'] : array();

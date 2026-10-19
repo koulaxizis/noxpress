@@ -26,6 +26,8 @@
  *  _bkf_back_src, _bkf_feed_price, _bkf_ptype, _bkf_fixed_until,
  *  _bkf_locked, _bkf_img_fail (image addresses that failed once),
  *  _bkf_pub_url (this product's page on the publisher's site, 1.3.0),
+ *  _bkf_pub_cover_src (the cover came from that page, 1.4.0),
+ *  _bkf_pub_cover_no (a publisher cover that was not larger, 1.4.0),
  *  _bkf_pub_price / _bkf_pub_at / _bkf_pub_note (the publisher's own
  *  price, when it was read, why it was not used; BKF_Pub_Price).
  * Price: the publisher's page when one is set up for the publisher and
@@ -39,6 +41,9 @@ final class BKF_Importer {
 
 	const SOURCE    = 'bookpoint';
 	const MAX_IMAGE = 10485760; // 10 MB
+
+	/** True when the last sideload() reused an attachment already in the library. */
+	private static $reused = false;
 
 	/** Ids changed during this request (for noxpress_products_changed). */
 	private static $changed = array();
@@ -391,7 +396,7 @@ final class BKF_Importer {
 
 	/** Every product meta key of the plugin. */
 	public static function meta_keys(): array {
-		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url' );
+		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url', '_bkf_pub_cover_src', '_bkf_pub_cover_no' );
 	}
 
 	/** A title that left the feed. */
@@ -467,15 +472,16 @@ final class BKF_Importer {
 					}
 					break;
 				case 'dims':
+					// No trailing zeros: "600 g", not "600.000" (Chris, 2026-10-19).
 					if ( $r['weight'] > 0 ) {
-						$p->set_weight( (string) wc_format_decimal( wc_get_weight( $r['weight'], get_option( 'woocommerce_weight_unit', 'kg' ), 'g' ), 3 ) );
+						$p->set_weight( (string) wc_format_decimal( wc_get_weight( $r['weight'], get_option( 'woocommerce_weight_unit', 'kg' ), 'g' ), 3, true ) );
 					}
 					$unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 					if ( $r['height'] > 0 ) {
-						$p->set_height( (string) wc_format_decimal( wc_get_dimension( $r['height'], $unit, 'cm' ), 2 ) );
+						$p->set_height( (string) wc_format_decimal( wc_get_dimension( $r['height'], $unit, 'cm' ), 2, true ) );
 					}
 					if ( $r['width'] > 0 ) {
-						$p->set_width( (string) wc_format_decimal( wc_get_dimension( $r['width'], $unit, 'cm' ), 2 ) );
+						$p->set_width( (string) wc_format_decimal( wc_get_dimension( $r['width'], $unit, 'cm' ), 2, true ) );
 					}
 					break;
 				case 'attrs':
@@ -515,11 +521,16 @@ final class BKF_Importer {
 	private static function with_pub_price( array $r, int $pid ): array {
 		$r['pub_price'] = null;
 		$r['pub_why']   = '';
+		$r['pub_cover'] = '';
 		if ( '' === BKF_Pub_Price::template( $r ) ) {
 			return $r;
 		}
 		$why = '';
 		$p   = BKF_Pub_Price::price( $r, $why );
+		$s   = BKF_Settings::get();
+		if ( $s['images'] && $s['pub_cover'] ) {
+			$r['pub_cover'] = BKF_Pub_Price::cover( $r );
+		}
 		if ( null === $p && $pid ) {
 			$last = (string) get_post_meta( $pid, '_bkf_pub_price', true );
 			$at   = (int) get_post_meta( $pid, '_bkf_pub_at', true );
@@ -918,15 +929,21 @@ final class BKF_Importer {
 		$failed  = $force ? array() : array_filter( explode( "\n", (string) get_post_meta( $pid, '_bkf_img_fail', true ) ) );
 		$fail    = array();
 
-		if ( '' !== $r['cover'] && ! in_array( $r['cover'], $failed, true ) && ( $force || (string) get_post_meta( $pid, '_bkf_cover_src', true ) !== $r['cover'] || ! $p->get_image_id() ) ) {
+		// A cover taken from the publisher's page stays until a full update.
+		$from_pub = '' !== (string) get_post_meta( $pid, '_bkf_pub_cover_src', true ) && $p->get_image_id();
+		if ( '' !== $r['cover'] && ! in_array( $r['cover'], $failed, true ) && ( $force || ! $from_pub ) && ( $force || (string) get_post_meta( $pid, '_bkf_cover_src', true ) !== $r['cover'] || ! $p->get_image_id() ) ) {
 			$att = self::sideload( $r['cover'], $pid, $r, '' );
 			if ( ! $att ) {
 				$fail[] = $r['cover'];
 			} else {
 				$p->set_image_id( $att );
 				update_post_meta( $pid, '_bkf_cover_src', $r['cover'] );
+				delete_post_meta( $pid, '_bkf_pub_cover_src' );
 				$changed = true;
 			}
+		}
+		if ( self::pub_cover( $pid, $p, $r, $force ) ) {
+			$changed = true;
 		}
 		if ( $s['back_cover'] && '' !== $r['back'] && ! in_array( $r['back'], $failed, true ) && ( $force || (string) get_post_meta( $pid, '_bkf_back_src', true ) !== $r['back'] ) ) {
 			$att = self::sideload( $r['back'], $pid, $r, '-back' );
@@ -953,6 +970,57 @@ final class BKF_Importer {
 		return $changed;
 	}
 
+	/**
+	 * The cover from the publisher's page (1.4.0), only when it has more
+	 * pixels than the product's current image. A smaller one is deleted
+	 * again and its address remembered, so it is not downloaded daily.
+	 */
+	private static function pub_cover( int $pid, WC_Product $p, array $r, bool $force ): bool {
+		$url = isset( $r['pub_cover'] ) && is_string( $r['pub_cover'] ) ? $r['pub_cover'] : '';
+		if ( '' === $url ) {
+			return false;
+		}
+		$cur = (int) $p->get_image_id();
+		if ( ! $force && $cur && ( $url === (string) get_post_meta( $pid, '_bkf_pub_cover_src', true ) || $url === (string) get_post_meta( $pid, '_bkf_pub_cover_no', true ) ) ) {
+			return false;
+		}
+		self::$reused = false;
+		$att          = self::sideload( $url, $pid, $r, '' );
+		if ( ! $att ) {
+			update_post_meta( $pid, '_bkf_pub_cover_no', $url );
+			return false;
+		}
+		if ( $att === $cur ) {
+			update_post_meta( $pid, '_bkf_pub_cover_src', $url );
+			return false;
+		}
+		if ( self::pixels( $att ) > self::pixels( $cur ) ) {
+			$p->set_image_id( $att );
+			update_post_meta( $pid, '_bkf_pub_cover_src', $url );
+			delete_post_meta( $pid, '_bkf_pub_cover_no' );
+			return true;
+		}
+		if ( ! self::$reused ) {
+			wp_delete_attachment( $att, true );
+		}
+		update_post_meta( $pid, '_bkf_pub_cover_no', $url );
+		return false;
+	}
+
+	/** Width × height of an attachment image (0 when unknown). */
+	private static function pixels( int $att ): int {
+		if ( ! $att ) {
+			return 0;
+		}
+		$m = wp_get_attachment_metadata( $att );
+		if ( is_array( $m ) && ! empty( $m['width'] ) && ! empty( $m['height'] ) ) {
+			return (int) $m['width'] * (int) $m['height'];
+		}
+		$file = get_attached_file( $att );
+		$size = $file && is_readable( $file ) ? @getimagesize( $file ) : false; // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return is_array( $size ) ? (int) $size[0] * (int) $size[1] : 0;
+	}
+
 	/** Downloads one image; attachment id or 0 (logged). */
 	private static function sideload( string $url, int $pid, array $r, string $suffix ): int {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -971,6 +1039,7 @@ final class BKF_Importer {
 			)
 		);
 		if ( $found ) {
+			self::$reused = true;
 			return (int) $found[0];
 		}
 
