@@ -7,6 +7,8 @@
  *  - biography       the content (block or classic editor)
  *  - _crt_roles_text "Poet, musician" ('' = from the roles with products)
  *  - _crt_sort_name  index sort name ('' = the name as written)
+ *  - _crt_gender     'm' | 'f' | '' (neutral): the article of the product
+ *                    tab title («Ο συγγραφέας», «Η συγγραφέας», «Συγγραφέας»)
  *  - _crt_links      JSON [ { url, label } ]
  *  - _crt_press      JSON [ { type: interview|video|review, date: Y-m-d,
  *                    outlet, title, url, image: attachment id } ]
@@ -17,7 +19,10 @@
  *  - _crt_roles      JSON [ taxonomy ] roles with published products (computed)
  *  - _crt_count      published products (computed)
  *
- * The meta is not exposed to REST. Capabilities follow pages (editors,
+ * The meta the store writes is also exposed to REST (since 1.1.0), for
+ * those who may edit the creator (edit context only), with the same
+ * validation as the edit screen; the computed meta (_crt_terms,
+ * _crt_roles, _crt_count) is not. Capabilities follow pages (editors,
  * administrators and shop managers).
  */
 
@@ -29,6 +34,7 @@ final class CRT_CPT {
 
 	const M_ROLES_TEXT = '_crt_roles_text';
 	const M_SORT       = '_crt_sort_name';
+	const M_GENDER     = '_crt_gender';
 	const M_LINKS      = '_crt_links';
 	const M_PRESS      = '_crt_press';
 	const M_KEY        = '_crt_key';
@@ -40,8 +46,11 @@ final class CRT_CPT {
 
 	const PRESS_TYPES = array( 'interview', 'video', 'review' );
 
+	const GENDERS = array( 'm', 'f' );
+
 	public static function init(): void {
 		add_action( 'init', array( __CLASS__, 'register' ), 5 );
+		add_action( 'init', array( __CLASS__, 'register_meta' ), 6 );
 		add_action( 'init', array( __CLASS__, 'maybe_flush' ), 99 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'classic_editor' ), 10, 2 );
 		add_filter( 'post_updated_messages', array( __CLASS__, 'messages' ) );
@@ -129,6 +138,97 @@ final class CRT_CPT {
 		);
 	}
 
+	/**
+	 * The store's own meta in REST (edit context, edit_post capability),
+	 * e.g. to fill creators from another system. Lists are JSON strings,
+	 * validated like the edit screen; an invalid list is stored empty.
+	 */
+	public static function register_meta(): void {
+		$fields = array(
+			self::M_ROLES_TEXT => array( __CLASS__, 'rest_text_160' ),
+			self::M_SORT       => array( __CLASS__, 'rest_text_120' ),
+			self::M_GENDER     => array( __CLASS__, 'rest_gender' ),
+			self::M_LINKS      => array( __CLASS__, 'rest_links' ),
+			self::M_PRESS      => array( __CLASS__, 'rest_press' ),
+			self::M_KEY        => array( __CLASS__, 'rest_key' ),
+			self::M_EXTRA      => array( __CLASS__, 'rest_ids' ),
+			self::M_EXCLUDE    => array( __CLASS__, 'rest_ids' ),
+		);
+		foreach ( $fields as $key => $cb ) {
+			register_post_meta(
+				self::PT,
+				$key,
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'default'           => '',
+					'sanitize_callback' => $cb,
+					'auth_callback'     => static function ( $allowed, $meta_key, $post_id ) {
+						return current_user_can( 'edit_post', (int) $post_id );
+					},
+					'show_in_rest'      => array(
+						'schema' => array(
+							'type'    => 'string',
+							'context' => array( 'edit' ),
+						),
+					),
+				)
+			);
+		}
+	}
+
+	public static function rest_text_160( $v ): string {
+		return is_string( $v ) ? CRT_Settings::clip( sanitize_text_field( $v ), 160 ) : '';
+	}
+
+	public static function rest_text_120( $v ): string {
+		return is_string( $v ) ? CRT_Settings::clip( sanitize_text_field( $v ), 120 ) : '';
+	}
+
+	public static function rest_gender( $v ): string {
+		return is_string( $v ) && in_array( $v, self::GENDERS, true ) ? $v : '';
+	}
+
+	public static function rest_key( $v ): string {
+		return is_string( $v ) ? urldecode( sanitize_title( $v ) ) : '';
+	}
+
+	/** A JSON list from REST, decoded (an array is accepted too). */
+	private static function rest_list( $v ): array {
+		if ( is_array( $v ) ) {
+			return $v;
+		}
+		$d = is_string( $v ) && '' !== $v ? json_decode( $v, true ) : null;
+		return is_array( $d ) ? $d : array();
+	}
+
+	private static function rest_json( array $list ): string {
+		return $list ? (string) wp_json_encode( array_values( $list ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) : '';
+	}
+
+	public static function rest_links( $v ): string {
+		return self::rest_json( self::sanitize_links( self::rest_list( $v ) ) );
+	}
+
+	public static function rest_press( $v ): string {
+		return self::rest_json( self::sanitize_press( self::rest_list( $v ) ) );
+	}
+
+	/** term_taxonomy_ids of the role taxonomies only. */
+	public static function rest_ids( $v ): string {
+		$valid = CRT_Match::role_terms();
+		$list  = array();
+		foreach ( self::rest_list( $v ) as $tt ) {
+			$tt = (int) $tt;
+			if ( isset( $valid[ $tt ] ) ) {
+				$list[] = $tt;
+			}
+		}
+		$list = array_values( array_unique( $list ) );
+		sort( $list );
+		return self::rest_json( $list );
+	}
+
 	/** Rewrite rules after activation or a change of the URL base. */
 	public static function maybe_flush(): void {
 		if ( get_option( 'crt_flush' ) ) {
@@ -198,6 +298,12 @@ final class CRT_CPT {
 			}
 		);
 		return $items;
+	}
+
+	/** 'm' | 'f' | '' (neutral). */
+	public static function gender( int $id ): string {
+		$g = (string) get_post_meta( $id, self::M_GENDER, true );
+		return in_array( $g, self::GENDERS, true ) ? $g : '';
 	}
 
 	/** Name used for sorting the index. */
