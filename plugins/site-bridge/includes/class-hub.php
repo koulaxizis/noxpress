@@ -246,7 +246,7 @@ final class SBR_Hub {
 		if ( ! is_array( $data ) ) {
 			return new WP_Error( 'sbr_bad_answer', 'The site sent an invalid answer.' );
 		}
-		self::touch( (string) $site['id'], 'status' === ( $payload['op'] ?? '' ) && ! empty( $data['ok'] ) ? (array) $data['result'] : null );
+		self::touch( (string) $site['id'], in_array( $payload['op'] ?? '', array( 'status', 'window' ), true ) && ! empty( $data['ok'] ) ? (array) $data['result'] : null );
 		return $data;
 	}
 
