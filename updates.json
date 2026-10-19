@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Prices from the publishers' own sites: a page address per publisher ({isbn}, {isbn13}, {title}); the price found there replaces the catalogue's automatically, with plausibility checks and history lines.\n* Publisher price on the product box, and \"Read the price\" in Tools.\n* The connection test reports https correctly when the address itself is https.",
+        "changelog": "* A page on the publisher's site per product (Book Feed box), for publishers without an address per ISBN.\n* Publisher price from the page's text after a label (\"Τιμή εκδότη\" by default, editable), read first.\n* Contributor names as \"Name Surname\" instead of the catalogue's \"Surname, Name\" (setting).\n* \"Read the price\" in Tools accepts a page address.",
         "published": "2026-10-19",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ac2432d11c6e2fa46d9bde7ab23b2a93ddb03e1ab860f8a41c65cd9bf67967e6",
-        "signature": "oJMttY/HasjN0AStDRCGb78Lgx/T62+otBNS/wvIf7LDw4uFQd6JTMCG5iv8Mtyd/4G/1WWxnS5HkKW/9EkNCQ==",
+        "sha256": "71974bdd036f6cd54f5f65ebc45fbb525876b1ea8345549de21b584aade1b4ef",
+        "signature": "WtCaam8OzKhkbwXrsiXPNEw3lCDyMDaGMBi8Hcu7Y2Dov8Yldx3yJBz5KvvvlFXCrGQQZaUN/ytkl0/C0C2+AQ==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.2.0/book-feed.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.3.0/book-feed.zip"
       }
     },
     "book-preview": {
