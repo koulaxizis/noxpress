@@ -1,8 +1,8 @@
 {
   "display": 50,
-  "total": 79,
+  "total": 84,
   "offset": 5,
-  "updated": "2026-10-18",
+  "updated": "2026-10-19",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -254,14 +254,18 @@
     },
     "653534219": {
       "file": "nox-tp-1.5.2/theme-patcher.zip",
-      "count": 0
+      "count": 1
     },
     "653539420": {
       "file": "nox-tp-1.5.3/theme-patcher.zip",
-      "count": 0
+      "count": 2
     },
     "653539559": {
       "file": "nox-oc-1.1.1/oros-connect.zip",
+      "count": 2
+    },
+    "655962585": {
+      "file": "nox-hs-1.0.0/home-sections.zip",
       "count": 0
     }
   }
