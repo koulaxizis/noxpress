@@ -111,19 +111,30 @@ final class BKF_Pub_Price {
 		}
 		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
 		$got = $fresh ? false : get_transient( $key );
-		// Entries from before 1.4.0 have no image: read the page again.
-		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) ) {
-			$why = '';
-			$img = '';
-			$p   = self::fetch( $url, $r, $why, $img );
-			$got = array(
-				'p'   => $p,
-				'why' => $why,
-				'img' => $img,
+		// Entries from before 1.4.2 have no "read" mark: read the page again.
+		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) || ! array_key_exists( 'read', $got ) ) {
+			$why  = '';
+			$img  = '';
+			$read = false;
+			$p    = self::fetch( $url, $r, $why, $img, $read );
+			$got  = array(
+				'p'    => $p,
+				'why'  => $why,
+				'img'  => $img,
+				'read' => $read,
 			);
 			set_transient( $key, $got, self::TTL );
 		}
 		return $got;
+	}
+
+	/**
+	 * True when the publisher's page answered but has no price for this
+	 * book: the page's own answer, not a passing error (1.4.2).
+	 */
+	public static function no_price( array $r ): bool {
+		$got = self::page( $r );
+		return null !== $got && ! empty( $got['read'] ) && ! isset( $got['p'] );
 	}
 
 	/** A price for messages: "12,50" in the store's format. */
@@ -142,9 +153,10 @@ final class BKF_Pub_Price {
 		return $p >= $feed / 2 && $p <= $feed * 2;
 	}
 
-	/** Reads the page; the price or null (reason in $why, cover address in $img). */
-	public static function fetch( string $url, array $r, ?string &$why = null, ?string &$img = null ): ?float {
-		$img = '';
+	/** Reads the page; the price or null (reason in $why, cover address in $img, $read true when the page answered). */
+	public static function fetch( string $url, array $r, ?string &$why = null, ?string &$img = null, ?bool &$read = null ): ?float {
+		$img  = '';
+		$read = false;
 		$res = wp_safe_remote_get(
 			$url,
 			array(
@@ -165,6 +177,7 @@ final class BKF_Pub_Price {
 			$why = sprintf( __( 'Η σελίδα του εκδότη απάντησε %d.', 'book-feed' ), $code );
 			return null;
 		}
+		$read = true;
 		$body = (string) wp_remote_retrieve_body( $res );
 		$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
 		$img  = self::image( $body, $r['isbn_digits'] );
@@ -345,8 +358,8 @@ final class BKF_Pub_Price {
 	 * other titles, "readers also bought"), and the book's own price may
 	 * be only in such a list (1.4.1, Dioptra). So, in order:
 	 *  1. the label within 150 characters after this book's title, with
- *     no number between (an ISBN or a year means another part of the
- *     page);
+ *     no price, year or ISBN between (small numbers such as "ΣΕΙΡΑ 3"
+ *     are fine, 1.4.2); those mean another part of the page;
 	 *  2. else the label's number when every labelled number on the page
 	 *     is the same;
 	 *  3. else nothing, and $why = 'ambiguous'.
@@ -361,7 +374,7 @@ final class BKF_Pub_Price {
 			}
 			$l   = preg_quote( self::fold( trim( $label ) ), '/' );
 			$num = '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)';
-			if ( mb_strlen( $t ) >= 3 && preg_match( '/' . preg_quote( $t, '/' ) . '(?:(?!' . $l . ')[^\d]){0,150}?' . $l . $num . '/isu', $flat, $m ) ) {
+			if ( mb_strlen( $t ) >= 3 && preg_match( '/' . preg_quote( $t, '/' ) . '(?:(?!' . $l . ')(?!\d{4})(?!\d+[.,]\d).){0,150}?' . $l . $num . '/isu', $flat, $m ) ) {
 				$p = self::num( $m[1] );
 				if ( null !== $p ) {
 					return $p;

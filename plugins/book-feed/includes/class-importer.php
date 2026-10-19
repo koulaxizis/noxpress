@@ -522,6 +522,7 @@ final class BKF_Importer {
 		$r['pub_price'] = null;
 		$r['pub_why']   = '';
 		$r['pub_cover'] = '';
+		$r['pub_none']  = false;
 		if ( '' === BKF_Pub_Price::template( $r ) ) {
 			return $r;
 		}
@@ -531,7 +532,11 @@ final class BKF_Importer {
 		if ( $s['images'] && $s['pub_cover'] ) {
 			$r['pub_cover'] = BKF_Pub_Price::cover( $r );
 		}
-		if ( null === $p && $pid ) {
+		$r['pub_none'] = BKF_Pub_Price::no_price( $r );
+		// The last good price covers a page that could not be read or gave
+		// an implausible price, not a page that answered without a price
+		// for this book (1.4.2).
+		if ( null === $p && $pid && ! $r['pub_none'] ) {
 			$last = (string) get_post_meta( $pid, '_bkf_pub_price', true );
 			$at   = (int) get_post_meta( $pid, '_bkf_pub_at', true );
 			if ( is_numeric( $last ) && $at > time() - 7 * DAY_IN_SECONDS && BKF_Pub_Price::plausible( (float) $last, $r['price'] ) ) {
@@ -560,6 +565,10 @@ final class BKF_Importer {
 				BKF_Log::add( 'price', $pid, $r['isbn'], $r['title'], array( 'price' ), sprintf( __( 'Κατάλογος %1$s → εκδότης %2$s', 'book-feed' ), null === $r['price'] ? '—' : BKF_Pub_Price::money( (float) $r['price'] ), BKF_Pub_Price::money( (float) $now ) ) );
 			}
 			update_post_meta( $pid, '_bkf_pub_price', $now );
+		} elseif ( ! empty( $r['pub_none'] ) ) {
+			// The page answered without a price: the old one is not shown any more.
+			delete_post_meta( $pid, '_bkf_pub_price' );
+			delete_post_meta( $pid, '_bkf_pub_at' );
 		}
 		if ( '' !== $r['pub_why'] && $r['pub_why'] !== $note ) {
 			BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'price' ), $r['pub_why'] );
