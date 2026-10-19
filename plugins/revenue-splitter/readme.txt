@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -54,6 +54,9 @@ Without `--user` the commands run as a trusted shell context. If you pass `--use
 Only this plugin's own options, transients, cron event, product/order meta and order item meta. The shared `rs_lang` user meta is kept when Store Pulse or Smart Formatter is still installed.
 
 == Changelog ==
+
+= 1.9.3 =
+* Fixed: saving a product's beneficiaries stored Greek names as "u0393u039b..." in `_rs_split`, because the JSON escapes lost their backslashes. Names are now stored as real UTF-8, and saving a product once repairs an older damaged value.
 
 = 1.9.2 =
 * Fixed: the tables in the beneficiary portal are readable on light themes such as Storefront. The theme's table colours turned the cells white with light text.

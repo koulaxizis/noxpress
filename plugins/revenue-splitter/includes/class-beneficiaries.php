@@ -728,7 +728,10 @@ class RS_Beneficiaries {
 			return;
 		}
 
-		update_post_meta( $post_id, self::META_KEY, wp_json_encode( $clean ) );
+		// v1.9.3 FIX: update_post_meta() unslashes its value, which stripped the
+		// backslashes of the \uXXXX escapes and stored names as "u0393u039b...".
+		// Store real UTF-8 and slash the JSON so quotes inside names survive.
+		update_post_meta( $post_id, self::META_KEY, wp_slash( wp_json_encode( $clean, JSON_UNESCAPED_UNICODE ) ) );
 
 		// v1.3.1 FIX (#3): νέος/αλλαγμένος καταμερισμός → τα cached
 		// reports (dashboard, portal, CLI) πρέπει να ξαναϋπολογιστούν.
