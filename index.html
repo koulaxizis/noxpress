@@ -71,12 +71,9 @@ header { padding: 72px 0 48px; text-align: left; }
 }
 .lang-toggle:hover { border-color: var(--accent); color: #fff; }
 
-.dl-count {
-	color: var(--muted);
-	margin-top: 8px;
-	font-size: 0.95rem;
-}
-.dl-count strong { color: var(--accent-bright); font-weight: 600; }
+.download-count { font-size: 13px; color: var(--muted); margin: 10px 0 14px; }
+.download-count[hidden] { display: none; }
+.download-count strong { color: var(--text); font-weight: 600; }
 .support-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -478,7 +475,7 @@ footer .heart { color: var(--accent-bright); }
 		<div>
 			<div class="wordmark">noxpress<span class="dot">.</span></div>
 			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
-			<p class="dl-count" id="dlCount" hidden></p>
+			<p class="download-count" id="download-count" hidden></p>
 			<div class="support-row">
 				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" aria-label="Support noxpress on Ko-fi">
 					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
@@ -1368,7 +1365,7 @@ footer .heart { color: var(--accent-bright); }
 		bf_desc: 'Titles of other publishers from the Bookpoint book catalogue (OSDEL web service) as WooCommerce products: search and import, rules per publisher, and a daily sync of price and availability.',
 		bf_li1: 'Search by title, contributor, ISBN, publisher, years and kind; titles already in the store are marked, and a product with the same ISBN is linked instead of duplicated',
 		bf_li2: 'Complete products: description, ISBN as GTIN and SKU, cover in the media library, publisher and contributors as attributes in the order you choose, mapped categories with their parents, tags from subjects, tax class from the VAT rate, weight and dimensions',
-		bf_li3: 'Daily background sync: price and availability always follow the catalogue, other fields until you edit them by hand; prices can come from the publishers' own sites; titles that leave the catalogue go out of stock',
+		bf_li3: 'Daily background sync: price and availability always follow the catalogue, other fields until you edit them by hand; prices can come from the publishers\' own sites; titles that leave the catalogue go out of stock',
 		bf_li4: 'Rules per publisher bring in new titles as drafts; a warning when a sale breaks the fixed book price',
 		bf_li5: 'Safe by design: the service password stored sealed and never shown, https first, a stop when the catalogue suddenly returns nothing; history with CSV, WP-CLI; bilingual UI and shared «Noxpress» menu',
 		bf_download: 'Download v1.3.0 (.zip)',
@@ -1832,7 +1829,7 @@ footer .heart { color: var(--accent-bright); }
 	 * downloads.json του ίδιου site, που γράφει το workflow «Count
 	 * downloads». Χωρίς αρχείο ή με 0, η γραμμή μένει κρυφή.
 	 * ------------------------------------------------------------------ */
-	var el = document.getElementById('dlCount');
+	var el = document.getElementById('download-count');
 	if (!el || typeof fetch !== 'function') { return; }
 	var shown = 0;
 	function render() {
@@ -1845,7 +1842,7 @@ footer .heart { color: var(--accent-bright); }
 		el.hidden = false;
 	}
 	fetch('downloads.json', { cache: 'no-cache' }).then(function (r) {
-		if (!r.ok) { throw new Error(r.status); }
+		if (!r.ok) { throw new Error('downloads.json ' + r.status); }
 		return r.json();
 	}).then(function (d) {
 		var n = parseInt(d && d.display, 10);
