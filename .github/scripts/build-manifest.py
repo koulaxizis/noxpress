@@ -55,6 +55,7 @@ SLUGS = {
     'ws': 'wish-shelf',
     'ce': 'checkout-extras',
     'nm': 'data-migrator',
+    'bf': 'book-feed',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
 SEMVER = re.compile(r'^\d+\.\d+\.\d+$')
