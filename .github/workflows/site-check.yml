@@ -1,13 +1,14 @@
 # Ελέγχει ότι κάθε κάρτα του noxpress.tech δείχνει την έκδοση του header του
 # plugin (meta, link λήψης, `{p}_download` EN/EL) και έχει το βίντεό της
-# (Bible §13), και ότι τα inline scripts της σελίδας δεν έχουν συντακτικό
-# λάθος. Τρέχει σε κάθε PR που αγγίζει το site ή τα plugins.
+# (Bible §13), και ότι τα inline scripts των σελίδων περνούν το `node --check`
+# (Bible §17). Τρέχει σε κάθε PR που αγγίζει το site ή τα plugins.
 name: Site cards
 
 on:
   pull_request:
     paths:
       - 'index.html'
+      - 'supporters/index.html'
       - 'plugins/**'
       - 'media/videos/**'
   workflow_dispatch:
@@ -23,4 +24,4 @@ jobs:
       - name: Check plugin cards
         run: python3 .github/scripts/check-site-cards.py --personal 'site-bridge'
       - name: Check inline scripts
-        run: node .github/scripts/check-site-scripts.js index.html
+        run: python3 .github/scripts/check-site-js.py
