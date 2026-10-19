@@ -184,15 +184,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fixed: the tables in the beneficiary portal are readable on light themes such as Storefront. The theme's table colours turned the cells white with light text.\n* Fixed: the live split total under the product's beneficiaries is readable on the white product box.\n* Fixed: the internal regular-price stamp (_rs_reg_unit) no longer shows under each item on the order screen.",
-        "published": "2026-10-14",
+        "changelog": "* Fixed: saving a product's beneficiaries stored Greek names as \"u0393u039b...\" in `_rs_split`, because the JSON escapes lost their backslashes. Names are now stored as real UTF-8, and saving a product once repairs an older damaged value.\n* Fixed: restoring a JSON backup no longer strips the backslashes from product overrides and free-copy reasons, so beneficiary names with Greek letters or quotes come back intact.",
+        "published": "2026-10-19",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0bb0e3d4d69abdd3989def7b62579923db2ac63554604f5f8f218208b6a83e2a",
-        "signature": "eQpPfu9llUaWmVdpnnjFrGobS23vjZTOpoSmEdzGqydhISrBYmI3aNESSo0gTlUs1CbLoJ50RokTZsoy4s4iBA==",
+        "sha256": "b19338f53813d95dc5d2d2621a9b3776641fda76640fae11eda37d7dd02ab463",
+        "signature": "Uoa37/Oax0ncT1FDKRt+y9u5abIB1VvY2+hZrkPqcXCbEnEjQnM+QMf5QfIbIcbaDsyrO59irSiPs/4tv5pOCQ==",
         "tested_wp": "6.8",
-        "version": "1.9.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.2/revenue-splitter.zip"
+        "version": "1.9.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.3/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
