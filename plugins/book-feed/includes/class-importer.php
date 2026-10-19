@@ -24,7 +24,11 @@
  *  _bkf_synced, _bkf_updated, _bkf_hash, _bkf_attr_keys, _bkf_rel_isbn,
  *  _bkf_rule, _bkf_linked, _bkf_gone, _bkf_gone_status, _bkf_cover_src,
  *  _bkf_back_src, _bkf_feed_price, _bkf_ptype, _bkf_fixed_until,
- *  _bkf_locked, _bkf_img_fail (image addresses that failed once).
+ *  _bkf_locked, _bkf_img_fail (image addresses that failed once),
+ *  _bkf_pub_price / _bkf_pub_at / _bkf_pub_note (the publisher's own
+ *  price, when it was read, why it was not used; BKF_Pub_Price).
+ * Price: the publisher's page when one is set up for the publisher and
+ * its price is plausible, else the catalogue's.
  * Attachments we download carry _bkf_cover_src.
  */
 
@@ -184,6 +188,7 @@ final class BKF_Importer {
 
 	/** Creates the product, every field written and hashed. */
 	private static function create( array $r, array $opt ): int {
+		$r    = self::with_pub_price( $r, 0 );
 		$s    = BKF_Settings::get();
 		$mode = isset( $opt['mode'] ) && 'external' === $opt['mode'] && ! empty( $opt['url'] ) ? 'external' : 'sell';
 
@@ -234,6 +239,7 @@ final class BKF_Importer {
 			update_post_meta( $pid, '_bkf_rule', (string) $opt['rule'] );
 		}
 		self::write_meta( $pid, $r );
+		self::note_pub_price( $pid, $r );
 
 		// Cover after the first save (the attachment needs a parent).
 		$img = self::write_images( $pid, $r );
@@ -272,6 +278,7 @@ final class BKF_Importer {
 			return array();
 		}
 
+		$r        = self::with_pub_price( $r, $pid );
 		$hash     = self::hashes( $pid );
 		$external = $p->is_type( 'external' );
 		$want     = $force ? array_merge( array( 'price', 'stock' ), BKF_Settings::SYNC_FIELDS ) : array_merge( array( 'price', 'stock' ), $s['fields'] );
@@ -330,6 +337,7 @@ final class BKF_Importer {
 			self::store_hashes( $p, array_diff( $fields, array( 'price', 'stock' ) ), $hash );
 		}
 		self::write_meta( $pid, $r );
+		self::note_pub_price( $pid, $r );
 
 		$changed = array();
 		foreach ( $fields as $f ) {
@@ -380,7 +388,7 @@ final class BKF_Importer {
 
 	/** Every product meta key of the plugin. */
 	public static function meta_keys(): array {
-		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail' );
+		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note' );
 	}
 
 	/** A title that left the feed. */
@@ -485,14 +493,64 @@ final class BKF_Importer {
 
 	/** Regular price as the store keeps it (the feed's price includes VAT), or null. */
 	public static function price( array $r ): ?string {
-		if ( null === $r['price'] || $r['price'] <= 0 ) {
+		$gross = isset( $r['pub_price'] ) && null !== $r['pub_price'] ? $r['pub_price'] : $r['price'];
+		if ( null === $gross || $gross <= 0 ) {
 			return null;
 		}
-		$price = (float) $r['price'];
+		$price = (float) $gross;
 		if ( wc_tax_enabled() && ! wc_prices_include_tax() && null !== $r['vat'] && $r['vat'] > 0 ) {
 			$price = $price / ( 1 + $r['vat'] / 100 );
 		}
 		return (string) wc_format_decimal( $price, wc_get_price_decimals() );
+	}
+
+	/**
+	 * The record with pub_price (float|null) and pub_why: the publisher's
+	 * price when one is set up, else null. When the page cannot be read
+	 * now, a price read within the last 7 days still counts.
+	 */
+	private static function with_pub_price( array $r, int $pid ): array {
+		$r['pub_price'] = null;
+		$r['pub_why']   = '';
+		if ( '' === BKF_Pub_Price::template( $r ) ) {
+			return $r;
+		}
+		$why = '';
+		$p   = BKF_Pub_Price::price( $r, $why );
+		if ( null === $p && $pid ) {
+			$last = (string) get_post_meta( $pid, '_bkf_pub_price', true );
+			$at   = (int) get_post_meta( $pid, '_bkf_pub_at', true );
+			if ( is_numeric( $last ) && $at > time() - 7 * DAY_IN_SECONDS && BKF_Pub_Price::plausible( (float) $last, $r['price'] ) ) {
+				$p = (float) $last;
+			}
+		}
+		$r['pub_price'] = $p;
+		$r['pub_why']   = $why;
+		return $r;
+	}
+
+	/** Keeps the publisher's price on the product and writes the history when it changes. */
+	private static function note_pub_price( int $pid, array $r ): void {
+		if ( ! array_key_exists( 'pub_price', $r ) || '' === BKF_Pub_Price::template( $r ) ) {
+			return;
+		}
+		$prev = (string) get_post_meta( $pid, '_bkf_pub_price', true );
+		$note = (string) get_post_meta( $pid, '_bkf_pub_note', true );
+		if ( null !== $r['pub_price'] ) {
+			$now = (string) $r['pub_price'];
+			if ( '' === $r['pub_why'] ) {
+				update_post_meta( $pid, '_bkf_pub_at', time() );
+			}
+			if ( $now !== $prev && ( null === $r['price'] || abs( $r['pub_price'] - $r['price'] ) > 0.004 ) ) {
+				/* translators: 1: catalogue price, 2: publisher price */
+				BKF_Log::add( 'price', $pid, $r['isbn'], $r['title'], array( 'price' ), sprintf( __( 'Κατάλογος %1$s → εκδότης %2$s', 'book-feed' ), null === $r['price'] ? '—' : BKF_Pub_Price::money( (float) $r['price'] ), BKF_Pub_Price::money( (float) $now ) ) );
+			}
+			update_post_meta( $pid, '_bkf_pub_price', $now );
+		}
+		if ( '' !== $r['pub_why'] && $r['pub_why'] !== $note ) {
+			BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'price' ), $r['pub_why'] );
+		}
+		update_post_meta( $pid, '_bkf_pub_note', $r['pub_why'] );
 	}
 
 	/** Categories at import: the rule's, the mapped ones, the default. */

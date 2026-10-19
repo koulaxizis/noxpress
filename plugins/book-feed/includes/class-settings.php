@@ -27,6 +27,9 @@
  *                     tags on import, at most tags_max
  *    img_alt          cover alt text template, img_name file name template:
  *                     {title} {subtitle} {authors} {publisher} {isbn}
+ *    pub_prices       pub_id => { name, url }: the book's page on the
+ *                     publisher's site ({isbn}, {isbn13}, {title}); its
+ *                     price replaces the catalogue's (BKF_Pub_Price)
  *    tax              VAT rate (string) => tax class slug ('' = standard)
  *    stock            availability text => instock | onbackorder | outofstock
  *    gone             what happens to a title that leaves the feed:
@@ -68,6 +71,7 @@ final class BKF_Settings {
 	const IMG_TAGS = array( '{title}', '{subtitle}', '{authors}', '{publisher}', '{isbn}' );
 
 	const MAX_ORDER  = 40;
+	const MAX_PUB    = 100;
 	const MAX_RENAME = 200;
 
 	/** Fields kept in sync besides price and availability. */
@@ -115,6 +119,7 @@ final class BKF_Settings {
 			'tags_max'        => 10,
 			'img_alt'         => '{title}',
 			'img_name'        => '{title}-{isbn}',
+			'pub_prices'      => array(),
 			'tax'             => array(),
 			'stock'           => array(),
 			'gone'            => 'outofstock',
@@ -231,6 +236,18 @@ final class BKF_Settings {
 		$out['cat_parents'] = ! empty( $v['cat_parents'] );
 		$out['tags']        = in_array( $v['tags'] ?? '', array( '', 'class', 'cats' ), true ) ? $v['tags'] : $d['tags'];
 		$out['tags_max']    = max( 1, min( 50, (int) ( $v['tags_max'] ?? $d['tags_max'] ) ) );
+		$out['pub_prices'] = array();
+		foreach ( ( isset( $v['pub_prices'] ) && is_array( $v['pub_prices'] ) ? $v['pub_prices'] : array() ) as $pub => $row ) {
+			$pub = self::text( $pub, 40 );
+			$url = is_array( $row ) ? self::text( $row['url'] ?? '', 300 ) : '';
+			if ( '' === $pub || ! preg_match( '/^[A-Za-z0-9_\-]+$/', $pub ) || ! self::pub_url_ok( $url ) || count( $out['pub_prices'] ) >= self::MAX_PUB ) {
+				continue;
+			}
+			$out['pub_prices'][ $pub ] = array(
+				'name' => self::text( $row['name'] ?? '', 150 ),
+				'url'  => $url,
+			);
+		}
 		foreach ( array( 'img_alt', 'img_name' ) as $k ) {
 			$t         = self::text( $v[ $k ] ?? '', 200 );
 			$out[ $k ] = '' !== $t ? $t : $d[ $k ];
@@ -342,6 +359,11 @@ final class BKF_Settings {
 	public static function role_target( string $role ): string {
 		$s = self::get();
 		return isset( $s['roles'][ $role ] ) ? $s['roles'][ $role ] : 'local';
+	}
+
+	/** A publisher page template: http(s), a host, and {isbn} or {isbn13} in it. */
+	public static function pub_url_ok( string $url ): bool {
+		return (bool) preg_match( '#^https?://[^/\s{}]+#i', $url ) && ( false !== strpos( $url, '{isbn}' ) || false !== strpos( $url, '{isbn13}' ) );
 	}
 
 	/** A feed value as the store writes it: the rename table, else as is ('' = drop). */

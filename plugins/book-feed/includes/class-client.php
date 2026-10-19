@@ -167,8 +167,11 @@ final class BKF_Client {
 	/** 'https' | 'http' | '' — what the last successful request used. */
 	public static function scheme(): string {
 		$s = BKF_Settings::get();
+		if ( 0 === stripos( $s['url'], 'https://' ) ) {
+			return 'https';
+		}
 		if ( ! $s['https'] ) {
-			return 0 === stripos( $s['url'], 'https://' ) ? 'https' : 'http';
+			return 'http';
 		}
 		$k = get_transient( self::SCHEME_TR );
 		return is_string( $k ) ? $k : '';

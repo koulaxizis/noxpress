@@ -686,6 +686,16 @@ final class BKF_Admin_Ajax {
 					/* translators: %s: price */
 					echo wp_kses_post( sprintf( __( 'Τιμή καταλόγου: %s', 'book-feed' ), wc_price( (float) $feed ) ) );
 				}
+				$pub  = (string) get_post_meta( $pid, '_bkf_pub_price', true );
+				$note = (string) get_post_meta( $pid, '_bkf_pub_note', true );
+				if ( is_numeric( $pub ) ) {
+					echo '<br />';
+					/* translators: %s: price */
+					echo wp_kses_post( sprintf( __( 'Τιμή στο site του εκδότη: %s', 'book-feed' ), wc_price( (float) $pub ) ) );
+				}
+				if ( '' !== $note ) {
+					echo '<br /><span class="bkf-muted">' . esc_html( $note ) . '</span>';
+				}
 				if ( '' !== $until && $until >= wp_date( 'Y-m-d' ) ) {
 					echo '<br />';
 					/* translators: %s: date */

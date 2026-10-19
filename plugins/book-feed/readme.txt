@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -35,6 +35,12 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * If the catalogue suddenly returns none of the store's titles, the sync stops without changing anything.
 * Rules per publisher bring new titles in automatically, always as drafts.
 * Runs in the background (Action Scheduler) in steps of up to 10 seconds, one at a time, with a safety action and stall detection. "Sync now" and a live status on every tab.
+
+**Prices from the publishers' own sites**
+
+* Catalogue prices are often old. For each publisher you list, the plugin reads the price from the book's page on the publisher's site (schema.org structured data, a WooCommerce Store API answer, Open Graph or microdata) and uses it instead, on import and on every sync. While the publisher's shop runs a sale, its list price is taken.
+* A page that names another ISBN is ignored. A price below half or above double the catalogue's is not used. When the page cannot be read, a price read in the last 7 days still counts, else the catalogue's. Every change goes to the history; one look per title per day.
+* "Read the price" in Tools tries one ISBN without changing anything.
 
 **Fixed book price**
 
@@ -85,6 +91,11 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.2.0 =
+* Prices from the publishers' own sites: a page address per publisher ({isbn}, {isbn13}, {title}); the price found there replaces the catalogue's automatically, with plausibility checks and history lines.
+* Publisher price on the product box, and "Read the price" in Tools.
+* The connection test reports https correctly when the address itself is https.
 
 = 1.1.0 =
 * Order of the attributes on the product, by name; the default order now starts with the ISBN.

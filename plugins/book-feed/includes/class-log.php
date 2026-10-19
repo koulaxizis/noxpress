@@ -17,7 +17,7 @@ final class BKF_Log {
 	const OPTION = 'bkf_log';
 	const MAX    = 500;
 
-	const ACTS = array( 'import', 'update', 'link', 'unlink', 'gone', 'back', 'locked', 'error', 'run' );
+	const ACTS = array( 'import', 'update', 'price', 'link', 'unlink', 'gone', 'back', 'locked', 'error', 'run' );
 
 	private static $pending = array();
 	private static $hooked  = false;
@@ -81,6 +81,7 @@ final class BKF_Log {
 		$map = array(
 			'import' => __( 'Εισαγωγή', 'book-feed' ),
 			'update' => __( 'Ενημέρωση', 'book-feed' ),
+			'price'  => __( 'Τιμή εκδότη', 'book-feed' ),
 			'link'   => __( 'Σύνδεση', 'book-feed' ),
 			'unlink' => __( 'Αποσύνδεση', 'book-feed' ),
 			'gone'   => __( 'Εκτός καταλόγου', 'book-feed' ),
