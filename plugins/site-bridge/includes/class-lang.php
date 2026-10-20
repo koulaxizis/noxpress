@@ -209,6 +209,7 @@ final class SBR_Lang {
 		'Συνδεδεμένος ως %s.'                                         => 'Logged in as %s.',
 		'Μετά την έγκριση η σύνδεση επιστρέφει στο:'                  => 'After approval the connection returns to:',
 		'Τοπική διεύθυνση (Claude Code): έγκρινε μόνο αν μόλις ξεκίνησες εσύ τη σύνδεση από τον υπολογιστή σου.' => 'Local address (Claude Code): approve only if you just started this connection from your own computer.',
+		'Έγκρινε μόνο αν μόλις πάτησες εσύ Connect στο Claude. Ένας σύνδεσμος έγκρισης που σου έστειλε κάποιος άλλος συνδέει τον δικό του λογαριασμό με τα sites σου.' => 'Approve only if you just pressed Connect in Claude yourself. An approval link someone else sent you connects their account to your sites.',
 		'Κάθε site εφαρμόζει επιπλέον το δικό του επίπεδο και το παράθυρο εγγραφής.' => 'Each site also applies its own level and write window.',
 		'Και όσα sites προστεθούν αργότερα'                           => 'And any sites added later',
 		'Η έγκριση ισχύει 90 ημέρες. Ανακαλείται όποτε θέλεις από Noxpress → Site Bridge → Συνδέσεις.' => 'The approval lasts 90 days. Revoke it any time in Noxpress → Site Bridge → Connections.',

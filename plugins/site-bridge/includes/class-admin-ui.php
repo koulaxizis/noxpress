@@ -1025,6 +1025,8 @@ button.ok{background:#6d4aff;border-color:#6d4aff;color:#fff}code{color:#beb1ff;
 		<div class="host"><?php echo esc_html( $host ); ?></div>
 		<?php if ( in_array( $host, array( 'localhost', '127.0.0.1', '[::1]' ), true ) ) : ?>
 			<p class="muted"><?php esc_html_e( 'Τοπική διεύθυνση (Claude Code): έγκρινε μόνο αν μόλις ξεκίνησες εσύ τη σύνδεση από τον υπολογιστή σου.', 'site-bridge' ); ?></p>
+		<?php else : ?>
+			<p class="muted"><?php esc_html_e( 'Έγκρινε μόνο αν μόλις πάτησες εσύ Connect στο Claude. Ένας σύνδεσμος έγκρισης που σου έστειλε κάποιος άλλος συνδέει τον δικό του λογαριασμό με τα sites σου.', 'site-bridge' ); ?></p>
 		<?php endif; ?>
 	</div>
 	<form method="post" action="">
