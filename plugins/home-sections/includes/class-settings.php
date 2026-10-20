@@ -11,6 +11,10 @@
  *      preorders  leave pre-orders out
  *      title      keep only products whose title contains this text
  *      ids        product ids left out
+ *  - video    texts of [hs_video] (Bible §14.17: store settings, not
+ *             msgids): lang 'auto' | 'el' | 'en', texts key => el / en.
+ *             An empty Greek text falls back to the default; an empty
+ *             English text shows the Greek one.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,6 +25,7 @@ final class HMS_Settings {
 	const MAX_PRESETS = 20;
 	const MAX_IDS     = 100;
 	const MAX_TITLE   = 100;
+	const MAX_TEXT    = 200;
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -29,7 +34,73 @@ final class HMS_Settings {
 		return array(
 			'alias'   => '',
 			'presets' => array(),
+			'video'   => self::video_defaults(),
 		);
+	}
+
+	/** Default visitor texts of [hs_video], Greek and English. */
+	public static function video_text_defaults(): array {
+		return array(
+			'trailer_heading'      => array(
+				'el' => 'Προτεινόμενο book trailer',
+				'en' => 'Featured book trailer',
+			),
+			'presentation_heading' => array(
+				'el' => 'Πρόσφατη παρουσίαση βιβλίου',
+				'en' => 'Latest book presentation',
+			),
+			'trailer_title'        => array(
+				'el' => 'Book trailer του βιβλίου {name}',
+				'en' => 'Book trailer of {name}',
+			),
+			'presentation_title'   => array(
+				'el' => 'Παρουσίαση του βιβλίου {name}',
+				'en' => 'Presentation of {name}',
+			),
+			'play'                 => array(
+				'el' => 'Αναπαραγωγή: {title}',
+				'en' => 'Play: {title}',
+			),
+			'link'                 => array(
+				'el' => 'Δείτε το βιβλίο',
+				'en' => 'See the book',
+			),
+		);
+	}
+
+	public static function video_defaults(): array {
+		return array(
+			'lang'  => 'auto',
+			'texts' => self::video_text_defaults(),
+		);
+	}
+
+	/** Whitelist validation of the video settings. */
+	public static function video( $raw ): array {
+		$v = self::video_defaults();
+		if ( ! is_array( $raw ) ) {
+			return $v;
+		}
+		if ( isset( $raw['lang'] ) && in_array( $raw['lang'], array( 'auto', 'el', 'en' ), true ) ) {
+			$v['lang'] = $raw['lang'];
+		}
+		$texts = isset( $raw['texts'] ) && is_array( $raw['texts'] ) ? $raw['texts'] : array();
+		foreach ( $v['texts'] as $key => $def ) {
+			$row = isset( $texts[ $key ] ) && is_array( $texts[ $key ] ) ? $texts[ $key ] : array();
+			foreach ( array( 'el', 'en' ) as $lang ) {
+				if ( ! isset( $row[ $lang ] ) || ! is_scalar( $row[ $lang ] ) ) {
+					continue;
+				}
+				$t = sanitize_text_field( (string) $row[ $lang ] );
+				$t = function_exists( 'mb_substr' ) ? mb_substr( $t, 0, self::MAX_TEXT ) : substr( $t, 0, self::MAX_TEXT );
+				$t = trim( $t );
+				if ( '' === $t && 'el' === $lang ) {
+					continue; // Greek is required: keep the default.
+				}
+				$v['texts'][ $key ][ $lang ] = $t;
+			}
+		}
+		return $v;
 	}
 
 	/** An empty preset: changes nothing until a field is set. */
@@ -87,6 +158,7 @@ final class HMS_Settings {
 	public static function sanitize( array $raw, bool $check = false ): array {
 		$s          = self::defaults();
 		$s['alias'] = self::clean_alias( $raw['alias'] ?? '' );
+		$s['video'] = self::video( $raw['video'] ?? array() );
 
 		$seen = array();
 		if ( isset( $raw['presets'] ) && is_array( $raw['presets'] ) ) {

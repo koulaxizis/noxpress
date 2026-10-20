@@ -1,14 +1,16 @@
 <?php
 /**
- * Home Sections — uninstall.php (v1.0.0)
+ * Home Sections — uninstall.php (v1.1.0)
  *
  * Deleted:
- *  - Option hms_settings (alias prefix, presets).
- *  - Transients hms_aui_msg_{uid} (PRG notices).
+ *  - Option hms_settings (alias prefix, presets, video texts).
+ *  - Transients hms_aui_msg_{uid} (PRG notices) and hms_video_cache (the
+ *    [hs_video] picks).
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * Nothing else exists: the plugin never writes to products, terms or
- * orders (the markers apply at query time). The rs_lang user meta belongs
+ * orders (the markers apply at query time; [hs_video] only reads the
+ * products' tab meta). The rs_lang user meta belongs
  * to Revenue Splitter and is not touched. Shortcodes that carry marker
  * classes stay in the pages and simply list products without them.
  */
@@ -22,6 +24,7 @@ function hms_uninstall_site(): void {
 	global $wpdb;
 
 	delete_option( 'hms_settings' );
+	delete_transient( 'hms_video_cache' );
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(

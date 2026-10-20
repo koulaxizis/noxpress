@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Home Sections
  * Plugin URI:           https://noxpress.tech
- * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets. Τα προϊόντα δεν αλλάζουν.
- * Version:              1.0.0
+ * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets, και το [hs_video] με το νεότερο book trailer ή παρουσίαση από τις καρτέλες βίντεο των προϊόντων. Τα προϊόντα δεν αλλάζουν.
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -29,8 +29,12 @@
  *                    (built-in hs-…, the alias prefix, presets) and turns
  *                    them into query args; the title condition in
  *                    posts_where
+ *  - HMS_Video     → the [hs_video] shortcode: the newest product video
+ *                    (trailer / presentation) from the products' video
+ *                    tabs, poster markup only, cache transient, the
+ *                    click-to-load script (assets/video.js)
  *  - HMS_Admin_UI  → menu, settings page (markers, alias, presets,
- *                    shortcode test), footer
+ *                    shortcodes, video texts, shortcode test), footer
  *
  * Front-end rules (Bible §14): nothing changes after activation — a
  * marker class acts only where a [products] shortcode carries it, and a
@@ -51,12 +55,23 @@
  *    marker excludes products by the meta keys of known pre-order
  *    plugins (PRENA _simple_preorder, Pre-Orders _por_on), read in the
  *    product query only. A query cannot call their PHP APIs. Filter
- *    hms_preorder_meta adds or removes keys.
+ *    hms_preorder_meta adds or removes keys. The same applies to the
+ *    video tabs of [hs_video] (meta wb_custom_tabs of Custom Product Tabs
+ *    for WooCommerce, read with get_post_meta; filter hms_video_source).
+ *  - §14.5 (no write on a visitor request): [hs_video] keeps its pick
+ *    (product ID + video ID per attribute set) in ONE transient,
+ *    hms_video_cache (12 h), written when a visitor request finds it
+ *    missing or stale and cleared whenever a product or its tabs change.
+ *    Nothing else is written. Without it every view would scan 50
+ *    products.
+ *  - §14.10 (queries only in save hooks): that scan runs at render time
+ *    on a cache miss, because the pick depends on the shortcode's own
+ *    attributes (category, exclude, pre-orders).
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HMS_VERSION', '1.0.0' );
+define( 'HMS_VERSION', '1.1.0' );
 define( 'HMS_FILE', __FILE__ );
 define( 'HMS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HMS_URL', plugin_dir_url( __FILE__ ) );
@@ -100,6 +115,11 @@ final class Home_Sections {
 
 		require_once HMS_PATH . 'includes/class-settings.php';
 		require_once HMS_PATH . 'includes/class-markers.php';
+		require_once HMS_PATH . 'includes/class-video.php';
+
+		// [hs_video] is registered even with HMS_DISABLE, so it never shows
+		// as text; it then prints nothing (Bible §14).
+		HMS_Video::init();
 
 		// Emergency switch (Bible §14): no front-end hook at all.
 		if ( ! self::killed() ) {

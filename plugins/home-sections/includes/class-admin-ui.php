@@ -6,8 +6,10 @@
  * (admin_menu priority 230), slug hms-settings:
  *  - the built-in markers (a reference table)
  *  - the alias prefix and the presets (one card each, plus an empty one)
+ *  - the [hs_video] shortcode (attributes) and its visitor texts
  *  - a shortcode test: which products a [products …] shortcode returns
- *    and how each of its classes is read
+ *    and how each of its classes is read, or which product and video an
+ *    [hs_video …] shortcode picks (without its cache)
  *  - developer notes, footer
  *
  * Saving: POST on admin_init, slug + nonce + capability, strict
@@ -131,6 +133,8 @@ final class HMS_Admin_UI {
 				<p class="hms-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'home-sections' ); ?></button></p>
 			</form>
 
+			<?php self::render_video( $s['video'] ); ?>
+
 			<?php self::render_test(); ?>
 
 			<h2 class="hms-h2"><?php esc_html_e( 'Για προγραμματιστές', 'home-sections' ); ?></h2>
@@ -138,7 +142,12 @@ final class HMS_Admin_UI {
 				<table class="widefat hms-table">
 					<tbody>
 						<tr><td><code>hms_preorder_meta</code></td><td><?php esc_html_e( 'Φίλτρο στα meta keys των προπαραγγελιών (meta key => τιμή). Προεπιλογή: _simple_preorder = yes (PRENA) και _por_on = yes (Pre-Orders).', 'home-sections' ); ?></td></tr>
-						<tr><td><code>HMS_DISABLE</code></td><td><?php esc_html_e( 'Σταθερά στο wp-config.php που σταματά κάθε marker.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_video_source</code></td><td><?php esc_html_e( 'Φίλτρο στην πηγή των βίντεο: meta_key (προεπιλογή wb_custom_tabs) και positions, η θέση της καρτέλας ανά τύπο (προεπιλογή trailer 30, presentation 31).', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_video_classes</code></td><td><?php esc_html_e( 'Φίλτρο στα CSS classes του [hs_video]: heading, button, play, meta.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_video_people_taxonomy</code></td><td><?php esc_html_e( 'Φίλτρο στην ταξινομία με τα πρόσωπα που μπαίνουν μετά το όνομα του προϊόντος (προεπιλογή pa_syggrafeis· κενό = κανένα).', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_video_text</code></td><td><?php esc_html_e( 'Φίλτρο σε κάθε κείμενο του [hs_video] (κείμενο, κλειδί, γλώσσα), π.χ. για WPML.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_video_script</code></td><td><?php esc_html_e( 'Φίλτρο: false για να μη φορτώνεται το script του plugin, όταν η σελίδα έχει δικό της.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>HMS_DISABLE</code></td><td><?php esc_html_e( 'Σταθερά στο wp-config.php που σταματά κάθε marker και κάθε [hs_video].', 'home-sections' ); ?></td></tr>
 					</tbody>
 				</table>
 			</div>
@@ -254,6 +263,76 @@ final class HMS_Admin_UI {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * [hs_video]: attributes + visitor texts
+	 * ------------------------------------------------------------------- */
+
+	/** Admin labels of the visitor texts (msgids). */
+	private static function video_text_labels(): array {
+		return array(
+			'trailer_heading'      => __( 'Τίτλος: trailer', 'home-sections' ),
+			'presentation_heading' => __( 'Τίτλος: παρουσίαση', 'home-sections' ),
+			'trailer_title'        => __( 'Όνομα player: trailer ({name})', 'home-sections' ),
+			'presentation_title'   => __( 'Όνομα player: παρουσίαση ({name})', 'home-sections' ),
+			'play'                 => __( 'Ετικέτα κουμπιού ({title})', 'home-sections' ),
+			'link'                 => __( 'Σύνδεσμος προς το προϊόν', 'home-sections' ),
+		);
+	}
+
+	private static function render_video( array $v ): void {
+		$rows = array(
+			'type'      => __( 'trailer (προεπιλογή) ή presentation: η καρτέλα βίντεο του προϊόντος (θέση 30 ή 31).', 'home-sections' ),
+			'id'        => __( 'Ένα συγκεκριμένο προϊόν αντί για το νεότερο.', 'home-sections' ),
+			'exclude'   => __( 'IDs προϊόντων που μένουν έξω, χωρισμένα με κόμμα.', 'home-sections' ),
+			'category'  => __( 'Μόνο προϊόντα αυτών των κατηγοριών (slugs, με κόμμα).', 'home-sections' ),
+			'preorders' => __( 'no: χωρίς τις προπαραγγελίες (PRENA και Pre-Orders).', 'home-sections' ),
+			'heading'   => __( 'Άλλος τίτλος από τον τίτλο των ρυθμίσεων· κενό = χωρίς τίτλο.', 'home-sections' ),
+		);
+		?>
+		<h2 class="hms-h2"><?php esc_html_e( 'Shortcode βίντεο', 'home-sections' ); ?></h2>
+		<div class="hms-zone">
+			<p class="description"><?php esc_html_e( 'Το [hs_video] δείχνει το νεότερο δημοσιευμένο προϊόν που έχει βίντεο στην καρτέλα του (Custom Product Tabs for WooCommerce): εικόνα και κουμπί αναπαραγωγής, και ο player του YouTube φορτώνει μόνο με το πάτημα. Χωρίς αποτέλεσμα δεν τυπώνει τίποτα.', 'home-sections' ); ?></p>
+			<table class="widefat hms-table">
+				<tbody>
+					<?php foreach ( $rows as $att => $text ) : ?>
+						<tr><td><code><?php echo esc_html( $att ); ?>=""</code></td><td><?php echo esc_html( $text ); ?></td></tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p class="description hms-mt-8"><code>[hs_video type="trailer" preorders="no"]</code> <code>[hs_video type="presentation" id="123"]</code></p>
+		</div>
+
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="hms_action" value="video" />
+			<h2 class="hms-h2"><?php esc_html_e( 'Κείμενα βίντεο', 'home-sections' ); ?></h2>
+			<div class="hms-zone">
+				<p class="description"><?php esc_html_e( 'Τα κείμενα που βλέπει ο επισκέπτης. Κενό ελληνικό κείμενο επιστρέφει στην προεπιλογή· κενό αγγλικό δείχνει το ελληνικό.', 'home-sections' ); ?></p>
+				<p class="hms-field"><span><?php esc_html_e( 'Γλώσσα', 'home-sections' ); ?></span>
+					<select name="hms_v[lang]">
+						<option value="auto" <?php selected( $v['lang'], 'auto' ); ?>><?php esc_html_e( 'Αυτόματα (γλώσσα του site)', 'home-sections' ); ?></option>
+						<option value="el" <?php selected( $v['lang'], 'el' ); ?>>Ελληνικά</option>
+						<option value="en" <?php selected( $v['lang'], 'en' ); ?>>English</option>
+					</select>
+				</p>
+				<table class="widefat hms-table hms-mt-8">
+					<thead><tr><th></th><th>Ελληνικά</th><th>English</th></tr></thead>
+					<tbody>
+						<?php foreach ( self::video_text_labels() as $key => $label ) : ?>
+							<tr>
+								<td><?php echo esc_html( $label ); ?></td>
+								<td><input type="text" class="hms-code" name="hms_v[texts][<?php echo esc_attr( $key ); ?>][el]" value="<?php echo esc_attr( $v['texts'][ $key ]['el'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" /></td>
+								<td><input type="text" class="hms-code" name="hms_v[texts][<?php echo esc_attr( $key ); ?>][en]" value="<?php echo esc_attr( $v['texts'][ $key ]['en'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" /></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p class="hms-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'home-sections' ); ?></button></p>
+			</div>
+		</form>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Shortcode test
 	 * ------------------------------------------------------------------- */
 
@@ -262,7 +341,7 @@ final class HMS_Admin_UI {
 		?>
 		<h2 class="hms-h2"><?php esc_html_e( 'Δοκιμή shortcode', 'home-sections' ); ?></h2>
 		<div class="hms-zone">
-			<p class="description"><?php esc_html_e( 'Επικόλλησε ένα shortcode [products …] για να δεις ποια προϊόντα επιστρέφει και πώς διαβάζεται κάθε class. Δεν αλλάζει τίποτα.', 'home-sections' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Επικόλλησε ένα shortcode [products …] για να δεις ποια προϊόντα επιστρέφει και πώς διαβάζεται κάθε class, ή ένα [hs_video …] για να δεις ποιο προϊόν και ποιο βίντεο διαλέγει. Δεν αλλάζει τίποτα.', 'home-sections' ); ?></p>
 			<form method="post">
 				<?php self::nonce_field(); ?>
 				<input type="hidden" name="hms_action" value="test" />
@@ -276,6 +355,11 @@ final class HMS_Admin_UI {
 			}
 			if ( '' !== $t['error'] ) {
 				echo '<p class="hms-warn">' . esc_html( $t['error'] ) . '</p></div>';
+				return;
+			}
+			if ( isset( $t['video'] ) ) {
+				self::render_video_test( $t['video'] );
+				echo '</div>';
 				return;
 			}
 			?>
@@ -310,6 +394,49 @@ final class HMS_Admin_UI {
 		<?php
 	}
 
+	/** The result of an [hs_video] test. */
+	private static function render_video_test( array $v ): void {
+		$a = $v['atts'];
+		?>
+		<h3 class="hms-h3"><?php esc_html_e( 'Attributes', 'home-sections' ); ?></h3>
+		<table class="widefat hms-table">
+			<tbody>
+				<tr><td><code>type</code></td><td<?php echo '' === $a['type'] ? ' class="hms-warn"' : ''; ?>><?php echo '' === $a['type'] ? esc_html__( 'Άκυρος τύπος: γράψε trailer ή presentation.', 'home-sections' ) : esc_html( $a['type'] ); ?></td></tr>
+				<tr><td><code>id</code></td><td><?php echo $a['id'] ? esc_html( (string) $a['id'] ) : '—'; ?></td></tr>
+				<tr><td><code>exclude</code></td><td><?php echo $a['exclude'] ? esc_html( implode( ', ', $a['exclude'] ) ) : '—'; ?></td></tr>
+				<tr><td><code>category</code></td><td><?php echo $a['category'] ? esc_html( implode( ', ', $a['category'] ) ) : '—'; ?></td></tr>
+				<tr><td><code>preorders</code></td><td><?php echo $a['preorders'] ? esc_html__( 'μαζί με τις προπαραγγελίες', 'home-sections' ) : esc_html__( 'χωρίς τις προπαραγγελίες', 'home-sections' ); ?></td></tr>
+			</tbody>
+		</table>
+
+		<h3 class="hms-h3"><?php esc_html_e( 'Αποτέλεσμα', 'home-sections' ); ?></h3>
+		<?php if ( 0 === $v['pid'] ) : ?>
+			<p class="hms-warn"><?php esc_html_e( 'Κανένα προϊόν με βίντεο: το shortcode δεν τυπώνει τίποτα.', 'home-sections' ); ?></p>
+		<?php else : ?>
+			<p>
+				<a href="<?php echo esc_url( (string) get_edit_post_link( $v['pid'] ) ); ?>">#<?php echo esc_html( (string) $v['pid'] ); ?></a>
+				<?php echo esc_html( get_the_title( $v['pid'] ) ); ?> · <?php esc_html_e( 'βίντεο', 'home-sections' ); ?> <code><?php echo esc_html( $v['vid'] ); ?></code>
+			</p>
+			<p><img src="<?php echo esc_url( 'https://i.ytimg.com/vi/' . $v['vid'] . '/mqdefault.jpg' ); ?>" alt="" width="320" height="180" loading="lazy" /></p>
+			<p><textarea class="hms-code" rows="6" readonly><?php echo esc_textarea( $v['html'] ); ?></textarea></p>
+		<?php endif; ?>
+		<?php
+	}
+
+	/** Picks the [hs_video] product without the cache (nothing is written). */
+	private static function do_video_test( string $sc, array $out ): array {
+		$atts              = shortcode_parse_atts( preg_replace( '/^\[hs_video\s*|\]$/', '', $sc ) );
+		$a                 = HMS_Video::parse_atts( is_array( $atts ) ? $atts : array() );
+		list( $pid, $vid ) = HMS_Video::find( $a );
+		$out['video']      = array(
+			'atts' => $a,
+			'pid'  => $pid,
+			'vid'  => $vid,
+			'html' => $pid ? HMS_Video::html( $a, $pid, $vid ) : '',
+		);
+		return $out;
+	}
+
 	/**
 	 * Runs the shortcode's own query (WooCommerce builds the args, our
 	 * filter adds the markers) without rendering it.
@@ -322,8 +449,16 @@ final class HMS_Admin_UI {
 			'products' => array(),
 			'total'    => 0,
 		);
+		if ( preg_match( '/^\[hs_video(\s[^\]]*)?\]$/', $sc ) ) {
+			try {
+				return self::do_video_test( $sc, $out );
+			} catch ( \Throwable $e ) {
+				$out['error'] = __( 'Η δοκιμή απέτυχε.', 'home-sections' );
+				return $out;
+			}
+		}
 		if ( ! preg_match( '/^\[products(\s[^\]]*)?\]$/', $sc, $m ) ) {
-			$out['error'] = __( 'Γράψε ένα μόνο shortcode της μορφής [products …].', 'home-sections' );
+			$out['error'] = __( 'Γράψε ένα μόνο shortcode της μορφής [products …] ή [hs_video …].', 'home-sections' );
 			return $out;
 		}
 		if ( ! class_exists( 'WC_Shortcode_Products' ) ) {
@@ -449,6 +584,9 @@ final class HMS_Admin_UI {
 			case 'save':
 				self::redirect( self::do_save() );
 				break;
+			case 'video':
+				self::redirect( self::do_save_video() );
+				break;
 			case 'test':
 				// Read-only: answered in this request, no redirect.
 				self::$test = self::do_test( trim( substr( self::post( 'hms_sc' ), 0, 2000 ) ) );
@@ -540,9 +678,18 @@ final class HMS_Admin_UI {
 			array(
 				'alias'   => $alias,
 				'presets' => $presets,
+				'video'   => HMS_Settings::get()['video'],
 			)
 		);
 		return array_merge( $msgs, self::purge_caches() );
+	}
+
+	/** Saves the [hs_video] texts only; alias and presets stay as they are. */
+	private static function do_save_video(): array {
+		$s          = HMS_Settings::get();
+		$s['video'] = HMS_Settings::video( self::post_array( 'hms_v' ) );
+		HMS_Settings::save( $s );
+		return array_merge( array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'home-sections' ) ) ), self::purge_caches() );
 	}
 
 	/**
