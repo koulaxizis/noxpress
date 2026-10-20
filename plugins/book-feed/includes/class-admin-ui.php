@@ -362,13 +362,19 @@ final class BKF_Admin_UI {
 
 	/**
 	 * Publishing status filter (1.8.0): any, or one value of the feed's
-	 * publishing_status («Κυκλοφορεί» always listed, the rest as seen).
+	 * publishing_status («Κυκλοφορεί» always listed, the rest as seen),
+	 * or every value but one ("-X", 1.8.1, e.g. all but «Εξαντλημένο»).
 	 */
 	public static function pstat_select( string $name, string $cur ): void {
-		$vals = array_values( array_unique( array_merge( array( 'Κυκλοφορεί' ), BKF_Settings::seen()['status'], '' !== $cur ? array( $cur ) : array() ) ) );
+		$plain = '-' === substr( $cur, 0, 1 ) ? substr( $cur, 1 ) : $cur;
+		$vals  = array_values( array_unique( array_merge( array( 'Κυκλοφορεί', 'Εξαντλημένο' ), BKF_Settings::seen()['status'], '' !== $plain ? array( $plain ) : array() ) ) );
 		echo '<select name="' . esc_attr( $name ) . '"><option value="">' . esc_html__( 'Όλες', 'book-feed' ) . '</option>';
 		foreach ( $vals as $v ) {
 			echo '<option value="' . esc_attr( $v ) . '" ' . selected( $cur, $v, false ) . '>' . esc_html( $v ) . '</option>';
+		}
+		foreach ( $vals as $v ) {
+			/* translators: %s: a publishing status, e.g. «Εξαντλημένο» */
+			echo '<option value="' . esc_attr( '-' . $v ) . '" ' . selected( $cur, '-' . $v, false ) . '>' . esc_html( sprintf( __( 'Όλες εκτός από: %s', 'book-feed' ), $v ) ) . '</option>';
 		}
 		echo '</select>';
 	}

@@ -98,6 +98,8 @@ The settings, the history, the password, the scheduled actions and the plugin's 
 == Changelog ==
 
 = 1.8.1 =
+* "Publishing status" filter: also "All except: …", e.g. every title but the out-of-print ones («Εξαντλημένο»), so forthcoming titles still come in.
+* Each imported product keeps the catalogue's publishing status in `_bkf_pub_status` (written on import and on every sync).
 * Fixed: a rule run skipped the rest of a page of results when a step ran out of time, so a first run could import only part of a publisher's titles (165 found, 97 imported). The next step now reads the same page again; titles already imported are skipped.
 
 = 1.8.0 =

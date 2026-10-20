@@ -1037,6 +1037,7 @@ final class BKF_Importer {
 		update_post_meta( $pid, '_bkf_feed_price', null === $r['price'] ? '' : (string) $r['price'] );
 		update_post_meta( $pid, '_bkf_ptype', $r['ptype'] );
 		update_post_meta( $pid, '_bkf_fixed_until', $r['valid_until'] );
+		update_post_meta( $pid, '_bkf_pub_status', $r['status'] );
 	}
 
 	/** The URL of an external product from a template ({isbn}, {isbn13}, {title}). */
