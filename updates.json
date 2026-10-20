@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* \"Publishing status\" filter in the search and in rules: any status, or one value of the feed, such as «Κυκλοφορεί», so out-of-print or forthcoming titles stay out. \"Save search as rule\" and \"Import all results\" keep it.",
+        "changelog": "* \"Publishing status\" filter: also \"All except: …\", e.g. every title but the out-of-print ones («Εξαντλημένο»), so forthcoming titles still come in.\n* Each imported product keeps the catalogue's publishing status in `_bkf_pub_status` (written on import and on every sync).\n* Fixed: a rule run skipped the rest of a page of results when a step ran out of time, so a first run could import only part of a publisher's titles (165 found, 97 imported). The next step now reads the same page again; titles already imported are skipped.",
         "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4a546065a1417023514f2f16b98de75587f5aab7017d02f335ff696d126dd4ec",
-        "signature": "DP/FrPHjrX6mYQN13duU6nTLNZ5Ya2o/Z1+gt1ZjDs1EjHa2oxAYN+2JS5lPE2aG++ovZsvgxbZHuCYs8+7gBQ==",
+        "sha256": "9b0803ac8b0c5982da688f3c46fe648810d9b81ebc6351fd56fc922869902395",
+        "signature": "A1so7UP6tci4IgTWmVJruCs+CAGpHnjxP2J/3EUWFIEkzE9WM40sveDQ3EnMGyeHJ72AUTPLBiB6I8nTVIyNBw==",
         "tested_wp": "7.1",
-        "version": "1.8.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.8.0/book-feed.zip"
+        "version": "1.8.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.8.1/book-feed.zip"
       }
     },
     "book-preview": {
