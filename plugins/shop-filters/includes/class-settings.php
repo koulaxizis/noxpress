@@ -209,6 +209,8 @@ final class SHF_Settings {
 			'title'  => isset( $f['title'] ) ? mb_substr( sanitize_text_field( (string) $f['title'] ), 0, 80 ) : '',
 			'open'   => ! empty( $f['open'] ),
 			'counts' => ! isset( $f['counts'] ) || ! empty( $f['counts'] ),
+			// Category tree on a category page: only the branch of that category.
+			'branch' => 'cat' === $type && ( ! isset( $f['branch'] ) || ! empty( $f['branch'] ) ),
 		);
 	}
 

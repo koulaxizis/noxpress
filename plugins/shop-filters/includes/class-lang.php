@@ -83,6 +83,8 @@ final class SHF_Lang {
 		'Τίτλος'                                                   => 'Title',
 		'Ανοιχτό'                                                  => 'Open',
 		'Μετρητές'                                                 => 'Counts',
+		'Μόνο ο κλάδος της κατηγορίας'                             => 'Only the category\'s branch',
+		'Σε σελίδα κατηγορίας, το δέντρο δείχνει μόνο τον κλάδο της (την κατηγορία πρώτου επιπέδου και τις υποκατηγορίες της). Στο κατάστημα δείχνει όλο το δέντρο.' => 'On a category page, the tree shows only its branch (the top-level category and its subcategories). The shop shows the whole tree.',
 		'Αφαίρεση'                                                 => 'Remove',
 		'Δεν υπάρχουν φίλτρα σε αυτό το σετ.'                      => 'There are no filters in this set.',
 		'Προσθήκη φίλτρου:'                                        => 'Add filter:',
