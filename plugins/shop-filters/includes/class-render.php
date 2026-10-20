@@ -286,6 +286,17 @@ final class SHF_Render {
 			$t          = $parents[ $t ] ?? 0;
 		}
 
+		// On a category page, only the branch of that category: its top-level
+		// ancestor and everything under it (the shop shows the whole tree).
+		if ( $f['branch'] && $current > 0 && isset( $parents[ $current ] ) ) {
+			$root  = $current;
+			$guard = 0;
+			while ( ( $parents[ $root ] ?? 0 ) > 0 && isset( $parents[ $parents[ $root ] ] ) && $guard++ < 20 ) {
+				$root = $parents[ $root ];
+			}
+			$children[0] = array( $root );
+		}
+
 		$tree = self::cat_level( 0, $children, $names, $counts, $current, $open, $f['counts'], 0 );
 		if ( '' === $tree ) {
 			return '';
