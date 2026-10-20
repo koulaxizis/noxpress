@@ -729,7 +729,22 @@ final class BKF_Importer {
 				'meta_query' => array( array( 'key' => 'bkf_publisher', 'value' => $term->name ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- on a brand logo change only.
 			)
 		);
-		foreach ( is_array( $cats ) ? $cats : array() as $cat ) {
+		$cats   = is_array( $cats ) ? array_map( 'intval', $cats ) : array();
+		$parent = (int) BKF_Settings::get()['pub_cat'];
+		if ( $parent > 0 ) {
+			// A publisher subcategory made by hand, before the plugin met it.
+			$same = get_terms(
+				array(
+					'taxonomy'   => 'product_cat',
+					'parent'     => $parent,
+					'name'       => $term->name,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				)
+			);
+			$cats = array_unique( array_merge( $cats, is_array( $same ) ? array_map( 'intval', $same ) : array() ) );
+		}
+		foreach ( $cats as $cat ) {
 			self::logo_to_cat( (int) $cat, (int) $value );
 		}
 	}

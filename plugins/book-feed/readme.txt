@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -24,7 +24,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 
 * Title (with the subtitle in the title, in an attribute or nowhere), description and short description, ISBN as GTIN and SKU, the cover (and optionally the back cover) downloaded into the media library, weight and dimensions, tax class from the VAT rate.
 * Publisher, contributors per role, year, pages, language, series, binding and kind as attributes: store attributes (pa_, filterable in Shop Filters and widgets), attributes of the product only, or skipped. The publisher can also be a brand.
-* Catalogue categories map to store categories, optionally with their parent categories; they can also become an attribute (e.g. a "Genre" attribute). Each publisher can also get a subcategory of its own under a category you choose, with its brand logo as the image. Subjects and keywords (or the categories) can become product tags.
+* Catalogue categories map to store categories, optionally with their parent categories; they can also become an attribute (e.g. a "Genre" attribute). Each publisher can also get a subcategory of its own under a category you choose, with its brand logo as the image; [bkf_publishers] shows their logos in a small sliding strip. Subjects and keywords (or the categories) can become product tags.
 * Fit the products to the store's own structure: the order of the attributes on the product, renamed values ("Soft cover = Paperback", or dropped), and templates for the cover's file name and alt text (`{title}`, `{subtitle}`, `{authors}`, `{publisher}`, `{isbn}`).
 * A product-only "display" mode makes an external product with a button to another site (`{isbn}`, `{isbn13}`, `{title}` in the address).
 
@@ -94,6 +94,10 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.6.0 =
+* Shortcode [bkf_publishers]: the logos of the publisher subcategories that have titles, in a small strip that drifts slowly sideways, each linking to its subcategory. Greyscale until hovered; stops on hover and focus; stands still for visitors who ask for reduced motion. Attributes height, speed, parent.
+* A brand logo now also reaches a publisher subcategory made by hand with the same name.
 
 = 1.5.0 =
 * A subcategory per publisher (setting, off by default): each publisher becomes a subcategory of the category you choose, with the logo of the brand of the same name as its image. Each title goes into it once: on import, or at the next sync for titles already in the store; a title taken out by hand is not put back.
