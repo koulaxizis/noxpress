@@ -160,6 +160,8 @@ final class SBR_Lang {
 		'Ημέρες ιστορικού'                                            => 'Days of log',
 		'IP που δέχεται το endpoint MCP (μία ανά γραμμή, CIDR)'       => 'IPs the MCP endpoint accepts (one per line, CIDR)',
 		'Κενό = κάθε IP. Το Claude καλεί από 160.79.104.0/21· το Claude Code από τη δική σου IP.' => 'Empty = any IP. Claude calls from 160.79.104.0/21; Claude Code from your own IP.',
+		'Το Site Bridge δίνει στο Claude απομακρυσμένη πρόσβαση διαχειριστή στα sites που επιτρέπεις. Άνοιξε μόνο ό,τι χρειάζεσαι και κράτα τα sites σε Ανάγνωση.' => 'Site Bridge gives Claude remote administrator access to the sites you allow. Open only what you need and keep sites at read.',
+		'Δουλεύει με το Claude. Δεν είναι προϊόν της Anthropic και δεν σχετίζεται με αυτήν.' => 'Works with Claude. Not a product of Anthropic and not affiliated with Anthropic.',
 
 		// Log.
 		'Hub και site'                                                => 'Hub and site',

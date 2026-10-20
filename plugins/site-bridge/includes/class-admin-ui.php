@@ -207,6 +207,8 @@ final class SBR_Admin_UI {
 	private static function render_overview(): void {
 		$s = SBR_Settings::get();
 		?>
+		<p class="description sbr-warn"><?php esc_html_e( 'Το Site Bridge δίνει στο Claude απομακρυσμένη πρόσβαση διαχειριστή στα sites που επιτρέπεις. Άνοιξε μόνο ό,τι χρειάζεσαι και κράτα τα sites σε Ανάγνωση.', 'site-bridge' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Δουλεύει με το Claude. Δεν είναι προϊόν της Anthropic και δεν σχετίζεται με αυτήν.', 'site-bridge' ); ?></p>
 		<h2 class="sbr-h2"><?php esc_html_e( 'Ρόλοι', 'site-bridge' ); ?></h2>
 		<div class="sbr-zone">
 			<?php self::form_open( 'save_roles' ); ?>

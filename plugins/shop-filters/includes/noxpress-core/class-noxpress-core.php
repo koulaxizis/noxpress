@@ -56,6 +56,8 @@ final class Noxpress_Core {
 		'Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.' => 'Product sections with the [products] shortcode: marker classes that leave out products, categories or pre-orders and filter by a word in the title.',
 		'Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.' => 'Titles of other publishers from the Bookpoint catalogue (OSDEL) as products: search and import, rules per publisher and a daily sync of price and availability.',
 
+		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
+
 		// Hub.
 		'Όλα τα plugins της σουίτας Noxpress: κατάσταση, εκδόσεις και ενημερώσεις.' => 'Every plugin of the Noxpress suite: status, versions and updates.',
 		'Plugins'                                               => 'Plugins',
@@ -137,7 +139,8 @@ final class Noxpress_Core {
 
 	/**
 	 * Suite plugins the hub and the updater handle, keyed by slug
-	 * (folder and main file name).
+	 * (folder and main file name). "unlisted" plugins get updates but
+	 * show in the hub only where they are installed.
 	 */
 	public static function catalog(): array {
 		return array(
@@ -255,6 +258,12 @@ final class Noxpress_Core {
 				'name' => 'Book Feed',
 				'desc' => __( 'Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.', 'noxpress' ),
 				'page' => 'bkf-feed',
+			),
+			'site-bridge'       => array(
+				'name'     => 'Site Bridge',
+				'desc'     => __( 'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.', 'noxpress' ),
+				'page'     => 'sbr-settings',
+				'unlisted' => true,
 			),
 		);
 	}
