@@ -439,8 +439,15 @@ final class BKF_Sync {
 			return self::next_rule( $job, false );
 		}
 		$records = BKF_Record::from_docs( $res['docs'] );
+		$cut     = false;
 		foreach ( $records as $r ) {
-			if ( $job['per_rule'] >= $rule['max'] || microtime( true ) - $t0 > $budget + 20 ) {
+			if ( $job['per_rule'] >= $rule['max'] ) {
+				break;
+			}
+			if ( microtime( true ) - $t0 > $budget + 20 ) {
+				// Out of time mid-page: the next step reads this page again.
+				// Titles imported already are skipped by find_by_source().
+				$cut = true;
 				break;
 			}
 			if ( BKF_Importer::find_by_source( $r['id'] ) ) {
@@ -466,6 +473,9 @@ final class BKF_Sync {
 			} elseif ( 'error' === $out['result'] ) {
 				++$job['stats']['errors'];
 			}
+		}
+		if ( $cut ) {
+			return $job;
 		}
 		$job['start'] += self::PAGE;
 		if ( $job['per_rule'] >= $rule['max'] || $job['start'] >= $res['num'] || ! $res['docs'] ) {

@@ -55,7 +55,8 @@
  *  bkf_rules (autoload off): automatic imports, each
  *    { id, on, name, pub_id, pub_name, title, author, kind, pstat,
  *      year_from, year_to, cat, mode, url, button, max, every, status,
- *      last }. pstat = one publishing status, e.g. «Κυκλοφορεί» (1.8.0).
+ *      last }. pstat = one publishing status, e.g. «Κυκλοφορεί» (1.8.0),
+ *      or "-" + a status for every status but that one (1.8.1).
  *    A rule needs a publisher, title words or a contributor (1.7.0: any
  *    saved search). every = days between runs (1–90; rules saved before
  *    1.7.0 have none and keep running daily); status = draft | publish

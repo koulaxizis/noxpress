@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,11 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.8.1 =
+* "Publishing status" filter: also "All except: …", e.g. every title but the out-of-print ones («Εξαντλημένο»), so forthcoming titles still come in.
+* Each imported product keeps the catalogue's publishing status in `_bkf_pub_status` (written on import and on every sync).
+* Fixed: a rule run skipped the rest of a page of results when a step ran out of time, so a first run could import only part of a publisher's titles (165 found, 97 imported). The next step now reads the same page again; titles already imported are skipped.
 
 = 1.8.0 =
 * "Publishing status" filter in the search and in rules: any status, or one value of the feed, such as «Κυκλοφορεί», so out-of-print or forthcoming titles stay out. "Save search as rule" and "Import all results" keep it.

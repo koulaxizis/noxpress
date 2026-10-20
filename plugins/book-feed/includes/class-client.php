@@ -240,7 +240,7 @@ final class BKF_Client {
 	 * Builds q for books.
 	 *
 	 * @param array $f isbn, title, author, pub_id, year_from, year_to, kind,
-	 *                 pstat (publishing status, exact, 1.8.0),
+	 *                 pstat (publishing status, exact, 1.8.0; "-X" = all but X, 1.8.1),
 	 *                 since (Unix time, last_update), ids (product_id list).
 	 */
 	public static function book_query( array $f ): string {
@@ -281,7 +281,10 @@ final class BKF_Client {
 			$and[] = self::exact( 'product_kind', $f['kind'] );
 		}
 		if ( ! empty( $f['pstat'] ) && is_string( $f['pstat'] ) ) {
-			$and[] = self::exact( 'publishing_status', $f['pstat'] );
+			// A leading "-" keeps every status except that one (1.8.1).
+			$and[] = '-' === substr( $f['pstat'], 0, 1 )
+				? '(*:* -' . self::exact( 'publishing_status', substr( $f['pstat'], 1 ) ) . ')'
+				: self::exact( 'publishing_status', $f['pstat'] );
 		}
 		if ( ! empty( $f['since'] ) ) {
 			$and[] = 'last_update:[' . gmdate( 'Y-m-d\TH:i:s\Z', (int) $f['since'] ) . ' TO *]';

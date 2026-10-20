@@ -56,6 +56,7 @@ final class BKF_Lang {
 		'Όλα'                                                       => 'All',
 		'Κατάσταση κυκλοφορίας'                                     => 'Publishing status',
 		'Όλες'                                                      => 'All',
+		'Όλες εκτός από: %s'                                        => 'All except: %s',
 		'Αναζήτηση'                                                 => 'Search',
 		'Πάτησε «Αναζήτηση» για να τρέξει η αναζήτηση.'             => 'Press "Search" to run the search.',
 		'Η αναζήτηση απέτυχε: %s'                                   => 'The search failed: %s',
