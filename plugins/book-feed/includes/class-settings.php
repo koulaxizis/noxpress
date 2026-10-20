@@ -53,8 +53,9 @@
  *    delete_products  delete the imported products on uninstall (off)
  *
  *  bkf_rules (autoload off): automatic imports, each
- *    { id, on, name, pub_id, pub_name, title, author, kind, year_from,
- *      year_to, cat, mode, url, button, max, every, status, last }.
+ *    { id, on, name, pub_id, pub_name, title, author, kind, pstat,
+ *      year_from, year_to, cat, mode, url, button, max, every, status,
+ *      last }. pstat = one publishing status, e.g. «Κυκλοφορεί» (1.8.0).
  *    A rule needs a publisher, title words or a contributor (1.7.0: any
  *    saved search). every = days between runs (1–90; rules saved before
  *    1.7.0 have none and keep running daily); status = draft | publish
@@ -510,6 +511,7 @@ final class BKF_Settings {
 			'title'     => $title,
 			'author'    => $author,
 			'kind'      => self::text( $r['kind'] ?? '', 60 ),
+			'pstat'     => self::text( $r['pstat'] ?? '', 80 ),
 			'year_from' => max( 0, min( 2100, (int) ( $r['year_from'] ?? 0 ) ) ),
 			'year_to'   => max( 0, min( 2100, (int) ( $r['year_to'] ?? 0 ) ) ),
 			'cat'       => ( $cat > 0 && term_exists( $cat, 'product_cat' ) ) ? $cat : 0,

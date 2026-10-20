@@ -54,6 +54,8 @@ final class BKF_Lang {
 		'Έτος από – έως'                                            => 'Year from – to',
 		'Είδος'                                                     => 'Kind',
 		'Όλα'                                                       => 'All',
+		'Κατάσταση κυκλοφορίας'                                     => 'Publishing status',
+		'Όλες'                                                      => 'All',
 		'Αναζήτηση'                                                 => 'Search',
 		'Πάτησε «Αναζήτηση» για να τρέξει η αναζήτηση.'             => 'Press "Search" to run the search.',
 		'Η αναζήτηση απέτυχε: %s'                                   => 'The search failed: %s',
