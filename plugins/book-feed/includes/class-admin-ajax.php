@@ -397,6 +397,7 @@ final class BKF_Admin_Ajax {
 			'bkf_y1'   => $f['year_from'] ? (string) $f['year_from'] : '',
 			'bkf_y2'   => $f['year_to'] ? (string) $f['year_to'] : '',
 			'bkf_kind' => $f['kind'],
+			'bkf_ps'   => $f['pstat'],
 		);
 		foreach ( $map as $k => $v ) {
 			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( (string) $v ) . '" />';
@@ -478,6 +479,7 @@ final class BKF_Admin_Ajax {
 				'title'     => $f['title'],
 				'author'    => $f['author'],
 				'kind'      => $f['kind'],
+				'pstat'     => $f['pstat'],
 				'year_from' => $f['year_from'],
 				'year_to'   => $f['year_to'],
 				'cat'       => $opt['cat'],
@@ -535,6 +537,7 @@ final class BKF_Admin_Ajax {
 			'year_from' => min( 2100, absint( $q( 'bkf_y1' ) ) ),
 			'year_to'   => min( 2100, absint( $q( 'bkf_y2' ) ) ),
 			'kind'      => BKF_Settings::text( $q( 'bkf_kind' ), 60 ),
+			'pstat'     => BKF_Settings::text( $q( 'bkf_ps' ), 80 ),
 		);
 	}
 
@@ -549,6 +552,7 @@ final class BKF_Admin_Ajax {
 			'bkf_y1'   => $f['year_from'] ? $f['year_from'] : '',
 			'bkf_y2'   => $f['year_to'] ? $f['year_to'] : '',
 			'bkf_kind' => $f['kind'],
+			'bkf_ps'   => $f['pstat'],
 			'paged'    => $paged > 1 ? $paged : '',
 		);
 		return wp_nonce_url( BKF_Admin_UI::url( 'search', array_filter( $args, 'strlen' ) ), BKF_Admin_UI::NONCE_FIND, 'bkf_f' );
@@ -583,7 +587,7 @@ final class BKF_Admin_Ajax {
 		$f     = self::filters();
 		$paged = max( 1, absint( BKF_Admin_UI::q( 'paged' ) ) );
 		$seen  = BKF_Settings::seen();
-		$asked = '' !== $f['title'] . $f['author'] . $f['isbn'] . $f['pub_id'] . $f['pub_name'] . $f['kind'] || $f['year_from'] || $f['year_to'];
+		$asked = '' !== $f['title'] . $f['author'] . $f['isbn'] . $f['pub_id'] . $f['pub_name'] . $f['kind'] . $f['pstat'] || $f['year_from'] || $f['year_to'];
 		$valid = $asked && wp_verify_nonce( BKF_Admin_UI::q( 'bkf_f' ), BKF_Admin_UI::NONCE_FIND );
 		?>
 		<form method="get" class="bkf-zone bkf-search">
@@ -623,6 +627,9 @@ final class BKF_Admin_Ajax {
 						}
 						?>
 					</select>
+				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Κατάσταση κυκλοφορίας', 'book-feed' ); ?></span>
+					<?php BKF_Admin_UI::pstat_select( 'bkf_ps', $f['pstat'] ); ?>
 				</p>
 			</div>
 			<p><button type="submit" class="button button-primary" <?php disabled( ! BKF_Settings::ready() ); ?>><?php esc_html_e( 'Αναζήτηση', 'book-feed' ); ?></button></p>

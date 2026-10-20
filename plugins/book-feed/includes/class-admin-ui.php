@@ -360,6 +360,19 @@ final class BKF_Admin_UI {
 		<?php
 	}
 
+	/**
+	 * Publishing status filter (1.8.0): any, or one value of the feed's
+	 * publishing_status («Κυκλοφορεί» always listed, the rest as seen).
+	 */
+	public static function pstat_select( string $name, string $cur ): void {
+		$vals = array_values( array_unique( array_merge( array( 'Κυκλοφορεί' ), BKF_Settings::seen()['status'], '' !== $cur ? array( $cur ) : array() ) ) );
+		echo '<select name="' . esc_attr( $name ) . '"><option value="">' . esc_html__( 'Όλες', 'book-feed' ) . '</option>';
+		foreach ( $vals as $v ) {
+			echo '<option value="' . esc_attr( $v ) . '" ' . selected( $cur, $v, false ) . '>' . esc_html( $v ) . '</option>';
+		}
+		echo '</select>';
+	}
+
 	private static function rule_card( int $i, ?array $r ): void {
 		$new  = null === $r;
 		$r    = $new ? BKF_Settings::clean_rule( array( 'pub_id' => 'x', 'on' => true, 'every' => 7 ) ) : $r;
@@ -404,6 +417,9 @@ final class BKF_Admin_UI {
 						}
 						?>
 					</select>
+				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Κατάσταση κυκλοφορίας', 'book-feed' ); ?></span>
+					<?php self::pstat_select( $name . '[pstat]', $r['pstat'] ); ?>
 				</p>
 				<p class="bkf-field"><span><?php esc_html_e( 'Έτος από – έως', 'book-feed' ); ?></span>
 					<span class="bkf-pair">
@@ -460,6 +476,7 @@ final class BKF_Admin_UI {
 							'bkf_t'    => $r['title'],
 							'bkf_a'    => $r['author'],
 							'bkf_kind' => $r['kind'],
+							'bkf_ps'   => $r['pstat'],
 							'bkf_y1'   => $r['year_from'] ? (string) $r['year_from'] : '',
 							'bkf_y2'   => $r['year_to'] ? (string) $r['year_to'] : '',
 						),

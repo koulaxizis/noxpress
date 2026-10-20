@@ -421,6 +421,7 @@ final class BKF_Sync {
 						'year_from' => $rule['year_from'],
 						'year_to'   => $rule['year_to'],
 						'kind'      => $rule['kind'],
+						'pstat'     => $rule['pstat'],
 						'since'     => $since,
 					)
 				),

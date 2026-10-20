@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.8.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -35,7 +35,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * Price and availability always follow the catalogue. Title, descriptions, cover, attributes, dimensions and tax class follow it too, until you edit them by hand: from then on that field is locked, and the history says so.
 * A title that leaves the catalogue becomes out of stock (default) or a draft, and comes back when it returns.
 * If the catalogue suddenly returns none of the store's titles, the sync stops without changing anything.
-* Rules bring new titles in automatically: a publisher, title words or a contributor, with kind and years, checked every X days (1–90), as drafts or published, with "Run now". One summary email when they bring something (can be turned off), and a history line per rule even when there is nothing new.
+* Rules bring new titles in automatically: a publisher, title words or a contributor, with kind, publishing status and years, checked every X days (1–90), as drafts or published, with "Run now". One summary email when they bring something (can be turned off), and a history line per rule even when there is nothing new.
 * Runs in the background (Action Scheduler) in steps of up to 10 seconds, one at a time, with a safety action and stall detection. "Sync now" and a live status on every tab.
 
 **Prices from the publishers' own sites**
@@ -96,6 +96,9 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.8.0 =
+* "Publishing status" filter in the search and in rules: any status, or one value of the feed, such as «Κυκλοφορεί», so out-of-print or forthcoming titles stay out. "Save search as rule" and "Import all results" keep it.
 
 = 1.7.1 =
 * [bkf_publishers] names="1" prints each publisher's name under its logo.
