@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.1
+Stable tag: 1.9.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,12 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.9.0 =
+* Square covers (setting): every downloaded cover becomes a square PNG with a transparent background, the whole cover centred on a canvas as wide as its longer side, never cropped.
+* Tools → "Make the existing covers square": the covers Book Feed already downloaded for imported titles, in place (same attachment, new PNG file and sizes, old files removed), in the background. Turning the setting on starts it too. Covers uploaded by hand are never touched.
+* The book's own page on the publisher's site: when the publisher's address is a search page, the link whose text is the book's title is read as well, and taken when it names the ISBN (or gives a price and names no other ISBN). A Store API answer gives the product's permalink and image. The page found is kept as the product's page (`_bkf_pub_url`) when it has none, so later price and cover checks go straight to it.
+* "Read the price" in Tools shows the book's page it found.
 
 = 1.8.1 =
 * "Publishing status" filter: also "All except: …", e.g. every title but the out-of-print ones («Εξαντλημένο»), so forthcoming titles still come in.
