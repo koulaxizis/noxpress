@@ -2,7 +2,8 @@
 /**
  * CRT_Metabox — the creator edit screen.
  *
- *  - «Στοιχεία»: roles text, sort name, links (repeater).
+ *  - «Στοιχεία»: roles text, sort name, gender (product tab title), links
+ *    (repeater).
  *  - «Συνεντεύξεις, βίντεο, κριτικές»: one list, each row with a type
  *    (repeater; videos may have a local image).
  *  - «Ταίριασμα με χαρακτηριστικά»: the matching key, the terms found
@@ -54,6 +55,8 @@ final class CRT_Metabox {
 		add_meta_box( 'crt-details', __( 'Στοιχεία δημιουργού', 'featured-creators' ), array( __CLASS__, 'box_details' ), CRT_CPT::PT, 'normal', 'high' );
 		add_meta_box( 'crt-press', __( 'Συνεντεύξεις, βίντεο, κριτικές και αναφορές', 'featured-creators' ), array( __CLASS__, 'box_press' ), CRT_CPT::PT, 'normal', 'default' );
 		add_meta_box( 'crt-match', __( 'Ταίριασμα με χαρακτηριστικά', 'featured-creators' ), array( __CLASS__, 'box_match' ), CRT_CPT::PT, 'normal', 'default' );
+		// The post type supports custom-fields for REST only; the boxes above edit the meta.
+		remove_meta_box( 'postcustom', CRT_CPT::PT, 'normal' );
 	}
 
 	/* =====================================================================
@@ -72,6 +75,20 @@ final class CRT_Metabox {
 			<label class="crt-label" for="crt-sort"><?php esc_html_e( 'Όνομα ταξινόμησης', 'featured-creators' ); ?></label>
 			<input type="text" id="crt-sort" name="crt_sort" maxlength="120" value="<?php echo esc_attr( (string) get_post_meta( $post->ID, CRT_CPT::M_SORT, true ) ); ?>" placeholder="<?php echo esc_attr( $post->post_title ); ?>" />
 			<p class="description"><?php esc_html_e( 'Για τη σειρά στο ευρετήριο, π.χ. «Κουλαξίζης Χρήστος». Κενό = το όνομα όπως γράφεται.', 'featured-creators' ); ?></p>
+
+			<label class="crt-label" for="crt-gender"><?php esc_html_e( 'Άρθρο στον τίτλο της καρτέλας', 'featured-creators' ); ?></label>
+			<select id="crt-gender" name="crt_gender">
+				<?php
+				foreach ( array(
+					''  => __( 'Χωρίς άρθρο («Συγγραφέας»)', 'featured-creators' ),
+					'm' => __( 'Ο («Ο συγγραφέας»)', 'featured-creators' ),
+					'f' => __( 'Η («Η συγγραφέας»)', 'featured-creators' ),
+				) as $k => $label ) {
+					echo '<option value="' . esc_attr( $k ) . '" ' . selected( CRT_CPT::gender( $post->ID ), $k, false ) . '>' . esc_html( $label ) . '</option>';
+				}
+				?>
+			</select>
+			<p class="description"><?php esc_html_e( 'Για την καρτέλα δημιουργού στο προϊόν, όταν το προϊόν έχει μόνο αυτόν τον δημιουργό.', 'featured-creators' ); ?></p>
 
 			<span class="crt-label"><?php esc_html_e( 'Σύνδεσμοι', 'featured-creators' ); ?></span>
 			<div class="crt-rows" data-crt-rows="links">
@@ -283,6 +300,9 @@ final class CRT_Metabox {
 
 		$sort = isset( $_POST['crt_sort'] ) && is_string( $_POST['crt_sort'] ) ? CRT_Settings::clip( sanitize_text_field( wp_unslash( $_POST['crt_sort'] ) ), 120 ) : '';
 		self::set_or_delete( (int) $post_id, CRT_CPT::M_SORT, $sort );
+
+		$gender = isset( $_POST['crt_gender'] ) && is_string( $_POST['crt_gender'] ) ? CRT_CPT::rest_gender( sanitize_key( wp_unslash( $_POST['crt_gender'] ) ) ) : '';
+		self::set_or_delete( (int) $post_id, CRT_CPT::M_GENDER, $gender );
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized by CRT_CPT::sanitize_links().
 		$links = isset( $_POST['crt_links'] ) && is_array( $_POST['crt_links'] ) ? wp_unslash( $_POST['crt_links'] ) : array();

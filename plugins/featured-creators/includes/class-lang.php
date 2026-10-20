@@ -217,6 +217,25 @@ final class CRT_Lang {
 		'Ο δημιουργός υποβλήθηκε.' => 'Creator submitted.',
 		'Ο δημιουργός προγραμματίστηκε.' => 'Creator scheduled.',
 		'Το προσχέδιο του δημιουργού ενημερώθηκε.' => 'Creator draft updated.',
+		// 1.1.0
+		'Άρθρο στον τίτλο της καρτέλας' => 'Article in the tab title',
+		'Χωρίς άρθρο («Συγγραφέας»)' => 'No article ("Author")',
+		'Ο («Ο συγγραφέας»)' => 'Masculine («Ο συγγραφέας»)',
+		'Η («Η συγγραφέας»)' => 'Feminine («Η συγγραφέας»)',
+		'Για την καρτέλα δημιουργού στο προϊόν, όταν το προϊόν έχει μόνο αυτόν τον δημιουργό.' => 'For the creator tab on the product, when the product has only this creator.',
+		'Πληθυντικός (el / en)' => 'Plural (el / en)',
+		'Ενότητα στη σελίδα' => 'Section on the page',
+		'Στην καρτέλα' => 'In the tab',
+		'Πληθυντικός: π.χ. «Συγγραφείς», στον τίτλο της καρτέλας όταν ένα προϊόν έχει πολλούς δημιουργούς του ίδιου ρόλου. Ενότητα στη σελίδα: χωρίς τικ, ο ρόλος μετράει για το ταίριασμα και τις ιδιότητες, αλλά τα προϊόντα του δεν εμφανίζονται στη σελίδα του δημιουργού (π.χ. σελιδοποίηση).' => 'Plural: e.g. "Authors", in the tab title when a product has several creators of the same role. Section on the page: unticked, the role counts for matching and the roles line, but its products are not shown on the creator page (e.g. typesetting).',
+		'Καρτέλα δημιουργού στο προϊόν (φωτογραφία, βιογραφικό, σύνδεσμοι, τα τρία πιο πρόσφατα δημοσιεύματα)' => 'Creator tab on the product (photo, biography, links, the three newest press items)',
+		'Θέση καρτέλας' => 'Tab position',
+		'Προτεραιότητα του WooCommerce: Περιγραφή 10, Επιπλέον πληροφορίες 20, Αξιολογήσεις 30.' => 'WooCommerce priority: Description 10, Additional information 20, Reviews 30.',
+		'Στην καρτέλα μπαίνουν μόνο οι δημοσιευμένοι δημιουργοί των ρόλων με τικ «Στην καρτέλα». Προϊόν χωρίς τέτοιον δημιουργό δεν παίρνει καρτέλα.' => 'The tab shows only the published creators of the roles ticked "In the tab". A product without such a creator gets no tab.',
+		'Τίτλος καρτέλας: ένας δημιουργός, «Ο» ({role} = ρόλος)' => 'Tab title: one creator, masculine ({role} = role)',
+		'Τίτλος καρτέλας: μία δημιουργός, «Η» ({role} = ρόλος)' => 'Tab title: one creator, feminine ({role} = role)',
+		'Τίτλος καρτέλας: ένας δημιουργός χωρίς άρθρο ({role} = ρόλος)' => 'Tab title: one creator, no article ({role} = role)',
+		'Τίτλος καρτέλας: πολλοί, ίδιος ρόλος ({roles} = πληθυντικός)' => 'Tab title: several, same role ({roles} = plural)',
+		'Τίτλος καρτέλας: πολλοί, διαφορετικοί ρόλοι' => 'Tab title: several, different roles',
 	);
 
 	public static function init(): void {

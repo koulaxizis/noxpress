@@ -1,9 +1,9 @@
 /**
- * Featured Creators — front.css (v1.0.0)
+ * Featured Creators — front.css (v1.1.0)
  *
- * Scoped to .crt-root (creator page, creator box, index). The product
- * cards inside .crt-products are WooCommerce's and the theme's own and are
- * not styled here. Layout properties of our own elements carry !important
+ * Scoped to .crt-root (creator page, creator box, creator tab, index). The
+ * product cards inside .crt-products are WooCommerce's and the theme's own
+ * and are not styled here. Layout properties of our own elements carry !important
  * so theme rules with an id cannot rearrange them (Bible §14, rule 13).
  * Colours and fonts are inherited; --crt-gap and --crt-avatar can be set
  * by the theme.
@@ -221,9 +221,39 @@ body.crt-creator-page #primary.content-area { width: 100% !important; max-width:
 .crt-index .crt-group__cards { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)) !important; gap: 1em 1.5em !important; }
 .crt-index .crt-card { align-items: center !important; }
 
+/* Creator tab on the product (1.1.0). */
+.crt-tab { --crt-avatar: 120px; }
+.crt-tab .crt-tab__person {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	align-items: flex-start !important;
+	gap: var(--crt-gap) !important;
+	margin: 0 0 var(--crt-gap) !important;
+	padding: 0 0 var(--crt-gap) !important;
+	border-bottom: 1px solid var(--crt-line) !important;
+}
+.crt-tab .crt-tab__person:last-child { margin-bottom: 0 !important; padding-bottom: 0 !important; border-bottom: 0 !important; }
+.crt-tab .crt-tab__photo { flex: 0 0 auto !important; display: block !important; width: var(--crt-avatar) !important; height: var(--crt-avatar) !important; line-height: 0; text-decoration: none !important; }
+.crt-tab .crt-tab__body { display: block !important; flex: 1 1 280px !important; min-width: 0 !important; max-width: 46em !important; }
+.crt-tab .crt-tab__name { margin: 0 0 .2em !important; padding: 0 !important; font-size: 1.2em; }
+.crt-tab .crt-tab__name a { text-decoration: none; }
+.crt-tab .crt-tab__name a:hover,
+.crt-tab .crt-tab__name a:focus { text-decoration: underline; }
+.crt-tab .crt-tab__roles { margin: 0 0 .6em !important; opacity: .8; }
+.crt-tab .crt-tab__bio { margin: 0 0 .75em !important; }
+.crt-tab .crt-links { display: flex !important; flex-wrap: wrap !important; gap: .4em 1em !important; margin: 0 0 .75em !important; padding: 0 !important; list-style: none !important; }
+.crt-tab .crt-link { display: inline-flex !important; align-items: center !important; gap: .35em !important; text-decoration: none; white-space: nowrap; }
+.crt-tab .crt-link:hover span,
+.crt-tab .crt-link:focus span { text-decoration: underline; }
+.crt-tab .crt-tab__press { margin: 0 0 .75em !important; padding: 0 0 0 1.1em !important; }
+.crt-tab .crt-tab__press li { margin: 0 0 .3em !important; }
+.crt-tab .crt-tab__press .crt-item__meta { display: inline !important; font-size: .85em; opacity: .75; }
+.crt-tab .crt-tab__more { margin: 0 !important; }
+
 @media (max-width: 600px) {
 	.crt-page .crt-head { flex-direction: column !important; align-items: flex-start !important; }
 	.crt-page .crt-head__photo { width: 140px !important; }
+	.crt-tab { --crt-avatar: 88px; }
 }
 
 /* Last, and doubled for specificity: hidden always wins over the layout rules above. */

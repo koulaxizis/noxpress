@@ -5,12 +5,18 @@
  *
  *  - mode            'off' | 'test' (default: shop managers only) | 'live'
  *  - lang            visitor text language: 'auto' (site locale) | 'el' | 'en'
- *  - roles           ordered list of { tax, h_el, h_en, l_el, l_en, schema, box }:
+ *  - roles           ordered list of { tax, h_el, h_en, l_el, l_en, p_el, p_en,
+ *                    schema, box, tab, section }:
  *                    tax = a global attribute taxonomy (pa_*); h_* = section
  *                    heading on the creator page; l_* = role name (box,
- *                    index, header); '' = the attribute's label; schema =
- *                    schema.org property (self::PROPS); box = shown in the
- *                    creator box on the product
+ *                    index, header, product tab); p_* = role name in the
+ *                    plural (product tab with several creators); '' = the
+ *                    attribute's label; schema = schema.org property
+ *                    (self::PROPS); box = shown in the creator box on the
+ *                    product; tab = shown in the creator tab on the
+ *                    product; section = its products get a section on the
+ *                    creator page (off: the role only matches and shows in
+ *                    the roles line, e.g. page layout with 60 products)
  *  - base            URL base of the creator pages (/base/slug/)
  *  - top             space above the creator page (CSS length)
  *  - columns         product columns on the creator page (1–6)
@@ -21,6 +27,9 @@
  *  - box, box_pos    creator box on the product: 'description' (end of the
  *                    Description tab) | 'after' (after the tabs) | 'none'
  *                    (shortcode / block only); box_max cards
+ *  - tab, tab_priority product tab with the creators of the "tab" roles
+ *                    (photo, short biography, links, latest press items),
+ *                    at this WooCommerce tab priority (1–200)
  *  - index_page      page with the index (breadcrumbs, schema, back link)
  *  - schema          Person + ProfilePage on creator pages
  *  - schema_products roles on products (needs schema_types)
@@ -45,6 +54,11 @@ final class CRT_Settings {
 		't_all'        => 40,
 		't_formats'    => 80,
 		't_box'        => 80,
+		't_tab_m'      => 80,
+		't_tab_f'      => 80,
+		't_tab_n'      => 80,
+		't_tab_many'   => 80,
+		't_tab_mixed'  => 80,
 	);
 
 	/** schema.org properties a role may map to ('' = none). */
@@ -71,6 +85,8 @@ final class CRT_Settings {
 			'box'             => true,
 			'box_pos'         => 'description',
 			'box_max'         => 3,
+			'tab'             => false,
+			'tab_priority'    => 35,
 			'index_page'      => 0,
 			'schema'          => true,
 			'schema_products' => true,
@@ -107,6 +123,28 @@ final class CRT_Settings {
 			't_box'           => array(
 				'el' => 'Οι δημιουργοί',
 				'en' => 'The creators',
+			),
+			// Product tab title. {role} = the role name, {roles} = the
+			// plural; the first letter of the result is capitalised.
+			't_tab_m'         => array(
+				'el' => 'Ο {role}',
+				'en' => 'About the {role}',
+			),
+			't_tab_f'         => array(
+				'el' => 'Η {role}',
+				'en' => 'About the {role}',
+			),
+			't_tab_n'         => array(
+				'el' => '{role}',
+				'en' => 'About the {role}',
+			),
+			't_tab_many'      => array(
+				'el' => 'Οι {roles}',
+				'en' => 'About the {roles}',
+			),
+			't_tab_mixed'     => array(
+				'el' => 'Οι δημιουργοί',
+				'en' => 'About the creators',
 			),
 		);
 	}
@@ -185,13 +223,16 @@ final class CRT_Settings {
 			$s['bundle_types'] = array_values( array_unique( $s['bundle_types'] ) );
 		}
 
-		foreach ( array( 'formats', 'links', 'box', 'schema', 'schema_products', 'delete_posts' ) as $k ) {
+		foreach ( array( 'formats', 'links', 'box', 'tab', 'schema', 'schema_products', 'delete_posts' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 
 		$s['box_pos'] = isset( $raw['box_pos'] ) && in_array( $raw['box_pos'], array( 'description', 'after', 'none' ), true ) ? $raw['box_pos'] : $d['box_pos'];
 		$max          = isset( $raw['box_max'] ) ? (int) $raw['box_max'] : 0;
 		$s['box_max'] = $max >= 1 && $max <= 12 ? $max : $d['box_max'];
+
+		$prio              = isset( $raw['tab_priority'] ) ? (int) $raw['tab_priority'] : 0;
+		$s['tab_priority'] = $prio >= 1 && $prio <= 200 ? $prio : $d['tab_priority'];
 
 		$page            = isset( $raw['index_page'] ) ? (int) $raw['index_page'] : 0;
 		$s['index_page'] = $page > 0 && 'page' === get_post_type( $page ) ? $page : 0;
@@ -251,12 +292,15 @@ final class CRT_Settings {
 			}
 			$seen[ $tax ] = true;
 			$row          = array( 'tax' => $tax );
-			foreach ( array( 'h_el', 'h_en', 'l_el', 'l_en' ) as $k ) {
+			foreach ( array( 'h_el', 'h_en', 'l_el', 'l_en', 'p_el', 'p_en' ) as $k ) {
 				$row[ $k ] = isset( $r[ $k ] ) && is_string( $r[ $k ] ) ? self::clip( sanitize_text_field( $r[ $k ] ), 80 ) : '';
 			}
-			$row['schema'] = isset( $r['schema'] ) && in_array( $r['schema'], self::PROPS, true ) ? $r['schema'] : self::guess_prop( $taxes[ $tax ] );
-			$row['box']    = ! empty( $r['box'] );
-			$out[]         = $row;
+			$row['schema']  = isset( $r['schema'] ) && in_array( $r['schema'], self::PROPS, true ) ? $r['schema'] : self::guess_prop( $taxes[ $tax ] );
+			$row['box']     = ! empty( $r['box'] );
+			$row['tab']     = ! empty( $r['tab'] );
+			// Settings saved before 1.1.0 have no 'section': every role had one.
+			$row['section'] = ! isset( $r['section'] ) || ! empty( $r['section'] );
+			$out[]          = $row;
 		}
 		return $out;
 	}
@@ -265,13 +309,17 @@ final class CRT_Settings {
 	public static function new_role( string $tax, bool $box ): array {
 		$taxes = self::attribute_taxonomies();
 		return array(
-			'tax'    => $tax,
-			'h_el'   => '',
-			'h_en'   => '',
-			'l_el'   => '',
-			'l_en'   => '',
-			'schema' => self::guess_prop( isset( $taxes[ $tax ] ) ? $taxes[ $tax ] : '' ),
-			'box'    => $box,
+			'tax'     => $tax,
+			'h_el'    => '',
+			'h_en'    => '',
+			'l_el'    => '',
+			'l_en'    => '',
+			'p_el'    => '',
+			'p_en'    => '',
+			'schema'  => self::guess_prop( isset( $taxes[ $tax ] ) ? $taxes[ $tax ] : '' ),
+			'box'     => $box,
+			'tab'     => false,
+			'section' => true,
 		);
 	}
 
@@ -354,6 +402,23 @@ final class CRT_Settings {
 		return $out;
 	}
 
+	/** Role taxonomies shown in the product tab, in order. */
+	public static function tab_taxes(): array {
+		$out = array();
+		foreach ( self::get()['roles'] as $r ) {
+			if ( $r['tab'] && taxonomy_exists( $r['tax'] ) ) {
+				$out[] = $r['tax'];
+			}
+		}
+		return $out;
+	}
+
+	/** Whether a role gets its own section of products on the creator page. */
+	public static function has_section( string $tax ): bool {
+		$r = self::role( $tax );
+		return null !== $r && $r['section'];
+	}
+
 	/** The role row of a taxonomy, or null. */
 	public static function role( string $tax ): ?array {
 		foreach ( self::get()['roles'] as $r ) {
@@ -374,16 +439,17 @@ final class CRT_Settings {
 	}
 
 	/**
-	 * A role's visitor text: 'h' (section heading) or 'l' (role name). An
-	 * empty value falls back to the other language, then to the label of
-	 * the attribute.
+	 * A role's visitor text: 'h' (section heading), 'l' (role name) or 'p'
+	 * (role name in the plural). An empty value falls back to the other
+	 * language, then ('h' only) to the role name, then to the label of the
+	 * attribute.
 	 */
 	public static function role_text( string $tax, string $which ): string {
 		$r    = self::role( $tax );
 		$lang = self::lang();
 		$text = '';
 		if ( null !== $r ) {
-			$k    = ( 'h' === $which ? 'h_' : 'l_' );
+			$k    = ( 'h' === $which || 'p' === $which ? $which . '_' : 'l_' );
 			$text = ( 'en' === $lang && '' !== $r[ $k . 'en' ] ) ? $r[ $k . 'en' ] : $r[ $k . 'el' ];
 			if ( '' === $text && 'h' === $which ) {
 				$text = ( 'en' === $lang && '' !== $r['l_en'] ) ? $r['l_en'] : $r['l_el'];
@@ -411,7 +477,8 @@ final class CRT_Settings {
 		 *
 		 * @param string $text Text with its {placeholders}.
 		 * @param string $key  Text key (t_more, t_bundles, …), or
-		 *                     'h:pa_x' / 'l:pa_x' for a role heading / name.
+		 *                     'h:pa_x' / 'l:pa_x' / 'p:pa_x' for a role
+		 *                     heading / name / name in the plural.
 		 * @param string $lang 'el' | 'en'.
 		 */
 		return (string) apply_filters( 'crt_text', $text, $key, $lang );

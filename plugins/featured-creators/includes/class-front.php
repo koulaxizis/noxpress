@@ -13,6 +13,10 @@
  *    its creator is public.
  *  - Creator box on the product: end of the Description tab (its callback
  *    is wrapped), after the tabs, or [nox_creator_box] / block only.
+ *  - Creator tab on the product (1.1.0): the public creators of the "tab"
+ *    roles with photo, short biography, links and their latest press
+ *    items; the title follows the creator's gender and the role
+ *    («Ο συγγραφέας», «Η εικονογράφος», «Οι συγγραφείς»).
  *  - Index: [nox_creators] / block, role filter by link (?crt_role=…) and,
  *    with JavaScript, without reload; no AJAX.
  *
@@ -55,6 +59,7 @@ final class CRT_Front {
 
 		add_filter( 'woocommerce_display_product_attributes', array( __CLASS__, 'attribute_links' ), 20, 2 );
 		add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'tabs' ), 98 );
+		add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'creator_tab' ), 98 );
 		add_action( 'woocommerce_after_single_product_summary', array( __CLASS__, 'box_after_tabs' ), 12 );
 
 		// Sitemaps list creators only when everyone may see them.
@@ -299,7 +304,7 @@ final class CRT_Front {
 
 		$prod = CRT_Match::creator_products( $cid );
 		foreach ( CRT_Settings::role_taxes() as $tax ) {
-			if ( empty( $prod['roles'][ $tax ] ) ) {
+			if ( empty( $prod['roles'][ $tax ] ) || ! CRT_Settings::has_section( $tax ) ) {
 				continue;
 			}
 			$h .= '<section class="crt-sec crt-sec--role" data-role="' . esc_attr( $tax ) . '">';
@@ -451,7 +456,7 @@ final class CRT_Front {
 		return '<svg class="crt-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' . $p . '</svg>';
 	}
 
-	private static function links_html( int $cid ): string {
+	public static function links_html( int $cid ): string {
 		$links = CRT_CPT::links( $cid );
 		if ( ! $links ) {
 			return '';
@@ -718,6 +723,172 @@ final class CRT_Front {
 		} catch ( \Throwable $e ) {
 			self::fail();
 		}
+	}
+
+	/* =====================================================================
+	 * Creator tab on the product (1.1.0)
+	 * =================================================================== */
+
+	/** Creators for the tab: public, in a "tab" role, at most 6. */
+	public static function tab_creators( int $product_id ): array {
+		$taxes = CRT_Settings::tab_taxes();
+		if ( ! $taxes ) {
+			return array();
+		}
+		$out = array();
+		foreach ( CRT_Match::product_creators( $product_id ) as $c ) {
+			$roles = array_values( array_intersect( $c['roles'], $taxes ) );
+			if ( ! $roles ) {
+				continue;
+			}
+			$c['roles'] = $roles;
+			$out[]      = $c;
+			if ( count( $out ) >= 6 ) {
+				break;
+			}
+		}
+		return $out;
+	}
+
+	/** Lower case (multibyte safe), for a role name inside a sentence. */
+	private static function lower( string $v ): string {
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $v, 'UTF-8' ) : strtolower( $v );
+	}
+
+	/** First letter in upper case (multibyte safe). */
+	private static function ucfirst( string $v ): string {
+		if ( ! function_exists( 'mb_substr' ) ) {
+			return ucfirst( $v );
+		}
+		return mb_strtoupper( mb_substr( $v, 0, 1, 'UTF-8' ), 'UTF-8' ) . mb_substr( $v, 1, null, 'UTF-8' );
+	}
+
+	/**
+	 * «Ο συγγραφέας» / «Η εικονογράφος» / «Συγγραφέας» for one creator,
+	 * «Οι συγγραφείς» for several in the same first role, else «Οι δημιουργοί».
+	 */
+	public static function tab_title( array $list ): string {
+		if ( 1 === count( $list ) ) {
+			$g    = CRT_CPT::gender( (int) $list[0]['id'] );
+			$key  = 'm' === $g ? 't_tab_m' : ( 'f' === $g ? 't_tab_f' : 't_tab_n' );
+			$role = self::lower( CRT_Settings::role_text( $list[0]['roles'][0], 'l' ) );
+			return self::ucfirst( str_replace( '{role}', $role, CRT_Settings::text( $key ) ) );
+		}
+		$first = array_unique(
+			array_map(
+				static function ( $c ) {
+					return $c['roles'][0];
+				},
+				$list
+			)
+		);
+		if ( 1 === count( $first ) ) {
+			$roles = self::lower( CRT_Settings::role_text( reset( $first ), 'p' ) );
+			return self::ucfirst( str_replace( '{roles}', $roles, CRT_Settings::text( 't_tab_many' ) ) );
+		}
+		return CRT_Settings::text( 't_tab_mixed' );
+	}
+
+	/** Adds the tab when the product has creators for it. */
+	public static function creator_tab( $tabs ) {
+		$s = CRT_Settings::get();
+		if ( ! is_array( $tabs ) || ! $s['tab'] || ! self::visible() ) {
+			return $tabs;
+		}
+		try {
+			$list = self::tab_creators( (int) get_the_ID() );
+			if ( ! $list ) {
+				return $tabs;
+			}
+			$tabs['crt_creators'] = array(
+				'title'    => self::tab_title( $list ),
+				'priority' => (int) $s['tab_priority'],
+				'callback' => array( __CLASS__, 'creator_tab_content' ),
+			);
+		} catch ( \Throwable $e ) {
+			self::fail();
+		}
+		return $tabs;
+	}
+
+	/** The tab callback. */
+	public static function creator_tab_content( $key = 'crt_creators', $tab = array() ): void {
+		if ( ! self::visible() ) {
+			return;
+		}
+		try {
+			echo self::render_tab( (int) get_the_ID() ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in render_tab().
+		} catch ( \Throwable $e ) {
+			self::fail();
+		}
+	}
+
+	public static function render_tab( int $product_id ): string {
+		$list = self::tab_creators( $product_id );
+		if ( ! $list ) {
+			return '';
+		}
+		self::css();
+		$more = CRT_Settings::text( 't_more' );
+		$h    = '<div class="crt-root crt-tab">';
+		foreach ( $list as $c ) {
+			$cid = (int) $c['id'];
+			$h  .= '<section class="crt-tab__person">';
+			$h  .= '<a class="crt-tab__photo" href="' . esc_url( $c['url'] ) . '" tabindex="-1" aria-hidden="true">' . self::avatar( $cid ) . '</a>';
+			$h  .= '<div class="crt-tab__body">';
+			$h  .= '<h3 class="crt-tab__name"><a href="' . esc_url( $c['url'] ) . '">' . esc_html( $c['name'] ) . '</a></h3>';
+			$roles = self::roles_line( $cid );
+			if ( '' !== $roles ) {
+				$h .= '<p class="crt-tab__roles">' . esc_html( $roles ) . '</p>';
+			}
+			$bio = self::tab_bio( $cid );
+			if ( '' !== $bio ) {
+				$h .= '<p class="crt-tab__bio">' . esc_html( $bio ) . '</p>';
+			}
+			$h .= self::links_html( $cid );
+			$h .= self::tab_press( $cid );
+			$h .= '<p class="crt-tab__more"><a class="crt-card__more" href="' . esc_url( $c['url'] ) . '">' . esc_html( $more ) . ' <span aria-hidden="true">→</span></a></p>';
+			$h .= '</div></section>';
+		}
+		return $h . '</div>';
+	}
+
+	/** Excerpt, else the start of the biography: about 60 words. */
+	private static function tab_bio( int $cid ): string {
+		$p = get_post( $cid );
+		if ( ! $p instanceof WP_Post ) {
+			return '';
+		}
+		$text = '' !== trim( $p->post_excerpt ) ? $p->post_excerpt : excerpt_remove_blocks( strip_shortcodes( $p->post_content ) );
+		return wp_trim_words( wp_strip_all_tags( $text, true ), 60, '…' );
+	}
+
+	/** The 3 newest press items, as a short list. */
+	private static function tab_press( int $cid ): string {
+		$items = array_slice( CRT_CPT::press( $cid ), 0, 3 );
+		if ( ! $items ) {
+			return '';
+		}
+		$h = '<ul class="crt-tab__press">';
+		foreach ( $items as $it ) {
+			$meta = array();
+			if ( '' !== $it['date'] ) {
+				$meta[] = '<time datetime="' . esc_attr( $it['date'] ) . '">' . esc_html( date_i18n( (string) get_option( 'date_format' ), (int) strtotime( $it['date'] . ' 12:00:00' ) ) ) . '</time>';
+			}
+			if ( '' !== $it['outlet'] ) {
+				$meta[] = esc_html( $it['outlet'] );
+			}
+			$label = '' !== $it['title'] ? $it['title'] : (string) wp_parse_url( $it['url'], PHP_URL_HOST );
+			$h    .= '<li>';
+			if ( $meta ) {
+				$h .= '<span class="crt-item__meta">' . implode( ' · ', $meta ) . '</span> ';
+			}
+			$h .= '' !== $it['url']
+				? '<a href="' . esc_url( $it['url'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $label ) . '</a>'
+				: esc_html( $label );
+			$h .= '</li>';
+		}
+		return $h . '</ul>';
 	}
 
 	/** [nox_creator_box id="123"] — id defaults to the current product. */
