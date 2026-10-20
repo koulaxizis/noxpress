@@ -29,7 +29,14 @@
  *  _bkf_pub_cover_src (the cover came from that page, 1.4.0),
  *  _bkf_pub_cover_no (a publisher cover that was not larger, 1.4.0),
  *  _bkf_pub_price / _bkf_pub_at / _bkf_pub_note (the publisher's own
- *  price, when it was read, why it was not used; BKF_Pub_Price).
+ *  price, when it was read, why it was not used; BKF_Pub_Price),
+ *  _bkf_pub_cat (the publisher subcategory added once, 1.5.0).
+ * Publisher subcategories (1.5.0, setting pub_cat): one subcategory per
+ * publisher under the chosen category, added to each title once (on
+ * import, or at the next sync for titles imported before), so a
+ * subcategory removed by hand stays removed. Term meta: bkf_publisher
+ * (the name), bkf_logo (the image copied from the brand of the same
+ * name; while the category still shows it, a new brand logo follows).
  * Price: the publisher's page when one is set up for the publisher and
  * its price is plausible, else the catalogue's.
  * Attachments we download carry _bkf_cover_src.
@@ -255,6 +262,7 @@ final class BKF_Importer {
 		}
 
 		self::brand( $pid, $r );
+		self::publisher_cat( $pid, $r );
 		self::tags( $pid, $r );
 		self::store_hashes( $p, $all );
 		return $pid;
@@ -346,6 +354,7 @@ final class BKF_Importer {
 		}
 		self::write_meta( $pid, $r );
 		self::note_pub_price( $pid, $r );
+		self::publisher_cat( $pid, $r );
 
 		$changed = array();
 		foreach ( $fields as $f ) {
@@ -396,7 +405,7 @@ final class BKF_Importer {
 
 	/** Every product meta key of the plugin. */
 	public static function meta_keys(): array {
-		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url', '_bkf_pub_cover_src', '_bkf_pub_cover_no' );
+		return array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url', '_bkf_pub_cover_src', '_bkf_pub_cover_no', '_bkf_pub_cat' );
 	}
 
 	/** A title that left the feed. */
@@ -612,6 +621,116 @@ final class BKF_Importer {
 		$term = self::term( $name, 'product_brand' );
 		if ( $term ) {
 			wp_set_object_terms( $pid, array( $term ), 'product_brand', false );
+		}
+	}
+
+	/** The publisher's subcategory (setting pub_cat), added once per title. */
+	private static function publisher_cat( int $pid, array $r ): void {
+		$s      = BKF_Settings::get();
+		$parent = (int) $s['pub_cat'];
+		$name   = self::publisher( $r );
+		if ( $parent <= 0 || '' === $name || '' !== (string) get_post_meta( $pid, '_bkf_pub_cat', true ) || ! term_exists( $parent, 'product_cat' ) ) {
+			return;
+		}
+		$cat = self::publisher_term( $name, $parent );
+		if ( ! $cat ) {
+			return;
+		}
+		$ids = array( $cat );
+		if ( $s['cat_parents'] ) {
+			$ids = array_merge( $ids, array_map( 'intval', get_ancestors( $cat, 'product_cat', 'taxonomy' ) ) );
+		}
+		$res = wp_set_object_terms( $pid, $ids, 'product_cat', true );
+		if ( is_wp_error( $res ) ) {
+			return;
+		}
+		update_post_meta( $pid, '_bkf_pub_cat', $cat );
+		self::$changed[] = $pid;
+	}
+
+	/** The publisher's subcategory under $parent, created when missing; 0 on failure. */
+	public static function publisher_term( string $name, int $parent ): int {
+		$found = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'parent'     => $parent,
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'number'     => 1,
+				// meta_query, not meta_key: WooCommerce takes meta_key over for its category order.
+				'meta_query' => array( array( 'key' => 'bkf_publisher', 'value' => $name ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- one subcategory per import.
+			)
+		);
+		$id = ( is_array( $found ) && $found ) ? (int) $found[0] : 0;
+		if ( ! $id ) {
+			// One made by hand with the same name.
+			$found = get_terms(
+				array(
+					'taxonomy'   => 'product_cat',
+					'parent'     => $parent,
+					'hide_empty' => false,
+					'name'       => $name,
+					'fields'     => 'ids',
+					'number'     => 1,
+				)
+			);
+			$id = ( is_array( $found ) && $found ) ? (int) $found[0] : 0;
+		}
+		if ( ! $id ) {
+			$res = wp_insert_term( $name, 'product_cat', array( 'parent' => $parent ) );
+			if ( is_wp_error( $res ) ) {
+				$id = (int) $res->get_error_data( 'term_exists' );
+			} else {
+				$id = (int) $res['term_id'];
+			}
+		}
+		if ( ! $id ) {
+			return 0;
+		}
+		update_term_meta( $id, 'bkf_publisher', $name );
+		$brand = taxonomy_exists( 'product_brand' ) ? get_term_by( 'name', $name, 'product_brand' ) : false;
+		if ( $brand ) {
+			self::logo_to_cat( $id, (int) get_term_meta( $brand->term_id, 'thumbnail_id', true ) );
+		}
+		return $id;
+	}
+
+	/**
+	 * The brand's logo as the category image: when the category has none,
+	 * or still shows the logo copied before (an image chosen by hand stays).
+	 */
+	private static function logo_to_cat( int $cat, int $att ): void {
+		if ( $att <= 0 ) {
+			return;
+		}
+		$now    = (int) get_term_meta( $cat, 'thumbnail_id', true );
+		$copied = (int) get_term_meta( $cat, 'bkf_logo', true );
+		if ( $now > 0 && $now !== $copied ) {
+			return;
+		}
+		update_term_meta( $cat, 'thumbnail_id', $att );
+		update_term_meta( $cat, 'bkf_logo', $att );
+	}
+
+	/** A brand's logo was set or changed: the publisher subcategories of that name follow. */
+	public static function brand_logo( $meta_id, $term_id, $key, $value ): void {
+		if ( 'thumbnail_id' !== $key ) {
+			return;
+		}
+		$term = get_term( (int) $term_id );
+		if ( ! $term instanceof WP_Term || 'product_brand' !== $term->taxonomy ) {
+			return;
+		}
+		$cats = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'meta_query' => array( array( 'key' => 'bkf_publisher', 'value' => $term->name ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- on a brand logo change only.
+			)
+		);
+		foreach ( is_array( $cats ) ? $cats : array() as $cat ) {
+			self::logo_to_cat( (int) $cat, (int) $value );
 		}
 	}
 

@@ -9,7 +9,8 @@
  *    warning), bkf_scheme (http / https memory).
  *  - Scheduled actions of the group book-feed (Action Scheduler) and the
  *    WP-Cron hooks bkf_step, bkf_safety, bkf_daily.
- *  - Every _bkf_* post meta (products and cover attachments).
+ *  - Every _bkf_* post meta (products and cover attachments), and the
+ *    term meta bkf_publisher / bkf_logo of publisher subcategories.
  *  - Only when "Also delete the imported products" is ticked (off by
  *    default): the products the plugin created (_bkf_source, not linked),
  *    in batches. Products that were linked (they existed before) always
@@ -69,8 +70,12 @@ function bkf_uninstall_site(): void {
 	}
 	delete_transient( 'bkf_scheme' );
 
-	foreach ( array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url', '_bkf_pub_cover_src', '_bkf_pub_cover_no' ) as $bkf_key ) {
+	foreach ( array( '_bkf_source', '_bkf_source_id', '_bkf_isbn', '_bkf_synced', '_bkf_updated', '_bkf_hash', '_bkf_attr_keys', '_bkf_rel_isbn', '_bkf_rule', '_bkf_linked', '_bkf_gone', '_bkf_gone_status', '_bkf_cover_src', '_bkf_back_src', '_bkf_feed_price', '_bkf_ptype', '_bkf_fixed_until', '_bkf_locked', '_bkf_img_fail', '_bkf_pub_price', '_bkf_pub_at', '_bkf_pub_note', '_bkf_pub_url', '_bkf_pub_cover_src', '_bkf_pub_cover_no', '_bkf_pub_cat' ) as $bkf_key ) {
 		delete_post_meta_by_key( $bkf_key );
+	}
+	// The publisher subcategories stay; only our notes on them go (images stay).
+	foreach ( array( 'bkf_publisher', 'bkf_logo' ) as $bkf_key ) {
+		delete_metadata( 'term', 0, $bkf_key, '', true );
 	}
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.

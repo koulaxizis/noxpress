@@ -25,6 +25,8 @@
  *    cats             feed category => product_cat id
  *    cat_parents      also add the parents of the mapped categories
  *    default_cat      product_cat id for titles without a mapped category
+ *    pub_cat          product_cat id under which each publisher gets a
+ *                     subcategory (0 = off, 1.5.0; BKF_Importer)
  *    tags             '' | class (subjects and keywords) | cats: product
  *                     tags on import, at most tags_max
  *    img_alt          cover alt text template, img_name file name template:
@@ -123,6 +125,7 @@ final class BKF_Settings {
 			'cats'            => array(),
 			'cat_parents'     => false,
 			'default_cat'     => 0,
+			'pub_cat'         => 0,
 			'tags'            => '',
 			'tags_max'        => 10,
 			'img_alt'         => '{title}',
@@ -245,6 +248,8 @@ final class BKF_Settings {
 		$dc                 = (int) ( $v['default_cat'] ?? 0 );
 		$out['default_cat'] = ( $dc > 0 && term_exists( $dc, 'product_cat' ) ) ? $dc : 0;
 		$out['cat_parents'] = ! empty( $v['cat_parents'] );
+		$pc                 = (int) ( $v['pub_cat'] ?? 0 );
+		$out['pub_cat']     = ( $pc > 0 && term_exists( $pc, 'product_cat' ) ) ? $pc : 0;
 		$out['tags']        = in_array( $v['tags'] ?? '', array( '', 'class', 'cats' ), true ) ? $v['tags'] : $d['tags'];
 		$out['tags_max']    = max( 1, min( 50, (int) ( $v['tags_max'] ?? $d['tags_max'] ) ) );
 		$out['pub_prices'] = array();

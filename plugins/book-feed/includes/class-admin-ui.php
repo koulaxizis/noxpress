@@ -697,6 +697,10 @@ final class BKF_Admin_UI {
 					</tbody></table>
 				<?php endif; ?>
 				<label class="bkf-check bkf-mt-8"><input type="checkbox" name="bkf_s[cat_parents]" value="1" <?php checked( $s['cat_parents'] ); ?> /> <?php esc_html_e( 'Και οι γονικές κατηγορίες της κατηγορίας που αντιστοιχίστηκε', 'book-feed' ); ?></label>
+				<p class="bkf-field bkf-mt-8"><span><?php esc_html_e( 'Υποκατηγορία ανά εκδότη, κάτω από', 'book-feed' ); ?></span>
+					<?php echo self::cat_select( 'bkf_s[pub_cat]', (int) $s['pub_cat'], __( '— Όχι —', 'book-feed' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup. ?>
+				</p>
+				<p class="bkf-hint"><?php esc_html_e( 'Κάθε εκδότης γίνεται υποκατηγορία της κατηγορίας που διαλέγεις και κάθε τίτλος μπαίνει σε αυτήν μία φορά: στην εισαγωγή, ή στον επόμενο συγχρονισμό για όσους υπάρχουν ήδη. Αν αφαιρέσεις έναν τίτλο από την υποκατηγορία του, δεν ξαναμπαίνει. Η εικόνα της υποκατηγορίας είναι το λογότυπο της μάρκας με το ίδιο όνομα, εκτός αν βάλεις δική σου.', 'book-feed' ); ?></p>
 				<p class="bkf-hint"><?php esc_html_e( 'Η κατηγορία μπαίνει μόνο στην εισαγωγή. Ένας κανόνας με δική του κατηγορία κερδίζει την αντιστοίχιση. Για χρόνο αποστολής ειδικά για αυτούς τους τίτλους, όρισε ημέρες προετοιμασίας στην κατηγορία τους από το Shipping Notes.', 'book-feed' ); ?></p>
 			</div>
 
