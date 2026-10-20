@@ -46,11 +46,19 @@
  *    fields           fields kept in sync besides price and availability
  *    guard_pct        default largest discount on a fixed price, %
  *    pause            pause between pages of the feed, ms
+ *    bulk_max         most titles one "import all results" goes through
+ *                     (100–5000, 1.7.0; BKF_Bulk)
+ *    notify / notify_to  a summary email when rules bring new titles
+ *                     (on; '' = the site's admin address, 1.7.0)
  *    delete_products  delete the imported products on uninstall (off)
  *
- *  bkf_rules (autoload off): automatic imports per publisher, each
- *    { id, on, name, pub_id, pub_name, kind, year_from, cat, mode,
- *      url, button, max, last }. New titles always come in as drafts.
+ *  bkf_rules (autoload off): automatic imports, each
+ *    { id, on, name, pub_id, pub_name, title, author, kind, year_from,
+ *      year_to, cat, mode, url, button, max, every, status, last }.
+ *    A rule needs a publisher, title words or a contributor (1.7.0: any
+ *    saved search). every = days between runs (1–90; rules saved before
+ *    1.7.0 have none and keep running daily); status = draft | publish
+ *    for the new titles (before 1.7.0 always draft).
  *
  *  bkf_seen (autoload off): values met in the feed (kinds, availability,
  *    roles, categories, VAT rates, price types, forms, subjects), so the mapping
@@ -141,6 +149,9 @@ final class BKF_Settings {
 			'fields'          => self::SYNC_FIELDS,
 			'guard_pct'       => 10,
 			'pause'           => 500,
+			'bulk_max'        => 1000,
+			'notify'          => true,
+			'notify_to'       => '',
 			'delete_products' => false,
 		);
 	}
@@ -303,6 +314,10 @@ final class BKF_Settings {
 
 		$out['guard_pct']       = max( 0, min( 100, (int) ( $v['guard_pct'] ?? $d['guard_pct'] ) ) );
 		$out['pause']           = max( 0, min( 5000, (int) ( $v['pause'] ?? $d['pause'] ) ) );
+		$out['bulk_max']        = max( 100, min( 5000, (int) ( $v['bulk_max'] ?? $d['bulk_max'] ) ) );
+		$out['notify']          = ! empty( $v['notify'] );
+		$to                     = sanitize_email( (string) ( $v['notify_to'] ?? '' ) );
+		$out['notify_to']       = is_email( $to ) ? $to : '';
 		$out['delete_products'] = ! empty( $v['delete_products'] );
 		return $out;
 	}
@@ -466,8 +481,14 @@ final class BKF_Settings {
 	}
 
 	public static function clean_rule( array $r ): ?array {
-		$pub = self::text( $r['pub_id'] ?? '', 40 );
-		if ( '' === $pub || ! preg_match( '/^[A-Za-z0-9_\-]+$/', $pub ) ) {
+		$pub    = self::text( $r['pub_id'] ?? '', 40 );
+		$title  = self::text( $r['title'] ?? '', 200 );
+		$author = self::text( $r['author'] ?? '', 200 );
+		if ( '' !== $pub && ! preg_match( '/^[A-Za-z0-9_\-]+$/', $pub ) ) {
+			return null;
+		}
+		// Something to narrow the feed: never "every title of the catalogue".
+		if ( '' === $pub . $title . $author ) {
 			return null;
 		}
 		$id   = isset( $r['id'] ) && is_string( $r['id'] ) && preg_match( '/^[a-f0-9]{8}$/', $r['id'] ) ? $r['id'] : substr( md5( uniqid( '', true ) ), 0, 8 );
@@ -486,15 +507,28 @@ final class BKF_Settings {
 			'name'      => self::text( $r['name'] ?? '', 100 ),
 			'pub_id'    => $pub,
 			'pub_name'  => self::text( $r['pub_name'] ?? '', 150 ),
+			'title'     => $title,
+			'author'    => $author,
 			'kind'      => self::text( $r['kind'] ?? '', 60 ),
 			'year_from' => max( 0, min( 2100, (int) ( $r['year_from'] ?? 0 ) ) ),
+			'year_to'   => max( 0, min( 2100, (int) ( $r['year_to'] ?? 0 ) ) ),
 			'cat'       => ( $cat > 0 && term_exists( $cat, 'product_cat' ) ) ? $cat : 0,
 			'mode'      => $mode,
 			'url'       => $url,
 			'button'    => self::text( $r['button'] ?? '', 60 ),
 			'max'       => max( 1, min( 500, (int) ( $r['max'] ?? 50 ) ) ),
+			// Rules from before 1.7.0 have no frequency: they keep running daily.
+			'every'     => max( 1, min( 90, (int) ( $r['every'] ?? 1 ) ) ),
+			'status'    => in_array( $r['status'] ?? '', array( 'draft', 'publish' ), true ) ? $r['status'] : 'draft',
 			'last'      => max( 0, (int) ( $r['last'] ?? 0 ) ),
 		);
+	}
+
+	/** True when a rule should run in a job that starts now. */
+	public static function rule_due( array $r ): bool {
+		// Six hours of slack: a daily run at 04:00 is not missed because
+		// the last one finished at 04:20.
+		return $r['on'] && ( ! $r['last'] || time() - $r['last'] >= $r['every'] * DAY_IN_SECONDS - 6 * HOUR_IN_SECONDS );
 	}
 
 	/* ---------------------------------------------------------------------

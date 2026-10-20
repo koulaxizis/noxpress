@@ -12,7 +12,12 @@
  *  - bkf_link          marks an existing product (same ISBN) as a feed title
  *  - bkf_product       the product box: sync | take (rewrite every field
  *                      from the feed) | unlink
+ *  - bkf_bulk          progress of an "import all results" (BKF_Bulk)
  *  - do_import_post / do_link: the same without JavaScript (PRG)
+ *  - do_import_all     "import all results": the search's filters come
+ *                      back in the form, are cleaned again and asked of
+ *                      the feed again (never a list of ids) (1.7.0)
+ *  - do_save_rule      "save the search as a rule" (1.7.0)
  *
  * Every request: nonce + capability; ids validated; writes run under the
  * job's lock so a sync step and an import never touch a product together.
@@ -33,6 +38,7 @@ final class BKF_Admin_Ajax {
 		add_action( 'wp_ajax_bkf_link', array( __CLASS__, 'ajax_link' ) );
 		add_action( 'wp_ajax_bkf_product', array( __CLASS__, 'ajax_product' ) );
 		add_action( 'wp_ajax_bkf_job', array( __CLASS__, 'ajax_job' ) );
+		add_action( 'wp_ajax_bkf_bulk', array( __CLASS__, 'ajax_bulk' ) );
 		add_action( 'add_meta_boxes_product', array( __CLASS__, 'add_box' ) );
 		add_action( 'woocommerce_process_product_meta', array( __CLASS__, 'save_box' ) );
 	}
@@ -214,6 +220,18 @@ final class BKF_Admin_Ajax {
 		);
 	}
 
+	/** The running bulk import, for its box. */
+	public static function ajax_bulk(): void {
+		self::check_ajax();
+		$b = BKF_Bulk::get();
+		wp_send_json_success(
+			array(
+				'running' => null !== $b,
+				'text'    => $b ? BKF_Bulk::text( $b ) : '',
+			)
+		);
+	}
+
 	public static function ajax_import(): void {
 		self::check_ajax();
 		$ids = self::post( 'ids' );
@@ -368,6 +386,118 @@ final class BKF_Admin_Ajax {
 		return $msgs;
 	}
 
+	/** The search's filters as hidden fields of the results form. */
+	private static function filter_fields( array $f ): void {
+		$map = array(
+			'bkf_t'    => $f['title'],
+			'bkf_a'    => $f['author'],
+			'bkf_i'    => $f['isbn'],
+			'bkf_pub'  => $f['pub_id'],
+			'bkf_pubn' => $f['pub_name'],
+			'bkf_y1'   => $f['year_from'] ? (string) $f['year_from'] : '',
+			'bkf_y2'   => $f['year_to'] ? (string) $f['year_to'] : '',
+			'bkf_kind' => $f['kind'],
+		);
+		foreach ( $map as $k => $v ) {
+			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( (string) $v ) . '" />';
+		}
+	}
+
+	/** True when the filters narrow the feed at all. */
+	private static function narrowed( array $f ): bool {
+		return '' !== $f['title'] . $f['author'] . $f['isbn'] . $f['pub_id'] . $f['kind'] || $f['year_from'] || $f['year_to'];
+	}
+
+	/** "Import all results": starts a background bulk import. */
+	public static function do_import_all(): array {
+		$f = self::filters( true );
+		unset( $f['pub_name'] );
+		if ( ! self::narrowed( $f ) ) {
+			return array( BKF_Admin_UI::msg( 'error', __( 'Κάνε πρώτα μια αναζήτηση.', 'book-feed' ) ) );
+		}
+		if ( BKF_Bulk::get() ) {
+			return array( BKF_Admin_UI::msg( 'warning', __( 'Τρέχει ήδη μαζική εισαγωγή.', 'book-feed' ) ) );
+		}
+		$res = BKF_Client::query(
+			array(
+				'q'    => BKF_Client::book_query( $f ),
+				'fl'   => 'product_id',
+				'rows' => 1,
+			)
+		);
+		if ( is_wp_error( $res ) ) {
+			return array( BKF_Admin_UI::msg( 'error', $res->get_error_message() ) );
+		}
+		if ( ! $res['num'] ) {
+			return array( BKF_Admin_UI::msg( 'warning', __( 'Δεν βρέθηκαν τίτλοι.', 'book-feed' ) ) );
+		}
+		$opt = self::import_opts(
+			array(
+				'status' => self::post( 'bkf_status' ),
+				'cat'    => self::post( 'bkf_cat' ),
+			)
+		);
+		BKF_Bulk::start( $f, $opt['status'], $opt['cat'], $res['num'] );
+		$b    = BKF_Bulk::get();
+		$msgs = array(
+			BKF_Admin_UI::msg(
+				'success',
+				/* translators: %d: titles */
+				sprintf( __( 'Η μαζική εισαγωγή ξεκίνησε στο παρασκήνιο: έως %d τίτλοι. Μπορείς να κλείσεις τη σελίδα· η πρόοδος φαίνεται εδώ.', 'book-feed' ), $b ? (int) $b['limit'] : 0 )
+			),
+		);
+		if ( $b && $b['limit'] < $res['num'] ) {
+			/* translators: 1: the limit, 2: results */
+			$msgs[] = BKF_Admin_UI::msg( 'warning', sprintf( __( 'Η αναζήτηση έχει %2$s τίτλους· εισάγονται οι πρώτοι %1$d (όριο στις Ρυθμίσεις).', 'book-feed' ), (int) $b['limit'], number_format_i18n( $res['num'] ) ) );
+		}
+		return $msgs;
+	}
+
+	/** "Save the search as a rule": a new rule with every filter of the search. */
+	public static function do_save_rule(): array {
+		$f = self::filters( true );
+		if ( '' === $f['pub_id'] . $f['title'] . $f['author'] ) {
+			return array( BKF_Admin_UI::msg( 'error', __( 'Ένας κανόνας θέλει εκδότη, λέξεις του τίτλου ή συντελεστή.', 'book-feed' ) ) );
+		}
+		$rules = BKF_Settings::rules();
+		if ( count( $rules ) >= BKF_Settings::MAX_RULES ) {
+			/* translators: %d: maximum rules */
+			return array( BKF_Admin_UI::msg( 'error', sprintf( __( 'Έως %d κανόνες.', 'book-feed' ), BKF_Settings::MAX_RULES ) ) );
+		}
+		$opt  = self::import_opts(
+			array(
+				'status' => self::post( 'bkf_status' ),
+				'cat'    => self::post( 'bkf_cat' ),
+			)
+		);
+		$rule = BKF_Settings::clean_rule(
+			array(
+				'on'        => true,
+				'pub_id'    => $f['pub_id'],
+				'pub_name'  => $f['pub_name'],
+				'title'     => $f['title'],
+				'author'    => $f['author'],
+				'kind'      => $f['kind'],
+				'year_from' => $f['year_from'],
+				'year_to'   => $f['year_to'],
+				'cat'       => $opt['cat'],
+				'status'    => $opt['status'],
+				'every'     => 7,
+				'max'       => 50,
+			)
+		);
+		if ( ! $rule ) {
+			return array( BKF_Admin_UI::msg( 'error', __( 'Ένας κανόνας θέλει εκδότη, λέξεις του τίτλου ή συντελεστή.', 'book-feed' ) ) );
+		}
+		$rules[] = $rule;
+		BKF_Settings::save_rules( $rules );
+		$msgs = array( BKF_Admin_UI::msg( 'success', __( 'Ο κανόνας αποθηκεύτηκε: τρέχει κάθε 7 ημέρες και φέρνει μόνο νέους τίτλους. Άλλαξέ τον εδώ.', 'book-feed' ) ) );
+		if ( '' !== $f['isbn'] ) {
+			$msgs[] = BKF_Admin_UI::msg( 'warning', __( 'Το ISBN δεν κρατήθηκε: ένας κανόνας ψάχνει νέους τίτλους.', 'book-feed' ) );
+		}
+		return $msgs;
+	}
+
 	public static function do_link(): array {
 		$v     = self::post( 'bkf_link' );
 		$parts = is_string( $v ) ? explode( '|', $v, 2 ) : array();
@@ -385,8 +515,17 @@ final class BKF_Admin_Ajax {
 	 * Search tab
 	 * =================================================================== */
 
-	private static function filters(): array {
-		$q = array( 'BKF_Admin_UI', 'q' );
+	/**
+	 * The search's filters, from the query string or (from the results
+	 * form, $post) from the hidden fields that carry them.
+	 */
+	private static function filters( bool $post = false ): array {
+		$q = $post
+			? static function ( string $k ): string {
+				$v = self::post( $k );
+				return is_scalar( $v ) ? sanitize_text_field( (string) $v ) : '';
+			}
+			: array( 'BKF_Admin_UI', 'q' );
 		return array(
 			'title'     => BKF_Settings::text( $q( 'bkf_t' ), 200 ),
 			'author'    => BKF_Settings::text( $q( 'bkf_a' ), 200 ),
@@ -413,6 +552,31 @@ final class BKF_Admin_Ajax {
 			'paged'    => $paged > 1 ? $paged : '',
 		);
 		return wp_nonce_url( BKF_Admin_UI::url( 'search', array_filter( $args, 'strlen' ) ), BKF_Admin_UI::NONCE_FIND, 'bkf_f' );
+	}
+
+	/** The running bulk import (with stop), else the last one for a day. */
+	public static function bulk_box(): void {
+		$b    = BKF_Bulk::get();
+		$last = $b ? null : BKF_Bulk::last();
+		if ( ! $b && ( ! $last || time() - $last['t'] > DAY_IN_SECONDS ) ) {
+			return;
+		}
+		echo '<div class="bkf-status-row bkf-bulk">';
+		if ( $b ) {
+			echo '<span class="bkf-badge bkf-badge--warn bkf-running">' . esc_html__( 'Μαζική εισαγωγή σε εξέλιξη', 'book-feed' ) . '</span> ';
+			echo '<span class="bkf-muted bkf-bulk-text">' . esc_html( BKF_Bulk::text( $b ) ) . '</span>';
+			echo '<form method="post" class="bkf-inline-form">';
+			BKF_Admin_UI::nonce_field();
+			echo '<input type="hidden" name="bkf_action" value="bulk_stop" />';
+			echo '<button type="submit" class="button">' . esc_html__( 'Διακοπή', 'book-feed' ) . '</button></form>';
+		} else {
+			/* translators: 1: date and time, 2: summary */
+			echo '<span class="bkf-muted">' . esc_html( sprintf( __( 'Τελευταία μαζική εισαγωγή %1$s: %2$s', 'book-feed' ), BKF_Admin_UI::when( $last['t'] ), BKF_Bulk::text( $last ) ) ) . '</span>';
+			if ( '' !== $last['error'] ) {
+				echo ' <span class="bkf-badge bkf-badge--danger">' . esc_html( $last['error'] ) . '</span>';
+			}
+		}
+		echo '</div>';
 	}
 
 	public static function render_search(): void {
@@ -531,7 +695,9 @@ final class BKF_Admin_Ajax {
 	}
 
 	private static function results( array $recs, array $marks, int $num, int $paged, int $pages, array $f ): void {
-		$s = BKF_Settings::get();
+		$s    = BKF_Settings::get();
+		$cap  = min( $num, (int) $s['bulk_max'] );
+		$busy = null !== BKF_Bulk::get();
 		?>
 		<p class="bkf-muted">
 			<?php
@@ -548,6 +714,7 @@ final class BKF_Admin_Ajax {
 		<form method="post" id="bkf-results">
 			<?php BKF_Admin_UI::nonce_field(); ?>
 			<input type="hidden" name="bkf_action" value="import" />
+			<?php self::filter_fields( $f ); ?>
 			<div class="bkf-zone bkf-import-bar">
 				<label class="bkf-inline"><?php esc_html_e( 'Κατάσταση', 'book-feed' ); ?>
 					<select name="bkf_status" id="bkf-status-sel">
@@ -559,7 +726,26 @@ final class BKF_Admin_Ajax {
 					<?php echo BKF_Admin_UI::cat_select( 'bkf_cat', 0, __( '— Από την αντιστοίχιση των Ρυθμίσεων —', 'book-feed' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup. ?>
 				</label>
 				<button type="submit" class="button button-primary" id="bkf-import-btn"><?php esc_html_e( 'Εισαγωγή επιλεγμένων', 'book-feed' ); ?></button>
+				<?php if ( $pages > 1 ) : ?>
+					<button type="submit" class="button bkf-all-btn" name="bkf_all" value="1" data-bkf-count="<?php echo esc_attr( (string) $cap ); ?>" <?php disabled( $busy ); ?> title="<?php echo $busy ? esc_attr__( 'Τρέχει ήδη μαζική εισαγωγή.', 'book-feed' ) : esc_attr__( 'Όλα τα αποτελέσματα, σε όλες τις σελίδες, στο παρασκήνιο. Όσοι τίτλοι υπάρχουν ήδη παρακάμπτονται.', 'book-feed' ); ?>">
+						<?php
+						/* translators: %s: number of titles */
+						echo esc_html( sprintf( __( 'Εισαγωγή όλων των αποτελεσμάτων (%s)', 'book-feed' ), number_format_i18n( $cap ) ) );
+						?>
+					</button>
+				<?php endif; ?>
+				<?php if ( '' !== $f['pub_id'] . $f['title'] . $f['author'] ) : ?>
+					<button type="submit" class="button bkf-rule-btn" name="bkf_save_rule" value="1" title="<?php esc_attr_e( 'Νέος κανόνας με τα φίλτρα αυτής της αναζήτησης, την κατάσταση και την κατηγορία που διάλεξες: κάθε 7 ημέρες φέρνει μόνο τους νέους τίτλους.', 'book-feed' ); ?>"><?php esc_html_e( 'Αποθήκευση αναζήτησης ως κανόνα', 'book-feed' ); ?></button>
+				<?php endif; ?>
 				<span class="bkf-progress" id="bkf-progress" aria-live="polite"></span>
+				<?php if ( $num > $cap && $pages > 1 ) : ?>
+					<span class="bkf-hint">
+						<?php
+						/* translators: 1: the limit, 2: results */
+						echo esc_html( sprintf( __( 'Η αναζήτηση έχει %2$s τίτλους· η εισαγωγή όλων φέρνει τους πρώτους %1$s (όριο στις Ρυθμίσεις).', 'book-feed' ), number_format_i18n( $cap ), number_format_i18n( $num ) ) );
+						?>
+					</span>
+				<?php endif; ?>
 			</div>
 			<div class="bkf-scroll">
 				<table class="widefat bkf-table bkf-results">

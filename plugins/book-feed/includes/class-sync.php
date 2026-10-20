@@ -8,9 +8,15 @@
  *              feed no longer returns is marked gone. A batch where the
  *              feed returns nothing at all stops the job instead (a wrong
  *              query must never take a whole catalogue off sale).
- *  2. rules    each active rule: the publisher's titles (newest first,
- *              since the rule's last run, less one day), new ones
- *              imported as drafts, up to the rule's limit per run.
+ *  2. rules    each rule that is due (every X days, 1.7.0; the list is
+ *              fixed when the job starts): the titles matching its
+ *              search (newest first, since the rule's last run, less
+ *              one day), new ones imported with the rule's status, up
+ *              to the rule's limit per run. "Run now" on a rule starts
+ *              a job with that rule alone and no phase 1.
+ *
+ * When rules brought new titles, the end of the job sends one summary
+ * email (setting notify) and writes one history line per rule.
  *
  * Steps run through Action Scheduler (group book-feed): each step works
  * for at most 10 s, saves the state and schedules the next one. A lock
@@ -44,11 +50,11 @@ final class BKF_Sync {
 	 * Scheduling
 	 * ------------------------------------------------------------------- */
 
-	private static function as_ok(): bool {
+	public static function as_ok(): bool {
 		return function_exists( 'as_schedule_single_action' ) && function_exists( 'as_next_scheduled_action' );
 	}
 
-	private static function schedule( string $hook, int $ts ): void {
+	public static function schedule( string $hook, int $ts ): void {
 		if ( self::as_ok() ) {
 			as_schedule_single_action( $ts, $hook, array(), self::GROUP );
 		} else {
@@ -56,14 +62,14 @@ final class BKF_Sync {
 		}
 	}
 
-	private static function next( string $hook ) {
+	public static function next( string $hook ) {
 		if ( self::as_ok() ) {
 			return as_next_scheduled_action( $hook, array(), self::GROUP );
 		}
 		return wp_next_scheduled( $hook );
 	}
 
-	private static function unschedule( string $hook ): void {
+	public static function unschedule( string $hook ): void {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( $hook );
 		}
@@ -145,21 +151,33 @@ final class BKF_Sync {
 	/**
 	 * Starts a job unless one is running.
 	 *
-	 * @param string $why manual | daily | cli.
+	 * @param string $why  manual | daily | cli | rule.
+	 * @param string $only a rule id: that rule alone, now, without phase 1.
 	 */
-	public static function start( string $why, bool $schedule = true ): bool {
+	public static function start( string $why, bool $schedule = true, string $only = '' ): bool {
 		if ( self::job() ) {
+			return false;
+		}
+		$due = array();
+		foreach ( BKF_Settings::rules() as $r ) {
+			if ( '' !== $only ? $r['id'] === $only : BKF_Settings::rule_due( $r ) ) {
+				$due[] = $r['id'];
+			}
+		}
+		if ( '' !== $only && ! $due ) {
 			return false;
 		}
 		$job = array(
 			'id'       => substr( md5( uniqid( '', true ) ), 0, 12 ),
-			'why'      => in_array( $why, array( 'manual', 'daily', 'cli' ), true ) ? $why : 'manual',
-			'phase'    => 'linked',
+			'why'      => '' !== $only ? 'rule' : ( in_array( $why, array( 'manual', 'daily', 'cli' ), true ) ? $why : 'manual' ),
+			'phase'    => '' !== $only ? 'rules' : 'linked',
 			'cursor'   => 0,
 			'rule'     => 0,
 			'start'    => 0,
 			'per_rule' => 0,
 			'rules_ok' => array(),
+			'due'      => $due,
+			'per'      => array(),
 			'stats'    => self::empty_stats(),
 			'began'    => time(),
 			'steps'    => 0,
@@ -386,14 +404,7 @@ final class BKF_Sync {
 
 	/** Phase 2: one page of the current rule. */
 	private static function step_rules( array $job, float $t0, int $budget ): array {
-		$rules = array_values(
-			array_filter(
-				BKF_Settings::rules(),
-				static function ( $r ) {
-					return $r['on'];
-				}
-			)
-		);
+		$rules = self::due_rules( $job );
 		if ( ! isset( $rules[ $job['rule'] ] ) ) {
 			$job['phase'] = 'done';
 			return $job;
@@ -405,7 +416,10 @@ final class BKF_Sync {
 				'q'     => BKF_Client::book_query(
 					array(
 						'pub_id'    => $rule['pub_id'],
+						'title'     => $rule['title'],
+						'author'    => $rule['author'],
 						'year_from' => $rule['year_from'],
+						'year_to'   => $rule['year_to'],
 						'kind'      => $rule['kind'],
 						'since'     => $since,
 					)
@@ -434,7 +448,7 @@ final class BKF_Sync {
 			$out = BKF_Importer::import(
 				$r,
 				array(
-					'status' => 'draft',
+					'status' => $rule['status'],
 					'cat'    => $rule['cat'],
 					'mode'   => $rule['mode'],
 					'url'    => $rule['url'],
@@ -445,6 +459,7 @@ final class BKF_Sync {
 			if ( 'imported' === $out['result'] ) {
 				++$job['stats']['imported'];
 				++$job['per_rule'];
+				$job['per'][ $rule['id'] ] = (int) ( $job['per'][ $rule['id'] ] ?? 0 ) + 1;
 			} elseif ( 'exists' === $out['result'] ) {
 				++$job['stats']['exists'];
 			} elseif ( 'error' === $out['result'] ) {
@@ -459,14 +474,7 @@ final class BKF_Sync {
 	}
 
 	private static function next_rule( array $job, bool $ok ): array {
-		$rules = array_values(
-			array_filter(
-				BKF_Settings::rules(),
-				static function ( $r ) {
-					return $r['on'];
-				}
-			)
-		);
+		$rules = self::due_rules( $job );
 		if ( $ok && isset( $rules[ $job['rule'] ] ) ) {
 			$job['rules_ok'][] = $rules[ $job['rule'] ]['id'];
 		}
@@ -476,11 +484,29 @@ final class BKF_Sync {
 		return $job;
 	}
 
+	/**
+	 * The active rules this job runs, in their saved order. A job started
+	 * before 1.7.0 has no list: every active rule, as then.
+	 */
+	private static function due_rules( array $job ): array {
+		$due = isset( $job['due'] ) && is_array( $job['due'] ) ? $job['due'] : null;
+		$out = array();
+		foreach ( BKF_Settings::rules() as $r ) {
+			if ( null === $due ? $r['on'] : in_array( $r['id'], $due, true ) ) {
+				$out[] = $r;
+			}
+		}
+		return $out;
+	}
+
 	public static function rule_name( array $rule ): string {
 		if ( '' !== $rule['name'] ) {
 			return $rule['name'];
 		}
-		return '' !== $rule['pub_name'] ? $rule['pub_name'] : $rule['pub_id'];
+		if ( '' !== $rule['pub_name'] || '' !== $rule['pub_id'] ) {
+			return '' !== $rule['pub_name'] ? $rule['pub_name'] : $rule['pub_id'];
+		}
+		return implode( ' · ', array_filter( array( $rule['title'], $rule['author'] ), 'strlen' ) );
 	}
 
 	/** Ends a job: the rules that ran get their time, a summary is kept. */
@@ -507,5 +533,52 @@ final class BKF_Sync {
 		/* translators: 1: checked, 2: updated, 3: gone, 4: imported, 5: already in the store, 6: errors */
 		$msg = sprintf( __( 'Έλεγχος %1$d, ενημερώσεις %2$d, εκτός καταλόγου %3$d, νέοι τίτλοι %4$d, υπάρχουν ήδη %5$d, σφάλματα %6$d.', 'book-feed' ), $st['checked'], $st['updated'], $st['gone'], $st['imported'], $st['exists'], $st['errors'] );
 		BKF_Log::add( 'run', 0, '', '', array(), '' !== $last['error'] ? $msg . ' ' . $last['error'] : $msg );
+		self::report_rules( $job );
+	}
+
+	/**
+	 * One history line per rule that ran ("0 new" included, so a rule
+	 * that never finds anything shows), and one email when any brought
+	 * new titles.
+	 */
+	private static function report_rules( array $job ): void {
+		$ran = isset( $job['rules_ok'] ) && is_array( $job['rules_ok'] ) ? $job['rules_ok'] : array();
+		$per = isset( $job['per'] ) && is_array( $job['per'] ) ? $job['per'] : array();
+		if ( ! $ran && ! $per ) {
+			return;
+		}
+		$lines = array();
+		$total = 0;
+		foreach ( BKF_Settings::rules() as $r ) {
+			if ( ! in_array( $r['id'], $ran, true ) && ! isset( $per[ $r['id'] ] ) ) {
+				continue;
+			}
+			$n      = (int) ( $per[ $r['id'] ] ?? 0 );
+			$total += $n;
+			/* translators: 1: rule name, 2: new titles */
+			BKF_Log::add( 'run', 0, '', '', array(), sprintf( __( 'Κανόνας «%1$s»: νέοι τίτλοι %2$d.', 'book-feed' ), self::rule_name( $r ), $n ) );
+			if ( $n ) {
+				$lines[] = sprintf(
+					/* translators: 1: rule name, 2: new titles, 3: draft or published */
+					__( '%1$s: νέοι τίτλοι %2$d (%3$s)', 'book-feed' ),
+					self::rule_name( $r ),
+					$n,
+					'publish' === $r['status'] ? __( 'δημοσιευμένοι', 'book-feed' ) : __( 'πρόχειρα', 'book-feed' )
+				);
+			}
+		}
+		$s = BKF_Settings::get();
+		if ( ! $total || ! $s['notify'] ) {
+			return;
+		}
+		$to = '' !== $s['notify_to'] ? $s['notify_to'] : (string) get_option( 'admin_email' );
+		if ( ! is_email( $to ) ) {
+			return;
+		}
+		$site = wp_specialchars_decode( (string) get_option( 'blogname' ), ENT_QUOTES );
+		/* translators: 1: site name, 2: new titles */
+		$subject = sprintf( __( '[%1$s] Book Feed: νέοι τίτλοι %2$d', 'book-feed' ), $site, $total );
+		$body    = implode( "\n", $lines ) . "\n\n" . __( 'Τα προϊόντα:', 'book-feed' ) . ' ' . admin_url( 'edit.php?post_type=product' ) . "\n" . __( 'Ιστορικό:', 'book-feed' ) . ' ' . admin_url( 'admin.php?page=bkf-feed&tab=log' ) . "\n";
+		wp_mail( $to, $subject, $body );
 	}
 }
