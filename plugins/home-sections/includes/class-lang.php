@@ -7,8 +7,8 @@
  * (or without RS) the user's locale decides: el* → Greek (msgids pass
  * through as they are), anything else → English.
  *
- * Visitors see no text of ours: the plugin only changes which products a
- * [products] shortcode lists.
+ * Visitors see no msgid of ours: the [products] markers print nothing, and
+ * the texts of [hs_video] are store settings (Bible §14.17, HMS_Settings).
  *
  * Always loaded (even without WooCommerce) so the "WooCommerce missing"
  * admin notice is translated too.
@@ -57,14 +57,40 @@ final class HMS_Lang {
 		'Διαγραφή'                                                  => 'Delete',
 		'Αποθήκευση'                                                => 'Save',
 
+		'Shortcode βίντεο'                                          => 'Video shortcode',
+		'Το [hs_video] δείχνει το νεότερο δημοσιευμένο προϊόν που έχει βίντεο στην καρτέλα του (Custom Product Tabs for WooCommerce): εικόνα και κουμπί αναπαραγωγής, και ο player του YouTube φορτώνει μόνο με το πάτημα. Χωρίς αποτέλεσμα δεν τυπώνει τίποτα.' => '[hs_video] shows the newest published product that has a video in its tab (Custom Product Tabs for WooCommerce): a poster and a play button, and the YouTube player loads only on click. With no result it prints nothing.',
+		'trailer (προεπιλογή) ή presentation: η καρτέλα βίντεο του προϊόντος (θέση 30 ή 31).' => 'trailer (default) or presentation: the product\'s video tab (position 30 or 31).',
+		'Ένα συγκεκριμένο προϊόν αντί για το νεότερο.'              => 'A specific product instead of the newest one.',
+		'IDs προϊόντων που μένουν έξω, χωρισμένα με κόμμα.'         => 'Product IDs to leave out, comma-separated.',
+		'Μόνο προϊόντα αυτών των κατηγοριών (slugs, με κόμμα).'     => 'Only products of these categories (slugs, comma-separated).',
+		'no: χωρίς τις προπαραγγελίες (PRENA και Pre-Orders).'      => 'no: without pre-orders (PRENA and Pre-Orders).',
+		'Άλλος τίτλος από τον τίτλο των ρυθμίσεων· κενό = χωρίς τίτλο.' => 'A heading other than the one in the settings; empty = no heading.',
+		'Κείμενα βίντεο'                                            => 'Video texts',
+		'Τα κείμενα που βλέπει ο επισκέπτης. Κενό ελληνικό κείμενο επιστρέφει στην προεπιλογή· κενό αγγλικό δείχνει το ελληνικό.' => 'The texts visitors see. An empty Greek text goes back to the default; an empty English text shows the Greek one.',
+		'Γλώσσα'                                                    => 'Language',
+		'Αυτόματα (γλώσσα του site)'                                => 'Automatic (site language)',
+		'Τίτλος: trailer'                                           => 'Heading: trailer',
+		'Τίτλος: παρουσίαση'                                        => 'Heading: presentation',
+		'Όνομα player: trailer ({name})'                            => 'Player name: trailer ({name})',
+		'Όνομα player: παρουσίαση ({name})'                         => 'Player name: presentation ({name})',
+		'Ετικέτα κουμπιού ({title})'                                => 'Button label ({title})',
+		'Σύνδεσμος προς το προϊόν'                                  => 'Link to the product',
+
 		'Δοκιμή shortcode'                                          => 'Shortcode test',
-		'Επικόλλησε ένα shortcode [products …] για να δεις ποια προϊόντα επιστρέφει και πώς διαβάζεται κάθε class. Δεν αλλάζει τίποτα.' => 'Paste a [products …] shortcode to see which products it returns and how each class is read. Nothing is changed.',
+		'Επικόλλησε ένα shortcode [products …] για να δεις ποια προϊόντα επιστρέφει και πώς διαβάζεται κάθε class, ή ένα [hs_video …] για να δεις ποιο προϊόν και ποιο βίντεο διαλέγει. Δεν αλλάζει τίποτα.' => 'Paste a [products …] shortcode to see which products it returns and how each class is read, or an [hs_video …] one to see which product and video it picks. Nothing is changed.',
 		'Δοκιμή'                                                    => 'Test',
 		'Classes'                                                   => 'Classes',
 		'Το shortcode δεν έχει class: κανένας marker δεν ισχύει.'   => 'The shortcode has no class: no marker applies.',
 		'Προϊόντα'                                                  => 'Products',
 		'Η πρώτη σελίδα δείχνει %1$d από τα %2$d προϊόντα που βρίσκει το query (εδώ έως 20).' => 'The first page shows %1$d of the %2$d products the query finds (up to 20 here).',
-		'Γράψε ένα μόνο shortcode της μορφής [products …].'         => 'Enter a single shortcode of the form [products …].',
+		'Γράψε ένα μόνο shortcode της μορφής [products …] ή [hs_video …].' => 'Enter a single shortcode of the form [products …] or [hs_video …].',
+		'Η δοκιμή απέτυχε.'                                         => 'The test failed.',
+		'Attributes'                                                => 'Attributes',
+		'Άκυρος τύπος: γράψε trailer ή presentation.'               => 'Invalid type: write trailer or presentation.',
+		'μαζί με τις προπαραγγελίες'                                => 'pre-orders included',
+		'Αποτέλεσμα'                                                => 'Result',
+		'Κανένα προϊόν με βίντεο: το shortcode δεν τυπώνει τίποτα.' => 'No product with a video: the shortcode prints nothing.',
+		'βίντεο'                                                    => 'video',
 		'Το WooCommerce δεν έχει το shortcode [products].'          => 'WooCommerce does not have the [products] shortcode.',
 		'Η δοκιμή απέτυχε: το WooCommerce δεν μπόρεσε να φτιάξει το query αυτού του shortcode.' => 'The test failed: WooCommerce could not build the query of this shortcode.',
 		'Δεν υπάρχει προϊόν #%d: δεν αφήνει έξω τίποτα.'            => 'There is no product #%d: it leaves nothing out.',
@@ -82,7 +108,12 @@ final class HMS_Lang {
 
 		'Για προγραμματιστές'                                       => 'For developers',
 		'Φίλτρο στα meta keys των προπαραγγελιών (meta key => τιμή). Προεπιλογή: _simple_preorder = yes (PRENA) και _por_on = yes (Pre-Orders).' => 'Filter on the pre-order meta keys (meta key => value). Default: _simple_preorder = yes (PRENA) and _por_on = yes (Pre-Orders).',
-		'Σταθερά στο wp-config.php που σταματά κάθε marker.'        => 'Constant in wp-config.php that stops every marker.',
+		'Σταθερά στο wp-config.php που σταματά κάθε marker και κάθε [hs_video].' => 'Constant in wp-config.php that stops every marker and every [hs_video].',
+		'Φίλτρο στην πηγή των βίντεο: meta_key (προεπιλογή wb_custom_tabs) και positions, η θέση της καρτέλας ανά τύπο (προεπιλογή trailer 30, presentation 31).' => 'Filter on the video source: meta_key (default wb_custom_tabs) and positions, the tab position per type (default trailer 30, presentation 31).',
+		'Φίλτρο στα CSS classes του [hs_video]: heading, button, play, meta.' => 'Filter on the CSS classes of [hs_video]: heading, button, play, meta.',
+		'Φίλτρο στην ταξινομία με τα πρόσωπα που μπαίνουν μετά το όνομα του προϊόντος (προεπιλογή pa_syggrafeis· κενό = κανένα).' => 'Filter on the taxonomy whose people follow the product name (default pa_syggrafeis; empty = none).',
+		'Φίλτρο σε κάθε κείμενο του [hs_video] (κείμενο, κλειδί, γλώσσα), π.χ. για WPML.' => 'Filter on every text of [hs_video] (text, key, language), e.g. for WPML.',
+		'Φίλτρο: false για να μη φορτώνεται το script του plugin, όταν η σελίδα έχει δικό της.' => 'Filter: false to skip the plugin\'s script when the page has its own.',
 
 		'Άγνωστη ενέργεια.'                                         => 'Unknown action.',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                               => 'Settings saved.',
