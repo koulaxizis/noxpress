@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* [bkf_publishers] names=\"1\" prints each publisher's name under its logo.",
+        "changelog": "* \"Publishing status\" filter in the search and in rules: any status, or one value of the feed, such as «Κυκλοφορεί», so out-of-print or forthcoming titles stay out. \"Save search as rule\" and \"Import all results\" keep it.",
         "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "3e286b4002faa80672f950f4c41daf2a6fc3388c5f7ee548f462c8dccd019c56",
-        "signature": "/4Ww0dlFRDyvfB6uikQ3/6rJJ2CIOh/xvl4nH6Tf5HLeJnmfnHZH74a4zHLxTxnxsUImfijqry+Qes3hozYPAQ==",
+        "sha256": "4a546065a1417023514f2f16b98de75587f5aab7017d02f335ff696d126dd4ec",
+        "signature": "DP/FrPHjrX6mYQN13duU6nTLNZ5Ya2o/Z1+gt1ZjDs1EjHa2oxAYN+2JS5lPE2aG++ovZsvgxbZHuCYs8+7gBQ==",
         "tested_wp": "7.1",
-        "version": "1.7.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.7.1/book-feed.zip"
+        "version": "1.8.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.8.0/book-feed.zip"
       }
     },
     "book-preview": {
