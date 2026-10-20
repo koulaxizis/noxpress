@@ -17,7 +17,7 @@ final class SBR_Settings {
 	const LEVELS = array( 'off', 'read', 'write', 'admin' );
 
 	/** Write window lengths offered in the admin, in minutes. */
-	const WINDOW_MINUTES = array( 15, 30, 60, 180, 300 );
+	const WINDOW_MINUTES = array( 15, 30, 60, 180, 300, 720 );
 
 	/** Per-request cache. */
 	private static $cache = null;
