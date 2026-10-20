@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* A subcategory per publisher (setting, off by default): each publisher becomes a subcategory of the category you choose, with the logo of the brand of the same name as its image. Each title goes into it once: on import, or at the next sync for titles already in the store; a title taken out by hand is not put back.\n* A category image you set yourself stays; while the subcategory still shows the copied logo, a new brand logo replaces it.",
+        "changelog": "* Shortcode [bkf_publishers]: the logos of the publisher subcategories that have titles, in a small strip that drifts slowly sideways, each linking to its subcategory. Greyscale until hovered; stops on hover and focus; stands still for visitors who ask for reduced motion. Attributes height, speed, parent.\n* A brand logo now also reaches a publisher subcategory made by hand with the same name.",
         "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "36a0905c2b3f7612242cbda2d8816f0e22155f24db2dd217ffc58ca4edbb8c55",
-        "signature": "UbLyovpW/8Oj1foW3DEsN8QXMPvbRGWl+P2wN6Om8sx4ezoM88fBb8h/bJETWU9jkZfEUSrBDbmpiZn2erpDDg==",
+        "sha256": "8898fc6b0b75965987505f5f9fec41c114d6857065b928779ddbefc0c12d02a1",
+        "signature": "+nesy78XYzaPZ5OsGqK8zCkhmRTM8pfu2QkoiwiWo6YISWYg2MSxFuvrUZpfW5PdADc9ZlbpY2UniE1gR5fMAQ==",
         "tested_wp": "7.1",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.5.0/book-feed.zip"
+        "version": "1.6.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.6.0/book-feed.zip"
       }
     },
     "book-preview": {
