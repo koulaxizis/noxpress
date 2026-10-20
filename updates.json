@@ -106,15 +106,15 @@
     },
     "home-sections": {
       "beta": {
-        "changelog": "* Initial release.\n* Built-in markers for the [products] shortcode: hs-exclude-{ID}, hs-exclude-cat-{slug}, hs-no-preorders (PRENA and Pre-Orders), hs-title-{word}.\n* Presets: named markers that combine categories to leave out, no pre-orders, a title phrase and product IDs.\n* Optional alias prefix for the built-in markers.\n* Shortcode test on the settings page: the products a shortcode returns and how each class is read.\n* HMS_DISABLE, page cache clearing on save, clean uninstall.",
-        "published": "2026-10-19",
+        "changelog": "* New: [hs_video] shortcode, the newest book trailer (tab position 30) or book presentation (position 31) from the products' video tabs (Custom Product Tabs for WooCommerce), with id, exclude, category, preorders and heading attributes.\n* Poster markup only, no server-side iframe; a small click-to-load script (youtube-nocookie.com) loads only where the shortcode rendered and coexists with a page script that does the same.\n* Visitor texts as settings in Greek and English, with an automatic, Greek or English choice.\n* One 12-hour transient for the picks, cleared when a product or its tabs change.\n* Shortcode test accepts [hs_video …]: the product, the video and the markup.\n* Filters hms_video_source, hms_video_classes, hms_video_people_taxonomy, hms_video_text, hms_video_script.\n* [products] markers unchanged: pages give byte-identical output.",
+        "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8eb6448a6fc3d569ff0dbeed69e98e6b80bd2e8ee817c5cd3cb74d71d1fe0af8",
-        "signature": "i5QjEiiMjl1SOJIvi2Bd+BwMT6IhOe2bYw7bCzlYiqe8wBQXEmIPWVxZo9alrJKpNqdtN8Qg4jMsv4mZUlhVBA==",
+        "sha256": "01ec3a99b074b004ddf116b9334e3a6487c7b34a144dd4f93e6f347f34cc7daa",
+        "signature": "xAMdXyPsPI8BO5fZV6qTahUvDPe9+or94f20YUDFPb64JgL1G7e4Lv6wmC0walcQlgtottQn/smrGpFrHu4LAw==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.0.0/home-sections.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.1.0/home-sections.zip"
       }
     },
     "oros-connect": {
