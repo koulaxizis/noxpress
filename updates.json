@@ -221,15 +221,15 @@
     },
     "shop-filters": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* New: on a category page the category tree shows only that category's branch (its top-level category and the subcategories), so it matches what is listed. The shop page still shows the whole tree. Setting per category filter, «Only the category's branch», on by default.\n* Fix: unticking «Counts» on a filter was not saved.",
+        "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "fd0abcda14ead2f05fbb8e5000a0cb120699b6f71b63c9c621c17993e7d72099",
-        "signature": "MGc9ELrWTj2syZIsHWUXwh4uPiKKRPSittXCRssPVYDHx6I3e7JKaUCPaLKWWgk6Wj5bChS9VbA+thOWc3PpDw==",
+        "sha256": "3927380cbec7661c944e5c22bc63ca9fe8672acbf70a211131774c7d2f307d18",
+        "signature": "5v2BVBBeH1b9JfkGRgbw1TfTTKlYWgEtPK5BPNzAbifVnBtmu2w+Ay4wsOq5K5fw04QquI1JDxHvv/VfbvizCQ==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.1.0/shop-filters.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.2.0/shop-filters.zip"
       }
     },
     "site-bridge": {
