@@ -3,7 +3,7 @@
  * Plugin Name:          Book Feed
  * Plugin URI:           https://noxpress.tech
  * Description:          Τίτλοι άλλων εκδοτικών από κατάλογο βιβλίων (Bookpoint / ΟΣΔΕΛ) ως προϊόντα WooCommerce: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη, καθημερινός συγχρονισμός τιμής και διαθεσιμότητας, κλείδωμα όσων διορθώνεις με το χέρι.
- * Version:              1.6.0
+ * Version:              1.7.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -36,7 +36,11 @@
  *                      field locks, link, unlink, cover images)
  *  - BKF_Sync        → the background job (Action Scheduler): linked
  *                      products, then the rules; one at a time, steps
- *                      of at most 10 s, a safety action, stall detection
+ *                      of at most 10 s, a safety action, stall detection;
+ *                      rules every X days, summary email
+ *  - BKF_Bulk        → "import all results" of a search, in the
+ *                      background under the same lock, with a cap
+ *  - BKF_Publishers  → [bkf_publishers] logo strip
  *  - BKF_Log         → history (bkf_log, last 500 entries), CSV export
  *  - BKF_Guard       → fixed book price: discount warning on save
  *  - BKF_Admin_UI    → menu, page (rules, history, settings, tools),
@@ -64,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BKF_VERSION', '1.6.0' );
+define( 'BKF_VERSION', '1.7.0' );
 define( 'BKF_FILE', __FILE__ );
 define( 'BKF_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BKF_URL', plugin_dir_url( __FILE__ ) );
@@ -113,9 +117,11 @@ final class Book_Feed {
 		require_once BKF_PATH . 'includes/class-pub-price.php';
 		require_once BKF_PATH . 'includes/class-importer.php';
 		require_once BKF_PATH . 'includes/class-sync.php';
+		require_once BKF_PATH . 'includes/class-bulk.php';
 		require_once BKF_PATH . 'includes/class-publishers.php';
 
 		BKF_Sync::init();
+		BKF_Bulk::init();
 		BKF_Publishers::init();
 		add_action( 'added_term_meta', array( 'BKF_Importer', 'brand_logo' ), 10, 4 );
 		add_action( 'updated_term_meta', array( 'BKF_Importer', 'brand_logo' ), 10, 4 );
@@ -150,6 +156,7 @@ final class Book_Feed {
 		wp_clear_scheduled_hook( 'bkf_step' );
 		wp_clear_scheduled_hook( 'bkf_safety' );
 		wp_clear_scheduled_hook( 'bkf_daily' );
+		wp_clear_scheduled_hook( 'bkf_bulk_step' );
 	}
 }
 

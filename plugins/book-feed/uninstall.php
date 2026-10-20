@@ -4,11 +4,11 @@
  *
  * Deleted:
  *  - Options bkf_settings, bkf_rules, bkf_seen, bkf_pass (the sealed
- *    password), bkf_log, bkf_job, bkf_lock, bkf_last.
+ *    password), bkf_log, bkf_job, bkf_lock, bkf_last, bkf_bulk, bkf_bulk_last.
  *  - Transients bkf_aui_msg_{uid} (PRG notices), bkf_guard_{uid} (price
  *    warning), bkf_scheme (http / https memory).
  *  - Scheduled actions of the group book-feed (Action Scheduler) and the
- *    WP-Cron hooks bkf_step, bkf_safety, bkf_daily.
+ *    WP-Cron hooks bkf_step, bkf_safety, bkf_daily, bkf_bulk_step.
  *  - Every _bkf_* post meta (products and cover attachments), and the
  *    term meta bkf_publisher / bkf_logo of publisher subcategories.
  *  - Only when "Also delete the imported products" is ticked (off by
@@ -34,7 +34,7 @@ function bkf_uninstall_site(): void {
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
 		as_unschedule_all_actions( '', array(), 'book-feed' );
 	}
-	foreach ( array( 'bkf_step', 'bkf_safety', 'bkf_daily' ) as $bkf_hook ) {
+	foreach ( array( 'bkf_step', 'bkf_safety', 'bkf_daily', 'bkf_bulk_step' ) as $bkf_hook ) {
 		wp_clear_scheduled_hook( $bkf_hook );
 	}
 
@@ -65,7 +65,7 @@ function bkf_uninstall_site(): void {
 		} while ( $ids );
 	}
 
-	foreach ( array( 'bkf_settings', 'bkf_rules', 'bkf_seen', 'bkf_pass', 'bkf_log', 'bkf_job', 'bkf_lock', 'bkf_last' ) as $bkf_opt ) {
+	foreach ( array( 'bkf_settings', 'bkf_rules', 'bkf_seen', 'bkf_pass', 'bkf_log', 'bkf_job', 'bkf_lock', 'bkf_last', 'bkf_bulk', 'bkf_bulk_last' ) as $bkf_opt ) {
 		delete_option( $bkf_opt );
 	}
 	delete_transient( 'bkf_scheme' );

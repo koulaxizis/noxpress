@@ -3,7 +3,10 @@
  *
  * Search tab: select all, import of the ticked titles in small batches
  * (AJAX bkf_import; the server fetches each title again from the feed,
- * the browser only sends ids), "Σύνδεση" for a product with the same ISBN.
+ * the browser only sends ids), "Σύνδεση" for a product with the same ISBN,
+ * "Εισαγωγή όλων" (a confirmation, then the plain POST: the server runs
+ * it in the background) and "Αποθήκευση ως κανόνα" (plain POST, 1.7.0).
+ * Live text of a running bulk import.
  * Publisher autocomplete (search form and rule cards). Product box
  * buttons. Live text of a running sync. Confirmations (data-bkf-confirm).
  * No dependencies. Without JavaScript every form still works (POST).
@@ -316,6 +319,21 @@
 
 		form.addEventListener( 'submit', function ( e ) {
 			var sub = e.submitter || document.activeElement;
+			if ( sub && sub.classList && sub.classList.contains( 'bkf-rule-btn' ) ) {
+				return; // plain POST
+			}
+			if ( sub && sub.classList && sub.classList.contains( 'bkf-all-btn' ) ) {
+				var sel = form.querySelector( '[name="bkf_status"]' );
+				var label = sel && sel.selectedIndex >= 0 ? sel.options[ sel.selectedIndex ].text : '';
+				var text = t.all.replace( '%1$s', sub.getAttribute( 'data-bkf-count' ) || '' ).replace( '%2$s', label );
+				if ( sel && 'publish' === sel.value ) {
+					text += '\n\n' + t.allpub;
+				}
+				if ( running || ! window.confirm( text ) ) {
+					e.preventDefault();
+				}
+				return; // plain POST
+			}
 			e.preventDefault();
 			if ( running ) {
 				return;
@@ -388,6 +406,28 @@
 	/* ---------------------------------------------------------------
 	 * Running sync: live text
 	 * ------------------------------------------------------------- */
+
+	var bulkText = document.querySelector( '.bkf-bulk-text' );
+	if ( bulkText ) {
+		var pollBulk = function () {
+			post( 'bkf_bulk', {} )
+				.then( function ( d ) {
+					if ( d.running ) {
+						bulkText.textContent = d.text;
+						setTimeout( pollBulk, 5000 );
+						return;
+					}
+					bulkText.textContent = t.bulkdone + ' ';
+					var a = el( 'a', '', t.reload );
+					a.href = window.location.href;
+					bulkText.appendChild( a );
+				} )
+				.catch( function () {
+					setTimeout( pollBulk, 15000 );
+				} );
+		};
+		setTimeout( pollBulk, 5000 );
+	}
 
 	var jobText = document.querySelector( '.bkf-job-text' );
 	if ( jobText ) {

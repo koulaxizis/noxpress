@@ -4,7 +4,8 @@
  *
  * The bkf_log option (autoload off) keeps the newest 500 entries:
  * { t (Unix), act, pid, isbn, title, fields (comma list), msg }.
- * Acts: import, update, link, unlink, gone, back, locked, error, run.
+ * Acts: import, update, link, unlink, gone, back, locked, error, run,
+ * bulk (1.7.0: the summary of an "import all results").
  * Entries are collected during a request and written once at the end.
  * Nothing secret goes in: messages from the service are redacted by
  * BKF_Client before they get here.
@@ -17,7 +18,7 @@ final class BKF_Log {
 	const OPTION = 'bkf_log';
 	const MAX    = 500;
 
-	const ACTS = array( 'import', 'update', 'price', 'link', 'unlink', 'gone', 'back', 'locked', 'error', 'run' );
+	const ACTS = array( 'import', 'update', 'price', 'link', 'unlink', 'gone', 'back', 'locked', 'error', 'run', 'bulk' );
 
 	private static $pending = array();
 	private static $hooked  = false;
@@ -89,6 +90,7 @@ final class BKF_Log {
 			'locked' => __( 'Κλειδωμένα πεδία', 'book-feed' ),
 			'error'  => __( 'Σφάλμα', 'book-feed' ),
 			'run'    => __( 'Συγχρονισμός', 'book-feed' ),
+			'bulk'   => __( 'Μαζική εισαγωγή', 'book-feed' ),
 		);
 		return isset( $map[ $act ] ) ? $map[ $act ] : $act;
 	}

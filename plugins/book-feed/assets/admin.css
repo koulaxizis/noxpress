@@ -481,6 +481,11 @@ a.bkf-kofi:hover {
 }
 .bkf-import-bar .bkf-inline { margin: 0; }
 .bkf-import-bar select { max-width: 260px; }
+.bkf-import-bar .button { white-space: normal; height: auto; min-height: 30px; text-align: left; }
+@media (max-width: 600px) {
+	.bkf-import-bar .bkf-inline { flex-wrap: wrap; max-width: 100%; }
+	.bkf-import-bar select { max-width: 100%; }
+}
 .bkf-progress { color: var(--bkf-muted); }
 .bkf-results .bkf-cb { width: 28px; }
 .bkf-results .bkf-thumb { width: 44px; }

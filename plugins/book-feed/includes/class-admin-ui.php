@@ -7,14 +7,17 @@
  *  - search    the feed's catalogue: title, contributor, ISBN, publisher,
  *              years, kind; results with "in the store" / "same ISBN"
  *              marks; import of the ticked titles (AJAX, 5 per request)
- *  - rules     automatic imports per publisher
+ *  - rules     automatic imports: a publisher or any saved search,
+ *              every X days, with the status of the new titles, and
+ *              "Run now" (1.7.0)
  *  - log       history, filter by act, CSV export, clear
  *  - settings  connection, import, field mapping, roles, categories,
  *              VAT, availability, sync, fixed price, uninstall
  *  - tools     settings backup (JSON, without the password), developers
  *
  * A status box on every tab: connection, the running job (with stop),
- * the last run and "Sync now".
+ * the last run and "Sync now", and a running "import all results" with
+ * its progress and stop (1.7.0).
  *
  * Every state change: POST on admin_init, slug + nonce + capability,
  * strict validation, PRG with the message in bkf_aui_msg_{uid}. CSV and
@@ -135,6 +138,10 @@ final class BKF_Admin_UI {
 					'confirm'   => __( 'Σίγουρα;', 'book-feed' ),
 					'take'      => __( 'Όλα τα πεδία του προϊόντος θα γραφτούν ξανά από τον κατάλογο. Συνέχεια;', 'book-feed' ),
 					'unlink'    => __( 'Το προϊόν μένει όπως είναι, αλλά δεν θα συγχρονίζεται πια. Συνέχεια;', 'book-feed' ),
+					/* translators: 1: number of titles, 2: status (Draft / Published) */
+					'all'       => __( 'Θα εισαχθούν έως %1$s τίτλοι, στο παρασκήνιο, με κατάσταση «%2$s». Όσοι υπάρχουν ήδη στο κατάστημα παρακάμπτονται. Συνέχεια;', 'book-feed' ),
+					'allpub'    => __( 'Προσοχή: θα εμφανιστούν αμέσως στο κατάστημα.', 'book-feed' ),
+					'bulkdone'  => __( 'Η μαζική εισαγωγή τελείωσε.', 'book-feed' ),
 				),
 			)
 		);
@@ -272,6 +279,7 @@ final class BKF_Admin_UI {
 					<?php endif; ?>
 				<?php endif; ?>
 			</div>
+			<?php BKF_Admin_Ajax::bulk_box(); ?>
 		</div>
 		<?php
 	}
@@ -338,7 +346,9 @@ final class BKF_Admin_UI {
 		<form method="post">
 			<?php self::nonce_field(); ?>
 			<input type="hidden" name="bkf_action" value="save_rules" />
-			<p class="description"><?php esc_html_e( 'Ένας κανόνας φέρνει αυτόματα τους νέους τίτλους ενός εκδότη, στον καθημερινό συγχρονισμό, πάντα ως πρόχειρα για να τους ελέγξεις πριν τη δημοσίευση. Οι τίτλοι που υπάρχουν ήδη στο κατάστημα (ίδιο ISBN) δεν διπλασιάζονται.', 'book-feed' ); ?></p>
+			<?php // Enter in a field saves (the first submit button), never "Run now". ?>
+			<button type="submit" class="screen-reader-text" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'Αποθήκευση', 'book-feed' ); ?></button>
+			<p class="description"><?php esc_html_e( 'Ένας κανόνας φέρνει αυτόματα τους νέους τίτλους που ταιριάζουν στα κριτήριά του (εκδότης, λέξεις του τίτλου, συντελεστής, είδος, έτη), κάθε Χ ημέρες, μέσα στον καθημερινό συγχρονισμό. Οι τίτλοι που υπάρχουν ήδη στο κατάστημα (ίδιο ISBN) δεν διπλασιάζονται. Κανόνα φτιάχνεις και από μια αναζήτηση, με το «Αποθήκευση αναζήτησης ως κανόνα».', 'book-feed' ); ?></p>
 			<?php
 			foreach ( $rules as $i => $r ) {
 				self::rule_card( $i, $r );
@@ -352,7 +362,7 @@ final class BKF_Admin_UI {
 
 	private static function rule_card( int $i, ?array $r ): void {
 		$new  = null === $r;
-		$r    = $new ? BKF_Settings::clean_rule( array( 'pub_id' => 'x', 'on' => true ) ) : $r;
+		$r    = $new ? BKF_Settings::clean_rule( array( 'pub_id' => 'x', 'on' => true, 'every' => 7 ) ) : $r;
 		$name = 'bkf_r[' . $i . ']';
 		$seen = BKF_Settings::seen();
 		if ( $new ) {
@@ -375,6 +385,12 @@ final class BKF_Admin_UI {
 				<p class="bkf-field"><span><?php esc_html_e( 'Όνομα κανόνα (προαιρετικό)', 'book-feed' ); ?></span>
 					<input type="text" name="<?php echo esc_attr( $name ); ?>[name]" value="<?php echo esc_attr( $r['name'] ); ?>" />
 				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Λέξεις του τίτλου', 'book-feed' ); ?></span>
+					<input type="text" name="<?php echo esc_attr( $name ); ?>[title]" value="<?php echo esc_attr( $r['title'] ); ?>" />
+				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Συγγραφέας ή άλλος συντελεστής', 'book-feed' ); ?></span>
+					<input type="text" name="<?php echo esc_attr( $name ); ?>[author]" value="<?php echo esc_attr( $r['author'] ); ?>" />
+				</p>
 				<p class="bkf-field"><span><?php esc_html_e( 'Είδος', 'book-feed' ); ?></span>
 					<select name="<?php echo esc_attr( $name ); ?>[kind]">
 						<option value=""><?php esc_html_e( 'Όλα', 'book-feed' ); ?></option>
@@ -389,8 +405,20 @@ final class BKF_Admin_UI {
 						?>
 					</select>
 				</p>
-				<p class="bkf-field"><span><?php esc_html_e( 'Μόνο από το έτος', 'book-feed' ); ?></span>
-					<input type="number" min="0" max="2100" name="<?php echo esc_attr( $name ); ?>[year_from]" value="<?php echo esc_attr( $r['year_from'] ? (string) $r['year_from'] : '' ); ?>" />
+				<p class="bkf-field"><span><?php esc_html_e( 'Έτος από – έως', 'book-feed' ); ?></span>
+					<span class="bkf-pair">
+						<input type="number" min="0" max="2100" name="<?php echo esc_attr( $name ); ?>[year_from]" value="<?php echo esc_attr( $r['year_from'] ? (string) $r['year_from'] : '' ); ?>" />
+						<input type="number" min="0" max="2100" name="<?php echo esc_attr( $name ); ?>[year_to]" value="<?php echo esc_attr( $r['year_to'] ? (string) $r['year_to'] : '' ); ?>" />
+					</span>
+				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Έλεγχος κάθε (ημέρες)', 'book-feed' ); ?></span>
+					<input type="number" min="1" max="90" name="<?php echo esc_attr( $name ); ?>[every]" value="<?php echo esc_attr( (string) $r['every'] ); ?>" />
+				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Κατάσταση νέων τίτλων', 'book-feed' ); ?></span>
+					<select name="<?php echo esc_attr( $name ); ?>[status]">
+						<option value="draft" <?php selected( $r['status'], 'draft' ); ?>><?php esc_html_e( 'Πρόχειρο', 'book-feed' ); ?></option>
+						<option value="publish" <?php selected( $r['status'], 'publish' ); ?>><?php esc_html_e( 'Δημοσιευμένο', 'book-feed' ); ?></option>
+					</select>
 				</p>
 				<p class="bkf-field"><span><?php esc_html_e( 'Νέοι τίτλοι ανά εκτέλεση (έως)', 'book-feed' ); ?></span>
 					<input type="number" min="1" max="500" name="<?php echo esc_attr( $name ); ?>[max]" value="<?php echo esc_attr( (string) $r['max'] ); ?>" />
@@ -418,11 +446,28 @@ final class BKF_Admin_UI {
 					if ( $r['last'] ) {
 						/* translators: %s: date */
 						echo '<span class="bkf-badge">' . esc_html( sprintf( __( 'Τελευταία εκτέλεση: %s', 'book-feed' ), self::when( $r['last'] ) ) ) . '</span> ';
+						if ( $r['on'] ) {
+							/* translators: %s: date */
+							echo '<span class="bkf-badge bkf-badge--muted">' . esc_html( sprintf( __( 'Επόμενη: από %s', 'book-feed' ), wp_date( get_option( 'date_format' ), $r['last'] + $r['every'] * DAY_IN_SECONDS ) ) ) . '</span> ';
+						}
 					} else {
 						echo '<span class="bkf-badge bkf-badge--muted">' . esc_html__( 'Δεν έχει τρέξει ακόμα', 'book-feed' ) . '</span> ';
 					}
+					$find = array_filter(
+						array(
+							'bkf_pub'  => $r['pub_id'],
+							'bkf_pubn' => $r['pub_name'],
+							'bkf_t'    => $r['title'],
+							'bkf_a'    => $r['author'],
+							'bkf_kind' => $r['kind'],
+							'bkf_y1'   => $r['year_from'] ? (string) $r['year_from'] : '',
+							'bkf_y2'   => $r['year_to'] ? (string) $r['year_to'] : '',
+						),
+						'strlen'
+					);
 					?>
-					<a href="<?php echo esc_url( wp_nonce_url( self::url( 'search', array( 'bkf_pub' => $r['pub_id'], 'bkf_pubn' => $r['pub_name'], 'bkf_kind' => $r['kind'], 'bkf_y1' => $r['year_from'] ? $r['year_from'] : '' ) ), self::NONCE_FIND, 'bkf_f' ) ); ?>"><?php esc_html_e( 'Δες τους τίτλους του', 'book-feed' ); ?></a>
+					<a href="<?php echo esc_url( wp_nonce_url( self::url( 'search', $find ), self::NONCE_FIND, 'bkf_f' ) ); ?>"><?php esc_html_e( 'Δες τους τίτλους του', 'book-feed' ); ?></a>
+					<button type="submit" class="button button-small" name="bkf_run_rule" value="<?php echo esc_attr( $r['id'] ); ?>" <?php disabled( ! BKF_Settings::ready() ); ?> title="<?php esc_attr_e( 'Αποθηκεύει τους κανόνες και τρέχει αυτόν τον κανόνα τώρα, στο παρασκήνιο.', 'book-feed' ); ?>"><?php esc_html_e( 'Εκτέλεση τώρα', 'book-feed' ); ?></button>
 				</p>
 				<p class="bkf-row"><label class="bkf-inline bkf-warn"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[delete]" value="1" /> <?php esc_html_e( 'Διαγραφή κανόνα', 'book-feed' ); ?></label></p>
 			<?php endif; ?>
@@ -830,6 +875,14 @@ final class BKF_Admin_UI {
 				<p class="bkf-field"><span><?php esc_html_e( 'Παύση ανάμεσα στις σελίδες του καταλόγου (ms)', 'book-feed' ); ?></span>
 					<input type="number" min="0" max="5000" step="100" name="bkf_s[pause]" value="<?php echo esc_attr( (string) $s['pause'] ); ?>" />
 				</p>
+				<label class="bkf-check bkf-mt-8"><input type="checkbox" name="bkf_s[notify]" value="1" <?php checked( $s['notify'] ); ?> /> <?php esc_html_e( 'Email όταν οι κανόνες φέρνουν νέους τίτλους (ένα ανά εκτέλεση)', 'book-feed' ); ?></label>
+				<p class="bkf-field"><span><?php esc_html_e( 'Διεύθυνση email', 'book-feed' ); ?></span>
+					<input type="email" name="bkf_s[notify_to]" value="<?php echo esc_attr( $s['notify_to'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" />
+				</p>
+				<p class="bkf-field"><span><?php esc_html_e( 'Όριο τίτλων ανά «Εισαγωγή όλων των αποτελεσμάτων»', 'book-feed' ); ?></span>
+					<input type="number" min="100" max="5000" step="100" name="bkf_s[bulk_max]" value="<?php echo esc_attr( (string) $s['bulk_max'] ); ?>" />
+				</p>
+				<p class="bkf-hint"><?php esc_html_e( 'Κάθε τίτλος με εξώφυλλο θέλει 2–4 δευτερόλεπτα και μια εικόνα στη βιβλιοθήκη πολυμέσων· το όριο κρατά μια αναζήτηση χωρίς φίλτρα από το να γεμίσει το κατάστημα.', 'book-feed' ); ?></p>
 			</div>
 
 			<h2 class="bkf-h2"><?php esc_html_e( 'Ενιαία τιμή βιβλίου', 'book-feed' ); ?></h2>
@@ -933,6 +986,10 @@ final class BKF_Admin_UI {
 			case 'save_rules':
 				self::redirect( 'rules', self::do_save_rules() );
 				break;
+			case 'bulk_stop':
+				BKF_Bulk::stop();
+				self::redirect( $back, array( self::msg( 'success', __( 'Η μαζική εισαγωγή σταμάτησε. Όσοι τίτλοι εισήχθησαν μένουν.', 'book-feed' ) ) ) );
+				break;
 			case 'sync':
 				if ( ! BKF_Settings::ready() ) {
 					self::redirect( $back, array( self::msg( 'error', __( 'Λείπουν το όνομα χρήστη ή ο κωδικός της υπηρεσίας (Ρυθμίσεις).', 'book-feed' ) ) ) );
@@ -952,7 +1009,14 @@ final class BKF_Admin_UI {
 				self::redirect( 'log', array( self::msg( 'success', __( 'Το ιστορικό καθαρίστηκε.', 'book-feed' ) ) ) );
 				break;
 			case 'import':
-				// Same form: a "Σύνδεση" button sends bkf_link.
+				// Same form: "Σύνδεση" sends bkf_link, "Εισαγωγή όλων" bkf_all,
+				// "Αποθήκευση αναζήτησης ως κανόνα" bkf_save_rule.
+				if ( isset( $_POST['bkf_save_rule'] ) ) {
+					self::redirect( 'rules', BKF_Admin_Ajax::do_save_rule() );
+				}
+				if ( isset( $_POST['bkf_all'] ) ) {
+					BKF_Admin_Ajax::back( BKF_Settings::ready() ? BKF_Admin_Ajax::do_import_all() : array( self::msg( 'error', __( 'Λείπουν το όνομα χρήστη ή ο κωδικός της υπηρεσίας (Ρυθμίσεις).', 'book-feed' ) ) ) );
+				}
 				BKF_Admin_Ajax::back( isset( $_POST['bkf_link'] ) ? BKF_Admin_Ajax::do_link() : BKF_Admin_Ajax::do_import_post() );
 				break;
 			default:
@@ -971,6 +1035,11 @@ final class BKF_Admin_UI {
 		set_transient( 'bkf_aui_msg_' . get_current_user_id(), $msgs, 60 );
 		wp_safe_redirect( self::url( $tab ) );
 		exit;
+	}
+
+	private static function post_scalar( string $key ): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route().
+		return isset( $_POST[ $key ] ) && is_scalar( $_POST[ $key ] ) ? sanitize_key( wp_unslash( (string) $_POST[ $key ] ) ) : '';
 	}
 
 	private static function post_array( string $key ): array {
@@ -1013,7 +1082,7 @@ final class BKF_Admin_UI {
 		}
 		$new['stock']  = self::pairs( $in, 'stock_names', 'stock_to' );
 		$new['fields'] = isset( $in['fields'] ) && is_array( $in['fields'] ) ? $in['fields'] : array();
-		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'pub_cover', 'cat_parents', 'sync_on', 'delete_products' ) as $b ) {
+		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'pub_cover', 'cat_parents', 'sync_on', 'notify', 'delete_products' ) as $b ) {
 			$new[ $b ] = ! empty( $in[ $b ] );
 		}
 		$new['pub_prices'] = array();
@@ -1153,8 +1222,11 @@ final class BKF_Admin_UI {
 			if ( ! is_array( $r ) || ! empty( $r['delete'] ) ) {
 				continue;
 			}
-			$pub = isset( $r['pub_id'] ) && is_scalar( $r['pub_id'] ) ? trim( (string) $r['pub_id'] ) : '';
-			if ( '' === $pub ) {
+			$what = '';
+			foreach ( array( 'pub_id', 'title', 'author' ) as $k ) {
+				$what .= isset( $r[ $k ] ) && is_scalar( $r[ $k ] ) ? trim( (string) $r[ $k ] ) : '';
+			}
+			if ( '' === $what ) {
 				if ( ! empty( $r['id'] ) ) {
 					++$bad;
 				}
@@ -1173,7 +1245,17 @@ final class BKF_Admin_UI {
 		BKF_Settings::save_rules( $rules );
 		$msgs = array( self::msg( 'success', __( 'Οι κανόνες αποθηκεύτηκαν.', 'book-feed' ) ) );
 		if ( $bad ) {
-			$msgs[] = self::msg( 'warning', __( 'Κάποιοι κανόνες δεν κρατήθηκαν ή άλλαξαν: ο κωδικός εκδότη θέλει μόνο γράμματα, ψηφία, - και _, και η «Μόνο προβολή» θέλει διεύθυνση http(s).', 'book-feed' ) );
+			$msgs[] = self::msg( 'warning', __( 'Κάποιοι κανόνες δεν κρατήθηκαν ή άλλαξαν: ένας κανόνας θέλει εκδότη, λέξεις του τίτλου ή συντελεστή, ο κωδικός εκδότη θέλει μόνο γράμματα, ψηφία, - και _, και η «Μόνο προβολή» θέλει διεύθυνση http(s).', 'book-feed' ) );
+		}
+		$run = self::post_scalar( 'bkf_run_rule' );
+		if ( '' !== $run ) {
+			if ( ! BKF_Settings::ready() ) {
+				$msgs[] = self::msg( 'error', __( 'Λείπουν το όνομα χρήστη ή ο κωδικός της υπηρεσίας (Ρυθμίσεις).', 'book-feed' ) );
+			} elseif ( BKF_Sync::start( 'rule', true, $run ) ) {
+				$msgs[] = self::msg( 'success', __( 'Ο κανόνας τρέχει στο παρασκήνιο. Οι νέοι τίτλοι και το αποτέλεσμα γράφονται στο Ιστορικό.', 'book-feed' ) );
+			} else {
+				$msgs[] = self::msg( 'warning', BKF_Sync::job() ? __( 'Τρέχει ήδη συγχρονισμός· ξαναδοκίμασε όταν τελειώσει.', 'book-feed' ) : __( 'Ο κανόνας δεν βρέθηκε.', 'book-feed' ) );
+			}
 		}
 		return $msgs;
 	}

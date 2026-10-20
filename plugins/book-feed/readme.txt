@@ -5,11 +5,11 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web service) into WooCommerce: search and import, rules per publisher, a daily sync of price and availability, and locks for whatever you edit by hand.
+Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web service) into WooCommerce: search and import (also every result at once, in the background), rules that bring new titles every few days, a daily sync of price and availability, and locks for whatever you edit by hand.
 
 == Description ==
 
@@ -18,6 +18,8 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * Search the catalogue by title, contributor, ISBN, publisher (with autocomplete), years and kind.
 * Each result shows whether the title is already in the store, or whether a product with the same ISBN exists. That product can be linked with one click instead of being duplicated.
 * Import the ticked titles as drafts or published, into a category you choose or the one mapped in the settings.
+* "Import all results" brings every title of a search, on every page, in the background: you can close the page, the progress and a stop button show on every tab. Titles already in the store are skipped, and a limit (1,000 by default, up to 5,000) keeps a search without filters from filling the store.
+* "Save search as rule" turns the search into a rule that brings its new titles automatically.
 * Every title is fetched again from the catalogue on the server: nothing that the browser sends ends up on a product.
 
 **What a product gets**
@@ -33,7 +35,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * Price and availability always follow the catalogue. Title, descriptions, cover, attributes, dimensions and tax class follow it too, until you edit them by hand: from then on that field is locked, and the history says so.
 * A title that leaves the catalogue becomes out of stock (default) or a draft, and comes back when it returns.
 * If the catalogue suddenly returns none of the store's titles, the sync stops without changing anything.
-* Rules per publisher bring new titles in automatically, always as drafts.
+* Rules bring new titles in automatically: a publisher, title words or a contributor, with kind and years, checked every X days (1–90), as drafts or published, with "Run now". One summary email when they bring something (can be turned off), and a history line per rule even when there is nothing new.
 * Runs in the background (Action Scheduler) in steps of up to 10 seconds, one at a time, with a safety action and stall detection. "Sync now" and a live status on every tab.
 
 **Prices from the publishers' own sites**
@@ -94,6 +96,12 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.7.0 =
+* "Import all results": every title of a search, on every page, imported in the background with the status and category you pick, under the same lock as the sync. A confirmation names the number of titles and warns when they will be published at once. Progress and a stop button on every tab; titles already in the store are skipped; a limit per run (setting, 1,000 by default, 100–5,000).
+* "Save search as rule": a new rule with every filter of the search (title words, contributor, publisher, kind, years), the status and category you picked, checked every 7 days.
+* Rules: any search, not only a publisher; "check every X days" (rules from earlier versions keep running daily); the status of the new titles (draft or published); "Run now" on each rule; the next run date on the card.
+* After a run, one history line per rule ("new titles 0" included) and one summary email when rules brought new titles (setting, on by default; the site's admin address unless you give another).
 
 = 1.6.0 =
 * Shortcode [bkf_publishers]: the logos of the publisher subcategories that have titles, in a small strip that drifts slowly sideways, each linking to its subcategory. Greyscale until hovered; stops on hover and focus; stands still for visitors who ask for reduced motion. Attributes height, speed, parent.
