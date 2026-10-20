@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Site Bridge
  * Plugin URI:           https://noxpress.tech
- * Description:          Το Claude διαχειρίζεται τα WordPress / WooCommerce sites σου μέσω MCP, από τους δικούς σου servers. Ένα Hub δέχεται τη σύνδεση του Claude (OAuth 2.1) και προωθεί κάθε κλήση, υπογεγραμμένη, στα sites. Κάθε site αποφασίζει μόνο του: ανάγνωση, εγγραφή ή διαχείριση, με παράθυρο εγγραφής που ανοίγεις εσύ. Ιστορικό κάθε κλήσης. Για προσωπική χρήση.
- * Version:              1.2.0
+ * Description:          Το Claude διαχειρίζεται τα WordPress / WooCommerce sites σου μέσω MCP, από τους δικούς σου servers. Ένα Hub δέχεται τη σύνδεση του Claude (OAuth 2.1) και προωθεί κάθε κλήση, υπογεγραμμένη, στα sites. Κάθε site αποφασίζει μόνο του: ανάγνωση, εγγραφή ή διαχείριση, με παράθυρο εγγραφής που ανοίγεις εσύ. Ιστορικό κάθε κλήσης. Δουλεύει με το Claude, δεν σχετίζεται με την Anthropic.
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -46,9 +46,8 @@
  *    routes when it is active (Bible 1.20 writes the exception).
  *  - §8 (capability manage_woocommerce): manage_options, remote access to
  *    the whole site.
- *  - §16 (catalog): for personal use, not in the Noxpress Core catalog,
- *    the hub or noxpress.tech; updates are installed by hand. It still
- *    ships Noxpress Core for the shared menu.
+ *  - §16 (catalog): in the Noxpress Core catalog since Core 1.1.17
+ *    (until 1.2.0 it was for personal use only, Bible §21).
  *
  * Front end (Bible §14): nothing. Only REST routes under site-bridge/v1
  * and the /.well-known/ OAuth metadata paths answer; SBR_DISABLE in
@@ -59,7 +58,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SBR_VERSION', '1.2.0' );
+define( 'SBR_VERSION', '1.3.0' );
 define( 'SBR_FILE', __FILE__ );
 define( 'SBR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SBR_URL', plugin_dir_url( __FILE__ ) );
