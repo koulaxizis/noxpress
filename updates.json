@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* \"Import all results\": every title of a search, on every page, imported in the background with the status and category you pick, under the same lock as the sync. A confirmation names the number of titles and warns when they will be published at once. Progress and a stop button on every tab; titles already in the store are skipped; a limit per run (setting, 1,000 by default, 100–5,000).\n* \"Save search as rule\": a new rule with every filter of the search (title words, contributor, publisher, kind, years), the status and category you picked, checked every 7 days.\n* Rules: any search, not only a publisher; \"check every X days\" (rules from earlier versions keep running daily); the status of the new titles (draft or published); \"Run now\" on each rule; the next run date on the card.\n* After a run, one history line per rule (\"new titles 0\" included) and one summary email when rules brought new titles (setting, on by default; the site's admin address unless you give another).",
+        "changelog": "* [bkf_publishers] names=\"1\" prints each publisher's name under its logo.",
         "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "84a93ccbcdd9d064198de1860045b0c79f38331790fbaf8528256b8ffe61554a",
-        "signature": "tUidCgRiOrYBX8p0bcVAsl/45yDBrIJHLzjb7rMJLQjuCzoVFxWxEIgGWcWlv+MiWhyxZ5DYED6JkDcfUznHCg==",
+        "sha256": "3e286b4002faa80672f950f4c41daf2a6fc3388c5f7ee548f462c8dccd019c56",
+        "signature": "/4Ww0dlFRDyvfB6uikQ3/6rJJ2CIOh/xvl4nH6Tf5HLeJnmfnHZH74a4zHLxTxnxsUImfijqry+Qes3hozYPAQ==",
         "tested_wp": "7.1",
-        "version": "1.7.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.7.0/book-feed.zip"
+        "version": "1.7.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.7.1/book-feed.zip"
       }
     },
     "book-preview": {
