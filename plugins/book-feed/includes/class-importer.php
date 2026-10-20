@@ -532,6 +532,7 @@ final class BKF_Importer {
 		$r['pub_why']   = '';
 		$r['pub_cover'] = '';
 		$r['pub_none']  = false;
+		$r['pub_link']  = '';
 		if ( '' === BKF_Pub_Price::template( $r ) ) {
 			return $r;
 		}
@@ -542,6 +543,7 @@ final class BKF_Importer {
 			$r['pub_cover'] = BKF_Pub_Price::cover( $r );
 		}
 		$r['pub_none'] = BKF_Pub_Price::no_price( $r );
+		$r['pub_link'] = BKF_Pub_Price::link( $r );
 		// The last good price covers a page that could not be read or gave
 		// an implausible price, not a page that answered without a price
 		// for this book (1.4.2).
@@ -583,6 +585,11 @@ final class BKF_Importer {
 			BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'price' ), $r['pub_why'] );
 		}
 		update_post_meta( $pid, '_bkf_pub_note', $r['pub_why'] );
+		// The book's page found on the publisher's site (1.9.0): kept as
+		// the product's page when it has none, so later looks go there.
+		if ( ! empty( $r['pub_link'] ) && '' === (string) get_post_meta( $pid, '_bkf_pub_url', true ) && BKF_Settings::page_url_ok( $r['pub_link'] ) ) {
+			update_post_meta( $pid, '_bkf_pub_url', $r['pub_link'] );
+		}
 	}
 
 	/** Categories at import: the rule's, the mapped ones, the default. */
@@ -1206,7 +1213,17 @@ final class BKF_Importer {
 			return 0;
 		}
 
-		$s    = BKF_Settings::get();
+		$s = BKF_Settings::get();
+		if ( $s['square'] ) {
+			$png = BKF_Square::file( $tmp );
+			if ( is_wp_error( $png ) ) {
+				BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'image' ), $png->get_error_message() );
+			} elseif ( '' !== $png ) {
+				wp_delete_file( $tmp );
+				$tmp  = $png;
+				$mime = 'image/png';
+			}
+		}
 		$name = self::fill( $s['img_name'], $r );
 		$base = function_exists( 'glp_convert' ) ? glp_convert( $name, 'slug' ) : self::latin( $name );
 		$base = sanitize_title( $base );
@@ -1228,6 +1245,9 @@ final class BKF_Importer {
 		$alt = self::fill( $s['img_alt'], $r );
 		update_post_meta( $att, '_wp_attachment_image_alt', '' !== $alt ? $alt : $r['title'] );
 		update_post_meta( $att, '_bkf_cover_src', $url );
+		if ( $s['square'] ) {
+			update_post_meta( $att, '_bkf_square', '1' );
+		}
 		return (int) $att;
 	}
 

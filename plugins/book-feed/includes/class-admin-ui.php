@@ -689,6 +689,7 @@ final class BKF_Admin_UI {
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[images]" value="1" <?php checked( $s['images'] ); ?> /> <?php esc_html_e( 'Κατέβασμα του εξωφύλλου στη βιβλιοθήκη πολυμέσων', 'book-feed' ); ?></label>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[back_cover]" value="1" <?php checked( $s['back_cover'] ); ?> /> <?php esc_html_e( 'Και το οπισθόφυλλο, στη συλλογή εικόνων', 'book-feed' ); ?></label>
 				<label class="bkf-check"><input type="checkbox" name="bkf_s[pub_cover]" value="1" <?php checked( $s['pub_cover'] ); ?> /> <?php esc_html_e( 'Το εξώφυλλο από τη σελίδα του εκδότη, όταν είναι μεγαλύτερο από του καταλόγου', 'book-feed' ); ?></label>
+				<label class="bkf-check"><input type="checkbox" name="bkf_s[square]" value="1" <?php checked( $s['square'] ); ?> /> <?php esc_html_e( 'Τετράγωνο εξώφυλλο: ολόκληρο, στο κέντρο, σε διάφανο φόντο (PNG)', 'book-feed' ); ?></label>
 				<div class="bkf-grid bkf-mt-8">
 					<p class="bkf-field"><span><?php esc_html_e( 'Όνομα αρχείου του εξωφύλλου', 'book-feed' ); ?></span>
 						<input type="text" class="bkf-wide-input" name="bkf_s[img_name]" value="<?php echo esc_attr( $s['img_name'] ); ?>" />
@@ -956,6 +957,28 @@ final class BKF_Admin_UI {
 			<p class="description bkf-mt-8"><?php esc_html_e( 'Βρίσκει τον τίτλο στον κατάλογο, ανοίγει τη σελίδα που γράφεις, αλλιώς τη σελίδα του προϊόντος ή του εκδότη από τις Ρυθμίσεις, και δείχνει τι τιμή διαβάζει. Δεν αλλάζει κανένα προϊόν.', 'book-feed' ); ?></p>
 		</div>
 
+		<h2 class="bkf-h2"><?php esc_html_e( 'Τετράγωνα εξώφυλλα', 'book-feed' ); ?></h2>
+		<div class="bkf-zone">
+			<?php
+			$sq   = BKF_Square::get();
+			$sql  = BKF_Square::last();
+			$left = BKF_Square::left();
+			if ( $sq ) {
+				echo '<p>' . esc_html( BKF_Square::text( $sq ) ) . ' ' . esc_html__( 'Τρέχει στο παρασκήνιο.', 'book-feed' ) . '</p>';
+			} elseif ( $sql ) {
+				echo '<p>' . esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $sql['t'] ) . ' · ' . BKF_Square::text( $sql ) ) . '</p>';
+			}
+			?>
+			<form method="post" class="bkf-inline-form">
+				<?php self::nonce_field(); ?>
+				<input type="hidden" name="bkf_action" value="square" />
+				<button type="submit" class="button" <?php disabled( $sq || ! $left || ! BKF_Square::available() ); ?>>
+					<?php echo esc_html( sprintf( /* translators: %d: covers */ __( 'Κάνε τετράγωνα τα υπάρχοντα εξώφυλλα (%d)', 'book-feed' ), $left ) ); ?>
+				</button>
+			</form>
+			<p class="description bkf-mt-8"><?php esc_html_e( 'Μόνο εξώφυλλα που κατέβασε το Book Feed για τίτλους του καταλόγου· όσα ανέβασες με το χέρι μένουν όπως είναι. Ίδια εικόνα στη βιβλιοθήκη, νέο αρχείο PNG: καθάρισε την cache της σελίδας μετά.', 'book-feed' ); ?></p>
+		</div>
+
 		<h2 class="bkf-h2"><?php esc_html_e( 'Για προγραμματιστές', 'book-feed' ); ?></h2>
 		<div class="bkf-zone">
 			<table class="widefat bkf-table">
@@ -1026,6 +1049,10 @@ final class BKF_Admin_UI {
 				break;
 			case 'pp_test':
 				self::redirect( 'tools', array( self::pp_test() ) );
+				break;
+			case 'square':
+				$ok = BKF_Square::available() && BKF_Square::start();
+				self::redirect( 'tools', array( $ok ? self::msg( 'success', __( 'Τα εξώφυλλα γίνονται τετράγωνα στο παρασκήνιο.', 'book-feed' ) ) : self::msg( 'warning', __( 'Τρέχει ήδη, ή ο server δεν μπορεί να φτιάξει τετράγωνη εικόνα.', 'book-feed' ) ) ) );
 				break;
 			case 'clear_log':
 				BKF_Log::clear();
@@ -1105,7 +1132,7 @@ final class BKF_Admin_UI {
 		}
 		$new['stock']  = self::pairs( $in, 'stock_names', 'stock_to' );
 		$new['fields'] = isset( $in['fields'] ) && is_array( $in['fields'] ) ? $in['fields'] : array();
-		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'pub_cover', 'cat_parents', 'sync_on', 'notify', 'delete_products' ) as $b ) {
+		foreach ( array( 'https', 'sku', 'descriptions', 'images', 'back_cover', 'pub_cover', 'square', 'cat_parents', 'sync_on', 'notify', 'delete_products' ) as $b ) {
 			$new[ $b ] = ! empty( $in[ $b ] );
 		}
 		$new['pub_prices'] = array();
@@ -1207,6 +1234,8 @@ final class BKF_Admin_UI {
 		$why = '';
 		$p   = BKF_Pub_Price::price( $r, $why, true );
 		$cat = null === $r['price'] ? '—' : BKF_Pub_Price::money( (float) $r['price'] );
+		$own = BKF_Pub_Price::link( $r );
+		$url = '' !== $own ? $own : $url;
 		if ( null === $p ) {
 			/* translators: 1: title, 2: catalogue price, 3: reason, 4: address */
 			return self::msg( 'warning', sprintf( __( '«%1$s»: μένει η τιμή του καταλόγου (%2$s). %3$s Σελίδα: %4$s', 'book-feed' ), $r['title'], $cat, $why, $url ) );

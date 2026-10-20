@@ -37,8 +37,16 @@
  * JSON-LD Product image, an absolute http(s) address. The importer takes
  * it only when it is larger than the catalogue's (cover()).
  *
- * Everything read from the page is hostile: only numbers and one image
- * address come out.
+ * The book's own page (1.9.0): when the template is a search page that
+ * does not name this ISBN, the first link on the same site whose text is
+ * the book's title is read too (one more request), and taken when it
+ * names the ISBN. The book's page address (that link, a Store API
+ * product's permalink, or the template page itself when it names the
+ * ISBN) comes out as 'link'; the importer keeps it in _bkf_pub_url when
+ * the product has none, so later looks go straight to it.
+ *
+ * Everything read from the page is hostile: only numbers, one image
+ * address and one page address come out.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -100,8 +108,14 @@ final class BKF_Pub_Price {
 		return null !== $got && isset( $got['img'] ) && is_string( $got['img'] ) ? $got['img'] : '';
 	}
 
+	/** The book's own page on the publisher's site, when one was found, or ''. */
+	public static function link( array $r ): string {
+		$got = self::page( $r );
+		return null !== $got && isset( $got['link'] ) && is_string( $got['link'] ) ? $got['link'] : '';
+	}
+
 	/**
-	 * What the publisher's page gave for a record (price, reason, image),
+	 * What the publisher's page gave for a record (price, reason, image, link),
 	 * read once a day and kept in a transient; null without a page.
 	 */
 	private static function page( array $r, bool $fresh = false ): ?array {
@@ -111,17 +125,21 @@ final class BKF_Pub_Price {
 		}
 		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
 		$got = $fresh ? false : get_transient( $key );
-		// Entries from before 1.4.2 have no "read" mark: read the page again.
-		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) || ! array_key_exists( 'read', $got ) ) {
+		// Entries from before 1.9.0 have no "link": read the page again.
+		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) || ! array_key_exists( 'read', $got ) || ! array_key_exists( 'link', $got ) ) {
 			$why  = '';
 			$img  = '';
 			$read = false;
-			$p    = self::fetch( $url, $r, $why, $img, $read );
+			$link = '';
+			// A product's own page is the book's page: no link to follow.
+			$own  = isset( $r['pub_url'] ) && is_string( $r['pub_url'] ) && '' !== $r['pub_url'] && $url === $r['pub_url'];
+			$p    = self::fetch( $url, $r, $why, $img, $read, $link, ! $own );
 			$got  = array(
 				'p'    => $p,
 				'why'  => $why,
 				'img'  => $img,
 				'read' => $read,
+				'link' => $link,
 			);
 			set_transient( $key, $got, self::TTL );
 		}
@@ -153,11 +171,16 @@ final class BKF_Pub_Price {
 		return $p >= $feed / 2 && $p <= $feed * 2;
 	}
 
-	/** Reads the page; the price or null (reason in $why, cover address in $img, $read true when the page answered). */
-	public static function fetch( string $url, array $r, ?string &$why = null, ?string &$img = null, ?bool &$read = null ): ?float {
+	/**
+	 * Reads the page; the price or null (reason in $why, cover address in
+	 * $img, $read true when the page answered, the book's page in $link).
+	 * $follow: also try the book's link on a search page (1.9.0).
+	 */
+	public static function fetch( string $url, array $r, ?string &$why = null, ?string &$img = null, ?bool &$read = null, ?string &$link = null, bool $follow = true ): ?float {
 		$img  = '';
 		$read = false;
-		$res = wp_safe_remote_get(
+		$link = '';
+		$res  = wp_safe_remote_get(
 			$url,
 			array(
 				'timeout'             => self::TIMEOUT,
@@ -179,8 +202,40 @@ final class BKF_Pub_Price {
 		}
 		$read = true;
 		$body = (string) wp_remote_retrieve_body( $res );
-		$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
-		$img  = self::image( $body, $r['isbn_digits'] );
+		$t    = ltrim( $body );
+		if ( '' !== $t && '[' === $t[0] ) {
+			// Store API: the matching product's price, image and permalink.
+			$list = json_decode( $t, true );
+			$hit  = null;
+			$p    = is_array( $list ) ? self::store_api( $list, $r['isbn_digits'], $hit ) : null;
+			if ( is_array( $hit ) ) {
+				$link = isset( $hit['permalink'] ) && is_string( $hit['permalink'] ) ? self::abs_url( $hit['permalink'] ) : '';
+				$src  = $hit['images'][0]['src'] ?? '';
+				$img  = is_string( $src ) ? self::abs_url( $src ) : '';
+			}
+		} elseif ( self::names_isbn( $body, $r['isbn_digits'] ) ) {
+			$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
+			$img  = self::image( $body, $r['isbn_digits'] );
+			$link = self::canonical( $body, $url );
+		} else {
+			$p   = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
+			$img = self::image( $body, $r['isbn_digits'] );
+			$to  = $follow ? self::title_link( $body, $url, (string) $r['title'] ) : '';
+			if ( '' !== $to && $to !== $url ) {
+				$w2 = '';
+				$i2 = '';
+				$r2 = false;
+				$l2 = '';
+				$p2 = self::fetch( $to, $r, $w2, $i2, $r2, $l2, false );
+				if ( '' !== $l2 || null !== $p2 ) {
+					// The title's page names this ISBN, or gives a price and
+					// names no other ISBN: it is the book's page.
+					$link = '' !== $l2 ? $l2 : $to;
+					$p    = null !== $p2 ? $p2 : $p;
+					$img  = '' !== $i2 ? $i2 : $img;
+				}
+			}
+		}
 		if ( null === $p ) {
 			$why = __( 'Δεν βρέθηκε τιμή για αυτό το ISBN στη σελίδα του εκδότη.', 'book-feed' );
 		}
@@ -335,6 +390,60 @@ final class BKF_Pub_Price {
 		return esc_url_raw( $u, array( 'http', 'https' ) );
 	}
 
+	/** True when the page (scripts included) names this ISBN. */
+	private static function names_isbn( string $html, string $isbn_digits ): bool {
+		if ( '' === $isbn_digits || ! preg_match_all( '/97[89][\d\-\s]{10,16}/', preg_replace( '/<[^>]*>/', ' ', $html ), $mm ) ) {
+			return false;
+		}
+		return in_array( $isbn_digits, array_map( array( 'BKF_Record', 'isbn_digits' ), array_map( 'trim', $mm[0] ) ), true );
+	}
+
+	/** The page's canonical address on the same site, else the address read. */
+	private static function canonical( string $html, string $url ): string {
+		if ( preg_match( '#<link[^>]+rel=["\']canonical["\'][^>]+href=["\']([^"\']+)["\']#i', $html, $m ) || preg_match( '#<link[^>]+href=["\']([^"\']+)["\'][^>]+rel=["\']canonical["\']#i', $html, $m ) ) {
+			$u = self::abs_url( $m[1] );
+			if ( '' !== $u && self::same_site( $u, $url ) ) {
+				return $u;
+			}
+		}
+		return self::abs_url( $url );
+	}
+
+	/** True when two addresses are on the same host (www. aside). */
+	private static function same_site( string $a, string $b ): bool {
+		$ha = preg_replace( '/^www\./i', '', strtolower( (string) wp_parse_url( $a, PHP_URL_HOST ) ) );
+		$hb = preg_replace( '/^www\./i', '', strtolower( (string) wp_parse_url( $b, PHP_URL_HOST ) ) );
+		return '' !== $ha && $ha === $hb;
+	}
+
+	/**
+	 * On a search page: the first link on the same site whose text is the
+	 * book's title (accents and case aside; a subtitle after it is fine),
+	 * or ''.
+	 */
+	private static function title_link( string $html, string $url, string $title ): string {
+		$want = trim( self::fold( $title ) );
+		if ( '' === $want || ! preg_match_all( '#<a\s[^>]*href=["\']([^"\'\#]+)["\'][^>]*>(.*?)</a>#is', $html, $m, PREG_SET_ORDER ) ) {
+			return '';
+		}
+		$host = wp_parse_url( $url, PHP_URL_SCHEME ) . '://' . wp_parse_url( $url, PHP_URL_HOST );
+		foreach ( $m as $a ) {
+			$text = trim( self::fold( self::text( $a[2] ) ) );
+			if ( '' === $text || ( $text !== $want && 0 !== strpos( $text, $want . ' ' ) && 0 !== strpos( $text, $want . ':' ) ) ) {
+				continue;
+			}
+			$href = html_entity_decode( $a[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			if ( '/' === substr( $href, 0, 1 ) && '/' !== substr( $href, 1, 1 ) ) {
+				$href = $host . $href;
+			}
+			$u = self::abs_url( $href );
+			if ( '' !== $u && self::same_site( $u, $url ) ) {
+				return $u;
+			}
+		}
+		return '';
+	}
+
 	/** The visible text of a page, one space between words. */
 	private static function text( string $html ): string {
 		$t = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
@@ -405,8 +514,9 @@ final class BKF_Pub_Price {
 		return str_replace( 'ς', 'σ', $s );
 	}
 
-	/** The regular price in a Store API product list. */
-	private static function store_api( array $list, string $isbn_digits ): ?float {
+	/** The regular price in a Store API product list ($hit: the product). */
+	private static function store_api( array $list, string $isbn_digits, ?array &$hit = null ): ?float {
+		$hit  = null;
 		$hits = array();
 		foreach ( $list as $prod ) {
 			if ( ! is_array( $prod ) || ! isset( $prod['prices'] ) || ! is_array( $prod['prices'] ) ) {
@@ -424,6 +534,7 @@ final class BKF_Pub_Price {
 		if ( 1 !== count( $hits ) ) {
 			return null;
 		}
+		$hit   = $hits[0];
 		$pr    = $hits[0]['prices'];
 		$minor = isset( $pr['currency_minor_unit'] ) ? max( 0, min( 4, (int) $pr['currency_minor_unit'] ) ) : 2;
 		foreach ( array( 'regular_price', 'price' ) as $k ) {
