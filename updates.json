@@ -93,15 +93,15 @@
     },
     "hide-catalog": {
       "beta": {
-        "changelog": "* Initial release.\n* Rules per product category, with or without subcategories: hide products from the shop, other listings, search, related products / upsells / cross-sells, and product shortcodes and blocks (Product Collection, product grid blocks, Store API product list).\n* \"Only when all its categories are hidden\" option, with a preview of affected products per rule.\n* Hide the category itself from category lists, product categories and breadcrumbs; one-click rule for the default category.\n* Category page: open, noindex (WordPress, Yoast, Rank Math), 404 or redirect to the shop; closed pages leave the core and Rank Math sitemaps.\n* Import from \"Hide Categories Or Products On Shop Page\"; notice when FiboSearch is active.\n* Test mode, HIC_DISABLE, page cache clearing on save, settings backup, clean uninstall.",
-        "published": "2026-10-13",
+        "changelog": "* Fix: with a rule that hides a category from lists, a visitor's page could rebuild WordPress's stored category hierarchy without that category, so its subcategories vanished from get_term_children() site-wide (an empty subcategory page, rules with subcategories missing them). The full read behind that hierarchy is no longer filtered.",
+        "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "48630f38ea235deea22960c08bd4990ca7f95824593bbf03954b65f155939619",
-        "signature": "DFh1VyeHkn4A0Ijq8v6h2urStZ1U/xlx/3tNm1O/QVod8dwTOPIQ5Mhu4ocNIZjpzLus8EnCu284Q97QLIMEBw==",
+        "sha256": "de4698efd83c501a5d06fea5f5d8ad8b2ef9c7b4a8606c74e4f831a03c1c6eb2",
+        "signature": "fIP1Jl9R+aRdxev2LXszvt1cEVaBKVmvKzeyrj155d5e/3xP2oNTGzh64KNLlvVe2mYPxb/v8+xRmGu1KY63Bg==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.0/hide-catalog.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.1/hide-catalog.zip"
       }
     },
     "home-sections": {
