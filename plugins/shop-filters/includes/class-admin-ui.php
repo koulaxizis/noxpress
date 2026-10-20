@@ -381,9 +381,14 @@ final class SHF_Admin_UI {
 							</label>
 							<label class="shf-inline"><input type="checkbox" name="shf_f[<?php echo (int) $i; ?>][open]" value="1" <?php checked( $f['open'] ); ?> /> <?php esc_html_e( 'Ανοιχτό', 'shop-filters' ); ?></label>
 							<?php if ( 'price' !== $f['type'] ) : ?>
+								<input type="hidden" name="shf_f[<?php echo (int) $i; ?>][counts]" value="0" />
 								<label class="shf-inline"><input type="checkbox" name="shf_f[<?php echo (int) $i; ?>][counts]" value="1" <?php checked( $f['counts'] ); ?> /> <?php esc_html_e( 'Μετρητές', 'shop-filters' ); ?></label>
 							<?php else : ?>
 								<input type="hidden" name="shf_f[<?php echo (int) $i; ?>][counts]" value="1" />
+							<?php endif; ?>
+							<?php if ( 'cat' === $f['type'] ) : ?>
+								<input type="hidden" name="shf_f[<?php echo (int) $i; ?>][branch]" value="0" />
+								<label class="shf-inline" title="<?php esc_attr_e( 'Σε σελίδα κατηγορίας, το δέντρο δείχνει μόνο τον κλάδο της (την κατηγορία πρώτου επιπέδου και τις υποκατηγορίες της). Στο κατάστημα δείχνει όλο το δέντρο.', 'shop-filters' ); ?>"><input type="checkbox" name="shf_f[<?php echo (int) $i; ?>][branch]" value="1" <?php checked( $f['branch'] ); ?> /> <?php esc_html_e( 'Μόνο ο κλάδος της κατηγορίας', 'shop-filters' ); ?></label>
 							<?php endif; ?>
 							<label class="shf-inline"><input type="checkbox" name="shf_f[<?php echo (int) $i; ?>][remove]" value="1" /> <?php esc_html_e( 'Αφαίρεση', 'shop-filters' ); ?></label>
 						</li>

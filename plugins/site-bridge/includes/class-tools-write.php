@@ -184,6 +184,12 @@ final class SBR_Tools_Write {
 		if ( 0 !== strpos( $url, 'https://' ) ) {
 			return false;
 		}
+		// The prefix is compared as text: no dot segments (an HTTP client
+		// resolves "/../" and leaves the prefix), escapes, user info,
+		// query or fragment.
+		if ( preg_match( '#[%\\\\@?\#]|/\.\.?(/|$)#', $url ) ) {
+			return false;
+		}
 		foreach ( SBR_Settings::lines( 'zip_hosts' ) as $prefix ) {
 			if ( 0 === strpos( $url, $prefix ) ) {
 				return true;

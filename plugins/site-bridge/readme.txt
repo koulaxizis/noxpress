@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -32,7 +32,7 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 
 * Read: `list_sites`, `site_info`, `plugins_list`, `themes_list`, `option_get`, `db_tables`, `db_describe`, `db_select` (SELECT / SHOW / DESCRIBE / EXPLAIN only, with guards, optionally through a read-only database user), `rest_get`, `page_html`, `files_list`, `file_read`, `files_search`, `upload_read`, `logs_tail`, `cron_list`, `site_health`, `abilities_list`, `core_update_check`.
 * Write: `rest_write` (the site's own REST API, so plugins validate and hook as usual), `option_set`, `media_upload_from_url`, `cache_flush`, `ability_run` (WordPress Abilities API, class taken from the ability's annotations).
-* Admin: `plugins_install` (zip only from allowed URL prefixes, by default github.com/koulaxizis/ and downloads.wordpress.org), `plugins_activate`, `plugins_deactivate`, `plugins_update`, `themes_update`, `noxpress_channel_set`.
+* Admin: `plugins_install` (zip only from allowed URL prefixes, by default the noxpress GitHub releases and downloads.wordpress.org), `plugins_activate`, `plugins_deactivate`, `plugins_update`, `themes_update`, `noxpress_channel_set`.
 * Never: writing files, SQL writes, user or password changes, reading wp-config.php, .env, keys or backups.
 
 **Connections and audit**
@@ -43,9 +43,15 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 * Every call is logged on the Hub and on the site, with arguments (secrets redacted), result, time and size. Filters and CSV export. The log is kept for 90 days (setting).
 * Kill switch: revoke every connection at once, or `define( 'SBR_DISABLE', true );` in wp-config.php to close every endpoint.
 
-**Personal use**
+**Before you install**
 
-Site Bridge is built for its author's own sites. It is not listed in the Noxpress catalog and gets no automatic updates: install new release zips by hand. It shares the "Noxpress" admin menu with the other Noxpress plugins.
+Site Bridge gives Claude remote administrator access to the sites you allow. Turn on only the roles you need, keep sites at read, and open the write window only while you work. It is provided as is, under the MIT license, with no warranty.
+
+Works with Claude. Site Bridge is not a product of Anthropic and is not affiliated with Anthropic.
+
+**Updates and support**
+
+Updates arrive through the Noxpress hub like every other Noxpress plugin (beta channel until it is marked stable). It shares the "Noxpress" admin menu with the other Noxpress plugins. Support is through GitHub Issues at https://github.com/koulaxizis/noxpress/issues, with no guarantee of an answer.
 
 == Installation ==
 
@@ -74,6 +80,16 @@ The secret key is sealed with the salts, so a new key pair is made and a notice 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: Site Bridge is no longer for personal use only. It updates through the Noxpress hub (updates.json) like every other Noxpress plugin. Sites on 1.2.0 install 1.3.0 by hand once.
+* New: Overview says that the plugin gives remote administrator access and that it is not affiliated with Anthropic.
+* New: a card on noxpress.tech, and Site Bridge in the Noxpress hub of every site (Noxpress Core 1.1.17).
+* Security: db_select no longer shows a secret option or meta value under another row's name. A query that reads option_value or meta_value must be one plain SELECT (no UNION, WITH, subquery or derived table) with option_name / meta_key as plain columns of the same table. The mysql, performance_schema and sys schemas are refused.
+* Security: plugins_install refuses zip URLs with dot segments, escapes, user info, query or fragment, so "/../" can no longer leave an allowed prefix.
+* Security: file tools no longer serve archives and backup copies (.zip, .tar, .gz, .7z, .rar, .jpa, .bak, .old, .swp and the like).
+* Security: the approval screen warns that an approval link sent by someone else connects their account. Pairing from the Hub no longer follows redirects or reaches private addresses (except local test installs).
+* Change: new installs allow plugin zips only from the noxpress GitHub releases and downloads.wordpress.org (was every github.com/koulaxizis/ repository). Saved settings are kept.
 
 = 1.2.0 =
 * New: the Hub's Sites list opens a site's write window for 15, 30 or 60 minutes, 3 or 5 hours (was 30 minutes only). Sites still on 1.0.0 open 30 minutes for 3 and 5 hours; update them too.

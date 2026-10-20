@@ -116,6 +116,9 @@ final class Noxpress_Hub {
 		foreach ( Noxpress_Core::catalog() as $slug => $info ) {
 			$file   = Noxpress_Core::plugin_file( $slug );
 			$is_in  = isset( $installed[ $slug ] );
+			if ( ! $is_in && ! empty( $info['unlisted'] ) ) {
+				continue;
+			}
 			$active = $is_in && ( is_plugin_active( $file ) || is_plugin_active_for_network( $file ) );
 			$rel    = Noxpress_Updater::latest( $slug, $manifest );
 			$other  = Noxpress_Updater::other( $slug, $manifest );

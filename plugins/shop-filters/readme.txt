@@ -5,7 +5,7 @@ Tags: woocommerce, product filters, layered navigation, attributes, classic them
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -81,6 +81,10 @@ On block themes the widget and the shortcode work where a classic widget or a sh
 The plugin's options (`shf_settings`, `shf_sets`, `shf_groups_*`, `widget_shf_filters`), its widgets in the sidebars and its transients are removed. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: on a category page the category tree shows only that category's branch (its top-level category and the subcategories), so it matches what is listed. The shop page still shows the whole tree. Setting per category filter, «Only the category's branch», on by default.
+* Fix: unticking «Counts» on a filter was not saved.
 
 = 1.1.0 =
 * New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.

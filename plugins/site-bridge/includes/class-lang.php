@@ -160,6 +160,8 @@ final class SBR_Lang {
 		'Ημέρες ιστορικού'                                            => 'Days of log',
 		'IP που δέχεται το endpoint MCP (μία ανά γραμμή, CIDR)'       => 'IPs the MCP endpoint accepts (one per line, CIDR)',
 		'Κενό = κάθε IP. Το Claude καλεί από 160.79.104.0/21· το Claude Code από τη δική σου IP.' => 'Empty = any IP. Claude calls from 160.79.104.0/21; Claude Code from your own IP.',
+		'Το Site Bridge δίνει στο Claude απομακρυσμένη πρόσβαση διαχειριστή στα sites που επιτρέπεις. Άνοιξε μόνο ό,τι χρειάζεσαι και κράτα τα sites σε Ανάγνωση.' => 'Site Bridge gives Claude remote administrator access to the sites you allow. Open only what you need and keep sites at read.',
+		'Δουλεύει με το Claude. Δεν είναι προϊόν της Anthropic και δεν σχετίζεται με αυτήν.' => 'Works with Claude. Not a product of Anthropic and not affiliated with Anthropic.',
 
 		// Log.
 		'Hub και site'                                                => 'Hub and site',
@@ -207,6 +209,7 @@ final class SBR_Lang {
 		'Συνδεδεμένος ως %s.'                                         => 'Logged in as %s.',
 		'Μετά την έγκριση η σύνδεση επιστρέφει στο:'                  => 'After approval the connection returns to:',
 		'Τοπική διεύθυνση (Claude Code): έγκρινε μόνο αν μόλις ξεκίνησες εσύ τη σύνδεση από τον υπολογιστή σου.' => 'Local address (Claude Code): approve only if you just started this connection from your own computer.',
+		'Έγκρινε μόνο αν μόλις πάτησες εσύ Connect στο Claude. Ένας σύνδεσμος έγκρισης που σου έστειλε κάποιος άλλος συνδέει τον δικό του λογαριασμό με τα sites σου.' => 'Approve only if you just pressed Connect in Claude yourself. An approval link someone else sent you connects their account to your sites.',
 		'Κάθε site εφαρμόζει επιπλέον το δικό του επίπεδο και το παράθυρο εγγραφής.' => 'Each site also applies its own level and write window.',
 		'Και όσα sites προστεθούν αργότερα'                           => 'And any sites added later',
 		'Η έγκριση ισχύει 90 ημέρες. Ανακαλείται όποτε θέλεις από Noxpress → Site Bridge → Συνδέσεις.' => 'The approval lasts 90 days. Revoke it any time in Noxpress → Site Bridge → Connections.',

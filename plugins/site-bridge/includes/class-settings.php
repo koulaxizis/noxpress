@@ -37,7 +37,7 @@ final class SBR_Settings {
 			'clients'       => "https://claude.ai/\nhttps://claude.com/",
 			'rate_min'      => 120,
 			'rate_day'      => 10000,
-			'zip_hosts'     => "https://github.com/koulaxizis/\nhttps://downloads.wordpress.org/",
+			'zip_hosts'     => "https://github.com/koulaxizis/noxpress/releases/download/\nhttps://downloads.wordpress.org/",
 			'log_days'      => 90,
 		);
 	}

@@ -6,6 +6,8 @@
  * address in the settings (bkf_settings.pub_prices: pub_id => template
  * with {isbn}, {isbn13}, {title}), the product page is read and its price
  * takes the place of the catalogue's, automatically (Chris, 2026-10-19).
+ * A product can name its own page instead (_bkf_pub_url, in the Book Feed
+ * box): sites whose addresses do not carry the ISBN (1.3.0).
  *
  * Where the price comes from, in order (first one found wins):
  *  0. A WooCommerce Store API answer (/wp-json/wc/store/v1/products?
@@ -16,6 +18,9 @@
  *     the shop runs a sale), else offers.price / lowPrice.
  *  2. <meta property="product:price:amount"> (Open Graph).
  *  3. itemprop="price" content="…" (microdata).
+ *  4. The page's text: a number right after one of the words in the
+ *     settings (pub_labels, "Τιμή εκδότη"). Read before 1–3 when found,
+ *     since those often carry the shop's own (discounted) price.
  * When the page names an ISBN / GTIN of its own and it is not this
  * title's, nothing is taken (a search page that landed on another book).
  *
@@ -28,7 +33,12 @@
  *  - One request per title per day: the result (price or "none") is kept
  *    in a transient per ISBN, so imports and the sync share it.
  *
- * Everything read from the page is hostile: only numbers come out.
+ * The same page also gives the book's cover (1.4.0): og:image or the
+ * JSON-LD Product image, an absolute http(s) address. The importer takes
+ * it only when it is larger than the catalogue's (cover()).
+ *
+ * Everything read from the page is hostile: only numbers and one image
+ * address come out.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -39,8 +49,11 @@ final class BKF_Pub_Price {
 	const MAX_BODY = 2097152;
 	const TIMEOUT  = 8;
 
-	/** Template for a record's publisher, or ''. */
+	/** The product's own page, else the template for the record's publisher, or ''. */
 	public static function template( array $r ): string {
+		if ( isset( $r['pub_url'] ) && is_string( $r['pub_url'] ) && BKF_Settings::page_url_ok( $r['pub_url'] ) ) {
+			return $r['pub_url'];
+		}
 		$s = BKF_Settings::get();
 		return ( '' !== $r['pub_id'] && isset( $s['pub_prices'][ $r['pub_id'] ] ) ) ? $s['pub_prices'][ $r['pub_id'] ]['url'] : '';
 	}
@@ -64,20 +77,9 @@ final class BKF_Pub_Price {
 	 */
 	public static function price( array $r, ?string &$why = null, bool $fresh = false ): ?float {
 		$why = '';
-		$url = self::url( self::template( $r ), $r );
-		if ( '' === $url ) {
+		$got = self::page( $r, $fresh );
+		if ( null === $got ) {
 			return null;
-		}
-		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
-		$got = $fresh ? false : get_transient( $key );
-		if ( ! is_array( $got ) ) {
-			$why = '';
-			$p   = self::fetch( $url, $r, $why );
-			$got = array(
-				'p'   => $p,
-				'why' => $why,
-			);
-			set_transient( $key, $got, self::TTL );
 		}
 		$p   = isset( $got['p'] ) && is_numeric( $got['p'] ) ? (float) $got['p'] : null;
 		$why = isset( $got['why'] ) && is_string( $got['why'] ) ? $got['why'] : '';
@@ -90,6 +92,49 @@ final class BKF_Pub_Price {
 			return null;
 		}
 		return $p;
+	}
+
+	/** The cover address on the publisher's page for a record, or ''. */
+	public static function cover( array $r ): string {
+		$got = self::page( $r );
+		return null !== $got && isset( $got['img'] ) && is_string( $got['img'] ) ? $got['img'] : '';
+	}
+
+	/**
+	 * What the publisher's page gave for a record (price, reason, image),
+	 * read once a day and kept in a transient; null without a page.
+	 */
+	private static function page( array $r, bool $fresh = false ): ?array {
+		$url = self::url( self::template( $r ), $r );
+		if ( '' === $url ) {
+			return null;
+		}
+		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
+		$got = $fresh ? false : get_transient( $key );
+		// Entries from before 1.4.2 have no "read" mark: read the page again.
+		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) || ! array_key_exists( 'read', $got ) ) {
+			$why  = '';
+			$img  = '';
+			$read = false;
+			$p    = self::fetch( $url, $r, $why, $img, $read );
+			$got  = array(
+				'p'    => $p,
+				'why'  => $why,
+				'img'  => $img,
+				'read' => $read,
+			);
+			set_transient( $key, $got, self::TTL );
+		}
+		return $got;
+	}
+
+	/**
+	 * True when the publisher's page answered but has no price for this
+	 * book: the page's own answer, not a passing error (1.4.2).
+	 */
+	public static function no_price( array $r ): bool {
+		$got = self::page( $r );
+		return null !== $got && ! empty( $got['read'] ) && ! isset( $got['p'] );
 	}
 
 	/** A price for messages: "12,50" in the store's format. */
@@ -108,8 +153,10 @@ final class BKF_Pub_Price {
 		return $p >= $feed / 2 && $p <= $feed * 2;
 	}
 
-	/** Reads the page; the price or null (reason in $why). */
-	public static function fetch( string $url, array $r, ?string &$why = null ): ?float {
+	/** Reads the page; the price or null (reason in $why, cover address in $img, $read true when the page answered). */
+	public static function fetch( string $url, array $r, ?string &$why = null, ?string &$img = null, ?bool &$read = null ): ?float {
+		$img  = '';
+		$read = false;
 		$res = wp_safe_remote_get(
 			$url,
 			array(
@@ -130,20 +177,41 @@ final class BKF_Pub_Price {
 			$why = sprintf( __( 'Η σελίδα του εκδότη απάντησε %d.', 'book-feed' ), $code );
 			return null;
 		}
-		$p = self::parse( (string) wp_remote_retrieve_body( $res ), $r['isbn_digits'] );
+		$read = true;
+		$body = (string) wp_remote_retrieve_body( $res );
+		$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
+		$img  = self::image( $body, $r['isbn_digits'] );
 		if ( null === $p ) {
 			$why = __( 'Δεν βρέθηκε τιμή για αυτό το ISBN στη σελίδα του εκδότη.', 'book-feed' );
 		}
 		return $p;
 	}
 
-	/** The price on a product page for this ISBN, or null. */
-	public static function parse( string $html, string $isbn_digits ): ?float {
+	/**
+	 * The price on a product page for this ISBN, or null. $labels: the
+	 * words before a price in the text (null = the settings'); $title: the
+	 * book's title, to pick its own labelled price among others (1.4.1).
+	 */
+	public static function parse( string $html, string $isbn_digits, ?array $labels = null, string $title = '' ): ?float {
 		// 0. Store API (JSON list of products).
 		$t = ltrim( $html );
 		if ( '' !== $t && '[' === $t[0] ) {
 			$list = json_decode( $t, true );
 			return is_array( $list ) ? self::store_api( $list, $isbn_digits ) : null;
+		}
+		// 4 first: a labelled price is the publisher's list price.
+		if ( self::other_book( $html, $isbn_digits ) ) {
+			return null;
+		}
+		$why = '';
+		$p   = self::labelled( self::text( $html ), null === $labels ? BKF_Settings::get()['pub_labels'] : $labels, $title, $why );
+		if ( null !== $p ) {
+			return $p;
+		}
+		if ( 'ambiguous' === $why ) {
+			// Labelled prices of several books (lists of related titles):
+			// the structured price is as likely to be another book's.
+			return null;
 		}
 		// 1. JSON-LD.
 		if ( preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $m ) ) {
@@ -167,14 +235,6 @@ final class BKF_Pub_Price {
 				}
 			}
 		}
-		// The page names other ISBNs only: not ours.
-		if ( preg_match_all( '/97[89][\d\-\s]{10,16}/', wp_strip_all_tags( $html ), $mm ) ) {
-			$seen = array_unique( array_map( array( 'BKF_Record', 'isbn_digits' ), $mm[0] ) );
-			$seen = array_filter( $seen );
-			if ( $seen && ! in_array( $isbn_digits, $seen, true ) ) {
-				return null;
-			}
-		}
 		// 2. Open Graph product price.
 		if ( preg_match( '#<meta[^>]+property=["\'](?:product|og):price:amount["\'][^>]+content=["\']([\d.,]+)["\']#i', $html, $m ) || preg_match( '#<meta[^>]+content=["\']([\d.,]+)["\'][^>]+property=["\'](?:product|og):price:amount["\']#i', $html, $m ) ) {
 			return self::num( $m[1] );
@@ -184,6 +244,165 @@ final class BKF_Pub_Price {
 			return self::num( $m[1] );
 		}
 		return null;
+	}
+
+	/**
+	 * The cover on a product page for this ISBN: the JSON-LD Product
+	 * image, else og:image; an absolute http(s) address or ''. When the
+	 * page links the same picture as a file of its own (a gallery link
+	 * around a resized image), that file is taken instead (1.4.1).
+	 */
+	public static function image( string $html, string $isbn_digits ): string {
+		$u = self::found_image( $html, $isbn_digits );
+		return '' !== $u ? self::full_size( $html, $u ) : '';
+	}
+
+	/** The image the page names for the book (JSON-LD, else og:image), or ''. */
+	private static function found_image( string $html, string $isbn_digits ): string {
+		$t = ltrim( $html );
+		if ( '' === $t || '[' === $t[0] || self::other_book( $html, $isbn_digits ) ) {
+			return '';
+		}
+		if ( preg_match_all( '#<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $m ) ) {
+			foreach ( $m[1] as $json ) {
+				$data = json_decode( trim( $json ), true );
+				if ( ! is_array( $data ) ) {
+					continue;
+				}
+				foreach ( self::products( $data ) as $prod ) {
+					$ids = self::ids( $prod );
+					if ( $ids && ! in_array( $isbn_digits, $ids, true ) ) {
+						continue;
+					}
+					$img = $prod['image'] ?? null;
+					if ( is_array( $img ) ) {
+						$img = isset( $img[0] ) ? $img[0] : $img;
+						$img = is_array( $img ) ? ( $img['contentUrl'] ?? ( $img['url'] ?? null ) ) : $img;
+					}
+					$u = is_string( $img ) ? self::abs_url( $img ) : '';
+					if ( '' !== $u ) {
+						return $u;
+					}
+				}
+			}
+		}
+		foreach ( array( 'og:image:secure_url', 'og:image' ) as $prop ) {
+			$q = preg_quote( $prop, '#' );
+			if ( preg_match( '#<meta[^>]+property=["\']' . $q . '["\'][^>]+content=["\']([^"\']+)["\']#i', $html, $mm ) || preg_match( '#<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']' . $q . '["\']#i', $html, $mm ) ) {
+				$u = self::abs_url( $mm[1] );
+				if ( '' !== $u ) {
+					return $u;
+				}
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * A link on the page to the same picture as $u without the resize
+	 * marks ("/w640/", "-600x600"), e.g. <a href="/files/products/x.jpg">
+	 * around <img src="/mediastream/w600/files/products/x.jpg.jpg">.
+	 */
+	private static function full_size( string $html, string $u ): string {
+		$path = (string) wp_parse_url( $u, PHP_URL_PATH );
+		$stem = preg_replace( '/(\.(?:jpe?g|png|gif|webp))+$/i', '', basename( $path ) );
+		$stem = preg_replace( '/-\d{2,5}x\d{2,5}$/', '', (string) $stem );
+		if ( strlen( (string) $stem ) < 4 ) {
+			return $u;
+		}
+		$re = '#<a\s[^>]*href=["\']([^"\']*/' . preg_quote( $stem, '#' ) . '\.(?:jpe?g|png|webp))["\']#i';
+		if ( ! preg_match( $re, $html, $m ) ) {
+			return $u;
+		}
+		$link = html_entity_decode( $m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		if ( '/' === substr( $link, 0, 1 ) && '/' !== substr( $link, 1, 1 ) ) {
+			$host = wp_parse_url( $u, PHP_URL_SCHEME ) . '://' . wp_parse_url( $u, PHP_URL_HOST );
+			$link = $host . $link;
+		}
+		$full = self::abs_url( $link );
+		return '' !== $full ? $full : $u;
+	}
+
+	/** An absolute http(s) address (or "//host/…"), else ''. */
+	private static function abs_url( string $u ): string {
+		$u = trim( html_entity_decode( $u, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		if ( 0 === strpos( $u, '//' ) ) {
+			$u = 'https:' . $u;
+		}
+		if ( strlen( $u ) > 1000 || ! preg_match( '#^https?://[^/\s"\'<>]+/\S*$#i', $u ) ) {
+			return '';
+		}
+		return esc_url_raw( $u, array( 'http', 'https' ) );
+	}
+
+	/** The visible text of a page, one space between words. */
+	private static function text( string $html ): string {
+		$t = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		return trim( (string) preg_replace( '/[\s\x{00a0}]+/u', ' ', $t ) );
+	}
+
+	/** True when the page (scripts included) names ISBNs and none is this title's. */
+	private static function other_book( string $html, string $isbn_digits ): bool {
+		if ( ! preg_match_all( '/97[89][\d\-\s]{10,16}/', preg_replace( '/<[^>]*>/', ' ', $html ), $mm ) ) {
+			return false;
+		}
+		$seen = array_filter( array_unique( array_map( array( 'BKF_Record', 'isbn_digits' ), array_map( 'trim', $mm[0] ) ) ) );
+		return $seen && ! in_array( $isbn_digits, $seen, true );
+	}
+
+	/**
+	 * The number after a label ("Τιμή εκδότη: 24,40 €", "Τιμή εκδότη
+	 * (με ΦΠΑ) 24,40"), at most 20 other characters between, or null.
+	 *
+	 * Pages often list other books with the same label (the author's
+	 * other titles, "readers also bought"), and the book's own price may
+	 * be only in such a list (1.4.1, Dioptra). So, in order:
+	 *  1. the label within 150 characters after this book's title, with
+ *     no price, year or ISBN between (small numbers such as "ΣΕΙΡΑ 3"
+ *     are fine, 1.4.2); those mean another part of the page;
+	 *  2. else the label's number when every labelled number on the page
+	 *     is the same;
+	 *  3. else nothing, and $why = 'ambiguous'.
+	 */
+	private static function labelled( string $text, array $labels, string $title = '', ?string &$why = null ): ?float {
+		$why  = '';
+		$flat = self::fold( $text );
+		$t    = trim( self::fold( $title ) );
+		foreach ( $labels as $label ) {
+			if ( ! is_string( $label ) || '' === trim( $label ) ) {
+				continue;
+			}
+			$l   = preg_quote( self::fold( trim( $label ) ), '/' );
+			$num = '[^\d]{0,20}?(\d{1,6}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\d)';
+			if ( mb_strlen( $t ) >= 3 && preg_match( '/' . preg_quote( $t, '/' ) . '(?:(?!' . $l . ')(?!\d{4})(?!\d+[.,]\d).){0,150}?' . $l . $num . '/isu', $flat, $m ) ) {
+				$p = self::num( $m[1] );
+				if ( null !== $p ) {
+					return $p;
+				}
+			}
+			if ( preg_match_all( '/' . $l . $num . '/iu', $flat, $mm ) ) {
+				$seen = array_values( array_unique( array_filter( array_map( array( __CLASS__, 'num' ), $mm[1] ) ) ) );
+				if ( 1 === count( $seen ) ) {
+					return $seen[0];
+				}
+				if ( count( $seen ) > 1 ) {
+					$why = 'ambiguous';
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Lower case without accents, for matching titles and labels. */
+	private static function fold( string $s ): string {
+		if ( class_exists( 'Normalizer' ) ) {
+			$n = Normalizer::normalize( $s, Normalizer::FORM_D );
+			if ( is_string( $n ) ) {
+				$s = (string) preg_replace( '/\p{Mn}+/u', '', $n );
+			}
+		}
+		$s = function_exists( 'mb_strtolower' ) ? mb_strtolower( $s, 'UTF-8' ) : strtolower( $s );
+		return str_replace( 'ς', 'σ', $s );
 	}
 
 	/** The regular price in a Store API product list. */

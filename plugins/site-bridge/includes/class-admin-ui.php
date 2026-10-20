@@ -207,6 +207,8 @@ final class SBR_Admin_UI {
 	private static function render_overview(): void {
 		$s = SBR_Settings::get();
 		?>
+		<p class="description sbr-warn"><?php esc_html_e( 'Το Site Bridge δίνει στο Claude απομακρυσμένη πρόσβαση διαχειριστή στα sites που επιτρέπεις. Άνοιξε μόνο ό,τι χρειάζεσαι και κράτα τα sites σε Ανάγνωση.', 'site-bridge' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Δουλεύει με το Claude. Δεν είναι προϊόν της Anthropic και δεν σχετίζεται με αυτήν.', 'site-bridge' ); ?></p>
 		<h2 class="sbr-h2"><?php esc_html_e( 'Ρόλοι', 'site-bridge' ); ?></h2>
 		<div class="sbr-zone">
 			<?php self::form_open( 'save_roles' ); ?>
@@ -1023,6 +1025,8 @@ button.ok{background:#6d4aff;border-color:#6d4aff;color:#fff}code{color:#beb1ff;
 		<div class="host"><?php echo esc_html( $host ); ?></div>
 		<?php if ( in_array( $host, array( 'localhost', '127.0.0.1', '[::1]' ), true ) ) : ?>
 			<p class="muted"><?php esc_html_e( 'Τοπική διεύθυνση (Claude Code): έγκρινε μόνο αν μόλις ξεκίνησες εσύ τη σύνδεση από τον υπολογιστή σου.', 'site-bridge' ); ?></p>
+		<?php else : ?>
+			<p class="muted"><?php esc_html_e( 'Έγκρινε μόνο αν μόλις πάτησες εσύ Connect στο Claude. Ένας σύνδεσμος έγκρισης που σου έστειλε κάποιος άλλος συνδέει τον δικό του λογαριασμό με τα sites σου.', 'site-bridge' ); ?></p>
 		<?php endif; ?>
 	</div>
 	<form method="post" action="">

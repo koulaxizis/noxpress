@@ -142,15 +142,19 @@ final class SBR_Hub {
 				'ts'      => time(),
 			)
 		);
-		$res  = wp_remote_post(
+		// The address comes from a pasted code: no redirects, and no
+		// private addresses except on local test installs.
+		$post = self::local_ok( (string) $p['u'] ) ? 'wp_remote_post' : 'wp_safe_remote_post';
+		$res  = $post(
 			trailingslashit( (string) $p['u'] ) . 'pair',
 			array(
-				'timeout' => 20,
-				'headers' => array(
+				'timeout'     => 20,
+				'redirection' => 0,
+				'headers'     => array(
 					'Content-Type' => 'application/json',
 					'X-SBR-Sig'    => SBR_Crypto::sign( 'SBR1|PAIR|' . hash( 'sha256', $body ) ),
 				),
-				'body'    => $body,
+				'body'        => $body,
 			)
 		);
 		if ( is_wp_error( $res ) ) {
