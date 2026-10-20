@@ -6,7 +6,8 @@
  *
  * Attributes: height (logo height in px, 24–120, default 40),
  * speed (seconds per round, 10–300, default 40), parent (product_cat
- * id, default the pub_cat setting). Each logo links to its
+ * id, default the pub_cat setting), names ("1" / yes / true / on: each
+ * publisher's name under its logo, 1.7.1; off by default). Each logo links to its
  * subcategory; a subcategory without an image shows its name.
  * The strip stops on hover and focus, and stands still (scrolls by
  * hand) for visitors who ask for reduced motion.
@@ -65,6 +66,7 @@ final class BKF_Publishers {
 				'height' => 40,
 				'speed'  => 40,
 				'parent' => 0,
+				'names'  => '',
 			),
 			$atts,
 			'bkf_publishers'
@@ -72,6 +74,7 @@ final class BKF_Publishers {
 		$height = max( 24, min( 120, (int) $a['height'] ) );
 		$speed  = max( 10, min( 300, (int) $a['speed'] ) );
 		$parent = (int) $a['parent'] > 0 ? (int) $a['parent'] : (int) BKF_Settings::get()['pub_cat'];
+		$names  = in_array( strtolower( trim( (string) $a['names'] ) ), array( '1', 'yes', 'true', 'on' ), true );
 		$terms  = self::terms( $parent );
 		if ( ! $terms ) {
 			return '';
@@ -96,6 +99,8 @@ final class BKF_Publishers {
 			) : '';
 			if ( '' === $html ) {
 				$html = '<span class="bkf-pubs__name">' . esc_html( $t->name ) . '</span>';
+			} elseif ( $names ) {
+				$html .= '<span class="bkf-pubs__cap">' . esc_html( $t->name ) . '</span>';
 			}
 			$items .= '<li class="bkf-pubs__item"><a href="' . esc_url( $link ) . '" title="' . esc_attr( $t->name ) . '">' . $html . '</a></li>';
 		}
@@ -111,7 +116,7 @@ final class BKF_Publishers {
 		$hidden = str_replace( '<a href=', '<a tabindex="-1" href=', $half );
 
 		$out  = self::style();
-		$out .= '<div class="bkf-pubs" style="--bkf-pubs-h:' . $height . 'px;--bkf-pubs-t:' . $speed . 's" role="region" aria-label="' . esc_attr__( 'Εκδοτικοί οίκοι', 'book-feed' ) . '">';
+		$out .= '<div class="bkf-pubs' . ( $names ? ' bkf-pubs--names' : '' ) . '" style="--bkf-pubs-h:' . $height . 'px;--bkf-pubs-t:' . $speed . 's" role="region" aria-label="' . esc_attr__( 'Εκδοτικοί οίκοι', 'book-feed' ) . '">';
 		$out .= '<ul class="bkf-pubs__track"><li class="bkf-pubs__half"><ul>' . $half . '</ul></li>';
 		$out .= '<li class="bkf-pubs__half" aria-hidden="true"><ul>' . $hidden . '</ul></li></ul></div>';
 		return $out;
@@ -133,6 +138,9 @@ final class BKF_Publishers {
 			. '.bkf-pubs__item a:hover,.bkf-pubs__item a:focus{opacity:1;filter:none}'
 			. '.bkf-pubs__logo{height:100%;width:auto;max-width:none;object-fit:contain}'
 			. '.bkf-pubs__name{font-size:.85em;letter-spacing:.04em;white-space:nowrap;color:inherit}'
+			. '.bkf-pubs--names .bkf-pubs__item a{flex-direction:column;justify-content:center;height:auto;gap:6px;padding:2px 0}'
+			. '.bkf-pubs--names .bkf-pubs__logo{height:var(--bkf-pubs-h,40px)}'
+			. '.bkf-pubs__cap{display:block;font-size:.75em;line-height:1.2;letter-spacing:.02em;white-space:nowrap;color:inherit}'
 			. '@keyframes bkf-pubs-run{from{transform:translateX(0)}to{transform:translateX(-50%)}}'
 			. '@media (prefers-reduced-motion:reduce){.bkf-pubs{overflow-x:auto;-webkit-mask-image:none;mask-image:none}.bkf-pubs__track{animation:none}.bkf-pubs__half[aria-hidden]{display:none}}'
 			. '</style>';
