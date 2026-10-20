@@ -94,6 +94,13 @@ final class SBR_Guard {
 				return array( 'error' => 'The query names a secret (' . $lit . '): its value is never readable.' );
 			}
 		}
+		if ( preg_match( '/\b(mysql|performance_schema|sys)\s*\./i', $bare ) ) {
+			return array( 'error' => 'The server\'s own schemas (mysql, performance_schema, sys) are never readable.' );
+		}
+		$pairs = self::value_pairs( $bare );
+		if ( '' !== $pairs ) {
+			return array( 'error' => $pairs );
+		}
 
 		if ( 'select' === $kind ) {
 			$sql = self::cap_limit( $sql, $bare, $max_rows );
@@ -102,6 +109,87 @@ final class SBR_Guard {
 			'sql'  => $sql,
 			'kind' => $kind,
 		);
+	}
+
+	/**
+	 * Values are masked by the name that comes back next to them
+	 * (option_name / meta_key), so that name must be the real one. When a
+	 * query reads option_value or meta_value: one SELECT only (no UNION,
+	 * WITH, subquery or derived table), the four columns only as plain
+	 * columns under their own name, and a name and its value from the same
+	 * table. Returns the refusal, or ''.
+	 */
+	private static function value_pairs( string $bare ): string {
+		if ( ! preg_match( '/\b(option_value|meta_value)\b/i', $bare ) ) {
+			return '';
+		}
+		$why = 'Reading option_value or meta_value needs a single plain SELECT (no UNION, WITH, subquery or derived table), with option_name / meta_key as plain columns of the same table. Filter with JOIN and WHERE instead.';
+		if ( preg_match_all( '/\bSELECT\b/i', $bare ) > 1 || preg_match( '/\b(UNION|WITH)\b/i', $bare ) ) {
+			return $why;
+		}
+		$items = self::outer_items( $bare );
+		$quals = array();
+		$star  = false;
+		$named = false;
+		foreach ( $items as $item ) {
+			if ( preg_match( '/^(?:[A-Za-z0-9_$]+\s*\.\s*)?\*$/', $item ) ) {
+				$star = true;
+				continue;
+			}
+			$plain = preg_match( '/^(?:([A-Za-z0-9_$]+)\s*\.\s*)?(option_name|option_value|meta_key|meta_value)(?:\s+(?:AS\s+)?([A-Za-z0-9_$]+))?$/i', $item, $m );
+			$out   = '';
+			if ( preg_match( '/(?:\bAS\s+|\s)([A-Za-z0-9_$]+)$/i', $item, $a ) ) {
+				$out = strtolower( $a[1] );
+			} elseif ( preg_match( '/(?:^|\.)\s*([A-Za-z0-9_$]+)$/', $item, $a ) ) {
+				$out = strtolower( $a[1] );
+			}
+			if ( ! in_array( $out, array( 'option_name', 'option_value', 'meta_key', 'meta_value' ), true ) ) {
+				continue;
+			}
+			if ( ! $plain || ( isset( $m[3] ) && '' !== $m[3] && strtolower( $m[3] ) !== strtolower( $m[2] ) ) ) {
+				return $why;
+			}
+			$named         = true;
+			$quals[ $out ] = strtolower( $m[1] );
+		}
+		if ( $star && $named ) {
+			return $why;
+		}
+		foreach ( array( 'option_name' => 'option_value', 'meta_key' => 'meta_value' ) as $n => $v ) {
+			if ( isset( $quals[ $n ], $quals[ $v ] ) && $quals[ $n ] !== $quals[ $v ] ) {
+				return $why;
+			}
+		}
+		return '';
+	}
+
+	/** Items of the outer select list (top-level commas, up to the top-level FROM). */
+	private static function outer_items( string $bare ): array {
+		if ( ! preg_match( '/\bSELECT\b(\s+(?:DISTINCT|ALL|DISTINCTROW|HIGH_PRIORITY|STRAIGHT_JOIN|SQL_\w+)\b)*/i', $bare, $m, PREG_OFFSET_CAPTURE ) ) {
+			return array();
+		}
+		$len   = strlen( $bare );
+		$depth = 0;
+		$cur   = '';
+		$items = array();
+		for ( $i = $m[0][1] + strlen( $m[0][0] ); $i < $len; $i++ ) {
+			$ch = $bare[ $i ];
+			if ( 0 === $depth && preg_match( '/\GFROM\b/i', $bare, $f, 0, $i ) && ( 0 === $i || ! preg_match( '/[A-Za-z0-9_$]/', $bare[ $i - 1 ] ) ) ) {
+				break;
+			}
+			if ( '(' === $ch ) {
+				++$depth;
+			} elseif ( ')' === $ch ) {
+				--$depth;
+			} elseif ( ',' === $ch && 0 === $depth ) {
+				$items[] = trim( $cur );
+				$cur     = '';
+				continue;
+			}
+			$cur .= $ch;
+		}
+		$items[] = trim( $cur );
+		return array_values( array_filter( $items, 'strlen' ) );
 	}
 
 	/**
@@ -395,7 +483,7 @@ final class SBR_Guard {
 
 	/** File names never served by the file tools. */
 	private static function blocked_name( string $base ): bool {
-		return (bool) preg_match( '/^(wp-config.*|\.env.*|\.htaccess|\.htpasswd|\.user\.ini|php\.ini|auth\.json|id_rsa.*|id_ed25519.*)$|\.(sql|sql\.gz|sqlite\d?|db|key|pem|p12|pfx|crt|kdbx|wpress|daf)$/i', $base );
+		return (bool) preg_match( '/^(wp-config.*|\.env.*|\.htaccess|\.htpasswd|\.user\.ini|php\.ini|auth\.json|id_rsa.*|id_ed25519.*)$|\.(sql|sql\.gz|sqlite\d?|db|key|pem|p12|pfx|crt|kdbx|wpress|daf|zip|tar|tgz|gz|bz2|xz|7z|rar|jpa|bak|old|orig|save|swp)$|~$/i', $base );
 	}
 
 	/** Folder names never entered (any level). */

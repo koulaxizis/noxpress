@@ -22,6 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check plugin cards
-        run: python3 .github/scripts/check-site-cards.py --personal 'site-bridge'
+        run: python3 .github/scripts/check-site-cards.py
       - name: Check inline scripts
         run: python3 .github/scripts/check-site-js.py

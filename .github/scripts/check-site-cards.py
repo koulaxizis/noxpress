@@ -8,7 +8,7 @@ For each plugins/<slug>/ with a card (<article class="card" id="<slug>">):
     only: a new plugin may get its video in a later PR).
 A plugin without a card must be listed in --personal (Bible §21).
 
-Usage: check-site-cards.py [--personal "site-bridge"]
+Usage: check-site-cards.py [--personal "<slug> ..."]
 Prints one line per problem and exits 1 if there is any (warnings do not fail). Standard library only.
 """
 
@@ -29,7 +29,7 @@ def header_version(slug):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--personal', default='site-bridge', help='space-separated slugs without a card')
+    ap.add_argument('--personal', default='', help='space-separated slugs without a card')
     args = ap.parse_args()
     personal = set(args.personal.split())
     with open(os.path.join(ROOT, 'index.html'), encoding='utf-8') as f:

@@ -19,7 +19,7 @@
 #   oc → oros-connect
 #   pb → product-bundles
 #   po → pre-orders
-#   sb → site-bridge (προσωπική χρήση: release ναι, updates.json όχι)
+#   sb → site-bridge
 #   pq → publishing-quote
 #   ws → wish-shelf
 #   ce → checkout-extras
@@ -61,7 +61,8 @@ env:
   AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs bf'
   # Plugins για προσωπική χρήση (Bible §21): βγαίνουν ως release αλλά δεν
   # μπαίνουν στο updates.json, άρα κανένα site δεν τα βλέπει στο hub.
-  PERSONAL: 'sb'
+  # Σήμερα κανένα (το Site Bridge βγήκε από τη λίστα στο 1.3.0).
+  PERSONAL: ''
 
 jobs:
   release:
