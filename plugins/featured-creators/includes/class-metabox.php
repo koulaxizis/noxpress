@@ -55,6 +55,8 @@ final class CRT_Metabox {
 		add_meta_box( 'crt-details', __( 'Στοιχεία δημιουργού', 'featured-creators' ), array( __CLASS__, 'box_details' ), CRT_CPT::PT, 'normal', 'high' );
 		add_meta_box( 'crt-press', __( 'Συνεντεύξεις, βίντεο, κριτικές και αναφορές', 'featured-creators' ), array( __CLASS__, 'box_press' ), CRT_CPT::PT, 'normal', 'default' );
 		add_meta_box( 'crt-match', __( 'Ταίριασμα με χαρακτηριστικά', 'featured-creators' ), array( __CLASS__, 'box_match' ), CRT_CPT::PT, 'normal', 'default' );
+		// The post type supports custom-fields for REST only; the boxes above edit the meta.
+		remove_meta_box( 'postcustom', CRT_CPT::PT, 'normal' );
 	}
 
 	/* =====================================================================

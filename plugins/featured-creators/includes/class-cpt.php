@@ -123,7 +123,8 @@ final class CRT_CPT {
 				'hierarchical'        => false,
 				'capability_type'     => 'page',
 				'map_meta_cap'        => true,
-				'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'revisions' ),
+				// custom-fields: the meta of register_meta() shows in REST only with it.
+				'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'custom-fields' ),
 				'rewrite'             => array(
 					'slug'       => $s['base'],
 					'with_front' => false,
