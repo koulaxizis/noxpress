@@ -46,9 +46,8 @@
  *    routes when it is active (Bible 1.20 writes the exception).
  *  - §8 (capability manage_woocommerce): manage_options, remote access to
  *    the whole site.
- *  - §16 (catalog): in the Noxpress Core catalog as "unlisted" (updates
- *    through updates.json, shown in the hub only where it is installed),
- *    no card on noxpress.tech yet (Bible §21).
+ *  - §16 (catalog): in the Noxpress Core catalog since Core 1.1.17
+ *    (until 1.2.0 it was for personal use only, Bible §21).
  *
  * Front end (Bible §14): nothing. Only REST routes under site-bridge/v1
  * and the /.well-known/ OAuth metadata paths answer; SBR_DISABLE in

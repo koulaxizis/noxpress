@@ -84,7 +84,7 @@ Every setting, key, pairing, connection and the audit log are deleted, so no tok
 = 1.3.0 =
 * New: Site Bridge is no longer for personal use only. It updates through the Noxpress hub (updates.json) like every other Noxpress plugin. Sites on 1.2.0 install 1.3.0 by hand once.
 * New: Overview says that the plugin gives remote administrator access and that it is not affiliated with Anthropic.
-* Noxpress Core 1.1.17: Site Bridge in the catalog as "unlisted" (updates, shown in the hub only where installed).
+* New: a card on noxpress.tech, and Site Bridge in the Noxpress hub of every site (Noxpress Core 1.1.17).
 * Security: db_select no longer shows a secret option or meta value under another row's name. A query that reads option_value or meta_value must be one plain SELECT (no UNION, WITH, subquery or derived table) with option_name / meta_key as plain columns of the same table. The mysql, performance_schema and sys schemas are refused.
 * Security: plugins_install refuses zip URLs with dot segments, escapes, user info, query or fragment, so "/../" can no longer leave an allowed prefix.
 * Security: file tools no longer serve archives and backup copies (.zip, .tar, .gz, .7z, .rar, .jpa, .bak, .old, .swp and the like).

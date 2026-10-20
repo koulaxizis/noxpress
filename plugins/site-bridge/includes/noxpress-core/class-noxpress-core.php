@@ -260,10 +260,9 @@ final class Noxpress_Core {
 				'page' => 'bkf-feed',
 			),
 			'site-bridge'       => array(
-				'name'     => 'Site Bridge',
-				'desc'     => __( 'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.', 'noxpress' ),
-				'page'     => 'sbr-settings',
-				'unlisted' => true,
+				'name' => 'Site Bridge',
+				'desc' => __( 'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.', 'noxpress' ),
+				'page' => 'sbr-settings',
 			),
 		);
 	}

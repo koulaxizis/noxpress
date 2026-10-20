@@ -43,8 +43,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          # nox-sb-*: Site Bridge has no site card yet (Bible §21, step 3), not counted.
-          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-(?!sb-)[a-z]+-' --offset "$OFFSET")"
+          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-[a-z]+-' --offset "$OFFSET")"
           echo "downloads.json: $result"
           if [ "$result" != changed ]; then
             exit 0
