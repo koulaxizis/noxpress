@@ -67,15 +67,15 @@
     },
     "featured-creators": {
       "beta": {
-        "changelog": "* First release (beta).\n* Creator post type with photo, roles line, biography, links and lists of interviews, videos and reviews.\n* Matching by slug across the chosen role attributes, with exclusions, extra terms and conflict detection.\n* Creator page for classic and block themes, with one section per role, a bundles group and the press lists; one card per work with Product Formats.\n* Links in \"Additional information\", creator box on the product, index with role filter and A–Z order; shortcodes and blocks.\n* Draft creators from the terms, coverage check, settings export and import.\n* ProfilePage and Person schema (Rank Math graph or standalone JSON-LD), creators on products as author, illustrator and more.\n* Test mode, CRT_DISABLE, Greek and English texts, clean uninstall.",
-        "published": "2026-10-11",
+        "changelog": "* New: creator tab on the product, for the roles ticked \"In the tab\" (Pages and products → On the product, with its WooCommerce priority). Photo, short biography, links, the three newest press items and a link to the creator page; only published creators; no tab when the product has none.\n* New: tab title by the creator's gender (new field \"Article in the tab title\": «Ο», «Η» or none) and the role, or the role in the plural for several creators of the same role; five editable visitor texts.\n* New: role name in the plural (Roles tab).\n* New: \"Section on the page\" per role: a role can match and show in the roles line without listing its products on the creator page.\n* New: the creator's own meta in REST (edit context, edit_post capability), validated like the edit screen.",
+        "published": "2026-10-20",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1e48e05f281307de4a2d500055a531bcc91c31bc74d878a5e67b64a0fd76b3d8",
-        "signature": "pjyRF1VMv/6cT13SD+Bf5HIviMQmrCwsmjjuPYYt/ODSYq4VCNTnGT3KS+KtCgX5p/q8aGIiPoHbvBETAyu5AA==",
+        "sha256": "ba8761e60255832cc8ebc735469d212c43f5868b4eaf1ed7def3df732d94f91a",
+        "signature": "KLKL/JqqZyBNuGHddkycE3R4nd7Ch6JLpDzDmHPbidp9EvejcoIbx7xEVAEB9ocUxZ2ev327+/fH3fqQHn01DQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.0.0/featured-creators.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.1.0/featured-creators.zip"
       }
     },
     "greeklish-permalinks": {
