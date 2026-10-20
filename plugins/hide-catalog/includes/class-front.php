@@ -351,6 +351,13 @@ final class HIC_Front {
 					return $args;
 				}
 			}
+			// Nor the full read behind core's stored hierarchy
+			// (_get_term_hierarchy, option product_cat_children): without
+			// the hidden categories, their subcategories would vanish from
+			// get_term_children() everywhere until the next category save.
+			if ( ( isset( $args['get'] ) && 'all' === $args['get'] ) || ( isset( $args['fields'] ) && 'id=>parent' === $args['fields'] ) ) {
+				return $args;
+			}
 			if ( ! self::page_request() || ! HIC_Rules::active() ) {
 				return $args;
 			}
