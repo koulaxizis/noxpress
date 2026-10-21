@@ -369,7 +369,15 @@ final class SBR_Tools_Write {
 		if ( is_wp_error( $ok ) ) {
 			return $ok;
 		}
-		wp_update_plugins();
+		// 1.5.1: a fresh check, as the hub's "Check now" does. Without it
+		// the 12-hour caches of WordPress and of the Noxpress manifest hide
+		// a release made since the last check.
+		if ( class_exists( 'Noxpress_Updater' ) && method_exists( 'Noxpress_Updater', 'refresh' ) ) {
+			Noxpress_Updater::refresh();
+		} else {
+			delete_site_transient( 'update_plugins' );
+			wp_update_plugins();
+		}
 		$tr     = get_site_transient( 'update_plugins' );
 		$avail  = isset( $tr->response ) && is_array( $tr->response ) ? $tr->response : array();
 		$wanted = SBR_Tools::a_list( $a, 'plugins', 100 );
