@@ -7,7 +7,8 @@
  * "Εισαγωγή όλων" (a confirmation, then the plain POST: the server runs
  * it in the background) and "Αποθήκευση ως κανόνα" (plain POST, 1.7.0).
  * Live text of a running bulk import.
- * Publisher autocomplete (search form and rule cards). Product box
+ * Publisher autocomplete (search form and rule cards). A rule card's
+ * "Προεπισκόπηση" (AJAX bkf_preview, 1.12.0). Product box
  * buttons. Live text of a running sync. Confirmations (data-bkf-confirm).
  * No dependencies. Without JavaScript every form still works (POST).
  */
@@ -402,6 +403,73 @@
 				} );
 		} );
 	}
+
+	/* ---------------------------------------------------------------
+	 * Rule cards: "Προεπισκόπηση" (1.12.0). Sends the card's fields as
+	 * typed; the server reads the feed as the next run would and imports
+	 * nothing. Nothing is saved.
+	 * ------------------------------------------------------------- */
+
+	function fmt( s ) {
+		var args = Array.prototype.slice.call( arguments, 1 );
+		return s.replace( /%(\d)\$s/g, function ( m, i ) {
+			return String( args[ i - 1 ] );
+		} ).replace( '%s', String( args[ 0 ] ) );
+	}
+
+	document.querySelectorAll( '.bkf-preview' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			var card = btn.closest( '.bkf-rule-card' );
+			var out = card && card.querySelector( '.bkf-preview-out' );
+			if ( ! out ) {
+				return;
+			}
+			var data = {};
+			card.querySelectorAll( 'input[name], select[name]' ).forEach( function ( f ) {
+				var m = f.name.match( /^bkf_r\[\d+\]\[(\w+)\]$/ );
+				if ( ! m || 'delete' === m[ 1 ] || ( 'checkbox' === f.type && ! f.checked ) ) {
+					return;
+				}
+				data[ 'rule[' + m[ 1 ] + ']' ] = f.value;
+			} );
+			out.hidden = false;
+			out.textContent = t.pvload;
+			btn.disabled = true;
+			post( 'bkf_preview', data )
+				.then( function ( d ) {
+					out.textContent = '';
+					out.appendChild( el( 'p', '', fmt( t.pvsum, d.total, d.checked, d.in_store, d.new, d.will, d.max ) ) );
+					if ( d.since ) {
+						out.appendChild( el( 'p', 'bkf-hint', fmt( t.pvsince, new Date( d.since * 1000 ).toLocaleDateString() ) ) );
+					}
+					if ( d.more ) {
+						out.appendChild( el( 'p', 'bkf-hint', t.pvmore ) );
+					}
+					if ( ! d.titles.length ) {
+						out.appendChild( el( 'p', '', t.pvnone ) );
+						return;
+					}
+					out.appendChild( el( 'p', '', fmt( t.pvfirst, d.titles.length ) ) );
+					var ul = el( 'ul', 'bkf-preview-list' );
+					d.titles.forEach( function ( x ) {
+						var li = el( 'li', '' );
+						li.appendChild( el( 'strong', '', x.title ) );
+						var bits = [ x.people.join( ', ' ), x.year ? String( x.year ) : '', x.pstat, x.isbn ].filter( Boolean );
+						if ( bits.length ) {
+							li.appendChild( document.createTextNode( ' · ' + bits.join( ' · ' ) ) );
+						}
+						ul.appendChild( li );
+					} );
+					out.appendChild( ul );
+				} )
+				.catch( function ( e ) {
+					out.textContent = e.message;
+				} )
+				.then( function () {
+					btn.disabled = false;
+				} );
+		} );
+	} );
 
 	/* ---------------------------------------------------------------
 	 * Running sync: live text

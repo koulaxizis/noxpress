@@ -22,6 +22,8 @@
  *  book-feed/rule-save      a new rule, or changes to one (its category,
  *                           display mode and last run are kept)
  *  book-feed/rule-delete    removes a rule
+ *  book-feed/rule-preview   what a rule would bring on its next run,
+ *                           importing nothing (read, 1.12.0)
  *  book-feed/publishers     publisher autocomplete, 3+ characters (read)
  *  book-feed/options        kinds and publishing statuses seen (read)
  *  book-feed/isbn           one ISBN: the catalogue's title and whether
@@ -67,13 +69,13 @@ final class BKF_Abilities {
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			return;
 		}
-		$none = array(
+		$none       = array(
 			'type'                 => 'object',
 			'properties'           => array(),
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
-		$pid  = array(
+		$pid        = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'product_id' => array(
@@ -84,7 +86,34 @@ final class BKF_Abilities {
 			'required'             => array( 'product_id' ),
 			'additionalProperties' => false,
 		);
-		$defs = array(
+		$rule_props = array(
+			'id'        => array( 'type' => 'string' ),
+			'name'      => array( 'type' => 'string' ),
+			'on'        => array( 'type' => 'boolean' ),
+			'pub_id'    => array( 'type' => 'string' ),
+			'pub_name'  => array( 'type' => 'string' ),
+			'title'     => array( 'type' => 'string' ),
+			'author'    => array( 'type' => 'string' ),
+			'kind'      => array( 'type' => 'string' ),
+			'pstat'     => array( 'type' => 'string' ),
+			'year_from' => array( 'type' => 'integer' ),
+			'year_to'   => array( 'type' => 'integer' ),
+			'every'     => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+				'maximum' => 90,
+			),
+			'status'    => array(
+				'type' => 'string',
+				'enum' => array( 'draft', 'publish' ),
+			),
+			'max'       => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+				'maximum' => 500,
+			),
+		);
+		$defs       = array(
 			'status'       => array(
 				'label'       => 'Book Feed: status',
 				'description' => 'The running job (phase, counts), the last finished run, the cover job, the next daily run and the rules (id, name, on, every, last run, due). Changes nothing.',
@@ -172,37 +201,22 @@ final class BKF_Abilities {
 				'description' => 'Creates a rule, or with "id" changes that rule. A rule needs a publisher (pub_id from book-feed/publishers), title words or a contributor. The category, display mode and last run of an existing rule are kept; a new rule uses the category of the settings.',
 				'input'       => array(
 					'type'                 => 'object',
-					'properties'           => array(
-						'id'        => array( 'type' => 'string' ),
-						'name'      => array( 'type' => 'string' ),
-						'on'        => array( 'type' => 'boolean' ),
-						'pub_id'    => array( 'type' => 'string' ),
-						'pub_name'  => array( 'type' => 'string' ),
-						'title'     => array( 'type' => 'string' ),
-						'author'    => array( 'type' => 'string' ),
-						'kind'      => array( 'type' => 'string' ),
-						'pstat'     => array( 'type' => 'string' ),
-						'year_from' => array( 'type' => 'integer' ),
-						'year_to'   => array( 'type' => 'integer' ),
-						'every'     => array(
-							'type'    => 'integer',
-							'minimum' => 1,
-							'maximum' => 90,
-						),
-						'status'    => array(
-							'type' => 'string',
-							'enum' => array( 'draft', 'publish' ),
-						),
-						'max'       => array(
-							'type'    => 'integer',
-							'minimum' => 1,
-							'maximum' => 500,
-						),
-					),
+					'properties'           => $rule_props,
 					'additionalProperties' => false,
 				),
 				'ann'         => array( false, false, false ),
 				'run'         => array( __CLASS__, 'rule_save' ),
+			),
+			'rule-preview' => array(
+				'label'       => 'Book Feed: preview a rule',
+				'description' => 'What a rule would bring on its next run, without importing anything: the titles that match, how many the store has already, how many are new and will be imported (up to its max), and the first new titles. Takes the same fields as book-feed/rule-save; with "id" the saved rule is the base (its last run decides which titles count as changed), without it the fields alone. Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => $rule_props,
+					'additionalProperties' => false,
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'rule_preview' ),
 			),
 			'rule-delete'  => array(
 				'label'       => 'Book Feed: delete a rule',
@@ -502,7 +516,11 @@ final class BKF_Abilities {
 		return array( 'rules' => $out );
 	}
 
-	public static function rule_save( $in = null ) {
+	/**
+	 * A rule from the input: merged into the saved rule with that "id", or
+	 * a new one. Returns { rule, at, rules } or WP_Error.
+	 */
+	private static function rule_input( $in, bool $adding ) {
 		$in    = is_array( $in ) ? $in : array();
 		$rules = BKF_Settings::rules();
 		$id    = isset( $in['id'] ) && is_string( $in['id'] ) ? strtolower( trim( $in['id'] ) ) : '';
@@ -516,7 +534,7 @@ final class BKF_Abilities {
 			if ( null === $at ) {
 				return new WP_Error( 'bkf_rule', 'Unknown rule id.' );
 			}
-		} elseif ( count( $rules ) >= BKF_Settings::MAX_RULES ) {
+		} elseif ( $adding && count( $rules ) >= BKF_Settings::MAX_RULES ) {
 			return new WP_Error( 'bkf_rule', sprintf( 'At most %d rules.', BKF_Settings::MAX_RULES ) );
 		}
 		$base = null !== $at ? $rules[ $at ] : array(
@@ -546,6 +564,21 @@ final class BKF_Abilities {
 		if ( ! $rule ) {
 			return new WP_Error( 'bkf_rule', 'A rule needs a publisher, title words or a contributor.' );
 		}
+		return array(
+			'rule'  => $rule,
+			'at'    => $at,
+			'rules' => $rules,
+		);
+	}
+
+	public static function rule_save( $in = null ) {
+		$got = self::rule_input( $in, true );
+		if ( is_wp_error( $got ) ) {
+			return $got;
+		}
+		$rule  = $got['rule'];
+		$at    = $got['at'];
+		$rules = $got['rules'];
 		if ( null !== $at ) {
 			$rules[ $at ] = $rule;
 		} else {
@@ -576,6 +609,15 @@ final class BKF_Abilities {
 			'deleted' => true,
 			'rules'   => self::rules()['rules'],
 		);
+	}
+
+	/** What the rule (saved, or as typed) would bring on its next run; imports nothing. */
+	public static function rule_preview( $in = null ) {
+		$got = self::rule_input( $in, false );
+		if ( is_wp_error( $got ) ) {
+			return $got;
+		}
+		return BKF_Sync::preview( $got['rule'] );
 	}
 
 	public static function publishers( $in = null ) {

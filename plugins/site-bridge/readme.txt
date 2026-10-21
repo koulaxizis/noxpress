@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,9 @@ Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.7.1 =
+* New: the phone app can preview a Book Feed rule (`book-feed/rule-preview`, read, Book Feed 1.12.0+): what it would bring on its next run, importing nothing. Only the Hub needs 1.7.1.
 
 = 1.7.0 =
 * New: the phone app can use other Noxpress plugins through the Hub, starting with Book Feed (1.11.0+). New route `app/ability` runs one ability from a short allow-list per plugin through the Hub's `ability_run`, so each site applies its level and write window as for Claude. Read abilities use the read key; the rest need the fingerprint key, and when the site's window is closed and the site lets the Hub open it, the Hub opens it for 15 minutes first (logged as `app_window_open`, emailed when that setting is on).

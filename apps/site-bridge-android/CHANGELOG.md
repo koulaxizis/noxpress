@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.3.0
+
+* New: "Preview" in the rule dialog: what the rule as filled in would bring on its next run (matching titles, already in the store, new, to be imported, and the first new titles), without saving or importing anything. Needs Book Feed 1.12.0+ on the site and Site Bridge 1.7.1+ on the Hub. Uses the read key, no fingerprint.
+
 ## 1.2.1
 
 * New: a rule's publishing status can be "Every status except this one" (e.g. every status but «Εξαντλημένο»), as in WP admin. Before, the app kept such a rule but could not make one.

@@ -27,6 +27,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,7 +58,44 @@ class BfActions(
     val scan: () -> Unit,
     val importIsbn: (String) -> Unit,
     val notify: (Boolean) -> Unit,
+    val preview: (JSONObject) -> Unit,
 )
+
+/** What a rule would bring on its next run (book-feed/rule-preview); nothing is imported. */
+@Composable
+private fun PreviewBox(p: JSONObject) {
+    Column(Modifier.padding(top = 8.dp)) {
+        Text(
+            stringResource(
+                R.string.bf_pv_sum,
+                p.optInt("total"), p.optInt("checked"), p.optInt("in_store"), p.optInt("new"), p.optInt("will"), p.optInt("max"),
+            ),
+            color = Nx.text,
+            fontSize = 13.sp,
+        )
+        val since = p.optLong("since")
+        if (since > 0) Text(stringResource(R.string.bf_pv_since, Ui.dateTime(since)), color = Nx.muted, fontSize = 12.sp)
+        if (p.optBoolean("more")) Text(stringResource(R.string.bf_pv_more), color = Nx.muted, fontSize = 12.sp)
+        val titles = p.optJSONArray("titles")
+        if (titles == null || titles.length() == 0) {
+            Text(stringResource(R.string.bf_pv_none), color = Nx.text, fontSize = 13.sp)
+            return@Column
+        }
+        Spacer(Modifier.height(4.dp))
+        for (i in 0 until titles.length()) {
+            val t = titles.getJSONObject(i)
+            val people = t.optJSONArray("people")
+            val line = listOf(
+                if (people == null) "" else (0 until people.length()).joinToString(", ") { people.optString(it) },
+                t.optInt("year").takeIf { it > 0 }?.toString().orEmpty(),
+                t.optString("pstat"),
+                t.optString("isbn"),
+            ).filter { it.isNotEmpty() }.joinToString(" · ")
+            Text(t.optString("title"), color = Nx.heading, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
+            if (line.isNotEmpty()) Text(line, color = Nx.muted, fontSize = 12.sp)
+        }
+    }
+}
 
 /** An ISO 8601 time from the site, as local dd/MM HH:mm, or "". */
 private fun iso(v: String): String = try {
@@ -291,6 +329,26 @@ private fun RuleDialog(ui: UiState, bf: BfActions, r: JSONObject, onDone: () -> 
     var on by remember { mutableStateOf(if (isNew) true else r.optBoolean("on")) }
     var askDelete by remember { mutableStateOf(false) }
     val enough = pubId.isNotEmpty() || title.isNotBlank() || author.isNotBlank()
+    fun fields(): JSONObject {
+        val o = JSONObject()
+            .put("name", name.trim())
+            .put("pub_id", pubId)
+            .put("pub_name", pubName)
+            .put("title", title.trim())
+            .put("author", author.trim())
+            .put("kind", kind)
+            .put("pstat", if (pstat.isNotEmpty() && pstatExcept) "-$pstat" else pstat)
+            .put("year_from", yFrom.toIntOrNull() ?: 0)
+            .put("year_to", yTo.toIntOrNull() ?: 0)
+            .put("every", (every.toIntOrNull() ?: 7).coerceIn(1, 90))
+            .put("status", if (publish) "publish" else "draft")
+            .put("on", on)
+        if (!isNew) o.put("id", r.optString("id"))
+        return o
+    }
+    // A preview stays shown only while the fields are the ones it was made for.
+    val pv = ui.bfPreview?.takeIf { it.optString("for") == fields().toString() }
+    DisposableEffect(Unit) { onDispose { ui.bfPreview = null } }
 
     AlertDialog(
         onDismissRequest = onDone,
@@ -391,6 +449,11 @@ private fun RuleDialog(ui: UiState, bf: BfActions, r: JSONObject, onDone: () -> 
                 }
                 if (isNew) Text(stringResource(R.string.bf_f_cat_note), color = Nx.muted, fontSize = 12.sp)
                 if (!enough) Text(stringResource(R.string.bf_f_need), color = Nx.warn, fontSize = 12.sp)
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = { bf.preview(fields()) }, enabled = enough && !ui.busy, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.bf_preview))
+                }
+                if (pv != null) PreviewBox(pv.getJSONObject("result"))
                 if (!isNew) {
                     TextButton(onClick = { askDelete = true }) { Text(stringResource(R.string.bf_delete), color = Nx.danger) }
                 }
@@ -400,21 +463,7 @@ private fun RuleDialog(ui: UiState, bf: BfActions, r: JSONObject, onDone: () -> 
             TextButton(
                 enabled = enough && !ui.busy,
                 onClick = {
-                    val o = JSONObject()
-                        .put("name", name.trim())
-                        .put("pub_id", pubId)
-                        .put("pub_name", pubName)
-                        .put("title", title.trim())
-                        .put("author", author.trim())
-                        .put("kind", kind)
-                        .put("pstat", if (pstat.isNotEmpty() && pstatExcept) "-$pstat" else pstat)
-                        .put("year_from", yFrom.toIntOrNull() ?: 0)
-                        .put("year_to", yTo.toIntOrNull() ?: 0)
-                        .put("every", (every.toIntOrNull() ?: 7).coerceIn(1, 90))
-                        .put("status", if (publish) "publish" else "draft")
-                        .put("on", on)
-                    if (!isNew) o.put("id", r.optString("id"))
-                    bf.saveRule(o)
+                    bf.saveRule(fields())
                     onDone()
                 },
             ) { Text(stringResource(R.string.bf_save), color = Nx.link) }

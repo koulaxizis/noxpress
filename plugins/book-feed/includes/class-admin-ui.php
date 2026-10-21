@@ -142,6 +142,15 @@ final class BKF_Admin_UI {
 					'all'       => __( 'Θα εισαχθούν έως %1$s τίτλοι, στο παρασκήνιο, με κατάσταση «%2$s». Όσοι υπάρχουν ήδη στο κατάστημα παρακάμπτονται. Συνέχεια;', 'book-feed' ),
 					'allpub'    => __( 'Προσοχή: θα εμφανιστούν αμέσως στο κατάστημα.', 'book-feed' ),
 					'bulkdone'  => __( 'Η μαζική εισαγωγή τελείωσε.', 'book-feed' ),
+					'pvload'    => __( 'Ανάγνωση του καταλόγου…', 'book-feed' ),
+					/* translators: 1: matching titles, 2: checked, 3: in the store, 4: new, 5: to import, 6: max per run */
+					'pvsum'     => __( 'Ταιριάζουν %1$s τίτλοι. Ελέγχθηκαν %2$s: %3$s υπάρχουν ήδη στο κατάστημα, %4$s νέοι. Θα εισαχθούν %5$s (έως %6$s ανά εκτέλεση).', 'book-feed' ),
+					'pvmore'    => __( 'Υπάρχουν κι άλλοι τίτλοι πέρα από όσους ελέγχθηκαν· η εκτέλεση θα τους διαβάσει κι αυτούς.', 'book-feed' ),
+					/* translators: %s: date */
+					'pvsince'   => __( 'Μόνο τίτλοι που άλλαξαν από %s (μετά την τελευταία εκτέλεση).', 'book-feed' ),
+					'pvnone'    => __( 'Κανένας νέος τίτλος.', 'book-feed' ),
+					/* translators: %s: number of titles */
+					'pvfirst'   => __( 'Οι πρώτοι %s νέοι:', 'book-feed' ),
 				),
 			)
 		);
@@ -462,6 +471,10 @@ final class BKF_Admin_UI {
 					<input type="text" name="<?php echo esc_attr( $name ); ?>[button]" value="<?php echo esc_attr( $r['button'] ); ?>" />
 				</p>
 			</div>
+			<p class="bkf-row">
+				<button type="button" class="button button-small bkf-preview" <?php disabled( ! BKF_Settings::ready() ); ?> title="<?php esc_attr_e( 'Δείχνει τι θα έφερνε ο κανόνας όπως είναι συμπληρωμένος, χωρίς να αποθηκεύσει ή να εισαγάγει κάτι.', 'book-feed' ); ?>"><?php esc_html_e( 'Προεπισκόπηση', 'book-feed' ); ?></button>
+			</p>
+			<div class="bkf-preview-out" hidden></div>
 			<?php if ( ! $new ) : ?>
 				<p class="bkf-row">
 					<?php
