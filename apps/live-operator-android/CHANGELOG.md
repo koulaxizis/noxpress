@@ -1,5 +1,9 @@
 # Live Operator app — changelog
 
+## 1.0.1
+
+* The app is called «Live Operator» on the home screen (1.0.0 was published as «Γλαρόλυκοι Live»). Same signing key: installs over 1.0.0.
+
 ## 1.0.0
 
 * First release: «Live Operator», the Live Operator page of glarolykoi.net (/live-operator/) full screen, as a Trusted Web Activity.
