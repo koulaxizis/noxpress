@@ -6,6 +6,7 @@
  *  - Every sbr_* option: sbr_settings, sbr_window_until, sbr_keys (the
  *    Ed25519 key pair), sbr_key_reset, sbr_hub_trust, sbr_pairing,
  *    sbr_hub_seen, sbr_sites (the Hub's paired sites), sbr_dcr_clients,
+ *    sbr_app_devices and sbr_app_pairing (the Android app, 1.6.0),
  *    sbr_db_version.
  *  - Every sbr_* transient (OAuth requests and codes, nonces, rate
  *    counters, CIMD cache, PRG notices).

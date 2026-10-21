@@ -231,6 +231,27 @@ final class SBR_Lang {
 		'Αυτό το site υπάρχει ήδη στη λίστα. Αφαίρεσέ το πρώτα αν θέλεις νέα σύζευξη.' => 'This site is already on the list. Remove it first if you want a new pairing.',
 		'Το site δεν απάντησε: %s'                                    => 'The site did not answer: %s',
 		'Η σύζευξη απέτυχε (%s). Έλεγξε ότι ο ρόλος Site είναι ενεργός στο site και ότι ο κωδικός δεν χρησιμοποιήθηκε ή έληξε.' => 'Pairing failed (%s). Check that the Site role is on at the site and that the code was not used already or expired.',
+		// App tab (1.6.0).
+		'Εφαρμογή'                                                    => 'App',
+		'Εφαρμογή Android'                                            => 'Android app',
+		'Η εφαρμογή Site Bridge ανοίγει και κλείνει το παράθυρο εγγραφής των sites αυτού του Hub από το κινητό, και δείχνει το ιστορικό. Τίποτα άλλο. Βλέπει μόνο sites με επίπεδο Εγγραφή ή Διαχείριση, και ανοίγει παράθυρο μόνο όπου το site το επιτρέπει στο Hub.' => 'The Site Bridge app opens and closes the write window of this Hub\'s sites from your phone, and shows the log. Nothing else. It sees only sites with level Write or Admin, and opens a window only where the site lets the Hub do it.',
+		'Κάθε κινητό έχει δικά του κλειδιά, που δεν φεύγουν ποτέ από αυτό. Το άνοιγμα θέλει δαχτυλικό αποτύπωμα (ή το PIN του κινητού) κάθε φορά.' => 'Each phone has its own keys, which never leave it. Opening needs a fingerprint (or the phone\'s PIN) every time.',
+		'Η PHP αυτού του server δεν έχει το openssl με καμπύλες EC: η εφαρμογή δεν μπορεί να συνδεθεί εδώ.' => 'This server\'s PHP has no openssl with EC curves: the app cannot connect here.',
+		'Η εφαρμογή μπορεί να συνδεθεί σε αυτό το Hub'                => 'The app can connect to this Hub',
+		'Email στον διαχειριστή σε κάθε άνοιγμα παραθύρου από την εφαρμογή' => 'E-mail the administrator each time the app opens a window',
+		'Σύνδεση κινητού'                                             => 'Connect a phone',
+		'Εγκατάστησε την εφαρμογή από τα %s (αρχείο site-bridge.apk).' => 'Install the app from the %s (file site-bridge.apk).',
+		'releases του Noxpress'                                       => 'Noxpress releases',
+		'Πάτα «Νέος κωδικός για κινητό» και σάρωσε το QR με την εφαρμογή (ή επικόλλησε τον κωδικό). Ισχύει 15 λεπτά και μία φορά.' => 'Press "New code for a phone" and scan the QR with the app (or paste the code). It works for 15 minutes, once.',
+		'QR κωδικός σύνδεσης'                                         => 'Connection QR code',
+		'Νέος κωδικός για κινητό'                                     => 'New code for a phone',
+		'Συσκευές'                                                    => 'Devices',
+		'Συσκευή'                                                     => 'Device',
+		'Συνδέθηκε'                                                   => 'Connected',
+		'Καμία συσκευή ακόμα.'                                        => 'No devices yet.',
+		'Να ανακληθεί η συσκευή; Θα χρειαστεί νέα σύνδεση με QR.'     => 'Revoke this device? It will need a new QR connection.',
+		'Η συσκευή ανακλήθηκε.'                                       => 'The device was revoked.',
+		'Άγνωστη συσκευή.'                                            => 'Unknown device.',
 	);
 
 	public static function init(): void {

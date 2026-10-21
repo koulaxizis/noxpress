@@ -3,7 +3,7 @@
  * Plugin Name:          Site Bridge
  * Plugin URI:           https://noxpress.tech
  * Description:          Το Claude διαχειρίζεται τα WordPress / WooCommerce sites σου μέσω MCP, από τους δικούς σου servers. Ένα Hub δέχεται τη σύνδεση του Claude (OAuth 2.1) και προωθεί κάθε κλήση, υπογεγραμμένη, στα sites. Κάθε site αποφασίζει μόνο του: ανάγνωση, εγγραφή ή διαχείριση, με παράθυρο εγγραφής που ανοίγεις εσύ. Ιστορικό κάθε κλήσης. Δουλεύει με το Claude, δεν σχετίζεται με την Anthropic.
- * Version:              1.5.1
+ * Version:              1.6.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -37,6 +37,8 @@
  *  - SBR_OAuth     → OAuth 2.1 authorization server (metadata, CIMD,
  *                    authorize + consent, token, optional DCR)
  *  - SBR_MCP       → MCP endpoint (Streamable HTTP, JSON responses)
+ *  - SBR_App       → Hub role: the Android app (device keys, pairing,
+ *                    write windows of the Hub's sites, the log)
  *  - SBR_Admin_UI  → menu, overview + diagnostics, access, sites,
  *                    connections, history, consent screen, footer
  *
@@ -58,7 +60,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SBR_VERSION', '1.5.1' );
+define( 'SBR_VERSION', '1.6.0' );
 define( 'SBR_FILE', __FILE__ );
 define( 'SBR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SBR_URL', plugin_dir_url( __FILE__ ) );
@@ -78,6 +80,7 @@ require_once SBR_PATH . 'includes/class-site.php';
 require_once SBR_PATH . 'includes/class-hub.php';
 require_once SBR_PATH . 'includes/class-oauth.php';
 require_once SBR_PATH . 'includes/class-mcp.php';
+require_once SBR_PATH . 'includes/class-app.php';
 
 /** A REST response printed as raw bytes by Site_Bridge::serve_raw(). */
 final class SBR_Response extends WP_REST_Response {
@@ -105,6 +108,7 @@ final class Site_Bridge {
 			SBR_Hub::init();
 			SBR_OAuth::init();
 			SBR_MCP::init();
+			SBR_App::init();
 			add_filter( 'rest_pre_serve_request', array( __CLASS__, 'serve_raw' ), 10, 4 );
 		}
 

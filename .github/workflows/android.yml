@@ -1,0 +1,168 @@
+# Χτίζει την εφαρμογή Android του Site Bridge (apps/site-bridge-android).
+#
+# Πότε τρέχει:
+#  - pull request που αλλάζει την εφαρμογή → unit tests, lint και debug APK
+#    ως artifact του run (για δοκιμή στο κινητό πριν από το merge).
+#  - push στο main που αλλάζει την εφαρμογή, ή χειροκίνητα → τα ίδια, και αν
+#    δεν υπάρχει ακόμα release nox-sba-<versionName>, βγάζει υπογεγραμμένο
+#    site-bridge.apk ως pre-release (beta). Ανέβασε το versionName (και το
+#    versionCode) στο app/build.gradle.kts και κάνε merge — τίποτα άλλο.
+#
+# Το release χρειάζεται τα secrets (Settings → Secrets and variables →
+# Actions):
+#   SBA_KEYSTORE_B64       το keystore σε base64 (base64 -w0 site-bridge.jks)
+#   SBA_KEYSTORE_PASSWORD  ο κωδικός του keystore
+#   SBA_KEY_ALIAS          το alias του κλειδιού
+#   SBA_KEY_PASSWORD       ο κωδικός του κλειδιού
+# Χωρίς αυτά το job «release» σταματά με μήνυμα· το debug APK βγαίνει πάντα.
+# Το ίδιο κλειδί πρέπει να υπογράφει κάθε έκδοση: αν χαθεί, το Android δεν
+# δέχεται ενημέρωση πάνω από την παλιά εφαρμογή.
+#
+# Το tag nox-sba-* δεν είναι plugin: το release.yml και το updates.json το
+# αγνοούν (κανένας κωδικός plugin δεν είναι «sba»).
+name: Android app
+
+on:
+  pull_request:
+    paths: ['apps/site-bridge-android/**', '.github/workflows/android.yml']
+  push:
+    branches: [main]
+    paths: ['apps/site-bridge-android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/site-bridge-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests, lint, debug APK
+        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+
+      - name: Rename debug APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk site-bridge-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-bridge-debug-apk
+          path: apps/site-bridge-android/site-bridge-debug.apk
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports
+          path: |
+            apps/site-bridge-android/app/build/reports/
+            apps/site-bridge-android/app/build/test-results/
+          retention-days: 7
+
+  release:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/site-bridge-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version and tag
+        id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(grep -m1 -E 'versionName\s*=' app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')"
+          if ! echo "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::versionName '$version' is not semver"
+            exit 1
+          fi
+          tag="nox-sba-$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag already released — skipping."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check signing secrets
+        if: steps.v.outputs.skip == '0'
+        env:
+          SBA_KEYSTORE_B64: ${{ secrets.SBA_KEYSTORE_B64 }}
+          SBA_KEYSTORE_PASSWORD: ${{ secrets.SBA_KEYSTORE_PASSWORD }}
+          SBA_KEY_ALIAS: ${{ secrets.SBA_KEY_ALIAS }}
+          SBA_KEY_PASSWORD: ${{ secrets.SBA_KEY_PASSWORD }}
+        run: |
+          if [ -z "$SBA_KEYSTORE_B64" ] || [ -z "$SBA_KEYSTORE_PASSWORD" ] || [ -z "$SBA_KEY_ALIAS" ] || [ -z "$SBA_KEY_PASSWORD" ]; then
+            echo "::error::The app signing secrets are missing (SBA_KEYSTORE_B64, SBA_KEYSTORE_PASSWORD, SBA_KEY_ALIAS, SBA_KEY_PASSWORD): add them in Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.v.outputs.skip == '0'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.v.outputs.skip == '0'
+
+      - name: Build signed APK and publish
+        if: steps.v.outputs.skip == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SBA_KEYSTORE_B64: ${{ secrets.SBA_KEYSTORE_B64 }}
+          SBA_KEYSTORE_PASSWORD: ${{ secrets.SBA_KEYSTORE_PASSWORD }}
+          SBA_KEY_ALIAS: ${{ secrets.SBA_KEY_ALIAS }}
+          SBA_KEY_PASSWORD: ${{ secrets.SBA_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export SBA_KEYSTORE_FILE="$RUNNER_TEMP/sba.jks"
+          echo "$SBA_KEYSTORE_B64" | base64 -d > "$SBA_KEYSTORE_FILE"
+          ./gradlew --no-daemon assembleRelease
+          rm -f "$SBA_KEYSTORE_FILE"
+
+          cp app/build/outputs/apk/release/app-release.apk site-bridge.apk
+          sha256sum site-bridge.apk | cut -d' ' -f1 > site-bridge.apk.sha256
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)"
+          "$apksigner" verify site-bridge.apk
+          cert="$("$apksigner" verify --print-certs site-bridge.apk | grep -m1 'SHA-256 digest' | sed -E 's/.*: //')"
+
+          version="${{ steps.v.outputs.version }}"
+          {
+            echo "**Beta**: under testing before it is marked stable."
+            echo
+            echo "Android 9+. Needs a Hub with Site Bridge 1.6.0+ and the App tab switched on."
+            echo
+            echo "- APK SHA-256: \`$(cat site-bridge.apk.sha256)\`"
+            echo "- Signing certificate SHA-256: \`$cert\`"
+            echo
+            echo "### Changes"
+            awk -v v="## $version" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md
+          } > notes.md
+
+          gh release create "${{ steps.v.outputs.tag }}" site-bridge.apk site-bridge.apk.sha256 \
+            --target "$GITHUB_SHA" \
+            --title "Site Bridge app $version (beta)" \
+            --notes-file notes.md \
+            --prerelease
