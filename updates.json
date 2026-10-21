@@ -184,15 +184,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fixed: saving a product's beneficiaries stored Greek names as \"u0393u039b...\" in `_rs_split`, because the JSON escapes lost their backslashes. Names are now stored as real UTF-8, and saving a product once repairs an older damaged value.\n* Fixed: restoring a JSON backup no longer strips the backslashes from product overrides and free-copy reasons, so beneficiary names with Greek letters or quotes come back intact.",
-        "published": "2026-10-19",
+        "changelog": "* New: WordPress abilities (6.9+) in the \"noxpress\" category: `revenue-splitter/report` (the sales report of a period), `revenue-splitter/balances` (lifetime sales, income, payments and what is owed per beneficiary), `revenue-splitter/monthly-status` (who gets the monthly report and whether last month's was sent), `revenue-splitter/monthly-preview` (one beneficiary's monthly report as figures), `revenue-splitter/send-test` (the test email, to the site's admin address) and `revenue-splitter/monthly-send` (last month's reports now; marked destructive, and a month already sent needs `resend`). They need `manage_woocommerce`, are not in the REST API, and never return email addresses, portal keys or ledger notes.\n* Changed: the monthly email's figures and its sending are shared functions (`RS_Emails::monthly_data()`, `RS_Emails::send_monthly()`); the daily check and the email itself are unchanged.",
+        "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b19338f53813d95dc5d2d2621a9b3776641fda76640fae11eda37d7dd02ab463",
-        "signature": "Uoa37/Oax0ncT1FDKRt+y9u5abIB1VvY2+hZrkPqcXCbEnEjQnM+QMf5QfIbIcbaDsyrO59irSiPs/4tv5pOCQ==",
+        "sha256": "7f65b75e94ca3c3081165dd85140171558ea29a989b6ecf8fcfc880d1e04b933",
+        "signature": "G/hpgEwZ8U6mz5AKhRuG16L8ZlwJ0CUa53lFIotTQ2TyPd8UvWWrFmg8053ddG69Rwb5jw49RfTngvq+hLeHAA==",
         "tested_wp": "6.8",
-        "version": "1.9.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.9.3/revenue-splitter.zip"
+        "version": "1.10.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.10.0/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -273,15 +273,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Fixed: the publisher profit card says \"Publisher profit (last month)\" instead of \"Publisher profit (period) (last month)\".",
-        "published": "2026-10-14",
+        "changelog": "* New: WordPress abilities (6.9+) in the \"noxpress\" category, all read-only: `store-pulse/overview` (the dashboard cards of a period, with the money cards when Revenue Splitter is active), `store-pulse/stock` (the low-stock and out-of-stock lists) and `store-pulse/sales` (the Sales screen's rows per product and totals, with the same filters). For AI and remote tools such as Site Bridge; they need `manage_woocommerce`, are not in the REST API and never return customer details (customers are a count).",
+        "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "7a0580d815df5620a340c5a73190a8d6c327d43527db3d79da0b2853b5981e25",
-        "signature": "5Rs09KffYqK0PwqfSoKGdT/1gzrL5mLflZmO087+PyovO7ldu1v1pY2vYJBerwv8v97GiNIkTtnBQ8NkU7aFDg==",
+        "sha256": "adbb77eac32357703b764e045f75334295964323b2c3346022ace5212773cd7d",
+        "signature": "uW9Ohjjfatb9CbzCw/DDbFMJvHhS9oE17zkoEsQxZJp8voVYKnIttS2HfEA0mD0eyQzEe2XuhJD3iU0eWXigBA==",
         "tested_wp": "6.8",
-        "version": "1.6.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.6.1/store-pulse.zip"
+        "version": "1.7.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.7.0/store-pulse.zip"
       }
     },
     "theme-patcher": {
