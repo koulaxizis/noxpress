@@ -136,4 +136,6 @@
     </plurals>
     <string name="update_available">Νέα έκδοση %1$s</string>
     <string name="update_get">Λήψη</string>
+    <string name="update_channel">Ενημερώσεις εφαρμογής</string>
+    <string name="update_tap">Πάτα για λήψη του υπογεγραμμένου APK.</string>
 </resources>

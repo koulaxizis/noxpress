@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_channel">Ενημερώσεις εφαρμογής</string>
+    <string name="update_available">Νέα έκδοση %1$s</string>
+    <string name="update_tap">Πάτα για λήψη του υπογεγραμμένου APK.</string>
+    <string name="update_get">Λήψη</string>
+</resources>

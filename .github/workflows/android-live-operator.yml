@@ -47,8 +47,8 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Lint, debug APK
-        run: ./gradlew --no-daemon lintDebug assembleDebug
+      - name: Unit tests, lint, debug APK
+        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
 
       - name: Rename debug APK and print its certificate
         run: |

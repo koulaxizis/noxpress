@@ -75,6 +75,9 @@ class MainActivity : FragmentActivity() {
         if (!granted) ui.message = getString(R.string.bf_notify_denied)
     }
 
+    // Asked once (1.5.0), for the new-version notification; a "no" is final here.
+    private val askUpdateNotify = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         store = Store(this)
@@ -85,6 +88,11 @@ class MainActivity : FragmentActivity() {
         ui.bfNotify = store.bfNotify && Notify.allowed(this)
         pendingTileOpen = intent?.action == ACTION_TILE_OPEN
         if (intent?.action == Notify.ACTION_BF) ui.tab = "bf"
+        UpdateNotice.schedule(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !store.updAsked && !Notify.allowed(this)) {
+            store.updAsked = true
+            askUpdateNotify.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         setContent {
             SiteBridgeApp(
                 ui = ui,
@@ -144,6 +152,7 @@ class MainActivity : FragmentActivity() {
             store.updVer = f?.version.orEmpty()
             store.updUrl = f?.url.orEmpty()
             ui.update = f
+            if (f != null) UpdateNotice.show(this@MainActivity, store, f)
         }
     }
 

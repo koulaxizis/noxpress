@@ -19,7 +19,7 @@
             android:resource="@string/asset_statements" />
 
         <activity
-            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:name=".Launcher"
             android:exported="true"
             android:label="@string/app_name">
             <meta-data

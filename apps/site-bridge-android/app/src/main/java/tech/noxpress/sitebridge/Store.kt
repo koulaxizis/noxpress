@@ -15,6 +15,8 @@ import android.content.SharedPreferences
  *  bf_sites   sites with Book Feed, "id\tlabel" per line (for the worker)
  *  bf_since_<site>  the Hub time the last notices were read up to
  *  upd_at / upd_ver / upd_url  the last look for a newer app (1.4.0)
+ *  upd_notified  the version the update notification already told (1.5.0)
+ *  upd_asked  the notification permission was asked once for updates (1.5.0)
  */
 class Store(context: Context) {
 
@@ -78,6 +80,14 @@ class Store(context: Context) {
     var updUrl: String
         get() = p.getString("upd_url", "") ?: ""
         set(v) = p.edit().putString("upd_url", v).apply()
+
+    var updNotified: String
+        get() = p.getString("upd_notified", "") ?: ""
+        set(v) = p.edit().putString("upd_notified", v).apply()
+
+    var updAsked: Boolean
+        get() = p.getBoolean("upd_asked", false)
+        set(v) = p.edit().putBoolean("upd_asked", v).apply()
 
     val paired: Boolean get() = base.isNotEmpty() && device.isNotEmpty()
 
