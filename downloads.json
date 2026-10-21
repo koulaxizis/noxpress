@@ -1,6 +1,6 @@
 {
   "display": 100,
-  "total": 179,
+  "total": 183,
   "offset": 5,
   "updated": "2026-10-21",
   "assets": {
@@ -398,10 +398,18 @@
     },
     "662060702": {
       "file": "nox-sb-1.7.0/site-bridge.zip",
-      "count": 0
+      "count": 2
     },
     "662060886": {
       "file": "nox-bf-1.11.0/book-feed.zip",
+      "count": 2
+    },
+    "662316105": {
+      "file": "nox-sb-1.7.1/site-bridge.zip",
+      "count": 0
+    },
+    "662316351": {
+      "file": "nox-bf-1.12.0/book-feed.zip",
       "count": 0
     }
   }
