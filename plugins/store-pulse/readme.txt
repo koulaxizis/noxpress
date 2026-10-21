@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.7.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -21,6 +21,7 @@ Store Pulse adds a compact dashboard and a WordPress home-screen widget ("Quick 
 * Low-stock and out-of-stock products, including variations that manage their own stock. Counts are complete; the lists show up to 50 products.
 * Sales by product (Noxpress → SP Sales): units and amounts per product, or per variation, for any period (presets, this or last month or year, all time, or your own dates), counted by completed, paid or created date. Choose the order statuses, all products, some categories (subcategories included) or specific products, whether free lines count and whether refunds are subtracted, the columns (ID, name, SKU, categories, units, before discount, discount, sales, VAT, net, refunded units and amount, orders, stock) and the sort order. See the first 50 rows on screen with totals, or download everything as CSV: "Excel, Greek" (semicolon and decimal comma) or standard (comma and decimal point), UTF-8 with BOM. Amounts include VAT; shipping and fees never count. With Revenue Splitter, VAT uses its rate for each product, so the figures match Revenue Splitter; without it, the tax WooCommerce stored on each order line. Your last choices are remembered per user.
 * With the Revenue Splitter plugin active: the publisher's share and net amount for the period, and what is owed to every other beneficiary. Store Pulse only reads Revenue Splitter's public APIs and never recalculates splits, VAT or shipping.
+* Abilities (WordPress 6.9+): the dashboard, the stock lists and the sales report are also read-only WordPress abilities (`store-pulse/overview`, `store-pulse/stock`, `store-pulse/sales`) for AI and remote tools such as Site Bridge, with the same capability. Customers are only ever a count.
 
 Part of the Noxpress plugin family. All Noxpress plugins share a single "Noxpress" admin menu; its first page is the Noxpress hub (status, versions and updates of the whole suite), and Store Pulse adds its pages under it. The pages are always available at `admin.php?page=sp-dashboard`, `admin.php?page=sp-sales` and `admin.php?page=sp-settings`.
 
@@ -56,6 +57,9 @@ Only Store Pulse's own options, cached transients and each user's last choices o
 VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The totals differ only when the choices differ: Revenue Splitter counts completed and processing orders by order date, from its "sales start" date, while SP Sales counts the statuses and the date you choose.
 
 == Changelog ==
+
+= 1.7.0 =
+* New: WordPress abilities (6.9+) in the "noxpress" category, all read-only: `store-pulse/overview` (the dashboard cards of a period, with the money cards when Revenue Splitter is active), `store-pulse/stock` (the low-stock and out-of-stock lists) and `store-pulse/sales` (the Sales screen's rows per product and totals, with the same filters). For AI and remote tools such as Site Bridge; they need `manage_woocommerce`, are not in the REST API and never return customer details (customers are a count).
 
 = 1.6.1 =
 * Fixed: the publisher profit card says "Publisher profit (last month)" instead of "Publisher profit (period) (last month)".

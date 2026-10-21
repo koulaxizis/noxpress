@@ -103,6 +103,11 @@ final class SP_Sales {
 		add_action( 'admin_init', array( __CLASS__, 'maybe_download' ) );
 	}
 
+	/** 1.7.0: The messages of the last sanitize() (for the abilities). */
+	public static function errors(): array {
+		return self::$errors;
+	}
+
 	public static function url(): string {
 		return admin_url( 'admin.php?page=' . self::SLUG );
 	}
