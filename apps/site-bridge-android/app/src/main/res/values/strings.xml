@@ -20,6 +20,7 @@
     <string name="closed">Closed</string>
     <string name="open_until">Open until %1$s · %2$s left</string>
     <string name="open_btn">Open for %1$s</string>
+    <string name="renew_btn">Renew for %1$s from now</string>
     <string name="close_btn">Close now</string>
     <string name="cannot_open">This site does not let the Hub open its window (Site Bridge → Access, on the site).</string>
     <string name="unreachable">The Hub could not reach the site: %1$s</string>

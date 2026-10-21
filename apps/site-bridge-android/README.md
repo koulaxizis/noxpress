@@ -23,7 +23,7 @@ To remove a phone, revoke it in the Hub's App tab, or use **Disconnect** in the 
 On pairing the app makes two ECDSA P-256 keys in the Android Keystore and sends only their public parts:
 
 * **read** — status, log and closing a window; no prompt.
-* **act** — opening a window. The Keystore signs with it only right after a fingerprint (or, from Android 11, the screen lock), once per signature. Adding a fingerprint cancels it, and the app asks to pair again.
+* **act** — opening or renewing a window. The Keystore signs with it only right after a fingerprint (or, from Android 11, the screen lock), once per signature. Adding a fingerprint cancels it, and the app asks to pair again.
 
 Each request carries `X-SBA-Device`, `X-SBA-Ts`, `X-SBA-Nonce`, `X-SBA-Key` and `X-SBA-Sig`, the signature of
 

@@ -287,8 +287,18 @@ private fun SiteCard(s: Site, now: Long, busy: Boolean, picked: Int, onOpen: (Si
         Spacer(Modifier.height(10.dp))
         when {
             !s.canOpen -> Text(stringResource(R.string.cannot_open), color = Nx.muted, fontSize = 13.sp)
-            open -> OutlinedButton(onClick = { onClose(s) }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.close_btn))
+            // Renewing starts the picked length from now (the site resets its window), so it can also shorten it.
+            open -> Column {
+                Button(
+                    onClick = { onOpen(s) },
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Nx.accent),
+                ) { Text(stringResource(R.string.renew_btn, duration(picked))) }
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = { onClose(s) }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.close_btn))
+                }
             }
             else -> Button(
                 onClick = { onOpen(s) },

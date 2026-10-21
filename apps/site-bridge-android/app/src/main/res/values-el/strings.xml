@@ -19,6 +19,7 @@
     <string name="closed">Κλειστό</string>
     <string name="open_until">Ανοιχτό ως %1$s · απομένουν %2$s</string>
     <string name="open_btn">Άνοιγμα για %1$s</string>
+    <string name="renew_btn">Ανανέωση για %1$s από τώρα</string>
     <string name="close_btn">Κλείσιμο τώρα</string>
     <string name="cannot_open">Αυτό το site δεν επιτρέπει στο Hub να ανοίξει το παράθυρό του (Site Bridge → Πρόσβαση, στο site).</string>
     <string name="unreachable">Το Hub δεν έφτασε στο site: %1$s</string>

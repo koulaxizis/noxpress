@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.1.0
+
+* New: "Renew for <length> from now" on a site whose window is open. It asks for the fingerprint like opening and starts the picked length from that moment (it replaces the time left, it does not add to it). Needs no Hub change.
+
 ## 1.0.0
 
 * First release (beta). Pair the phone with a Site Bridge Hub (1.6.0+) by scanning the QR of the Hub's App tab, or by pasting its code.
