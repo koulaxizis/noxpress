@@ -1,6 +1,6 @@
 {
   "display": 100,
-  "total": 242,
+  "total": 243,
   "offset": 5,
   "updated": "2026-10-21",
   "assets": {
@@ -414,6 +414,34 @@
     },
     "662426972": {
       "file": "nox-lo-1.0.0/live-operator.zip",
+      "count": 1
+    },
+    "663017529": {
+      "file": "nox-loa-1.0.0/live-operator.apk",
+      "count": 0
+    },
+    "663017530": {
+      "file": "nox-loa-1.0.0/live-operator.apk.sha256",
+      "count": 0
+    },
+    "663024209": {
+      "file": "nox-sba-1.3.0/site-bridge.apk.sha256",
+      "count": 0
+    },
+    "663024211": {
+      "file": "nox-sba-1.3.0/site-bridge.apk",
+      "count": 0
+    },
+    "663028340": {
+      "file": "nox-loa-1.0.1/live-operator.apk",
+      "count": 0
+    },
+    "663028342": {
+      "file": "nox-loa-1.0.1/live-operator.apk.sha256",
+      "count": 0
+    },
+    "663046252": {
+      "file": "nox-lo-1.1.0/live-operator.zip",
       "count": 0
     }
   }
