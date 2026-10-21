@@ -8,7 +8,7 @@ plugins {
 // Another site: ./gradlew assembleRelease -PliveOperatorUrl=https://example.com/live-operator/ -PliveOperatorName="Example Live"
 val customUrl: String? = findProperty("liveOperatorUrl") as String?
 val appUrl: String = customUrl ?: "https://glarolykoi.net/live-operator/"
-val appName: String = (findProperty("liveOperatorName") as String?) ?: "Γλαρόλυκοι Live"
+val appName: String = (findProperty("liveOperatorName") as String?) ?: "Live Operator"
 val appUri: URI = URI(appUrl)
 require(appUri.scheme == "https" && !appUri.host.isNullOrEmpty()) { "liveOperatorUrl must be an https URL" }
 val appOrigin = "https://" + appUri.host + (if (appUri.port > 0) ":" + appUri.port else "")
@@ -27,7 +27,7 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-loa-<versionName>.
-        versionCode = 2
+        versionCode = 3
         versionName = "1.1.0"
 
         manifestPlaceholders["hostName"] = appUri.host
