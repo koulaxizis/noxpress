@@ -234,15 +234,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* Fixed: `plugins_update` saw \"no update\" for a release made since the last check, because WordPress and the Noxpress manifest keep their update checks for 12 hours. It now checks afresh first, as the hub's \"Check now\" does.",
+        "changelog": "* New: the Site Bridge Android app (beta). A new App tab on the Hub (off by default) pairs a phone with a QR code and lists the paired devices with revoke. The app sees the Hub's sites with level write or admin, opens a write window (fingerprint required, enforced by the phone's Keystore) or closes it early, and shows the Hub's log. Routes under site-bridge/v1/app/, signed per device with ECDSA P-256; nothing changes on the sites.\n* New: an email to the admin address after every window opened from the app (setting, on by default).",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "062807481e9a136fe3be3a75e60c311f126789eddb4b157f3da6dabce67ddb95",
-        "signature": "ToiN1cncvAdShCAeYUOKTnLeczemCsNa4Fl0p0TEJPwGwcsdRQ/mkjZfKXXqP5uEFwCoT5vp8849AaQR/mh4DQ==",
+        "sha256": "e00e94fa5dd7d9996f49218b173558bc8968d69e392b881260ea98c5b0ca217f",
+        "signature": "vPJa/rDkRIbeZKTVaHyJDwKqUQAQawa6SVshdv36aotsElm/7zZpC+TEcl6WiLS2PBsLFFAoa3EYCMnYZ89XDw==",
         "tested_wp": "7.1",
-        "version": "1.5.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.5.1/site-bridge.zip"
+        "version": "1.6.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.6.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
