@@ -281,7 +281,9 @@ private fun RuleDialog(ui: UiState, bf: BfActions, r: JSONObject, onDone: () -> 
     var title by remember { mutableStateOf(r.optString("title")) }
     var author by remember { mutableStateOf(r.optString("author")) }
     var kind by remember { mutableStateOf(r.optString("kind")) }
-    var pstat by remember { mutableStateOf(r.optString("pstat")) }
+    // A leading "-" in pstat means every status except that one (Book Feed 1.8.1).
+    var pstat by remember { mutableStateOf(r.optString("pstat").removePrefix("-")) }
+    var pstatExcept by remember { mutableStateOf(r.optString("pstat").startsWith("-")) }
     var yFrom by remember { mutableStateOf(r.optInt("year_from").takeIf { it > 0 }?.toString().orEmpty()) }
     var yTo by remember { mutableStateOf(r.optInt("year_to").takeIf { it > 0 }?.toString().orEmpty()) }
     var every by remember { mutableStateOf(r.optInt("every", 7).toString()) }
@@ -344,6 +346,12 @@ private fun RuleDialog(ui: UiState, bf: BfActions, r: JSONObject, onDone: () -> 
                         FilterChip(selected = pstat == v, onClick = { pstat = v }, label = { Text(v) }, colors = chipColors())
                     }
                 }
+                if (pstat.isNotEmpty()) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FilterChip(selected = !pstatExcept, onClick = { pstatExcept = false }, label = { Text(stringResource(R.string.bf_pstat_only)) }, colors = chipColors())
+                        FilterChip(selected = pstatExcept, onClick = { pstatExcept = true }, label = { Text(stringResource(R.string.bf_pstat_except)) }, colors = chipColors())
+                    }
+                }
                 Row {
                     OutlinedTextField(
                         value = yFrom,
@@ -399,7 +407,7 @@ private fun RuleDialog(ui: UiState, bf: BfActions, r: JSONObject, onDone: () -> 
                         .put("title", title.trim())
                         .put("author", author.trim())
                         .put("kind", kind)
-                        .put("pstat", pstat)
+                        .put("pstat", if (pstat.isNotEmpty() && pstatExcept) "-$pstat" else pstat)
                         .put("year_from", yFrom.toIntOrNull() ?: 0)
                         .put("year_to", yTo.toIntOrNull() ?: 0)
                         .put("every", (every.toIntOrNull() ?: 7).coerceIn(1, 90))

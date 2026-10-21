@@ -108,6 +108,8 @@
     <string name="bf_f_author">Author or other contributor</string>
     <string name="bf_f_kind">Kind</string>
     <string name="bf_f_pstat">Publishing status</string>
+    <string name="bf_pstat_only">Only this status</string>
+    <string name="bf_pstat_except">Every status except this one</string>
     <string name="bf_f_year_from">Year from</string>
     <string name="bf_f_year_to">Year to</string>
     <string name="bf_f_every">Every how many days (1–90)</string>
