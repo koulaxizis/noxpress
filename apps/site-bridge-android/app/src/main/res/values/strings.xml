@@ -137,4 +137,6 @@
         <item quantity="one">Every day</item>
         <item quantity="other">Every %1$d days</item>
     </plurals>
+    <string name="update_available">New version %1$s</string>
+    <string name="update_get">Download</string>
 </resources>

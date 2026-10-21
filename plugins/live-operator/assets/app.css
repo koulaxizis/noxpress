@@ -60,6 +60,16 @@ a { color: var(--lop-link); }
 	font-size: 14px;
 }
 
+.lop-update {
+	margin: 0 0 10px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: var(--lop-panel);
+	border: 1px solid var(--lop-border);
+	font-size: 14px;
+}
+.lop-update a { color: inherit; font-weight: 600; }
+
 /* ===== Switch ===== */
 .lop-top {
 	background: var(--lop-panel);

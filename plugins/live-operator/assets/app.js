@@ -791,6 +791,125 @@
 			});
 	}
 
+	/* ---------- app update notice ---------- */
+
+	// The official Android app opens the page with ?app=<its version>. Then,
+	// at most every 12 hours, the page looks at the repository's releases for
+	// a newer nox-loa-* and shows a line with the APK link. Builds for other
+	// sites do not send the parameter, so they never see the notice.
+	var updEl = h('p', { class: 'lop-update', hidden: true });
+	root.insertBefore(updEl, topEl);
+
+	function store(kind) {
+		try {
+			return window[kind];
+		} catch (e) {
+			return null;
+		}
+	}
+
+	function sget(kind, key) {
+		var st = store(kind);
+		try {
+			return st ? st.getItem(key) : null;
+		} catch (e) {
+			return null;
+		}
+	}
+
+	function sset(kind, key, value) {
+		var st = store(kind);
+		try {
+			if (st) {
+				st.setItem(key, value);
+			}
+		} catch (e) {}
+	}
+
+	function semver(v) {
+		var m = /^(\d+)\.(\d+)\.(\d+)$/.exec(v || '');
+		return m ? [+m[1], +m[2], +m[3]] : null;
+	}
+
+	function newer(a, b) {
+		var x = semver(a);
+		var y = semver(b);
+		if (!x || !y) {
+			return false;
+		}
+		for (var i = 0; i < 3; i++) {
+			if (x[i] !== y[i]) {
+				return x[i] > y[i];
+			}
+		}
+		return false;
+	}
+
+	function showUpdate(found, current) {
+		if (!found || !newer(found.v, current)) {
+			return;
+		}
+		updEl.textContent = '';
+		updEl.appendChild(document.createTextNode(t('appUpdate', found.v) + ' '));
+		updEl.appendChild(h('a', { href: found.url, rel: 'noopener', text: t('appGet') }));
+		updEl.hidden = false;
+	}
+
+	function pickRelease(list) {
+		var best = null;
+		(Array.isArray(list) ? list : []).forEach(function (r) {
+			var tag = (r && r.tag_name) || '';
+			if (r.draft || tag.indexOf('nox-loa-') !== 0) {
+				return;
+			}
+			var v = tag.slice(8);
+			if (!semver(v) || (best && !newer(v, best.v))) {
+				return;
+			}
+			var url = r.html_url || '';
+			(r.assets || []).forEach(function (a) {
+				if (/\.apk$/.test(a.name || '') && a.browser_download_url) {
+					url = a.browser_download_url;
+				}
+			});
+			best = { v: v, url: url };
+		});
+		return best;
+	}
+
+	function checkAppUpdate() {
+		var m = /[?&]app=([0-9.]+)(?:&|$)/.exec(location.search);
+		if (m && semver(m[1])) {
+			sset('sessionStorage', 'lop_app', m[1]);
+		}
+		var current = sget('sessionStorage', 'lop_app');
+		if (!current || !window.fetch) {
+			return;
+		}
+		var cached = null;
+		try {
+			cached = JSON.parse(sget('localStorage', 'lop_upd') || 'null');
+		} catch (e) {}
+		if (cached && cached.found) {
+			showUpdate(cached.found, current);
+		}
+		if (cached && Date.now() - (cached.at || 0) < 12 * 3600 * 1000) {
+			return;
+		}
+		fetch('https://api.github.com/repos/koulaxizis/noxpress/releases?per_page=50', {
+			credentials: 'omit',
+			headers: { Accept: 'application/vnd.github+json' }
+		}).then(function (r) {
+			return r.ok ? r.json() : Promise.reject(r.status);
+		}).then(function (list) {
+			var found = pickRelease(list);
+			sset('localStorage', 'lop_upd', JSON.stringify({ at: Date.now(), found: found }));
+			showUpdate(found, current);
+		}).catch(function () {
+			// Silent: no notice is better than a wrong one.
+		});
+	}
+
 	/* ---------- routing and polling ---------- */
 
 	function route() {
@@ -861,6 +980,7 @@
 
 	renderTop();
 	initPush();
+	checkAppUpdate();
 	if (/(?:^|[#&])c=/.test(location.hash)) {
 		route();
 		loadThreads();

@@ -134,4 +134,6 @@
         <item quantity="one">Κάθε ημέρα</item>
         <item quantity="other">Κάθε %1$d ημέρες</item>
     </plurals>
+    <string name="update_available">Νέα έκδοση %1$s</string>
+    <string name="update_get">Λήψη</string>
 </resources>

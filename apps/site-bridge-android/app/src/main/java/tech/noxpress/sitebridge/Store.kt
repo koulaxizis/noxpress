@@ -14,6 +14,7 @@ import android.content.SharedPreferences
  *  bf_notify  Book Feed notifications on
  *  bf_sites   sites with Book Feed, "id\tlabel" per line (for the worker)
  *  bf_since_<site>  the Hub time the last notices were read up to
+ *  upd_at / upd_ver / upd_url  the last look for a newer app (1.4.0)
  */
 class Store(context: Context) {
 
@@ -65,6 +66,18 @@ class Store(context: Context) {
     fun setBfSince(site: String, v: Long) {
         p.edit().putLong("bf_since_$site", v).apply()
     }
+
+    var updAt: Long
+        get() = p.getLong("upd_at", 0L)
+        set(v) = p.edit().putLong("upd_at", v).apply()
+
+    var updVer: String
+        get() = p.getString("upd_ver", "") ?: ""
+        set(v) = p.edit().putString("upd_ver", v).apply()
+
+    var updUrl: String
+        get() = p.getString("upd_url", "") ?: ""
+        set(v) = p.edit().putString("upd_url", v).apply()
 
     val paired: Boolean get() = base.isNotEmpty() && device.isNotEmpty()
 

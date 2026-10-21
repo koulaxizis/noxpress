@@ -1,5 +1,10 @@
 # Site Bridge app — changelog
 
+## 1.4.0
+
+* New: the app looks on GitHub for a newer `nox-sba-*` release (when it comes to the front, at most every 12 hours) and shows "New version X" under the header with a "Download" link to the signed APK. Nothing is installed by itself and nothing about the phone or the Hub is sent; a failed look stays silent.
+* Obtainium can follow the releases too (see the README).
+
 ## 1.3.0
 
 * New: "Preview" in the rule dialog: what the rule as filled in would bring on its next run (matching titles, already in the store, new, to be imported, and the first new titles), without saving or importing anything. Needs Book Feed 1.12.0+ on the site and Site Bridge 1.7.1+ on the Hub. Uses the read key, no fingerprint.

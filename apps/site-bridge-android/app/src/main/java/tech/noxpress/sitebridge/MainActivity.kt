@@ -23,8 +23,10 @@ import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -53,6 +55,7 @@ class UiState {
     var bfIsbn by mutableStateOf<JSONObject?>(null)
     var bfPreview by mutableStateOf<JSONObject?>(null)
     var bfNotify by mutableStateOf(false)
+    var update by mutableStateOf<Updates.Found?>(null)
 }
 
 class MainActivity : FragmentActivity() {
@@ -126,6 +129,22 @@ class MainActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
         if (ui.paired) refresh()
+        checkUpdate()
+    }
+
+    /** A newer signed app on GitHub, looked up at most every 12 hours; never an error on screen. */
+    private fun checkUpdate() {
+        val current = BuildConfig.VERSION_NAME
+        if (store.updVer.isNotEmpty() && Updates.newer(store.updVer, current)) ui.update = Updates.Found(store.updVer, store.updUrl)
+        val now = System.currentTimeMillis() / 1000
+        if (now - store.updAt < Updates.EVERY) return
+        store.updAt = now
+        lifecycleScope.launch {
+            val f = withContext(Dispatchers.IO) { runCatching { Updates.check(current) }.getOrNull() }
+            store.updVer = f?.version.orEmpty()
+            store.updUrl = f?.url.orEmpty()
+            ui.update = f
+        }
     }
 
     /* ----- Pairing ----- */

@@ -294,6 +294,9 @@ final class LOP_App {
 			'inbox'         => __( 'Live Chat του PurioChat', 'live-operator' ),
 			/* translators: %d: seconds */
 			'timeoutHint'   => __( 'Ένα αίτημα περιμένει %d δευτερόλεπτα πριν γυρίσει στο AI.', 'live-operator' ),
+			/* translators: %s: app version, e.g. 1.2.0 */
+			'appUpdate'     => __( 'Νέα έκδοση της εφαρμογής: %s.', 'live-operator' ),
+			'appGet'        => __( 'Λήψη', 'live-operator' ),
 		);
 	}
 }

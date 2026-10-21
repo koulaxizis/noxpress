@@ -6,7 +6,8 @@ plugins {
 
 // The app is a Trusted Web Activity of the Live Operator page of one site.
 // Another site: ./gradlew assembleRelease -PliveOperatorUrl=https://example.com/live-operator/ -PliveOperatorName="Example Live"
-val appUrl: String = (findProperty("liveOperatorUrl") as String?) ?: "https://glarolykoi.net/live-operator/"
+val customUrl: String? = findProperty("liveOperatorUrl") as String?
+val appUrl: String = customUrl ?: "https://glarolykoi.net/live-operator/"
 val appName: String = (findProperty("liveOperatorName") as String?) ?: "Live Operator"
 val appUri: URI = URI(appUrl)
 require(appUri.scheme == "https" && !appUri.host.isNullOrEmpty()) { "liveOperatorUrl must be an https URL" }
@@ -26,13 +27,16 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-loa-<versionName>.
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
 
         manifestPlaceholders["hostName"] = appUri.host
         manifestPlaceholders["appPath"] = appUri.path.ifEmpty { "/" }
         resValue("string", "app_name", appName)
-        resValue("string", "launch_url", appUrl)
+        // The official build opens the page with ?app=<version>, so the
+        // Live Operator plugin (1.1.0+) can say when a newer nox-loa-*
+        // release exists. Builds for other sites leave it out.
+        resValue("string", "launch_url", if (customUrl == null) "$appUrl?app=$versionName" else appUrl)
         resValue(
             "string",
             "asset_statements",
