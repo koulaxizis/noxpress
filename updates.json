@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* New: abilities for the Site Bridge phone app: `book-feed/rules`, `rule-save` (a new rule or changes to one; its category, display mode and last run are kept), `rule-delete`, `publishers` (autocomplete), `options` (kinds and statuses seen), `isbn` (the catalogue's title and the store's product for one ISBN), `import` (one ISBN as a draft, refused when the store has that ISBN) and `notices` (titles imported, errors, titles gone and the last run since a time).",
+        "changelog": "* New: \"Preview\" on every rule card, the new one too: what the rule as filled in would bring on its next run, without saving or importing anything. It reads the catalogue as the run does (same filters, same order; a rule that has run counts only titles changed since its last run), up to 500 titles, and says how many match, how many the store has already, how many are new and how many will be imported (up to the rule's max), with the first 30 new titles.\n* New: ability `book-feed/rule-preview` (read) for the same, used by the Site Bridge phone app.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8ab4fbae52a3baca1ff77d882ee18d41b574e4f5be91be29278b3289797fdd54",
-        "signature": "3TKkV+c9QL2LIbTPmd13ACRBv9BdnujQZhPUi1Nk/VbIn1x11YhahYuFPLZUylXcQjfruz2+Oo+Ui1ikdpviAg==",
+        "sha256": "2cefa985adf1e01743ad2ae651ba56383621fdb86647353ac34135d5e10190ac",
+        "signature": "DgeBDvIctAOWkv8XHo3TSB4+Q4oeUXWSkKMh9HJPk4SqkMlYEcFCd/AD5++R3y23ew8m2noYnfhB9HAnRC3IAg==",
         "tested_wp": "7.1",
-        "version": "1.11.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.11.0/book-feed.zip"
+        "version": "1.12.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.12.0/book-feed.zip"
       }
     },
     "book-preview": {
@@ -234,15 +234,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: the phone app can use other Noxpress plugins through the Hub, starting with Book Feed (1.11.0+). New route `app/ability` runs one ability from a short allow-list per plugin through the Hub's `ability_run`, so each site applies its level and write window as for Claude. Read abilities use the read key; the rest need the fingerprint key, and when the site's window is closed and the site lets the Hub open it, the Hub opens it for 15 minutes first (logged as `app_window_open`, emailed when that setting is on).\n* New: a site's status lists the plugins the app can use there (`modules`), so the app shows their tabs only where they work. Sites need 1.7.0 for this.",
+        "changelog": "* New: the phone app can preview a Book Feed rule (`book-feed/rule-preview`, read, Book Feed 1.12.0+): what it would bring on its next run, importing nothing. Only the Hub needs 1.7.1.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "60aa97f7814142061e5d564bb844b0e6f5a26cb7f79f0b24bbd8fac0b13c4e5e",
-        "signature": "7kjtkYBAgP7h6g8EAe219vLh6Wo/6DEin0oDd0jb+1IbsbVP/hfydXb5MMcFMte5SNeRHH56H33fcevVjEG6Bg==",
+        "sha256": "b721c8661c83590c3d9ae851d202150979e7f2f9ab7b345eab549b5c44db755d",
+        "signature": "dHczfH9XiSU6caTgLAkXJ0+uFG15nO16+q7qI4hK7qUlxb79Zp+PXScOb1fdsikZXYQCkwqRc30cQllLI0MsDw==",
         "tested_wp": "7.1",
-        "version": "1.7.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.7.0/site-bridge.zip"
+        "version": "1.7.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.7.1/site-bridge.zip"
       }
     },
     "smart-formatter": {
