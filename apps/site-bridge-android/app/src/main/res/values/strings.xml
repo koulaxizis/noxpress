@@ -46,7 +46,7 @@
     <string name="not_anthropic">Works with Claude. Not made by or affiliated with Anthropic.</string>
     <string name="err_invalidated">New fingerprints were added to this phone, so its key for opening was cancelled. Connect again with a new QR.</string>
     <string name="err_network">No connection to the Hub: %1$s</string>
-    <string name="err_clock">The phone’s clock is wrong. Turn on automatic date and time.</string>
+    <string name="err_clock">The phone’s time and the Hub’s differ by %1$s seconds. Check automatic date and time on the phone, then try again.</string>
     <string name="err_unknown_device">This phone is no longer connected to the Hub (revoked). Connect again with a new QR.</string>
     <string name="err_app_off">The app is off on the Hub (Site Bridge → App).</string>
 </resources>

@@ -257,7 +257,7 @@ class MainActivity : FragmentActivity() {
     private fun explain(e: HubError): String? = when (e.code) {
         "cancel" -> null
         "network" -> getString(R.string.err_network, e.message ?: "")
-        "clock" -> getString(R.string.err_clock)
+        "clock" -> getString(R.string.err_clock, e.message ?: "?")
         "unknown_device" -> getString(R.string.err_unknown_device)
         "app_off" -> getString(R.string.err_app_off)
         "remote_window" -> getString(R.string.cannot_open)

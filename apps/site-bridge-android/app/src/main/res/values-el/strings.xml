@@ -45,7 +45,7 @@
     <string name="not_anthropic">Δουλεύει με το Claude. Δεν είναι προϊόν της Anthropic και δεν σχετίζεται με αυτήν.</string>
     <string name="err_invalidated">Προστέθηκαν νέα δαχτυλικά στο κινητό, οπότε το κλειδί ανοίγματος ακυρώθηκε. Σύνδεσε ξανά με νέο QR.</string>
     <string name="err_network">Καμία σύνδεση με το Hub: %1$s</string>
-    <string name="err_clock">Η ώρα του κινητού είναι λάθος. Άνοιξε την αυτόματη ημερομηνία και ώρα.</string>
+    <string name="err_clock">Η ώρα του κινητού και του Hub διαφέρουν κατά %1$s δευτερόλεπτα. Έλεγξε την αυτόματη ημερομηνία και ώρα στο κινητό και δοκίμασε ξανά.</string>
     <string name="err_unknown_device">Αυτό το κινητό δεν είναι πια συνδεδεμένο με το Hub (ανακλήθηκε). Σύνδεσε ξανά με νέο QR.</string>
     <string name="err_app_off">Η εφαρμογή είναι κλειστή στο Hub (Site Bridge → Εφαρμογή).</string>
 </resources>
