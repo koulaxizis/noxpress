@@ -119,15 +119,15 @@
     },
     "live-operator": {
       "beta": {
-        "changelog": "* Initial release.\n* Server-side online / offline switch for PurioChat Pro's Live Chat, with automatic offline and a notification at the end.\n* Web Push without third parties (VAPID, aes128gcm) for every new request and visitor message, with a test button.\n* Operator app at /live-operator/ (installable), and Digital Asset Links for the companion Android app.\n* LOP_DISABLE, bilingual admin, Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.18).",
+        "changelog": "* New: opened from the official Android app (1.1.0+), the page shows \"New app version X. Download\" when a newer nox-loa-* release exists. It looks at GitHub at most every 12 hours, from the phone, and stays silent on any error. In a browser, or in an app built for another site, nothing changes.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b31a65639d84fe6ddd797112d2c1fb95f5c293d81c9c1f0a503380652e47fd0e",
-        "signature": "ZjqB2w/1hOTmCWYjU/UYmALGK65qvRhReRSG8ZJNnjsd7hRxC+EzRGoucfatIFLUg9JikOsjAEHjEvqaqew+BA==",
+        "sha256": "da79014ab783736a73efb29e53370602147cf36186281c55c5fb741f257f0996",
+        "signature": "6lkXgcMzmRtuxL2tVoRArOWcf+fx0iECjtblRL/cv8QzX+WPvgAVeMiBisWJsp3Sc6zg159thP9e2NlzTS6fAg==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.0.0/live-operator.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.1.0/live-operator.zip"
       }
     },
     "oros-connect": {
