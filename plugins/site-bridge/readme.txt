@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -80,6 +80,9 @@ The secret key is sealed with the salts, so a new key pair is made and a notice 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.5.1 =
+* Fixed: `plugins_update` saw "no update" for a release made since the last check, because WordPress and the Noxpress manifest keep their update checks for 12 hours. It now checks afresh first, as the hub's "Check now" does.
 
 = 1.5.0 =
 * New: `bridge_status` shows the settings Claude is bound by on a site: level, write window and minutes left, whether the Hub may open it, run-as administrator, masking, admin e-mails, IP lists (on / off), rate limits, log retention and the paired Hub. Read only.
