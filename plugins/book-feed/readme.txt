@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.0
+Stable tag: 1.12.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -40,7 +40,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 
 **Prices from the publishers' own sites**
 
-* Catalogue prices are often old. For each publisher you list, the plugin reads the price from the book's page on the publisher's site (schema.org structured data, a WooCommerce Store API answer, Open Graph or microdata) and uses it instead, on import and on every sync. While the publisher's shop runs a sale, its list price is taken.
+* Catalogue prices are often old. For each publisher you list, the plugin reads the price from the book's page on the publisher's site (schema.org structured data, a WooCommerce Store API answer, Open Graph or microdata) and uses it instead of the catalogue's when it is higher, on import and on every sync. A lower publisher price is not used (1.12.1): the catalogue's is the book's fixed price, and a lower one is usually the publisher's own sale. While the publisher's shop runs a sale, its list price is taken when the page shows it.
 * A page that names another ISBN is ignored. A price below half or above double the catalogue's is not used. When the page cannot be read, a price read in the last 7 days still counts, else the catalogue's. Every change goes to the history; one look per title per day.
 * Publishers whose addresses do not carry the ISBN: put the book's page in the Book Feed box of the product; the price is read from there.
 * Pages without structured data: the first number after words such as "Τιμή εκδότη" (setting, one per line) is taken, before any other price on the page, since the publisher's e-shop often shows its own discounted price. When the page also lists other books with the same words, only the price right after this book's title counts; if none can be told apart, no price is taken from the page.
@@ -97,6 +97,9 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.12.1 =
+* Changed: the publisher's price replaces the catalogue's (OSDEL) only when it is higher. A lower one, often the publisher's own shop sale, would have undercut the fixed book price; the catalogue's price is kept then, and the history notes only the prices that are used.
 
 = 1.12.0 =
 * New: "Preview" on every rule card, the new one too: what the rule as filled in would bring on its next run, without saving or importing anything. It reads the catalogue as the run does (same filters, same order; a rule that has run counts only titles changed since its last run), up to 500 titles, and says how many match, how many the store has already, how many are new and how many will be imported (up to the rule's max), with the first 30 new titles.

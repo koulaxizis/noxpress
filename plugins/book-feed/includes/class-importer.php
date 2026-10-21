@@ -509,9 +509,17 @@ final class BKF_Importer {
 		return $r['title'];
 	}
 
-	/** Regular price as the store keeps it (the feed's price includes VAT), or null. */
+	/**
+	 * Regular price as the store keeps it (the feed's price includes VAT),
+	 * or null. The publisher's price counts only when it is above the
+	 * catalogue's: a lower one is usually the publisher's own sale, and the
+	 * catalogue's (OSDEL) is the book's fixed price (1.12.1).
+	 */
 	public static function price( array $r ): ?string {
-		$gross = isset( $r['pub_price'] ) && null !== $r['pub_price'] ? $r['pub_price'] : $r['price'];
+		$gross = $r['price'];
+		if ( isset( $r['pub_price'] ) && null !== $r['pub_price'] && ( null === $gross || $r['pub_price'] > $gross ) ) {
+			$gross = $r['pub_price'];
+		}
 		if ( null === $gross || $gross <= 0 ) {
 			return null;
 		}
@@ -571,7 +579,7 @@ final class BKF_Importer {
 			if ( '' === $r['pub_why'] ) {
 				update_post_meta( $pid, '_bkf_pub_at', time() );
 			}
-			if ( $now !== $prev && ( null === $r['price'] || abs( $r['pub_price'] - $r['price'] ) > 0.004 ) ) {
+			if ( $now !== $prev && ( null === $r['price'] || $r['pub_price'] - $r['price'] > 0.004 ) ) {
 				/* translators: 1: catalogue price, 2: publisher price */
 				BKF_Log::add( 'price', $pid, $r['isbn'], $r['title'], array( 'price' ), sprintf( __( 'Κατάλογος %1$s → εκδότης %2$s', 'book-feed' ), null === $r['price'] ? '—' : BKF_Pub_Price::money( (float) $r['price'] ), BKF_Pub_Price::money( (float) $now ) ) );
 			}
