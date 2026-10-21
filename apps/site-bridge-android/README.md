@@ -1,13 +1,13 @@
 # Site Bridge — Android app
 
-Opens and closes the **write window** of the sites of a Site Bridge Hub from your phone, and shows the Hub's log. Nothing else. Design: Noxpress Bible §21 and §13.
+Opens and closes the **write window** of the sites of a Site Bridge Hub from your phone, and shows the Hub's log. From 1.2.0 it has a **Book Feed** tab (sync, rules, ISBN lookup and import as a draft, notifications) on sites that have Book Feed 1.11.0+. Design: Noxpress Bible §21 and §13; notes/android-app/03-book-feed-app.md.
 
 Works with Claude. Not made by or affiliated with Anthropic.
 
 ## Requirements
 
 * Android 9 or newer.
-* A Hub with Site Bridge 1.6.0+ over HTTPS, with **Noxpress → Site Bridge → App** switched on.
+* A Hub with Site Bridge 1.6.0+ (1.7.0+ for plugin tabs, on the Hub and on the site) over HTTPS, with **Noxpress → Site Bridge → App** switched on.
 * On each site whose window the app should open: **Access** → "The Hub may open this site's write window", and level write or admin. Sites at read never show in the app.
 
 ## Install and pair
@@ -23,7 +23,7 @@ To remove a phone, revoke it in the Hub's App tab, or use **Disconnect** in the 
 On pairing the app makes two ECDSA P-256 keys in the Android Keystore and sends only their public parts:
 
 * **read** — status, log and closing a window; no prompt.
-* **act** — opening or renewing a window. The Keystore signs with it only right after a fingerprint (or, from Android 11, the screen lock), once per signature. Adding a fingerprint cancels it, and the app asks to pair again.
+* **act** — opening or renewing a window, and every plugin action that changes a site (Book Feed: sync, stop, rules, import). The Keystore signs with it only right after a fingerprint (or, from Android 11, the screen lock), once per signature. Adding a fingerprint cancels it, and the app asks to pair again.
 
 Each request carries `X-SBA-Device`, `X-SBA-Ts`, `X-SBA-Nonce`, `X-SBA-Key` and `X-SBA-Sig`, the signature of
 
@@ -32,6 +32,12 @@ SBA1|<METHOD>|/site-bridge/v1/<path>|<device>|<unix time>|<nonce>|<sha256 hex of
 ```
 
 The Hub accepts ±300 s and each nonce once. See `plugins/site-bridge/includes/class-app.php`.
+
+## Plugin tabs
+
+`POST app/ability` runs one ability of a short allow-list (`SBR_App::MODULES`) on one site, through the Hub's `ability_run`, so the site applies its level and write window as for Claude. A tab shows only for sites whose status lists the plugin in `modules`. When an action needs the window and it is closed, the Hub opens it for 15 minutes first if the site allows it (`window_opened` in the answer).
+
+Notifications: WorkManager, about once an hour, `book-feed/notices` with the read key for each site with Book Feed; the first look only sets the starting time.
 
 ## Build
 

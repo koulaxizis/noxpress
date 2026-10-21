@@ -206,6 +206,8 @@ final class SBR_Site {
 			'window_until'  => SBR_Settings::window_until(),
 			'remote_window' => (bool) SBR_Settings::v( 'remote_window' ),
 			'woocommerce'   => function_exists( 'WC' ),
+			// Plugins whose abilities the Hub's phone app can use (1.7.0).
+			'modules'       => SBR_App::modules_here(),
 		);
 	}
 

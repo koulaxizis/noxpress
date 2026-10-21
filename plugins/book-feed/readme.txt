@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.10.1
+Stable tag: 1.11.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -64,7 +64,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * `bkf_get_source( $product_id )`: where a product came from (`source`, `id`, `isbn`, `synced`, `linked`), or null.
 * Fires `noxpress_products_changed( $ids )` after each import or sync step that changed products.
 * WP-CLI: `wp book-feed status`, `wp book-feed search --title=…` (read only), `wp book-feed sync --yes`.
-* Abilities (WordPress 6.9+): status, history, publisher's price, sync now, stop, square covers and one product's sync, for remote tools such as Site Bridge.
+* Abilities (WordPress 6.9+): status, history, publisher's price, sync now, stop, square covers and one product's sync, for remote tools such as Site Bridge. From 1.11.0 also rules (list, save, delete), publisher lookup, ISBN lookup, import of one ISBN as a draft and "what happened since", for the Site Bridge phone app.
 
 == Installation ==
 
@@ -97,6 +97,9 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.11.0 =
+* New: abilities for the Site Bridge phone app: `book-feed/rules`, `rule-save` (a new rule or changes to one; its category, display mode and last run are kept), `rule-delete`, `publishers` (autocomplete), `options` (kinds and statuses seen), `isbn` (the catalogue's title and the store's product for one ISBN), `import` (one ISBN as a draft, refused when the store has that ISBN) and `notices` (titles imported, errors, titles gone and the last run since a time).
 
 = 1.10.1 =
 * Fixed: a sync could stop for good after 1.9.1, when many titles got a larger cover from the publisher at once: downloading, squaring and resizing them all in one batch of 50 ran past PHP's 5-minute limit, and every retry started the same batch again. A batch now stops after the title that uses up the step's time and the next step goes on from there.

@@ -11,6 +11,9 @@ import android.content.SharedPreferences
  *  offset     Hub clock minus phone clock, seconds
  *  minutes    the window length picked last
  *  tile_*     the site of the Quick Settings tile and its last known state
+ *  bf_notify  Book Feed notifications on
+ *  bf_sites   sites with Book Feed, "id\tlabel" per line (for the worker)
+ *  bf_since_<site>  the Hub time the last notices were read up to
  */
 class Store(context: Context) {
 
@@ -47,6 +50,21 @@ class Store(context: Context) {
     var tileUntil: Long
         get() = p.getLong("tile_until", 0L)
         set(v) = p.edit().putLong("tile_until", v).apply()
+
+    var bfNotify: Boolean
+        get() = p.getBoolean("bf_notify", false)
+        set(v) = p.edit().putBoolean("bf_notify", v).apply()
+
+    /** Sites with Book Feed: id to label. */
+    var bfSites: Map<String, String>
+        get() = (p.getString("bf_sites", "") ?: "").lines().filter { '\t' in it }.associate { it.substringBefore('\t') to it.substringAfter('\t') }
+        set(v) = p.edit().putString("bf_sites", v.entries.joinToString("\n") { it.key + "\t" + it.value.replace('\n', ' ').replace('\t', ' ') }).apply()
+
+    fun bfSince(site: String): Long = p.getLong("bf_since_$site", 0L)
+
+    fun setBfSince(site: String, v: Long) {
+        p.edit().putLong("bf_since_$site", v).apply()
+    }
 
     val paired: Boolean get() = base.isNotEmpty() && device.isNotEmpty()
 

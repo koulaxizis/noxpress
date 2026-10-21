@@ -19,7 +19,12 @@ data class Site(
     val canOpen: Boolean,
     val reachable: Boolean,
     val error: String,
+    /** Noxpress plugins the app can use on this site (Site Bridge 1.7.0+ on it), e.g. "book-feed". */
+    val modules: List<String> = emptyList(),
 )
+
+/** An ability's answer, and the window the Hub opened first for it (0: none). */
+class AbilityResult(val result: JSONObject, val windowOpened: Long)
 
 data class LogRow(
     val ts: Long,
@@ -85,6 +90,16 @@ class Api(private val store: Store) {
         }
     }
 
+    /**
+     * One allow-listed ability on one site, through the Hub. Read abilities
+     * pass no [actSigner]; the others need it (fingerprint).
+     */
+    suspend fun ability(siteId: String, name: String, input: JSONObject, actSigner: (suspend (String) -> String)?): AbilityResult {
+        val body = JSONObject().put("site", siteId).put("name", name).put("input", input)
+        val j = signed("POST", "app/ability", body, actSigner)
+        return AbilityResult(j.optJSONObject("result") ?: JSONObject(), j.optLong("window_opened"))
+    }
+
     suspend fun forget() {
         signed("POST", "app/forget", JSONObject(), null)
     }
@@ -99,6 +114,7 @@ class Api(private val store: Store) {
         canOpen = o.optBoolean("can_open"),
         reachable = o.optBoolean("reachable", true),
         error = o.optString("error"),
+        modules = o.optJSONArray("modules")?.let { a -> (0 until a.length()).map { a.optString(it) } } ?: emptyList(),
     )
 
     /**

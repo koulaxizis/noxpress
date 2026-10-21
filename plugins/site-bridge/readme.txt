@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -45,7 +45,8 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 
 **Android app (beta, from 1.6.0)**
 
-* The Site Bridge app opens and closes the write window of the Hub's sites from your phone, and shows the Hub's log. Nothing else.
+* The Site Bridge app opens and closes the write window of the Hub's sites from your phone, and shows the Hub's log.
+* From 1.7.0 it also has a tab per Noxpress plugin that offers one (first: Book Feed 1.11.0+): status and "sync now", rules, an ISBN lookup with the camera and import as a draft, and notifications. The Hub runs only a short list of that plugin's abilities, through its own ability_run, so each site keeps its level and its window. Anything that changes a site needs the fingerprint; if the site's window is closed and the site lets the Hub open it, the Hub opens it for 15 minutes first (logged and emailed like any opening from the app).
 * It talks only to the Hub, which opens the window the way its Sites tab does, so nothing changes on the sites. It shows only sites with level write or admin, and opens a window only where the site lets the Hub do it.
 * Pairing: **App** tab on the Hub → turn the app on → **New code for a phone** → scan the QR (valid for 15 minutes, once).
 * The phone makes two EC P-256 keys in the Android Keystore, which never leave it. Every request is signed (timestamp, single-use nonce). Opening a window is accepted only with the second key, which the Keystore uses only right after a fingerprint (or the screen lock) for that one request. No password or token travels, so hosts that drop the Authorization header do not matter.
@@ -95,6 +96,10 @@ Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.7.0 =
+* New: the phone app can use other Noxpress plugins through the Hub, starting with Book Feed (1.11.0+). New route `app/ability` runs one ability from a short allow-list per plugin through the Hub's `ability_run`, so each site applies its level and write window as for Claude. Read abilities use the read key; the rest need the fingerprint key, and when the site's window is closed and the site lets the Hub open it, the Hub opens it for 15 minutes first (logged as `app_window_open`, emailed when that setting is on).
+* New: a site's status lists the plugins the app can use there (`modules`), so the app shows their tabs only where they work. Sites need 1.7.0 for this.
 
 = 1.6.0 =
 * New: the Site Bridge Android app (beta). A new App tab on the Hub (off by default) pairs a phone with a QR code and lists the paired devices with revoke. The app sees the Hub's sites with level write or admin, opens a write window (fingerprint required, enforced by the phone's Keystore) or closes it early, and shows the Hub's log. Routes under site-bridge/v1/app/, signed per device with ECDSA P-256; nothing changes on the sites.

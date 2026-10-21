@@ -1,5 +1,11 @@
 # Site Bridge app — changelog
 
+## 1.2.0
+
+* New: a Book Feed tab, shown when a site of the Hub has Book Feed 1.11.0+ and Site Bridge 1.7.0+. The sync's state with "Sync now" and "Stop"; the rules with "Run now", new rules and changes (publisher search, title words, contributor, kind, publishing status, years, every how many days, draft or published, on/off) and delete; an ISBN lookup by typing or by scanning the barcode, with "Import as a draft" for a title the store does not have.
+* Anything that changes the site asks for the fingerprint. If the site's write window is closed and the site lets the Hub open it, the Hub opens it for 15 minutes first and the app says so.
+* New: Book Feed notifications (off until you turn them on): about once an hour the app asks the Hub what happened on each site with Book Feed and shows new titles, sync errors and titles that left the catalogue. No Firebase: WorkManager, with the read key.
+
 ## 1.1.0
 
 * New: "Renew for <length> from now" on a site whose window is open. It asks for the fingerprint like opening and starts the picked length from that moment (it replaces the time left, it does not add to it). Needs no Hub change.
