@@ -302,27 +302,50 @@ final class RS_Emails {
 	 * ΜΟΝΟ ο αμέσως προηγούμενος — εκουσίως, όχι backlog spam.
 	 */
 	public static function maybe_send_monthly(): void {
+		self::send_monthly();
+	}
+
+	/**
+	 * 1.10.0: The sender behind maybe_send_monthly(), also used by the
+	 * revenue-splitter/monthly-send ability.
+	 *
+	 * $resend sends the previous month again even when it was already
+	 * sent. $only sends that one beneficiary's report and leaves
+	 * OPT_LAST_RUN alone (the monthly run still happens as usual).
+	 *
+	 * @return array{month:string,already:bool,sent:int,failed:int,no_email:int}
+	 */
+	public static function send_monthly( bool $resend = false, string $only = '' ): array {
 
 		$prev = new DateTimeImmutable( 'first day of previous month', wp_timezone() );
 		$key  = $prev->format( 'Y-m' );
+		$out  = array(
+			'month'    => $key,
+			'already'  => (string) get_option( self::OPT_LAST_RUN, '' ) === $key,
+			'sent'     => 0,
+			'failed'   => 0,
+			'no_email' => 0,
+		);
 
-		if ( (string) get_option( self::OPT_LAST_RUN, '' ) === $key ) {
-			return; // Ήδη σταλεί για αυτόν τον μήνα.
+		if ( '' === $only && $out['already'] && ! $resend ) {
+			return $out; // Ήδη σταλεί για αυτόν τον μήνα.
 		}
 
 		$start = $prev->format( 'Y-m-01' );
 		$end   = $prev->format( 'Y-m-t' );
+		$names = '' !== $only ? array( $only ) : array_keys( self::get_report_map() );
 
-		foreach ( array_keys( self::get_report_map() ) as $name ) {
+		foreach ( $names as $name ) {
 
 			$email = self::get_email( $name );
 			if ( '' === $email ) {
+				$out['no_email']++;
 				continue; // Opt-in χωρίς email (άλλαξε email) — skip.
 			}
 
 			$body = self::build_monthly_body( $name, $start, $end );
 
-			self::send(
+			$ok = self::send(
 				$email,
 				sprintf(
 					/* translators: %s: μήνας/έτος αναφοράς */
@@ -331,21 +354,25 @@ final class RS_Emails {
 				),
 				$body
 			);
+			$out[ $ok ? 'sent' : 'failed' ]++;
 		}
 
 		// Mark-άρουμε ΑΝΕΞΑΡΤΗΤΑ από το πλήθος των αποστολών — μία φορά
 		// ανά μήνα, χωρίς retries (αποφυγή double-send σε flaky cron).
-		update_option( self::OPT_LAST_RUN, $key );
+		if ( '' === $only ) {
+			update_option( self::OPT_LAST_RUN, $key );
+		}
+
+		return $out;
 	}
 
 	/**
-	 * Το HTML body της μηνιαίας αναφοράς ενός δικαιούχου.
+	 * 1.10.0: The figures of one beneficiary's monthly report (the email
+	 * and the revenue-splitter/monthly-preview ability show the same).
 	 *
-	 * Δομή: χαιρετισμός, KPI μεριδίου μήνα, KPI αποπληρωτέου υπολοίπου,
-	 * πίνακας «Τα προϊόντα σου» (τίτλος/τεμ./μερίδιο), υποσημείωση.
-	 * Escape: ΠΑΝΤΑ esc_html/esc_attr — no exceptions.
+	 * @return array{share:float,remaining:float,rows:array<int,array{title:string,qty:int,amount:float,pct:float}>}
 	 */
-	private static function build_monthly_body( string $who, string $start, string $end ): string {
+	public static function monthly_data( string $who, string $start, string $end ): array {
 
 		$report = RS_Reports::run(
 			array(
@@ -376,6 +403,27 @@ final class RS_Emails {
 		$inc_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'income' );
 		$pay_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' );
 		$remain  = round( $sales_l + $inc_l - $pay_l, 2 );
+
+		return array(
+			'share'     => round( $share, 2 ),
+			'remaining' => $remain,
+			'rows'      => $rows,
+		);
+	}
+
+	/**
+	 * Το HTML body της μηνιαίας αναφοράς ενός δικαιούχου.
+	 *
+	 * Δομή: χαιρετισμός, KPI μεριδίου μήνα, KPI αποπληρωτέου υπολοίπου,
+	 * πίνακας «Τα προϊόντα σου» (τίτλος/τεμ./μερίδιο), υποσημείωση.
+	 * Escape: ΠΑΝΤΑ esc_html/esc_attr — no exceptions.
+	 */
+	private static function build_monthly_body( string $who, string $start, string $end ): string {
+
+		$data   = self::monthly_data( $who, $start, $end );
+		$share  = $data['share'];
+		$remain = $data['remaining'];
+		$rows   = $data['rows'];
 
 		$cur  = self::currency_fmt();
 		$from = RS_Lang::fmt_date( $start );

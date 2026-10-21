@@ -3,7 +3,7 @@
  * Plugin Name:          Store Pulse
  * Plugin URI:           https://noxpress.tech
  * Description:          Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, πωλήσεις ανά προϊόν με εξαγωγή CSV, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
- * Version:              1.6.1
+ * Version:              1.7.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -34,7 +34,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SP_VERSION', '1.6.1' );
+define( 'SP_VERSION', '1.7.0' );
 define( 'SP_FILE', __FILE__ );
 define( 'SP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SP_URL', plugin_dir_url( __FILE__ ) );
@@ -90,10 +90,12 @@ function sp_bootstrap(): void {
 	require_once SP_PATH . 'includes/class-sp-admin.php';
 	require_once SP_PATH . 'includes/class-sp-dashboard.php';
 	require_once SP_PATH . 'includes/class-sp-sales.php';
+	require_once SP_PATH . 'includes/class-sp-abilities.php';
 
 	SP_Data::init();
 	SP_Admin::init();
 	SP_Sales::init();
+	SP_Abilities::init();
 }
 
 /** Είναι ενεργό το Revenue Splitter (με όλα τα APIs που χρειαζόμαστε); */
