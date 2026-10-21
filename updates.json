@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* The book's own page, also when the publisher's search page names the ISBN itself (Διόπτρα): the link with the book's title is still read, so the full-size cover and the book's address come from the book's page. A search page that 1.9.0 kept in `_bkf_pub_url` is replaced by the book's page on the next sync.\n* A larger cover from the publisher's page keeps the alt text, caption and description of the cover it replaces; its title is the new file's name.",
+        "changelog": "* WordPress Abilities API (WordPress 6.9+), category \"Noxpress\": `book-feed/status`, `book-feed/history`, `book-feed/price-check` (read), `book-feed/sync-start` (all, or one rule), `book-feed/sync-cancel`, `book-feed/square-start` and `book-feed/product-sync`. They do what the buttons in WP admin do, with the same capability (manage_woocommerce), so a remote tool such as Site Bridge's `ability_run` can start and follow a sync. Nothing returns the feed's account or password.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "715f223bf74687a5e6bc6a228d713cf4afcf024e831fbad40245a0256138c311",
-        "signature": "1ulxcGEdNPXR3fYZ/+hYPQKBbCUSh4q4l22HEP4DpXDSQ6ZAFumyMTJKPyGuQP9sz24JFLgrbkqTet7TOJacDA==",
+        "sha256": "0161c263613e52c0c81861bfbe472e8abac16c316f304ec7a37b856b20f1f3a2",
+        "signature": "lgURIuAQ+Ui47Kln733/7YQ68wCVj9KlK6+C7n7t9FvMv0n+1j1qqRmMjhxn0Pay0wasPWZs/isTu5SPmUcPDA==",
         "tested_wp": "7.1",
-        "version": "1.9.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.9.1/book-feed.zip"
+        "version": "1.10.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.10.0/book-feed.zip"
       }
     },
     "book-preview": {
@@ -234,15 +234,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: a 12 hour write window, for long sessions and heavy work, in Access and in the Hub's Sites list. Sites before 1.4.0 open 30 minutes when the Hub asks for 12 hours; update them too.",
+        "changelog": "* New: `bridge_status` shows the settings Claude is bound by on a site: level, write window and minutes left, whether the Hub may open it, run-as administrator, masking, admin e-mails, IP lists (on / off), rate limits, log retention and the paired Hub. Read only.\n* New: `audit_log` reads the site's Site Bridge log, newest first, with filters (tool, status, side, from / to). IP addresses are masked when the site masks personal data.\n* New: `write_window_close` closes the write window when the work is done. It can never open or extend it; the level, the window, run-as, IP lists and pairing stay with the owner in WP admin.\n* New: `abilities_list` takes `search` (name, label or category) and `brief`, so the abilities of one plugin (e.g. `book-feed/`) come without the rest. The category is shown too.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "39a7e09c86b16727abd5720d65c658c9c5211d6565cdbf7253f8decf85d1dc69",
-        "signature": "LzMPRl0+juGObPb/dMFxE61TPkNeFZm5fqiqt2gusKM/HfgOjBKkl3icyaJVxfV418xoAAkVaDwJ/deJ9aX1Ag==",
+        "sha256": "61f2b588323b2eb09bf42279ddf0a0c4494c05fa3848bb6902b7e64108fe678d",
+        "signature": "tHhTqt0ofgpPDncHcMatp7TTWCBgXVU/ARerRdEbSp6mCsOcxz8nrQUUMcl4VEnm9DRF2MH7NMzkal7aqAKNDw==",
         "tested_wp": "7.1",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.4.0/site-bridge.zip"
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.5.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
