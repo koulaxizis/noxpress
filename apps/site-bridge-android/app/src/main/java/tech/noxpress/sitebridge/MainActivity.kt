@@ -1,12 +1,15 @@
 package tech.noxpress.sitebridge
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.service.quicksettings.TileService
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
@@ -22,13 +25,15 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /** What the screens show. */
 class UiState {
     var paired by mutableStateOf(false)
-    var tab by mutableIntStateOf(0)
+    /** sites | bf | log | settings */
+    var tab by mutableStateOf("sites")
     var busy by mutableStateOf(false)
     var message by mutableStateOf<String?>(null)
     var sites by mutableStateOf<List<Site>>(emptyList())
@@ -37,6 +42,16 @@ class UiState {
     var log by mutableStateOf<List<LogRow>>(emptyList())
     var logSite by mutableStateOf("")
     var tileSite by mutableStateOf("")
+
+    // Book Feed tab (1.2.0)
+    var bfSite by mutableStateOf("")
+    var bfStatus by mutableStateOf<JSONObject?>(null)
+    var bfRules by mutableStateOf<List<JSONObject>>(emptyList())
+    var bfKinds by mutableStateOf<List<String>>(emptyList())
+    var bfStatuses by mutableStateOf<List<String>>(emptyList())
+    var bfPubs by mutableStateOf<List<Pair<String, String>>>(emptyList())
+    var bfIsbn by mutableStateOf<JSONObject?>(null)
+    var bfNotify by mutableStateOf(false)
 }
 
 class MainActivity : FragmentActivity() {
@@ -51,6 +66,11 @@ class MainActivity : FragmentActivity() {
     private val ui = UiState()
     private var pendingTileOpen = false
 
+    private val askNotify = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        setNotify(granted)
+        if (!granted) ui.message = getString(R.string.bf_notify_denied)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         store = Store(this)
@@ -58,7 +78,9 @@ class MainActivity : FragmentActivity() {
         ui.paired = store.paired && Keys.exists()
         ui.picked = store.minutes
         ui.tileSite = store.tileSite
+        ui.bfNotify = store.bfNotify && Notify.allowed(this)
         pendingTileOpen = intent?.action == ACTION_TILE_OPEN
+        if (intent?.action == Notify.ACTION_BF) ui.tab = "bf"
         setContent {
             SiteBridgeApp(
                 ui = ui,
@@ -73,6 +95,19 @@ class MainActivity : FragmentActivity() {
                 onTile = ::setTile,
                 onDisconnect = ::disconnect,
                 onDismiss = { ui.message = null },
+                bf = BfActions(
+                    load = ::bfLoad,
+                    sync = { bfAct("book-feed/sync-start", JSONObject(), R.string.bf_confirm_sync) },
+                    stop = { bfAct("book-feed/sync-cancel", JSONObject(), R.string.bf_confirm_stop) },
+                    runRule = { id -> bfAct("book-feed/sync-start", JSONObject().put("rule", id), R.string.bf_confirm_run) },
+                    saveRule = { r -> bfAct("book-feed/rule-save", r, R.string.bf_confirm_save) },
+                    deleteRule = { id -> bfAct("book-feed/rule-delete", JSONObject().put("id", id), R.string.bf_confirm_delete) },
+                    publishers = ::bfPublishers,
+                    lookup = ::bfLookup,
+                    scan = ::bfScan,
+                    importIsbn = { isbn -> bfAct("book-feed/import", JSONObject().put("isbn", isbn), R.string.bf_confirm_import) { bfLookup(isbn) } },
+                    notify = ::askNotifications,
+                ),
             )
         }
     }
@@ -83,6 +118,7 @@ class MainActivity : FragmentActivity() {
             pendingTileOpen = true
             refresh()
         }
+        if (intent.action == Notify.ACTION_BF && ui.paired) ui.tab = "bf"
     }
 
     override fun onResume() {
@@ -112,7 +148,7 @@ class MainActivity : FragmentActivity() {
         call {
             api.pair(code)
             ui.paired = true
-            ui.tab = 0
+            ui.tab = "sites"
             refreshNow()
         }
     }
@@ -132,6 +168,14 @@ class MainActivity : FragmentActivity() {
         }
         sites.firstOrNull { it.id == store.tileSite }?.let { store.tileUntil = it.windowUntil }
         updateTile()
+        val bf = sites.filter { "book-feed" in it.modules }
+        store.bfSites = bf.associate { it.id to it.label }
+        if (bf.none { it.id == ui.bfSite }) {
+            ui.bfSite = bf.firstOrNull()?.id ?: ""
+            ui.bfStatus = null
+            ui.bfRules = emptyList()
+        }
+        if (bf.isEmpty() && ui.tab == "bf") ui.tab = "sites"
         if (pendingTileOpen) {
             pendingTileOpen = false
             sites.firstOrNull { it.id == store.tileSite && it.canOpen }?.let { setWindow(it, ui.picked) }
@@ -149,7 +193,9 @@ class MainActivity : FragmentActivity() {
     }
 
     /** The act key's signature, after the fingerprint (or screen lock) prompt. */
-    private suspend fun actSign(message: String): String = suspendCancellableCoroutine { cont ->
+    private suspend fun actSign(message: String): String = actSignAs(getString(R.string.prompt_title), message)
+
+    private suspend fun actSignAs(title: String, message: String): String = suspendCancellableCoroutine { cont ->
         val sig = try {
             Keys.actSignature()
         } catch (e: KeyPermanentlyInvalidatedException) {
@@ -183,7 +229,7 @@ class MainActivity : FragmentActivity() {
             },
         )
         val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.prompt_title))
+            .setTitle(title)
             .setSubtitle(getString(R.string.prompt_sub, store.hub))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             info.setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
@@ -193,6 +239,102 @@ class MainActivity : FragmentActivity() {
         }
         prompt.authenticate(info.build(), BiometricPrompt.CryptoObject(sig))
         cont.invokeOnCancellation { prompt.cancelAuthentication() }
+    }
+
+    /* ----- Book Feed ----- */
+
+    private fun bfLoad(site: String) {
+        if (site.isEmpty()) return
+        if (site != ui.bfSite) {
+            ui.bfSite = site
+            ui.bfStatus = null
+            ui.bfRules = emptyList()
+            ui.bfIsbn = null
+        }
+        call {
+            ui.bfStatus = api.ability(site, "book-feed/status", JSONObject(), null).result
+            ui.bfRules = list(api.ability(site, "book-feed/rules", JSONObject(), null).result, "rules")
+            if (ui.bfStatuses.isEmpty()) {
+                val o = api.ability(site, "book-feed/options", JSONObject(), null).result
+                ui.bfKinds = strings(o, "kinds")
+                ui.bfStatuses = strings(o, "statuses")
+            }
+        }
+    }
+
+    /** A Book Feed action that changes the site: fingerprint first, then a fresh status. */
+    private fun bfAct(name: String, input: JSONObject, prompt: Int, after: (() -> Unit)? = null) {
+        val site = ui.bfSite
+        if (site.isEmpty()) return
+        val label = ui.sites.firstOrNull { it.id == site }?.label ?: site
+        call {
+            val signer: suspend (String) -> String = { m -> actSignAs(getString(prompt), m) }
+            val r = api.ability(site, name, input, signer)
+            if (r.result.has("rules")) ui.bfRules = list(r.result, "rules")
+            val done = when (name) {
+                "book-feed/sync-start" -> if (r.result.optBoolean("started")) getString(R.string.bf_started) else r.result.optString("reason")
+                "book-feed/sync-cancel" -> getString(R.string.bf_stopped)
+                "book-feed/rule-save" -> getString(R.string.bf_saved)
+                "book-feed/rule-delete" -> getString(R.string.bf_deleted)
+                "book-feed/import" -> getString(R.string.bf_imported)
+                else -> ""
+            }
+            ui.message = if (r.windowOpened > 0) done + "\n" + getString(R.string.bf_window_opened, label, Ui.time(r.windowOpened)) else done
+            ui.bfStatus = api.ability(site, "book-feed/status", JSONObject(), null).result
+            if (r.windowOpened > 0) refreshNow()
+            after?.invoke()
+        }
+    }
+
+    private fun bfPublishers(text: String) {
+        val site = ui.bfSite
+        if (site.isEmpty() || text.trim().length < 3) {
+            ui.bfPubs = emptyList()
+            return
+        }
+        call {
+            val a = api.ability(site, "book-feed/publishers", JSONObject().put("text", text.trim()), null).result.optJSONArray("publishers")
+            ui.bfPubs = if (a == null) emptyList() else (0 until a.length()).map { a.getJSONObject(it) }.map { it.optString("id") to it.optString("name") }
+        }
+    }
+
+    private fun bfLookup(isbn: String) {
+        val site = ui.bfSite
+        if (site.isEmpty()) return
+        call { ui.bfIsbn = api.ability(site, "book-feed/isbn", JSONObject().put("isbn", isbn), null).result }
+    }
+
+    private fun bfScan() {
+        val opts = GmsBarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_EAN_13).build()
+        GmsBarcodeScanning.getClient(this, opts).startScan()
+            .addOnSuccessListener { b -> b.rawValue?.let { bfLookup(it) } }
+            .addOnFailureListener { e -> ui.message = getString(R.string.err_scan, e.message ?: "") }
+    }
+
+    private fun askNotifications(on: Boolean) {
+        if (on && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            askNotify.launch(Manifest.permission.POST_NOTIFICATIONS)
+            return
+        }
+        setNotify(on)
+    }
+
+    private fun setNotify(on: Boolean) {
+        store.bfNotify = on
+        ui.bfNotify = on
+        Notify.schedule(this, on)
+    }
+
+    private fun list(o: JSONObject, key: String): List<JSONObject> {
+        val a = o.optJSONArray(key) ?: return emptyList()
+        return (0 until a.length()).mapNotNull { a.optJSONObject(it) }
+    }
+
+    private fun strings(o: JSONObject, key: String): List<String> {
+        val a = o.optJSONArray(key) ?: return emptyList()
+        return (0 until a.length()).map { a.optString(it) }.filter { it.isNotEmpty() }
     }
 
     /* ----- Log, tile, disconnect ----- */
@@ -222,9 +364,11 @@ class MainActivity : FragmentActivity() {
             } catch (e: Exception) {
                 // The Hub may be unreachable or the device already revoked: forget locally anyway.
             }
+            Notify.schedule(this@MainActivity, false)
             Keys.delete()
             store.clear()
             ui.paired = false
+            ui.bfNotify = false
             ui.sites = emptyList()
             ui.log = emptyList()
             ui.tileSite = ""
@@ -261,6 +405,7 @@ class MainActivity : FragmentActivity() {
         "unknown_device" -> getString(R.string.err_unknown_device)
         "app_off" -> getString(R.string.err_app_off)
         "remote_window" -> getString(R.string.cannot_open)
+        "window_closed" -> getString(R.string.bf_window_closed)
         else -> e.message
     }
 }

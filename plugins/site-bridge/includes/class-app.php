@@ -2,9 +2,11 @@
 /**
  * SBR_App — the Android app of the Hub (from 1.6.0).
  *
- * The app does one thing: it opens and closes the write window of the
- * Hub's sites, through the Hub (SBR_Hub::window(), the same signed op the
- * Sites tab uses), and shows the Hub's log. Nothing new runs on the sites.
+ * The app opens and closes the write window of the Hub's sites, through
+ * the Hub (SBR_Hub::window(), the same signed op the Sites tab uses), and
+ * shows the Hub's log. From 1.7.0 it also runs the abilities of a short
+ * allow-list per plugin (MODULES, e.g. Book Feed), through the Hub's own
+ * ability_run, so each site keeps applying its level and its window.
  *
  * REST routes (namespace site-bridge/v1), only while the Hub role and the
  * "Mobile app" switch are on (404 otherwise):
@@ -13,6 +15,12 @@
  *  - GET  /app/sites   sites with level write or admin, fresh status
  *  - POST /app/window  open (minutes > 0) or close (0) one site's window
  *  - GET  /app/log     the latest rows of the Hub's log
+ *  - POST /app/ability one allow-listed ability on one site (1.7.0): read
+ *                      ones with the read key; the others with the act key
+ *                      (fingerprint), and when the site's window is closed
+ *                      and the Hub may open it, the Hub opens it for
+ *                      AUTO_WINDOW minutes first (logged and e-mailed like
+ *                      any opening from the app)
  *  - POST /app/forget  the device removes itself
  *
  * Devices (option sbr_app_devices, autoload off): two ECDSA P-256 keys
@@ -40,6 +48,33 @@ final class SBR_App {
 	const MAX_DEVICES = 10;
 	const CODE_TTL    = 900;
 	const LOG_MAX     = 100;
+	const AUTO_WINDOW = 15;
+
+	/**
+	 * Abilities the app may run, per plugin: name => read | write. "probe"
+	 * marks a plugin version that has them all (sites list it in "modules").
+	 * Nothing else reaches ability_run from the app.
+	 */
+	const MODULES = array(
+		'book-feed' => array(
+			'probe'     => 'book-feed/notices',
+			'abilities' => array(
+				'book-feed/status'      => 'read',
+				'book-feed/history'     => 'read',
+				'book-feed/rules'       => 'read',
+				'book-feed/publishers'  => 'read',
+				'book-feed/options'     => 'read',
+				'book-feed/isbn'        => 'read',
+				'book-feed/notices'     => 'read',
+				'book-feed/price-check' => 'read',
+				'book-feed/sync-start'  => 'write',
+				'book-feed/sync-cancel' => 'write',
+				'book-feed/rule-save'   => 'write',
+				'book-feed/rule-delete' => 'write',
+				'book-feed/import'      => 'write',
+			),
+		),
+	);
 
 	public static function init(): void {
 		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
@@ -47,11 +82,12 @@ final class SBR_App {
 
 	public static function routes(): void {
 		$routes = array(
-			'/app/pair'   => array( 'POST', 'pair' ),
-			'/app/sites'  => array( 'GET', 'sites' ),
-			'/app/window' => array( 'POST', 'window' ),
-			'/app/log'    => array( 'GET', 'log' ),
-			'/app/forget' => array( 'POST', 'forget' ),
+			'/app/pair'    => array( 'POST', 'pair' ),
+			'/app/sites'   => array( 'GET', 'sites' ),
+			'/app/window'  => array( 'POST', 'window' ),
+			'/app/log'     => array( 'GET', 'log' ),
+			'/app/ability' => array( 'POST', 'ability' ),
+			'/app/forget'  => array( 'POST', 'forget' ),
 		);
 		foreach ( $routes as $path => $r ) {
 			register_rest_route(
@@ -73,6 +109,30 @@ final class SBR_App {
 
 	public static function enabled(): bool {
 		return SBR_Hub::enabled() && (bool) SBR_Settings::v( 'app' ) && self::supported();
+	}
+
+	/** The MODULES this site can serve (SBR_Site::status() reports them). */
+	public static function modules_here(): array {
+		$out = array();
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			return $out;
+		}
+		foreach ( self::MODULES as $m => $def ) {
+			if ( wp_get_ability( $def['probe'] ) ) {
+				$out[] = $m;
+			}
+		}
+		return $out;
+	}
+
+	/** read | write for an allow-listed ability, else ''. */
+	public static function ability_need( string $name ): string {
+		foreach ( self::MODULES as $def ) {
+			if ( isset( $def['abilities'][ $name ] ) ) {
+				return $def['abilities'][ $name ];
+			}
+		}
+		return '';
 	}
 
 	/* =====================================================================
@@ -288,6 +348,82 @@ final class SBR_App {
 		);
 	}
 
+	public static function ability( WP_REST_Request $req ): WP_REST_Response {
+		$data  = json_decode( (string) $req->get_body(), true );
+		$data  = is_array( $data ) ? $data : array();
+		$name  = is_string( $data['name'] ?? null ) ? (string) $data['name'] : '';
+		$need  = self::ability_need( $name );
+		$input = isset( $data['input'] ) && is_array( $data['input'] ) ? $data['input'] : array();
+		// Anything that changes a site needs the fingerprint key.
+		$dev = self::auth( $req, 'read' === $need ? 'read' : 'act' );
+		if ( $dev instanceof WP_REST_Response ) {
+			return $dev;
+		}
+		$id   = sanitize_key( (string) ( $data['site'] ?? '' ) );
+		$args = array(
+			'site'    => $id,
+			'ability' => $name,
+		);
+		if ( '' === $need ) {
+			self::audit( 'app_ability', 'denied', 'Not on the app\'s list', $args, $dev );
+			return self::fail( 403, 'not_allowed', 'The app may not run this ability.' );
+		}
+		$sites = SBR_Hub::sites();
+		$row   = isset( $sites[ $id ] ) ? self::site_row( $sites[ $id ], 'write' === $need ) : null;
+		if ( ! $row ) {
+			self::audit( 'app_ability', 'denied', 'Unknown site or level read', $args, $dev );
+			return self::fail( 404, 'unknown_site', 'This site is not on the Hub, or its level is not write or admin.' );
+		}
+		$opened = 0;
+		if ( 'write' === $need && ! $row['window_until'] ) {
+			if ( ! $row['can_open'] ) {
+				self::audit( 'app_ability', 'denied', 'Window closed and the Hub may not open it', $args, $dev );
+				return self::fail( 403, 'window_closed', 'The write window of this site is closed, and it does not let the Hub open it. Open it on the site (Site Bridge → Access).' );
+			}
+			$w      = SBR_Hub::window( $sites[ $id ], self::AUTO_WINDOW );
+			$w_args = array(
+				'site'    => $id,
+				'minutes' => self::AUTO_WINDOW,
+				'for'     => $name,
+			);
+			if ( is_wp_error( $w ) ) {
+				self::audit( 'app_window_open', 'error', $w->get_error_message(), $w_args, $dev );
+				return self::fail( 502, 'site', $w->get_error_message() );
+			}
+			$opened = (int) ( $w['window_until'] ?? 0 );
+			self::audit( 'app_window_open', 'ok', '', $w_args, $dev );
+			if ( SBR_Settings::v( 'app_email' ) ) {
+				self::mail_open( $dev, (string) $row['label'], $opened );
+			}
+		}
+		$grant = array(
+			'id'          => 0,
+			'client_name' => 'app: ' . (string) $dev['name'],
+			'scope'       => 'read write',
+			'sites'       => '["' . $id . '"]',
+		);
+		$r     = SBR_Hub::call(
+			$grant,
+			'ability_run',
+			array(
+				'site'  => $id,
+				'name'  => $name,
+				'input' => $input,
+			)
+		);
+		if ( empty( $r['ok'] ) ) {
+			return self::fail( 502, 'site', (string) ( $r['error'] ?? 'Error.' ), array( 'window_opened' => $opened ) );
+		}
+		$res = is_array( $r['result'] ) && array_key_exists( 'result', $r['result'] ) ? $r['result']['result'] : $r['result'];
+		return self::ok(
+			array(
+				'result'        => $res,
+				'window_opened' => $opened,
+				'now'           => time(),
+			)
+		);
+	}
+
 	public static function log( WP_REST_Request $req ): WP_REST_Response {
 		$dev = self::auth( $req, 'read' );
 		if ( $dev instanceof WP_REST_Response ) {
@@ -365,6 +501,7 @@ final class SBR_App {
 			'can_open'     => $self || ! empty( $st['remote_window'] ),
 			'reachable'    => '' === $error,
 			'error'        => $error,
+			'modules'      => array_values( array_intersect( array_keys( self::MODULES ), (array) ( $st['modules'] ?? array() ) ) ),
 		);
 	}
 

@@ -16,6 +16,21 @@
  *  book-feed/product-sync   the product box's "Sync": that product from
  *                           the feed now; edited fields stay locked
  *
+ * For the Site Bridge phone app (1.11.0):
+ *
+ *  book-feed/rules          every rule with all its filters (read)
+ *  book-feed/rule-save      a new rule, or changes to one (its category,
+ *                           display mode and last run are kept)
+ *  book-feed/rule-delete    removes a rule
+ *  book-feed/publishers     publisher autocomplete, 3+ characters (read)
+ *  book-feed/options        kinds and publishing statuses seen (read)
+ *  book-feed/isbn           one ISBN: the catalogue's title and whether
+ *                           the store has it (read)
+ *  book-feed/import         one ISBN as a draft, never published
+ *  book-feed/notices        what happened since a time: titles imported,
+ *                           errors, titles gone, the last finished run
+ *                           (read; the app's notifications)
+ *
  * Nothing here returns the feed's password or account. Registered only on
  * WordPress 6.9+, where the Abilities API exists.
  */
@@ -144,6 +159,127 @@ final class BKF_Abilities {
 				'input'       => $pid,
 				'ann'         => array( false, false, true ),
 				'run'         => array( __CLASS__, 'product_sync' ),
+			),
+			'rules'        => array(
+				'label'       => 'Book Feed: rules',
+				'description' => 'Every rule with its filters: id, name, on, publisher (pub_id, pub_name), title words, contributor, kind, publishing status, years, every (days), status of new titles, max per run, last run and whether it is due. Changes nothing.',
+				'input'       => $none,
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'rules' ),
+			),
+			'rule-save'    => array(
+				'label'       => 'Book Feed: save a rule',
+				'description' => 'Creates a rule, or with "id" changes that rule. A rule needs a publisher (pub_id from book-feed/publishers), title words or a contributor. The category, display mode and last run of an existing rule are kept; a new rule uses the category of the settings.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'        => array( 'type' => 'string' ),
+						'name'      => array( 'type' => 'string' ),
+						'on'        => array( 'type' => 'boolean' ),
+						'pub_id'    => array( 'type' => 'string' ),
+						'pub_name'  => array( 'type' => 'string' ),
+						'title'     => array( 'type' => 'string' ),
+						'author'    => array( 'type' => 'string' ),
+						'kind'      => array( 'type' => 'string' ),
+						'pstat'     => array( 'type' => 'string' ),
+						'year_from' => array( 'type' => 'integer' ),
+						'year_to'   => array( 'type' => 'integer' ),
+						'every'     => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 90,
+						),
+						'status'    => array(
+							'type' => 'string',
+							'enum' => array( 'draft', 'publish' ),
+						),
+						'max'       => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 500,
+						),
+					),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'rule_save' ),
+			),
+			'rule-delete'  => array(
+				'label'       => 'Book Feed: delete a rule',
+				'description' => 'Removes one rule. The titles it brought stay in the store.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id' => array( 'type' => 'string' ),
+					),
+					'required'             => array( 'id' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, true ),
+				'run'         => array( __CLASS__, 'rule_delete' ),
+			),
+			'publishers'   => array(
+				'label'       => 'Book Feed: find a publisher',
+				'description' => 'Publishers of the catalogue whose name has these words (3 characters at least): id and name, for a rule.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'text' => array( 'type' => 'string' ),
+					),
+					'required'             => array( 'text' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'publishers' ),
+			),
+			'options'      => array(
+				'label'       => 'Book Feed: values for a rule',
+				'description' => 'The kinds and publishing statuses seen in the catalogue, for a rule\'s choices.',
+				'input'       => $none,
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'options' ),
+			),
+			'isbn'         => array(
+				'label'       => 'Book Feed: look up an ISBN',
+				'description' => 'The catalogue\'s title for one ISBN (title, contributors, publisher, year, price, publishing status) and the store\'s product with that ISBN, if any (id, status, whether Book Feed manages it). Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'isbn' => array( 'type' => 'string' ),
+					),
+					'required'             => array( 'isbn' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'isbn' ),
+			),
+			'import'       => array(
+				'label'       => 'Book Feed: import an ISBN as a draft',
+				'description' => 'Imports the catalogue\'s title for one ISBN as a draft, with the category of the settings. Refused when the store already has a product with that ISBN.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'isbn' => array( 'type' => 'string' ),
+					),
+					'required'             => array( 'isbn' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'import' ),
+			),
+			'notices'      => array(
+				'label'       => 'Book Feed: what happened since',
+				'description' => 'Since a Unix time (at most 7 days back): titles imported (count and the first titles), errors of the sync and of the rules, titles that left the catalogue, and the last finished run if it ended since. "now" is the time to ask from next.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'since' => array( 'type' => 'integer' ),
+					),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'notices' ),
 			),
 		);
 		foreach ( $defs as $name => $d ) {
@@ -333,6 +469,308 @@ final class BKF_Abilities {
 			'product_id' => $pid,
 			'changed'    => array_values( (array) $changed ),
 		);
+	}
+
+
+	/* ---------------------------------------------------------------------
+	 * Phone app (1.11.0)
+	 * ------------------------------------------------------------------- */
+
+	public static function rules( $in = null ): array {
+		$out = array();
+		foreach ( BKF_Settings::rules() as $r ) {
+			$out[] = array(
+				'id'        => $r['id'],
+				'name'      => $r['name'],
+				'label'     => BKF_Sync::rule_name( $r ),
+				'on'        => $r['on'],
+				'pub_id'    => $r['pub_id'],
+				'pub_name'  => $r['pub_name'],
+				'title'     => $r['title'],
+				'author'    => $r['author'],
+				'kind'      => $r['kind'],
+				'pstat'     => $r['pstat'],
+				'year_from' => $r['year_from'],
+				'year_to'   => $r['year_to'],
+				'every'     => $r['every'],
+				'status'    => $r['status'],
+				'max'       => $r['max'],
+				'last'      => $r['last'] ? gmdate( 'c', $r['last'] ) : null,
+				'due'       => BKF_Settings::rule_due( $r ),
+			);
+		}
+		return array( 'rules' => $out );
+	}
+
+	public static function rule_save( $in = null ) {
+		$in    = is_array( $in ) ? $in : array();
+		$rules = BKF_Settings::rules();
+		$id    = isset( $in['id'] ) && is_string( $in['id'] ) ? strtolower( trim( $in['id'] ) ) : '';
+		$at    = null;
+		if ( '' !== $id ) {
+			foreach ( $rules as $i => $r ) {
+				if ( $r['id'] === $id ) {
+					$at = $i;
+				}
+			}
+			if ( null === $at ) {
+				return new WP_Error( 'bkf_rule', 'Unknown rule id.' );
+			}
+		} elseif ( count( $rules ) >= BKF_Settings::MAX_RULES ) {
+			return new WP_Error( 'bkf_rule', sprintf( 'At most %d rules.', BKF_Settings::MAX_RULES ) );
+		}
+		$base = null !== $at ? $rules[ $at ] : array(
+			'on'     => true,
+			'every'  => 7,
+			'max'    => 50,
+			'status' => 'draft',
+		);
+		foreach ( array( 'name', 'pub_id', 'pub_name', 'title', 'author', 'kind', 'pstat', 'status' ) as $k ) {
+			if ( isset( $in[ $k ] ) && is_string( $in[ $k ] ) ) {
+				$base[ $k ] = $in[ $k ];
+			}
+		}
+		foreach ( array( 'year_from', 'year_to', 'every', 'max' ) as $k ) {
+			if ( isset( $in[ $k ] ) && is_numeric( $in[ $k ] ) ) {
+				$base[ $k ] = (int) $in[ $k ];
+			}
+		}
+		if ( isset( $in['on'] ) ) {
+			$base['on'] = (bool) $in['on'];
+		}
+		// A publisher name without its id would narrow nothing.
+		if ( '' === (string) ( $base['pub_id'] ?? '' ) ) {
+			$base['pub_name'] = '';
+		}
+		$rule = BKF_Settings::clean_rule( $base );
+		if ( ! $rule ) {
+			return new WP_Error( 'bkf_rule', 'A rule needs a publisher, title words or a contributor.' );
+		}
+		if ( null !== $at ) {
+			$rules[ $at ] = $rule;
+		} else {
+			$rules[] = $rule;
+		}
+		BKF_Settings::save_rules( $rules );
+		return array(
+			'saved' => true,
+			'id'    => $rule['id'],
+			'rules' => self::rules()['rules'],
+		);
+	}
+
+	public static function rule_delete( $in = null ) {
+		$id    = is_array( $in ) && isset( $in['id'] ) && is_string( $in['id'] ) ? strtolower( trim( $in['id'] ) ) : '';
+		$rules = BKF_Settings::rules();
+		$keep  = array();
+		foreach ( $rules as $r ) {
+			if ( $r['id'] !== $id ) {
+				$keep[] = $r;
+			}
+		}
+		if ( count( $keep ) === count( $rules ) ) {
+			return new WP_Error( 'bkf_rule', 'Unknown rule id.' );
+		}
+		BKF_Settings::save_rules( $keep );
+		return array(
+			'deleted' => true,
+			'rules'   => self::rules()['rules'],
+		);
+	}
+
+	public static function publishers( $in = null ) {
+		$text = is_array( $in ) && isset( $in['text'] ) && is_string( $in['text'] ) ? BKF_Settings::text( $in['text'], 100 ) : '';
+		if ( ( function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text ) ) < 3 ) {
+			return array( 'publishers' => array() );
+		}
+		$res = BKF_Client::publishers( $text );
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		return array( 'publishers' => array_values( (array) $res ) );
+	}
+
+	public static function options( $in = null ): array {
+		$seen = BKF_Settings::seen();
+		return array(
+			'kinds'    => $seen['kind'],
+			'statuses' => array_values( array_unique( array_merge( array( 'Κυκλοφορεί', 'Εξαντλημένο' ), $seen['status'] ) ) ),
+		);
+	}
+
+	public static function isbn( $in = null ) {
+		$isbn = self::isbn_in( $in );
+		if ( is_wp_error( $isbn ) ) {
+			return $isbn;
+		}
+		$rec = self::by_isbn( $isbn );
+		if ( is_wp_error( $rec ) ) {
+			return $rec;
+		}
+		$pid = BKF_Importer::find_by_isbn( $isbn );
+		$out = array(
+			'isbn'    => $isbn,
+			'found'   => null !== $rec,
+			'title'   => null,
+			'product' => null,
+		);
+		if ( $rec ) {
+			$names = array();
+			foreach ( (array) $rec['contribs'] as $c ) {
+				if ( is_array( $c ) && ! empty( $c['name'] ) ) {
+					$names[] = (string) $c['name'];
+				}
+			}
+			$out['title'] = array(
+				'id'        => $rec['id'],
+				'title'     => $rec['title'],
+				'subtitle'  => (string) ( $rec['subtitle'] ?? '' ),
+				'people'    => array_slice( array_values( array_unique( $names ) ), 0, 6 ),
+				'publisher' => (string) ( $rec['pub_name'] ?? '' ),
+				'year'      => (int) ( $rec['year'] ?? 0 ),
+				'price'     => $rec['price'],
+				'pstat'     => (string) ( $rec['status'] ?? '' ),
+				'kind'      => (string) ( $rec['kind'] ?? '' ),
+			);
+		}
+		if ( $pid ) {
+			$p              = wc_get_product( $pid );
+			$out['product'] = array(
+				'id'     => $pid,
+				'name'   => $p ? $p->get_name() : '',
+				'status' => (string) get_post_status( $pid ),
+				'price'  => $p ? (string) $p->get_price() : '',
+				'feed'   => '' !== (string) get_post_meta( $pid, '_bkf_source_id', true ),
+			);
+		}
+		return $out;
+	}
+
+	public static function import( $in = null ) {
+		if ( ! BKF_Settings::ready() ) {
+			return new WP_Error( 'bkf_not_ready', 'Book Feed has no working connection to the feed yet (Settings).' );
+		}
+		$isbn = self::isbn_in( $in );
+		if ( is_wp_error( $isbn ) ) {
+			return $isbn;
+		}
+		if ( BKF_Importer::find_by_isbn( $isbn ) ) {
+			return new WP_Error( 'bkf_exists', 'The store already has a product with this ISBN.' );
+		}
+		$rec = self::by_isbn( $isbn );
+		if ( is_wp_error( $rec ) ) {
+			return $rec;
+		}
+		if ( ! $rec ) {
+			return new WP_Error( 'bkf_missing', 'The catalogue has no title with this ISBN.' );
+		}
+		if ( function_exists( 'wc_set_time_limit' ) ) {
+			wc_set_time_limit( 120 );
+		}
+		$row = BKF_Sync::with_lock(
+			static function () use ( $rec ) {
+				$row = BKF_Importer::import(
+					$rec,
+					array(
+						'status' => 'draft',
+						'cat'    => 0,
+						'mode'   => 'sell',
+					)
+				);
+				BKF_Log::flush();
+				return $row;
+			}
+		);
+		if ( false === $row ) {
+			return new WP_Error( 'bkf_busy', 'A sync step is running; try again in a minute.' );
+		}
+		$ids = BKF_Importer::take_changed();
+		if ( $ids ) {
+			do_action( 'noxpress_products_changed', $ids );
+		}
+		return array(
+			'result'     => (string) $row['result'],
+			'product_id' => (int) $row['pid'],
+			'message'    => (string) ( $row['msg'] ?? '' ),
+		);
+	}
+
+	public static function notices( $in = null ): array {
+		$now   = time();
+		$since = is_array( $in ) && isset( $in['since'] ) ? (int) $in['since'] : 0;
+		$since = max( $now - 7 * DAY_IN_SECONDS, min( $now, $since ) );
+		$out   = array(
+			'now'      => $now,
+			'since'    => $since,
+			'imported' => 0,
+			'titles'   => array(),
+			'errors'   => array(),
+			'gone'     => 0,
+			'last_run' => null,
+		);
+		$last  = BKF_Sync::last();
+		if ( $last && (int) $last['t'] > $since ) {
+			$out['last_run'] = array(
+				'at'    => (int) $last['t'],
+				'why'   => (string) ( $last['why'] ?? '' ),
+				'stats' => $last['stats'] ?? array(),
+				'error' => (string) ( $last['error'] ?? '' ),
+			);
+		}
+		foreach ( BKF_Log::all() as $e ) {
+			if ( $e['t'] <= $since ) {
+				break;
+			}
+			switch ( $e['act'] ) {
+				case 'import':
+					++$out['imported'];
+					if ( count( $out['titles'] ) < 5 && '' !== $e['title'] ) {
+						$out['titles'][] = $e['title'];
+					}
+					break;
+				case 'error':
+					// Job-level errors only: a product's cover or price error is in the history.
+					if ( ! $e['pid'] && count( $out['errors'] ) < 5 ) {
+						$out['errors'][] = $e['msg'];
+					}
+					break;
+				case 'gone':
+					++$out['gone'];
+					break;
+			}
+		}
+		return $out;
+	}
+
+	/** The ISBN digits from the input (10 or 13, X allowed last), or WP_Error. */
+	private static function isbn_in( $in ) {
+		$raw = is_array( $in ) && isset( $in['isbn'] ) && is_scalar( $in['isbn'] ) ? strtoupper( (string) $in['isbn'] ) : '';
+		$d   = preg_replace( '/[^0-9X]/', '', $raw );
+		if ( ! preg_match( '/^(\d{9}[\dX]|\d{13})$/', $d ) ) {
+			return new WP_Error( 'bkf_isbn', 'Not an ISBN (10 or 13 digits).' );
+		}
+		return $d;
+	}
+
+	/** The catalogue's record for an ISBN, null when none, or WP_Error. */
+	private static function by_isbn( string $isbn ) {
+		$res = BKF_Client::query(
+			array(
+				'q'    => BKF_Client::book_query( array( 'isbn' => $isbn ) ),
+				'fl'   => BKF_Client::BOOK_FIELDS,
+				'rows' => 5,
+			)
+		);
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$recs = BKF_Record::from_docs( $res['docs'] );
+		foreach ( $recs as $r ) {
+			if ( $r['isbn_digits'] === $isbn || substr( $r['isbn_digits'], -10, 9 ) === substr( $isbn, 0, 9 ) ) {
+				return $r;
+			}
+		}
+		return $recs ? $recs[0] : null;
 	}
 
 	/* ---------------------------------------------------------------------

@@ -98,6 +98,7 @@ fun SiteBridgeApp(
     onTile: (Site?) -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit,
+    bf: BfActions,
 ) {
     val scheme = darkColorScheme(
         primary = Nx.accent,
@@ -123,21 +124,31 @@ fun SiteBridgeApp(
                 if (!ui.paired) {
                     PairScreen(onScan, onPaste)
                 } else {
-                    TabRow(selectedTabIndex = ui.tab, containerColor = Nx.panel, contentColor = Nx.heading) {
-                        listOf(R.string.tab_sites, R.string.tab_log, R.string.tab_settings).forEachIndexed { i, label ->
+                    // The Book Feed tab shows only when a site of the Hub has Book Feed 1.11.0+.
+                    val tabs = buildList {
+                        add("sites" to R.string.tab_sites)
+                        if (ui.sites.any { "book-feed" in it.modules }) add("bf" to R.string.tab_bf)
+                        add("log" to R.string.tab_log)
+                        add("settings" to R.string.tab_settings)
+                    }
+                    val at = tabs.indexOfFirst { it.first == ui.tab }.coerceAtLeast(0)
+                    TabRow(selectedTabIndex = at, containerColor = Nx.panel, contentColor = Nx.heading) {
+                        tabs.forEach { (key, label) ->
                             Tab(
-                                selected = ui.tab == i,
+                                selected = tabs[at].first == key,
                                 onClick = {
-                                    ui.tab = i
-                                    if (i == 1) onLog(ui.logSite)
+                                    ui.tab = key
+                                    if (key == "log") onLog(ui.logSite)
+                                    if (key == "bf") bf.load(ui.bfSite)
                                 },
-                                text = { Text(stringResource(label)) },
+                                text = { Text(stringResource(label), maxLines = 1) },
                             )
                         }
                     }
-                    when (ui.tab) {
-                        0 -> SitesScreen(ui, store, onRefresh, onPick, onOpen, onClose)
-                        1 -> LogScreen(ui, onLog)
+                    when (tabs[at].first) {
+                        "sites" -> SitesScreen(ui, store, onRefresh, onPick, onOpen, onClose)
+                        "bf" -> BookFeedScreen(ui, bf)
+                        "log" -> LogScreen(ui, onLog)
                         else -> SettingsScreen(ui, store, onTile, onDisconnect)
                     }
                 }
@@ -173,7 +184,7 @@ private fun Header(hub: String?, busy: Boolean) {
 }
 
 @Composable
-private fun Zone(content: @Composable () -> Unit) {
+internal fun Zone(content: @Composable () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -311,7 +322,7 @@ private fun SiteCard(s: Site, now: Long, busy: Boolean, picked: Int, onOpen: (Si
 }
 
 @Composable
-private fun Badge(text: String, color: Color) {
+internal fun Badge(text: String, color: Color) {
     Text(
         text,
         color = color,
