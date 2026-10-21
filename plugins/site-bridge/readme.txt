@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.6.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -43,6 +43,16 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 * Every call is logged on the Hub and on the site, with arguments (secrets redacted), result, time and size. Filters and CSV export. The log is kept for 90 days (setting).
 * Kill switch: revoke every connection at once, or `define( 'SBR_DISABLE', true );` in wp-config.php to close every endpoint.
 
+**Android app (beta, from 1.6.0)**
+
+* The Site Bridge app opens and closes the write window of the Hub's sites from your phone, and shows the Hub's log. Nothing else.
+* It talks only to the Hub, which opens the window the way its Sites tab does, so nothing changes on the sites. It shows only sites with level write or admin, and opens a window only where the site lets the Hub do it.
+* Pairing: **App** tab on the Hub → turn the app on → **New code for a phone** → scan the QR (valid for 15 minutes, once).
+* The phone makes two EC P-256 keys in the Android Keystore, which never leave it. Every request is signed (timestamp, single-use nonce). Opening a window is accepted only with the second key, which the Keystore uses only right after a fingerprint (or the screen lock) for that one request. No password or token travels, so hosts that drop the Authorization header do not matter.
+* An email to the admin address after every opening from the app (setting). Devices are listed in the App tab and can be revoked.
+* A Quick Settings tile opens and closes one site's window with a tap.
+* The app's APK is in the noxpress releases (`nox-sba-*`).
+
 **Before you install**
 
 Site Bridge gives Claude remote administrator access to the sites you allow. Turn on only the roles you need, keep sites at read, and open the write window only while you work. It is provided as is, under the MIT license, with no warranty.
@@ -60,6 +70,7 @@ Updates arrive through the Noxpress hub like every other Noxpress plugin (beta c
 3. On each site: **Access** → choose the level and the run-as administrator → **New pairing code**.
 4. On the Hub: **Sites** → paste the code → **Pair**.
 5. In Claude: Settings → Connectors → Add custom connector, name "Site Bridge", URL the MCP address shown in Overview. Leave the OAuth client fields empty. Press Connect, log in to the Hub and approve.
+6. Optional, the Android app: on the Hub, **App** → turn it on → **New code for a phone**, and scan the QR with the app. On each site the app should open, tick "The Hub may open this site's write window" in **Access**.
 
 == Frequently Asked Questions ==
 
@@ -75,11 +86,19 @@ The site's level must allow it and the site's write window must be open. Open it
 
 The secret key is sealed with the salts, so a new key pair is made and a notice asks you to pair the sites again.
 
+= I lost my phone. =
+
+Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys are useless without that Hub's device entry, and opening a window also needs the phone owner's fingerprint or screen lock.
+
 = What happens on uninstall? =
 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.6.0 =
+* New: the Site Bridge Android app (beta). A new App tab on the Hub (off by default) pairs a phone with a QR code and lists the paired devices with revoke. The app sees the Hub's sites with level write or admin, opens a write window (fingerprint required, enforced by the phone's Keystore) or closes it early, and shows the Hub's log. Routes under site-bridge/v1/app/, signed per device with ECDSA P-256; nothing changes on the sites.
+* New: an email to the admin address after every window opened from the app (setting, on by default).
 
 = 1.5.1 =
 * Fixed: `plugins_update` saw "no update" for a release made since the last check, because WordPress and the Noxpress manifest keep their update checks for 12 hours. It now checks afresh first, as the hub's "Check now" does.

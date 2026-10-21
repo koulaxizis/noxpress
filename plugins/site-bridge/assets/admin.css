@@ -425,3 +425,4 @@ a.sbr-kofi:hover {
 .sbr-steps { margin: 6px 0 0 18px; }
 .sbr-steps li { margin-bottom: 4px; }
 .sbr-danger-zone { border-color: #6b3a3a !important; }
+.sbr-wrap .sbr-qr { width: 240px; height: 240px; image-rendering: pixelated; background: #fff; border-radius: 6px; padding: 0; }

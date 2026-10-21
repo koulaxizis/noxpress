@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Site Bridge</string>
+    <string name="pair_title">Connect to your Hub</string>
+    <string name="pair_help">In WordPress, on the Hub: Noxpress → Site Bridge → App. Turn the app on, press “New code for a phone” and scan the QR.</string>
+    <string name="scan">Scan QR</string>
+    <string name="paste_label">Or paste the code</string>
+    <string name="connect">Connect</string>
+    <string name="bad_code">This is not a Site Bridge app code.</string>
+    <string name="code_expired">The code expired. Make a new one in WordPress.</string>
+    <string name="err_scan">The scanner did not start: %1$s</string>
+    <string name="tab_sites">Sites</string>
+    <string name="tab_log">Log</string>
+    <string name="tab_settings">Settings</string>
+    <string name="length">Window length</string>
+    <string name="dur_minutes">%1$d min</string>
+    <string name="dur_hours">%1$d h</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_sites">No site of this Hub has level Write or Admin.</string>
+    <string name="closed">Closed</string>
+    <string name="open_until">Open until %1$s · %2$s left</string>
+    <string name="open_btn">Open for %1$s</string>
+    <string name="close_btn">Close now</string>
+    <string name="cannot_open">This site does not let the Hub open its window (Site Bridge → Access, on the site).</string>
+    <string name="unreachable">The Hub could not reach the site: %1$s</string>
+    <string name="level_write">Write</string>
+    <string name="level_admin">Admin</string>
+    <string name="prompt_title">Open the write window</string>
+    <string name="prompt_sub">Hub: %1$s</string>
+    <string name="cancel">Cancel</string>
+    <string name="opened">The window is open until %1$s.</string>
+    <string name="closed_msg">The window is closed.</string>
+    <string name="log_all">All</string>
+    <string name="log_empty">Nothing yet.</string>
+    <string name="settings_hub">Hub</string>
+    <string name="settings_device">Device id</string>
+    <string name="tile_site">Quick Settings tile</string>
+    <string name="tile_help">Add the “Site Bridge” tile from the Quick Settings edit screen. A tap opens the window of this site with the length you picked last (after your fingerprint); a tap on an open window closes it.</string>
+    <string name="tile_none">None</string>
+    <string name="tile_pick">Pick a site in the app</string>
+    <string name="tile_open_sub">open until %1$s</string>
+    <string name="disconnect">Disconnect from the Hub</string>
+    <string name="disconnect_confirm">Disconnect this phone? To connect again you will need a new QR from WordPress.</string>
+    <string name="version">Version %1$s</string>
+    <string name="not_anthropic">Works with Claude. Not made by or affiliated with Anthropic.</string>
+    <string name="err_invalidated">New fingerprints were added to this phone, so its key for opening was cancelled. Connect again with a new QR.</string>
+    <string name="err_network">No connection to the Hub: %1$s</string>
+    <string name="err_clock">The phone’s clock is wrong. Turn on automatic date and time.</string>
+    <string name="err_unknown_device">This phone is no longer connected to the Hub (revoked). Connect again with a new QR.</string>
+    <string name="err_app_off">The app is off on the Hub (Site Bridge → App).</string>
+</resources>

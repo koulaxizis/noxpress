@@ -39,6 +39,8 @@ final class SBR_Settings {
 			'rate_day'      => 10000,
 			'zip_hosts'     => "https://github.com/koulaxizis/noxpress/releases/download/\nhttps://downloads.wordpress.org/",
 			'log_days'      => 90,
+			'app'           => false,
+			'app_email'     => true,
 		);
 	}
 
@@ -68,7 +70,7 @@ final class SBR_Settings {
 	public static function sanitize( array $in ): array {
 		$d   = self::defaults();
 		$out = array();
-		foreach ( array( 'hub', 'site', 'remote_window', 'pii_mask', 'email_admin', 'dcr' ) as $k ) {
+		foreach ( array( 'hub', 'site', 'remote_window', 'pii_mask', 'email_admin', 'dcr', 'app', 'app_email' ) as $k ) {
 			$out[ $k ] = isset( $in[ $k ] ) ? (bool) $in[ $k ] : $d[ $k ];
 		}
 		$out['level']  = isset( $in['level'] ) && in_array( $in['level'], self::LEVELS, true ) ? $in['level'] : $d['level'];

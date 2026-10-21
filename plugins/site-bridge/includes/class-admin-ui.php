@@ -11,6 +11,8 @@
  *  - sites        Hub role: paired sites, add / remove, status, window
  *  - connections  Hub role: OAuth connections, revoke, kill switch,
  *                 allowed clients, DCR, limits, Hub IP list
+ *  - app          Hub role: the Android app (switch, e-mail, pairing QR,
+ *                 devices and revoke)
  *  - log          audit log with filters and CSV export
  *
  * admin.php?page=sbr-authorize&req=… is the OAuth consent screen: a
@@ -52,6 +54,7 @@ final class SBR_Admin_UI {
 		if ( SBR_Settings::v( 'hub' ) ) {
 			$t['sites']       = __( 'Sites', 'site-bridge' );
 			$t['connections'] = __( 'Συνδέσεις', 'site-bridge' );
+			$t['app']         = __( 'Εφαρμογή', 'site-bridge' );
 		}
 		$t['log'] = __( 'Ιστορικό', 'site-bridge' );
 		return $t;
@@ -115,6 +118,9 @@ final class SBR_Admin_UI {
 		}
 		wp_enqueue_style( 'sbr-admin', SBR_URL . 'assets/admin.css', array(), SBR_VERSION );
 		wp_enqueue_script( 'sbr-admin', SBR_URL . 'assets/admin.js', array(), SBR_VERSION, true );
+		if ( 'app' === self::current_tab() ) {
+			wp_enqueue_script( 'sbr-qr', SBR_URL . 'assets/qr.js', array(), SBR_VERSION, true );
+		}
 		wp_localize_script(
 			'sbr-admin',
 			'sbrAdmin',
@@ -179,6 +185,9 @@ final class SBR_Admin_UI {
 					break;
 				case 'connections':
 					self::render_connections();
+					break;
+				case 'app':
+					self::render_app();
 					break;
 				case 'log':
 					self::render_log();
@@ -599,6 +608,79 @@ final class SBR_Admin_UI {
 		<?php
 	}
 
+	/* ----- App (Hub role) ----- */
+
+	private static function render_app(): void {
+		$s       = SBR_Settings::get();
+		$devices = SBR_App::devices();
+		$code    = get_transient( 'sbr_app_code_' . get_current_user_id() );
+		?>
+		<h2 class="sbr-h2"><?php esc_html_e( 'Εφαρμογή Android', 'site-bridge' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Η εφαρμογή Site Bridge ανοίγει και κλείνει το παράθυρο εγγραφής των sites αυτού του Hub από το κινητό, και δείχνει το ιστορικό. Τίποτα άλλο. Βλέπει μόνο sites με επίπεδο Εγγραφή ή Διαχείριση, και ανοίγει παράθυρο μόνο όπου το site το επιτρέπει στο Hub.', 'site-bridge' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Κάθε κινητό έχει δικά του κλειδιά, που δεν φεύγουν ποτέ από αυτό. Το άνοιγμα θέλει δαχτυλικό αποτύπωμα (ή το PIN του κινητού) κάθε φορά.', 'site-bridge' ); ?></p>
+		<?php if ( ! SBR_App::supported() ) : ?>
+			<div class="notice notice-error inline"><p><?php esc_html_e( 'Η PHP αυτού του server δεν έχει το openssl με καμπύλες EC: η εφαρμογή δεν μπορεί να συνδεθεί εδώ.', 'site-bridge' ); ?></p></div>
+		<?php endif; ?>
+		<div class="sbr-zone">
+			<?php self::form_open( 'save_app' ); ?>
+				<label class="sbr-check"><input type="checkbox" name="sbr_app" value="1" <?php checked( $s['app'] ); ?>>
+					<strong><?php esc_html_e( 'Η εφαρμογή μπορεί να συνδεθεί σε αυτό το Hub', 'site-bridge' ); ?></strong></label>
+				<label class="sbr-check"><input type="checkbox" name="sbr_app_email" value="1" <?php checked( $s['app_email'] ); ?>>
+					<?php esc_html_e( 'Email στον διαχειριστή σε κάθε άνοιγμα παραθύρου από την εφαρμογή', 'site-bridge' ); ?></label>
+				<p class="sbr-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'site-bridge' ); ?></button></p>
+			</form>
+		</div>
+
+		<?php if ( $s['app'] ) : ?>
+			<h2 class="sbr-h2"><?php esc_html_e( 'Σύνδεση κινητού', 'site-bridge' ); ?></h2>
+			<div class="sbr-zone">
+				<ol class="sbr-steps">
+					<li><?php
+						/* translators: %s: link to the releases */
+						printf( esc_html__( 'Εγκατάστησε την εφαρμογή από τα %s (αρχείο site-bridge.apk).', 'site-bridge' ), '<a href="https://github.com/koulaxizis/noxpress/releases?q=nox-sba" target="_blank" rel="noopener noreferrer">' . esc_html__( 'releases του Noxpress', 'site-bridge' ) . '</a>' );
+					?></li>
+					<li><?php esc_html_e( 'Πάτα «Νέος κωδικός για κινητό» και σάρωσε το QR με την εφαρμογή (ή επικόλλησε τον κωδικό). Ισχύει 15 λεπτά και μία φορά.', 'site-bridge' ); ?></li>
+				</ol>
+				<?php if ( is_string( $code ) && '' !== $code ) : ?>
+					<p><canvas class="sbr-qr" data-sbr-qr="<?php echo esc_attr( $code ); ?>" role="img" aria-label="<?php esc_attr_e( 'QR κωδικός σύνδεσης', 'site-bridge' ); ?>"></canvas></p>
+					<textarea id="sbr-app-code" class="sbr-code" readonly><?php echo esc_textarea( $code ); ?></textarea>
+					<p><button type="button" class="button" data-sbr-copy="sbr-app-code"><?php esc_html_e( 'Αντιγραφή', 'site-bridge' ); ?></button></p>
+				<?php endif; ?>
+				<?php self::form_open( 'app_code' ); ?>
+					<p><button type="submit" class="button"><?php esc_html_e( 'Νέος κωδικός για κινητό', 'site-bridge' ); ?></button></p>
+				</form>
+			</div>
+		<?php endif; ?>
+
+		<h2 class="sbr-h2"><?php esc_html_e( 'Συσκευές', 'site-bridge' ); ?></h2>
+		<table class="widefat sbr-table">
+			<thead><tr>
+				<th><?php esc_html_e( 'Συσκευή', 'site-bridge' ); ?></th>
+				<th><?php esc_html_e( 'Συνδέθηκε', 'site-bridge' ); ?></th>
+				<th><?php esc_html_e( 'Τελευταία χρήση', 'site-bridge' ); ?></th>
+				<th>IP</th>
+				<th></th>
+			</tr></thead>
+			<tbody>
+			<?php
+			if ( ! $devices ) {
+				echo '<tr><td colspan="5" class="sbr-empty">' . esc_html__( 'Καμία συσκευή ακόμα.', 'site-bridge' ) . '</td></tr>';
+			}
+			foreach ( $devices as $d ) {
+				echo '<tr><td>' . esc_html( (string) $d['name'] ) . '<br><span class="sbr-hint">' . esc_html( (string) $d['id'] ) . '</span></td>';
+				echo '<td>' . esc_html( self::when( (int) $d['created'] ) ) . '</td>';
+				echo '<td>' . esc_html( self::when( (int) $d['last_used'] ) ) . '</td>';
+				echo '<td>' . esc_html( (string) $d['ip'] ) . '</td><td>';
+				self::form_open( 'app_revoke', 'sbr-inline-form' );
+				echo '<input type="hidden" name="sbr_device" value="' . esc_attr( (string) $d['id'] ) . '"><button type="submit" class="button" data-sbr-confirm="' . esc_attr__( 'Να ανακληθεί η συσκευή; Θα χρειαστεί νέα σύνδεση με QR.', 'site-bridge' ) . '">' . esc_html__( 'Ανάκληση', 'site-bridge' ) . '</button></form>';
+				echo '</td></tr>';
+			}
+			?>
+			</tbody>
+		</table>
+		<?php
+	}
+
 	/* ----- Log ----- */
 
 	private static function log_filters(): array {
@@ -822,6 +904,23 @@ final class SBR_Admin_UI {
 				SBR_Settings::save( $s );
 				self::audit( 'hub_settings', array( 'dcr' => $s['dcr'] ) );
 				self::redirect( 'connections', array_merge( $saved, self::dropped( array( 'sbr_clients' => 'clients', 'sbr_hub_ips' => 'hub_ips' ) ) ) );
+				break;
+			case 'save_app':
+				$s['app']       = '1' === self::post( 'sbr_app' );
+				$s['app_email'] = '1' === self::post( 'sbr_app_email' );
+				SBR_Settings::save( $s );
+				self::audit( 'app_settings', array( 'app' => $s['app'], 'app_email' => $s['app_email'] ) );
+				self::redirect( 'app', $saved );
+				break;
+			case 'app_code':
+				set_transient( 'sbr_app_code_' . get_current_user_id(), SBR_App::new_code(), SBR_App::CODE_TTL );
+				self::redirect( 'app', array() );
+				break;
+			case 'app_revoke':
+				$dev = sanitize_key( self::post( 'sbr_device' ) );
+				$ok  = SBR_App::revoke( $dev );
+				self::audit( 'app_revoke', array( 'device' => $dev ) );
+				self::redirect( 'app', array( $ok ? self::msg( 'success', __( 'Η συσκευή ανακλήθηκε.', 'site-bridge' ) ) : self::msg( 'error', __( 'Άγνωστη συσκευή.', 'site-bridge' ) ) ) );
 				break;
 			default:
 				self::redirect( 'overview', array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'site-bridge' ) ) ) );
