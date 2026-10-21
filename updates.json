@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* WordPress Abilities API (WordPress 6.9+), category \"Noxpress\": `book-feed/status`, `book-feed/history`, `book-feed/price-check` (read), `book-feed/sync-start` (all, or one rule), `book-feed/sync-cancel`, `book-feed/square-start` and `book-feed/product-sync`. They do what the buttons in WP admin do, with the same capability (manage_woocommerce), so a remote tool such as Site Bridge's `ability_run` can start and follow a sync. Nothing returns the feed's account or password.",
+        "changelog": "* Fixed: a sync could stop for good after 1.9.1, when many titles got a larger cover from the publisher at once: downloading, squaring and resizing them all in one batch of 50 ran past PHP's 5-minute limit, and every retry started the same batch again. A batch now stops after the title that uses up the step's time and the next step goes on from there.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0161c263613e52c0c81861bfbe472e8abac16c316f304ec7a37b856b20f1f3a2",
-        "signature": "lgURIuAQ+Ui47Kln733/7YQ68wCVj9KlK6+C7n7t9FvMv0n+1j1qqRmMjhxn0Pay0wasPWZs/isTu5SPmUcPDA==",
+        "sha256": "2f1d2f4812536e004427cb22a3b5132cff665af11e6e11a33a5f30493e6e3fa9",
+        "signature": "u5hR7nXM0O6av5U3Z0PMDzs00knitHuSKcprhmSWiOUatCFQQWpC2M3gTAnTS7hjvu3WhMr/tN2JXBD+kOZVAQ==",
         "tested_wp": "7.1",
-        "version": "1.10.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.10.0/book-feed.zip"
+        "version": "1.10.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.10.1/book-feed.zip"
       }
     },
     "book-preview": {
