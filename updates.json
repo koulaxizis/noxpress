@@ -117,6 +117,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.1.0/home-sections.zip"
       }
     },
+    "live-operator": {
+      "beta": {
+        "changelog": "* Initial release.\n* Server-side online / offline switch for PurioChat Pro's Live Chat, with automatic offline and a notification at the end.\n* Web Push without third parties (VAPID, aes128gcm) for every new request and visitor message, with a test button.\n* Operator app at /live-operator/ (installable), and Digital Asset Links for the companion Android app.\n* LOP_DISABLE, bilingual admin, Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.18).",
+        "published": "2026-10-21",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "b31a65639d84fe6ddd797112d2c1fb95f5c293d81c9c1f0a503380652e47fd0e",
+        "signature": "ZjqB2w/1hOTmCWYjU/UYmALGK65qvRhReRSG8ZJNnjsd7hRxC+EzRGoucfatIFLUg9JikOsjAEHjEvqaqew+BA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.0.0/live-operator.zip"
+      }
+    },
     "oros-connect": {
       "beta": {
         "changelog": "* Fixed: the Offers status said \"(1 requests)\" for a single request; it now says \"(1 request)\" (\"(1 αίτημα)\" in Greek).",
