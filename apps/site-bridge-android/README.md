@@ -20,6 +20,8 @@ Works with Claude. Not made by or affiliated with Anthropic.
 
 The app looks at the repository's releases when it comes to the front, at most every 12 hours, and shows **New version X — Download** under the header when a newer `nox-sba-*` release exists. It only opens the APK link; Android asks before installing. A signed release installs over the previous one only when both are signed with the same key (a debug build does not update a signed one).
 
+From 1.5.0 the same check also runs in the background every 12 hours (WorkManager): a newer version brings one notification, whose tap or **Download** downloads the APK in the browser, also while the app is closed. Android 13+ asks for the notification permission once.
+
 Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Site Bridge app` (the repository also publishes plugins and the Live Operator app). The APK asset is `site-bridge.apk`.
 
 To remove a phone, revoke it in the Hub's App tab, or use **Disconnect** in the app's Settings.

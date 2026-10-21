@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.5.0
+
+* New: a notification for a newer signed app, also while the app is closed. WorkManager looks at the `nox-sba-*` releases every 12 hours; each new version is told once, and a tap (or "Download") downloads its APK in the browser. Android 13+ asks for the notification permission once, at the first start of this version.
+
 ## 1.4.0
 
 * New: the app looks on GitHub for a newer `nox-sba-*` release (when it comes to the front, at most every 12 hours) and shows "New version X" under the header with a "Download" link to the signed APK. Nothing is installed by itself and nothing about the phone or the Hub is sent; a failed look stays silent.

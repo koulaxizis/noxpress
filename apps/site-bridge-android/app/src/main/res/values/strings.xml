@@ -139,4 +139,6 @@
     </plurals>
     <string name="update_available">New version %1$s</string>
     <string name="update_get">Download</string>
+    <string name="update_channel">App updates</string>
+    <string name="update_tap">Tap to download the signed APK.</string>
 </resources>

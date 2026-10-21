@@ -1,5 +1,9 @@
 # Live Operator app — changelog
 
+## 1.2.0
+
+* New: a notification for a newer signed app, also while the app is closed. WorkManager looks at the `nox-loa-*` releases every 12 hours; each new version is told once, and a tap (or "Download") downloads its APK in the browser. It uses the notification permission the app already asks for the chat notifications. Only in this official build.
+
 ## 1.1.0
 
 * New: the app opens the page with its version, and the Live Operator plugin 1.1.0+ shows "New app version X. Download" at the top when a newer `nox-loa-*` release exists (it looks at GitHub at most every 12 hours). Only in this official build; a build for another site does not send its version.

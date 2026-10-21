@@ -19,6 +19,8 @@ No code of its own: `com.google.androidbrowserhelper` 2.5.0 (Google) does the la
 
 From 1.1.0 the app opens the page as `/live-operator/?app=<version>`. The plugin (1.1.0+) then looks at the repository's releases at most every 12 hours, from the phone, and shows **New app version X. Download** at the top when a newer `nox-loa-*` release exists. Android asks before installing, and a signed release installs over the previous one only with the same key. Builds for another site (below) leave the parameter out, so they never point to this app's releases.
 
+From 1.2.0 the app also checks in the background every 12 hours (WorkManager), so a newer version brings one Android notification, whose tap or **Download** downloads the APK in the browser, also while the app is closed. It uses the notification permission the app asks for the chat notifications. Only in the official build.
+
 Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Live Operator app` (the repository also publishes plugins and the Site Bridge app). The APK asset is `live-operator.apk`.
 
 ## Another site

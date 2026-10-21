@@ -2,6 +2,7 @@ import java.net.URI
 
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 // The app is a Trusted Web Activity of the Live Operator page of one site.
@@ -27,8 +28,8 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-loa-<versionName>.
-        versionCode = 3
-        versionName = "1.1.0"
+        versionCode = 4
+        versionName = "1.2.0"
 
         manifestPlaceholders["hostName"] = appUri.host
         manifestPlaceholders["appPath"] = appUri.path.ifEmpty { "/" }
@@ -37,6 +38,8 @@ android {
         // Live Operator plugin (1.1.0+) can say when a newer nox-loa-*
         // release exists. Builds for other sites leave it out.
         resValue("string", "launch_url", if (customUrl == null) "$appUrl?app=$versionName" else appUrl)
+        // Only the official build looks for newer nox-loa-* releases (1.2.0).
+        buildConfigField("boolean", "UPDATES", (customUrl == null).toString())
         resValue(
             "string",
             "asset_statements",
@@ -76,6 +79,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+    buildFeatures {
+        buildConfig = true
+    }
     androidResources {
         generateLocaleConfig = true
     }
@@ -85,4 +94,10 @@ dependencies {
     // Trusted Web Activity launcher, notification delegation and the
     // Android 13 notification permission (Google, exact version).
     implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.5.0")
+    // The new-version notification (1.2.0).
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }
