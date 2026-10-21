@@ -234,15 +234,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: `bridge_status` shows the settings Claude is bound by on a site: level, write window and minutes left, whether the Hub may open it, run-as administrator, masking, admin e-mails, IP lists (on / off), rate limits, log retention and the paired Hub. Read only.\n* New: `audit_log` reads the site's Site Bridge log, newest first, with filters (tool, status, side, from / to). IP addresses are masked when the site masks personal data.\n* New: `write_window_close` closes the write window when the work is done. It can never open or extend it; the level, the window, run-as, IP lists and pairing stay with the owner in WP admin.\n* New: `abilities_list` takes `search` (name, label or category) and `brief`, so the abilities of one plugin (e.g. `book-feed/`) come without the rest. The category is shown too.",
+        "changelog": "* Fixed: `plugins_update` saw \"no update\" for a release made since the last check, because WordPress and the Noxpress manifest keep their update checks for 12 hours. It now checks afresh first, as the hub's \"Check now\" does.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "61f2b588323b2eb09bf42279ddf0a0c4494c05fa3848bb6902b7e64108fe678d",
-        "signature": "tHhTqt0ofgpPDncHcMatp7TTWCBgXVU/ARerRdEbSp6mCsOcxz8nrQUUMcl4VEnm9DRF2MH7NMzkal7aqAKNDw==",
+        "sha256": "062807481e9a136fe3be3a75e60c311f126789eddb4b157f3da6dabce67ddb95",
+        "signature": "ToiN1cncvAdShCAeYUOKTnLeczemCsNa4Fl0p0TEJPwGwcsdRQ/mkjZfKXXqP5uEFwCoT5vp8849AaQR/mh4DQ==",
         "tested_wp": "7.1",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.5.0/site-bridge.zip"
+        "version": "1.5.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.5.1/site-bridge.zip"
       }
     },
     "smart-formatter": {
