@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.10.0
+Stable tag: 1.10.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -97,6 +97,9 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.10.1 =
+* Fixed: a sync could stop for good after 1.9.1, when many titles got a larger cover from the publisher at once: downloading, squaring and resizing them all in one batch of 50 ran past PHP's 5-minute limit, and every retry started the same batch again. A batch now stops after the title that uses up the step's time and the next step goes on from there.
 
 = 1.10.0 =
 * WordPress Abilities API (WordPress 6.9+), category "Noxpress": `book-feed/status`, `book-feed/history`, `book-feed/price-check` (read), `book-feed/sync-start` (all, or one rule), `book-feed/sync-cancel`, `book-feed/square-start` and `book-feed/product-sync`. They do what the buttons in WP admin do, with the same capability (manage_woocommerce), so a remote tool such as Site Bridge's `ability_run` can start and follow a sync. Nothing returns the feed's account or password.

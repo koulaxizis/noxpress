@@ -320,7 +320,7 @@ final class BKF_Sync {
 		$s = BKF_Settings::get();
 		while ( 'done' !== $job['phase'] && microtime( true ) - $t0 < $budget ) {
 			if ( 'linked' === $job['phase'] ) {
-				$job = self::step_linked( $job );
+				$job = self::step_linked( $job, $t0, $budget );
 			} elseif ( 'rules' === $job['phase'] ) {
 				$job = self::step_rules( $job, $t0, $budget );
 			}
@@ -334,8 +334,13 @@ final class BKF_Sync {
 		return $job;
 	}
 
-	/** Phase 1: one batch of our products. */
-	private static function step_linked( array $job ): array {
+	/**
+	 * Phase 1: one batch of our products, in id order. 1.10.1: stops after
+	 * the product that uses up the time budget (a new publisher cover is
+	 * downloaded, squared and resized, which can take long), so a batch no
+	 * longer outlives PHP's time limit; the next step goes on from there.
+	 */
+	private static function step_linked( array $job, float $t0, int $budget ): array {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- batched meta scan.
 		$rows = $wpdb->get_results(
@@ -375,30 +380,39 @@ final class BKF_Sync {
 			BKF_Log::add( 'error', 0, '', '', array(), $job['error'] );
 			return $job;
 		}
-		$found = array();
+		$by_pid = array();
 		foreach ( $records as $r ) {
-			if ( isset( $map[ $r['id'] ] ) ) {
-				$found[ $r['id'] ] = true;
+			if ( isset( $map[ $r['id'] ] ) && ! isset( $by_pid[ $map[ $r['id'] ] ] ) ) {
+				$by_pid[ $map[ $r['id'] ] ] = $r;
+			}
+		}
+		$cursor = max( array_values( $map ) );
+		$pids   = array_values( $map );
+		sort( $pids );
+		foreach ( $pids as $pid ) {
+			if ( isset( $by_pid[ $pid ] ) ) {
+				$r = $by_pid[ $pid ];
 				++$job['stats']['checked'];
 				try {
-					if ( BKF_Importer::update( $map[ $r['id'] ], $r ) ) {
+					if ( BKF_Importer::update( $pid, $r ) ) {
 						++$job['stats']['updated'];
 					}
 				} catch ( \Throwable $e ) {
 					++$job['stats']['errors'];
-					BKF_Log::add( 'error', $map[ $r['id'] ], $r['isbn'], $r['title'], array(), $e->getMessage() );
+					BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array(), $e->getMessage() );
 				}
-			}
-		}
-		foreach ( $map as $id => $pid ) {
-			if ( ! isset( $found[ $id ] ) ) {
+			} else {
 				if ( '1' !== (string) get_post_meta( $pid, '_bkf_gone', true ) ) {
 					++$job['stats']['gone'];
 				}
 				BKF_Importer::gone( $pid );
 			}
+			if ( microtime( true ) - $t0 > $budget ) {
+				$cursor = $pid;
+				break;
+			}
 		}
-		$job['cursor'] = max( array_values( $map ) );
+		$job['cursor'] = $cursor;
 		return $job;
 	}
 
