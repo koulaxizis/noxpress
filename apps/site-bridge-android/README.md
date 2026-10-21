@@ -37,6 +37,8 @@ The Hub accepts ±300 s and each nonce once. See `plugins/site-bridge/includes/c
 
 `POST app/ability` runs one ability of a short allow-list (`SBR_App::MODULES`) on one site, through the Hub's `ability_run`, so the site applies its level and write window as for Claude. A tab shows only for sites whose status lists the plugin in `modules`. When an action needs the window and it is closed, the Hub opens it for 15 minutes first if the site allows it (`window_opened` in the answer).
 
+Rule preview (1.3.0): `book-feed/rule-preview` with the read key; the dialog shows it only while its fields are the ones it was made for.
+
 Notifications: WorkManager, about once an hour, `book-feed/notices` with the read key for each site with Book Feed; the first look only sets the starting time.
 
 ## Build

@@ -110,6 +110,11 @@
     <string name="bf_f_pstat">Publishing status</string>
     <string name="bf_pstat_only">Only this status</string>
     <string name="bf_pstat_except">Every status except this one</string>
+    <string name="bf_preview">Preview</string>
+    <string name="bf_pv_sum">Matching titles: %1$d. Checked %2$d: %3$d already in the store, %4$d new. %5$d will be imported (up to %6$d per run).</string>
+    <string name="bf_pv_since">Only titles changed since %1$s (after the last run).</string>
+    <string name="bf_pv_more">There are more titles than the ones checked; the run reads them too.</string>
+    <string name="bf_pv_none">No new titles.</string>
     <string name="bf_f_year_from">Year from</string>
     <string name="bf_f_year_to">Year to</string>
     <string name="bf_f_every">Every how many days (1–90)</string>

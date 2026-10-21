@@ -51,6 +51,7 @@ class UiState {
     var bfStatuses by mutableStateOf<List<String>>(emptyList())
     var bfPubs by mutableStateOf<List<Pair<String, String>>>(emptyList())
     var bfIsbn by mutableStateOf<JSONObject?>(null)
+    var bfPreview by mutableStateOf<JSONObject?>(null)
     var bfNotify by mutableStateOf(false)
 }
 
@@ -107,6 +108,7 @@ class MainActivity : FragmentActivity() {
                     scan = ::bfScan,
                     importIsbn = { isbn -> bfAct("book-feed/import", JSONObject().put("isbn", isbn), R.string.bf_confirm_import) { bfLookup(isbn) } },
                     notify = ::askNotifications,
+                    preview = ::bfPreview,
                 ),
             )
         }
@@ -295,6 +297,19 @@ class MainActivity : FragmentActivity() {
         call {
             val a = api.ability(site, "book-feed/publishers", JSONObject().put("text", text.trim()), null).result.optJSONArray("publishers")
             ui.bfPubs = if (a == null) emptyList() else (0 until a.length()).map { a.getJSONObject(it) }.map { it.optString("id") to it.optString("name") }
+        }
+    }
+
+    /** A rule's preview (read key): what its next run would bring, importing nothing. */
+    private fun bfPreview(rule: JSONObject) {
+        val site = ui.bfSite
+        if (site.isEmpty()) return
+        val asked = rule.toString()
+        // The dialog's own switches and the draft/publish choice do not narrow the feed.
+        val input = JSONObject(asked).apply { remove("on"); remove("every"); remove("status"); remove("name") }
+        call {
+            val res = api.ability(site, "book-feed/rule-preview", input, null).result
+            ui.bfPreview = JSONObject().put("for", asked).put("result", res)
         }
     }
 

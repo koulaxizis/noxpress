@@ -39,6 +39,7 @@ final class BKF_Admin_Ajax {
 		add_action( 'wp_ajax_bkf_product', array( __CLASS__, 'ajax_product' ) );
 		add_action( 'wp_ajax_bkf_job', array( __CLASS__, 'ajax_job' ) );
 		add_action( 'wp_ajax_bkf_bulk', array( __CLASS__, 'ajax_bulk' ) );
+		add_action( 'wp_ajax_bkf_preview', array( __CLASS__, 'ajax_preview' ) );
 		add_action( 'add_meta_boxes_product', array( __CLASS__, 'add_box' ) );
 		add_action( 'woocommerce_process_product_meta', array( __CLASS__, 'save_box' ) );
 	}
@@ -230,6 +231,21 @@ final class BKF_Admin_Ajax {
 				'text'    => $b ? BKF_Bulk::text( $b ) : '',
 			)
 		);
+	}
+
+	/** A rule card's "Preview" (1.12.0): the card's fields as typed, nothing saved. */
+	public static function ajax_preview(): void {
+		self::check_ajax();
+		$in   = self::post( 'rule' );
+		$rule = is_array( $in ) ? BKF_Settings::clean_rule( $in ) : null;
+		if ( ! $rule ) {
+			wp_send_json_error( array( 'message' => __( 'Ο κανόνας χρειάζεται εκδότη, λέξεις του τίτλου ή συντελεστή.', 'book-feed' ) ) );
+		}
+		$res = BKF_Sync::preview( $rule );
+		if ( is_wp_error( $res ) ) {
+			wp_send_json_error( array( 'message' => $res->get_error_message() ) );
+		}
+		wp_send_json_success( $res );
 	}
 
 	public static function ajax_import(): void {

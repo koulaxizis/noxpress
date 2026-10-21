@@ -107,6 +107,11 @@
     <string name="bf_f_pstat">Κατάσταση κυκλοφορίας</string>
     <string name="bf_pstat_only">Μόνο αυτή</string>
     <string name="bf_pstat_except">Όλες εκτός από αυτή</string>
+    <string name="bf_preview">Προεπισκόπηση</string>
+    <string name="bf_pv_sum">Ταιριάζουν %1$d τίτλοι. Ελέγχθηκαν %2$d: %3$d υπάρχουν ήδη στο κατάστημα, %4$d νέοι. Θα εισαχθούν %5$d (έως %6$d ανά εκτέλεση).</string>
+    <string name="bf_pv_since">Μόνο τίτλοι που άλλαξαν από %1$s (μετά την τελευταία εκτέλεση).</string>
+    <string name="bf_pv_more">Υπάρχουν κι άλλοι τίτλοι πέρα από όσους ελέγχθηκαν· η εκτέλεση θα τους διαβάσει κι αυτούς.</string>
+    <string name="bf_pv_none">Κανένας νέος τίτλος.</string>
     <string name="bf_f_year_from">Έτος από</string>
     <string name="bf_f_year_to">Έτος έως</string>
     <string name="bf_f_every">Κάθε πόσες ημέρες (1–90)</string>

@@ -39,6 +39,9 @@ final class BKF_Sync {
 	const BATCH  = 50;
 	const PAGE   = 50;
 
+	/** Pages of 100 a preview reads at most (1.12.0). */
+	const PREVIEW_PAGES = 5;
+
 	public static function init(): void {
 		add_action( 'bkf_step', array( __CLASS__, 'step' ) );
 		add_action( 'bkf_safety', array( __CLASS__, 'step' ) );
@@ -427,18 +430,7 @@ final class BKF_Sync {
 		$since = $rule['last'] > 0 ? $rule['last'] - DAY_IN_SECONDS : 0;
 		$res   = BKF_Client::query(
 			array(
-				'q'     => BKF_Client::book_query(
-					array(
-						'pub_id'    => $rule['pub_id'],
-						'title'     => $rule['title'],
-						'author'    => $rule['author'],
-						'year_from' => $rule['year_from'],
-						'year_to'   => $rule['year_to'],
-						'kind'      => $rule['kind'],
-						'pstat'     => $rule['pstat'],
-						'since'     => $since,
-					)
-				),
+				'q'     => self::rule_query( $rule, $since ),
 				'fl'    => BKF_Client::BOOK_FIELDS,
 				'rows'  => self::PAGE,
 				'start' => (int) $job['start'],
@@ -521,6 +513,97 @@ final class BKF_Sync {
 				$out[] = $r;
 			}
 		}
+		return $out;
+	}
+
+	/** The feed query of one rule; $since limits it to titles changed since then. */
+	private static function rule_query( array $rule, int $since ): string {
+		return BKF_Client::book_query(
+			array(
+				'pub_id'    => $rule['pub_id'],
+				'title'     => $rule['title'],
+				'author'    => $rule['author'],
+				'year_from' => $rule['year_from'],
+				'year_to'   => $rule['year_to'],
+				'kind'      => $rule['kind'],
+				'pstat'     => $rule['pstat'],
+				'since'     => $since,
+			)
+		);
+	}
+
+	/**
+	 * What the next run of a rule would bring, without importing (1.12.0).
+	 * Reads the feed as a run does (same query, same order, same "since"),
+	 * up to PREVIEW_PAGES pages, and skips the titles the store has.
+	 *
+	 * @param array $rule A clean rule (BKF_Settings::clean_rule()).
+	 * @param int   $show How many of the new titles to list.
+	 * @return array|WP_Error { total, checked, in_store, new, will, more,
+	 *                        max, since, titles: [ { id, isbn, title,
+	 *                        people, publisher, year, pstat, kind } ] }.
+	 */
+	public static function preview( array $rule, int $show = 30 ) {
+		$since = $rule['last'] > 0 ? $rule['last'] - DAY_IN_SECONDS : 0;
+		$q     = self::rule_query( $rule, $since );
+		$out   = array(
+			'total'    => 0,
+			'checked'  => 0,
+			'in_store' => 0,
+			'new'      => 0,
+			'will'     => 0,
+			'more'     => false,
+			'max'      => (int) $rule['max'],
+			'since'    => $since,
+			'titles'   => array(),
+		);
+		for ( $page = 0; $page < self::PREVIEW_PAGES; $page++ ) {
+			$res = BKF_Client::query(
+				array(
+					'q'     => $q,
+					'fl'    => BKF_Client::BOOK_FIELDS,
+					'rows'  => BKF_Client::MAX_ROWS,
+					'start' => $page * BKF_Client::MAX_ROWS,
+					'sort'  => 'pub_year desc, product_id asc',
+				)
+			);
+			if ( is_wp_error( $res ) ) {
+				return $res;
+			}
+			$out['total'] = (int) $res['num'];
+			foreach ( BKF_Record::from_docs( $res['docs'] ) as $r ) {
+				++$out['checked'];
+				if ( BKF_Importer::find_by_source( $r['id'] ) || BKF_Importer::find_by_isbn( $r['isbn_digits'] ) ) {
+					++$out['in_store'];
+					continue;
+				}
+				++$out['new'];
+				if ( count( $out['titles'] ) < $show ) {
+					$names = array();
+					foreach ( (array) $r['contribs'] as $c ) {
+						if ( is_array( $c ) && ! empty( $c['name'] ) ) {
+							$names[] = (string) $c['name'];
+						}
+					}
+					$out['titles'][] = array(
+						'id'        => $r['id'],
+						'isbn'      => $r['isbn'],
+						'title'     => $r['title'],
+						'people'    => array_slice( array_values( array_unique( $names ) ), 0, 3 ),
+						'publisher' => (string) ( $r['pub_name'] ?? '' ),
+						'year'      => (int) ( $r['year'] ?? 0 ),
+						'pstat'     => (string) ( $r['status'] ?? '' ),
+						'kind'      => (string) ( $r['kind'] ?? '' ),
+					);
+				}
+			}
+			if ( $out['new'] >= $out['max'] || $out['checked'] >= $out['total'] || ! $res['docs'] ) {
+				break;
+			}
+		}
+		$out['will'] = min( $out['new'], $out['max'] );
+		// Unread pages could hold more new titles while the cap is not reached.
+		$out['more'] = $out['new'] < $out['max'] && $out['checked'] < $out['total'];
 		return $out;
 	}
 
