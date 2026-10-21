@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Square covers (setting): every downloaded cover becomes a square PNG with a transparent background, the whole cover centred on a canvas as wide as its longer side, never cropped.\n* Tools → \"Make the existing covers square\": the covers Book Feed already downloaded for imported titles, in place (same attachment, new PNG file and sizes, old files removed), in the background. Turning the setting on starts it too. Covers uploaded by hand are never touched.\n* The book's own page on the publisher's site: when the publisher's address is a search page, the link whose text is the book's title is read as well, and taken when it names the ISBN (or gives a price and names no other ISBN). A Store API answer gives the product's permalink and image. The page found is kept as the product's page (`_bkf_pub_url`) when it has none, so later price and cover checks go straight to it.\n* \"Read the price\" in Tools shows the book's page it found.",
-        "published": "2026-10-20",
+        "changelog": "* The book's own page, also when the publisher's search page names the ISBN itself (Διόπτρα): the link with the book's title is still read, so the full-size cover and the book's address come from the book's page. A search page that 1.9.0 kept in `_bkf_pub_url` is replaced by the book's page on the next sync.\n* A larger cover from the publisher's page keeps the alt text, caption and description of the cover it replaces; its title is the new file's name.",
+        "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0f53c0b5f2cccc3aa8d2c8cf5b79f5a51db48052922854af05eff31443054564",
-        "signature": "FgkttwD9vj/JrPHBVBhu6u2rRilCYNRW/Rp6a8kuw1GPnAWx5pdWEq1pBuQc+dhYYt/BuSMFuv/mV6Y3vvNaBQ==",
+        "sha256": "715f223bf74687a5e6bc6a228d713cf4afcf024e831fbad40245a0256138c311",
+        "signature": "1ulxcGEdNPXR3fYZ/+hYPQKBbCUSh4q4l22HEP4DpXDSQ6ZAFumyMTJKPyGuQP9sz24JFLgrbkqTet7TOJacDA==",
         "tested_wp": "7.1",
-        "version": "1.9.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.9.0/book-feed.zip"
+        "version": "1.9.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.9.1/book-feed.zip"
       }
     },
     "book-preview": {
