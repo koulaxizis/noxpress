@@ -7,7 +7,7 @@ plugins {
 // The app is a Trusted Web Activity of the Live Operator page of one site.
 // Another site: ./gradlew assembleRelease -PliveOperatorUrl=https://example.com/live-operator/ -PliveOperatorName="Example Live"
 val appUrl: String = (findProperty("liveOperatorUrl") as String?) ?: "https://glarolykoi.net/live-operator/"
-val appName: String = (findProperty("liveOperatorName") as String?) ?: "Γλαρόλυκοι Live"
+val appName: String = (findProperty("liveOperatorName") as String?) ?: "Live Operator"
 val appUri: URI = URI(appUrl)
 require(appUri.scheme == "https" && !appUri.host.isNullOrEmpty()) { "liveOperatorUrl must be an https URL" }
 val appOrigin = "https://" + appUri.host + (if (appUri.port > 0) ":" + appUri.port else "")
