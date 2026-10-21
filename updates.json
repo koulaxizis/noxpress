@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Fixed: a sync could stop for good after 1.9.1, when many titles got a larger cover from the publisher at once: downloading, squaring and resizing them all in one batch of 50 ran past PHP's 5-minute limit, and every retry started the same batch again. A batch now stops after the title that uses up the step's time and the next step goes on from there.",
+        "changelog": "* New: abilities for the Site Bridge phone app: `book-feed/rules`, `rule-save` (a new rule or changes to one; its category, display mode and last run are kept), `rule-delete`, `publishers` (autocomplete), `options` (kinds and statuses seen), `isbn` (the catalogue's title and the store's product for one ISBN), `import` (one ISBN as a draft, refused when the store has that ISBN) and `notices` (titles imported, errors, titles gone and the last run since a time).",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2f1d2f4812536e004427cb22a3b5132cff665af11e6e11a33a5f30493e6e3fa9",
-        "signature": "u5hR7nXM0O6av5U3Z0PMDzs00knitHuSKcprhmSWiOUatCFQQWpC2M3gTAnTS7hjvu3WhMr/tN2JXBD+kOZVAQ==",
+        "sha256": "8ab4fbae52a3baca1ff77d882ee18d41b574e4f5be91be29278b3289797fdd54",
+        "signature": "3TKkV+c9QL2LIbTPmd13ACRBv9BdnujQZhPUi1Nk/VbIn1x11YhahYuFPLZUylXcQjfruz2+Oo+Ui1ikdpviAg==",
         "tested_wp": "7.1",
-        "version": "1.10.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.10.1/book-feed.zip"
+        "version": "1.11.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.11.0/book-feed.zip"
       }
     },
     "book-preview": {
@@ -234,15 +234,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: the Site Bridge Android app (beta). A new App tab on the Hub (off by default) pairs a phone with a QR code and lists the paired devices with revoke. The app sees the Hub's sites with level write or admin, opens a write window (fingerprint required, enforced by the phone's Keystore) or closes it early, and shows the Hub's log. Routes under site-bridge/v1/app/, signed per device with ECDSA P-256; nothing changes on the sites.\n* New: an email to the admin address after every window opened from the app (setting, on by default).",
+        "changelog": "* New: the phone app can use other Noxpress plugins through the Hub, starting with Book Feed (1.11.0+). New route `app/ability` runs one ability from a short allow-list per plugin through the Hub's `ability_run`, so each site applies its level and write window as for Claude. Read abilities use the read key; the rest need the fingerprint key, and when the site's window is closed and the site lets the Hub open it, the Hub opens it for 15 minutes first (logged as `app_window_open`, emailed when that setting is on).\n* New: a site's status lists the plugins the app can use there (`modules`), so the app shows their tabs only where they work. Sites need 1.7.0 for this.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e00e94fa5dd7d9996f49218b173558bc8968d69e392b881260ea98c5b0ca217f",
-        "signature": "vPJa/rDkRIbeZKTVaHyJDwKqUQAQawa6SVshdv36aotsElm/7zZpC+TEcl6WiLS2PBsLFFAoa3EYCMnYZ89XDw==",
+        "sha256": "60aa97f7814142061e5d564bb844b0e6f5a26cb7f79f0b24bbd8fac0b13c4e5e",
+        "signature": "7kjtkYBAgP7h6g8EAe219vLh6Wo/6DEin0oDd0jb+1IbsbVP/hfydXb5MMcFMte5SNeRHH56H33fcevVjEG6Bg==",
         "tested_wp": "7.1",
-        "version": "1.6.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.6.0/site-bridge.zip"
+        "version": "1.7.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.7.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
