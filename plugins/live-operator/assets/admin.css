@@ -1,0 +1,441 @@
+/**
+ * Live Operator — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5): the Greeklish Permalinks / RS panel,
+ * prefix lop-*. Palette #101218 / #6d4aff / #eae8fa, no max-width.
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.lop-wrap {
+	--lop-bg: #101218;
+	--lop-panel: #14161d;
+	--lop-panel-2: #1d2029;
+	--lop-input: #1a1d26;
+	--lop-border: #2e3240;
+	--lop-border-input: #3a3f52;
+	--lop-row-border: #23262f;
+	--lop-stripe: #181b23;
+	--lop-hover: #1e212c;
+	--lop-text: #eae8fa;
+	--lop-heading: #f6f4ff;
+	--lop-muted: #b7b2d6;
+	--lop-link: #beb1ff;
+	--lop-link-hover: #d4c9ff;
+	--lop-accent: #6d4aff;
+	--lop-accent-hover: #8263ff;
+	--lop-warn: #f5c97e;
+	--lop-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.lop-wrap {
+	color-scheme: dark;
+	background: var(--lop-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--lop-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.lop-wrap h1,
+.lop-wrap h2 {
+	color: var(--lop-heading);
+}
+
+.lop-wrap a { color: var(--lop-link); }
+.lop-wrap a:hover { color: var(--lop-link-hover); }
+
+.lop-wrap .lop-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--lop-muted);
+	border-bottom: 1px solid var(--lop-border);
+	padding-bottom: 6px;
+}
+
+.lop-wrap .description,
+.lop-wrap p.description,
+.lop-wrap .lop-hint {
+	color: var(--lop-muted) !important;
+}
+
+.lop-zone {
+	background: var(--lop-panel);
+	border: 1px solid var(--lop-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.lop-wrap input[type="text"],
+.lop-wrap input[type="url"],
+.lop-wrap input[type="number"],
+.lop-wrap input[type="time"],
+.lop-wrap input[type="date"],
+.lop-wrap textarea,
+.lop-wrap select {
+	background-color: var(--lop-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--lop-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.lop-wrap input::placeholder,
+.lop-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.lop-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.lop-wrap input[type="file"] {
+	color: var(--lop-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.lop-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.lop-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.lop-wrap input[type="checkbox"],
+.lop-wrap input[type="radio"] {
+	accent-color: var(--lop-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.lop-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.lop-wrap .button:hover:not(:disabled) {
+	border-color: var(--lop-accent) !important;
+	color: #ffffff !important;
+}
+
+.lop-wrap .button-primary {
+	background: var(--lop-accent) !important;
+	border-color: var(--lop-accent) !important;
+	color: #ffffff !important;
+}
+
+.lop-wrap .button-primary:hover:not(:disabled) {
+	background: var(--lop-accent-hover) !important;
+}
+
+.lop-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.lop-submit { margin-top: 20px; }
+.lop-inline-form { display: inline; margin-right: 10px; }
+.lop-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.lop-table,
+table.widefat.lop-table {
+	background: var(--lop-panel) !important;
+	border: 1px solid var(--lop-border) !important;
+	border-radius: 6px;
+	color: var(--lop-text) !important;
+	margin-top: 14px !important;
+}
+
+.lop-table thead th,
+.lop-table thead td {
+	background: var(--lop-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.lop-table tbody td,
+.lop-table tbody th {
+	background: var(--lop-panel) !important;
+	color: var(--lop-text) !important;
+	border-bottom: 1px solid var(--lop-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.lop-table tbody tr:nth-child(2n) td,
+.lop-table tbody tr:nth-child(2n) th {
+	background: var(--lop-stripe) !important;
+}
+
+.lop-table tbody tr:hover td,
+.lop-table tbody tr:hover th {
+	background: var(--lop-hover) !important;
+}
+
+.lop-table td,
+.lop-table th {
+	padding: 12px 14px;
+}
+
+.lop-table td code {
+	background: transparent !important;
+	color: var(--lop-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.lop-table .lop-empty {
+	color: var(--lop-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.lop-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.lop-footer a { color: #beb1ff; text-decoration: none; }
+.lop-footer a:hover { text-decoration: underline; }
+
+.lop-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.lop-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.lop-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.lop-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.lop-muted { color: var(--lop-muted) !important; }
+.lop-warn { color: var(--lop-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.lop-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.lop-wrap .lop-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--lop-heading);
+}
+
+.lop-status p { margin: 0 0 8px; }
+.lop-status p:last-child { margin-bottom: 0; }
+.lop-status code,
+.lop-wrap .description code,
+.lop-wrap .lop-hint code {
+	background: var(--lop-panel-2);
+	color: var(--lop-muted);
+	border: 1px solid var(--lop-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.lop-suspended { margin: 8px 0 0; }
+.lop-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.lop-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--lop-border);
+	background: var(--lop-panel-2);
+	color: var(--lop-text);
+	white-space: nowrap;
+}
+.lop-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.lop-badge--muted { color: var(--lop-muted); }
+.lop-badge--warn { border-color: #6b5a33; color: var(--lop-warn); }
+.lop-badge--danger { border-color: #6b3a3a; color: var(--lop-danger); }
+
+/* Area fieldsets. */
+.lop-area {
+	background: var(--lop-panel);
+	border: 1px solid var(--lop-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.lop-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--lop-heading);
+}
+.lop-row { margin: 4px 0 8px; }
+
+.lop-details > summary {
+	cursor: pointer;
+	color: var(--lop-link);
+	margin: 4px 0;
+}
+.lop-details[open] > summary { margin-bottom: 12px; }
+
+.lop-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.lop-wrap .lop-label {
+	display: block;
+	font-weight: 600;
+	color: var(--lop-heading);
+	margin: 8px 0 6px;
+}
+.lop-grid .lop-label:first-child { margin-top: 0; }
+
+.lop-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.lop-field > span:first-child {
+	min-width: 150px;
+	color: var(--lop-text);
+}
+.lop-wrap .lop-color { width: 96px; font-family: monospace; }
+.lop-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--lop-border-input);
+}
+
+.lop-wrap .lop-hint { display: block; font-size: 12px; margin-top: 4px; }
+.lop-wrap td .lop-hint { display: inline; }
+.lop-table td.lop-warn { color: var(--lop-warn) !important; }
+
+/* Tabs of the main page. */
+.lop-wrap .lop-tabs {
+	border-bottom: 1px solid var(--lop-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.lop-wrap .lop-tabs .nav-tab {
+	background: var(--lop-panel);
+	border-color: var(--lop-border);
+	color: var(--lop-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.lop-wrap .lop-tabs .nav-tab:hover { color: var(--lop-link-hover); background: var(--lop-hover); }
+.lop-wrap .lop-tabs .nav-tab-active,
+.lop-wrap .lop-tabs .nav-tab-active:hover {
+	background: var(--lop-bg);
+	border-bottom-color: var(--lop-bg);
+	color: var(--lop-heading);
+}
+
+/* One input per line (removal rules). */
+.lop-wrap .lop-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.lop-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--lop-border);
+	border-radius: 6px;
+	background: var(--lop-panel-2);
+}
+.lop-scroll .lop-field { margin-bottom: 4px; }
+
+/* ===== Greeklish Permalinks ===== */
+
+.lop-wrap .lop-wide { width: 100%; max-width: 640px; }
+.lop-wrap .lop-rules { width: 100%; max-width: 480px; min-height: 140px; font-family: monospace; }
+
+/* Live test. */
+.lop-test-out { margin: 10px 0 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; align-items: baseline; }
+.lop-test-out dt { color: var(--lop-muted); }
+.lop-test-out dd { margin: 0; }
+.lop-test-out code { font-size: 13px; word-break: break-all; }
+
+/* Bulk: choice of types, results table, progress. */
+.lop-scroll { max-height: 220px; overflow: auto; }
+.lop-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 16px; }
+.lop-counts { margin: 8px 0; }
+.lop-counts span { display: inline-block; margin: 0 14px 4px 0; }
+.lop-results { max-height: 520px; overflow: auto; margin-top: 10px; }
+.lop-results td { vertical-align: top; }
+.lop-results td.lop-c { width: 28px; }
+.lop-results code { word-break: break-all; }
+.lop-results .lop-note { display: block; margin-top: 2px; font-size: 12px; color: var(--lop-muted); }
+.lop-results tr.is-ok td.lop-st { color: #9fe0b5 !important; }
+.lop-results tr.is-skip td.lop-st { color: var(--lop-muted) !important; }
+.lop-results tr.is-error td.lop-st { color: var(--lop-danger) !important; }
+.lop-actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.lop-progress { height: 8px; max-width: 480px; margin: 12px 0 4px; border-radius: 4px; background: var(--lop-panel-2); overflow: hidden; }
+.lop-progress-bar { height: 100%; width: 0; background: var(--lop-accent); transition: width .2s; }
+.lop-hidden { display: none !important; }
+
+
+/* ===== Live Operator additions ===== */
+.lop-wrap .lop-status p { margin: 6px 0; }
+.lop-wrap .lop-status .lop-hint { display: block; margin: 2px 0 0; }
+.lop-wrap .lop-url {
+	margin-left: 8px;
+	background: var(--lop-panel-2);
+	color: var(--lop-text);
+	padding: 3px 6px;
+	border-radius: 4px;
+	word-break: break-all;
+}
+.lop-wrap .lop-inline-form { display: inline-block; margin: 0 6px 6px 0; }
+.lop-wrap textarea.lop-fingerprints { width: 100%; max-width: 760px; font-family: monospace; }

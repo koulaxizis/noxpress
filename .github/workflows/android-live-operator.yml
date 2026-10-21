@@ -1,0 +1,173 @@
+# Χτίζει την εφαρμογή Android του Live Operator (apps/live-operator-android).
+#
+# Πότε τρέχει:
+#  - pull request που αλλάζει την εφαρμογή → lint και debug APK ως artifact
+#    του run (για δοκιμή στο κινητό πριν από το merge).
+#  - push στο main που αλλάζει την εφαρμογή, ή χειροκίνητα → τα ίδια, και αν
+#    δεν υπάρχει ακόμα release nox-loa-<versionName>, βγάζει υπογεγραμμένο
+#    live-operator.apk ως pre-release (beta). Ανέβασε το versionName (και το
+#    versionCode) στο app/build.gradle.kts και κάνε merge — τίποτα άλλο.
+#
+# Υπογραφή με τα ίδια secrets με την εφαρμογή του Site Bridge (SBA_*), ώστε
+# ένα αποτύπωμα πιστοποιητικού να ισχύει και για τις δύο. Χωρίς αυτά το job
+# «release» σταματά με μήνυμα· το debug APK βγαίνει πάντα.
+#
+# Το tag nox-loa-* δεν είναι plugin: το release.yml και το updates.json το
+# αγνοούν (κανένας κωδικός plugin δεν είναι τριών γραμμάτων).
+name: Android app (Live Operator)
+
+on:
+  pull_request:
+    paths: ['apps/live-operator-android/**', '.github/workflows/android-live-operator.yml']
+  push:
+    branches: [main]
+    paths: ['apps/live-operator-android/**', '.github/workflows/android-live-operator.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-live-operator-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/live-operator-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Lint, debug APK
+        run: ./gradlew --no-daemon lintDebug assembleDebug
+
+      - name: Rename debug APK and print its certificate
+        run: |
+          set -euo pipefail
+          cp app/build/outputs/apk/debug/app-debug.apk live-operator-debug.apk
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)"
+          cert="$("$apksigner" verify --print-certs live-operator-debug.apk | grep -m1 'SHA-256 digest' | sed -E 's/.*: //' | tr 'a-f' 'A-F' | sed -E 's/(..)/\1:/g; s/:$//')"
+          {
+            echo "### Debug APK"
+            echo
+            echo "Debug signing certificate SHA-256 (for a test build only):"
+            echo
+            echo "\`$cert\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-operator-debug-apk
+          path: apps/live-operator-android/live-operator-debug.apk
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-operator-reports
+          path: apps/live-operator-android/app/build/reports/
+          retention-days: 7
+
+  release:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/live-operator-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version and tag
+        id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(grep -m1 -E 'versionName\s*=' app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')"
+          if ! echo "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::versionName '$version' is not semver"
+            exit 1
+          fi
+          tag="nox-loa-$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag already released — skipping."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check signing secrets
+        if: steps.v.outputs.skip == '0'
+        env:
+          SBA_KEYSTORE_B64: ${{ secrets.SBA_KEYSTORE_B64 }}
+          SBA_KEYSTORE_PASSWORD: ${{ secrets.SBA_KEYSTORE_PASSWORD }}
+          SBA_KEY_ALIAS: ${{ secrets.SBA_KEY_ALIAS }}
+          SBA_KEY_PASSWORD: ${{ secrets.SBA_KEY_PASSWORD }}
+        run: |
+          if [ -z "$SBA_KEYSTORE_B64" ] || [ -z "$SBA_KEYSTORE_PASSWORD" ] || [ -z "$SBA_KEY_ALIAS" ] || [ -z "$SBA_KEY_PASSWORD" ]; then
+            echo "::error::The app signing secrets are missing (SBA_KEYSTORE_B64, SBA_KEYSTORE_PASSWORD, SBA_KEY_ALIAS, SBA_KEY_PASSWORD): add them in Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.v.outputs.skip == '0'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.v.outputs.skip == '0'
+
+      - name: Build signed APK and publish
+        if: steps.v.outputs.skip == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SBA_KEYSTORE_B64: ${{ secrets.SBA_KEYSTORE_B64 }}
+          SBA_KEYSTORE_PASSWORD: ${{ secrets.SBA_KEYSTORE_PASSWORD }}
+          SBA_KEY_ALIAS: ${{ secrets.SBA_KEY_ALIAS }}
+          SBA_KEY_PASSWORD: ${{ secrets.SBA_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export SBA_KEYSTORE_FILE="$RUNNER_TEMP/sba.jks"
+          echo "$SBA_KEYSTORE_B64" | base64 -d > "$SBA_KEYSTORE_FILE"
+          ./gradlew --no-daemon assembleRelease
+          rm -f "$SBA_KEYSTORE_FILE"
+
+          cp app/build/outputs/apk/release/app-release.apk live-operator.apk
+          sha256sum live-operator.apk | cut -d' ' -f1 > live-operator.apk.sha256
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)"
+          "$apksigner" verify live-operator.apk
+          cert="$("$apksigner" verify --print-certs live-operator.apk | grep -m1 'SHA-256 digest' | sed -E 's/.*: //' | tr 'a-f' 'A-F' | sed -E 's/(..)/\1:/g; s/:$//')"
+
+          version="${{ steps.v.outputs.version }}"
+          {
+            echo "**Beta**: under testing before it is marked stable."
+            echo
+            echo "Android 9+ with Chrome. Needs the Live Operator plugin 1.0.0+ on the site."
+            echo
+            echo "- APK SHA-256: \`$(cat live-operator.apk.sha256)\`"
+            echo "- Signing certificate SHA-256 (paste it in Noxpress → Live Operator → Android app):"
+            echo
+            echo "  \`$cert\`"
+            echo
+            echo "### Changes"
+            awk -v v="## $version" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md
+          } > notes.md
+
+          gh release create "${{ steps.v.outputs.tag }}" live-operator.apk live-operator.apk.sha256 \
+            --target "$GITHUB_SHA" \
+            --title "Live Operator app $version (beta)" \
+            --notes-file notes.md \
+            --prerelease
