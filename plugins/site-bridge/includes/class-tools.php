@@ -186,8 +186,38 @@ final class SBR_Tools {
 			'abilities_list'         => array(
 				'class'       => 'read',
 				'title'       => 'List abilities',
-				'description' => 'Abilities registered with the WordPress Abilities API (WordPress 6.9+): name, label, description, annotations, input schema.',
+				'description' => 'Abilities registered with the WordPress Abilities API (WordPress 6.9+): name, label, description, annotations, input schema. "search" keeps only those whose name, label or category contains it (e.g. "book-feed", "noxpress"); "brief" leaves out the descriptions and schemas.',
+				'props'       => array(
+					'search' => $str + array( 'description' => 'Substring of the name, label or category, e.g. book-feed/.' ),
+					'brief'  => $bool + array( 'description' => 'Names, labels and annotations only.' ),
+				),
+			),
+			'bridge_status'          => array(
+				'class'       => 'read',
+				'fleet'       => true,
+				'title'       => 'Site Bridge status',
+				'description' => 'This site\'s Site Bridge settings as Claude is bound by them: version, level, write window (until, minutes left), whether the Hub may open it, the run-as administrator, personal data masking, admin e-mails, IP lists (on / off and size), rate limits, log retention, the Hub it is paired with and when it last called. Changes nothing; only the owner changes these in WP admin.',
 				'props'       => array(),
+			),
+			'audit_log'              => array(
+				'class'       => 'read',
+				'title'       => 'Audit log',
+				'description' => 'This site\'s Site Bridge log, newest first: time (UTC), side, connection, tool, class, arguments (secrets redacted), status, message, size and duration. Filters: tool, status (ok, denied, error), side (site, hub), from / to (Y-m-d, UTC). IP addresses are masked when the site masks personal data.',
+				'props'       => array(
+					'tool'   => $str,
+					'status' => array(
+						'type' => 'string',
+						'enum' => array( 'ok', 'denied', 'error' ),
+					),
+					'side'   => array(
+						'type' => 'string',
+						'enum' => array( 'site', 'hub' ),
+					),
+					'from'   => $str + array( 'description' => 'Y-m-d (UTC).' ),
+					'to'     => $str + array( 'description' => 'Y-m-d (UTC).' ),
+					'limit'  => $int + array( 'description' => 'Default 50, at most 200.' ),
+					'offset' => $int,
+				),
 			),
 			'core_update_check'      => array(
 				'class'       => 'read',
@@ -249,6 +279,12 @@ final class SBR_Tools {
 					'input' => array( 'description' => 'The ability\'s input.' ),
 				),
 				'required'    => array( 'name' ),
+			),
+			'write_window_close'     => array(
+				'class'       => 'write',
+				'title'       => 'Close the write window',
+				'description' => 'Closes this site\'s write window now, when the work is done, so nothing more can change until the owner opens it again. It can only close the window, never open or extend it.',
+				'props'       => array(),
 			),
 			'plugins_install'        => array(
 				'class'       => 'admin',
@@ -1123,18 +1159,108 @@ final class SBR_Tools {
 		if ( ! function_exists( 'wp_get_abilities' ) ) {
 			return new WP_Error( 'sbr_tool', 'This site has no Abilities API (WordPress 6.9+).' );
 		}
-		$out = array();
+		$find  = strtolower( self::a_str( $a, 'search' ) );
+		$brief = self::a_bool( $a, 'brief' );
+		$out   = array();
 		foreach ( wp_get_abilities() as $ab ) {
 			$meta  = method_exists( $ab, 'get_meta' ) ? (array) $ab->get_meta() : array();
-			$out[] = array(
-				'name'         => $ab->get_name(),
-				'label'        => method_exists( $ab, 'get_label' ) ? $ab->get_label() : '',
-				'description'  => method_exists( $ab, 'get_description' ) ? $ab->get_description() : '',
-				'annotations'  => $meta['annotations'] ?? null,
-				'input_schema' => method_exists( $ab, 'get_input_schema' ) ? $ab->get_input_schema() : null,
+			$label = method_exists( $ab, 'get_label' ) ? (string) $ab->get_label() : '';
+			$cat   = method_exists( $ab, 'get_category' ) ? (string) $ab->get_category() : '';
+			if ( '' !== $find && false === strpos( strtolower( $ab->get_name() . ' ' . $label . ' ' . $cat ), $find ) ) {
+				continue;
+			}
+			$row = array(
+				'name'        => $ab->get_name(),
+				'label'       => $label,
+				'category'    => $cat,
+				'annotations' => $meta['annotations'] ?? null,
 			);
+			if ( ! $brief ) {
+				$row['description']  = method_exists( $ab, 'get_description' ) ? $ab->get_description() : '';
+				$row['input_schema'] = method_exists( $ab, 'get_input_schema' ) ? $ab->get_input_schema() : null;
+			}
+			$out[] = $row;
 		}
 		return array( 'abilities' => $out );
+	}
+
+	private static function tool_bridge_status( array $a ): array {
+		$s     = SBR_Settings::get();
+		$until = SBR_Settings::window_until();
+		$user  = SBR_Settings::run_as_user();
+		$trust = SBR_Site::trust();
+		$seen  = (int) get_option( 'sbr_hub_seen', 0 );
+		$ips   = static function ( string $key ): array {
+			$n = count( SBR_Settings::lines( $key ) );
+			return array(
+				'on'      => $n > 0,
+				'entries' => $n,
+			);
+		};
+		return array(
+			'version'       => SBR_VERSION,
+			'roles'         => array(
+				'hub'  => (bool) $s['hub'],
+				'site' => (bool) $s['site'],
+			),
+			'level'         => $s['level'],
+			'write_window'  => array(
+				'open'         => $until > 0,
+				'until'        => $until ? gmdate( 'c', $until ) : null,
+				'minutes_left' => $until ? (int) ceil( max( 0, $until - time() ) / 60 ) : 0,
+				'hub_may_open' => (bool) $s['remote_window'],
+			),
+			'run_as'        => $user ? array(
+				'id'   => $user->ID,
+				'name' => $user->display_name,
+			) : null,
+			'pii_mask'      => (bool) $s['pii_mask'],
+			'email_admin'   => (bool) $s['email_admin'],
+			'ip_lists'      => array(
+				'site' => $ips( 'site_ips' ),
+				'hub'  => $ips( 'hub_ips' ),
+			),
+			'rate'          => array(
+				'per_minute' => (int) $s['rate_min'],
+				'per_day'    => (int) $s['rate_day'],
+			),
+			'log_days'      => (int) $s['log_days'],
+			'hub'           => array(
+				'paired'    => null !== $trust,
+				'url'       => is_array( $trust ) && isset( $trust['hub_url'] ) ? (string) $trust['hub_url'] : '',
+				'since'     => is_array( $trust ) && ! empty( $trust['paired'] ) ? gmdate( 'c', (int) $trust['paired'] ) : null,
+				'last_call' => $seen ? gmdate( 'c', $seen ) : null,
+			),
+			'owner_only'    => 'Level, write window, run-as, IP lists and pairing change only in WP admin → Noxpress → Site Bridge.',
+		);
+	}
+
+	private static function tool_audit_log( array $a ): array {
+		$f = array(
+			'tool'   => sanitize_key( self::a_str( $a, 'tool' ) ),
+			'status' => in_array( self::a_str( $a, 'status' ), array( 'ok', 'denied', 'error' ), true ) ? self::a_str( $a, 'status' ) : '',
+			'side'   => in_array( self::a_str( $a, 'side' ), array( 'site', 'hub' ), true ) ? self::a_str( $a, 'side' ) : '',
+			'from'   => self::a_str( $a, 'from' ),
+			'to'     => self::a_str( $a, 'to' ),
+		);
+		$limit = self::a_int( $a, 'limit', 50, 1, 200 );
+		$off   = self::a_int( $a, 'offset', 0, 0, 1000000 );
+		$pii   = (bool) SBR_Settings::v( 'pii_mask' );
+		$rows  = array();
+		foreach ( SBR_Store::log_rows( $f, $limit, $off ) as $r ) {
+			$args       = json_decode( (string) $r['args'], true );
+			$r['args']  = null !== $args ? $args : (string) $r['args'];
+			$r['ip']    = $pii ? SBR_Guard::mask_ip( (string) $r['ip'] ) : (string) $r['ip'];
+			$r['id']    = (int) $r['id'];
+			$r['bytes'] = (int) $r['bytes'];
+			$r['ms']    = (int) $r['ms'];
+			$rows[]     = $r;
+		}
+		return array(
+			'total'  => SBR_Store::log_count( $f ),
+			'offset' => $off,
+			'rows'   => $rows,
+		);
 	}
 
 	private static function tool_core_update_check( array $a ): array {
