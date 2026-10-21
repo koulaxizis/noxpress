@@ -1,6 +1,6 @@
 {
   "display": 100,
-  "total": 170,
+  "total": 177,
   "offset": 5,
   "updated": "2026-10-21",
   "assets": {
@@ -374,22 +374,26 @@
     },
     "661747014": {
       "file": "nox-bf-1.10.0/book-feed.zip",
-      "count": 1
+      "count": 2
     },
     "661761432": {
       "file": "nox-rs-1.10.0/revenue-splitter.zip",
-      "count": 1
+      "count": 2
     },
     "661761515": {
       "file": "nox-sp-1.7.0/store-pulse.zip",
-      "count": 1
+      "count": 2
     },
     "661769011": {
       "file": "nox-sb-1.5.1/site-bridge.zip",
-      "count": 0
+      "count": 2
     },
     "661786413": {
       "file": "nox-bf-1.10.1/book-feed.zip",
+      "count": 2
+    },
+    "661832785": {
+      "file": "nox-sb-1.6.0/site-bridge.zip",
       "count": 0
     }
   }
