@@ -1,0 +1,231 @@
+/**
+ * Live Operator — app.css (v1.0.0)
+ *
+ * The phone app: Noxpress dark palette (Bible §2), large touch targets,
+ * safe areas for full screen (TWA / standalone). Prefix lop-*.
+ */
+
+:root {
+	--lop-bg: #101218;
+	--lop-panel: #14161d;
+	--lop-panel-2: #1d2029;
+	--lop-input: #1a1d26;
+	--lop-border: #2e3240;
+	--lop-text: #eae8fa;
+	--lop-heading: #f6f4ff;
+	--lop-muted: #b7b2d6;
+	--lop-link: #beb1ff;
+	--lop-accent: #6d4aff;
+	--lop-accent-hover: #8263ff;
+	--lop-ok: #7ee2a8;
+	--lop-go: #1f9d5b;
+	--lop-warn: #f5c97e;
+	--lop-danger: #ff9a9a;
+	color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+	margin: 0;
+	background: var(--lop-bg);
+	color: var(--lop-text);
+	font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+	-webkit-text-size-adjust: 100%;
+}
+
+a { color: var(--lop-link); }
+
+.lop-app {
+	max-width: 720px;
+	margin: 0 auto;
+	padding: calc(12px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+
+.lop-boot { padding: 40px 16px; text-align: center; color: var(--lop-muted); }
+
+.lop-muted { color: var(--lop-muted); }
+.lop-ok { color: var(--lop-ok); }
+
+/* ===== Banner ===== */
+.lop-banner {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	margin: 0 0 10px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: #3a2d12;
+	color: var(--lop-warn);
+	font-size: 14px;
+}
+
+/* ===== Switch ===== */
+.lop-top {
+	background: var(--lop-panel);
+	border: 1px solid var(--lop-border);
+	border-radius: 12px;
+	padding: 14px;
+	margin-bottom: 16px;
+}
+
+.lop-switch {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.lop-switch__state { font-size: 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lop-switch__state .lop-muted { font-size: 14px; }
+.lop-switch__btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.lop-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #5a5f73;
+	flex: none;
+}
+.lop-switch.is-on .lop-dot { background: var(--lop-ok); box-shadow: 0 0 0 4px rgba(126, 226, 168, .18); }
+
+.lop-push {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--lop-border);
+	font-size: 14px;
+}
+.lop-push__btns { display: flex; gap: 6px; }
+
+.lop-note { margin: 10px 0 0; font-size: 14px; color: var(--lop-muted); }
+.lop-note--warn { color: var(--lop-warn); }
+
+/* ===== Buttons ===== */
+.lop-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding: 0 16px;
+	border: 1px solid var(--lop-accent);
+	border-radius: 10px;
+	background: var(--lop-accent);
+	color: #fff;
+	font: inherit;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+.lop-btn:hover { background: var(--lop-accent-hover); }
+.lop-btn:disabled { opacity: .55; cursor: default; }
+.lop-btn--go { background: var(--lop-go); border-color: var(--lop-go); }
+.lop-btn--go:hover { background: #24b469; }
+.lop-btn--ghost { background: transparent; color: var(--lop-text); border-color: var(--lop-border); }
+.lop-btn--ghost:hover { background: var(--lop-panel-2); }
+.lop-btn--small { min-height: 36px; padding: 0 12px; font-size: 14px; }
+
+/* ===== Inbox ===== */
+.lop-group {
+	margin: 18px 4px 8px;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+	color: var(--lop-muted);
+}
+
+.lop-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+.lop-item {
+	display: grid;
+	gap: 4px;
+	padding: 12px 14px;
+	border-radius: 12px;
+	border: 1px solid var(--lop-border);
+	background: var(--lop-panel);
+	color: var(--lop-text);
+	text-decoration: none;
+}
+.lop-item:active { background: var(--lop-panel-2); }
+.lop-item--waiting { border-color: var(--lop-warn); }
+.lop-item--human { border-left: 4px solid var(--lop-go); }
+.lop-item__top { display: flex; justify-content: space-between; gap: 8px; }
+.lop-item__top strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lop-item__msg { color: var(--lop-muted); font-size: 14px; overflow-wrap: anywhere; }
+.lop-item__meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; }
+
+.lop-tag {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--lop-panel-2);
+	font-size: 12px;
+}
+.lop-tag--warn { background: #3a2d12; color: var(--lop-warn); }
+
+.lop-empty { text-align: center; color: var(--lop-muted); padding: 32px 0; }
+.lop-hint { font-size: 13px; color: var(--lop-muted); margin: 18px 4px 0; }
+
+/* ===== Conversation ===== */
+.lop-thread__bar {
+	position: sticky;
+	top: 0;
+	z-index: 4;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 0;
+	background: var(--lop-bg);
+}
+.lop-thread__who { display: grid; min-width: 0; }
+.lop-thread__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lop-thread__sub { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.lop-msgs { display: flex; flex-direction: column; gap: 8px; padding: 8px 0 12px; }
+
+.lop-msg {
+	max-width: 86%;
+	padding: 8px 12px;
+	border-radius: 14px;
+	background: var(--lop-panel-2);
+	align-self: flex-start;
+}
+.lop-msg--agent { align-self: flex-end; background: #3b2a8f; }
+.lop-msg--ai { background: var(--lop-panel); border: 1px dashed var(--lop-border); }
+.lop-msg--system { align-self: center; background: transparent; color: var(--lop-muted); font-size: 13px; text-align: center; }
+.lop-msg__who { display: block; font-size: 12px; color: var(--lop-muted); margin-bottom: 2px; }
+.lop-msg__text { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.lop-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin: 4px 0 10px; }
+.lop-actions p { margin: 0; flex: 1 1 100%; font-size: 14px; }
+
+.lop-composer {
+	position: sticky;
+	bottom: 0;
+	display: flex;
+	gap: 8px;
+	align-items: flex-end;
+	padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+	background: var(--lop-bg);
+}
+.lop-composer[hidden] { display: none; }
+
+.lop-input {
+	flex: 1;
+	min-height: 44px;
+	max-height: 40vh;
+	padding: 10px 12px;
+	border-radius: 10px;
+	border: 1px solid var(--lop-border);
+	background: var(--lop-input);
+	color: var(--lop-text);
+	font: inherit;
+	resize: vertical;
+}
+.lop-input:focus { outline: 2px solid var(--lop-accent); outline-offset: 0; }

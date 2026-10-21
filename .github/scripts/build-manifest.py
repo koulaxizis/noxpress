@@ -57,6 +57,7 @@ SLUGS = {
     'nm': 'data-migrator',
     'hs': 'home-sections',
     'bf': 'book-feed',
+    'lo': 'live-operator',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

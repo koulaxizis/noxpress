@@ -62,7 +62,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $sf_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed' ) as $sf_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed', 'live-operator' ) as $sf_slug ) {
 	if ( 'smart-formatter' !== $sf_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $sf_slug . '/' . $sf_slug . '.php' ) ) {
 		$sf_suite_left = true;
 		break;

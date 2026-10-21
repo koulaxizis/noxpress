@@ -55,6 +55,7 @@ final class Noxpress_Core {
 		'Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.' => 'Full backup and restore of the site, here or on another server, with a domain change and no manual fixes.',
 		'Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.' => 'Product sections with the [products] shortcode: marker classes that leave out products, categories or pre-orders and filter by a word in the title.',
 		'Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.' => 'Titles of other publishers from the Bookpoint catalogue (OSDEL) as products: search and import, rules per publisher and a daily sync of price and availability.',
+		'Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.' => "PurioChat's live chat on your phone: an online / offline switch, notifications for every request and message, and replies from the Android app.",
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -258,6 +259,11 @@ final class Noxpress_Core {
 				'name' => 'Book Feed',
 				'desc' => __( 'Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.', 'noxpress' ),
 				'page' => 'bkf-feed',
+			),
+			'live-operator'     => array(
+				'name' => 'Live Operator',
+				'desc' => __( 'Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.', 'noxpress' ),
+				'page' => 'lop-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

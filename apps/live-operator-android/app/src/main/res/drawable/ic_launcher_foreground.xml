@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A chat bubble with three dots, in the safe zone of a 108dp adaptive icon (placeholder until the site's logo). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFEAE8FA"
+        android:pathData="M38,34 L70,34 Q78,34 78,42 L78,60 Q78,68 70,68 L48,68 L38,78 L40,68 L38,68 Q30,68 30,60 L30,42 Q30,34 38,34 Z" />
+    <path
+        android:fillColor="#FF6D4AFF"
+        android:pathData="M42,51 m-3.5,0 a3.5,3.5 0,1 1,7 0 a3.5,3.5 0,1 1,-7 0 M54,51 m-3.5,0 a3.5,3.5 0,1 1,7 0 a3.5,3.5 0,1 1,-7 0 M66,51 m-3.5,0 a3.5,3.5 0,1 1,7 0 a3.5,3.5 0,1 1,-7 0" />
+</vector>
