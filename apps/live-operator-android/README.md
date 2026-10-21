@@ -15,6 +15,12 @@ No code of its own: `com.google.androidbrowserhelper` 2.5.0 (Google) does the la
 2. Copy the **signing certificate SHA-256** from the same notes into **Noxpress → Live Operator → Android app → SHA-256 certificate fingerprints** and save. The site then serves `/.well-known/assetlinks.json`, and the app opens without an address bar. (Without it the app works, with a thin address bar.)
 3. Open the app, log in, tap **Turn on notifications** and **Test**.
 
+## Updates
+
+From 1.1.0 the app opens the page as `/live-operator/?app=<version>`. The plugin (1.1.0+) then looks at the repository's releases at most every 12 hours, from the phone, and shows **New app version X. Download** at the top when a newer `nox-loa-*` release exists. Android asks before installing, and a signed release installs over the previous one only with the same key. Builds for another site (below) leave the parameter out, so they never point to this app's releases.
+
+Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Live Operator app` (the repository also publishes plugins and the Site Bridge app). The APK asset is `live-operator.apk`.
+
 ## Another site
 
 The site and the name are build properties:

@@ -70,6 +70,8 @@ final class LOP_Lang {
 		'Η σύνδεση έληξε. Ξαναφορτώνει…'                   => 'The session expired. Reloading…',
 		'Live Chat του PurioChat'                          => 'PurioChat Live Chat',
 		'Ένα αίτημα περιμένει %d δευτερόλεπτα πριν γυρίσει στο AI.' => 'A request waits %d seconds before it goes back to the AI.',
+		'Νέα έκδοση της εφαρμογής: %s.' => 'New app version: %s.',
+		'Λήψη' => 'Download',
 
 		// Admin.
 		'Live Operator'                                    => 'Live Operator',

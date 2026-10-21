@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +85,22 @@ object Ui {
 fun duration(m: Int): String =
     if (m < 60) stringResource(R.string.dur_minutes, m) else stringResource(R.string.dur_hours, m / 60)
 
+/** "New version" with a download link, under the header (1.4.0). */
+@Composable
+private fun UpdateBar(f: Updates.Found) {
+    val open = LocalUriHandler.current
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(Nx.panel2)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.update_available, f.version), color = Nx.text, fontSize = 13.sp, modifier = Modifier.weight(1f))
+        TextButton(onClick = { runCatching { open.openUri(f.url) } }) { Text(stringResource(R.string.update_get), color = Nx.link) }
+    }
+}
+
 @Composable
 fun SiteBridgeApp(
     ui: UiState,
@@ -121,6 +138,7 @@ fun SiteBridgeApp(
         ) {
             Column(Modifier.fillMaxSize()) {
                 Header(store.hub.takeIf { ui.paired }, ui.busy)
+                ui.update?.let { UpdateBar(it) }
                 if (!ui.paired) {
                     PairScreen(onScan, onPaste)
                 } else {

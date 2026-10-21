@@ -1,5 +1,10 @@
 # Live Operator app — changelog
 
+## 1.1.0
+
+* New: the app opens the page with its version, and the Live Operator plugin 1.1.0+ shows "New app version X. Download" at the top when a newer `nox-loa-*` release exists (it looks at GitHub at most every 12 hours). Only in this official build; a build for another site does not send its version.
+* Obtainium can follow the releases too (see the README).
+
 ## 1.0.0
 
 * First release: «Γλαρόλυκοι Live», the Live Operator page of glarolykoi.net (/live-operator/) full screen, as a Trusted Web Activity.

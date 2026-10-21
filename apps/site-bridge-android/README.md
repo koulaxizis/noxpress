@@ -16,6 +16,12 @@ Works with Claude. Not made by or affiliated with Anthropic.
 2. On the Hub: **App** → **New code for a phone**.
 3. In the app: **Scan QR** (or paste the code). The code works for 15 minutes, once.
 
+### Updates
+
+The app looks at the repository's releases when it comes to the front, at most every 12 hours, and shows **New version X — Download** under the header when a newer `nox-sba-*` release exists. It only opens the APK link; Android asks before installing. A signed release installs over the previous one only when both are signed with the same key (a debug build does not update a signed one).
+
+Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Site Bridge app` (the repository also publishes plugins and the Live Operator app). The APK asset is `site-bridge.apk`.
+
 To remove a phone, revoke it in the Hub's App tab, or use **Disconnect** in the app's Settings.
 
 ## How it signs
