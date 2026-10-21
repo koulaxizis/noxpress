@@ -105,6 +105,8 @@
     <string name="bf_f_author">Συγγραφέας ή άλλος συντελεστής</string>
     <string name="bf_f_kind">Είδος</string>
     <string name="bf_f_pstat">Κατάσταση κυκλοφορίας</string>
+    <string name="bf_pstat_only">Μόνο αυτή</string>
+    <string name="bf_pstat_except">Όλες εκτός από αυτή</string>
     <string name="bf_f_year_from">Έτος από</string>
     <string name="bf_f_year_to">Έτος έως</string>
     <string name="bf_f_every">Κάθε πόσες ημέρες (1–90)</string>

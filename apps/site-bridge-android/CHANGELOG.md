@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.2.1
+
+* New: a rule's publishing status can be "Every status except this one" (e.g. every status but «Εξαντλημένο»), as in WP admin. Before, the app kept such a rule but could not make one.
+
 ## 1.2.0
 
 * New: a Book Feed tab, shown when a site of the Hub has Book Feed 1.11.0+ and Site Bridge 1.7.0+. The sync's state with "Sync now" and "Stop"; the rules with "Run now", new rules and changes (publisher search, title words, contributor, kind, publishing status, years, every how many days, draft or published, on/off) and delete; an ISBN lookup by typing or by scanning the barcode, with "Import as a draft" for a title the store does not have.
