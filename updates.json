@@ -234,15 +234,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: Site Bridge is no longer for personal use only. It updates through the Noxpress hub (updates.json) like every other Noxpress plugin. Sites on 1.2.0 install 1.3.0 by hand once.\n* New: Overview says that the plugin gives remote administrator access and that it is not affiliated with Anthropic.\n* New: a card on noxpress.tech, and Site Bridge in the Noxpress hub of every site (Noxpress Core 1.1.17).\n* Security: db_select no longer shows a secret option or meta value under another row's name. A query that reads option_value or meta_value must be one plain SELECT (no UNION, WITH, subquery or derived table) with option_name / meta_key as plain columns of the same table. The mysql, performance_schema and sys schemas are refused.\n* Security: plugins_install refuses zip URLs with dot segments, escapes, user info, query or fragment, so \"/../\" can no longer leave an allowed prefix.\n* Security: file tools no longer serve archives and backup copies (.zip, .tar, .gz, .7z, .rar, .jpa, .bak, .old, .swp and the like).\n* Security: the approval screen warns that an approval link sent by someone else connects their account. Pairing from the Hub no longer follows redirects or reaches private addresses (except local test installs).\n* Change: new installs allow plugin zips only from the noxpress GitHub releases and downloads.wordpress.org (was every github.com/koulaxizis/ repository). Saved settings are kept.",
-        "published": "2026-10-20",
+        "changelog": "* New: a 12 hour write window, for long sessions and heavy work, in Access and in the Hub's Sites list. Sites before 1.4.0 open 30 minutes when the Hub asks for 12 hours; update them too.",
+        "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "43b9df53f6eb6212bb7084a63bb0b59bc2fe2f1d017e1add591b1400615a5711",
-        "signature": "XwH2qXbzn0Vjb+y6ngfwoAelBmU9Urt3UXgVPwxoUUrItJPDpSwV83UM3dyyYRG6PGauwa6DiO5yttlUPhmSCg==",
+        "sha256": "39a7e09c86b16727abd5720d65c658c9c5211d6565cdbf7253f8decf85d1dc69",
+        "signature": "LzMPRl0+juGObPb/dMFxE61TPkNeFZm5fqiqt2gusKM/HfgOjBKkl3icyaJVxfV418xoAAkVaDwJ/deJ9aX1Ag==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.3.0/site-bridge.zip"
+        "version": "1.4.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.4.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
