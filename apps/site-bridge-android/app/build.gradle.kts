@@ -22,6 +22,15 @@ android {
     }
 
     signingConfigs {
+        // A fixed debug key in the repo (not a secret: debug builds only), so a
+        // debug APK from any CI run installs over the previous one. The runner's
+        // own debug key changes on every run.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         if (keystorePath != null) {
             create("release") {
                 storeFile = file(keystorePath)

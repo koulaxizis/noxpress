@@ -4,3 +4,5 @@ local.properties
 *.jks
 *.keystore
 .idea/
+# The shared debug key (public on purpose), so every CI debug APK installs over the last one.
+!app/debug.keystore

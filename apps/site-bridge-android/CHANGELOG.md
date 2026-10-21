@@ -3,6 +3,7 @@
 ## 1.1.0
 
 * New: "Renew for <length> from now" on a site whose window is open. It asks for the fingerprint like opening and starts the picked length from that moment (it replaces the time left, it does not add to it). Needs no Hub change.
+* Debug builds are signed with a fixed debug key from the repo, so a newer debug APK installs over the old one (each CI run used a new key).
 
 ## 1.0.0
 
