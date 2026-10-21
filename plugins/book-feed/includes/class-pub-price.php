@@ -43,7 +43,9 @@
  * names the ISBN. The book's page address (that link, a Store API
  * product's permalink, or the template page itself when it names the
  * ISBN) comes out as 'link'; the importer keeps it in _bkf_pub_url when
- * the product has none, so later looks go straight to it.
+ * the product has none, so later looks go straight to it. A search page
+ * that names the ISBN itself is not the book's page: its title link is
+ * followed too, and a search page kept by 1.9.0 is replaced (1.9.1).
  *
  * Everything read from the page is hostile: only numbers, one image
  * address and one page address come out.
@@ -62,8 +64,23 @@ final class BKF_Pub_Price {
 		if ( isset( $r['pub_url'] ) && is_string( $r['pub_url'] ) && BKF_Settings::page_url_ok( $r['pub_url'] ) ) {
 			return $r['pub_url'];
 		}
+		return self::pub_template( $r );
+	}
+
+	/** The template for the record's publisher (settings), or ''. */
+	private static function pub_template( array $r ): string {
 		$s = BKF_Settings::get();
 		return ( '' !== $r['pub_id'] && isset( $s['pub_prices'][ $r['pub_id'] ] ) ) ? $s['pub_prices'][ $r['pub_id'] ]['url'] : '';
+	}
+
+	/**
+	 * True when $u is the publisher's template page for this record (the
+	 * search page), not a book's own page. 1.9.0 kept such pages in
+	 * _bkf_pub_url when the search page itself named the ISBN (1.9.1).
+	 */
+	public static function is_template_page( array $r, string $u ): bool {
+		$t = self::url( self::pub_template( $r ), $r );
+		return '' !== $u && '' !== $t && untrailingslashit( $u ) === untrailingslashit( $t );
 	}
 
 	/** The page address for a record, or ''. */
@@ -125,14 +142,15 @@ final class BKF_Pub_Price {
 		}
 		$key = 'bkf_pp_' . md5( $r['isbn_digits'] . '|' . $url );
 		$got = $fresh ? false : get_transient( $key );
-		// Entries from before 1.9.0 have no "link": read the page again.
-		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) || ! array_key_exists( 'read', $got ) || ! array_key_exists( 'link', $got ) ) {
+		// Entries from before 1.9.1 may hold the search page as "link": read the page again.
+		if ( ! is_array( $got ) || ! array_key_exists( 'img', $got ) || ! array_key_exists( 'read', $got ) || ! array_key_exists( 'link', $got ) || ( $got['v'] ?? 0 ) < 2 ) {
 			$why  = '';
 			$img  = '';
 			$read = false;
 			$link = '';
-			// A product's own page is the book's page: no link to follow.
-			$own  = isset( $r['pub_url'] ) && is_string( $r['pub_url'] ) && '' !== $r['pub_url'] && $url === $r['pub_url'];
+			// A product's own page is the book's page: no link to follow
+			// (unless it is only the publisher's search page, 1.9.1).
+			$own  = isset( $r['pub_url'] ) && is_string( $r['pub_url'] ) && '' !== $r['pub_url'] && $url === $r['pub_url'] && ! self::is_template_page( $r, $r['pub_url'] );
 			$p    = self::fetch( $url, $r, $why, $img, $read, $link, ! $own );
 			$got  = array(
 				'p'    => $p,
@@ -140,6 +158,7 @@ final class BKF_Pub_Price {
 				'img'  => $img,
 				'read' => $read,
 				'link' => $link,
+				'v'    => 2,
 			);
 			set_transient( $key, $got, self::TTL );
 		}
@@ -217,6 +236,22 @@ final class BKF_Pub_Price {
 			$p    = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
 			$img  = self::image( $body, $r['isbn_digits'] );
 			$link = self::canonical( $body, $url );
+			// A search page that lists this ISBN (Διόπτρα): the book's own
+			// page still has the full-size cover and its address (1.9.1).
+			$to = $follow ? self::title_link( $body, $url, (string) $r['title'] ) : '';
+			if ( '' !== $to && $to !== $url && $to !== $link ) {
+				$w2 = '';
+				$i2 = '';
+				$r2 = false;
+				$l2 = '';
+				$p2 = self::fetch( $to, $r, $w2, $i2, $r2, $l2, false );
+				if ( '' !== $l2 ) {
+					// The title's page names this ISBN: it is the book's page.
+					$link = $l2;
+					$p    = null !== $p2 ? $p2 : $p;
+					$img  = '' !== $i2 ? $i2 : $img;
+				}
+			}
 		} else {
 			$p   = self::parse( $body, $r['isbn_digits'], null, (string) $r['title'] );
 			$img = self::image( $body, $r['isbn_digits'] );

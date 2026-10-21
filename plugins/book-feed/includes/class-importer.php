@@ -586,8 +586,10 @@ final class BKF_Importer {
 		}
 		update_post_meta( $pid, '_bkf_pub_note', $r['pub_why'] );
 		// The book's page found on the publisher's site (1.9.0): kept as
-		// the product's page when it has none, so later looks go there.
-		if ( ! empty( $r['pub_link'] ) && '' === (string) get_post_meta( $pid, '_bkf_pub_url', true ) && BKF_Settings::page_url_ok( $r['pub_link'] ) ) {
+		// the product's page when it has none (or only the search page,
+		// 1.9.1), so later looks go there.
+		$own = (string) get_post_meta( $pid, '_bkf_pub_url', true );
+		if ( ! empty( $r['pub_link'] ) && $r['pub_link'] !== $own && ( '' === $own || BKF_Pub_Price::is_template_page( $r, $own ) ) && BKF_Settings::page_url_ok( $r['pub_link'] ) ) {
 			update_post_meta( $pid, '_bkf_pub_url', $r['pub_link'] );
 		}
 	}
@@ -1146,6 +1148,7 @@ final class BKF_Importer {
 			return false;
 		}
 		if ( self::pixels( $att ) > self::pixels( $cur ) ) {
+			self::keep_image_text( $cur, $att );
 			$p->set_image_id( $att );
 			update_post_meta( $pid, '_bkf_pub_cover_src', $url );
 			delete_post_meta( $pid, '_bkf_pub_cover_no' );
@@ -1156,6 +1159,39 @@ final class BKF_Importer {
 		}
 		update_post_meta( $pid, '_bkf_pub_cover_no', $url );
 		return false;
+	}
+
+	/**
+	 * The texts written on the old cover (alt, caption, description) go to
+	 * the larger one that replaces it; the title becomes the new file's
+	 * name, as on our own covers (1.9.1).
+	 */
+	private static function keep_image_text( int $old, int $new ): void {
+		if ( ! $old || ! $new ) {
+			return;
+		}
+		$o = get_post( $old );
+		if ( ! $o ) {
+			return;
+		}
+		$alt = (string) get_post_meta( $old, '_wp_attachment_image_alt', true );
+		if ( '' !== $alt ) {
+			update_post_meta( $new, '_wp_attachment_image_alt', $alt );
+		}
+		$file = get_attached_file( $new );
+		$data = array( 'ID' => $new );
+		if ( '' !== $o->post_excerpt ) {
+			$data['post_excerpt'] = $o->post_excerpt;
+		}
+		if ( '' !== $o->post_content ) {
+			$data['post_content'] = $o->post_content;
+		}
+		if ( $file ) {
+			$data['post_title'] = pathinfo( $file, PATHINFO_FILENAME );
+		}
+		if ( count( $data ) > 1 ) {
+			wp_update_post( wp_slash( $data ) );
+		}
 	}
 
 	/** Width × height of an attachment image (0 when unknown). */
