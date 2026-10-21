@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -22,7 +22,7 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 **Each site decides**
 
 * Level per site: off, read, write or admin. New sites start at read.
-* Write and admin tools only run while the site's **write window** is open (15, 30 or 60 minutes, 3 or 5 hours, opened by the site's owner in WP admin; the Hub may open it only when the site allows that, off by default).
+* Write and admin tools only run while the site's **write window** is open (15, 30 or 60 minutes, 3, 5 or 12 hours, opened by the site's owner in WP admin; the Hub may open it only when the site allows that, off by default).
 * Tools run as an administrator chosen on the site, so WordPress's own permissions and hooks apply.
 * Personal data (email, phone, address, postcode, IP) is masked by default; secrets (passwords, keys, tokens, salts) are always returned as `***`.
 * Optional IP lists for the site endpoint and the MCP endpoint.
@@ -80,6 +80,9 @@ The secret key is sealed with the salts, so a new key pair is made and a notice 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: a 12 hour write window, for long sessions and heavy work, in Access and in the Hub's Sites list. Sites before 1.4.0 open 30 minutes when the Hub asks for 12 hours; update them too.
 
 = 1.3.0 =
 * New: Site Bridge is no longer for personal use only. It updates through the Noxpress hub (updates.json) like every other Noxpress plugin. Sites on 1.2.0 install 1.3.0 by hand once.
