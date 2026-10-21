@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,10 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.9.1 =
+* The book's own page, also when the publisher's search page names the ISBN itself (Διόπτρα): the link with the book's title is still read, so the full-size cover and the book's address come from the book's page. A search page that 1.9.0 kept in `_bkf_pub_url` is replaced by the book's page on the next sync.
+* A larger cover from the publisher's page keeps the alt text, caption and description of the cover it replaces; its title is the new file's name.
 
 = 1.9.0 =
 * Square covers (setting): every downloaded cover becomes a square PNG with a transparent background, the whole cover centred on a canvas as wide as its longer side, never cropped.
