@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -30,8 +30,8 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 
 **Tools**
 
-* Read: `list_sites`, `site_info`, `plugins_list`, `themes_list`, `option_get`, `db_tables`, `db_describe`, `db_select` (SELECT / SHOW / DESCRIBE / EXPLAIN only, with guards, optionally through a read-only database user), `rest_get`, `page_html`, `files_list`, `file_read`, `files_search`, `upload_read`, `logs_tail`, `cron_list`, `site_health`, `abilities_list`, `core_update_check`.
-* Write: `rest_write` (the site's own REST API, so plugins validate and hook as usual), `option_set`, `media_upload_from_url`, `cache_flush`, `ability_run` (WordPress Abilities API, class taken from the ability's annotations).
+* Read: `list_sites`, `site_info`, `bridge_status`, `audit_log`, `plugins_list`, `themes_list`, `option_get`, `db_tables`, `db_describe`, `db_select` (SELECT / SHOW / DESCRIBE / EXPLAIN only, with guards, optionally through a read-only database user), `rest_get`, `page_html`, `files_list`, `file_read`, `files_search`, `upload_read`, `logs_tail`, `cron_list`, `site_health`, `abilities_list`, `core_update_check`.
+* Write: `rest_write` (the site's own REST API, so plugins validate and hook as usual), `option_set`, `media_upload_from_url`, `cache_flush`, `ability_run` (WordPress Abilities API, class taken from the ability's annotations), `write_window_close` (closes the window early, never opens it).
 * Admin: `plugins_install` (zip only from allowed URL prefixes, by default the noxpress GitHub releases and downloads.wordpress.org), `plugins_activate`, `plugins_deactivate`, `plugins_update`, `themes_update`, `noxpress_channel_set`.
 * Never: writing files, SQL writes, user or password changes, reading wp-config.php, .env, keys or backups.
 
@@ -80,6 +80,12 @@ The secret key is sealed with the salts, so a new key pair is made and a notice 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.5.0 =
+* New: `bridge_status` shows the settings Claude is bound by on a site: level, write window and minutes left, whether the Hub may open it, run-as administrator, masking, admin e-mails, IP lists (on / off), rate limits, log retention and the paired Hub. Read only.
+* New: `audit_log` reads the site's Site Bridge log, newest first, with filters (tool, status, side, from / to). IP addresses are masked when the site masks personal data.
+* New: `write_window_close` closes the write window when the work is done. It can never open or extend it; the level, the window, run-as, IP lists and pairing stay with the owner in WP admin.
+* New: `abilities_list` takes `search` (name, label or category) and `brief`, so the abilities of one plugin (e.g. `book-feed/`) come without the rest. The category is shown too.
 
 = 1.4.0 =
 * New: a 12 hour write window, for long sessions and heavy work, in Access and in the Hub's Sites list. Sites before 1.4.0 open 30 minutes when the Hub asks for 12 hours; update them too.

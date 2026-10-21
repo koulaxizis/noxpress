@@ -145,6 +145,17 @@ final class SBR_Tools_Write {
 		return array( 'result' => SBR_Guard::clean_tree( $res ) );
 	}
 
+	/** Closes the write window now (it never opens or extends it). */
+	public static function tool_write_window_close( array $a ): array {
+		$was = SBR_Settings::window_until();
+		SBR_Settings::close_window();
+		return array(
+			'closed'     => true,
+			'was_until'  => $was ? gmdate( 'c', $was ) : null,
+			'_log_extra' => array( 'was_until' => $was ),
+		);
+	}
+
 	/* =====================================================================
 	 * Admin: plugins, themes, channel
 	 * =================================================================== */

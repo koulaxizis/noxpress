@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.9.1
+Stable tag: 1.10.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -64,6 +64,7 @@ Bring titles of other publishers from a book catalogue (Bookpoint / OSDEL web se
 * `bkf_get_source( $product_id )`: where a product came from (`source`, `id`, `isbn`, `synced`, `linked`), or null.
 * Fires `noxpress_products_changed( $ids )` after each import or sync step that changed products.
 * WP-CLI: `wp book-feed status`, `wp book-feed search --title=…` (read only), `wp book-feed sync --yes`.
+* Abilities (WordPress 6.9+): status, history, publisher's price, sync now, stop, square covers and one product's sync, for remote tools such as Site Bridge.
 
 == Installation ==
 
@@ -96,6 +97,9 @@ Put them in their own category and set preparation days on that category in Ship
 The settings, the history, the password, the scheduled actions and the plugin's marks on products are removed. Products, images and categories stay, unless "Also delete the imported products" is ticked; then the products the plugin created are deleted (linked products and images always stay). The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.10.0 =
+* WordPress Abilities API (WordPress 6.9+), category "Noxpress": `book-feed/status`, `book-feed/history`, `book-feed/price-check` (read), `book-feed/sync-start` (all, or one rule), `book-feed/sync-cancel`, `book-feed/square-start` and `book-feed/product-sync`. They do what the buttons in WP admin do, with the same capability (manage_woocommerce), so a remote tool such as Site Bridge's `ability_run` can start and follow a sync. Nothing returns the feed's account or password.
 
 = 1.9.1 =
 * The book's own page, also when the publisher's search page names the ISBN itself (Διόπτρα): the link with the book's title is still read, so the full-size cover and the book's address come from the book's page. A search page that 1.9.0 kept in `_bkf_pub_url` is replaced by the book's page on the next sync.
