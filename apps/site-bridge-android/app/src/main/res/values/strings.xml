@@ -20,6 +20,7 @@
     <string name="closed">Closed</string>
     <string name="open_until">Open until %1$s · %2$s left</string>
     <string name="open_btn">Open for %1$s</string>
+    <string name="renew_btn">Renew for %1$s from now</string>
     <string name="close_btn">Close now</string>
     <string name="cannot_open">This site does not let the Hub open its window (Site Bridge → Access, on the site).</string>
     <string name="unreachable">The Hub could not reach the site: %1$s</string>
@@ -45,7 +46,7 @@
     <string name="not_anthropic">Works with Claude. Not made by or affiliated with Anthropic.</string>
     <string name="err_invalidated">New fingerprints were added to this phone, so its key for opening was cancelled. Connect again with a new QR.</string>
     <string name="err_network">No connection to the Hub: %1$s</string>
-    <string name="err_clock">The phone’s clock is wrong. Turn on automatic date and time.</string>
+    <string name="err_clock">The phone’s time and the Hub’s differ by %1$s seconds. Check automatic date and time on the phone, then try again.</string>
     <string name="err_unknown_device">This phone is no longer connected to the Hub (revoked). Connect again with a new QR.</string>
     <string name="err_app_off">The app is off on the Hub (Site Bridge → App).</string>
 </resources>

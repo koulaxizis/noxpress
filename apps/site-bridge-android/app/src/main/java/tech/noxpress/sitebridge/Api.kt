@@ -103,8 +103,11 @@ class Api(private val store: Store) {
 
     /**
      * One signed call. A "clock" refusal sets the offset from the Hub's
-     * time and retries once (read calls only: the act key would need a
-     * second fingerprint).
+     * time and retries once; for the act key that means a second
+     * fingerprint, which beats failing.
+     * GETs carry a throwaway "_" parameter (not signed: the Hub signs the
+     * route only), so a cache in front of the Hub can never answer with an
+     * old body and an old "now".
      */
     private suspend fun signed(method: String, path: String, json: JSONObject?, actSigner: (suspend (String) -> String)?): JSONObject {
         val body = json?.toString()?.toByteArray(Charsets.UTF_8) ?: ByteArray(0)
@@ -112,12 +115,13 @@ class Api(private val store: Store) {
             val ts = store.now()
             val nonce = Protocol.nonce()
             val msg = Protocol.message(method, path, store.device, ts, nonce, body)
+            val url = store.base + path + if (method == "GET") (if ('?' in path) "&" else "?") + "_=" + Protocol.nonce() else ""
             val sig = if (actSigner != null) actSigner(msg) else withContext(Dispatchers.IO) { Keys.signRead(msg) }
             try {
                 val j = withContext(Dispatchers.IO) {
                     http(
                         method,
-                        store.base + path,
+                        url,
                         body,
                         mapOf(
                             "X-SBA-Device" to store.device,
@@ -131,7 +135,7 @@ class Api(private val store: Store) {
                 if (j.has("now")) store.offset = j.getLong("now") - System.currentTimeMillis() / 1000
                 return j
             } catch (e: HubError) {
-                if (e.code == "clock" && attempt == 0 && actSigner == null) continue
+                if (e.code == "clock" && attempt == 0) continue
                 throw e
             }
         }
@@ -162,6 +166,9 @@ class Api(private val store: Store) {
             if (code !in 200..299 || !j.optBoolean("ok")) {
                 if (j.optString("error") == "clock" && j.has("now")) {
                     store.offset = j.getLong("now") - System.currentTimeMillis() / 1000
+                    // How far off the request was, for the message (seconds, Hub minus request).
+                    val sent = headers["X-SBA-Ts"]?.toLongOrNull()
+                    if (sent != null) throw HubError("clock", (j.getLong("now") - sent).toString())
                 }
                 throw HubError(j.optString("error", "http"), j.optString("message", "HTTP $code"))
             }
