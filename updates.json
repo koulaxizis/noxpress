@@ -2,15 +2,15 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* New: \"Preview\" on every rule card, the new one too: what the rule as filled in would bring on its next run, without saving or importing anything. It reads the catalogue as the run does (same filters, same order; a rule that has run counts only titles changed since its last run), up to 500 titles, and says how many match, how many the store has already, how many are new and how many will be imported (up to the rule's max), with the first 30 new titles.\n* New: ability `book-feed/rule-preview` (read) for the same, used by the Site Bridge phone app.",
+        "changelog": "* Changed: the publisher's price replaces the catalogue's (OSDEL) only when it is higher. A lower one, often the publisher's own shop sale, would have undercut the fixed book price; the catalogue's price is kept then, and the history notes only the prices that are used.",
         "published": "2026-10-21",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2cefa985adf1e01743ad2ae651ba56383621fdb86647353ac34135d5e10190ac",
-        "signature": "DgeBDvIctAOWkv8XHo3TSB4+Q4oeUXWSkKMh9HJPk4SqkMlYEcFCd/AD5++R3y23ew8m2noYnfhB9HAnRC3IAg==",
+        "sha256": "ceb2072b9c11d3059977ef8fa3377544a64513197c94685cb4d8d82c590112db",
+        "signature": "Roq04igGvnmBBno/K8xDNxbJ/8G6yamRU3/b3JHPy5PNOG8RYheWi1qAaQb6AZZxTllU6O5Ko85IlaBvQHwVCQ==",
         "tested_wp": "7.1",
-        "version": "1.12.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.12.0/book-feed.zip"
+        "version": "1.12.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.12.1/book-feed.zip"
       }
     },
     "book-preview": {
