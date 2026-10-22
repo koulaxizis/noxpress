@@ -1,8 +1,8 @@
 {
-  "display": 100,
-  "total": 245,
+  "display": 250,
+  "total": 255,
   "offset": 5,
-  "updated": "2026-10-21",
+  "updated": "2026-10-22",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -442,7 +442,7 @@
     },
     "663046252": {
       "file": "nox-lo-1.1.0/live-operator.zip",
-      "count": 1
+      "count": 2
     },
     "663050637": {
       "file": "nox-loa-1.1.0/live-operator.apk.sha256",
@@ -450,7 +450,7 @@
     },
     "663050641": {
       "file": "nox-loa-1.1.0/live-operator.apk",
-      "count": 0
+      "count": 1
     },
     "663055694": {
       "file": "nox-sba-1.4.0/site-bridge.apk.sha256",
@@ -458,11 +458,27 @@
     },
     "663055696": {
       "file": "nox-sba-1.4.0/site-bridge.apk",
-      "count": 0
+      "count": 1
     },
     "663164576": {
       "file": "nox-bf-1.12.1/book-feed.zip",
+      "count": 2
+    },
+    "663192202": {
+      "file": "nox-loa-1.2.0/live-operator.apk.sha256",
       "count": 0
+    },
+    "663192205": {
+      "file": "nox-loa-1.2.0/live-operator.apk",
+      "count": 1
+    },
+    "663192611": {
+      "file": "nox-sba-1.5.0/site-bridge.apk.sha256",
+      "count": 0
+    },
+    "663192616": {
+      "file": "nox-sba-1.5.0/site-bridge.apk",
+      "count": 4
     }
   }
 }
