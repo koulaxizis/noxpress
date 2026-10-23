@@ -28,8 +28,8 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-loa-<versionName>.
-        versionCode = 4
-        versionName = "1.2.0"
+        versionCode = 5
+        versionName = "1.3.0"
 
         manifestPlaceholders["hostName"] = appUri.host
         manifestPlaceholders["appPath"] = appUri.path.ifEmpty { "/" }

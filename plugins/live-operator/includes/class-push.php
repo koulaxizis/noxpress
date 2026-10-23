@@ -272,7 +272,8 @@ final class LOP_Push {
 	}
 
 	private static function excerpt( string $text, int $max = 160 ): string {
-		$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $text ) ) );
+		// PurioChat keeps a lone "<" as "&lt;" (sanitize_textarea_field); the push shows plain text.
+		$text = trim( preg_replace( '/\s+/u', ' ', wp_specialchars_decode( wp_strip_all_tags( $text ), ENT_QUOTES ) ) );
 		if ( function_exists( 'mb_strlen' ) && mb_strlen( $text ) > $max ) {
 			return rtrim( mb_substr( $text, 0, $max - 1 ) ) . '…';
 		}

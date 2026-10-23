@@ -3,6 +3,9 @@
 
     <!-- Android 13+: the site's notifications, delegated by the browser to this app. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 1.3.0: a chat notification lights the screen for a few seconds (ChatService). -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
 
     <application
         android:allowBackup="false"
@@ -65,9 +68,10 @@
             android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity"
             android:exported="false" />
 
-        <!-- The browser hands the site's notifications to this service, so they show as the app's own. -->
+        <!-- The browser hands the site's notifications to this service, so they show as the app's own
+             (1.3.0: on a high-importance channel, and the screen lights up). -->
         <service
-            android:name="com.google.androidbrowserhelper.trusted.DelegationService"
+            android:name=".ChatService"
             android:enabled="true"
             android:exported="true">
             <meta-data
