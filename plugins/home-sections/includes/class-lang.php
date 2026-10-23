@@ -8,7 +8,8 @@
  * through as they are), anything else → English.
  *
  * Visitors see no msgid of ours: the [products] markers print nothing, and
- * the texts of [hs_video] are store settings (Bible §14.17, HMS_Settings).
+ * the texts of [hs_video] and [hs_stats] are store settings (Bible §14.17,
+ * HMS_Settings).
  *
  * Always loaded (even without WooCommerce) so the "WooCommerce missing"
  * admin notice is translated too.
@@ -108,12 +109,39 @@ final class HMS_Lang {
 
 		'Για προγραμματιστές'                                       => 'For developers',
 		'Φίλτρο στα meta keys των προπαραγγελιών (meta key => τιμή). Προεπιλογή: _simple_preorder = yes (PRENA) και _por_on = yes (Pre-Orders).' => 'Filter on the pre-order meta keys (meta key => value). Default: _simple_preorder = yes (PRENA) and _por_on = yes (Pre-Orders).',
-		'Σταθερά στο wp-config.php που σταματά κάθε marker και κάθε [hs_video].' => 'Constant in wp-config.php that stops every marker and every [hs_video].',
+		'Σταθερά στο wp-config.php που σταματά κάθε marker, κάθε [hs_video] και κάθε [hs_stats].' => 'Constant in wp-config.php that stops every marker, every [hs_video] and every [hs_stats].',
 		'Φίλτρο στην πηγή των βίντεο: meta_key (προεπιλογή wb_custom_tabs) και positions, η θέση της καρτέλας ανά τύπο (προεπιλογή trailer 30, presentation 31).' => 'Filter on the video source: meta_key (default wb_custom_tabs) and positions, the tab position per type (default trailer 30, presentation 31).',
 		'Φίλτρο στα CSS classes του [hs_video]: heading, button, play, meta.' => 'Filter on the CSS classes of [hs_video]: heading, button, play, meta.',
 		'Φίλτρο στην ταξινομία με τα πρόσωπα που μπαίνουν μετά το όνομα του προϊόντος (προεπιλογή pa_syggrafeis· κενό = κανένα).' => 'Filter on the taxonomy whose people follow the product name (default pa_syggrafeis; empty = none).',
 		'Φίλτρο σε κάθε κείμενο του [hs_video] (κείμενο, κλειδί, γλώσσα), π.χ. για WPML.' => 'Filter on every text of [hs_video] (text, key, language), e.g. for WPML.',
 		'Φίλτρο: false για να μη φορτώνεται το script του plugin, όταν η σελίδα έχει δικό της.' => 'Filter: false to skip the plugin\'s script when the page has its own.',
+		'Φίλτρο σε κάθε κείμενο του [hs_stats] (κείμενο, μετρητής, μέρος, γλώσσα), π.χ. για WPML.' => 'Filter on every text of [hs_stats] (text, counter, part, language), e.g. for WPML.',
+		'Φίλτρο: false για να μη φορτώνεται το CSS του [hs_stats], όταν η σελίδα έχει δικό της.' => 'Filter: false to skip the CSS of [hs_stats] when the page has its own.',
+		'Φίλτρο: false για να μη φορτώνεται το script του [hs_stats] (χωρίς ζωντανή ενημέρωση και μέτρημα).' => 'Filter: false to skip the script of [hs_stats] (no live update and no count-up).',
+		'Οι αριθμοί που δείχνει το [hs_stats], μόνο για ανάγνωση, χωρίς cache. Από εδώ τους παίρνει το script.' => 'The numbers [hs_stats] shows, read-only, not cached. The script takes them from here.',
+		'Η μέτρηση στο παρασκήνιο: ένα λεπτό μετά από κάθε αλλαγή, και κάθε 12 ώρες.' => 'The background count: one minute after every change, and every 12 hours.',
+
+		'Shortcode μετρητών'                                        => 'Stats shortcode',
+		'Διαθέσιμα προϊόντα'                                        => 'Available products',
+		'Ολοκληρωμένες παραγγελίες'                                 => 'Completed orders',
+		'Αγοραστές'                                                 => 'Buyers',
+		'Ποιοι μετρητές και με ποια σειρά: products, orders, buyers (με κόμμα). Προεπιλογή: και οι τρεις.' => 'Which counters, in which order: products, orders, buyers (comma-separated). Default: all three.',
+		'Τίτλος H2 πάνω από τους μετρητές· κενό = χωρίς τίτλο.'     => 'H2 heading above the counters; empty = no heading.',
+		'Επιπλέον CSS classes για την ενότητα.'                     => 'Extra CSS classes for the section.',
+		'Το [hs_stats] δείχνει πόσα προϊόντα είναι διαθέσιμα (δημοσιευμένα, ορατά, σε απόθεμα ή σε προπαραγγελία), πόσες παραγγελίες έχουν ολοκληρωθεί και πόσοι διαφορετικοί πελάτες τις έκαναν. Η μέτρηση γίνεται στο παρασκήνιο ένα λεπτό μετά από κάθε αλλαγή και κάθε 12 ώρες· η σελίδα ζητά τους τρέχοντες αριθμούς και τους μετράει από το 0 όταν φανούν, ακόμα κι αν μένει στην page cache.' => '[hs_stats] shows how many products are available (published, visible, in stock or on backorder), how many orders are completed and how many different customers placed them. The count runs in the background one minute after every change and every 12 hours; the page asks for the current numbers and counts them up from 0 when they come into view, even while it stays in the page cache.',
+		'Δεν υπάρχει ακόμα μέτρηση: το shortcode δεν τυπώνει τίποτα μέχρι την πρώτη.' => 'No count yet: the shortcode prints nothing until the first one.',
+		'Μέτρηση'                                                   => 'Count',
+		'Εμφανίζεται'                                               => 'Shown',
+		'Τελευταία μέτρηση: %s.'                                    => 'Last count: %s.',
+		'Μέτρησε τώρα'                                              => 'Count now',
+		'Κείμενα μετρητών'                                          => 'Stats texts',
+		'Πρόθεμα και λεζάντα κάθε μετρητή, όπως τα βλέπει ο επισκέπτης. Με στρογγύλεμα, ο αριθμός είναι το μεγαλύτερο πολλαπλάσιο κάτω από τη μέτρηση (605 με βήμα 10 → 600), γι’ αυτό ταιριάζει με πρόθεμα «Πάνω από». Κενή ελληνική λεζάντα επιστρέφει στην προεπιλογή· κενό αγγλικό δείχνει το ελληνικό.' => 'Prefix and label of each counter, as visitors see them. With rounding, the number is the largest multiple below the count (605 with step 10 → 600), so it goes with a prefix such as "Over". An empty Greek label returns to the default; an empty English one shows the Greek one.',
+		'Στρογγύλεμα'                                               => 'Rounding',
+		'Λεζάντα'                                                   => 'Label',
+		'Ακριβής αριθμός'                                           => 'Exact number',
+		'Όνομα ενότητας (για αναγνώστες οθόνης, όταν δεν υπάρχει τίτλος)' => 'Section name (for screen readers, when there is no heading)',
+		'Η μέτρηση δεν έγινε.'                                      => 'The count did not run.',
+		'Μετρήθηκαν %1$s προϊόντα, %2$s ολοκληρωμένες παραγγελίες και %3$s αγοραστές.' => 'Counted %1$s products, %2$s completed orders and %3$s buyers.',
 
 		'Άγνωστη ενέργεια.'                                         => 'Unknown action.',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                               => 'Settings saved.',

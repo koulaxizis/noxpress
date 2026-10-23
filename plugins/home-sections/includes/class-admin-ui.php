@@ -7,6 +7,8 @@
  *  - the built-in markers (a reference table)
  *  - the alias prefix and the presets (one card each, plus an empty one)
  *  - the [hs_video] shortcode (attributes) and its visitor texts
+ *  - the [hs_stats] shortcode (attributes), the stored counts with a
+ *    "count now" button, and its visitor texts and rounding
  *  - a shortcode test: which products a [products …] shortcode returns
  *    and how each of its classes is read, or which product and video an
  *    [hs_video …] shortcode picks (without its cache)
@@ -135,6 +137,8 @@ final class HMS_Admin_UI {
 
 			<?php self::render_video( $s['video'] ); ?>
 
+			<?php self::render_stats( $s['stats'] ); ?>
+
 			<?php self::render_test(); ?>
 
 			<h2 class="hms-h2"><?php esc_html_e( 'Για προγραμματιστές', 'home-sections' ); ?></h2>
@@ -147,7 +151,12 @@ final class HMS_Admin_UI {
 						<tr><td><code>hms_video_people_taxonomy</code></td><td><?php esc_html_e( 'Φίλτρο στην ταξινομία με τα πρόσωπα που μπαίνουν μετά το όνομα του προϊόντος (προεπιλογή pa_syggrafeis· κενό = κανένα).', 'home-sections' ); ?></td></tr>
 						<tr><td><code>hms_video_text</code></td><td><?php esc_html_e( 'Φίλτρο σε κάθε κείμενο του [hs_video] (κείμενο, κλειδί, γλώσσα), π.χ. για WPML.', 'home-sections' ); ?></td></tr>
 						<tr><td><code>hms_video_script</code></td><td><?php esc_html_e( 'Φίλτρο: false για να μη φορτώνεται το script του plugin, όταν η σελίδα έχει δικό της.', 'home-sections' ); ?></td></tr>
-						<tr><td><code>HMS_DISABLE</code></td><td><?php esc_html_e( 'Σταθερά στο wp-config.php που σταματά κάθε marker και κάθε [hs_video].', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_stats_text</code></td><td><?php esc_html_e( 'Φίλτρο σε κάθε κείμενο του [hs_stats] (κείμενο, μετρητής, μέρος, γλώσσα), π.χ. για WPML.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_stats_style</code></td><td><?php esc_html_e( 'Φίλτρο: false για να μη φορτώνεται το CSS του [hs_stats], όταν η σελίδα έχει δικό της.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_stats_script</code></td><td><?php esc_html_e( 'Φίλτρο: false για να μη φορτώνεται το script του [hs_stats] (χωρίς ζωντανή ενημέρωση και μέτρημα).', 'home-sections' ); ?></td></tr>
+						<tr><td><code>GET /wp-json/home-sections/v1/stats</code></td><td><?php esc_html_e( 'Οι αριθμοί που δείχνει το [hs_stats], μόνο για ανάγνωση, χωρίς cache. Από εδώ τους παίρνει το script.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>hms_stats_rebuild</code>, <code>hms_stats_refresh</code></td><td><?php esc_html_e( 'Η μέτρηση στο παρασκήνιο: ένα λεπτό μετά από κάθε αλλαγή, και κάθε 12 ώρες.', 'home-sections' ); ?></td></tr>
+						<tr><td><code>HMS_DISABLE</code></td><td><?php esc_html_e( 'Σταθερά στο wp-config.php που σταματά κάθε marker, κάθε [hs_video] και κάθε [hs_stats].', 'home-sections' ); ?></td></tr>
 					</tbody>
 				</table>
 			</div>
@@ -324,6 +333,118 @@ final class HMS_Admin_UI {
 								<td><input type="text" class="hms-code" name="hms_v[texts][<?php echo esc_attr( $key ); ?>][en]" value="<?php echo esc_attr( $v['texts'][ $key ]['en'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" /></td>
 							</tr>
 						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p class="hms-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'home-sections' ); ?></button></p>
+			</div>
+		</form>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * [hs_stats]: attributes, counts, visitor texts
+	 * ------------------------------------------------------------------- */
+
+	/** Admin names of the counters (msgids). */
+	private static function stats_labels(): array {
+		return array(
+			'products' => __( 'Διαθέσιμα προϊόντα', 'home-sections' ),
+			'orders'   => __( 'Ολοκληρωμένες παραγγελίες', 'home-sections' ),
+			'buyers'   => __( 'Αγοραστές', 'home-sections' ),
+		);
+	}
+
+	private static function render_stats( array $v ): void {
+		$rows = array(
+			'show'    => __( 'Ποιοι μετρητές και με ποια σειρά: products, orders, buyers (με κόμμα). Προεπιλογή: και οι τρεις.', 'home-sections' ),
+			'heading' => __( 'Τίτλος H2 πάνω από τους μετρητές· κενό = χωρίς τίτλο.', 'home-sections' ),
+			'class'   => __( 'Επιπλέον CSS classes για την ενότητα.', 'home-sections' ),
+		);
+		$d    = HMS_Stats::data();
+		$show = HMS_Stats::values();
+		?>
+		<h2 class="hms-h2"><?php esc_html_e( 'Shortcode μετρητών', 'home-sections' ); ?></h2>
+		<div class="hms-zone">
+			<p class="description"><?php esc_html_e( 'Το [hs_stats] δείχνει πόσα προϊόντα είναι διαθέσιμα (δημοσιευμένα, ορατά, σε απόθεμα ή σε προπαραγγελία), πόσες παραγγελίες έχουν ολοκληρωθεί και πόσοι διαφορετικοί πελάτες τις έκαναν. Η μέτρηση γίνεται στο παρασκήνιο ένα λεπτό μετά από κάθε αλλαγή και κάθε 12 ώρες· η σελίδα ζητά τους τρέχοντες αριθμούς και τους μετράει από το 0 όταν φανούν, ακόμα κι αν μένει στην page cache.', 'home-sections' ); ?></p>
+			<table class="widefat hms-table">
+				<tbody>
+					<?php foreach ( $rows as $att => $text ) : ?>
+						<tr><td><code><?php echo esc_html( $att ); ?>=""</code></td><td><?php echo esc_html( $text ); ?></td></tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p class="description hms-mt-8"><code>[hs_stats]</code> <code>[hs_stats show="orders,buyers" heading="…"]</code></p>
+
+			<?php if ( null === $d ) : ?>
+				<p class="hms-warn hms-mt-8"><?php esc_html_e( 'Δεν υπάρχει ακόμα μέτρηση: το shortcode δεν τυπώνει τίποτα μέχρι την πρώτη.', 'home-sections' ); ?></p>
+			<?php else : ?>
+				<table class="widefat hms-table hms-mt-8">
+					<thead><tr><th></th><th><?php esc_html_e( 'Μέτρηση', 'home-sections' ); ?></th><th><?php esc_html_e( 'Εμφανίζεται', 'home-sections' ); ?></th></tr></thead>
+					<tbody>
+						<?php foreach ( self::stats_labels() as $key => $label ) : ?>
+							<tr><td><?php echo esc_html( $label ); ?></td><td><?php echo esc_html( number_format_i18n( $d[ $key ] ) ); ?></td><td><?php echo esc_html( number_format_i18n( (int) $show[ $key ] ) ); ?></td></tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p class="description hms-mt-8">
+					<?php
+					/* translators: %s: date and time of the last count */
+					echo esc_html( sprintf( __( 'Τελευταία μέτρηση: %s.', 'home-sections' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $d['time'] ) ) );
+					?>
+				</p>
+			<?php endif; ?>
+			<form method="post" class="hms-mt-8">
+				<?php self::nonce_field(); ?>
+				<input type="hidden" name="hms_action" value="stats_count" />
+				<button type="submit" class="button"><?php esc_html_e( 'Μέτρησε τώρα', 'home-sections' ); ?></button>
+			</form>
+		</div>
+
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="hms_action" value="stats" />
+			<h2 class="hms-h2"><?php esc_html_e( 'Κείμενα μετρητών', 'home-sections' ); ?></h2>
+			<div class="hms-zone">
+				<p class="description"><?php esc_html_e( 'Πρόθεμα και λεζάντα κάθε μετρητή, όπως τα βλέπει ο επισκέπτης. Με στρογγύλεμα, ο αριθμός είναι το μεγαλύτερο πολλαπλάσιο κάτω από τη μέτρηση (605 με βήμα 10 → 600), γι’ αυτό ταιριάζει με πρόθεμα «Πάνω από». Κενή ελληνική λεζάντα επιστρέφει στην προεπιλογή· κενό αγγλικό δείχνει το ελληνικό.', 'home-sections' ); ?></p>
+				<p class="hms-field"><span><?php esc_html_e( 'Γλώσσα', 'home-sections' ); ?></span>
+					<select name="hms_s[lang]">
+						<option value="auto" <?php selected( $v['lang'], 'auto' ); ?>><?php esc_html_e( 'Αυτόματα (γλώσσα του site)', 'home-sections' ); ?></option>
+						<option value="el" <?php selected( $v['lang'], 'el' ); ?>>Ελληνικά</option>
+						<option value="en" <?php selected( $v['lang'], 'en' ); ?>>English</option>
+					</select>
+				</p>
+				<table class="widefat hms-table hms-mt-8">
+					<thead><tr><th></th><th><?php esc_html_e( 'Στρογγύλεμα', 'home-sections' ); ?></th><th><?php esc_html_e( 'Πρόθεμα', 'home-sections' ); ?> (EL / EN)</th><th><?php esc_html_e( 'Λεζάντα', 'home-sections' ); ?> (EL / EN)</th></tr></thead>
+					<tbody>
+						<?php foreach ( self::stats_labels() as $key => $label ) : ?>
+							<?php $it = $v['items'][ $key ]; ?>
+							<tr>
+								<td><?php echo esc_html( $label ); ?></td>
+								<td>
+									<select name="hms_s[items][<?php echo esc_attr( $key ); ?>][step]">
+										<?php foreach ( HMS_Stats::steps() as $step ) : ?>
+											<option value="<?php echo (int) $step; ?>" <?php selected( (int) $it['step'], $step ); ?>><?php echo 0 === $step ? esc_html__( 'Ακριβής αριθμός', 'home-sections' ) : esc_html( number_format_i18n( $step ) ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</td>
+								<td>
+									<input type="text" class="hms-code" name="hms_s[items][<?php echo esc_attr( $key ); ?>][prefix][el]" value="<?php echo esc_attr( $it['prefix']['el'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" />
+									<input type="text" class="hms-code" name="hms_s[items][<?php echo esc_attr( $key ); ?>][prefix][en]" value="<?php echo esc_attr( $it['prefix']['en'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" />
+								</td>
+								<td>
+									<input type="text" class="hms-code" name="hms_s[items][<?php echo esc_attr( $key ); ?>][label][el]" value="<?php echo esc_attr( $it['label']['el'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" />
+									<input type="text" class="hms-code" name="hms_s[items][<?php echo esc_attr( $key ); ?>][label][en]" value="<?php echo esc_attr( $it['label']['en'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" />
+								</td>
+							</tr>
+						<?php endforeach; ?>
+						<tr>
+							<td><?php esc_html_e( 'Όνομα ενότητας (για αναγνώστες οθόνης, όταν δεν υπάρχει τίτλος)', 'home-sections' ); ?></td>
+							<td></td>
+							<td colspan="2">
+								<input type="text" class="hms-code" name="hms_s[section][el]" value="<?php echo esc_attr( $v['section']['el'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" />
+								<input type="text" class="hms-code" name="hms_s[section][en]" value="<?php echo esc_attr( $v['section']['en'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" />
+							</td>
+						</tr>
 					</tbody>
 				</table>
 				<p class="hms-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'home-sections' ); ?></button></p>
@@ -587,6 +708,12 @@ final class HMS_Admin_UI {
 			case 'video':
 				self::redirect( self::do_save_video() );
 				break;
+			case 'stats':
+				self::redirect( self::do_save_stats() );
+				break;
+			case 'stats_count':
+				self::redirect( self::do_count_stats() );
+				break;
 			case 'test':
 				// Read-only: answered in this request, no redirect.
 				self::$test = self::do_test( trim( substr( self::post( 'hms_sc' ), 0, 2000 ) ) );
@@ -679,6 +806,7 @@ final class HMS_Admin_UI {
 				'alias'   => $alias,
 				'presets' => $presets,
 				'video'   => HMS_Settings::get()['video'],
+				'stats'   => HMS_Settings::get()['stats'],
 			)
 		);
 		return array_merge( $msgs, self::purge_caches() );
@@ -690,6 +818,30 @@ final class HMS_Admin_UI {
 		$s['video'] = HMS_Settings::video( self::post_array( 'hms_v' ) );
 		HMS_Settings::save( $s );
 		return array_merge( array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'home-sections' ) ) ), self::purge_caches() );
+	}
+
+	/** Saves the [hs_stats] texts and rounding only. */
+	private static function do_save_stats(): array {
+		$s          = HMS_Settings::get();
+		$s['stats'] = HMS_Settings::stats( self::post_array( 'hms_s' ) );
+		HMS_Settings::save( $s );
+		return array_merge( array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'home-sections' ) ) ), self::purge_caches() );
+	}
+
+	/** Counts now, in this admin request (the background rebuild, run at once). */
+	private static function do_count_stats(): array {
+		HMS_Stats::rebuild();
+		$d = HMS_Stats::data();
+		if ( null === $d ) {
+			return array( self::msg( 'error', __( 'Η μέτρηση δεν έγινε.', 'home-sections' ) ) );
+		}
+		return array(
+			self::msg(
+				'success',
+				/* translators: 1: products, 2: completed orders, 3: buyers */
+				sprintf( __( 'Μετρήθηκαν %1$s προϊόντα, %2$s ολοκληρωμένες παραγγελίες και %3$s αγοραστές.', 'home-sections' ), number_format_i18n( $d['products'] ), number_format_i18n( $d['orders'] ), number_format_i18n( $d['buyers'] ) )
+			),
+		);
 	}
 
 	/**

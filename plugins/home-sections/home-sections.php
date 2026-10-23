@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Home Sections
  * Plugin URI:           https://noxpress.tech
- * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets, και το [hs_video] με το νεότερο book trailer ή παρουσίαση από τις καρτέλες βίντεο των προϊόντων. Τα προϊόντα δεν αλλάζουν.
- * Version:              1.1.0
+ * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets, το [hs_video] με το νεότερο book trailer ή παρουσίαση από τις καρτέλες βίντεο των προϊόντων, και το [hs_stats] με ζωντανούς μετρητές για διαθέσιμα προϊόντα, ολοκληρωμένες παραγγελίες και αγοραστές. Τα προϊόντα δεν αλλάζουν.
+ * Version:              1.2.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -33,8 +33,14 @@
  *                    (trailer / presentation) from the products' video
  *                    tabs, poster markup only, cache transient, the
  *                    click-to-load script (assets/video.js)
+ *  - HMS_Stats     → the [hs_stats] shortcode: available products,
+ *                    completed orders and buyers, counted in the
+ *                    background (Action Scheduler) into the option
+ *                    hms_stats_data, a read-only REST route and the
+ *                    live / count-up script (assets/stats.js)
  *  - HMS_Admin_UI  → menu, settings page (markers, alias, presets,
- *                    shortcodes, video texts, shortcode test), footer
+ *                    shortcodes, video texts, stats texts and counts,
+ *                    shortcode test), footer
  *
  * Front-end rules (Bible §14): nothing changes after activation — a
  * marker class acts only where a [products] shortcode carries it, and a
@@ -67,11 +73,17 @@
  *  - §14.10 (queries only in save hooks): that scan runs at render time
  *    on a cache miss, because the pick depends on the shortcode's own
  *    attributes (category, exclude, pre-orders).
+ *  - §14.4 (never in REST): [hs_stats] has its own read-only route,
+ *    GET /home-sections/v1/stats, so a page held by a page cache still
+ *    shows the current numbers (see HMS_Stats).
+ *  - §14.5 (no write on a visitor request): an order or stock change at
+ *    checkout queues one background recount of [hs_stats] (one Action
+ *    Scheduler row); the count itself runs in the background.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HMS_VERSION', '1.1.0' );
+define( 'HMS_VERSION', '1.2.0' );
 define( 'HMS_FILE', __FILE__ );
 define( 'HMS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HMS_URL', plugin_dir_url( __FILE__ ) );
@@ -80,8 +92,9 @@ define( 'HMS_URL', plugin_dir_url( __FILE__ ) );
 // copy among the active Noxpress plugins is the one that loads.
 require_once HMS_PATH . 'includes/noxpress-core/loader.php';
 
-// WooCommerce compatibility: no order data is read or written; the Cart /
-// Checkout blocks are not changed.
+// WooCommerce compatibility: orders are only counted by [hs_stats], through
+// wc_get_orders() (no order data is written); the Cart / Checkout blocks
+// are not changed.
 add_action(
 	'before_woocommerce_init',
 	static function () {
@@ -116,10 +129,12 @@ final class Home_Sections {
 		require_once HMS_PATH . 'includes/class-settings.php';
 		require_once HMS_PATH . 'includes/class-markers.php';
 		require_once HMS_PATH . 'includes/class-video.php';
+		require_once HMS_PATH . 'includes/class-stats.php';
 
-		// [hs_video] is registered even with HMS_DISABLE, so it never shows
-		// as text; it then prints nothing (Bible §14).
+		// [hs_video] and [hs_stats] are registered even with HMS_DISABLE, so they
+		// never show as text; they then print nothing (Bible §14).
 		HMS_Video::init();
+		HMS_Stats::init();
 
 		// Emergency switch (Bible §14): no front-end hook at all.
 		if ( ! self::killed() ) {

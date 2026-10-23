@@ -1,17 +1,20 @@
 <?php
 /**
- * Home Sections — uninstall.php (v1.1.0)
+ * Home Sections — uninstall.php (v1.2.0)
  *
  * Deleted:
- *  - Option hms_settings (alias prefix, presets, video texts).
+ *  - Option hms_settings (alias prefix, presets, video and stats texts).
+ *  - Option hms_stats_data (the [hs_stats] counts) and the background
+ *    actions hms_stats_rebuild / hms_stats_refresh (Action Scheduler,
+ *    group home-sections, or WP-Cron).
  *  - Transients hms_aui_msg_{uid} (PRG notices) and hms_video_cache (the
  *    [hs_video] picks).
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * Nothing else exists: the plugin never writes to products, terms or
  * orders (the markers apply at query time; [hs_video] only reads the
- * products' tab meta). The rs_lang user meta belongs
- * to Revenue Splitter and is not touched. Shortcodes that carry marker
+ * products' tab meta; [hs_stats] only counts products and orders). The
+ * rs_lang user meta belongs to Revenue Splitter and is not touched. Shortcodes that carry marker
  * classes stay in the pages and simply list products without them.
  */
 
@@ -24,7 +27,15 @@ function hms_uninstall_site(): void {
 	global $wpdb;
 
 	delete_option( 'hms_settings' );
+	delete_option( 'hms_stats_data' );
 	delete_transient( 'hms_video_cache' );
+
+	foreach ( array( 'hms_stats_rebuild', 'hms_stats_refresh' ) as $hms_hook ) {
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( $hms_hook, array(), 'home-sections' );
+		}
+		wp_clear_scheduled_hook( $hms_hook );
+	}
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
