@@ -1,0 +1,446 @@
+/**
+ * Trade Accounts — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors tra-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.tra-wrap {
+	--tra-bg: #101218;
+	--tra-panel: #14161d;
+	--tra-panel-2: #1d2029;
+	--tra-input: #1a1d26;
+	--tra-border: #2e3240;
+	--tra-border-input: #3a3f52;
+	--tra-row-border: #23262f;
+	--tra-stripe: #181b23;
+	--tra-hover: #1e212c;
+	--tra-text: #eae8fa;
+	--tra-heading: #f6f4ff;
+	--tra-muted: #b7b2d6;
+	--tra-link: #beb1ff;
+	--tra-link-hover: #d4c9ff;
+	--tra-accent: #6d4aff;
+	--tra-accent-hover: #8263ff;
+	--tra-warn: #f5c97e;
+	--tra-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.tra-wrap {
+	color-scheme: dark;
+	background: var(--tra-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--tra-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.tra-wrap h1,
+.tra-wrap h2 {
+	color: var(--tra-heading);
+}
+
+.tra-wrap a { color: var(--tra-link); }
+.tra-wrap a:hover { color: var(--tra-link-hover); }
+
+.tra-wrap .tra-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--tra-muted);
+	border-bottom: 1px solid var(--tra-border);
+	padding-bottom: 6px;
+}
+
+.tra-wrap .description,
+.tra-wrap p.description,
+.tra-wrap .tra-hint {
+	color: var(--tra-muted) !important;
+}
+
+.tra-zone {
+	background: var(--tra-panel);
+	border: 1px solid var(--tra-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.tra-wrap input[type="text"],
+.tra-wrap input[type="email"],
+.tra-wrap input[type="url"],
+.tra-wrap input[type="number"],
+.tra-wrap input[type="time"],
+.tra-wrap input[type="date"],
+.tra-wrap textarea,
+.tra-wrap select {
+	background-color: var(--tra-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--tra-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.tra-wrap input::placeholder,
+.tra-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.tra-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.tra-wrap input[type="file"] {
+	color: var(--tra-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.tra-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.tra-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.tra-wrap input[type="checkbox"],
+.tra-wrap input[type="radio"] {
+	accent-color: var(--tra-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.tra-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.tra-wrap .button:hover:not(:disabled) {
+	border-color: var(--tra-accent) !important;
+	color: #ffffff !important;
+}
+
+.tra-wrap .button-primary {
+	background: var(--tra-accent) !important;
+	border-color: var(--tra-accent) !important;
+	color: #ffffff !important;
+}
+
+.tra-wrap .button-primary:hover:not(:disabled) {
+	background: var(--tra-accent-hover) !important;
+}
+
+.tra-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.tra-submit { margin-top: 20px; }
+.tra-inline-form { display: inline; margin-right: 10px; }
+.tra-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.tra-table,
+table.widefat.tra-table {
+	background: var(--tra-panel) !important;
+	border: 1px solid var(--tra-border) !important;
+	border-radius: 6px;
+	color: var(--tra-text) !important;
+	margin-top: 14px !important;
+}
+
+.tra-table thead th,
+.tra-table thead td {
+	background: var(--tra-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.tra-table tbody td,
+.tra-table tbody th {
+	background: var(--tra-panel) !important;
+	color: var(--tra-text) !important;
+	border-bottom: 1px solid var(--tra-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.tra-table tbody tr:nth-child(2n) td,
+.tra-table tbody tr:nth-child(2n) th {
+	background: var(--tra-stripe) !important;
+}
+
+.tra-table tbody tr:hover td,
+.tra-table tbody tr:hover th {
+	background: var(--tra-hover) !important;
+}
+
+.tra-table td,
+.tra-table th {
+	padding: 12px 14px;
+}
+
+.tra-table td code {
+	background: transparent !important;
+	color: var(--tra-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.tra-table .tra-empty {
+	color: var(--tra-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.tra-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.tra-footer a { color: #beb1ff; text-decoration: none; }
+.tra-footer a:hover { text-decoration: underline; }
+
+.tra-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.tra-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.tra-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.tra-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.tra-muted { color: var(--tra-muted) !important; }
+.tra-warn { color: var(--tra-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.tra-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.tra-wrap .tra-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--tra-heading);
+}
+
+.tra-status p { margin: 0 0 8px; }
+.tra-status p:last-child { margin-bottom: 0; }
+.tra-status code,
+.tra-wrap .description code,
+.tra-wrap .tra-hint code {
+	background: var(--tra-panel-2);
+	color: var(--tra-muted);
+	border: 1px solid var(--tra-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.tra-suspended { margin: 8px 0 0; }
+.tra-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.tra-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--tra-border);
+	background: var(--tra-panel-2);
+	color: var(--tra-text);
+	white-space: nowrap;
+}
+.tra-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.tra-badge--muted { color: var(--tra-muted); }
+.tra-badge--warn { border-color: #6b5a33; color: var(--tra-warn); }
+.tra-badge--danger { border-color: #6b3a3a; color: var(--tra-danger); }
+
+/* Area fieldsets. */
+.tra-area {
+	background: var(--tra-panel);
+	border: 1px solid var(--tra-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.tra-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--tra-heading);
+}
+.tra-row { margin: 4px 0 8px; }
+
+.tra-details > summary {
+	cursor: pointer;
+	color: var(--tra-link);
+	margin: 4px 0;
+}
+.tra-details[open] > summary { margin-bottom: 12px; }
+
+.tra-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.tra-wrap .tra-label {
+	display: block;
+	font-weight: 600;
+	color: var(--tra-heading);
+	margin: 8px 0 6px;
+}
+.tra-grid .tra-label:first-child { margin-top: 0; }
+
+.tra-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.tra-field > span:first-child {
+	min-width: 150px;
+	color: var(--tra-text);
+}
+.tra-wrap .tra-color { width: 96px; font-family: monospace; }
+.tra-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--tra-border-input);
+}
+
+.tra-wrap .tra-hint { display: block; font-size: 12px; margin-top: 4px; }
+.tra-wrap td .tra-hint { display: inline; }
+.tra-table td.tra-warn { color: var(--tra-warn) !important; }
+
+/* Tabs of the main page. */
+.tra-wrap .tra-tabs {
+	border-bottom: 1px solid var(--tra-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.tra-wrap .tra-tabs .nav-tab {
+	background: var(--tra-panel);
+	border-color: var(--tra-border);
+	color: var(--tra-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.tra-wrap .tra-tabs .nav-tab:hover { color: var(--tra-link-hover); background: var(--tra-hover); }
+.tra-wrap .tra-tabs .nav-tab-active,
+.tra-wrap .tra-tabs .nav-tab-active:hover {
+	background: var(--tra-bg);
+	border-bottom-color: var(--tra-bg);
+	color: var(--tra-heading);
+}
+
+/* One input per line (removal rules). */
+.tra-wrap .tra-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.tra-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--tra-border);
+	border-radius: 6px;
+	background: var(--tra-panel-2);
+}
+.tra-scroll .tra-field { margin-bottom: 4px; }
+
+/* ===== orOS Connect ===== */
+
+.tra-wrap .tra-wide { width: 100%; max-width: 640px; }
+.tra-wrap .tra-key { width: 100%; max-width: 360px; font-family: monospace; }
+.tra-wrap textarea.tra-wide { min-height: 96px; font-family: monospace; font-size: 12px; }
+
+/* Module cards. */
+.tra-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.tra-mod { background: var(--tra-panel); border: 1px solid var(--tra-border); border-radius: 6px; padding: 14px 16px; }
+.tra-mod h3 { margin: 0 0 6px; font-size: 14px; color: var(--tra-heading); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tra-mod p { margin: 0 0 10px; color: var(--tra-muted); }
+.tra-mod.is-soon { opacity: .7; }
+
+/* Two languages side by side. */
+.tra-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
+.tra-pair input[type="text"] { width: 100%; }
+.tra-pair .tra-lang { font-size: 12px; color: var(--tra-muted); display: block; margin-bottom: 2px; }
+
+/* Send log. */
+.tra-table td.is-ok { color: #9fe0b5 !important; }
+.tra-table td.is-retry { color: var(--tra-warn) !important; }
+.tra-table td.is-fail { color: var(--tra-danger) !important; }
+
+@media (max-width: 600px) {
+	.tra-wrap { padding: 20px 14px 18px; }
+	.tra-field { flex-wrap: wrap; }
+}
+
+/* ===== Trade Accounts additions ===== */
+/* A new feed password, shown once: easy to select and copy. */
+.tra-secret code.tra-key {
+	font-size: 14px;
+	user-select: all;
+	letter-spacing: .5px;
+}
+.tra-wrap code.tra-block {
+	white-space: pre-wrap;
+	word-break: break-all;
+	padding: 6px 10px;
+}
