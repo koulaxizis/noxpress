@@ -1,6 +1,6 @@
 {
   "display": 250,
-  "total": 261,
+  "total": 263,
   "offset": 5,
   "updated": "2026-10-24",
   "assets": {
@@ -494,6 +494,10 @@
     },
     "671899701": {
       "file": "nox-hs-1.2.0/home-sections.zip",
+      "count": 2
+    },
+    "671987661": {
+      "file": "nox-ta-1.0.0/trade-accounts.zip",
       "count": 0
     }
   }
