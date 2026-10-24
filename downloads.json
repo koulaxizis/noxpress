@@ -2,7 +2,7 @@
   "display": 250,
   "total": 255,
   "offset": 5,
-  "updated": "2026-10-22",
+  "updated": "2026-10-24",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -479,6 +479,10 @@
     "663192616": {
       "file": "nox-sba-1.5.0/site-bridge.apk",
       "count": 4
+    },
+    "671832171": {
+      "file": "nox-lo-1.1.1/live-operator.zip",
+      "count": 0
     }
   }
 }
