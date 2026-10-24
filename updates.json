@@ -310,6 +310,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.3/theme-patcher.zip"
       }
     },
+    "trade-accounts": {
+      "beta": {
+        "changelog": "* Initial release, with modules switched on one by one.\n* Trade prices module: «Χονδρική» role made by the shop, default and per-account discount on the eligible categories and brands, trade prices in the shop, cart, Store API and order, line and order marks, optional invoice rule (OBS Timologia), no page cache.\n* Trade Feed module: REST tra/v1 in JSON or XML with filters, Application Password per account (shown once, revocable), rate limit, call log without IP.\n* Accounts tab, «Not for trade» product checkbox, test / live / off mode, TRA_DISABLE, privacy policy text, settings export / import, Abilities API status.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.19).",
+        "published": "2026-10-24",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "5fc1878d8c8b978d5e347f265b55ce9e2398ca8d66176fa5a747bf71aef57147",
+        "signature": "qLhu7Ta0QPT2LF3gy9fjoI6XVAsU1E6md+NJhLubXs4VnLRJ7rhRoU0gaWi8t5+6HzZdFl9Mk6Ae5d4CYC9UBA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.0.0/trade-accounts.zip"
+      }
+    },
     "variation-picker": {
       "beta": {
         "changelog": "* Initial release.\n* Swatch types per attribute and per product: text button, color (two-tone), image, variation image, radio list, dropdown.\n* Value looks (color, second color, image, short label) on attribute terms and on custom product attributes.\n* Shape, size, font size, border width and colors with a live preview.\n* Blurred / crossed / hidden values for missing combinations and out of stock; smart selection; \"Color: Black\"; tooltip with name, image, price difference and low stock.\n* Automatic selection, deselect on second click, choices in the page address.\n* Size guides by category or per product, in an accessible dialog.\n* Swatches on shop cards with image swap and pre-selected links.\n* Availability maps built in the background (Action Scheduler) for products with many variations.\n* Import from CartFlows Variation Swatches, Variation Swatches (GetWooPlugins) and WCBoost Variation Swatches.\n* Color dot in the cart and mini-cart.\n* Editable Greek / English texts, settings export / import.\n* Test mode, VPK_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.6).",
