@@ -56,6 +56,7 @@ final class Noxpress_Core {
 		'Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.' => 'Product sections with the [products] shortcode: marker classes that leave out products, categories or pre-orders and filter by a word in the title.',
 		'Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.' => 'Titles of other publishers from the Bookpoint catalogue (OSDEL) as products: search and import, rules per publisher and a daily sync of price and availability.',
 		'Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.' => "PurioChat's live chat on your phone: an online / offline switch, notifications for every request and message, and replies from the Android app.",
+		'Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.' => 'Trade accounts for bookstores: a preset discount on the titles you choose, and an API (Trade Feed) in JSON or XML to list the books in their own e-shops.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -264,6 +265,11 @@ final class Noxpress_Core {
 				'name' => 'Live Operator',
 				'desc' => __( 'Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.', 'noxpress' ),
 				'page' => 'lop-settings',
+			),
+			'trade-accounts'    => array(
+				'name' => 'Trade Accounts',
+				'desc' => __( 'Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.', 'noxpress' ),
+				'page' => 'tra-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

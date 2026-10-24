@@ -58,6 +58,7 @@ SLUGS = {
     'hs': 'home-sections',
     'bf': 'book-feed',
     'lo': 'live-operator',
+    'ta': 'trade-accounts',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
