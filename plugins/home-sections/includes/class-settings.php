@@ -20,7 +20,10 @@
  *             key => {step (one of HMS_Stats::steps()), prefix el / en,
  *             label el / en}. An empty Greek label falls back to the
  *             default; an empty prefix is allowed; an empty English text
- *             shows the Greek one.
+ *             shows the Greek one. groups (1.3.0): list of max MAX_GROUPS
+ *             category groups {key, cats (product_cat term ids, with their
+ *             subcategories), label el / en}; a group without a valid key,
+ *             a category or a Greek label is dropped, a repeated key too.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,6 +35,7 @@ final class HMS_Settings {
 	const MAX_IDS     = 100;
 	const MAX_TITLE   = 100;
 	const MAX_TEXT    = 200;
+	const MAX_GROUPS  = 12;
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -153,7 +157,58 @@ final class HMS_Settings {
 					),
 				),
 			),
+			'groups'  => array(),
 		);
+	}
+
+	/** An empty category group (the new row of the settings page). */
+	public static function group_defaults(): array {
+		return array(
+			'key'   => '',
+			'cats'  => array(),
+			'label' => array(
+				'el' => '',
+				'en' => '',
+			),
+		);
+	}
+
+	/** A group key: a lowercase Latin letter, then letters, digits or dashes, up to 30, not a store key nor "groups". */
+	public static function valid_group_key( string $key ): bool {
+		return (bool) preg_match( '/^[a-z][a-z0-9-]{0,29}$/', $key ) && ! in_array( $key, array_merge( HMS_Stats::keys(), array( 'groups' ) ), true );
+	}
+
+	/**
+	 * One category group, or null when it is invalid. With $check (on
+	 * save), categories that do not exist are dropped.
+	 */
+	public static function group( $row, bool $check = false ): ?array {
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+		$g        = self::group_defaults();
+		$g['key'] = isset( $row['key'] ) && is_scalar( $row['key'] ) ? strtolower( trim( (string) $row['key'] ) ) : '';
+		if ( ! self::valid_group_key( $g['key'] ) ) {
+			return null;
+		}
+		$g['cats'] = self::int_list( $row['cats'] ?? array(), self::MAX_IDS );
+		if ( $check && $g['cats'] && taxonomy_exists( 'product_cat' ) ) {
+			$g['cats'] = array_values(
+				array_filter(
+					$g['cats'],
+					static function ( $id ) {
+						return (bool) term_exists( $id, 'product_cat' );
+					}
+				)
+			);
+		}
+		$label = isset( $row['label'] ) && is_array( $row['label'] ) ? $row['label'] : array();
+		foreach ( array( 'el', 'en' ) as $lang ) {
+			if ( isset( $label[ $lang ] ) && is_scalar( $label[ $lang ] ) ) {
+				$g['label'][ $lang ] = self::text( $label[ $lang ] );
+			}
+		}
+		return $g['cats'] && '' !== $g['label']['el'] ? $g : null;
 	}
 
 	/** One plain text, trimmed to MAX_TEXT. */
@@ -163,8 +218,8 @@ final class HMS_Settings {
 		return trim( $t );
 	}
 
-	/** Whitelist validation of the stats settings. */
-	public static function stats( $raw ): array {
+	/** Whitelist validation of the stats settings; $check as in group(). */
+	public static function stats( $raw, bool $check = false ): array {
 		$v = self::stats_defaults();
 		if ( ! is_array( $raw ) ) {
 			return $v;
@@ -199,6 +254,18 @@ final class HMS_Settings {
 					}
 					$v['items'][ $key ][ $part ][ $lang ] = $t;
 				}
+			}
+		}
+		$seen = array();
+		foreach ( isset( $raw['groups'] ) && is_array( $raw['groups'] ) ? $raw['groups'] : array() as $row ) {
+			$g = self::group( $row, $check );
+			if ( null === $g || isset( $seen[ $g['key'] ] ) ) {
+				continue;
+			}
+			$seen[ $g['key'] ] = true;
+			$v['groups'][]     = $g;
+			if ( count( $v['groups'] ) >= self::MAX_GROUPS ) {
+				break;
 			}
 		}
 		return $v;

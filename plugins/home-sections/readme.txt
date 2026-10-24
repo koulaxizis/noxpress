@@ -5,7 +5,7 @@ Tags: woocommerce, products shortcode, homepage, book trailer, store stats
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -52,6 +52,7 @@ Example:
 * Counted in the background (Action Scheduler of WooCommerce, WP-Cron without it) one minute after an order is completed or leaves "completed", a product is published or unpublished, or a stock status changes; a bulk edit gives one count. A recurring count every 12 hours catches the rest. The page view only reads one stored option.
 * Live: the numbers are in the HTML (they work without JavaScript), and a small script, loaded only where the shortcode rendered, asks the read-only route `GET /wp-json/home-sections/v1/stats` for the current ones, so a page held by a page cache still shows the latest numbers. It counts them up from 0 the first time they come into view (not with reduced motion).
 * Each counter has a prefix, a label and a rounding step as store settings in Greek and English: "Over 600 completed orders" for 605 with step 10.
+* Category groups (1.3.0): name groups of product categories ("printed": adult, teen and children's books and magazines) and show their available products with `show="groups"`, in a smaller row with `size="small"`: `[hs_stats show="groups" size="small"]` right under `[hs_stats]`.
 * The settings page shows the stored counts, the time of the last count and a "Count now" button.
 
 **Shortcode test**
@@ -65,7 +66,7 @@ Example:
 * Works with WooCommerce's shortcode cache: each section keeps its own cached results.
 * `define( 'HMS_DISABLE', true );` in wp-config.php stops every marker, [hs_video] and [hs_stats].
 * Clears the page cache of WP Rocket, LiteSpeed Cache, W3 Total Cache and WP Super Cache when you save.
-* No cookies, no external requests from the server, no visitor data. [hs_stats] publishes only three totals, never an order or a customer. The YouTube player and its thumbnails load from YouTube's servers, the player only after a click. HPOS compatible.
+* No cookies, no external requests from the server, no visitor data. [hs_stats] publishes only totals, never an order or a customer. The YouTube player and its thumbnails load from YouTube's servers, the player only after a click. HPOS compatible.
 * Part of the Noxpress ecosystem: shares the "Noxpress" admin menu and the Noxpress hub; updates come from noxpress.tech (GitHub releases) through WordPress's own update screens, checked with sha256 and an Ed25519 signature.
 
 **For developers**
@@ -76,7 +77,7 @@ Example:
 * Filter `hms_video_people_taxonomy` ( string $taxonomy ): the taxonomy whose terms follow the product name (default `pa_syggrafeis`; empty for none).
 * Filter `hms_video_text` ( string $text, string $key, string $lang ): every visitor text of [hs_video].
 * Filter `hms_video_script` ( bool $load ): false skips the plugin's click-to-load script when the page ships its own.
-* Filter `hms_stats_text` ( string $text, string $key, string $part, string $lang ): every visitor text of [hs_stats] (`$part` is `prefix` or `label`; key `section` is the section's name).
+* Filter `hms_stats_text` ( string $text, string $key, string $part, string $lang ): every visitor text of [hs_stats] (`$part` is `prefix` or `label`; key `section` is the section's name, a group's key is `cat-{key}`).
 * Filters `hms_stats_style` and `hms_stats_script` ( bool $load ): false skips the stylesheet or the live / count-up script of [hs_stats].
 * REST `GET /wp-json/home-sections/v1/stats`: `{"products":…,"orders":…,"buyers":…}`, the numbers as shown (rounding applied), read-only and not cached; 404 before the first count.
 
@@ -114,6 +115,14 @@ It picks the newest product. Add `preorders="no"`, `exclude="ID"`, or `id="ID"` 
 The settings, the stored counts, the background actions and the transients are removed. Shortcodes keep their classes and simply list products without the markers. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: category groups for [hs_stats]. Each group (key, product categories with their subcategories, label in Greek and English) counts the available products in it, each product once, as an exact number. Up to 12 groups, set on the settings page.
+* New: show="groups" (every group, in the order of the settings) or a group key, mixed freely with products, orders and buyers.
+* New: size="small", a smaller centred row that sits right under the store counters.
+* Groups are counted with the other counters (one minute after a change, every 12 hours) and also when a published product's categories change, a product category is created, edited or deleted, or the groups are saved (counted at once).
+* The REST route also returns the groups, as cat-{key}.
+* Store counters, [products] markers and [hs_video] unchanged.
 
 = 1.2.0 =
 * New: [hs_stats] shortcode, store counters for available products, completed orders and distinct buyers, with show, heading and class attributes.

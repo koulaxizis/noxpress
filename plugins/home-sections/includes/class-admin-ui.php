@@ -356,7 +356,8 @@ final class HMS_Admin_UI {
 
 	private static function render_stats( array $v ): void {
 		$rows = array(
-			'show'    => __( 'Ποιοι μετρητές και με ποια σειρά: products, orders, buyers (με κόμμα). Προεπιλογή: και οι τρεις.', 'home-sections' ),
+			'show'    => __( 'Ποιοι μετρητές και με ποια σειρά: products, orders, buyers, groups (όλες οι ομάδες κατηγοριών) ή το κλειδί μιας ομάδας (με κόμμα). Προεπιλογή: products, orders, buyers.', 'home-sections' ),
+			'size'    => __( 'small: μικρότερη σειρά, π.χ. κάτω από τους μετρητές του καταστήματος.', 'home-sections' ),
 			'heading' => __( 'Τίτλος H2 πάνω από τους μετρητές· κενό = χωρίς τίτλο.', 'home-sections' ),
 			'class'   => __( 'Επιπλέον CSS classes για την ενότητα.', 'home-sections' ),
 		);
@@ -373,7 +374,7 @@ final class HMS_Admin_UI {
 					<?php endforeach; ?>
 				</tbody>
 			</table>
-			<p class="description hms-mt-8"><code>[hs_stats]</code> <code>[hs_stats show="orders,buyers" heading="…"]</code></p>
+			<p class="description hms-mt-8"><code>[hs_stats]</code> <code>[hs_stats show="orders,buyers" heading="…"]</code> <code>[hs_stats show="groups" size="small"]</code></p>
 
 			<?php if ( null === $d ) : ?>
 				<p class="hms-warn hms-mt-8"><?php esc_html_e( 'Δεν υπάρχει ακόμα μέτρηση: το shortcode δεν τυπώνει τίποτα μέχρι την πρώτη.', 'home-sections' ); ?></p>
@@ -383,6 +384,10 @@ final class HMS_Admin_UI {
 					<tbody>
 						<?php foreach ( self::stats_labels() as $key => $label ) : ?>
 							<tr><td><?php echo esc_html( $label ); ?></td><td><?php echo esc_html( number_format_i18n( $d[ $key ] ) ); ?></td><td><?php echo esc_html( number_format_i18n( (int) $show[ $key ] ) ); ?></td></tr>
+						<?php endforeach; ?>
+						<?php foreach ( $v['groups'] as $g ) : ?>
+							<?php $n = isset( $d['groups'][ $g['key'] ] ) ? number_format_i18n( $d['groups'][ $g['key'] ] ) : '—'; ?>
+							<tr><td><?php echo esc_html( $g['label']['el'] ); ?> <code><?php echo esc_html( $g['key'] ); ?></code></td><td><?php echo esc_html( $n ); ?></td><td><?php echo esc_html( $n ); ?></td></tr>
 						<?php endforeach; ?>
 					</tbody>
 				</table>
@@ -447,9 +452,58 @@ final class HMS_Admin_UI {
 						</tr>
 					</tbody>
 				</table>
+				<?php self::render_groups( $v['groups'] ); ?>
 				<p class="hms-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'home-sections' ); ?></button></p>
 			</div>
 		</form>
+		<?php
+	}
+
+	/**
+	 * The category groups of [hs_stats]: the saved ones and two empty rows.
+	 *
+	 * @param array $groups Saved groups.
+	 */
+	private static function render_groups( array $groups ): void {
+		$terms = self::category_options();
+		$rows  = $groups;
+		$empty = min( 2, HMS_Settings::MAX_GROUPS - count( $groups ) );
+		for ( $i = 0; $i < $empty; $i++ ) {
+			$rows[] = null;
+		}
+		?>
+		<h3 class="hms-mt-8"><?php esc_html_e( 'Ομάδες κατηγοριών', 'home-sections' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'Κάθε ομάδα μετράει τα διαθέσιμα προϊόντα στις κατηγορίες της και στις υποκατηγορίες τους, το καθένα μία φορά, με ακριβή αριθμό. Φαίνονται με show="groups" ή με το κλειδί τους. Η μέτρηση γίνεται αμέσως μετά την αποθήκευση.', 'home-sections' ); ?></p>
+		<table class="widefat hms-table hms-mt-8">
+			<thead><tr><th><?php esc_html_e( 'Κλειδί', 'home-sections' ); ?></th><th><?php esc_html_e( 'Κατηγορίες', 'home-sections' ); ?></th><th><?php esc_html_e( 'Λεζάντα', 'home-sections' ); ?> (EL / EN)</th><th></th></tr></thead>
+			<tbody>
+				<?php foreach ( $rows as $i => $g ) : ?>
+					<?php
+					$new  = null === $g;
+					$g    = $new ? HMS_Settings::group_defaults() : $g;
+					$name = 'hms_s[groups][' . (int) $i . ']';
+					?>
+					<tr>
+						<td><input type="text" class="hms-code" name="<?php echo esc_attr( $name ); ?>[key]" value="<?php echo esc_attr( $g['key'] ); ?>" maxlength="30" <?php echo $new ? 'placeholder="printed"' : ''; ?>/></td>
+						<td>
+							<select name="<?php echo esc_attr( $name ); ?>[cats][]" multiple size="5">
+								<?php
+								foreach ( $terms as $id => $label ) {
+									echo '<option value="' . esc_attr( (string) $id ) . '"' . ( in_array( (int) $id, $g['cats'], true ) ? ' selected' : '' ) . '>' . esc_html( $label ) . '</option>';
+								}
+								?>
+							</select>
+						</td>
+						<td>
+							<input type="text" class="hms-code" name="<?php echo esc_attr( $name ); ?>[label][el]" value="<?php echo esc_attr( $g['label']['el'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" <?php echo $new ? 'placeholder="έντυπα"' : ''; ?>/>
+							<input type="text" class="hms-code" name="<?php echo esc_attr( $name ); ?>[label][en]" value="<?php echo esc_attr( $g['label']['en'] ); ?>" maxlength="<?php echo (int) HMS_Settings::MAX_TEXT; ?>" <?php echo $new ? 'placeholder="printed"' : ''; ?>/>
+						</td>
+						<td><?php if ( ! $new ) : ?><label class="hms-inline hms-warn"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[delete]" value="1" /> <?php esc_html_e( 'Διαγραφή', 'home-sections' ); ?></label><?php endif; ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<span class="hms-hint"><?php esc_html_e( 'Κλειδί: πεζά λατινικά, αριθμοί και παύλες, έως 30, όχι products, orders, buyers ή groups. Ομάδα χωρίς κατηγορία ή ελληνική λεζάντα δεν κρατιέται. Έως 12 ομάδες. Ctrl/Cmd + κλικ για πολλές κατηγορίες.', 'home-sections' ); ?></span>
 		<?php
 	}
 
@@ -820,12 +874,41 @@ final class HMS_Admin_UI {
 		return array_merge( array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'home-sections' ) ) ), self::purge_caches() );
 	}
 
-	/** Saves the [hs_stats] texts and rounding only. */
+	/** Saves the [hs_stats] texts, rounding and groups only, then counts the groups. */
 	private static function do_save_stats(): array {
+		$raw    = self::post_array( 'hms_s' );
+		$groups = array();
+		$bad    = array();
+		foreach ( isset( $raw['groups'] ) && is_array( $raw['groups'] ) ? $raw['groups'] : array() as $row ) {
+			if ( ! is_array( $row ) || ( isset( $row['delete'] ) && '1' === $row['delete'] ) ) {
+				continue;
+			}
+			$key = isset( $row['key'] ) && is_scalar( $row['key'] ) ? trim( (string) $row['key'] ) : '';
+			if ( '' === $key && empty( $row['cats'] ) ) {
+				continue; // An empty new row.
+			}
+			if ( null === HMS_Settings::group( $row, true ) ) {
+				$bad[] = '' !== $key ? $key : '—';
+				continue;
+			}
+			$groups[] = $row;
+		}
+		$raw['groups'] = $groups;
+
 		$s          = HMS_Settings::get();
-		$s['stats'] = HMS_Settings::stats( self::post_array( 'hms_s' ) );
+		$s['stats'] = HMS_Settings::stats( $raw, true );
 		HMS_Settings::save( $s );
-		return array_merge( array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'home-sections' ) ) ), self::purge_caches() );
+		HMS_Stats::rebuild();
+
+		$msgs = array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'home-sections' ) ) );
+		if ( $bad ) {
+			/* translators: %s: group keys */
+			$msgs[] = self::msg( 'warning', sprintf( __( 'Δεν κρατήθηκαν ομάδες με άκυρο κλειδί, χωρίς κατηγορία ή χωρίς ελληνική λεζάντα: %s.', 'home-sections' ), implode( ', ', $bad ) ) );
+		}
+		if ( count( $s['stats']['groups'] ) < count( $groups ) ) {
+			$msgs[] = self::msg( 'warning', __( 'Δύο ομάδες είχαν το ίδιο κλειδί ή ήταν πάνω από 12: κρατήθηκαν οι πρώτες.', 'home-sections' ) );
+		}
+		return array_merge( $msgs, self::purge_caches() );
 	}
 
 	/** Counts now, in this admin request (the background rebuild, run at once). */
