@@ -1,0 +1,9 @@
+/* Home Sections — [hs_stats] counters. Scoped to .hms-stats; filter hms_stats_style = false skips this file. */
+.hms-stats{margin:48px 0 0;padding:40px 16px;border-top:1px solid rgba(0,0,0,.1);text-align:center}
+.hms-stats .hms-stats__heading{margin:0 0 24px;text-align:center}
+.hms-stats ul.hms-stats__list{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin:0;padding:0;list-style:none}
+.hms-stats li.hms-stats__item{display:flex;flex-direction:column;align-items:center;gap:6px;margin:0;padding:0;list-style:none}
+.hms-stats li.hms-stats__item::before{content:none}
+.hms-stats .hms-stats__num{display:block;font-size:clamp(2.2rem,5vw,3.25rem);font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hms-stats .hms-stats__pre{font-size:.45em;font-weight:600;vertical-align:middle;opacity:.8}
+.hms-stats .hms-stats__label{display:block;font-size:1rem;line-height:1.4;opacity:.8}

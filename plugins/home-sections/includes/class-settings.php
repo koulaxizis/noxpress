@@ -15,6 +15,12 @@
  *             msgids): lang 'auto' | 'el' | 'en', texts key => el / en.
  *             An empty Greek text falls back to the default; an empty
  *             English text shows the Greek one.
+ *  - stats    texts and rounding of [hs_stats] (Bible §14.17): lang
+ *             'auto' | 'el' | 'en'; section (aria-label, el / en); items
+ *             key => {step (one of HMS_Stats::steps()), prefix el / en,
+ *             label el / en}. An empty Greek label falls back to the
+ *             default; an empty prefix is allowed; an empty English text
+ *             shows the Greek one.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,6 +41,7 @@ final class HMS_Settings {
 			'alias'   => '',
 			'presets' => array(),
 			'video'   => self::video_defaults(),
+			'stats'   => self::stats_defaults(),
 		);
 	}
 
@@ -103,6 +110,100 @@ final class HMS_Settings {
 		return $v;
 	}
 
+	/** Default texts and rounding of [hs_stats], Greek and English. */
+	public static function stats_defaults(): array {
+		return array(
+			'lang'    => 'auto',
+			'section' => array(
+				'el' => 'Το κατάστημα σε αριθμούς',
+				'en' => 'The store in numbers',
+			),
+			'items'   => array(
+				'products' => array(
+					'step'   => 0,
+					'prefix' => array(
+						'el' => '',
+						'en' => '',
+					),
+					'label'  => array(
+						'el' => 'προϊόντα',
+						'en' => 'products',
+					),
+				),
+				'orders'   => array(
+					'step'   => 10,
+					'prefix' => array(
+						'el' => 'Πάνω από',
+						'en' => 'Over',
+					),
+					'label'  => array(
+						'el' => 'ολοκληρωμένες παραγγελίες',
+						'en' => 'completed orders',
+					),
+				),
+				'buyers'   => array(
+					'step'   => 0,
+					'prefix' => array(
+						'el' => '',
+						'en' => '',
+					),
+					'label'  => array(
+						'el' => 'ευχαριστημένοι αγοραστές',
+						'en' => 'happy customers',
+					),
+				),
+			),
+		);
+	}
+
+	/** One plain text, trimmed to MAX_TEXT. */
+	private static function text( $raw ): string {
+		$t = sanitize_text_field( (string) $raw );
+		$t = function_exists( 'mb_substr' ) ? mb_substr( $t, 0, self::MAX_TEXT ) : substr( $t, 0, self::MAX_TEXT );
+		return trim( $t );
+	}
+
+	/** Whitelist validation of the stats settings. */
+	public static function stats( $raw ): array {
+		$v = self::stats_defaults();
+		if ( ! is_array( $raw ) ) {
+			return $v;
+		}
+		if ( isset( $raw['lang'] ) && in_array( $raw['lang'], array( 'auto', 'el', 'en' ), true ) ) {
+			$v['lang'] = $raw['lang'];
+		}
+		$sec = isset( $raw['section'] ) && is_array( $raw['section'] ) ? $raw['section'] : array();
+		foreach ( array( 'el', 'en' ) as $lang ) {
+			if ( isset( $sec[ $lang ] ) && is_scalar( $sec[ $lang ] ) ) {
+				$t = self::text( $sec[ $lang ] );
+				if ( '' !== $t || 'en' === $lang ) {
+					$v['section'][ $lang ] = $t;
+				}
+			}
+		}
+		$items = isset( $raw['items'] ) && is_array( $raw['items'] ) ? $raw['items'] : array();
+		foreach ( $v['items'] as $key => $def ) {
+			$row = isset( $items[ $key ] ) && is_array( $items[ $key ] ) ? $items[ $key ] : array();
+			if ( isset( $row['step'] ) && is_scalar( $row['step'] ) && in_array( (int) $row['step'], HMS_Stats::steps(), true ) && preg_match( '/^\d{1,4}$/', trim( (string) $row['step'] ) ) ) {
+				$v['items'][ $key ]['step'] = (int) $row['step'];
+			}
+			foreach ( array( 'prefix', 'label' ) as $part ) {
+				$texts = isset( $row[ $part ] ) && is_array( $row[ $part ] ) ? $row[ $part ] : array();
+				foreach ( array( 'el', 'en' ) as $lang ) {
+					if ( ! isset( $texts[ $lang ] ) || ! is_scalar( $texts[ $lang ] ) ) {
+						continue;
+					}
+					$t = self::text( $texts[ $lang ] );
+					if ( '' === $t && 'el' === $lang && 'label' === $part ) {
+						continue; // The Greek label is required: keep the default.
+					}
+					$v['items'][ $key ][ $part ][ $lang ] = $t;
+				}
+			}
+		}
+		return $v;
+	}
+
 	/** An empty preset: changes nothing until a field is set. */
 	public static function preset_defaults(): array {
 		return array(
@@ -159,6 +260,7 @@ final class HMS_Settings {
 		$s          = self::defaults();
 		$s['alias'] = self::clean_alias( $raw['alias'] ?? '' );
 		$s['video'] = self::video( $raw['video'] ?? array() );
+		$s['stats'] = self::stats( $raw['stats'] ?? array() );
 
 		$seen = array();
 		if ( isset( $raw['presets'] ) && is_array( $raw['presets'] ) ) {
