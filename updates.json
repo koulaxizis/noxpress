@@ -106,15 +106,15 @@
     },
     "home-sections": {
       "beta": {
-        "changelog": "* New: [hs_video] shortcode, the newest book trailer (tab position 30) or book presentation (position 31) from the products' video tabs (Custom Product Tabs for WooCommerce), with id, exclude, category, preorders and heading attributes.\n* Poster markup only, no server-side iframe; a small click-to-load script (youtube-nocookie.com) loads only where the shortcode rendered and coexists with a page script that does the same.\n* Visitor texts as settings in Greek and English, with an automatic, Greek or English choice.\n* One 12-hour transient for the picks, cleared when a product or its tabs change.\n* Shortcode test accepts [hs_video …]: the product, the video and the markup.\n* Filters hms_video_source, hms_video_classes, hms_video_people_taxonomy, hms_video_text, hms_video_script.\n* [products] markers unchanged: pages give byte-identical output.",
-        "published": "2026-10-20",
+        "changelog": "* New: [hs_stats] shortcode, store counters for available products, completed orders and distinct buyers, with show, heading and class attributes.\n* Counted in the background (Action Scheduler, WP-Cron fallback) one minute after a relevant order, product or stock change, and every 12 hours; stored in one option (hms_stats_data, not autoloaded).\n* Read-only REST route GET /home-sections/v1/stats and a small script that refreshes the numbers on cached pages and counts them up from 0 when they come into view (respects prefers-reduced-motion).\n* Prefix, label and rounding step per counter as visitor settings in Greek and English; small scoped stylesheet.\n* Settings page: stored counts, last count time and a \"Count now\" button.\n* Filters hms_stats_text, hms_stats_style, hms_stats_script.\n* [products] markers and [hs_video] unchanged.",
+        "published": "2026-10-24",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "01ec3a99b074b004ddf116b9334e3a6487c7b34a144dd4f93e6f347f34cc7daa",
-        "signature": "xAMdXyPsPI8BO5fZV6qTahUvDPe9+or94f20YUDFPb64JgL1G7e4Lv6wmC0walcQlgtottQn/smrGpFrHu4LAw==",
+        "sha256": "bb579e183b9ffc8d062359f76ed414bb63d07ceac05b2248f5d95d61ed057ae7",
+        "signature": "fFmx3j8ogLJGnENdJ29PHuulJbaQGbz3T2bv2JiQ6qInkEBIQ2o2sudMcLrULCzTITUjemwTyl9V9xKQgpVsAg==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.1.0/home-sections.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.2.0/home-sections.zip"
       }
     },
     "live-operator": {
