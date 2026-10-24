@@ -2,7 +2,7 @@
 
 The PurioChat Pro live chat of a site on your phone: the **Live Operator** plugin's page (`/live-operator/`) opened full screen as a [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity). The online / offline switch, the inbox, claim, reply and return to the AI all come from the plugin; the app adds the icon on the home screen, the full screen and the notifications as its own. Design: Noxpress Bible §21 (Live Operator) and §13.
 
-No code of its own: `com.google.androidbrowserhelper` 2.5.0 (Google) does the launch, the verification and the notification delegation. No Firebase, no analytics.
+Little code of its own: `com.google.androidbrowserhelper` 2.5.0 (Google) does the launch, the verification and the notification delegation. From 1.3.0 a chat notification is a heads-up on the «Chat» channel and lights the screen for a few seconds when it is off (not with Do Not Disturb). No Firebase, no analytics.
 
 ## Requirements
 

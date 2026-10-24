@@ -119,15 +119,15 @@
     },
     "live-operator": {
       "beta": {
-        "changelog": "* New: opened from the official Android app (1.1.0+), the page shows \"New app version X. Download\" when a newer nox-loa-* release exists. It looks at GitHub at most every 12 hours, from the phone, and stays silent on any error. In a browser, or in an app built for another site, nothing changes.",
-        "published": "2026-10-21",
+        "changelog": "* Fix: a message with \"<\" (as in \"<3\") showed as \"&lt;3\" in the app and in the notification preview. PurioChat stores a lone \"<\" as an HTML entity; the app and the push now show the character again (still as plain text, never as HTML).\n* The Android app 1.3.0 lights the screen and shows a heads-up for every chat notification.",
+        "published": "2026-10-24",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "da79014ab783736a73efb29e53370602147cf36186281c55c5fb741f257f0996",
-        "signature": "6lkXgcMzmRtuxL2tVoRArOWcf+fx0iECjtblRL/cv8QzX+WPvgAVeMiBisWJsp3Sc6zg159thP9e2NlzTS6fAg==",
+        "sha256": "48e4dd89e688480d008104f421bb0776f43e42ebb078765637e2d708084c8c42",
+        "signature": "1ZZQVBwQ5Gf/SLUWjxxQue6k+AUJItvjlsCP0t2Gtbg5IrIHC38hX1VIXAZZGYluhhvmYAkhflfKSqO1pVMKCg==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.1.0/live-operator.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.1.1/live-operator.zip"
       }
     },
     "oros-connect": {

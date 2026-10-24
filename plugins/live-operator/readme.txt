@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -72,6 +72,10 @@ The fingerprint is missing or wrong, or the server does not pass `/.well-known/a
 The settings, the switch state, the push keys, the devices and the transients are removed. PurioChat Pro's data and settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fix: a message with "<" (as in "<3") showed as "&lt;3" in the app and in the notification preview. PurioChat stores a lone "<" as an HTML entity; the app and the push now show the character again (still as plain text, never as HTML).
+* The Android app 1.3.0 lights the screen and shows a heads-up for every chat notification.
 
 = 1.1.0 =
 * New: opened from the official Android app (1.1.0+), the page shows "New app version X. Download" when a newer nox-loa-* release exists. It looks at GitHub at most every 12 hours, from the phone, and stays silent on any error. In a browser, or in an app built for another site, nothing changes.

@@ -1,5 +1,9 @@
 # Live Operator app — changelog
 
+## 1.3.0
+
+* New: a chat notification (new request, visitor message) lights the screen for a few seconds when it is off, and shows as a heads-up with sound on a new high-importance channel «Chat» / «Συνομιλίες». With Do Not Disturb on, only the notification shows, as before. The channel can be changed or turned off in the system's app notification settings.
+
 ## 1.2.0
 
 * New: a notification for a newer signed app, also while the app is closed. WorkManager looks at the `nox-loa-*` releases every 12 hours; each new version is told once, and a tap (or "Download") downloads its APK in the browser. It uses the notification permission the app already asks for the chat notifications. Only in this official build.
