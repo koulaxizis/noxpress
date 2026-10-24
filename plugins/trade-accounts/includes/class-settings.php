@@ -11,7 +11,7 @@
  *  - lang       string visitor texts: 'auto' (site locale) | 'el' | 'en'
  *  - discount   float  default discount of every trade account, % (0–90)
  *  - base       string 'regular': the discount is taken off the regular
- *                      price, and a lower sale price wins; 'active': off
+ *                      price (a sale price never counts); 'active': off
  *                      the price the shop shows now (sale price included)
  *  - cats       int[]  eligible product categories (their subcategories
  *                      count too); empty = no product is eligible

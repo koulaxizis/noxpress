@@ -15,8 +15,8 @@
  *    the product's General tab).
  * Filter tra_eligible( bool, WC_Product ) for code.
  *
- * Trade price: discount off the regular price, and a lower sale price
- * wins ('regular', default), or discount off the price shown now
+ * Trade price: discount off the regular retail price, whatever sale is
+ * running ('regular', default), or discount off the price shown now
  * ('active'). Rounded to the shop's decimals. The feed and the shop use
  * the same function, so they never disagree.
  */
@@ -131,9 +131,6 @@ final class TRA_Scope {
 			$price = $active * $factor;
 		} else {
 			$price = $regular * $factor;
-			if ( $sale > 0 && $sale < $price ) {
-				$price = $sale;
-			}
 		}
 		return round( $price, wc_get_price_decimals() );
 	}

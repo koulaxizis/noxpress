@@ -64,7 +64,7 @@ final class TRA_Lang {
 		'Έκπτωση κάθε λογαριασμού χονδρικής (%)' => 'Discount of every trade account (%)',
 		'Ένας λογαριασμός μπορεί να έχει και δική του έκπτωση (καρτέλα Λογαριασμοί).' => 'An account can also have its own discount (Accounts tab).',
 		'Η έκπτωση υπολογίζεται' => 'The discount is taken',
-		'Πάνω στην κανονική τιμή· αν η τιμή προσφοράς είναι χαμηλότερη, ισχύει αυτή' => 'Off the regular price; if the sale price is lower, that one applies',
+		'Πάνω στην κανονική τιμή λιανικής, χωρίς να μετρά καμία προσφορά' => 'Off the regular retail price, whatever sale is running',
 		'Πάνω στην τιμή που δείχνει το κατάστημα τώρα (και πάνω στην τιμή προσφοράς)' => 'Off the price the shop shows now (the sale price too)',
 		'Επιλέξιμα προϊόντα' => 'Eligible products',
 		'Επιλέξιμα τώρα: %d προϊόντα.' => 'Eligible now: %d products.',

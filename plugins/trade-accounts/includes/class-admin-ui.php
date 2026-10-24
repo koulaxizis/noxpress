@@ -331,7 +331,7 @@ final class TRA_Admin_UI {
 
 				<span class="tra-label"><?php esc_html_e( 'Η έκπτωση υπολογίζεται', 'trade-accounts' ); ?></span>
 				<?php
-				self::radio( 'tra_base', 'regular', $s['base'], __( 'Πάνω στην κανονική τιμή· αν η τιμή προσφοράς είναι χαμηλότερη, ισχύει αυτή', 'trade-accounts' ) );
+				self::radio( 'tra_base', 'regular', $s['base'], __( 'Πάνω στην κανονική τιμή λιανικής, χωρίς να μετρά καμία προσφορά', 'trade-accounts' ) );
 				self::radio( 'tra_base', 'active', $s['base'], __( 'Πάνω στην τιμή που δείχνει το κατάστημα τώρα (και πάνω στην τιμή προσφοράς)', 'trade-accounts' ) );
 				?>
 			</div>

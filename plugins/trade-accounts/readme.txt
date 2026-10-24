@@ -25,7 +25,7 @@ Every module is off after activation. A module that is off loads no code.
 **Trade prices module**
 
 * A «Χονδρική» (trade) role, made by the shop: from the Accounts tab (a new user, or an existing customer by e-mail; staff accounts are never changed) or by giving a customer the role in Users. No self sign-up.
-* One discount for every account (default 40%), or an account's own. Taken off the regular price, with a lower sale price winning, or off the price shown now.
+* One discount for every account (default 40%), or an account's own. Taken off the regular retail price whatever sale is running (default), or off the price shown now.
 * The account sees and pays the trade price everywhere: shop, product page, cart, mini-cart, classic checkout, Cart / Checkout blocks and the order. The regular price shows struck through, with an optional «Trade price» label (Greek and English text).
 * Order lines are ordinary lines at the trade price: payments, shipping, VAT, stock, refunds and Revenue Splitter (the same shares of the lower price) work as in retail. Each line and the order carry the discount, readable in the order screen and e-mails.
 * Optional invoice rule: a trade order needs the invoicing plugin's receipt type set to "invoice" (default: «Timologia for WooCommerce» by OBS, field and value in the settings); the checkout preselects it.
