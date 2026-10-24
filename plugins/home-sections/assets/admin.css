@@ -431,6 +431,7 @@ a.hms-kofi:hover {
 /* ===== Shortcode test ===== */
 .hms-wrap .hms-code { width: 100%; max-width: none; font-family: Consolas, Monaco, monospace; }
 .hms-wrap .hms-preset-card select[multiple] { min-width: 260px; min-height: 140px; }
+.hms-wrap .hms-table select[multiple] { width: 100%; min-width: 220px; }
 .hms-wrap .hms-result { margin: 10px 0 0; }
 .hms-wrap .hms-result li { margin: 0 0 4px; }
 

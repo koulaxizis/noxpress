@@ -1,9 +1,15 @@
 <?php
 /**
  * HMS_Stats — the [hs_stats] shortcode: store counters (available
- * products, completed orders, buyers) that follow the store as it changes.
+ * products, completed orders, buyers, and available products per group of
+ * categories) that follow the store as it changes.
  *
  *   [hs_stats show="products,orders,buyers" heading="…" class="…"]
+ *   [hs_stats show="groups" size="small"]
+ *
+ * show takes the store keys, "groups" (every category group, in the order
+ * of the settings) and single group keys, in any order. size="small" adds
+ * the class hms-stats--small (a smaller row, e.g. under the store row).
  *
  * Counts:
  *  - products  published products without a password, not hidden from
@@ -12,14 +18,18 @@
  *  - orders    orders with the status completed (wc_get_orders, HPOS safe)
  *  - buyers    distinct customers among those orders: the customer ID for
  *              accounts, the billing e-mail (lowercase) for guests
+ *  - groups    per category group of the settings (1.3.0): available
+ *              products (as above) in any of its categories or their
+ *              subcategories, each product once per group
  *
  * Storage (Bible §14.10, §14.23): the counts are derived data, so they are
  * computed in the background and kept in ONE option, hms_stats_data
- * (autoload off): {products, orders, buyers, time}. A rebuild is queued
- * with the Action Scheduler of WooCommerce (WP-Cron without it), 60 s
- * later and once, whenever an order enters or leaves the status
- * completed, a product is published / unpublished / trashed, or its stock
- * status changes; bulk edits give one rebuild. A recurring action every
+ * (autoload off): {products, orders, buyers, groups: {key: n}, time}. A
+ * rebuild is queued with the Action Scheduler of WooCommerce (WP-Cron
+ * without it), 60 s later and once, whenever an order enters or leaves the
+ * status completed, a product is published / unpublished / trashed, its
+ * stock status or its categories change, a product category is created,
+ * edited or deleted, or the groups are saved; bulk edits give one rebuild. A recurring action every
  * 12 hours catches what no hook reports (e.g. an order deleted from the
  * database). The page view and the REST route only read.
  *
@@ -32,7 +42,8 @@
  * Display: each counter has a prefix, a label and a rounding step (store
  * settings, Bible §14.17). With a step, the number shown is the largest
  * multiple of the step below the count ("Over 600" for 605); a count not
- * above the step is shown as it is.
+ * above the step is shown as it is. Groups are always exact, with a label
+ * and no prefix.
  *
  * Deviations from the Bible (with reason):
  *  - §14.4 (never in REST): GET /home-sections/v1/stats is the purpose of
@@ -59,6 +70,9 @@ final class HMS_Stats {
 	const DELAY  = 60;
 	const PERIOD = 43200; // 12 h.
 
+	/** Prefix of a group in the markup and the REST response (cat-printed). */
+	const GPRE = 'cat-';
+
 	/** Orders read per page while counting buyers. */
 	const PAGE = 200;
 
@@ -78,6 +92,10 @@ final class HMS_Stats {
 		add_action( 'transition_post_status', array( __CLASS__, 'on_transition' ), 10, 3 );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'queue' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'queue' ) );
+		add_action( 'set_object_terms', array( __CLASS__, 'on_terms' ), 10, 6 );
+		foreach ( array( 'created_product_cat', 'edited_product_cat', 'delete_product_cat' ) as $hook ) {
+			add_action( $hook, array( __CLASS__, 'queue' ) );
+		}
 
 		if ( ! Home_Sections::killed() ) {
 			add_action( 'rest_api_init', array( __CLASS__, 'register_route' ) );
@@ -99,8 +117,31 @@ final class HMS_Stats {
 	 * Counting (background only)
 	 * =================================================================== */
 
-	/** Available products: published, visible, in stock or on backorder. */
-	public static function count_products(): int {
+	/**
+	 * Available products: published, visible, in stock or on backorder;
+	 * with $cats, only those in one of these categories or below them.
+	 *
+	 * @param int[] $cats product_cat term ids (none = every product).
+	 */
+	public static function count_products( array $cats = array() ): int {
+		$tax = array(
+			array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => array( 'exclude-from-catalog' ),
+				'operator' => 'NOT IN',
+			),
+		);
+		if ( $cats ) {
+			$tax['relation'] = 'AND';
+			$tax[]           = array(
+				'taxonomy'         => 'product_cat',
+				'field'            => 'term_id',
+				'terms'            => array_map( 'intval', $cats ),
+				'include_children' => true,
+				'operator'         => 'IN',
+			);
+		}
 		$q = new WP_Query(
 			array(
 				'post_type'           => 'product',
@@ -117,14 +158,7 @@ final class HMS_Stats {
 						'compare' => 'IN',
 					),
 				),
-				'tax_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery -- catalog visibility, as WooCommerce does.
-					array(
-						'taxonomy' => 'product_visibility',
-						'field'    => 'name',
-						'terms'    => array( 'exclude-from-catalog' ),
-						'operator' => 'NOT IN',
-					),
-				),
+				'tax_query'           => $tax, // phpcs:ignore WordPress.DB.SlowDBQuery -- catalog visibility (as WooCommerce does) and the group's categories.
 			)
 		);
 		return (int) $q->found_posts;
@@ -176,10 +210,15 @@ final class HMS_Stats {
 			return;
 		}
 		list( $orders, $buyers ) = self::count_orders();
-		$data                    = array(
+		$groups                  = array();
+		foreach ( HMS_Settings::get()['stats']['groups'] as $g ) {
+			$groups[ $g['key'] ] = self::count_products( $g['cats'] );
+		}
+		$data = array(
 			'products' => self::count_products(),
 			'orders'   => $orders,
 			'buyers'   => $buyers,
+			'groups'   => $groups,
 			'time'     => time(),
 		);
 		update_option( self::OPT, $data, false );
@@ -194,6 +233,15 @@ final class HMS_Stats {
 		$out = array();
 		foreach ( array_merge( self::keys(), array( 'time' ) ) as $k ) {
 			$out[ $k ] = isset( $raw[ $k ] ) && is_numeric( $raw[ $k ] ) ? max( 0, (int) $raw[ $k ] ) : 0;
+		}
+		// Only the groups of the settings, in their order; a group saved
+		// after the last count is missing until the next one.
+		$out['groups'] = array();
+		$stored        = isset( $raw['groups'] ) && is_array( $raw['groups'] ) ? $raw['groups'] : array();
+		foreach ( HMS_Settings::get()['stats']['groups'] as $g ) {
+			if ( isset( $stored[ $g['key'] ] ) && is_numeric( $stored[ $g['key'] ] ) ) {
+				$out['groups'][ $g['key'] ] = max( 0, (int) $stored[ $g['key'] ] );
+			}
 		}
 		return $out;
 	}
@@ -242,6 +290,20 @@ final class HMS_Stats {
 		}
 	}
 
+	/** set_object_terms: the categories of a published product change (drafts count nowhere). */
+	public static function on_terms( $object_id, $terms, $tt_ids, $taxonomy, $append = false, $old_tt_ids = array() ): void {
+		if ( 'product_cat' !== $taxonomy || 'product' !== get_post_type( (int) $object_id ) || 'publish' !== get_post_status( (int) $object_id ) ) {
+			return;
+		}
+		$new = array_map( 'intval', (array) $tt_ids );
+		$old = array_map( 'intval', (array) $old_tt_ids );
+		sort( $new );
+		sort( $old );
+		if ( $new !== $old ) {
+			self::queue();
+		}
+	}
+
 	/** transition_post_status: a product enters or leaves "publish". */
 	public static function on_transition( $new_status, $old_status, $post ): void {
 		if ( $post instanceof WP_Post && 'product' === $post->post_type && $new_status !== $old_status && ( 'publish' === $new_status || 'publish' === $old_status ) ) {
@@ -271,6 +333,9 @@ final class HMS_Stats {
 		$out   = array();
 		foreach ( self::keys() as $k ) {
 			$out[ $k ] = self::shown( $d[ $k ], (int) $items[ $k ]['step'] );
+		}
+		foreach ( $d['groups'] as $k => $n ) {
+			$out[ self::GPRE . $k ] = $n;
 		}
 		return $out;
 	}
@@ -313,24 +378,39 @@ final class HMS_Stats {
 	 * Normalised attributes.
 	 *
 	 * @param mixed $atts Raw shortcode attributes.
-	 * @return array{show:string[],heading:string,class:string}
+	 * show holds the keys of the markup: store keys as they are, groups
+	 * with GPRE (cat-printed).
+	 *
+	 * @return array{show:string[],heading:string,class:string,size:string}
 	 */
 	public static function parse_atts( $atts ): array {
-		$atts = is_array( $atts ) ? $atts : array();
-		$show = array();
-		$raw  = isset( $atts['show'] ) && is_scalar( $atts['show'] ) ? strtolower( (string) $atts['show'] ) : '';
+		$atts   = is_array( $atts ) ? $atts : array();
+		$show   = array();
+		$groups = array();
+		foreach ( HMS_Settings::get()['stats']['groups'] as $g ) {
+			$groups[] = $g['key'];
+		}
+		$raw = isset( $atts['show'] ) && is_scalar( $atts['show'] ) ? strtolower( (string) $atts['show'] ) : '';
 		foreach ( preg_split( '/[\s,]+/', $raw, -1, PREG_SPLIT_NO_EMPTY ) as $k ) {
 			if ( in_array( $k, self::keys(), true ) ) {
 				$show[ $k ] = $k;
+			} elseif ( 'groups' === $k ) {
+				foreach ( $groups as $g ) {
+					$show[ self::GPRE . $g ] = self::GPRE . $g;
+				}
+			} elseif ( in_array( $k, $groups, true ) ) {
+				$show[ self::GPRE . $k ] = self::GPRE . $k;
 			}
 		}
 		$heading = isset( $atts['heading'] ) && is_scalar( $atts['heading'] ) ? sanitize_text_field( (string) $atts['heading'] ) : '';
 		$class   = isset( $atts['class'] ) && is_scalar( $atts['class'] ) ? (string) $atts['class'] : '';
 		$class   = implode( ' ', array_filter( array_map( 'sanitize_html_class', preg_split( '/\s+/', $class, -1, PREG_SPLIT_NO_EMPTY ) ) ) );
+		$size = isset( $atts['size'] ) && is_scalar( $atts['size'] ) && 'small' === strtolower( trim( (string) $atts['size'] ) ) ? 'small' : '';
 		return array(
 			'show'    => $show ? array_values( $show ) : self::keys(),
 			'heading' => $heading,
 			'class'   => $class,
+			'size'    => $size,
 		);
 	}
 
@@ -380,7 +460,8 @@ final class HMS_Stats {
 		if ( '' === $items ) {
 			return '';
 		}
-		$out = '<section class="hms-stats' . ( '' !== $a['class'] ? ' ' . esc_attr( $a['class'] ) : '' ) . '"'
+		$size = isset( $a['size'] ) && 'small' === $a['size'] ? ' hms-stats--small' : '';
+		$out  = '<section class="hms-stats' . $size . ( '' !== $a['class'] ? ' ' . esc_attr( $a['class'] ) : '' ) . '"'
 			. ( '' !== $a['heading'] ? '' : ' aria-label="' . esc_attr( self::text( 'section', 'label' ) ) . '"' ) . '>';
 		if ( '' !== $a['heading'] ) {
 			$out .= '<h2 class="hms-stats__heading">' . esc_html( $a['heading'] ) . '</h2>';
@@ -394,6 +475,19 @@ final class HMS_Stats {
 		$lang = 'auto' === $s['lang'] ? HMS_Lang::from_locale( (string) get_locale() ) : $s['lang'];
 		if ( 'section' === $key ) {
 			$row = $s['section'];
+		} elseif ( 0 === strpos( $key, self::GPRE ) ) {
+			$row = array(
+				'el' => '',
+				'en' => '',
+			);
+			if ( 'label' === $part ) {
+				foreach ( $s['groups'] as $g ) {
+					if ( self::GPRE . $g['key'] === $key ) {
+						$row = $g['label'];
+						break;
+					}
+				}
+			}
 		} else {
 			$row = isset( $s['items'][ $key ][ $part ] ) ? $s['items'][ $key ][ $part ] : array(
 				'el' => '',
