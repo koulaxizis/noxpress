@@ -106,15 +106,15 @@
     },
     "home-sections": {
       "beta": {
-        "changelog": "* New: [hs_stats] shortcode, store counters for available products, completed orders and distinct buyers, with show, heading and class attributes.\n* Counted in the background (Action Scheduler, WP-Cron fallback) one minute after a relevant order, product or stock change, and every 12 hours; stored in one option (hms_stats_data, not autoloaded).\n* Read-only REST route GET /home-sections/v1/stats and a small script that refreshes the numbers on cached pages and counts them up from 0 when they come into view (respects prefers-reduced-motion).\n* Prefix, label and rounding step per counter as visitor settings in Greek and English; small scoped stylesheet.\n* Settings page: stored counts, last count time and a \"Count now\" button.\n* Filters hms_stats_text, hms_stats_style, hms_stats_script.\n* [products] markers and [hs_video] unchanged.",
+        "changelog": "* New: category groups for [hs_stats]. Each group (key, product categories with their subcategories, label in Greek and English) counts the available products in it, each product once, as an exact number. Up to 12 groups, set on the settings page.\n* New: show=\"groups\" (every group, in the order of the settings) or a group key, mixed freely with products, orders and buyers.\n* New: size=\"small\", a smaller centred row that sits right under the store counters.\n* Groups are counted with the other counters (one minute after a change, every 12 hours) and also when a published product's categories change, a product category is created, edited or deleted, or the groups are saved (counted at once).\n* The REST route also returns the groups, as cat-{key}.\n* Store counters, [products] markers and [hs_video] unchanged.",
         "published": "2026-10-24",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "bb579e183b9ffc8d062359f76ed414bb63d07ceac05b2248f5d95d61ed057ae7",
-        "signature": "fFmx3j8ogLJGnENdJ29PHuulJbaQGbz3T2bv2JiQ6qInkEBIQ2o2sudMcLrULCzTITUjemwTyl9V9xKQgpVsAg==",
+        "sha256": "709ecfc5b134a36d6a4a5d078e27405b3ae412820af6e7188f6ecbb62e2a1741",
+        "signature": "MBq1kVR/SROErszLF/ZglzRbNCAJ8tU4MNIXyKQBfZTFd/tDquNRW9VQTI+RMZ5YiRFIdfGwP9oxc5qteLQjDA==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.2.0/home-sections.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.3.0/home-sections.zip"
       }
     },
     "live-operator": {
