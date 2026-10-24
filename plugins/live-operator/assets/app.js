@@ -102,8 +102,16 @@
 		return Math.floor(m / 60) + 'h ' + (m % 60) + "'";
 	}
 
+	// PurioChat stores messages through sanitize_textarea_field(), which turns
+	// a lone "<" (as in "<3") into "&lt;". Shown with textContent, so turning
+	// the entities back into characters is safe.
+	var ENT = { '&lt;': '<', '&gt;': '>', '&amp;': '&', '&quot;': '"', '&#039;': "'", '&#39;': "'" };
+	function plain(s) {
+		return String(s || '').replace(/&(?:lt|gt|amp|quot|#0?39);/g, function (e) { return ENT[e]; });
+	}
+
 	function excerpt(s, n) {
-		s = String(s || '').replace(/\s+/g, ' ').trim();
+		s = plain(s).replace(/\s+/g, ' ').trim();
 		return s.length > n ? s.slice(0, n - 1) + '…' : s;
 	}
 
@@ -699,7 +707,7 @@
 				var when = utc(m.created_at);
 				els.msgs.appendChild(h('div', { class: 'lop-msg lop-msg--' + type }, [
 					type !== 'system' ? h('span', { class: 'lop-msg__who', text: senderLabel(m) + (when ? ' · ' + hhmm(when) : '') }) : null,
-					h('div', { class: 'lop-msg__text', text: String(m.content || '') })
+					h('div', { class: 'lop-msg__text', text: plain(m.content) })
 				]));
 			});
 			if (atBottom || !els.scrolled) {

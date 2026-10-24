@@ -3,7 +3,7 @@
  * Plugin Name:          Live Operator
  * Plugin URI:           https://noxpress.tech
  * Description:          Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server (με αυτόματο offline), ειδοποιήσεις push για κάθε νέο αίτημα και μήνυμα, και εφαρμογή για ανάληψη και απαντήσεις, που μπαίνει στην αρχική οθόνη ή ανοίγει από την εφαρμογή Android. Χωρίς Firebase και χωρίς λογαριασμό σε τρίτους.
- * Version:              1.1.0
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -62,7 +62,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LOP_VERSION', '1.1.0' );
+define( 'LOP_VERSION', '1.1.1' );
 define( 'LOP_FILE', __FILE__ );
 define( 'LOP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LOP_URL', plugin_dir_url( __FILE__ ) );
