@@ -1,6 +1,6 @@
 {
   "display": 250,
-  "total": 255,
+  "total": 261,
   "offset": 5,
   "updated": "2026-10-24",
   "assets": {
@@ -482,6 +482,18 @@
     },
     "671832171": {
       "file": "nox-lo-1.1.1/live-operator.zip",
+      "count": 2
+    },
+    "671837381": {
+      "file": "nox-loa-1.3.0/live-operator.apk",
+      "count": 4
+    },
+    "671837391": {
+      "file": "nox-loa-1.3.0/live-operator.apk.sha256",
+      "count": 0
+    },
+    "671899701": {
+      "file": "nox-hs-1.2.0/home-sections.zip",
       "count": 0
     }
   }
