@@ -107,6 +107,11 @@ final class SBR_Tools_Write {
 			wc_delete_shop_order_transients();
 			$done[] = 'WooCommerce order transients';
 		}
+		// The suite's page cache (Fast Pages 1.0.0+, Bible §6): everything.
+		if ( has_action( 'noxpress_purge_page_cache' ) ) {
+			do_action( 'noxpress_purge_page_cache' );
+			$done[] = 'page cache';
+		}
 		return array( 'flushed' => $done );
 	}
 

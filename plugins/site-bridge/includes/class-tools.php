@@ -267,7 +267,7 @@ final class SBR_Tools {
 			'cache_flush'            => array(
 				'class'       => 'write',
 				'title'       => 'Flush caches',
-				'description' => 'Flushes the object cache and the WooCommerce product transients. Needs level write and an open write window.',
+				'description' => 'Flushes the object cache, the WooCommerce product transients and the page cache (Fast Pages). Needs level write and an open write window.',
 				'props'       => array(),
 			),
 			'ability_run'            => array(
