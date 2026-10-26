@@ -2,41 +2,41 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Changed: the publisher's price replaces the catalogue's (OSDEL) only when it is higher. A lower one, often the publisher's own shop sale, would have undercut the fixed book price; the catalogue's price is kept then, and the history notes only the prices that are used.",
-        "published": "2026-10-21",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ceb2072b9c11d3059977ef8fa3377544a64513197c94685cb4d8d82c590112db",
-        "signature": "Roq04igGvnmBBno/K8xDNxbJ/8G6yamRU3/b3JHPy5PNOG8RYheWi1qAaQb6AZZxTllU6O5Ko85IlaBvQHwVCQ==",
+        "sha256": "bd1172523d8e0fd67ca9de80298c5fd76d4a28ae0359997e3fd3f5069fcf9912",
+        "signature": "z7d7Fzsc0JUgsJsK9u+9ZVEEklzvhyAyUjOgC4kZBLfinIyQzB+nnCWjEto5fMSN4UhE7AU8I9YlleW9f1I5BA==",
         "tested_wp": "7.1",
-        "version": "1.12.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.12.1/book-feed.zip"
+        "version": "1.13.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.0/book-feed.zip"
       }
     },
     "book-preview": {
       "beta": {
-        "changelog": "* Fixed: on a product on sale, the \"Keep reading\" card shows the old price struck through next to the sale price, as the shop does.",
-        "published": "2026-10-14",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4d96a93764785cb6672d88ce5a4ff60ff8280a40633984cf4425eb9d02b147ac",
-        "signature": "RtaOm6UOTzHexObZsmMnsQE8FyECG7gtHD7nMQLsG1WZzujrY4pkqVZe7nGar1fD3gU6iR+kOg7E0b33oQ28DQ==",
+        "sha256": "4a76e269571f0697cadcecab88e201f8e00ea2b246c4e85e66f68beeb743d26b",
+        "signature": "oxTXibmn+NAjTYm2bFUwfd0nB2vJIAAbDr6fSYmRpw7DqF6jKKuhNZU6XqQNFTwoRGWCEQe4YNv3V8WYm5fGBg==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.0.1/book-preview.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.1.0/book-preview.zip"
       }
     },
     "checkout-extras": {
       "beta": {
-        "changelog": "* Initial release.\n* \"This is a gift\" at checkout (classic and block), with an optional, required or no message, an optional wrapping fee, three positions and a shippable-only rule.\n* Gift on the order: totals row, admin meta box, orders list column and \"Gifts only\" filter, admin New order email line; public function `cke_get_gift()`.\n* Thank-you page message (paid / awaiting payment) with placeholders, in its own box or in place of WooCommerce's line, and cross-sell, related or sale products with the theme's cards.\n* Thank-you coupon: issue rules, coupon properties, delivery in the order email or a separate WooCommerce email, copy button, reminder email, statistics, daily cleanup of expired unused coupons; filters `cke_coupon_args`, `cke_text`, action `cke_coupon_created`.\n* Editable Greek / English texts, settings export / import.\n* Test mode, CKE_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.13).",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "25e23e9794ddee40656e2d6ebe0ba65e9cf182e97108dbebaff81f1c11b2184e",
-        "signature": "ejDBVnqiEBnmykcRCa0B4va+7BjnYz9BKCnFVaxF058PQV5K2+it5C5lh6cZzrgjCs4JxgGneB+tMIL7AB9hDA==",
+        "sha256": "376e321775af96f05931007f8a5dad6ed48c240973bcac2b23a98f86590943df",
+        "signature": "N4aoT7V4CkgIVfs2172IV0rq4Uo/3PCThR0Y0qzv0QwbCDogVCGXAPIawvbRaQWo0JjXdxMLR0A/dQxuhfoFCA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.0.0/checkout-extras.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.1.0/checkout-extras.zip"
       }
     },
     "data-migrator": {
@@ -54,158 +54,158 @@
     },
     "easy-withdrawal": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e6bf50670a7cb20970960d456cf32c6bff37c5e90001d2b72d881b108c2ef22a",
-        "signature": "zn04THs9pyV7O8pdzBDvN+BSv2KnWKJlisJi3ehUtE3OAKgCvri2qIsuLHzdL8NftBY3qWtA2i+HpKAzVCyAAg==",
+        "sha256": "f094a1f980e12e5facb0f5f34c53146d463710f4c7b542dd123943c508a40684",
+        "signature": "yRxWRibsyVPD6CyZGfO/p42sb36NEaU23KpQh10IrygqRQenf7288+yONmVr5dfkwVgNIup1e+NR1aUCXfG8Ag==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.1.0/easy-withdrawal.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.0/easy-withdrawal.zip"
       }
     },
     "featured-creators": {
       "beta": {
-        "changelog": "* New: creator tab on the product, for the roles ticked \"In the tab\" (Pages and products → On the product, with its WooCommerce priority). Photo, short biography, links, the three newest press items and a link to the creator page; only published creators; no tab when the product has none.\n* New: tab title by the creator's gender (new field \"Article in the tab title\": «Ο», «Η» or none) and the role, or the role in the plural for several creators of the same role; five editable visitor texts.\n* New: role name in the plural (Roles tab).\n* New: \"Section on the page\" per role: a role can match and show in the roles line without listing its products on the creator page.\n* New: the creator's own meta in REST (edit context, edit_post capability), validated like the edit screen.",
-        "published": "2026-10-20",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ba8761e60255832cc8ebc735469d212c43f5868b4eaf1ed7def3df732d94f91a",
-        "signature": "KLKL/JqqZyBNuGHddkycE3R4nd7Ch6JLpDzDmHPbidp9EvejcoIbx7xEVAEB9ocUxZ2ev327+/fH3fqQHn01DQ==",
+        "sha256": "8476e06ba65b5f8d5590781b09523f957cb1a749fb31d5e4677b17982595f97a",
+        "signature": "57NDhjMlyF/U4p41iYtzwHXe3WzshVtLkIi1tdoWsSvo2Kq8YksQp0lMnXduI2pBMXo4YUmbi5SA0JBpnifeCQ==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.1.0/featured-creators.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.2.0/featured-creators.zip"
       }
     },
     "greeklish-permalinks": {
       "beta": {
-        "changelog": "* Bulk conversion follows the bulk-change rule of Noxpress Bible §12: each change is written to the undo log before it happens; if that write fails, the item is left alone, the run stops and everything it changed goes back.\n* \"Download backup\" saves the last run as JSON; Tools → Import checks it strictly and loads it back as the run to undo.\n* Content and downloadable files change only while they still hold the value in the log; undo of downloadable files checks the same.",
-        "published": "2026-10-13",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "db5d2b113fadd4c0315ac6991409b1ddb17f54c6a93503e065ce238ddca63d8e",
-        "signature": "+gobnw8robGOyLlrQN2wHOq/iCLqC0l31CDD7tCLtcmva9rYnqVm8bRyj6c8FTnMM9iz9I331Kx3pvGYAbtiBA==",
+        "sha256": "6ba8c4c1f9fde5f0e4f6c55e8f3f5ad462533cc4128a74565a0936a1430b9d39",
+        "signature": "zVtp5f96BJHVrAj40o8dze74Syg1uyS8ZbjQSOA90i0zPIzY6zb1JCnXvgdJzyaW2qpRieIziqOu38ogEcCTCw==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.1.0/greeklish-permalinks.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.2.0/greeklish-permalinks.zip"
       }
     },
     "hide-catalog": {
       "beta": {
-        "changelog": "* Fix: with a rule that hides a category from lists, a visitor's page could rebuild WordPress's stored category hierarchy without that category, so its subcategories vanished from get_term_children() site-wide (an empty subcategory page, rules with subcategories missing them). The full read behind that hierarchy is no longer filtered.",
-        "published": "2026-10-20",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "de4698efd83c501a5d06fea5f5d8ad8b2ef9c7b4a8606c74e4f831a03c1c6eb2",
-        "signature": "fIP1Jl9R+aRdxev2LXszvt1cEVaBKVmvKzeyrj155d5e/3xP2oNTGzh64KNLlvVe2mYPxb/v8+xRmGu1KY63Bg==",
+        "sha256": "1eb342269fd69c98b9a83a1c1de40ada652590f2570936b9c2683c3ca9b00e4f",
+        "signature": "jUQu9kytETBXDwYUMwlBSt7oktJG27hJdv8J6DeHK3NYPY1Sn9etTpaLQ8f5I8Omjxw0IT3fjVAd6BOtSF+wDA==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.0.1/hide-catalog.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.0/hide-catalog.zip"
       }
     },
     "home-sections": {
       "beta": {
-        "changelog": "* New: category groups for [hs_stats]. Each group (key, product categories with their subcategories, label in Greek and English) counts the available products in it, each product once, as an exact number. Up to 12 groups, set on the settings page.\n* New: show=\"groups\" (every group, in the order of the settings) or a group key, mixed freely with products, orders and buyers.\n* New: size=\"small\", a smaller centred row that sits right under the store counters.\n* Groups are counted with the other counters (one minute after a change, every 12 hours) and also when a published product's categories change, a product category is created, edited or deleted, or the groups are saved (counted at once).\n* The REST route also returns the groups, as cat-{key}.\n* Store counters, [products] markers and [hs_video] unchanged.",
-        "published": "2026-10-24",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "709ecfc5b134a36d6a4a5d078e27405b3ae412820af6e7188f6ecbb62e2a1741",
-        "signature": "MBq1kVR/SROErszLF/ZglzRbNCAJ8tU4MNIXyKQBfZTFd/tDquNRW9VQTI+RMZ5YiRFIdfGwP9oxc5qteLQjDA==",
+        "sha256": "15cf79f43c811bf2bf649f9fed86f2f7b6ec2661bebbd5f319ba9365b8bdd44d",
+        "signature": "OoRyPUnJp/Fn8DKVG0Hw8pbfaff17CKjU6ihlXtOiJkdvkhqq6VPBJRz4PxF1v1da/IdD8u67TjWcc7oyEmwDg==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.3.0/home-sections.zip"
+        "version": "1.4.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.0/home-sections.zip"
       }
     },
     "live-operator": {
       "beta": {
-        "changelog": "* Fix: a message with \"<\" (as in \"<3\") showed as \"&lt;3\" in the app and in the notification preview. PurioChat stores a lone \"<\" as an HTML entity; the app and the push now show the character again (still as plain text, never as HTML).\n* The Android app 1.3.0 lights the screen and shows a heads-up for every chat notification.",
-        "published": "2026-10-24",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "48e4dd89e688480d008104f421bb0776f43e42ebb078765637e2d708084c8c42",
-        "signature": "1ZZQVBwQ5Gf/SLUWjxxQue6k+AUJItvjlsCP0t2Gtbg5IrIHC38hX1VIXAZZGYluhhvmYAkhflfKSqO1pVMKCg==",
+        "sha256": "43249d31cb229701f056f761fb8a7fdfebb8f970c56266c93c40db0d412d176d",
+        "signature": "NRloSkJk9FqhCSFMfs7MSeBnrXgw7CLpTYM9rZzrW7qxCh4XqQtfPWlgzqCpQLY9ohQ/PDhd5srUx70JbhM9Aw==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.1.1/live-operator.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.2.0/live-operator.zip"
       }
     },
     "oros-connect": {
       "beta": {
-        "changelog": "* Fixed: the Offers status said \"(1 requests)\" for a single request; it now says \"(1 request)\" (\"(1 αίτημα)\" in Greek).",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e6a9d6694f7f9e634f09b8e505c9b9d1fe4c4d07a334907619dd759267d131da",
-        "signature": "26AYildouE9M149oDY0FOo9IgZEyUjPBsfHWo9bOhFRonjfN+Q/BO5QQuCRmPMGEA9NQm97of3AuoFGxNqKPCQ==",
+        "sha256": "bee33f378b5006fe95fac3cb4c09c0f6a2214448b5647929841d9522c2ffa85f",
+        "signature": "Fz3FLyMJD4lMLHVrFhkwzyUjW3GwxaHLvaBIhhSi3FmcyON1wDErv6bvBByDWLrHgvRAtgjD40Mkt8/Ud3gvCA==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.1.1/oros-connect.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.2.0/oros-connect.zip"
       }
     },
     "pre-orders": {
       "beta": {
-        "changelog": "* Fixed: the placeholder of \"Text for this product\" shows the store's release text in the visitor language (it was always Greek).\n* Changed: the \"Format\" column of Upcoming releases shows only when Product Formats is active.",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a4fc06a63a7cffb142caf7fba82ab6dd76f41131f1d5334bc7cc7f079fdecf39",
-        "signature": "xqBxZtV/vOZ2k2p1LwkArO1+Nf/6VzzYv+TjIi++qgGCsrbvXxLHEVoAQ3jf708BjwtizpWGCaPGXP6VLLQECA==",
+        "sha256": "65347ce57a8aeb031673522f9ddae6ece56ec202043da91d0dbef8e7459b4c52",
+        "signature": "f4jyEY4xlQaidVzdmZ5yxqx+k509kDzIHa6NBIYi8LsMHT6sdaYcDKnMYcsqqFzkoEAjmXq3B9R1KRMlGw69Ag==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.0.1/pre-orders.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.0/pre-orders.zip"
       }
     },
     "product-bundles": {
       "beta": {
-        "changelog": "* Fixed: saving a bundle kept no record of the variations you ticked for a variable product, so the bundle page offered every variation of it. Bundles saved with 1.0.0 offer all variations until you tick them again and update the bundle.",
-        "published": "2026-10-15",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8e3c9faf543079a570a508044ecb2a50c1efdab1877c7a8fc8bf6052b5890454",
-        "signature": "WblqyW6gmUS8EZTPRJhL3HqbHETvLE5cF3XGNFnmydXFVv4uAKDc4IMFLkPgqnLh9X4luw4BeMkNVqks8iGvCA==",
+        "sha256": "f6947c80cecc5a4deb8399720e7ee5dc3d50b9c27fc0c5cd33aba947c635ce26",
+        "signature": "XaDthVMFLLI52s91o2YVvNzphew38ortzFJiKLoc5U2Nw0WqKYGaeUjYB0VLH3nIVcjhZRMpkhpK81Ev5NIrCg==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.0.1/product-bundles.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.1.0/product-bundles.zip"
       }
     },
     "product-formats": {
       "beta": {
-        "changelog": "* New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.\n* New: \"Install beta\" for a single plugin, without moving the whole suite to Beta, or \"Switch everything to Beta\". Every package is still checked with sha256 and its signature.\n* New: \"Hide for this version\" per user; the notice comes back with a newer version.\n* Changed: Noxpress Core 1.1.0.",
-        "published": "2026-10-11",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "3eb18a5213125c55dd2bfd1762c62f6515a958d295bc26d9f9578c9a923f52a5",
-        "signature": "YEBYJoIA7umh9m5lI+66U5YzjoNSVzEk60OumPXIeC2UtOvMYb+sJ3/Se3mP+13lVQIrJSAj3A371GlnHON3Dw==",
+        "sha256": "e8c517a9a712670b215cdbe40fe7419c182fee555c0c775be3cec4f9160ce60d",
+        "signature": "nywdQyLCLPRMgQcVjk6jwaTmTyj0WDarh1GIzU/UpOeJ+PgxZAU+DdQFUGeGV8xf9e9JBrPvbKibSSNfs+khAw==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.1.0/product-formats.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.0/product-formats.zip"
       }
     },
     "publishing-quote": {
       "beta": {
-        "changelog": "* Initial release.\n* Server-side quote for editing, cover design, illustration, printing and extras (fixed, per item, per copy, per word, on request), with sizes, papers, bindings and finishes as templates, tiers, minimums, VAT per service and rounding per line.\n* Hidden typesetting fee spread inside the services and shown as «Included»; prices with or without VAT; per-copy price and validity date.\n* Block, shortcode and widget; works without JavaScript and with page caches.\n* «I'm interested» requests with email to the owner, acknowledgement to the visitor, states, notes, CSV export, retention, privacy exporter and eraser, and an API for other plugins.\n* Test / live / off mode, PBQ_DISABLE, test bench with the full breakdown, editable Greek and English texts, settings export / import.\n* Works without WooCommerce. Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.10).",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "49f41632f27fe951546bdf0ff98d7fea19b450328c802ee49bf6da8b07c40c8e",
-        "signature": "8jaLJlphq3wgWlmbyUpc/mkhanQTYVou1Yo+hCRc0CxXyD8i8YbPTC16EoD/dhJ6OW4vIaOUjRrEoizuLMehBg==",
+        "sha256": "a50b6d23cb0a1a033ada7df4a4b55f48ae2c4122dc9af648aed0303b2ce90b2c",
+        "signature": "stW2fs+5os+dffhrjPNxvf6Oawfuh0RpNxCrGUVFCP20TWo4n12wV/nbeq3CRexQA7210BsvyGa7EBXX77VNAQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.0.0/publishing-quote.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.0/publishing-quote.zip"
       }
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: read-only REST routes for orOS, `GET /wp-json/wc/v3/rs/balances?name=` and `GET /wp-json/wc/v3/rs/report?date_start=&date_end=&name=`, with the same figures as the `balances` and `report` abilities, amounts in integer cents and each product's current stock. Authenticated by the shop's WooCommerce REST keys (read is enough) or an Application Password, with `manage_woocommerce`. Nothing is written or stored.",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
         "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d7f42659f694ec8c464d669bb6453064af17623536e3e9315c8097e9a04aa05b",
-        "signature": "j4RqmYlW6TaBp+7NuJ3ssoHvXxOudP8umBXOxYlXYjVrIy99jCFfLmtZWccn9gF1+Skjj23wblaaKpsaVLYoAQ==",
+        "sha256": "63d8b2bf3237bbf9803a6b0b8a6e23e0cc60dfcea38aada9b99a9426b69e100f",
+        "signature": "H8X8YhDJaujVnag278iYDsE6iNTCvdl2MVmOu9A1zwMUdKo2YTmxUscRsQODM+gYXzsP8RfGK9Pqn8Yl06kTBw==",
         "tested_wp": "6.8",
-        "version": "1.11.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.11.0/revenue-splitter.zip"
+        "version": "1.12.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.0/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
@@ -221,132 +221,132 @@
     },
     "shipping-notes": {
       "beta": {
-        "changelog": "* Changed: with Pre-Orders active, the product's \"Available from\" field gives way to the Pre-Orders release date (a short line in the Shipping tab). A date already saved stays and can still be edited or cleared.\n* Fixed: saving a product without the \"Available from\" field on the form no longer clears a saved date.",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "212cf89bec68b2e1557f3f250ab1e8f320397f907575f47572947728401c830c",
-        "signature": "V0B/x/WuvPqdDLKZXhwiEkOwy/UQAJa+J/gxCRx2zMWXD3OMChHYE2abe6QU7i1DowkJ3DvMuOFzS20D7G6HDw==",
+        "sha256": "ee81df66694c01b12c16976f7153711457e5118f098ee767ad7919ea290c3217",
+        "signature": "IN6nb2kvLYbyUN7Z5TkaWbixXmRXa8FbjUIdzpgvtMSgx4rn9Gh8ea7l05Ymjectwv8eo4zDNb+Hvv/tA6biDw==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.1.1/shipping-notes.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.2.0/shipping-notes.zip"
       }
     },
     "shop-filters": {
       "beta": {
-        "changelog": "* New: on a category page the category tree shows only that category's branch (its top-level category and the subcategories), so it matches what is listed. The shop page still shows the whole tree. Setting per category filter, «Only the category's branch», on by default.\n* Fix: unticking «Counts» on a filter was not saved.",
-        "published": "2026-10-20",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "3927380cbec7661c944e5c22bc63ca9fe8672acbf70a211131774c7d2f307d18",
-        "signature": "5v2BVBBeH1b9JfkGRgbw1TfTTKlYWgEtPK5BPNzAbifVnBtmu2w+Ay4wsOq5K5fw04QquI1JDxHvv/VfbvizCQ==",
+        "sha256": "c89da63e18315747dc102b1ca943cbacd461c58f01087ba964c432ef2f35d74c",
+        "signature": "kEv03lSrcChHHJwDVHcKZ7Z2HuJDBR9aFCr1pSYIchUJX33LRnkgpY5G3WrFj82nhZQQ3KxqBmCr4zvw3aWJDg==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.2.0/shop-filters.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.0/shop-filters.zip"
       }
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: the phone app can preview a Book Feed rule (`book-feed/rule-preview`, read, Book Feed 1.12.0+): what it would bring on its next run, importing nothing. Only the Hub needs 1.7.1.",
-        "published": "2026-10-21",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b721c8661c83590c3d9ae851d202150979e7f2f9ab7b345eab549b5c44db755d",
-        "signature": "dHczfH9XiSU6caTgLAkXJ0+uFG15nO16+q7qI4hK7qUlxb79Zp+PXScOb1fdsikZXYQCkwqRc30cQllLI0MsDw==",
+        "sha256": "8ff5122a62730f5a323cff663af180602486fc594168373de6b799ab776c9fe2",
+        "signature": "kU76AK9wL3Ti8IHnUFaTzFCu6ilS1Egwd78jWLNxDLrGq3mdb2xWOND7/0pNMwsbm1PMMxQ79f7fG+NBJJFaCw==",
         "tested_wp": "7.1",
-        "version": "1.7.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.7.1/site-bridge.zip"
+        "version": "1.8.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.8.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
       "beta": {
-        "changelog": "* New: \"Plain text\" rule in two modes, keep line breaks or one paragraph. It removes every HTML tag and attribute (including `data-path-to-node` from text copied from AI tools), turns `&nbsp;` into spaces, removes zero-width characters and collapses blank lines; shortcodes stay. It works on every field; the dry run counts the fields that lose a link, an image or a table.\n* New: optional \"Clean on save\" setting: the short description becomes plain text when a product is saved from its edit screen. Included in the state export / import.\n* New: \"Download backup\" for every run in the history (JSON, importable from SF Settings).\n* Fixed: the backup of a run is now written before the products change. Before, products were saved first, so a failed backup write left changes without undo.\n* Fixed: a backup that would not fit (4 MB per run) was silently cut, dropping the oldest units. Apply now checks the size first and does not start; if a batch still does not fit, the run stops safely and everything changed so far restores in full.\n* Fixed: a value that changed between the check and the write is skipped instead of being overwritten.\n* Fixed: on narrow screens the history table scrolls on its own instead of widening the whole page.",
-        "published": "2026-10-13",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0a21c04aa6730edc9ff967223d00db29e4ba557eeb74c209927f5513fe3f9e57",
-        "signature": "RPXjx3nBbEwbC7lNaKs0Bl9XWNF+FY4uqLuDa8pWb0tV/XkGkQ4Qe4OxfA2rgO3K+MlGByPulkj1kHSj4YD4AA==",
+        "sha256": "f1e2d644f34250d46d218bece51425f069c8d78e30d26df9477ab33a3616502e",
+        "signature": "ekWB5fq70MSHB2toNCqYZnI80sdD8ge3vIDvK8A4saBKbVuTQUAla0g2XBrTGDEyNYWWWcOHweTURZbhBJdzBg==",
         "tested_wp": "6.8",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.4.0/smart-formatter.zip"
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.5.0/smart-formatter.zip"
       }
     },
     "store-pickup": {
       "beta": {
-        "changelog": "* New: the \"No pickup\" rule also reads the parcel the Printful plugin makes (\"Printful parcels\", on by default), so print-on-demand items need no shipping class.\n* Change: the rule works per parcel. In a mixed cart the parcel with your own products keeps pickup, and the \"No pickup\" message shows only when no parcel can be picked up. New default message text.",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8bb55b3bd643662f678d834ee18e5d2194c0d30de59bc0ce77a66fd3b60d1871",
-        "signature": "/w/dys/nfArL3lBSBLOl+bkC/7KSNDKUBO2WH+OLP1v5TwQdyJW9QDxKCWfx/zyqmOb0jF3xy/sr0lcetDUuDw==",
+        "sha256": "7656a3e1039a869e3c5cfdb25df3abdfa17bda4012e9af44e8c8f158b2c6b178",
+        "signature": "3l7OThKqX5F8Pt6AjNJ9pYvrc2ySY2suxXwtuQGqPBaptpyoal+xnFnqO2i9TZ4k6CnmjevBgVbLx6GQFOX2Cg==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.1.1/store-pickup.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.2.0/store-pickup.zip"
       }
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: WordPress abilities (6.9+) in the \"noxpress\" category, all read-only: `store-pulse/overview` (the dashboard cards of a period, with the money cards when Revenue Splitter is active), `store-pulse/stock` (the low-stock and out-of-stock lists) and `store-pulse/sales` (the Sales screen's rows per product and totals, with the same filters). For AI and remote tools such as Site Bridge; they need `manage_woocommerce`, are not in the REST API and never return customer details (customers are a count).",
-        "published": "2026-10-21",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "adbb77eac32357703b764e045f75334295964323b2c3346022ace5212773cd7d",
-        "signature": "uW9Ohjjfatb9CbzCw/DDbFMJvHhS9oE17zkoEsQxZJp8voVYKnIttS2HfEA0mD0eyQzEe2XuhJD3iU0eWXigBA==",
+        "sha256": "6486a333aca4bc8b92717c7ad4a34caa2569cbe034af240d32f2255610722a2b",
+        "signature": "1BPERlppAtJt2L6I4y8byunzLrL4wgd4gYV2IsSaQDEjqaQLSon5tkdn023yMePzxti5IrQn+lm0m/wIMbUjDQ==",
         "tested_wp": "6.8",
-        "version": "1.7.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.7.0/store-pulse.zip"
+        "version": "1.8.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.0/store-pulse.zip"
       }
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* Fixed: on the Prices tab the per-category labels table was wider than the panel at 1280 px; text fields and selects in settings tables now shrink with their column.",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e6a2d7e382120c9a7182450aacae3af9a8bb7a40dd6801865115ef171d1d5f21",
-        "signature": "F28PO5OD15Riu8rbS0pGdyjpFU54m69g1vMqlNUjV9NlPrsShqhXh+Qsh938pUUYZ6lFWcLyGKdUs2cmTrvADA==",
+        "sha256": "20008ccec43a2a586d62e8cf673be5994a6b274b4b4f2bff49862b717d815da2",
+        "signature": "kmVBFkxaHKZTnGHctR1j972Luic6mnooVYD4H1VX9D3K9Bon/gRnhvE5xY5AOsDTSGIiSMtds+xGFayaGbyQCg==",
         "tested_wp": "6.8",
-        "version": "1.5.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.5.3/theme-patcher.zip"
+        "version": "1.6.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.6.0/theme-patcher.zip"
       }
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* New: no discount coupon in a cart with trade prices (setting, on by default), with a Greek / English message; a coupon applied earlier is dropped.\n* New: no thank-you coupon after a trade order (setting, on by default): Thanko Thank You Page Customizer makes, shows and e-mails none, and Checkout Extras makes none.",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
         "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "9b78c1112cef17cae4529b0e5c50f1eee7cce278736fae1375ad527f123999a2",
-        "signature": "7kVX1jUIN4Jg6s6sQOrvjanzbK4LvleOmWb9PHavmfpuV1ntbLECkPodqk+9fiaFIuiDGBMJXdmYYj9e8VyxCg==",
+        "sha256": "08200dff6507b0aa732beefb9374c7dcba6eea40e318a619d2eb4d29ca6cb8d5",
+        "signature": "xMhZdfFNJ4tx4/KIM5yaly5CTH6IuQdF1BoN3oC9s5GmgUupq0WqJV83yI0jnaxvkjWrqn62yRkQOH2uu7iuBg==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.1.0/trade-accounts.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.2.0/trade-accounts.zip"
       }
     },
     "variation-picker": {
       "beta": {
-        "changelog": "* Initial release.\n* Swatch types per attribute and per product: text button, color (two-tone), image, variation image, radio list, dropdown.\n* Value looks (color, second color, image, short label) on attribute terms and on custom product attributes.\n* Shape, size, font size, border width and colors with a live preview.\n* Blurred / crossed / hidden values for missing combinations and out of stock; smart selection; \"Color: Black\"; tooltip with name, image, price difference and low stock.\n* Automatic selection, deselect on second click, choices in the page address.\n* Size guides by category or per product, in an accessible dialog.\n* Swatches on shop cards with image swap and pre-selected links.\n* Availability maps built in the background (Action Scheduler) for products with many variations.\n* Import from CartFlows Variation Swatches, Variation Swatches (GetWooPlugins) and WCBoost Variation Swatches.\n* Color dot in the cart and mini-cart.\n* Editable Greek / English texts, settings export / import.\n* Test mode, VPK_DISABLE, HPOS compatible.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.6).",
-        "published": "2026-10-13",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b01cbe7ef8a8a550295684ac83d36687d1749a3e7abd5728f641f97f35cec363",
-        "signature": "wkZtnN+lS/doZ3uMOXR5gnJjNkMpMd1ID2l3WV5kChPXkxm+XmArodfLGxskHvSpUSL5F7tet3dZ6fQe3KcZAA==",
+        "sha256": "9fc5837e7304c4d2c9c254f318b45ad1aa9fcdf72d75169f7a670bf0d10f252f",
+        "signature": "KhdgatLdzmcvluich3yoX2sII1ZMfsSh2Du24sAbYGhlvqo2wZUvTE49DlkbKlCkO/dPNKb2XWC4CvM3AHLUCg==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.0.0/variation-picker.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.1.0/variation-picker.zip"
       }
     },
     "wish-shelf": {
       "beta": {
-        "changelog": "* Named lists for signed-in customers (setting, off by default): tabs, create, rename, delete, move between lists, a share link per list. Filter wsh_max_lists.\n* Email alerts for price drops and products back in stock: customer opt-in, a WooCommerce email (off by default), a daily background check in batches, one email per customer, a stop link without sign-in.\n* Import from YITH WooCommerce Wishlist and TI WooCommerce Wishlist (their named lists too).\n* wsh_get_items() also returns list_id.\n* The tables upgrade on the first request after an update.\n* Uninstall also removes the alert opt-ins, the email settings, the queued checks and (with \"Delete the lists …\") the named lists.",
-        "published": "2026-10-18",
+        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "902e21a7ea4b4561230db85eefe517dcbc468435bd904838b28d0913ab8f9668",
-        "signature": "ur4FvvRdXJpRZccmVRT9TlJi2OccTCrhxG8rRUeV5OLQ4FMhlGp+XuvRQvMHMs7DfTOIVMfKUeg8v+BnUe40AQ==",
+        "sha256": "80734287cdcd323a760f80c916db1c62f3ddd0ab0da05bf1869ec2d17c6d6de5",
+        "signature": "CVNjeKQtBP4u6qd4mNUS6dguYvxc9MsI4NMItru1tQI/SAEBkhWHVmZLVdqiwmOh7ZlMUqTEJ87YMcNQA+1uBg==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.1.0/wish-shelf.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.0/wish-shelf.zip"
       }
     }
   }
