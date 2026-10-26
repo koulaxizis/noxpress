@@ -1068,7 +1068,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="site-bridge">
 		<h2><a href="#site-bridge">Site Bridge</a></h2>
 		<a class="card-video" href="media/videos/site-bridge.mp4" data-video="site-bridge" data-video-title="Site Bridge" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.8.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.9.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sb_desc">Let Claude manage your WordPress and WooCommerce sites over MCP, from your own servers, with no service in between. One Hub takes Claude’s connection and forwards every call, signed, to your sites; each site decides what is allowed. Works with Claude; not affiliated with Anthropic.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -1081,7 +1081,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.8.0/site-bridge.zip" rel="nofollow noopener" data-i18n="sb_download">Download v1.8.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.9.0/site-bridge.zip" rel="nofollow noopener" data-i18n="sb_download">Download v1.9.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/site-bridge" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1125,6 +1125,27 @@ footer .heart { color: var(--accent-bright); }
 		<div class="actions">
 			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.2.0/trade-accounts.zip" rel="nofollow noopener" data-i18n="ta_download">Download v1.2.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/trade-accounts" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
+	<article class="card" id="fast-pages">
+		<h2><a href="#fast-pages">Fast Pages</a></h2>
+		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="fp_desc">A page cache for visitors with smart purging and background preload, CSS / JS minify, lazy load and click-to-play YouTube. It replaces WP Rocket with no account or external service, and Claude can run it through Site Bridge.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="fp_li1">Pages served before WordPress loads (advanced-cache.php drop-in), with test mode first and an X-Fast-Pages header (HIT / MISS / BYPASS)</li>
+			<li data-i18n="fp_li2">Never cached: logged-in users, cart, checkout, account, visitors with a cart, searches and pages that send cookies; 10-hour lifespan so forms keep fresh nonces</li>
+			<li data-i18n="fp_li3">Smart purging on post, product, stock, comment and term changes, a suite hook for other plugins, and background preload from the sitemap</li>
+			<li data-i18n="fp_li4">Optional minify per CSS / JS file (no combining), lazy load for images, iframes and backgrounds, click-to-play YouTube (youtube-nocookie), image dimensions and hover preload</li>
+			<li data-i18n="fp_li5">Import from WP Rocket, database cleanup, seven abilities for Site Bridge, FPG_DISABLE; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.0/fast-pages.zip" rel="nofollow noopener" data-i18n="fp_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/fast-pages" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
 	</article>
@@ -1448,7 +1469,7 @@ footer .heart { color: var(--accent-bright); }
 		sb_li3: '30 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates',
 		sb_li4: 'Never PHP, shell or file writes; secrets always come back as ***, personal data masked by default, every call in an audit log on the Hub and the site',
 		sb_li5: 'Remote administrator access: install it only on sites you own, keep them at read and open the window only while you work. Bilingual UI and shared «Noxpress» menu',
-		sb_download: 'Download v1.8.0 (.zip)',
+		sb_download: 'Download v1.9.0 (.zip)',
 		lo_desc: 'The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.',
 		lo_li1: 'Online / offline from the phone, kept on the server even with the screen off, with automatic offline after the hours you choose and a notification when it ends',
 		lo_li2: 'Web Push straight from your site (VAPID, end-to-end encrypted), for every new request and every visitor message; no Firebase and no Telegram needed',
@@ -1463,6 +1484,13 @@ footer .heart { color: var(--accent-bright); }
 		ta_li4: 'Trade Feed: REST in JSON or XML, filters by category, ISBN, author, attribute, availability, pre-order and changes since a date, with retail and trade prices',
 		ta_li5: 'WordPress Application Password per account, shown once and revocable; rate limit with headers, call log without IP, test mode, TRA_DISABLE; bilingual UI and shared «Noxpress» menu',
 		ta_download: 'Download v1.2.0 (.zip)',
+		fp_desc: 'A page cache for visitors with smart purging and background preload, CSS / JS minify, lazy load and click-to-play YouTube. It replaces WP Rocket with no account or external service, and Claude can run it through Site Bridge.',
+		fp_li1: 'Pages served before WordPress loads (advanced-cache.php drop-in), with test mode first and an X-Fast-Pages header (HIT / MISS / BYPASS)',
+		fp_li2: 'Never cached: logged-in users, cart, checkout, account, visitors with a cart, searches and pages that send cookies; 10-hour lifespan so forms keep fresh nonces',
+		fp_li3: 'Smart purging on post, product, stock, comment and term changes, a suite hook for other plugins, and background preload from the sitemap',
+		fp_li4: 'Optional minify per CSS / JS file (no combining), lazy load for images, iframes and backgrounds, click-to-play YouTube (youtube-nocookie), image dimensions and hover preload',
+		fp_li5: 'Import from WP Rocket, database cleanup, seven abilities for Site Bridge, FPG_DISABLE; bilingual UI and shared «Noxpress» menu',
+		fp_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -1739,7 +1767,7 @@ footer .heart { color: var(--accent-bright); }
 		sb_li3: '30 εργαλεία: ρυθμίσεις, SQL μόνο για ανάγνωση, REST, HTML σελίδων, αρχεία, logs, cron και site health· περιεχόμενο, options, πολυμέσα και caches· εγκατάσταση και ενημέρωση plugins και θεμάτων',
 		sb_li4: 'Ποτέ PHP, shell ή εγγραφή αρχείων· τα μυστικά γυρίζουν πάντα ως ***, προσωπικά δεδομένα με μάσκα από προεπιλογή, κάθε κλήση στο ιστορικό του Hub και του site',
 		sb_li5: 'Απομακρυσμένη πρόσβαση διαχειριστή: βάλ\u2019 το μόνο σε δικά σου sites, κράτα τα σε ανάγνωση και άνοιγε το παράθυρο μόνο όσο δουλεύεις. Δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
-		sb_download: 'Λήψη v1.8.0 (.zip)',
+		sb_download: 'Λήψη v1.9.0 (.zip)',
 		lo_desc: 'Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server, ειδοποίηση για κάθε αίτημα και μήνυμα, και απαντήσεις από εφαρμογή Android ή web εφαρμογή στην αρχική οθόνη. Χωρίς Firebase, χωρίς λογαριασμό σε τρίτους.',
 		lo_li1: 'Online / offline από το κινητό, που μένει στον server και με σβηστή οθόνη, με αυτόματο offline μετά από όσες ώρες ορίσεις και ειδοποίηση όταν λήξει',
 		lo_li2: 'Web Push κατευθείαν από το site σου (VAPID, κρυπτογραφημένο από άκρο σε άκρο), για κάθε νέο αίτημα και κάθε μήνυμα επισκέπτη· χωρίς Firebase και χωρίς Telegram',
@@ -1754,6 +1782,13 @@ footer .heart { color: var(--accent-bright); }
 		ta_li4: 'Trade Feed: REST σε JSON ή XML, φίλτρα ανά κατηγορία, ISBN, συγγραφέα, ιδιότητα, διαθεσιμότητα, προπαραγγελία και αλλαγές από μια ημερομηνία, με τιμές λιανικής και χονδρικής',
 		ta_li5: 'Application Password του WordPress ανά λογαριασμό, που φαίνεται μία φορά και ανακαλείται· όριο κλήσεων με headers, ημερολόγιο χωρίς IP, λειτουργία δοκιμής, TRA_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ta_download: 'Λήψη v1.2.0 (.zip)',
+		fp_desc: 'Page cache για επισκέπτες με έξυπνο καθάρισμα και preload στο παρασκήνιο, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket χωρίς λογαριασμό ή εξωτερική υπηρεσία, και ο Claude το χειρίζεται μέσω Site Bridge.',
+		fp_li1: 'Σελίδες πριν φορτώσει το WordPress (drop-in advanced-cache.php), πρώτα σε λειτουργία δοκιμής, με header X-Fast-Pages (HIT / MISS / BYPASS)',
+		fp_li2: 'Ποτέ στην cache: συνδεδεμένοι χρήστες, καλάθι, ταμείο, λογαριασμός, επισκέπτες με καλάθι, αναζητήσεις και σελίδες που στέλνουν cookies· διάρκεια 10 ωρών ώστε οι φόρμες να έχουν πάντα φρέσκο nonce',
+		fp_li3: 'Έξυπνο καθάρισμα σε αλλαγές άρθρων, προϊόντων, αποθέματος, σχολίων και όρων, hook της σουίτας για τα άλλα plugins, και preload στο παρασκήνιο από το sitemap',
+		fp_li4: 'Προαιρετικά minify ανά αρχείο CSS / JS (χωρίς ένωση), lazy load για εικόνες, iframes και φόντα, YouTube με κλικ (youtube-nocookie), διαστάσεις εικόνων και preload στο hover',
+		fp_li5: 'Εισαγωγή από το WP Rocket, καθαρισμός βάσης, επτά abilities για το Site Bridge, FPG_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		fp_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
