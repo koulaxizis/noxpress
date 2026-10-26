@@ -311,7 +311,7 @@ section.plugins { padding-bottom: 40px; }
 	background: var(--accent);
 }
 
-.subscribe-box {
+.updates-box {
 	background:
 		radial-gradient(ellipse at top left, rgba(109, 74, 255, 0.22), transparent 55%),
 		var(--surface);
@@ -323,19 +323,19 @@ section.plugins { padding-bottom: 40px; }
 	text-align: center;
 	box-shadow: 0 0 34px rgba(109, 74, 255, 0.16);
 }
-.subscribe-box .subscribe-title {
+.updates-box .updates-title {
 	font-size: 1.15rem;
 	font-weight: 600;
 	color: #f2f0fe;
 	margin-bottom: 6px;
 }
-.subscribe-box p {
+.updates-box p {
 	color: var(--muted);
 	font-size: 0.95rem;
 	max-width: 40em;
 	margin: 0 auto 18px;
 }
-.subscribe-box .btn-subscribe {
+.updates-box .btn-updates {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
@@ -349,11 +349,11 @@ section.plugins { padding-bottom: 40px; }
 	font-weight: 600;
 	transition: background 0.15s ease, box-shadow 0.15s ease;
 }
-.subscribe-box .btn-subscribe:hover {
+.updates-box .btn-updates:hover {
 	background: #8263ff;
 	box-shadow: 0 0 22px rgba(109, 74, 255, 0.45);
 }
-.subscribe-box .subscribe-note {
+.updates-box .updates-note {
 	margin-top: 12px;
 	font-size: 0.78rem;
 	color: var(--muted);
@@ -1168,11 +1168,11 @@ footer .heart { color: var(--accent-bright); }
 	</article>
 </section>
 
-<section class="subscribe-box" id="subscribe" aria-labelledby="subscribe-title">
-	<div class="subscribe-title" id="subscribe-title" data-i18n="sub_title">Stay in the loop ✦</div>
-	<p data-i18n="sub_text">Get notified about new plugins, updates &amp; maintenance.</p>
-	<a class="btn-subscribe" href="https://preview.mailerlite.io/forms/642133/197598403923805558/share" rel="noopener" data-i18n="sub_btn">Subscribe</a>
-	<p class="subscribe-note" data-i18n="sub_note">No spam — only release announcements. Your email stays with MailerLite.</p>
+<section class="updates-box" id="updates" aria-labelledby="updates-title">
+	<div class="updates-title" id="updates-title" data-i18n="up_title">Stay in the loop ✦</div>
+	<p data-i18n="up_text">Every new plugin, release and fix is announced on Ko-fi. Follow noxpress there to see them first.</p>
+	<a class="btn-updates" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="up_btn">Follow on Ko-fi</a>
+	<p class="updates-note" data-i18n="up_note">Following is free. Ko-fi is the only place for noxpress news.</p>
 </section>
 
 <footer>
@@ -1184,10 +1184,10 @@ footer .heart { color: var(--accent-bright); }
 <dialog class="dl-dialog" id="dlDialog" aria-labelledby="dlTitle">
 	<button type="button" class="dl-close" id="dlClose" aria-label="Close">×</button>
 	<h2 id="dlTitle"><span data-i18n="dl_title">Your download is ready</span></h2>
-	<p data-i18n="dl_text">noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.</p>
+	<p data-i18n="dl_text">noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and following noxpress there tells you when updates land.</p>
 	<div class="dl-actions">
 		<a class="btn primary" id="dlKofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="dl_kofi">☕ Support on Ko-fi &amp; download</a>
-		<a class="btn" id="dlSub" href="https://preview.mailerlite.io/forms/642133/197598403923805558/share" target="_blank" rel="noopener" data-i18n="dl_sub">✦ Subscribe to updates &amp; download</a>
+		<a class="btn" id="dlFollow" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="dl_follow">✦ Follow on Ko-fi for updates &amp; download</a>
 	</div>
 	<button type="button" class="dl-skip" id="dlSkip" data-i18n="dl_skip">Skip to download</button>
 </dialog>
@@ -1467,9 +1467,9 @@ footer .heart { color: var(--accent-bright); }
 		more_show: 'All features',
 		more_hide: 'Fewer details',
 		dl_title: 'Your download is ready',
-		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and the newsletter tells you when updates land.',
+		dl_text: 'noxpress plugins are free and open source. If this one saves you time, a coffee on Ko-fi keeps them maintained — and following noxpress there tells you when updates land.',
 		dl_kofi: '☕ Support on Ko-fi &amp; download',
-		dl_sub: '✦ Subscribe to updates &amp; download',
+		dl_follow: '✦ Follow on Ko-fi for updates &amp; download',
 		dl_skip: 'Skip to download',
 		dl_close: 'Close',
 		video_btn: '▶ Video',
@@ -1492,10 +1492,10 @@ footer .heart { color: var(--accent-bright); }
 		ms_btn: 'Become a supporter',
 		ms_list: 'See the supporters',
 		ms_once: 'One-off coffee ☕',
-		sub_title: 'Stay in the loop ✦',
-		sub_text: 'Get notified about new plugins, updates &amp; maintenance.',
-		sub_btn: 'Subscribe',
-		sub_note: 'No spam — only release announcements. Your email stays with MailerLite.',
+		up_title: 'Stay in the loop ✦',
+		up_text: 'Every new plugin, release and fix is announced on Ko-fi. Follow noxpress there to see them first.',
+		up_btn: 'Follow on Ko-fi',
+		up_note: 'Following is free. Ko-fi is the only place for noxpress news.',
 		ft_supporters: 'Supporters',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
@@ -1758,9 +1758,9 @@ footer .heart { color: var(--accent-bright); }
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
-		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και το newsletter σε ενημερώνει όταν βγαίνουν ενημερώσεις.',
+		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα. Αν αυτό σου γλιτώνει χρόνο, ένας καφές στο Ko-fi κρατά τη συντήρησή τους ζωντανή — και αν ακολουθείς το noxpress εκεί, μαθαίνεις πότε βγαίνουν ενημερώσεις.',
 		dl_kofi: '☕ Στήριξε στο Ko-fi &amp; κατέβασε',
-		dl_sub: '✦ Εγγραφή για ενημερώσεις &amp; λήψη',
+		dl_follow: '✦ Ακολούθησε στο Ko-fi για ενημερώσεις &amp; κατέβασε',
 		dl_skip: 'Παράλειψη, κατέβασέ το',
 		dl_close: 'Κλείσιμο',
 		video_btn: '▶ Βίντεο',
@@ -1783,10 +1783,10 @@ footer .heart { color: var(--accent-bright); }
 		ms_btn: 'Γίνε υποστηρικτής',
 		ms_list: 'Δες τους υποστηρικτές',
 		ms_once: 'Ένας καφές, μία φορά ☕',
-		sub_title: 'Μείνε ενήμερος ✦',
-		sub_text: 'Ενημερώσου για νέα plugins, ενημερώσεις &amp; συντήρηση.',
-		sub_btn: 'Εγγραφή',
-		sub_note: 'Χωρίς spam — μόνο ανακοινώσεις εκδόσεων. Το email σου μένει στη MailerLite.',
+		up_title: 'Μείνε ενήμερος ✦',
+		up_text: 'Κάθε νέο plugin, έκδοση και διόρθωση ανακοινώνεται στο Ko-fi. Ακολούθησε το noxpress εκεί για να τα βλέπεις πρώτος.',
+		up_btn: 'Ακολούθησε στο Ko-fi',
+		up_note: 'Το follow είναι δωρεάν. Το Ko-fi είναι η μόνη πηγή νέων του noxpress.',
 		ft_supporters: 'Υποστηρικτές',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
@@ -1843,7 +1843,7 @@ footer .heart { color: var(--accent-bright); }
 (function () {
 	'use strict';
 	/* ------------------------------------------------------------------
-	 * Download popup — πριν από κάθε λήψη: Ko-fi, newsletter ή απλή λήψη.
+	 * Download popup — πριν από κάθε λήψη: στήριξη ή follow στο Ko-fi, ή απλή λήψη.
 	 * Χωρίς JS / χωρίς <dialog> το link κατεβάζει κανονικά.
 	 * ------------------------------------------------------------------ */
 	var dlg = document.getElementById('dlDialog');
@@ -1865,9 +1865,9 @@ footer .heart { color: var(--accent-bright); }
 			dlg.showModal();
 		});
 	}
-	// Ko-fi / newsletter ανοίγουν σε νέα καρτέλα (target=_blank)· η λήψη ξεκινά εδώ.
+	// Στήριξη / follow στο Ko-fi ανοίγουν σε νέα καρτέλα (target=_blank)· η λήψη ξεκινά εδώ.
 	document.getElementById('dlKofi').addEventListener('click', startDownload);
-	document.getElementById('dlSub').addEventListener('click', startDownload);
+	document.getElementById('dlFollow').addEventListener('click', startDownload);
 	document.getElementById('dlSkip').addEventListener('click', startDownload);
 	document.getElementById('dlClose').addEventListener('click', function () { pending = ''; dlg.close(); });
 	dlg.addEventListener('click', function (e) {
