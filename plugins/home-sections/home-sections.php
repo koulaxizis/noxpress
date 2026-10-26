@@ -3,7 +3,7 @@
  * Plugin Name:          Home Sections
  * Plugin URI:           https://noxpress.tech
  * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets, το [hs_video] με το νεότερο book trailer ή παρουσίαση από τις καρτέλες βίντεο των προϊόντων, και το [hs_stats] με ζωντανούς μετρητές για διαθέσιμα προϊόντα, ολοκληρωμένες παραγγελίες, αγοραστές και προϊόντα ανά ομάδα κατηγοριών. Τα προϊόντα δεν αλλάζουν.
- * Version:              1.3.0
+ * Version:              1.4.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -84,7 +84,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HMS_VERSION', '1.3.0' );
+define( 'HMS_VERSION', '1.4.0' );
 define( 'HMS_FILE', __FILE__ );
 define( 'HMS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HMS_URL', plugin_dir_url( __FILE__ ) );

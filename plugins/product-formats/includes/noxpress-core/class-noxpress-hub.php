@@ -13,6 +13,12 @@
  *
  * POST routes (admin_init, Bible §11): page slug → nonce → capability →
  * whitelisted action → PRG with a per-user notice transient.
+ *
+ * Bulk actions (install, update, uninstall all): a confirm dialog with a
+ * checklist, then one request per plugin through WordPress's own AJAX
+ * (install-plugin, update-plugin, delete-plugin), so no request can time
+ * out and the package checks stay the same. Only (de)activation has an
+ * AJAX of ours (noxpress_bulk_state).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,9 +28,13 @@ final class Noxpress_Hub {
 	const NONCE       = 'noxpress_hub';
 	const NONCE_FIELD = '_noxpress_nonce';
 
+	/** Unticked by default in "Uninstall all": their data is hard to replace. */
+	const KEEP_BY_DEFAULT = array( 'site-bridge', 'data-migrator' );
+
 	public static function init(): void {
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_action( 'wp_ajax_noxpress_bulk_state', array( __CLASS__, 'ajax_state' ) );
 	}
 
 	private static function on_page(): bool {
@@ -38,6 +48,54 @@ final class Noxpress_Hub {
 		}
 		wp_enqueue_style( 'noxpress-hub', Noxpress_Core::url( 'assets/hub.css' ), array(), NOXPRESS_CORE );
 		add_thickbox(); // Plugin details popup.
+		if ( self::bulk_allowed() ) {
+			wp_enqueue_script( 'noxpress-hub-bulk', Noxpress_Core::url( 'assets/hub-bulk.js' ), array(), NOXPRESS_CORE, true );
+		}
+	}
+
+	/** Bulk actions: file changes allowed, and on multisite only in the network admin. */
+	private static function bulk_allowed(): bool {
+		return ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) && ( ! is_multisite() || is_network_admin() );
+	}
+
+	/** Capability for (de)activating suite plugins: network-wide on multisite. */
+	private static function state_cap(): string {
+		return is_multisite() ? 'manage_network_plugins' : 'activate_plugins';
+	}
+
+	/**
+	 * AJAX: activate or deactivate one suite plugin (bulk actions).
+	 * Nonce → capability → catalog slug in its canonical folder.
+	 */
+	public static function ajax_state(): void {
+		check_ajax_referer( self::NONCE, 'nonce' );
+		if ( ! current_user_can( self::state_cap() ) ) {
+			wp_send_json_error( array( 'message' => __( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'noxpress' ) ), 403 );
+		}
+		$op   = isset( $_POST['op'] ) ? sanitize_key( wp_unslash( $_POST['op'] ) ) : '';
+		$slug = isset( $_POST['slug'] ) ? sanitize_key( wp_unslash( $_POST['slug'] ) ) : '';
+		$file = Noxpress_Core::plugin_file( $slug );
+		if ( ! in_array( $op, array( 'activate', 'deactivate' ), true ) || ! isset( Noxpress_Core::installed()[ $slug ] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Άγνωστο plugin της σουίτας.', 'noxpress' ) ), 400 );
+		}
+
+		if ( 'activate' === $op ) {
+			$result = activate_plugin( $file, '', is_multisite() );
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+			}
+		} else {
+			if ( is_multisite() && is_plugin_active_for_network( $file ) ) {
+				deactivate_plugins( $file, false, true );
+			}
+			if ( is_plugin_active( $file ) ) {
+				deactivate_plugins( $file );
+			}
+			if ( is_plugin_active( $file ) ) {
+				wp_send_json_error( array( 'message' => __( 'Η απενεργοποίηση δεν έγινε.', 'noxpress' ) ) );
+			}
+		}
+		wp_send_json_success();
 	}
 
 	/** Admin URL for plugin management: the network admin on multisite. */
@@ -207,6 +265,7 @@ final class Noxpress_Hub {
 			<?php endif; ?>
 
 			<h2 class="nx-h2"><?php esc_html_e( 'Plugins', 'noxpress' ); ?></h2>
+			<?php self::render_bulk( $rows ); ?>
 			<table class="widefat nx-table">
 				<thead>
 					<tr>
@@ -269,7 +328,7 @@ final class Noxpress_Hub {
 		$file = $row['file'];
 		$rel  = $row['release'];
 		?>
-		<tr>
+		<tr data-nx-slug="<?php echo esc_attr( $slug ); ?>">
 			<td>
 				<strong><?php echo esc_html( $row['info']['name'] ); ?></strong>
 				<span class="nx-desc"><?php echo esc_html( $row['info']['desc'] ); ?></span>
@@ -369,6 +428,127 @@ final class Noxpress_Hub {
 				?>
 			</td>
 		</tr>
+		<?php
+	}
+
+	/**
+	 * Bulk buttons and their confirm dialog (the dialog is filled by
+	 * assets/hub-bulk.js from the JSON below). Each button shows only when
+	 * it has something to do and the user may do it.
+	 */
+	private static function render_bulk( array $rows ): void {
+		if ( ! current_user_can( 'update_plugins' ) && ! current_user_can( 'install_plugins' ) && ! current_user_can( 'delete_plugins' ) ) {
+			return;
+		}
+		if ( ! self::bulk_allowed() ) {
+			if ( is_multisite() && ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) ) {
+				echo '<p class="nx-muted">' . esc_html__( 'Οι μαζικές ενέργειες γίνονται από το network admin.', 'noxpress' ) . '</p>';
+			}
+			return;
+		}
+
+		$lists     = array(
+			'install'   => array(),
+			'update'    => array(),
+			'uninstall' => array(),
+		);
+		$beta_only = 0;
+		foreach ( $rows as $row ) {
+			$item = array(
+				'slug'    => $row['slug'],
+				'file'    => $row['file'],
+				'name'    => $row['info']['name'],
+				'active'  => $row['active'],
+				'checked' => true,
+				'note'    => '',
+			);
+			if ( ! $row['installed'] ) {
+				if ( $row['release'] ) {
+					$lists['install'][] = $item + array( 'version' => $row['release']['version'] );
+				} elseif ( $row['other'] ) {
+					++$beta_only;
+				}
+				continue;
+			}
+			if ( $row['update'] && $row['queued'] ) {
+				$lists['update'][] = $item + array( 'version' => $row['version'] . ' → ' . $row['release']['version'] );
+			}
+			$item['version'] = $row['version'];
+			if ( in_array( $row['slug'], self::KEEP_BY_DEFAULT, true ) ) {
+				$item['checked'] = false;
+				$item['note']    = 'site-bridge' === $row['slug']
+					? __( 'Σβήνει κλειδιά και συζεύξεις: κόβεται η σύνδεση του Claude με τα sites.', 'noxpress' )
+					: __( 'Χωρίς το τικ «Να μείνουν τα αντίγραφα» στις ρυθμίσεις του, σβήνει όλα τα backups.', 'noxpress' );
+			}
+			$lists['uninstall'][] = $item;
+		}
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			$lists['install'] = array();
+		}
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			$lists['update'] = array();
+		}
+		if ( ! current_user_can( 'delete_plugins' ) || ! current_user_can( self::state_cap() ) ) {
+			$lists['uninstall'] = array();
+		}
+		if ( ! $lists['install'] && ! $lists['update'] && ! $lists['uninstall'] ) {
+			return;
+		}
+
+		$labels = array(
+			/* translators: %d: number of plugins */
+			'install'   => __( 'Εγκατάσταση όλων (%d)', 'noxpress' ),
+			/* translators: %d: number of plugins */
+			'update'    => __( 'Ενημέρωση όλων (%d)', 'noxpress' ),
+			/* translators: %d: number of plugins */
+			'uninstall' => __( 'Απεγκατάσταση όλων (%d)', 'noxpress' ),
+		);
+		$config = array(
+			'ajax'      => admin_url( 'admin-ajax.php' ),
+			'wpNonce'   => wp_create_nonce( 'updates' ),
+			'nonce'     => wp_create_nonce( self::NONCE ),
+			'plugins'   => self::manage_url( 'plugins.php' ),
+			'suite'     => count( Noxpress_Core::installed() ),
+			'lists'     => $lists,
+			'betaOnly'  => 'stable' === Noxpress_Updater::channel() ? $beta_only : 0,
+			'word'      => __( 'ΔΙΑΓΡΑΦΗ', 'noxpress' ),
+			'text'      => array(
+				'installTitle'   => __( 'Εγκατάσταση όλων', 'noxpress' ),
+				'updateTitle'    => __( 'Ενημέρωση όλων', 'noxpress' ),
+				'uninstallTitle' => __( 'Απεγκατάσταση όλων', 'noxpress' ),
+				'installIntro'   => __( 'Τα plugins εγκαθίστανται ένα-ένα, από το κανάλι ενημερώσεων του site. Δεν ενεργοποιούνται, εκτός αν το τσεκάρεις.', 'noxpress' ),
+				'updateIntro'    => __( 'Τα plugins ενημερώνονται ένα-ένα. Όσα είναι ενεργά μένουν ενεργά.', 'noxpress' ),
+				'uninstallIntro' => __( 'Τα plugins απενεργοποιούνται και διαγράφονται. Η διαγραφή τρέχει το uninstall κάθε plugin: σβήνει ρυθμίσεις και δεδομένα του, εκτός από όσα κρατά το ίδιο το plugin (π.χ. παραγγελίες ή ό,τι έχεις τσεκάρει να μείνει στα Εργαλεία του). Δεν αναιρείται.', 'noxpress' ),
+				'liveWarn'       => __( 'Σε live site τα χαρακτηριστικά τους φεύγουν αμέσως από το κατάστημα. Καλύτερα με πρόσφατο backup.', 'noxpress' ),
+				/* translators: %d: number of plugins */
+				'betaOnly'       => __( 'Plugins μόνο με beta έκδοση, που δεν μπαίνουν στο κανάλι Stable: %d. Για αυτά, «Μετάβαση στο Beta για όλα» ή «Εγκατάσταση beta» στη γραμμή τους.', 'noxpress' ),
+				'activate'       => __( 'Ενεργοποίηση μετά την εγκατάσταση', 'noxpress' ),
+				/* translators: %s: the word to type */
+				'typeWord'       => __( 'Γράψε %s για επιβεβαίωση:', 'noxpress' ),
+				'start'          => __( 'Έναρξη', 'noxpress' ),
+				'cancel'         => __( 'Άκυρο', 'noxpress' ),
+				'close'          => __( 'Κλείσιμο', 'noxpress' ),
+				'waiting'        => __( 'Σε αναμονή', 'noxpress' ),
+				'working'        => __( 'Γίνεται…', 'noxpress' ),
+				'done'           => __( 'Έγινε', 'noxpress' ),
+				'failed'         => __( 'Σφάλμα', 'noxpress' ),
+				/* translators: 1: plugins done, 2: plugins failed */
+				'summary'        => __( 'Ολοκληρώθηκε. Έγιναν: %1$d, σφάλματα: %2$d.', 'noxpress' ),
+				'gone'           => __( 'Δεν έμεινε κανένα plugin της σουίτας, άρα ούτε αυτή η σελίδα. Συνέχεια στη σελίδα Plugins.', 'noxpress' ),
+				'leave'          => __( 'Η εργασία δεν τελείωσε. Να φύγεις από τη σελίδα;', 'noxpress' ),
+				'network'        => __( 'Σφάλμα δικτύου.', 'noxpress' ),
+			),
+		);
+		?>
+		<div class="nx-bulk" id="nx-bulk">
+			<?php foreach ( $labels as $op => $label ) : ?>
+				<?php if ( $lists[ $op ] ) : ?>
+					<button type="button" class="button<?php echo 'uninstall' === $op ? ' nx-danger-button' : ''; ?>" data-nx-bulk="<?php echo esc_attr( $op ); ?>"><?php echo esc_html( sprintf( $label, count( $lists[ $op ] ) ) ); ?></button>
+				<?php endif; ?>
+			<?php endforeach; ?>
+			<dialog class="nx-dialog" id="nx-bulk-dialog" aria-labelledby="nx-bulk-title"></dialog>
+			<script type="application/json" id="nx-bulk-config"><?php echo wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE ); ?></script>
+		</div>
 		<?php
 	}
 

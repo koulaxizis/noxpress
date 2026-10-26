@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -100,6 +100,9 @@ The settings, the transients and the preparation days and release dates on produ
 The free shipping bar does. The parcel names, the "two parcels" message and the Greek partner labels are for the classic cart and checkout (`[woocommerce_cart]`, `[woocommerce_checkout]`); the order list on the thank-you page and in the emails works with both.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.1.1 =
 * Changed: with Pre-Orders active, the product's "Available from" field gives way to the Pre-Orders release date (a short line in the Shipping tab). A date already saved stays and can still be edited or cleared.

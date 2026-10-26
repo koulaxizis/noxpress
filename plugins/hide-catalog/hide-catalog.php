@@ -3,7 +3,7 @@
  * Plugin Name:          Hide Catalog
  * Plugin URI:           https://noxpress.tech
  * Description:          Απόκρυψη κατηγοριών προϊόντων και των προϊόντων τους από το shop, τις άλλες λίστες, την αναζήτηση, τα σχετικά προϊόντα, τα shortcodes και τα blocks, με κανόνα ανά κατηγορία. Η σελίδα της κατηγορίας μένει ανοιχτή ή κλείνει (noindex, 404, ανακατεύθυνση). Τα προϊόντα δεν αλλάζουν.
- * Version:              1.0.1
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -57,7 +57,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HIC_VERSION', '1.0.1' );
+define( 'HIC_VERSION', '1.1.0' );
 define( 'HIC_FILE', __FILE__ );
 define( 'HIC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HIC_URL', plugin_dir_url( __FILE__ ) );

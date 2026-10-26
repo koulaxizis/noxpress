@@ -5,7 +5,7 @@ Tags: publishing, quote, calculator, books, authors
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -85,6 +85,9 @@ Into the services, in proportion to their amounts (or into one service you choos
 The settings, the transients and the cleanup event are removed. The requests stay, as your business record, unless you tick «Delete the requests on uninstall» in General. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.0.0 =
 * Initial release.

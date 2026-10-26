@@ -3,7 +3,7 @@
  * Plugin Name:          Book Preview
  * Plugin URI:           https://noxpress.tech
  * Description:          Δείγμα βιβλίου στη σελίδα κάθε προϊόντος: ορίζεις ένα PDF και τις σελίδες του δείγματος, το plugin φτιάχνει στον server ξεχωριστό PDF μόνο με αυτές και το δείχνει σε viewer μέσα στη σελίδα. Το πλήρες PDF δεν φτάνει ποτέ στον browser.
- * Version:              1.0.1
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -58,7 +58,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BPV_VERSION', '1.0.1' );
+define( 'BPV_VERSION', '1.1.0' );
 define( 'BPV_FILE', __FILE__ );
 define( 'BPV_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BPV_URL', plugin_dir_url( __FILE__ ) );

@@ -226,3 +226,35 @@ a.nx-kofi:hover { background: #8263ff; color: #ffffff; }
 .nx-actions .nx-beta-button { border-color: #e0a84f !important; color: #f5c97e !important; background: transparent !important; }
 .nx-hide-form { display: inline; margin: 0; }
 .nx-wrap .button-link.nx-hide { color: var(--nx-muted); font-size: 12px; text-decoration: underline; }
+
+/* Bulk actions: install, update, uninstall all (§16). */
+.nx-bulk { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.nx-wrap .button.nx-danger-button { border-color: #8a3a3a !important; color: var(--nx-danger) !important; background: transparent !important; }
+.nx-wrap .button.nx-danger-button:hover { border-color: var(--nx-danger) !important; color: #ffffff !important; }
+.nx-wrap .button.button-primary.nx-danger-button { background: #8a2f2f !important; color: #ffffff !important; }
+.nx-wrap .button:disabled,
+.nx-wrap .button.button-primary:disabled { opacity: 0.45; background: var(--nx-panel-2) !important; border-color: var(--nx-border) !important; color: var(--nx-muted) !important; cursor: default; }
+.nx-dialog {
+	width: min(640px, calc(100vw - 32px));
+	max-height: calc(100vh - 64px);
+	box-sizing: border-box;
+	padding: 20px 22px;
+	background: var(--nx-panel);
+	color: var(--nx-text);
+	border: 1px solid var(--nx-border);
+	border-radius: 10px;
+}
+.nx-dialog::backdrop { background: rgba(5, 6, 10, 0.7); }
+.nx-dialog h2 { margin: 0 0 10px; }
+.nx-dialog p { margin: 0 0 10px; }
+.nx-danger-text { color: var(--nx-danger); }
+.nx-bulk-list { margin: 0 0 12px; padding: 0; list-style: none; border-top: 1px solid var(--nx-row-border); }
+.nx-bulk-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; padding: 6px 0; border-bottom: 1px solid var(--nx-row-border); }
+.nx-bulk-list .nx-check { flex: 1 1 260px; margin: 0; }
+.nx-bulk-list code { background: var(--nx-panel-2); color: var(--nx-text); font-size: 12px; }
+.nx-bulk-list .nx-desc { flex-basis: 100%; margin: 0 0 0 24px; }
+.nx-bulk-state:empty { display: none; }
+.nx-bulk-word input { margin-left: 6px; background: var(--nx-panel-2); color: var(--nx-text); border-color: var(--nx-border); }
+.nx-bulk-status:empty { display: none; }
+.nx-bulk-actions { display: flex; gap: 8px; margin: 12px 0 0 !important; }
+.nx-dialog input[type="checkbox"] { accent-color: var(--nx-accent); }
