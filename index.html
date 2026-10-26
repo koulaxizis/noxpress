@@ -96,6 +96,12 @@ header { padding: 72px 0 48px; text-align: left; }
 	font-weight: 500;
 	text-decoration: none;
 }
+.hub-line {
+	color: var(--muted);
+	margin-top: 14px;
+	font-size: 0.92rem;
+	max-width: 40em;
+}
 .video-cta:hover { border-color: var(--accent); color: var(--accent-bright); }
 .support-cta {
 	display: inline-flex;
@@ -488,6 +494,7 @@ footer .heart { color: var(--accent-bright); }
 				</a>
 				<a class="video-cta" href="media/videos/hub.mp4" data-video="hub" data-video-title="Noxpress Hub" data-i18n="video_hub">▶ Tour of the Noxpress hub</a>
 			</div>
+			<p class="hub-line" data-i18n="hub_line">One «Noxpress» hub in WP admin installs, updates and removes the plugins, one at a time or all at once, from signed releases, on the Stable or Beta channel you choose.</p>
 		</div>
 		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
 	</div>
@@ -1074,8 +1081,8 @@ footer .heart { color: var(--accent-bright); }
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
 		<ul>
 			<li data-i18n="sb_li1">One custom connector for every site: OAuth 2.1 with PKCE, approval per scope and per site, revoke any connection or all of them at once</li>
-			<li data-i18n="sb_li2">Each site decides: off, read, write or admin, plus a write window that only the owner opens for 15 minutes up to 5 hours</li>
-			<li data-i18n="sb_li3">30 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates</li>
+			<li data-i18n="sb_li2">Each site decides: off, read, write or admin, plus a write window that only the owner opens for 15 minutes up to 12 hours</li>
+			<li data-i18n="sb_li3">33 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates</li>
 			<li data-i18n="sb_li4">Never PHP, shell or file writes; secrets always come back as ***, personal data masked by default, every call in an audit log on the Hub and the site</li>
 			<li data-i18n="sb_li5">Remote administrator access: install it only on sites you own, keep them at read and open the window only while you work. Bilingual UI and shared «Noxpress» menu</li>
 		</ul>
@@ -1465,8 +1472,8 @@ footer .heart { color: var(--accent-bright); }
 		bf_download: 'Download v1.13.0 (.zip)',
 		sb_desc: 'Let Claude manage your WordPress and WooCommerce sites over MCP, from your own servers, with no service in between. One Hub takes Claude\u2019s connection and forwards every call, signed, to your sites; each site decides what is allowed. Works with Claude; not affiliated with Anthropic.',
 		sb_li1: 'One custom connector for every site: OAuth 2.1 with PKCE, approval per scope and per site, revoke any connection or all of them at once',
-		sb_li2: 'Each site decides: off, read, write or admin, plus a write window that only the owner opens for 15 minutes up to 5 hours',
-		sb_li3: '30 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates',
+		sb_li2: 'Each site decides: off, read, write or admin, plus a write window that only the owner opens for 15 minutes up to 12 hours',
+		sb_li3: '33 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates',
 		sb_li4: 'Never PHP, shell or file writes; secrets always come back as ***, personal data masked by default, every call in an audit log on the Hub and the site',
 		sb_li5: 'Remote administrator access: install it only on sites you own, keep them at read and open the window only while you work. Bilingual UI and shared «Noxpress» menu',
 		sb_download: 'Download v1.9.0 (.zip)',
@@ -1502,6 +1509,7 @@ footer .heart { color: var(--accent-bright); }
 		dl_close: 'Close',
 		video_btn: '▶ Video',
 		video_hub: '▶ Tour of the Noxpress hub',
+		hub_line: 'One «Noxpress» hub in WP admin installs, updates and removes the plugins, one at a time or all at once, from signed releases, on the Stable or Beta channel you choose.',
 		video_close: 'Close',
 		spt_title: 'Free forever, and how to help',
 		ff_title: 'Free forever',
@@ -1763,8 +1771,8 @@ footer .heart { color: var(--accent-bright); }
 		bf_download: 'Λήψη v1.13.0 (.zip)',
 		sb_desc: 'Το Claude διαχειρίζεται τα WordPress και WooCommerce sites σου μέσω MCP, από τους δικούς σου servers, χωρίς υπηρεσία στη μέση. Ένα Hub δέχεται τη σύνδεση του Claude και προωθεί κάθε κλήση, υπογεγραμμένη, στα sites· κάθε site αποφασίζει τι επιτρέπεται. Δουλεύει με το Claude· δεν σχετίζεται με την Anthropic.',
 		sb_li1: 'Ένας custom connector για όλα τα sites: OAuth 2.1 με PKCE, έγκριση ανά scope και ανά site, ανάκληση μίας ή όλων των συνδέσεων μαζί',
-		sb_li2: 'Κάθε site αποφασίζει: κλειστό, ανάγνωση, εγγραφή ή διαχείριση, και παράθυρο εγγραφής που ανοίγει μόνο ο ιδιοκτήτης, από 15 λεπτά έως 5 ώρες',
-		sb_li3: '30 εργαλεία: ρυθμίσεις, SQL μόνο για ανάγνωση, REST, HTML σελίδων, αρχεία, logs, cron και site health· περιεχόμενο, options, πολυμέσα και caches· εγκατάσταση και ενημέρωση plugins και θεμάτων',
+		sb_li2: 'Κάθε site αποφασίζει: κλειστό, ανάγνωση, εγγραφή ή διαχείριση, και παράθυρο εγγραφής που ανοίγει μόνο ο ιδιοκτήτης, από 15 λεπτά έως 12 ώρες',
+		sb_li3: '33 εργαλεία: ρυθμίσεις, SQL μόνο για ανάγνωση, REST, HTML σελίδων, αρχεία, logs, cron και site health· περιεχόμενο, options, πολυμέσα και caches· εγκατάσταση και ενημέρωση plugins και θεμάτων',
 		sb_li4: 'Ποτέ PHP, shell ή εγγραφή αρχείων· τα μυστικά γυρίζουν πάντα ως ***, προσωπικά δεδομένα με μάσκα από προεπιλογή, κάθε κλήση στο ιστορικό του Hub και του site',
 		sb_li5: 'Απομακρυσμένη πρόσβαση διαχειριστή: βάλ\u2019 το μόνο σε δικά σου sites, κράτα τα σε ανάγνωση και άνοιγε το παράθυρο μόνο όσο δουλεύεις. Δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
 		sb_download: 'Λήψη v1.9.0 (.zip)',
@@ -1800,6 +1808,7 @@ footer .heart { color: var(--accent-bright); }
 		dl_close: 'Κλείσιμο',
 		video_btn: '▶ Βίντεο',
 		video_hub: '▶ Ξενάγηση στο hub του Noxpress',
+		hub_line: 'Ένα hub «Noxpress» στο WP admin εγκαθιστά, ενημερώνει και αφαιρεί τα plugins, ένα-ένα ή όλα μαζί, από υπογεγραμμένα releases, στο κανάλι Stable ή Beta που διαλέγεις.',
 		video_close: 'Κλείσιμο',
 		spt_title: 'Δωρεάν για πάντα, και πώς να βοηθήσεις',
 		ff_title: 'Δωρεάν για πάντα',
