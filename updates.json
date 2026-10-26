@@ -312,15 +312,15 @@
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* Initial release, with modules switched on one by one.\n* Trade prices module: «Χονδρική» role made by the shop, default and per-account discount on the eligible categories and brands, trade prices in the shop, cart, Store API and order, line and order marks, optional invoice rule (OBS Timologia), no page cache.\n* Trade Feed module: REST tra/v1 in JSON or XML with filters, Application Password per account (shown once, revocable), rate limit, call log without IP.\n* Accounts tab, «Not for trade» product checkbox, test / live / off mode, TRA_DISABLE, privacy policy text, settings export / import, Abilities API status.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.1.19).",
-        "published": "2026-10-24",
+        "changelog": "* New: no discount coupon in a cart with trade prices (setting, on by default), with a Greek / English message; a coupon applied earlier is dropped.\n* New: no thank-you coupon after a trade order (setting, on by default): Thanko Thank You Page Customizer makes, shows and e-mails none, and Checkout Extras makes none.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "5fc1878d8c8b978d5e347f265b55ce9e2398ca8d66176fa5a747bf71aef57147",
-        "signature": "qLhu7Ta0QPT2LF3gy9fjoI6XVAsU1E6md+NJhLubXs4VnLRJ7rhRoU0gaWi8t5+6HzZdFl9Mk6Ae5d4CYC9UBA==",
+        "sha256": "9b78c1112cef17cae4529b0e5c50f1eee7cce278736fae1375ad527f123999a2",
+        "signature": "7kVX1jUIN4Jg6s6sQOrvjanzbK4LvleOmWb9PHavmfpuV1ntbLECkPodqk+9fiaFIuiDGBMJXdmYYj9e8VyxCg==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.0.0/trade-accounts.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.1.0/trade-accounts.zip"
       }
     },
     "variation-picker": {
