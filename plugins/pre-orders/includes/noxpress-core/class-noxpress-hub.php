@@ -533,7 +533,7 @@ final class Noxpress_Hub {
 				'done'           => __( 'Έγινε', 'noxpress' ),
 				'failed'         => __( 'Σφάλμα', 'noxpress' ),
 				/* translators: 1: plugins done, 2: plugins failed */
-				'summary'        => __( 'Ολοκληρώθηκε: %1$d επιτυχίες, %2$d σφάλματα.', 'noxpress' ),
+				'summary'        => __( 'Ολοκληρώθηκε. Έγιναν: %1$d, σφάλματα: %2$d.', 'noxpress' ),
 				'gone'           => __( 'Δεν έμεινε κανένα plugin της σουίτας, άρα ούτε αυτή η σελίδα. Συνέχεια στη σελίδα Plugins.', 'noxpress' ),
 				'leave'          => __( 'Η εργασία δεν τελείωσε. Να φύγεις από τη σελίδα;', 'noxpress' ),
 				'network'        => __( 'Σφάλμα δικτύου.', 'noxpress' ),

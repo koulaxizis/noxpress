@@ -138,7 +138,7 @@ final class Noxpress_Core {
 		'Γίνεται…'                                              => 'Working…',
 		'Έγινε'                                                 => 'Done',
 		'Σφάλμα'                                                => 'Error',
-		'Ολοκληρώθηκε: %1$d επιτυχίες, %2$d σφάλματα.'          => 'Finished: %1$d succeeded, %2$d failed.',
+		'Ολοκληρώθηκε. Έγιναν: %1$d, σφάλματα: %2$d.'          => 'Finished. Done: %1$d, failed: %2$d.',
 		'Δεν έμεινε κανένα plugin της σουίτας, άρα ούτε αυτή η σελίδα. Συνέχεια στη σελίδα Plugins.' => 'No suite plugin is left, so neither is this page. Continue on the Plugins page.',
 		'Η εργασία δεν τελείωσε. Να φύγεις από τη σελίδα;'       => 'The task is not finished. Leave the page?',
 		'Σφάλμα δικτύου.'                                       => 'Network error.',
