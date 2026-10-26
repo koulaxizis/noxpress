@@ -65,6 +65,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.0/easy-withdrawal.zip"
       }
     },
+    "fast-pages": {
+      "beta": {
+        "changelog": "* First release (beta): page cache with a drop-in and test mode, smart purging, background preload from the sitemap, CSS / JS minify, lazy load for images, iframes and backgrounds, click-to-play YouTube, image dimensions, hover preload, import from WP Rocket, database cleanup, and seven abilities for Site Bridge.",
+        "published": "2026-10-26",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "a69f9cfc1bd9c088633ffaac68dab8b89cac6fa6bbe313273ad1cfb413071f71",
+        "signature": "diq2Bwma16SQqw8jerQp4Ed8uO7Vkf1Ul7SRBr3tyM3R1DQ5wPd8r1OGjNcLXLHxdEuL1dveXccpAjdMWIsJAA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.0/fast-pages.zip"
+      }
+    },
     "featured-creators": {
       "beta": {
         "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
@@ -247,15 +260,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
+        "changelog": "* New: `cache_flush` also purges the page cache of Fast Pages (through the suite hook `noxpress_purge_page_cache`), so one call clears every cache after a change. The result lists \"page cache\" when it ran.\n* Noxpress Core 1.2.1: Fast Pages in the hub's catalog.",
         "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8ff5122a62730f5a323cff663af180602486fc594168373de6b799ab776c9fe2",
-        "signature": "kU76AK9wL3Ti8IHnUFaTzFCu6ilS1Egwd78jWLNxDLrGq3mdb2xWOND7/0pNMwsbm1PMMxQ79f7fG+NBJJFaCw==",
+        "sha256": "60d2bb6ba171c63fb655e55da1e40bbd173df96dd9b55403e20ecee43676b0c6",
+        "signature": "RsZEaDD2V/zA68D5EZSC2R2HSVUBXs6sskfZnq86v6hHqvEqH9tYay2gcTZjdU70WsdDfjgJXjNCzWiHK7p6CQ==",
         "tested_wp": "7.1",
-        "version": "1.8.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.8.0/site-bridge.zip"
+        "version": "1.9.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.9.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
