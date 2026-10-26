@@ -197,15 +197,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: WordPress abilities (6.9+) in the \"noxpress\" category: `revenue-splitter/report` (the sales report of a period), `revenue-splitter/balances` (lifetime sales, income, payments and what is owed per beneficiary), `revenue-splitter/monthly-status` (who gets the monthly report and whether last month's was sent), `revenue-splitter/monthly-preview` (one beneficiary's monthly report as figures), `revenue-splitter/send-test` (the test email, to the site's admin address) and `revenue-splitter/monthly-send` (last month's reports now; marked destructive, and a month already sent needs `resend`). They need `manage_woocommerce`, are not in the REST API, and never return email addresses, portal keys or ledger notes.\n* Changed: the monthly email's figures and its sending are shared functions (`RS_Emails::monthly_data()`, `RS_Emails::send_monthly()`); the daily check and the email itself are unchanged.",
-        "published": "2026-10-21",
+        "changelog": "* New: read-only REST routes for orOS, `GET /wp-json/wc/v3/rs/balances?name=` and `GET /wp-json/wc/v3/rs/report?date_start=&date_end=&name=`, with the same figures as the `balances` and `report` abilities, amounts in integer cents and each product's current stock. Authenticated by the shop's WooCommerce REST keys (read is enough) or an Application Password, with `manage_woocommerce`. Nothing is written or stored.",
+        "published": "2026-10-26",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "7f65b75e94ca3c3081165dd85140171558ea29a989b6ecf8fcfc880d1e04b933",
-        "signature": "G/hpgEwZ8U6mz5AKhRuG16L8ZlwJ0CUa53lFIotTQ2TyPd8UvWWrFmg8053ddG69Rwb5jw49RfTngvq+hLeHAA==",
+        "sha256": "d7f42659f694ec8c464d669bb6453064af17623536e3e9315c8097e9a04aa05b",
+        "signature": "j4RqmYlW6TaBp+7NuJ3ssoHvXxOudP8umBXOxYlXYjVrIy99jCFfLmtZWccn9gF1+Skjj23wblaaKpsaVLYoAQ==",
         "tested_wp": "6.8",
-        "version": "1.10.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.10.0/revenue-splitter.zip"
+        "version": "1.11.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.11.0/revenue-splitter.zip"
       },
       "stable": {
         "changelog": "",
