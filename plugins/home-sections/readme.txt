@@ -5,7 +5,7 @@ Tags: woocommerce, products shortcode, homepage, book trailer, store stats
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -115,6 +115,9 @@ It picks the newest product. Add `preorders="no"`, `exclude="ID"`, or `id="ID"` 
 The settings, the stored counts, the background actions and the transients are removed. Shortcodes keep their classes and simply list products without the markers. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.3.0 =
 * New: category groups for [hs_stats]. Each group (key, product categories with their subcategories, label in Greek and English) counts the available products in it, each product once, as an exact number. Up to 12 groups, set on the settings page.

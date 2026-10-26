@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.8.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,9 @@ Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.8.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.7.1 =
 * New: the phone app can preview a Book Feed rule (`book-feed/rule-preview`, read, Book Feed 1.12.0+): what it would bring on its next run, importing nothing. Only the Hub needs 1.7.1.

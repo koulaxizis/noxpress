@@ -5,7 +5,7 @@ Tags: woocommerce, withdrawal, right of withdrawal, eu directive 2023/2673, retu
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -83,6 +83,9 @@ No. Version 1.0 opens WooCommerce's refund form pre-filled; you confirm the refu
 The settings, the email settings, the transients and the "personalised" flags are removed. The requests and the digital-content consent stay in the order meta: they are your record of what customers declared and agreed to, and they go away with their orders.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.1.0 =
 * New: the Noxpress hub tells you when the other update channel has a newer version (in practice, a newer beta while the site follows Stable), with a counter on the Noxpress menu.

@@ -5,7 +5,7 @@ Tags: woocommerce, book preview, pdf, sample, ebook
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -87,6 +87,9 @@ No. The source PDF is only read. The plugin stores its choices in product meta (
 Everything the plugin created is removed: its options, product meta, background jobs and the sample files in `uploads/noxpress-previews/` (the folder too, when nothing else is in it). Your PDFs are never touched.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.0.1 =
 * Fixed: on a product on sale, the "Keep reading" card shows the old price struck through next to the sale price, as the shop does.

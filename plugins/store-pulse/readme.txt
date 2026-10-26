@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -57,6 +57,9 @@ Only Store Pulse's own options, cached transients and each user's last choices o
 VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The totals differ only when the choices differ: Revenue Splitter counts completed and processing orders by order date, from its "sales start" date, while SP Sales counts the statuses and the date you choose.
 
 == Changelog ==
+
+= 1.8.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.7.0 =
 * New: WordPress abilities (6.9+) in the "noxpress" category, all read-only: `store-pulse/overview` (the dashboard cards of a period, with the money cards when Revenue Splitter is active), `store-pulse/stock` (the low-stock and out-of-stock lists) and `store-pulse/sales` (the Sales screen's rows per product and totals, with the same filters). For AI and remote tools such as Site Bridge; they need `manage_woocommerce`, are not in the REST API and never return customer details (customers are a count).

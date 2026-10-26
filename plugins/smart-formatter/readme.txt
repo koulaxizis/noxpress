@@ -5,7 +5,7 @@ Tags: woocommerce, formatting, bulk edit, product description, typography
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -57,6 +57,9 @@ No. Global attribute values are terms shared by the whole store, so only custom 
 The plugin's own options and transients are removed. Product texts that were already formatted stay as they are.
 
 == Changelog ==
+
+= 1.5.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.4.0 =
 * New: "Plain text" rule in two modes, keep line breaks or one paragraph. It removes every HTML tag and attribute (including `data-path-to-node` from text copied from AI tools), turns `&nbsp;` into spaces, removes zero-width characters and collapses blank lines; shortcodes stay. It works on every field; the dry run counts the fields that lose a link, an image or a table.

@@ -5,7 +5,7 @@ Tags: woocommerce, hide category, hide products, shop page, catalog visibility
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -82,6 +82,9 @@ The sitemaps build their category lists the same way the rest of the site does. 
 The settings and the transients are removed. Nothing else exists: products, categories and orders were never changed. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.0.1 =
 * Fix: with a rule that hides a category from lists, a visitor's page could rebuild WordPress's stored category hierarchy without that category, so its subcategories vanished from get_term_children() site-wide (an empty subcategory page, rules with subcategories missing them). The full read behind that hierarchy is no longer filtered.

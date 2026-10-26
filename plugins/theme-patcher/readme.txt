@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, price labels, sale badge
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.5.3
+Stable tag: 1.6.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -138,6 +138,9 @@ The plugin's own options (`tp_settings`, `tp_cat_images`, `tp_care`) and transie
 Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is off. Use the Preview with the product ID to see which profile it gets and why, then clear the page cache (e.g. WP Rocket).
 
 == Changelog ==
+
+= 1.6.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.5.3 =
 * Fixed: on the Prices tab the per-category labels table was wider than the panel at 1280 px; text fields and selects in settings tables now shrink with their column.

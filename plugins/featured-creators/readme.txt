@@ -5,7 +5,7 @@ Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -107,6 +107,9 @@ Yes. The index filter uses plain links, and when the products of a creator chang
 Settings, notices and the term ownership meta are deleted. Creators are kept by default, because they are content you wrote; tick "Delete the creators" on the **Tools** tab before deleting the plugin to remove them too. Photos always stay in the media library. Products and attributes are never touched.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
 
 = 1.1.0 =
 * New: creator tab on the product, for the roles ticked "In the tab" (Pages and products → On the product, with its WooCommerce priority). Photo, short biography, links, the three newest press items and a link to the creator page; only published creators; no tab when the product has none.
