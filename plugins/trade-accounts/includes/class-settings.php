@@ -20,6 +20,10 @@
  *                      downloadable); default on
  *  - label      bool   «Τιμή χονδρικής» next to the price (default on)
  *  - invoice    bool   trade orders need an invoice (classic checkout)
+ *  - no_coupons bool   no coupon in a cart with trade lines (default on)
+ *  - no_reward  bool   no thank-you / reward coupon for a trade order
+ *                      (Thanko Thank You Page Customizer, Checkout
+ *                      Extras; default on)
  *  - inv_field  string checkout field of the invoicing plugin
  *  - inv_value  string its value for "invoice"
  *  - rate       int    feed calls per hour and account (10–2000)
@@ -49,6 +53,7 @@ final class TRA_Settings {
 		return array(
 			'label'   => array( 'Τιμή χονδρικής', 'Trade price', 60 ),
 			'invoice' => array( 'Οι παραγγελίες χονδρικής εκδίδονται με τιμολόγιο. Διάλεξε «Τιμολόγιο» και συμπλήρωσε τα στοιχεία της επιχείρησης.', 'Trade orders are invoiced. Choose «Invoice» and fill in the business details.', 300 ),
+			'coupon'  => array( 'Τα κουπόνια έκπτωσης δεν ισχύουν στις αγορές χονδρικής.', 'Discount coupons do not apply to trade purchases.', 200 ),
 		);
 	}
 
@@ -64,6 +69,8 @@ final class TRA_Settings {
 			'physical'  => true,
 			'label'     => true,
 			'invoice'   => false,
+			'no_coupons' => true,
+			'no_reward'  => true,
 			'inv_field' => 'billing_receipt_type',
 			'inv_value' => 'timologio',
 			'rate'      => 120,
@@ -109,7 +116,7 @@ final class TRA_Settings {
 		$s['cats']   = self::ids( isset( $raw['cats'] ) ? $raw['cats'] : array(), 'product_cat' );
 		$s['brands'] = self::ids( isset( $raw['brands'] ) ? $raw['brands'] : array(), 'product_brand' );
 
-		foreach ( array( 'physical', 'label', 'invoice' ) as $k ) {
+		foreach ( array( 'physical', 'label', 'invoice', 'no_coupons', 'no_reward' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 
@@ -140,9 +147,11 @@ final class TRA_Settings {
 				$s[ $f ] = null === $v ? $d[ $f ] : mb_substr( $v, 0, $t[2] );
 			}
 		}
-		// The invoice message never stays empty (the English one may: it falls back to Greek).
-		if ( '' === $s['t_invoice_el'] ) {
-			$s['t_invoice_el'] = $d['t_invoice_el'];
+		// The invoice and coupon messages never stay empty (the English one may: it falls back to Greek).
+		foreach ( array( 't_invoice_el', 't_coupon_el' ) as $f ) {
+			if ( '' === $s[ $f ] ) {
+				$s[ $f ] = $d[ $f ];
+			}
 		}
 
 		return $s;
@@ -203,7 +212,7 @@ final class TRA_Settings {
 		 * Filters a visitor text (e.g. for WPML / Polylang).
 		 *
 		 * @param string $v    Text.
-		 * @param string $key  label | invoice.
+		 * @param string $key  label | invoice | coupon.
 		 * @param string $lang 'el' | 'en'.
 		 */
 		return (string) apply_filters( 'tra_text', $v, $key, $lang );
