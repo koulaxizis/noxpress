@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.10.0
+Stable tag: 1.11.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -26,6 +26,7 @@ Revenue Splitter is built for publishers and shops that owe a share of each sale
 * **Backup & restore** – export/import the full plugin state as JSON.
 * **WP-CLI** – `wp rs report`, `wp rs ledger-add`, `wp rs ledger-list`, `wp rs ledger-delete`, `wp rs balance`, `wp rs backup`.
 * **Abilities** – on WordPress 6.9+, the reports, balances and monthly emails are also WordPress abilities (`revenue-splitter/report`, `balances`, `monthly-status`, `monthly-preview`, `send-test`, `monthly-send`) for AI and remote tools such as Site Bridge, with the same capability. They never return email addresses, portal keys or ledger notes.
+* **REST for orOS** – two read-only routes under the WooCommerce REST API, `GET /wp-json/wc/v3/rs/balances` (per beneficiary: sales share, other income, payments, remaining) and `GET /wp-json/wc/v3/rs/report` (products sold in a period, this year by default, with splits and current stock; `name` keeps one beneficiary's titles). They take the shop's WooCommerce REST keys (a read key is enough) or an Application Password, need `manage_woocommerce`, answer in integer cents and never return email addresses, portal keys or ledger notes. orOS's CRM shows them on a partner's card.
 * **Bilingual UI** – Greek and English, chosen per user (or following the WordPress locale).
 * **Noxpress hub** – the "Noxpress" menu opens the Noxpress hub: one page for the whole suite with status, installed and available version, and update, install, activate, changelog and auto-update links.
 * **Updates** – updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
@@ -55,6 +56,9 @@ Without `--user` the commands run as a trusted shell context. If you pass `--use
 Only this plugin's own options, transients, cron event, product/order meta and order item meta. The shared `rs_lang` user meta is kept when Store Pulse or Smart Formatter is still installed.
 
 == Changelog ==
+
+= 1.11.0 =
+* New: read-only REST routes for orOS, `GET /wp-json/wc/v3/rs/balances?name=` and `GET /wp-json/wc/v3/rs/report?date_start=&date_end=&name=`, with the same figures as the `balances` and `report` abilities, amounts in integer cents and each product's current stock. Authenticated by the shop's WooCommerce REST keys (read is enough) or an Application Password, with `manage_woocommerce`. Nothing is written or stored.
 
 = 1.10.0 =
 * New: WordPress abilities (6.9+) in the "noxpress" category: `revenue-splitter/report` (the sales report of a period), `revenue-splitter/balances` (lifetime sales, income, payments and what is owed per beneficiary), `revenue-splitter/monthly-status` (who gets the monthly report and whether last month's was sent), `revenue-splitter/monthly-preview` (one beneficiary's monthly report as figures), `revenue-splitter/send-test` (the test email, to the site's admin address) and `revenue-splitter/monthly-send` (last month's reports now; marked destructive, and a month already sent needs `resend`). They need `manage_woocommerce`, are not in the REST API, and never return email addresses, portal keys or ledger notes.
