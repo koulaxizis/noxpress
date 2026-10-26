@@ -27,6 +27,17 @@
  * Invoice (setting, classic checkout): a trade order needs the invoicing
  * plugin's receipt type set to "invoice"; the checkout preselects it.
  *
+ * Coupons (settings, on by default):
+ *  - no_coupons: a cart with a line at a trade price takes no coupon
+ *    (woocommerce_coupon_is_valid, so the classic cart, the blocks and the
+ *    re-check before payment all refuse it with the same message);
+ *  - no_reward: a trade order (order meta _tra_trade) gets no thank-you
+ *    coupon. Thanko Thank You Page Customizer (VillaTheme) is reached
+ *    through its own parameter filters: on the thank-you page of a trade
+ *    order its coupon type reads "none" and its coupon block is left out,
+ *    so no coupon is made, shown or e-mailed. Checkout Extras through
+ *    cke_coupon_args (false = no coupon).
+ *
  * Pages with wholesale prices are never cached (DONOTCACHEPAGE).
  */
 
@@ -66,6 +77,16 @@ final class TRA_Pricing {
 		add_filter( 'woocommerce_checkout_get_value', array( __CLASS__, 'invoice_default' ), 20, 2 );
 
 		add_action( 'template_redirect', array( __CLASS__, 'no_page_cache' ), 1 );
+
+		$s = TRA_Settings::get();
+		if ( $s['no_coupons'] ) {
+			add_filter( 'woocommerce_coupon_is_valid', array( __CLASS__, 'coupon_valid' ), 20, 3 );
+		}
+		if ( $s['no_reward'] ) {
+			add_filter( 'woo_thank_you_page_paramscoupon_type', array( __CLASS__, 'thanko_type' ), 20 );
+			add_filter( 'woo_thank_you_page_paramsblocks', array( __CLASS__, 'thanko_blocks' ), 20 );
+			add_filter( 'cke_coupon_args', array( __CLASS__, 'cke_coupon' ), 20, 2 );
+		}
 	}
 
 	public static function reset(): void {
@@ -233,6 +254,71 @@ final class TRA_Pricing {
 			return $s['inv_value'];
 		}
 		return $value;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Coupons
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * No coupon in a cart with trade lines. WooCommerce turns the exception
+	 * into the cart notice and drops a coupon applied earlier.
+	 *
+	 * @throws Exception When the cart holds a line at a trade price.
+	 */
+	public static function coupon_valid( $valid, $coupon, $discounts ) {
+		if ( ! $valid || ! self::applies() || ! self::trade_cart() ) {
+			return $valid;
+		}
+		throw new Exception( esc_html( TRA_Settings::text( 'coupon' ) ), 100 );
+	}
+
+	/** Whether an order is a trade order (it has a line at a trade price). */
+	private static function trade_order( $order ): bool {
+		$order = is_numeric( $order ) ? wc_get_order( (int) $order ) : $order;
+		return $order instanceof WC_Order && '' !== (string) $order->get_meta( '_tra_trade' );
+	}
+
+	/** The order of the thank-you page being shown, if it is a trade order. */
+	private static function thankyou_trade(): bool {
+		global $wp;
+		$id = isset( $wp->query_vars['order-received'] ) ? absint( $wp->query_vars['order-received'] ) : 0;
+		return $id > 0 && self::trade_order( $id );
+	}
+
+	/** Thanko: no coupon type for a trade order, so none is made or e-mailed. */
+	public static function thanko_type( $value ) {
+		return self::thankyou_trade() ? array( 'none' ) : $value;
+	}
+
+	/** Thanko: its coupon block left out of the layout for a trade order. */
+	public static function thanko_blocks( $value ) {
+		if ( ! is_string( $value ) || false === strpos( $value, 'coupon' ) || ! self::thankyou_trade() ) {
+			return $value;
+		}
+		$blocks = json_decode( $value, true );
+		if ( ! is_array( $blocks ) ) {
+			return $value;
+		}
+		$json = wp_json_encode( self::without_coupon( $blocks ) );
+		return false === $json ? $value : $json;
+	}
+
+	private static function without_coupon( array $a ): array {
+		$list = array_keys( $a ) === range( 0, count( $a ) - 1 );
+		$out  = array();
+		foreach ( $a as $k => $v ) {
+			if ( 'coupon' === $v ) {
+				continue;
+			}
+			$out[ $k ] = is_array( $v ) ? self::without_coupon( $v ) : $v;
+		}
+		return $list ? array_values( $out ) : $out;
+	}
+
+	/** Checkout Extras: no thank-you coupon for a trade order. */
+	public static function cke_coupon( $args, $order ) {
+		return self::trade_order( $order ) ? false : $args;
 	}
 
 	public static function no_page_cache(): void {

@@ -377,6 +377,15 @@ final class TRA_Admin_UI {
 				<?php self::text_pair( 'invoice', __( 'Μήνυμα όταν δεν επιλεγεί τιμολόγιο', 'trade-accounts' ), $s ); ?>
 			</div>
 
+			<h2 class="tra-h2"><?php esc_html_e( 'Κουπόνια', 'trade-accounts' ); ?></h2>
+			<div class="tra-zone">
+				<?php self::checkbox( 'tra_no_coupons', $s['no_coupons'], __( 'Κανένα κουπόνι έκπτωσης σε καλάθι με τιμές χονδρικής', 'trade-accounts' ) ); ?>
+				<?php self::text_pair( 'coupon', __( 'Μήνυμα όταν δοκιμάζει κουπόνι', 'trade-accounts' ), $s ); ?>
+				<span class="tra-label"><?php esc_html_e( 'Κουπόνι επιβράβευσης', 'trade-accounts' ); ?></span>
+				<?php self::checkbox( 'tra_no_reward', $s['no_reward'], __( 'Κανένα κουπόνι ευχαριστίας μετά από παραγγελία χονδρικής', 'trade-accounts' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Ισχύει για το κουπόνι της σελίδας ευχαριστίας του Thanko Thank You Page Customizer και του Checkout Extras: σε παραγγελία χονδρικής δεν δημιουργείται, δεν φαίνεται και δεν στέλνεται με email.', 'trade-accounts' ); ?></p>
+			</div>
+
 			<p class="tra-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'trade-accounts' ); ?></button></p>
 		</form>
 		<?php
@@ -763,6 +772,8 @@ final class TRA_Admin_UI {
 		$s['physical'] = '1' === self::post( 'tra_physical' );
 		$s['label']    = '1' === self::post( 'tra_label' );
 		$s['invoice']  = '1' === self::post( 'tra_invoice' );
+		$s['no_coupons'] = '1' === self::post( 'tra_no_coupons' );
+		$s['no_reward']  = '1' === self::post( 'tra_no_reward' );
 		$s['inv_field'] = self::post( 'tra_inv_field' );
 		$s['inv_value'] = self::post( 'tra_inv_value' );
 		foreach ( array_keys( TRA_Settings::texts() ) as $k ) {

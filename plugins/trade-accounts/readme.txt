@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -81,6 +81,10 @@ They are WordPress's own credentials for APIs: stored hashed, revocable one by o
 The settings, the call log, the plugin's user and product meta, its Application Passwords and the «Χονδρική» role are removed; trade accounts stay as customers. The discount marks stay in the orders, as the shop's record. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: no discount coupon in a cart with trade prices (setting, on by default), with a Greek / English message; a coupon applied earlier is dropped.
+* New: no thank-you coupon after a trade order (setting, on by default): Thanko Thank You Page Customizer makes, shows and e-mails none, and Checkout Extras makes none.
 
 = 1.0.0 =
 * Initial release, with modules switched on one by one.

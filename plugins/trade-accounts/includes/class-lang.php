@@ -83,6 +83,12 @@ final class TRA_Lang {
 		'Τιμή για «Τιμολόγιο»' => 'Value for «Invoice»',
 		'Προεπιλογή: το πεδίο τύπου παραστατικού του «Timologia for WooCommerce» (OBS). Το ταμείο προεπιλέγει το τιμολόγιο για τον λογαριασμό χονδρικής.' => 'Default: the document-type field of «Timologia for WooCommerce» (OBS). The checkout preselects the invoice for a trade account.',
 		'Μήνυμα όταν δεν επιλεγεί τιμολόγιο' => 'Message when no invoice is chosen',
+		'Κουπόνια' => 'Coupons',
+		'Κανένα κουπόνι έκπτωσης σε καλάθι με τιμές χονδρικής' => 'No discount coupon in a cart with trade prices',
+		'Μήνυμα όταν δοκιμάζει κουπόνι' => 'Message when a coupon is tried',
+		'Κουπόνι επιβράβευσης' => 'Reward coupon',
+		'Κανένα κουπόνι ευχαριστίας μετά από παραγγελία χονδρικής' => 'No thank-you coupon after a trade order',
+		'Ισχύει για το κουπόνι της σελίδας ευχαριστίας του Thanko Thank You Page Customizer και του Checkout Extras: σε παραγγελία χονδρικής δεν δημιουργείται, δεν φαίνεται και δεν στέλνεται με email.' => 'Applies to the thank-you page coupon of Thanko Thank You Page Customizer and of Checkout Extras: for a trade order it is not created, not shown and not e-mailed.',
 		// Accounts.
 		'Και τα δύο modules είναι κλειστά: οι λογαριασμοί υπάρχουν, αλλά δεν βλέπουν τιμές χονδρικής ούτε το Trade Feed μέχρι να ενεργοποιήσεις ένα module.' => 'Both modules are off: the accounts exist, but they see neither trade prices nor the Trade Feed until you switch a module on.',
 		'Οι τιμές χονδρικής δεν είναι ενεργές για τους λογαριασμούς (λειτουργία δοκιμής ή ανενεργό, καρτέλα Modules).' => 'Trade prices are not live for the accounts (test or off mode, Modules tab).',
