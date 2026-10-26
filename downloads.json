@@ -1,6 +1,6 @@
 {
   "display": 250,
-  "total": 294,
+  "total": 299,
   "offset": 5,
   "updated": "2026-10-26",
   "assets": {
@@ -506,10 +506,110 @@
     },
     "677408919": {
       "file": "nox-rs-1.11.0/revenue-splitter.zip",
-      "count": 0
+      "count": 3
     },
     "677418930": {
       "file": "nox-ta-1.1.0/trade-accounts.zip",
+      "count": 2
+    },
+    "677636209": {
+      "file": "nox-rs-1.12.0/revenue-splitter.zip",
+      "count": 0
+    },
+    "677636309": {
+      "file": "nox-sp-1.8.0/store-pulse.zip",
+      "count": 0
+    },
+    "677636432": {
+      "file": "nox-sf-1.5.0/smart-formatter.zip",
+      "count": 0
+    },
+    "677636520": {
+      "file": "nox-tp-1.6.0/theme-patcher.zip",
+      "count": 0
+    },
+    "677636673": {
+      "file": "nox-sh-1.3.0/shop-filters.zip",
+      "count": 0
+    },
+    "677636793": {
+      "file": "nox-pf-1.2.0/product-formats.zip",
+      "count": 0
+    },
+    "677636923": {
+      "file": "nox-ew-1.2.0/easy-withdrawal.zip",
+      "count": 0
+    },
+    "677637037": {
+      "file": "nox-sn-1.2.0/shipping-notes.zip",
+      "count": 0
+    },
+    "677637157": {
+      "file": "nox-bp-1.1.0/book-preview.zip",
+      "count": 0
+    },
+    "677637268": {
+      "file": "nox-cr-1.2.0/featured-creators.zip",
+      "count": 0
+    },
+    "677637383": {
+      "file": "nox-pk-1.2.0/store-pickup.zip",
+      "count": 0
+    },
+    "677637532": {
+      "file": "nox-hc-1.1.0/hide-catalog.zip",
+      "count": 0
+    },
+    "677637795": {
+      "file": "nox-vp-1.1.0/variation-picker.zip",
+      "count": 0
+    },
+    "677637896": {
+      "file": "nox-gl-1.2.0/greeklish-permalinks.zip",
+      "count": 0
+    },
+    "677638033": {
+      "file": "nox-oc-1.2.0/oros-connect.zip",
+      "count": 0
+    },
+    "677638224": {
+      "file": "nox-pb-1.1.0/product-bundles.zip",
+      "count": 0
+    },
+    "677638349": {
+      "file": "nox-sb-1.8.0/site-bridge.zip",
+      "count": 0
+    },
+    "677638513": {
+      "file": "nox-pq-1.1.0/publishing-quote.zip",
+      "count": 0
+    },
+    "677638635": {
+      "file": "nox-po-1.1.0/pre-orders.zip",
+      "count": 0
+    },
+    "677638762": {
+      "file": "nox-ws-1.2.0/wish-shelf.zip",
+      "count": 0
+    },
+    "677638894": {
+      "file": "nox-ce-1.1.0/checkout-extras.zip",
+      "count": 0
+    },
+    "677639079": {
+      "file": "nox-hs-1.4.0/home-sections.zip",
+      "count": 0
+    },
+    "677639187": {
+      "file": "nox-bf-1.13.0/book-feed.zip",
+      "count": 0
+    },
+    "677639292": {
+      "file": "nox-lo-1.2.0/live-operator.zip",
+      "count": 0
+    },
+    "677639421": {
+      "file": "nox-ta-1.2.0/trade-accounts.zip",
       "count": 0
     }
   }
