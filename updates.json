@@ -273,15 +273,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: `cache_flush` also purges the page cache of Fast Pages (through the suite hook `noxpress_purge_page_cache`), so one call clears every cache after a change. The result lists \"page cache\" when it ran.\n* Noxpress Core 1.2.1: Fast Pages in the hub's catalog.",
-        "published": "2026-10-26",
+        "changelog": "* New: Access → \"No window for abilities that only add something that waits\" (off by default). With level write or above, the abilities on that list run through `ability_run` while the write window is closed, so a daily routine can prepare posts without anyone opening the window. The list has one ability: `broadcast/queue-add` (Broadcast 1.0.0), whose posts wait for «Published» on the site. The write scope is still needed, and every call is in the history as before.",
+        "published": "2026-10-27",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "60d2bb6ba171c63fb655e55da1e40bbd173df96dd9b55403e20ecee43676b0c6",
-        "signature": "RsZEaDD2V/zA68D5EZSC2R2HSVUBXs6sskfZnq86v6hHqvEqH9tYay2gcTZjdU70WsdDfjgJXjNCzWiHK7p6CQ==",
+        "sha256": "49677f45eb350ba129e8f62c6f47454461757e280eca998c0ea065b4d759c054",
+        "signature": "5X0P2HTlgWtNDjmRLeG+gqill6DLrQbLdAzvvjumWakLXw05SOKIJ3u/LRGzsyhA80vKltc3CTYuDKA7Y6Y5Bg==",
         "tested_wp": "7.1",
-        "version": "1.9.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.9.0/site-bridge.zip"
+        "version": "1.10.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.10.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
