@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.10.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,9 @@ Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.10.0 =
+* New: Access → "No window for abilities that only add something that waits" (off by default). With level write or above, the abilities on that list run through `ability_run` while the write window is closed, so a daily routine can prepare posts without anyone opening the window. The list has one ability: `broadcast/queue-add` (Broadcast 1.0.0), whose posts wait for «Published» on the site. The write scope is still needed, and every call is in the history as before.
 
 = 1.9.0 =
 * New: `cache_flush` also purges the page cache of Fast Pages (through the suite hook `noxpress_purge_page_cache`), so one call clears every cache after a change. The result lists "page cache" when it ran.

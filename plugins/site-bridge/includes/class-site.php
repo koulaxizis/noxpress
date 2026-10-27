@@ -70,6 +70,14 @@ final class SBR_Site {
 		return is_array( $t ) && ! empty( $t['hub_pub'] ) && ! empty( $t['site_id'] ) ? $t : null;
 	}
 
+	/**
+	 * Abilities that may run without an open write window, when the owner
+	 * ticks "nowin" in Access (off by default). Each one only adds an item
+	 * that waits for the owner on the site; level "write" and the "write"
+	 * scope are still needed.
+	 */
+	const NO_WINDOW = array( 'broadcast/queue-add' );
+
 	/* =====================================================================
 	 * The gate
 	 * =================================================================== */
@@ -87,7 +95,7 @@ final class SBR_Site {
 		if ( 'ability_run' === $tool ) {
 			$class = SBR_Tools_Write::ability_class( $args );
 		}
-		$fail = self::check( $tool, $def, $class, $ctx );
+		$fail = self::check( $tool, $def, $class, $ctx, $args );
 		if ( $fail ) {
 			self::log( $tool, $class, $args, $ctx, 'denied', $fail[1], 0, $start );
 			return array(
@@ -135,7 +143,7 @@ final class SBR_Site {
 	}
 
 	/** null when allowed, else array( code, message ). */
-	private static function check( string $tool, ?array $def, string $class, array $ctx ): ?array {
+	private static function check( string $tool, ?array $def, string $class, array $ctx, array $args = array() ): ?array {
 		if ( ! self::enabled() ) {
 			return array( 'site_off', 'The Site role is off on this site.' );
 		}
@@ -146,7 +154,7 @@ final class SBR_Site {
 		if ( self::RANK[ $level ] < self::RANK[ $class ] ) {
 			return array( 'level', sprintf( 'This site allows "%1$s" and this tool needs "%2$s". Only the owner can change the level, in WP admin → Noxpress → Site Bridge → Access.', $level, $class ) );
 		}
-		if ( 'read' !== $class && ! SBR_Settings::window_until() ) {
+		if ( 'read' !== $class && ! SBR_Settings::window_until() && ! self::no_window( $tool, $class, $args ) ) {
 			return array( 'window_closed', 'The write window of this site is closed. Ask the owner to open it in WP admin → Noxpress → Site Bridge → Access (or from the Hub, if this site allows it), then try again.' );
 		}
 		$scopes = isset( $ctx['scopes'] ) && is_array( $ctx['scopes'] ) ? $ctx['scopes'] : array();
@@ -160,6 +168,12 @@ final class SBR_Site {
 			return array( 'no_user', 'No administrator is set to run tools on this site (Access → "Run as").' );
 		}
 		return null;
+	}
+
+	/** True for a write ability the owner lets run without a write window. */
+	public static function no_window( string $tool, string $class, array $args ): bool {
+		return 'ability_run' === $tool && 'write' === $class && SBR_Settings::v( 'nowin' )
+			&& in_array( SBR_Tools::a_str( $args, 'name' ), self::NO_WINDOW, true );
 	}
 
 	private static function log( string $tool, string $class, array $args, array $ctx, string $status, string $msg, int $bytes, float $start, array $extra = array() ): void {

@@ -388,6 +388,14 @@ final class SBR_Admin_UI {
 			?>
 			<label class="sbr-check sbr-mt-8"><input type="checkbox" name="sbr_remote_window" value="1" <?php checked( $s['remote_window'] ); ?>>
 				<?php esc_html_e( 'Το Hub μπορεί να ανοίξει το παράθυρο εγγραφής αυτού του site (κλειστό για sites πελατών)', 'site-bridge' ); ?></label>
+			<label class="sbr-check sbr-mt-8"><input type="checkbox" name="sbr_nowin" value="1" <?php checked( $s['nowin'] ); ?>>
+				<?php esc_html_e( 'Χωρίς παράθυρο για abilities που μόνο προσθέτουν κάτι σε αναμονή', 'site-bridge' ); ?></label>
+			<span class="sbr-hint">
+				<?php
+				/* translators: %s: list of ability names */
+				echo esc_html( sprintf( __( 'Με επίπεδο «Εγγραφή» ή πάνω, αυτές τρέχουν και με κλειστό παράθυρο, για μια καθημερινή ρουτίνα: %s. Ό,τι προσθέτουν περιμένει εσένα στο site (π.χ. το «Δημοσιεύτηκε» του Broadcast). Κλειστό για sites πελατών.', 'site-bridge' ), implode( ', ', SBR_Site::NO_WINDOW ) ) );
+				?>
+			</span>
 		</div>
 
 		<h2 class="sbr-h2"><?php esc_html_e( 'Εκτέλεση και προστασία', 'site-bridge' ); ?></h2>
@@ -823,6 +831,7 @@ final class SBR_Admin_UI {
 				$old              = $s['level'];
 				$s['level']       = self::post( 'sbr_level' );
 				$s['remote_window'] = '1' === self::post( 'sbr_remote_window' );
+				$s['nowin']         = '1' === self::post( 'sbr_nowin' );
 				$s['run_as']      = (int) self::post( 'sbr_run_as' );
 				$s['pii_mask']    = '1' === self::post( 'sbr_pii_mask' );
 				$s['email_admin'] = '1' === self::post( 'sbr_email_admin' );
@@ -830,7 +839,7 @@ final class SBR_Admin_UI {
 				$s['zip_hosts']   = self::post( 'sbr_zip_hosts' );
 				SBR_Settings::save( $s );
 				$s = SBR_Settings::get();
-				self::audit( 'access', array( 'level' => $old . ' → ' . $s['level'], 'pii_mask' => $s['pii_mask'], 'remote_window' => $s['remote_window'] ) );
+				self::audit( 'access', array( 'level' => $old . ' → ' . $s['level'], 'pii_mask' => $s['pii_mask'], 'remote_window' => $s['remote_window'], 'nowin' => $s['nowin'] ) );
 				$msgs = array_merge( $saved, self::dropped( array( 'sbr_site_ips' => 'site_ips', 'sbr_zip_hosts' => 'zip_hosts' ) ) );
 				if ( (int) self::post( 'sbr_run_as' ) && ! SBR_Settings::run_as_user() ) {
 					$msgs[] = self::msg( 'error', __( 'Ο χρήστης εκτέλεσης πρέπει να είναι διαχειριστής.', 'site-bridge' ) );
