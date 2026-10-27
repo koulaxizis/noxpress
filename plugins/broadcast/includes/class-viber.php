@@ -117,11 +117,29 @@ final class BRC_Viber {
 				'error' => 'no token',
 			);
 		}
-		$hook = self::call( 'set_webhook', array( 'url' => self::webhook_url() ), $token );
+		$before = BRC_Queue::notes();
+		$hook   = self::call( 'set_webhook', array( 'url' => self::webhook_url() ), $token );
 		if ( ! self::ok( $hook ) ) {
+			// The check call ran in another request: read the note fresh.
+			wp_cache_delete( 'alloptions', 'options' );
+			wp_cache_delete( 'brc_status', 'options' );
+			$after   = BRC_Queue::notes();
+			$reached = false;
+			foreach ( array( 'viber_cb', 'viber_unsigned' ) as $k ) {
+				if ( ! empty( $after[ $k ] ) && ( empty( $before[ $k ] ) || $after[ $k ] !== $before[ $k ] ) ) {
+					$reached = true;
+				}
+			}
+			$st = is_array( $hook['json'] ) && isset( $hook['json']['status'] ) ? (int) $hook['json']['status'] : -1;
+			$hint = '';
+			if ( 1 === $st ) {
+				$hint = $reached
+					? ' (Viber reached the site but did not accept the answer)'
+					: ' (no call from Viber reached ' . self::webhook_url() . ': a firewall, a security plugin or a Cloudflare rule may block it; allow POST to /wp-json/broadcast/)';
+			}
 			return array(
 				'ok'    => false,
-				'error' => 'set_webhook: ' . self::why( $hook ),
+				'error' => 'set_webhook: ' . self::why( $hook ) . $hint,
 			);
 		}
 		$info = self::call( 'get_account_info', array(), $token );
