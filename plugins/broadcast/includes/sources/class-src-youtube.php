@@ -233,6 +233,13 @@ final class BRC_Src_Youtube {
 			array(
 				'timeout'     => 10,
 				'redirection' => 3,
+				// Servers in the EU get the cookie consent page (consent.youtube.com)
+				// instead of the channel; these cookies skip it.
+				'headers'     => array(
+					'Cookie'          => 'SOCS=CAI; CONSENT=YES+1',
+					'Accept-Language' => 'en-US,en;q=0.8',
+					'User-Agent'      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+				),
 			)
 		);
 		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
