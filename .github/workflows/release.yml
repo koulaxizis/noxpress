@@ -29,6 +29,7 @@
 #   lo → live-operator
 #   ta → trade-accounts
 #   fp → fast-pages
+#   br → broadcast
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
@@ -61,7 +62,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs bf lo ta fp'
+  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs bf lo ta fp br'
   # Plugins για προσωπική χρήση (Bible §21): βγαίνουν ως release αλλά δεν
   # μπαίνουν στο updates.json, άρα κανένα site δεν τα βλέπει στο hub.
   # Σήμερα κανένα (το Site Bridge βγήκε από τη λίστα στο 1.3.0).
@@ -87,7 +88,7 @@ jobs:
         run: |
           set -euo pipefail
           ref=plugins/revenue-splitter/includes/noxpress-core
-          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge publishing-quote pre-orders wish-shelf checkout-extras data-migrator home-sections book-feed live-operator trade-accounts fast-pages; do
+          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge publishing-quote pre-orders wish-shelf checkout-extras data-migrator home-sections book-feed live-operator trade-accounts fast-pages broadcast; do
             if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
               echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
               exit 1
@@ -129,6 +130,7 @@ jobs:
               lo) echo live-operator ;;
               ta) echo trade-accounts ;;
               fp) echo fast-pages ;;
+              br) echo broadcast ;;
               *) return 1 ;;
             esac
           }
@@ -161,6 +163,7 @@ jobs:
               lo) echo "Live Operator" ;;
               ta) echo "Trade Accounts" ;;
               fp) echo "Fast Pages" ;;
+              br) echo "Broadcast" ;;
             esac
           }
           header_version() {
