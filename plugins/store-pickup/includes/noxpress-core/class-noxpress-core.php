@@ -58,6 +58,7 @@ final class Noxpress_Core {
 		'Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.' => "PurioChat's live chat on your phone: an online / offline switch, notifications for every request and message, and replies from the Android app.",
 		'Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.' => 'Trade accounts for bookstores: a preset discount on the titles you choose, and an API (Trade Feed) in JSON or XML to list the books in their own e-shops.',
 		'Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.' => 'A page cache for visitors with smart purging and preload, CSS / JS minify, lazy load and click-to-play YouTube. Replaces WP Rocket; Claude runs it through Site Bridge.',
+		'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.' => "Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos and posts you prepare, with a queue, approval and a history.",
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -308,6 +309,11 @@ final class Noxpress_Core {
 				'name' => 'Fast Pages',
 				'desc' => __( 'Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.', 'noxpress' ),
 				'page' => 'fpg-settings',
+			),
+			'broadcast'         => array(
+				'name' => 'Broadcast',
+				'desc' => __( 'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.', 'noxpress' ),
+				'page' => 'brc-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

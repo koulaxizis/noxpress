@@ -60,6 +60,7 @@ SLUGS = {
     'lo': 'live-operator',
     'ta': 'trade-accounts',
     'fp': 'fast-pages',
+    'br': 'broadcast',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
