@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Initial release, with modules switched on one by one.\n* Sources: new WooCommerce products (categories, types, image; Book Feed titles and Hide Catalog categories out by default; Pre-Orders dates), MailerLite «campaign.sent» webhook with signature check, YouTube channels without an API key and without Shorts by default, a post queue for routines and manual posts sent on «Published», and a weekly Book Feed digest.\n* Destination: Viber Channel (Channels Post API) with one-click connect, webhook with signature check, pictures with captions and text.\n* Queue with approval, a 14-day trial notice, dedupe, a brake per source, retries in the background, history with CSV export, templates per source.\n* Test / live / off mode, BRC_DISABLE, sealed secrets, settings export / import, four abilities. Works without WooCommerce. Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.2).",
+        "changelog": "* Fix: a YouTube @handle was not found on servers in the EU, where youtube.com answers with its cookie consent page; the lookup now skips that page. When a handle still cannot be read, the message says where to find the Channel ID (UC…).",
         "published": "2026-10-27",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1c0a5c99885cde83f91ece33ba8e5f95dc8f4f6b3536aa53ea23edffca5ba3ca",
-        "signature": "ngTaKubUQQAgiuo+JJdiEy2kz3cO52Eky+DtLpXMNqRsRZROhhporO56IVVxVYRakIZ/EMY26SiyvZUaUZ3WAw==",
+        "sha256": "cf0c951517289303a04ca25a8c3291cef0fbef7dc1ed3d69a75ba8d26c990eb3",
+        "signature": "7lkB8pnx1EzExZX97+kDSwNOSJBRymZKm/FKhTPnr8s3bLlVhkbkVCZu8Mub1BOUuZnMKGX2RGhBVtz4vSX8BQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.0/broadcast.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.1/broadcast.zip"
       }
     },
     "checkout-extras": {
