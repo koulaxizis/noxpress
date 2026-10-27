@@ -29,7 +29,7 @@ final class BRC_Rest {
 				self::NS,
 				'/viber',
 				array(
-					'methods'             => 'POST',
+					'methods'             => array( 'POST', 'GET' ),
 					'callback'            => array( __CLASS__, 'viber' ),
 					'permission_callback' => '__return_true', // Signed by Viber, checked in the callback.
 				)
@@ -63,7 +63,9 @@ final class BRC_Rest {
 		require_once BRC_PATH . 'includes/class-viber.php';
 		$sig = (string) $req->get_header( 'x_viber_content_signature' );
 		if ( ! BRC_Viber::callback( (string) $req->get_body(), $sig ) ) {
-			return self::answer( array( 'error' => 'bad signature' ), 403 );
+			// Nothing is read or stored from an unsigned call, so it gets a 200
+			// too: set_webhook fails (status 1) unless Viber's check call does.
+			BRC_Queue::note( 'viber_unsigned', time() );
 		}
 		return self::answer( array( 'status' => 0 ), 200 );
 	}
