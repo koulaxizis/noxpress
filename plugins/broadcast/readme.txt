@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, mailerlite
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -78,6 +78,9 @@ The plugin reads the feed of the channel's «long videos» list, where YouTube d
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: a YouTube @handle was not found on servers in the EU, where youtube.com answers with its cookie consent page; the lookup now skips that page. When a handle still cannot be read, the message says where to find the Channel ID (UC…).
 
 = 1.0.0 =
 * Initial release, with modules switched on one by one.

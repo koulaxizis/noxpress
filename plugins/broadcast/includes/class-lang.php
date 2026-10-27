@@ -225,7 +225,7 @@ final class BRC_Lang {
 		'Ο σύνδεσμος του newsletter θέλει https://. Δεν κρατήθηκε.' => 'The newsletter link needs https://. It was not kept.',
 		'Το secret του newsletter αποθηκεύτηκε σφραγισμένο.' => 'The newsletter secret was saved sealed.',
 		'Το secret δεν αποθηκεύτηκε: λείπει το OpenSSL (aes-256-gcm). Βάλ\' το ως σταθερά στο wp-config.php.' => 'The secret was not saved: OpenSSL (aes-256-gcm) is missing. Set it as a constant in wp-config.php.',
-		'Δεν βρέθηκε κανάλι YouTube για: %s' => 'No YouTube channel found for: %s',
+		'Δεν βρέθηκε κανάλι YouTube για: %s. Βάλε το Channel ID (ξεκινά με UC), από το youtube.com/account_advanced.' => 'No YouTube channel found for: %s. Enter the Channel ID (it starts with UC), from youtube.com/account_advanced.',
 		'Κρατήθηκαν τα πρώτα 5 κανάλια.' => 'The first 5 channels were kept.',
 		'Το token δεν μοιάζει με token του Viber (γράμματα, αριθμοί και -). Δεν κρατήθηκε.' => 'This does not look like a Viber token (letters, digits and -). It was not kept.',
 		'Το token αποθηκεύτηκε σφραγισμένο.' => 'The token was saved sealed.',

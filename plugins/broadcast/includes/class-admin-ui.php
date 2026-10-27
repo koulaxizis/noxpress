@@ -1218,7 +1218,7 @@ final class BRC_Admin_UI {
 		$s['yt_every']    = (int) self::post( 'brc_yt_every' );
 		if ( $bad ) {
 			/* translators: %s: list of channels */
-			$msgs[] = self::msg( 'error', sprintf( __( 'Δεν βρέθηκε κανάλι YouTube για: %s', 'broadcast' ), implode( ', ', array_slice( $bad, 0, 5 ) ) ) );
+			$msgs[] = self::msg( 'error', sprintf( __( 'Δεν βρέθηκε κανάλι YouTube για: %s. Βάλε το Channel ID (ξεκινά με UC), από το youtube.com/account_advanced.', 'broadcast' ), implode( ', ', array_slice( $bad, 0, 5 ) ) ) );
 		}
 		if ( count( $channels ) > 5 ) {
 			$msgs[] = self::msg( 'warning', __( 'Κρατήθηκαν τα πρώτα 5 κανάλια.', 'broadcast' ) );
