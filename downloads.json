@@ -1,6 +1,6 @@
 {
   "display": 250,
-  "total": 487,
+  "total": 488,
   "offset": 5,
   "updated": "2026-10-27",
   "assets": {
@@ -630,10 +630,14 @@
     },
     "683231839": {
       "file": "nox-br-1.0.1/broadcast.zip",
-      "count": 0
+      "count": 1
     },
     "683237809": {
       "file": "nox-br-1.0.2/broadcast.zip",
+      "count": 0
+    },
+    "683252004": {
+      "file": "nox-br-1.0.3/broadcast.zip",
       "count": 0
     }
   }
