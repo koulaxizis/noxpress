@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fix: «Connect to Viber» could fail with \"set_webhook: status 1\": the webhook route answered Viber's check call with 403 when it was not signed as expected. The route now answers every call with 200 and reads or stores nothing from an unsigned one (signed calls are still noted). When Viber reports status 1 again, the message says whether any call from Viber reached the site, which points to a firewall or Cloudflare rule.",
+        "changelog": "* New: when Viber cannot reach the webhook at /wp-json/broadcast/v1/viber (status 1, no call reached the site), «Connect to Viber» tries the same route as /?rest_route=/broadcast/v1/viber, for hosts whose firewall or CDN keeps callers away from /wp-json/.",
         "published": "2026-10-27",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "77b5338d38ae742820a38a1e98854c7c0e6035a4159f8db20ab9016d62a7292a",
-        "signature": "CCzkPdOy0yGMW9KxVfZgMZh0F6W224mxVENRZl3MI91dwLFX7nnmgplUpChBLDHbG9xreNot8vt69xi+SJ5aCg==",
+        "sha256": "aca2af9f9e7f885d681ecffc6e42bc08fac655a51ce9c53bc3ae11c8775fec10",
+        "signature": "9Vfu2ROfD4EOO4GaQkso7sNRoUyqL8FdwX1f2iinbRbua7ehIldu1S1VccGnUdGjMqm7ol1lhmTDjw4yW/VABA==",
         "tested_wp": "7.1",
-        "version": "1.0.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.2/broadcast.zip"
+        "version": "1.0.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.3/broadcast.zip"
       }
     },
     "checkout-extras": {
