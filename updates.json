@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fix: a YouTube @handle was not found on servers in the EU, where youtube.com answers with its cookie consent page; the lookup now skips that page. When a handle still cannot be read, the message says where to find the Channel ID (UC…).",
+        "changelog": "* Fix: «Connect to Viber» could fail with \"set_webhook: status 1\": the webhook route answered Viber's check call with 403 when it was not signed as expected. The route now answers every call with 200 and reads or stores nothing from an unsigned one (signed calls are still noted). When Viber reports status 1 again, the message says whether any call from Viber reached the site, which points to a firewall or Cloudflare rule.",
         "published": "2026-10-27",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "cf0c951517289303a04ca25a8c3291cef0fbef7dc1ed3d69a75ba8d26c990eb3",
-        "signature": "7lkB8pnx1EzExZX97+kDSwNOSJBRymZKm/FKhTPnr8s3bLlVhkbkVCZu8Mub1BOUuZnMKGX2RGhBVtz4vSX8BQ==",
+        "sha256": "77b5338d38ae742820a38a1e98854c7c0e6035a4159f8db20ab9016d62a7292a",
+        "signature": "CCzkPdOy0yGMW9KxVfZgMZh0F6W224mxVENRZl3MI91dwLFX7nnmgplUpChBLDHbG9xreNot8vt69xi+SJ5aCg==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.1/broadcast.zip"
+        "version": "1.0.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.2/broadcast.zip"
       }
     },
     "checkout-extras": {
