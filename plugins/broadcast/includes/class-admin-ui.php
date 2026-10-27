@@ -858,6 +858,7 @@ final class BRC_Admin_UI {
 	 * ------------------------------------------------------------------- */
 
 	private static function render_viber(): void {
+		require_once BRC_PATH . 'includes/class-viber.php';
 		$acc   = get_option( 'brc_viber', array() );
 		$acc   = is_array( $acc ) ? $acc : array();
 		$notes = BRC_Queue::notes();
@@ -885,7 +886,7 @@ final class BRC_Admin_UI {
 					}
 					?>
 				</p>
-				<?php if ( isset( $acc['hook'] ) && rest_url( 'broadcast/v1/viber' ) !== $acc['hook'] ) : ?>
+				<?php if ( isset( $acc['hook'] ) && ! in_array( $acc['hook'], array( BRC_Viber::webhook_url(), BRC_Viber::webhook_url_alt() ), true ) ) : ?>
 					<p class="brc-warn"><?php esc_html_e( 'Η διεύθυνση του site άλλαξε από τη σύνδεση: πάτησε ξανά «Σύνδεση με το Viber».', 'broadcast' ); ?></p>
 				<?php endif; ?>
 			<?php else : ?>

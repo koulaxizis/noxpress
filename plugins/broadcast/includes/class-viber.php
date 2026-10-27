@@ -53,6 +53,11 @@ final class BRC_Viber {
 		return rest_url( 'broadcast/v1/viber' );
 	}
 
+	/** The same route without /wp-json/ in the path. */
+	public static function webhook_url_alt(): string {
+		return add_query_arg( 'rest_route', '/broadcast/v1/viber', home_url( '/' ) );
+	}
+
 	/**
 	 * One API call.
 	 *
@@ -117,9 +122,18 @@ final class BRC_Viber {
 				'error' => 'no token',
 			);
 		}
-		$before = BRC_Queue::notes();
-		$hook   = self::call( 'set_webhook', array( 'url' => self::webhook_url() ), $token );
-		if ( ! self::ok( $hook ) ) {
+		// The REST URL first, then the same route through ?rest_route=, for
+		// hosts whose firewall or CDN keeps callers away from /wp-json/.
+		$urls = array_values( array_unique( array( self::webhook_url(), self::webhook_url_alt() ) ) );
+		$used = '';
+		$err  = '';
+		foreach ( $urls as $url ) {
+			$before = BRC_Queue::notes();
+			$hook   = self::call( 'set_webhook', array( 'url' => $url ), $token );
+			if ( self::ok( $hook ) ) {
+				$used = $url;
+				break;
+			}
 			// The check call ran in another request: read the note fresh.
 			wp_cache_delete( 'alloptions', 'options' );
 			wp_cache_delete( 'brc_status', 'options' );
@@ -130,16 +144,22 @@ final class BRC_Viber {
 					$reached = true;
 				}
 			}
-			$st = is_array( $hook['json'] ) && isset( $hook['json']['status'] ) ? (int) $hook['json']['status'] : -1;
+			$st   = is_array( $hook['json'] ) && isset( $hook['json']['status'] ) ? (int) $hook['json']['status'] : -1;
 			$hint = '';
 			if ( 1 === $st ) {
 				$hint = $reached
 					? ' (Viber reached the site but did not accept the answer)'
-					: ' (no call from Viber reached ' . self::webhook_url() . ': a firewall, a security plugin or a Cloudflare rule may block it; allow POST to /wp-json/broadcast/)';
+					: ' (no call from Viber reached ' . implode( ' or ', $urls ) . ': a firewall, a security plugin or a Cloudflare rule may block it; allow POST to /wp-json/broadcast/)';
 			}
+			$err = 'set_webhook: ' . self::why( $hook ) . $hint;
+			if ( 1 !== $st || $reached ) {
+				break; // Another URL will not help.
+			}
+		}
+		if ( '' === $used ) {
 			return array(
 				'ok'    => false,
-				'error' => 'set_webhook: ' . self::why( $hook ) . $hint,
+				'error' => $err,
 			);
 		}
 		$info = self::call( 'get_account_info', array(), $token );
@@ -171,7 +191,7 @@ final class BRC_Viber {
 				'subs'    => isset( $j['subscribers_count'] ) ? (int) $j['subscribers_count'] : 0,
 				'from'    => mb_substr( $from, 0, 64 ),
 				'at'      => time(),
-				'hook'    => self::webhook_url(),
+				'hook'    => $used,
 			),
 			false
 		);
