@@ -273,7 +273,7 @@ final class SBR_Tools {
 			'ability_run'            => array(
 				'class'       => 'write',
 				'title'       => 'Run an ability',
-				'description' => 'Runs a WordPress ability with an input. Read-only abilities need only level read; destructive ones need level admin; others need write. Write and admin need an open write window.',
+				'description' => 'Runs a WordPress ability with an input. Read-only abilities need only level read; destructive ones need level admin; others need write. Write and admin need an open write window, except the few abilities the owner lets run without one (Access: "No window for abilities that only add something that waits", e.g. broadcast/queue-add).',
 				'props'       => array(
 					'name'  => $str,
 					'input' => array( 'description' => 'The ability\'s input.' ),

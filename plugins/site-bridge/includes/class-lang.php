@@ -94,6 +94,8 @@ final class SBR_Lang {
 		'Διαχείριση'                                                  => 'Admin',
 		'Και plugins / θέματα: εγκατάσταση, ενεργοποίηση, ενημέρωση, κανάλι Noxpress. Μόνο με ανοιχτό παράθυρο.' => 'Plus plugins / themes: install, activate, update, Noxpress channel. Only with an open window.',
 		'Το Hub μπορεί να ανοίξει το παράθυρο εγγραφής αυτού του site (κλειστό για sites πελατών)' => 'The Hub may open this site\'s write window (keep off for client sites)',
+		'Χωρίς παράθυρο για abilities που μόνο προσθέτουν κάτι σε αναμονή' => 'No window for abilities that only add something that waits',
+		'Με επίπεδο «Εγγραφή» ή πάνω, αυτές τρέχουν και με κλειστό παράθυρο, για μια καθημερινή ρουτίνα: %s. Ό,τι προσθέτουν περιμένει εσένα στο site (π.χ. το «Δημοσιεύτηκε» του Broadcast). Κλειστό για sites πελατών.' => 'With level «Write» or above, these run with the window closed too, for a daily routine: %s. What they add waits for you on the site (e.g. Broadcast\'s «Published»). Keep off for client sites.',
 		'Εκτέλεση και προστασία'                                      => 'Execution and protection',
 		'Χρήστης εκτέλεσης'                                           => 'Run-as user',
 		'Τα εργαλεία τρέχουν ως αυτός ο διαχειριστής: τα δικαιώματά του ισχύουν και το όνομά του φαίνεται στις αλλαγές.' => 'Tools run as this administrator: their permissions apply and their name shows on the changes.',

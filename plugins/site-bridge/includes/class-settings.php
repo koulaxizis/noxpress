@@ -28,6 +28,7 @@ final class SBR_Settings {
 			'site'          => false,
 			'level'         => 'read',
 			'remote_window' => false,
+			'nowin'         => false,
 			'run_as'        => 0,
 			'pii_mask'      => true,
 			'email_admin'   => true,
@@ -70,7 +71,7 @@ final class SBR_Settings {
 	public static function sanitize( array $in ): array {
 		$d   = self::defaults();
 		$out = array();
-		foreach ( array( 'hub', 'site', 'remote_window', 'pii_mask', 'email_admin', 'dcr', 'app', 'app_email' ) as $k ) {
+		foreach ( array( 'hub', 'site', 'remote_window', 'nowin', 'pii_mask', 'email_admin', 'dcr', 'app', 'app_email' ) as $k ) {
 			$out[ $k ] = isset( $in[ $k ] ) ? (bool) $in[ $k ] : $d[ $k ];
 		}
 		$out['level']  = isset( $in['level'] ) && in_array( $in['level'], self::LEVELS, true ) ? $in['level'] : $d['level'];
