@@ -2,7 +2,8 @@
  * Live Operator — the operator app (vanilla JS, no build step).
  *
  * Talks to two REST namespaces with the logged-in cookie + wp_rest nonce:
- *   live-operator/v1        switch and push devices (this plugin)
+ *   live-operator/v1        switch, weekly schedule and push devices (this
+ *                           plugin)
  *   listeo/v1/live-handoff  PurioChat's own operator routes (threads,
  *                           claim, take-over, reply, return-to-ai), the same
  *                           ones its Live Chat admin page uses
@@ -27,7 +28,9 @@
 	var skew = state.now ? state.now * 1000 - Date.now() : 0;
 	var threads = [];
 	var threadsAt = 0;
-	var view = { cid: '', thread: null, messages: [], lastId: 0, busy: false, els: null };
+	var view = { cid: '', sched: false, thread: null, messages: [], lastId: 0, busy: false, els: null };
+	var sched = { data: null, draft: null, busy: false, note: '', warn: false };
+	var autoLoadAt = 0;
 	var push = { supported: false, sub: null, busy: false, note: '' };
 	var banner = '';
 	var switchBusy = false;
@@ -445,7 +448,8 @@
 			h('div', { class: 'lop-switch__state' }, [
 				h('span', { class: 'lop-dot', 'aria-hidden': 'true' }),
 				h('strong', { text: on ? t('online') : t('offline') }),
-				on && state.until ? h('span', { class: 'lop-muted', text: ' ' + t('until', hhmm(state.until * 1000)) }) : null
+				on && state.until ? h('span', { class: 'lop-muted', text: ' ' + t('until', state.until_label || hhmm(state.until * 1000)) }) : null,
+				on && state.source === 'schedule' ? h('span', { class: 'lop-tag', text: t('bySchedule') }) : null
 			]),
 			h('div', { class: 'lop-switch__btns' }, state.enabled
 				? (on
@@ -457,6 +461,22 @@
 				: [])
 		]);
 		topEl.appendChild(head);
+
+		var sc = state.schedule || {};
+		var line = [];
+		if (state.enabled && sc.on) {
+			if (sc.paused_until) {
+				line.push(h('span', { class: 'lop-warn', text: t('pausedUntil', sc.end_label) }));
+			} else if (!on && sc.next_label) {
+				line.push(h('span', { class: 'lop-muted', text: t('nextWindow', sc.next_label) }));
+			} else if (!sc.active && !sc.next_label) {
+				line.push(h('span', { class: 'lop-warn', text: t('schedNone') }));
+			}
+		} else {
+			line.push(h('span', { class: 'lop-muted', text: t('schedOff') }));
+		}
+		line.push(h('a', { class: 'lop-btn lop-btn--small lop-btn--ghost', href: '#schedule', text: t('schedule') }));
+		topEl.appendChild(h('div', { class: 'lop-sched-line' }, line));
 
 		if (!state.enabled) {
 			topEl.appendChild(h('p', { class: 'lop-note lop-note--warn' }, [t('switchOff') + ' ', h('a', { href: cfg.settings, text: t('settings') })]));
@@ -506,7 +526,7 @@
 			threadsAt = Date.now();
 			var waiting = threads.filter(function (x) { return x.inbox_group === 'waiting'; }).length;
 			document.title = (waiting ? '(' + waiting + ') ' : '') + (document.title.replace(/^\(\d+\)\s*/, ''));
-			if (!view.cid) {
+			if (!view.cid && !view.sched) {
 				renderList();
 			}
 		}, function () {});
@@ -564,7 +584,7 @@
 
 	/** Every second: the waiting counters, without a new request. */
 	function tick() {
-		if (view.cid || !threadsAt) {
+		if (view.cid || view.sched || !threadsAt) {
 			return;
 		}
 		var timeout = (state.purio && state.purio.timeout) || 0;
@@ -582,7 +602,15 @@
 				b.textContent = t('leftFor', dur(timeout - w));
 			}
 		});
-		if (state.online && state.until && now() > state.until * 1000) {
+	}
+
+	/** A change of the switch or the schedule is due: ask the server. */
+	function dueCheck() {
+		var sc = state.schedule || {};
+		var due = (state.online && state.until && now() > state.until * 1000) ||
+			(!state.online && state.enabled && sc.on && sc.next && now() > sc.next * 1000);
+		if (due && Date.now() - autoLoadAt > 15000) {
+			autoLoadAt = Date.now();
 			loadState();
 		}
 	}
@@ -628,6 +656,7 @@
 
 	function closeThread() {
 		view.cid = '';
+		view.sched = false;
 		view.els = null;
 		renderList();
 		loadThreads();
@@ -918,9 +947,217 @@
 		});
 	}
 
+	/* ---------- weekly schedule ---------- */
+
+	var DAYS = ['1', '2', '3', '4', '5', '6', '7'];
+
+	function copyDraft(d) {
+		var days = {};
+		DAYS.forEach(function (k) {
+			days[k] = ((d.days && d.days[k]) || []).map(function (r) {
+				return [r[0], r[1] === '24:00' ? '00:00' : r[1]];
+			});
+		});
+		return { on: !!d.on, notify_start: !!d.notify_start, days: days, closed: (d.closed || []).slice() };
+	}
+
+	function openSchedule() {
+		view.sched = true;
+		view.cid = '';
+		view.els = null;
+		sched.note = '';
+		mainEl.textContent = '';
+		mainEl.appendChild(h('p', { class: 'lop-empty', text: t('loading') }));
+		window.scrollTo(0, 0);
+		lop('GET', '/schedule').then(function (d) {
+			sched.data = d || {};
+			sched.draft = copyDraft(sched.data);
+			if (view.sched) {
+				renderSchedule();
+			}
+		}, function () {
+			if (view.sched) {
+				mainEl.textContent = '';
+				mainEl.appendChild(h('p', { class: 'lop-note lop-note--warn', text: t('failed') }));
+			}
+		});
+	}
+
+	/** 00:00 as an end is the next midnight (00:00–00:00 = all day). */
+	function toServer(d) {
+		var days = {};
+		DAYS.forEach(function (k) {
+			days[k] = d.days[k].filter(function (r) {
+				return r[0] || r[1];
+			}).map(function (r) {
+				return [r[0], r[1] === '00:00' && r[0] ? '24:00' : r[1]];
+			});
+		});
+		return { on: d.on, notify_start: d.notify_start, days: days, closed: d.closed };
+	}
+
+	function saveSchedule() {
+		if (sched.busy) {
+			return;
+		}
+		sched.busy = true;
+		renderSchedule();
+		lop('POST', '/schedule', toServer(sched.draft)).then(function (d) {
+			sched.busy = false;
+			sched.data = d || sched.data;
+			sched.draft = copyDraft(sched.data);
+			sched.warn = !!(d && d.dropped);
+			sched.note = sched.warn ? t('schedDropped', d.dropped) : t('schedSaved');
+			if (d && d.state) {
+				state = d.state;
+				renderTop();
+			}
+			if (view.sched) {
+				renderSchedule();
+			}
+		}, function () {
+			sched.busy = false;
+			sched.warn = true;
+			sched.note = t('failed');
+			if (view.sched) {
+				renderSchedule();
+			}
+		});
+	}
+
+	function timeInput(value, label, onset) {
+		return h('input', {
+			type: 'time',
+			class: 'lop-time',
+			value: value || '',
+			'aria-label': label,
+			onchange: function (e) { onset(e.target.value); },
+			oninput: function (e) { onset(e.target.value); }
+		});
+	}
+
+	function renderSchedule() {
+		var d = sched.draft;
+		var names = cfg.days || {};
+		mainEl.textContent = '';
+		var box = h('section', { class: 'lop-sched' });
+		box.appendChild(h('div', { class: 'lop-thread__bar' }, [
+			h('a', { class: 'lop-btn lop-btn--ghost lop-btn--small', href: '#', text: '‹ ' + t('back') }),
+			h('strong', { text: t('schedule') })
+		]));
+		if (!state.enabled) {
+			box.appendChild(h('p', { class: 'lop-note lop-note--warn' }, [t('switchOff') + ' ', h('a', { href: cfg.settings, text: t('settings') })]));
+		}
+		box.appendChild(h('label', { class: 'lop-check' }, [
+			h('input', { type: 'checkbox', checked: d.on, onchange: function (e) { d.on = e.target.checked; } }),
+			' ' + t('schedOn')
+		]));
+		box.appendChild(h('p', { class: 'lop-hint lop-hint--tight', text: t('schedOnHint') }));
+		box.appendChild(h('label', { class: 'lop-check' }, [
+			h('input', { type: 'checkbox', checked: d.notify_start, onchange: function (e) { d.notify_start = e.target.checked; } }),
+			' ' + t('schedNotify')
+		]));
+
+		var list = h('div', { class: 'lop-days' });
+		DAYS.forEach(function (k) {
+			var ranges = d.days[k];
+			var rows = ranges.map(function (r, i) {
+				return h('div', { class: 'lop-range' }, [
+					timeInput(r[0], (names[k] || k) + ' ' + t('from'), function (v) { r[0] = v; }),
+					h('span', { class: 'lop-muted', text: '–' }),
+					timeInput(r[1], (names[k] || k) + ' ' + t('to'), function (v) { r[1] = v; }),
+					h('button', {
+						type: 'button',
+						class: 'lop-btn lop-btn--small lop-btn--ghost',
+						'aria-label': t('schedRemove'),
+						onclick: function () { ranges.splice(i, 1); renderSchedule(); },
+						text: '×'
+					})
+				]);
+			});
+			if (!rows.length) {
+				rows.push(h('span', { class: 'lop-muted', text: t('schedClosedDay') }));
+			}
+			list.appendChild(h('div', { class: 'lop-day' }, [
+				h('strong', { class: 'lop-day__name', text: names[k] || k }),
+				h('div', { class: 'lop-day__ranges' }, rows),
+				ranges.length < 3 ? h('button', {
+					type: 'button',
+					class: 'lop-btn lop-btn--small lop-btn--ghost',
+					onclick: function () {
+						var last = ranges[ranges.length - 1];
+						ranges.push(last ? [last[1], ''] : ['10:00', '14:00']);
+						renderSchedule();
+					},
+					text: t('schedAdd')
+				}) : null
+			]));
+		});
+		box.appendChild(list);
+		box.appendChild(h('p', {}, [h('button', {
+			type: 'button',
+			class: 'lop-btn lop-btn--small lop-btn--ghost',
+			onclick: function () {
+				['2', '3', '4', '5'].forEach(function (k) {
+					d.days[k] = d.days['1'].map(function (r) { return [r[0], r[1]]; });
+				});
+				renderSchedule();
+			},
+			text: t('schedCopy')
+		})]));
+		box.appendChild(h('p', { class: 'lop-hint lop-hint--tight', text: t('schedTz', (sched.data && sched.data.timezone) || '') }));
+
+		box.appendChild(h('h2', { class: 'lop-group', text: t('schedClosed') }));
+		var chips = h('div', { class: 'lop-chips' });
+		d.closed.forEach(function (ymd, i) {
+			var p = ymd.split('-');
+			chips.appendChild(h('span', { class: 'lop-chip' }, [
+				parseInt(p[2], 10) + '/' + parseInt(p[1], 10) + '/' + p[0],
+				h('button', { type: 'button', class: 'lop-chip__x', 'aria-label': t('schedRemove'), onclick: function () { d.closed.splice(i, 1); renderSchedule(); }, text: '×' })
+			]));
+		});
+		var dateIn = h('input', { type: 'date', class: 'lop-time', 'aria-label': t('schedClosed') });
+		chips.appendChild(h('span', { class: 'lop-range' }, [
+			dateIn,
+			h('button', {
+				type: 'button',
+				class: 'lop-btn lop-btn--small lop-btn--ghost',
+				onclick: function () {
+					var v = dateIn.value;
+					if (/^\d{4}-\d{2}-\d{2}$/.test(v) && d.closed.indexOf(v) < 0 && d.closed.length < 30) {
+						d.closed.push(v);
+						d.closed.sort();
+						renderSchedule();
+					}
+				},
+				text: t('schedClosedAdd')
+			})
+		]));
+		box.appendChild(chips);
+		box.appendChild(h('p', { class: 'lop-hint lop-hint--tight', text: t('schedClosedHint') }));
+
+		if (sched.note) {
+			box.appendChild(h('p', { class: 'lop-note' + (sched.warn ? ' lop-note--warn' : ''), role: 'status', text: sched.note }));
+		}
+		box.appendChild(h('div', { class: 'lop-sched__save' }, [
+			h('button', { type: 'button', class: 'lop-btn lop-btn--go', disabled: sched.busy, onclick: saveSchedule, text: t('save') })
+		]));
+		mainEl.appendChild(box);
+	}
+
 	/* ---------- routing and polling ---------- */
 
 	function route() {
+		if (location.hash === '#schedule') {
+			if (!view.sched) {
+				openSchedule();
+			}
+			return;
+		}
+		if (view.sched) {
+			view.sched = false;
+			view.cid = '<schedule>'; // Never a thread id: always re-render below.
+		}
 		var m = /(?:^|[#&])c=([^&]+)/.exec(location.hash);
 		var cid = m ? decodeURIComponent(m[1]) : '';
 		if (cid && !/^[a-zA-Z0-9_-]+$/.test(cid)) {
@@ -984,12 +1221,15 @@
 			loadThread(false);
 		}
 	});
-	every('tick', 1000, tick);
+	every('tick', 1000, function () {
+		tick();
+		dueCheck();
+	});
 
 	renderTop();
 	initPush();
 	checkAppUpdate();
-	if (/(?:^|[#&])c=/.test(location.hash)) {
+	if (/(?:^|[#&])c=/.test(location.hash) || location.hash === '#schedule') {
 		route();
 		loadThreads();
 	} else {

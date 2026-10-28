@@ -17,6 +17,13 @@
  *    single WP-Cron event (lop_auto_offline) at until clears the state and
  *    sends the «you are offline now» notification.
  *
+ * The weekly schedule (LOP_Schedule, 1.3.0) is a second way to be
+ * online: online = the manual switch OR a schedule window that is not
+ * paused. «Go offline» inside a window pauses it until its end; «Go online»
+ * (or «Extend») un-pauses it. The automatic offline of the manual switch
+ * never pauses the schedule, and tells «offline» only when nothing keeps
+ * the operator online.
+ *
  * Only while the «enabled» setting is on; otherwise PurioChat works as
  * before. LOP_DISABLE stops the filters (bootstrap).
  */
@@ -45,13 +52,37 @@ final class LOP_Presence {
 		);
 	}
 
-	/** The switch decides now and says online. */
+	/** The switch decides now and says online (by hand or by schedule). */
 	public static function online(): bool {
+		if ( ! LOP_Settings::get()['enabled'] ) {
+			return false;
+		}
+		return self::manual_online() || LOP_Schedule::active();
+	}
+
+	/** Online by hand («Go online» / «Extend»), before its automatic end. */
+	public static function manual_online(): bool {
 		if ( ! LOP_Settings::get()['enabled'] ) {
 			return false;
 		}
 		$s = self::state();
 		return $s['on'] && $s['until'] > time();
+	}
+
+	/** Online until: the later of the manual end and the window's end. */
+	public static function until(): int {
+		$until = self::manual_online() ? self::state()['until'] : 0;
+		if ( LOP_Schedule::active() ) {
+			$until = max( $until, (int) LOP_Schedule::window()['cur'][1] );
+		}
+		return $until;
+	}
+
+	/** «manual», «schedule», «both» or '' (offline). */
+	public static function source(): string {
+		$m = self::manual_online();
+		$s = LOP_Schedule::active();
+		return $m && $s ? 'both' : ( $m ? 'manual' : ( $s ? 'schedule' : '' ) );
 	}
 
 	/** Online for the configured hours from now (also «extend»). */
@@ -70,10 +101,18 @@ final class LOP_Presence {
 		);
 		wp_clear_scheduled_hook( self::CRON );
 		wp_schedule_single_event( $until, self::CRON );
+		LOP_Schedule::resume();
 		return self::state();
 	}
 
+	/** Offline now: the manual switch off, and a schedule window paused. */
 	public static function go_offline(): array {
+		LOP_Schedule::pause();
+		return self::clear_manual();
+	}
+
+	/** The manual switch off, without touching the schedule. */
+	private static function clear_manual(): array {
 		update_option(
 			self::OPTION,
 			array(
@@ -130,8 +169,8 @@ final class LOP_Presence {
 			wp_schedule_single_event( $s['until'], self::CRON );
 			return;
 		}
-		self::go_offline();
-		if ( LOP_Settings::get()['enabled'] ) {
+		self::clear_manual();
+		if ( LOP_Settings::get()['enabled'] && ! self::online() ) {
 			LOP_Push::to_operators(
 				array(
 					'title' => __( 'Είσαι πλέον offline', 'live-operator' ),

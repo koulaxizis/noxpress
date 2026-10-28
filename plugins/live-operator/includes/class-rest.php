@@ -7,7 +7,11 @@
  * never cached, error messages in English (Bible §20).
  *
  *   GET    /state         switch, expiry, PurioChat status, push support
- *   POST   /state         { online: bool } — online again = extend
+ *   POST   /state         { online: bool } — online again = extend;
+ *                          offline inside a schedule window = pause
+ *   GET    /schedule      the weekly schedule and its next change
+ *   POST   /schedule      { on?, notify_start?, days?, closed? } — keys
+ *                          left out keep their value
  *   GET    /push          public key and this user's device count
  *   POST   /push          { endpoint, p256dh, auth } — this device
  *   DELETE /push          { endpoint }
@@ -43,6 +47,35 @@ final class LOP_REST {
 						'online' => array(
 							'type'     => 'boolean',
 							'required' => true,
+						),
+					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/schedule',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'get_schedule' ),
+					'permission_callback' => $perm,
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'set_schedule' ),
+					'permission_callback' => $perm,
+					'args'                => array(
+						'on'           => array( 'type' => 'boolean' ),
+						'notify_start' => array( 'type' => 'boolean' ),
+						'days'         => array( 'type' => 'object' ),
+						'closed'       => array(
+							'type'     => 'array',
+							'maxItems' => 100,
+							'items'    => array(
+								'type'      => 'string',
+								'maxLength' => 20,
+							),
 						),
 					),
 				),
@@ -107,22 +140,34 @@ final class LOP_REST {
 
 	/** Everything the app shows at the top. */
 	public static function state_payload(): array {
-		$set = LOP_Settings::get();
-		$s   = LOP_Presence::state();
+		$set    = LOP_Settings::get();
+		$s      = LOP_Presence::state();
+		$online = LOP_Presence::online();
+		$sched  = LOP_Schedule::payload();
 		return array(
-			'enabled' => $set['enabled'],
-			'online'  => LOP_Presence::online(),
-			'until'   => $s['on'] ? $s['until'] : 0,
-			'since'   => $s['on'] ? $s['since'] : 0,
-			'now'     => time(),
-			'hours'   => $set['hours'],
-			'purio'   => array(
+			'enabled'     => $set['enabled'],
+			'online'      => $online,
+			'until'       => $online ? LOP_Presence::until() : 0,
+			'until_label' => $online ? LOP_Schedule::label( LOP_Presence::until() ) : '',
+			'since'       => $s['on'] ? $s['since'] : 0,
+			'source'      => LOP_Presence::source(),
+			'now'         => time(),
+			'hours'       => $set['hours'],
+			'schedule'    => array(
+				'on'           => $sched['on'],
+				'active'       => $sched['active'],
+				'paused_until' => $sched['paused_until'],
+				'end_label'    => $sched['end_label'],
+				'next'         => $sched['next'],
+				'next_label'   => $sched['next_label'],
+			),
+			'purio'       => array(
 				'present' => LOP_Purio::present(),
 				'live'    => LOP_Purio::live(),
 				'mode'    => LOP_Purio::mode(),
 				'timeout' => LOP_Purio::timeout(),
 			),
-			'push'    => array(
+			'push'        => array(
 				'available' => LOP_Push::available(),
 				'devices'   => count( LOP_Push::subscriptions( get_current_user_id() ) ),
 			),
@@ -137,7 +182,27 @@ final class LOP_REST {
 	}
 
 	public static function get_state(): WP_REST_Response {
+		LOP_Schedule::ensure();
 		return self::respond( self::state_payload() );
+	}
+
+	public static function get_schedule(): WP_REST_Response {
+		LOP_Schedule::ensure();
+		return self::respond( LOP_Schedule::payload() );
+	}
+
+	public static function set_schedule( WP_REST_Request $request ): WP_REST_Response {
+		$changes = array();
+		foreach ( array( 'on', 'notify_start', 'days', 'closed' ) as $key ) {
+			if ( null !== $request->get_param( $key ) ) {
+				$changes[ $key ] = $request->get_param( $key );
+			}
+		}
+		$dropped         = LOP_Schedule::save( $changes );
+		$data            = LOP_Schedule::payload();
+		$data['dropped'] = $dropped;
+		$data['state']   = self::state_payload();
+		return self::respond( $data );
 	}
 
 	/** @return WP_REST_Response|WP_Error */

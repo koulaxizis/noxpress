@@ -1,12 +1,14 @@
 <?php
 /**
- * Live Operator — uninstall.php (v1.0.0)
+ * Live Operator — uninstall.php (v1.3.0)
  *
  * Deleted:
  *  - Options lop_settings, lop_state (the switch), lop_vapid (push keys),
- *    lop_rules (rewrite rules version).
+ *    lop_rules (rewrite rules version), lop_schedule and lop_sched_state
+ *    (the weekly schedule, 1.3.0).
  *  - User meta lop_push (the devices that receive notifications).
- *  - Transients lop_aui_msg_{uid} (PRG notices), the lop_auto_offline cron.
+ *  - Transients lop_aui_msg_{uid} (PRG notices), the lop_auto_offline and
+ *    lop_schedule_tick cron events.
  *  - Multisite: every site ONCE (the main site included in the loop).
  *  - The rewrite rules are rebuilt without /live-operator/ on the next
  *    request.
@@ -24,11 +26,14 @@ function lop_uninstall_site(): void {
 	global $wpdb;
 
 	wp_clear_scheduled_hook( 'lop_auto_offline' );
+	wp_clear_scheduled_hook( 'lop_schedule_tick' );
 
 	delete_option( 'lop_settings' );
 	delete_option( 'lop_state' );
 	delete_option( 'lop_vapid' );
 	delete_option( 'lop_rules' );
+	delete_option( 'lop_schedule' );
+	delete_option( 'lop_sched_state' );
 	delete_option( 'rewrite_rules' );
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.

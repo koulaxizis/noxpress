@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -20,6 +20,13 @@ PurioChat Pro shows «talk to a human» only while an operator is present, and i
 * One tap makes you online; visitors see the human option even with the phone in your pocket and the screen off.
 * Automatic offline after 1, 2, 4, 8 (default), 12 or 24 hours, with a notification when it happens. «Extend» starts the count again.
 * Optional: an open PurioChat Live Chat page also counts as online (off by default, so a forgotten computer does not keep you online).
+
+**Weekly schedule**
+
+* Online by itself on the days and hours you choose: up to 3 windows a day, in the site's time zone, also past midnight (22:00–02:00).
+* «Go offline» inside a window pauses only that window; the next one opens as usual. Outside the schedule the switch works as before.
+* Closed dates (holidays, leave), up to 30; past ones are removed by themselves.
+* A notification when a window starts (can be turned off) and when it ends. Set it in the settings or in the app.
 
 **Notifications for every request and message**
 
@@ -72,6 +79,10 @@ The fingerprint is missing or wrong, or the server does not pass `/.well-known/a
 The settings, the switch state, the push keys, the devices and the transients are removed. PurioChat Pro's data and settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.
+* The availability is worked out on every check, so it is right even when WP-Cron runs late; one WP-Cron event at the next change only sends the notifications.
 
 = 1.2.0 =
 * New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.

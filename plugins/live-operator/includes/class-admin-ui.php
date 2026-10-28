@@ -7,6 +7,7 @@
  *  - status   PurioChat Pro and its Live Chat, availability mode, waiting
  *             time, the switch, push support, this user's devices, links
  *  - settings the switch, automatic offline, inbox, preview, app name
+ *  - schedule the weekly schedule, closed dates (1.3.0)
  *  - android  package and certificate fingerprints for assetlinks.json
  *
  * Every state change: POST on admin_init (slug + nonce + capability, PRG,
@@ -25,6 +26,7 @@ final class LOP_Admin_UI {
 	public static function init(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 250 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
+		add_action( 'admin_init', array( 'LOP_Schedule', 'ensure' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'purio_notice' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( LOP_FILE ), array( __CLASS__, 'action_links' ) );
@@ -62,6 +64,7 @@ final class LOP_Admin_UI {
 			return;
 		}
 		wp_enqueue_style( 'lop-admin', LOP_URL . 'assets/admin.css', array(), LOP_VERSION );
+		wp_enqueue_script( 'lop-admin', LOP_URL . 'assets/admin.js', array(), LOP_VERSION, true );
 	}
 
 	/** PurioChat Pro is needed: say so on the plugins screen and our page. */
@@ -122,11 +125,10 @@ final class LOP_Admin_UI {
 	}
 
 	private static function render_status(): void {
-		$set   = LOP_Settings::get();
-		$state = LOP_Presence::state();
-		$mode  = LOP_Purio::mode();
-		$wait  = LOP_Purio::timeout();
-		$devs  = count( LOP_Push::subscriptions( get_current_user_id() ) );
+		$set  = LOP_Settings::get();
+		$mode = LOP_Purio::mode();
+		$wait = LOP_Purio::timeout();
+		$devs = count( LOP_Push::subscriptions( get_current_user_id() ) );
 		?>
 		<h2 class="lop-h2"><?php esc_html_e( 'Κατάσταση', 'live-operator' ); ?></h2>
 		<div class="lop-zone lop-status">
@@ -159,10 +161,30 @@ final class LOP_Admin_UI {
 			if ( ! $set['enabled'] ) {
 				self::line( __( 'Διακόπτης', 'live-operator' ), self::badge( 'muted', __( 'δεν είναι ενεργός', 'live-operator' ) ), __( 'Ενεργοποίησέ τον στις ρυθμίσεις παρακάτω.', 'live-operator' ) );
 			} elseif ( LOP_Presence::online() ) {
-				/* translators: %s: time */
-				self::line( __( 'Διακόπτης', 'live-operator' ), self::badge( 'ok', sprintf( __( 'online έως τις %s', 'live-operator' ), wp_date( 'H:i', $state['until'] ) ) ) );
+				self::line(
+					__( 'Διακόπτης', 'live-operator' ),
+					/* translators: %s: time */
+					self::badge( 'ok', sprintf( __( 'online έως τις %s', 'live-operator' ), LOP_Schedule::label( LOP_Presence::until() ) ) ),
+					'schedule' === LOP_Presence::source() ? __( 'από το ωράριο', 'live-operator' ) : ''
+				);
 			} else {
 				self::line( __( 'Διακόπτης', 'live-operator' ), self::badge( 'muted', __( 'offline', 'live-operator' ) ) );
+			}
+
+			if ( $set['enabled'] && LOP_Schedule::get()['on'] ) {
+				$sp = LOP_Schedule::payload();
+				if ( $sp['paused_until'] ) {
+					/* translators: %s: time */
+					self::line( __( 'Ωράριο', 'live-operator' ), self::badge( 'warn', sprintf( __( 'σε παύση έως τις %s', 'live-operator' ), $sp['end_label'] ) ), __( 'Πάτησες «Γίνε offline» μέσα στο ωράριο: το επόμενο διάστημα ανοίγει κανονικά.', 'live-operator' ) );
+				} elseif ( $sp['active'] ) {
+					/* translators: %s: time */
+					self::line( __( 'Ωράριο', 'live-operator' ), self::badge( 'ok', sprintf( __( 'ανοιχτό έως τις %s', 'live-operator' ), $sp['end_label'] ) ) );
+				} elseif ( $sp['next'] ) {
+					/* translators: %s: day and time */
+					self::line( __( 'Ωράριο', 'live-operator' ), self::badge( 'muted', sprintf( __( 'επόμενο: %s', 'live-operator' ), $sp['next_label'] ) ) );
+				} else {
+					self::line( __( 'Ωράριο', 'live-operator' ), self::badge( 'warn', __( 'κανένα διάστημα', 'live-operator' ) ), __( 'Πρόσθεσε ώρες σε κάποια μέρα παρακάτω.', 'live-operator' ) );
+				}
 			}
 
 			if ( ! LOP_Push::available() ) {
@@ -259,6 +281,8 @@ final class LOP_Admin_UI {
 				<p class="lop-hint lop-hint--under"><?php esc_html_e( 'Όπως φαίνεται όταν μπαίνει στην αρχική οθόνη του κινητού.', 'live-operator' ); ?></p>
 			</div>
 
+			<?php self::render_schedule(); ?>
+
 			<h2 class="lop-h2"><?php esc_html_e( 'Εφαρμογή Android', 'live-operator' ); ?></h2>
 			<div class="lop-zone">
 				<p class="lop-hint"><?php esc_html_e( 'Η εφαρμογή Android του Live Operator ανοίγει αυτή τη σελίδα σε πλήρη οθόνη. Για να μη φαίνεται η γραμμή διεύθυνσης, το site δηλώνει την εφαρμογή στο assetlinks.json με το αποτύπωμα του πιστοποιητικού της (γράφεται στις σημειώσεις κάθε έκδοσης της εφαρμογής).', 'live-operator' ); ?></p>
@@ -284,6 +308,63 @@ final class LOP_Admin_UI {
 		<?php
 	}
 
+	private static function render_schedule(): void {
+		$sc    = LOP_Schedule::get();
+		$names = LOP_Schedule::day_names();
+		?>
+		<h2 class="lop-h2"><?php esc_html_e( 'Ωράριο', 'live-operator' ); ?></h2>
+		<div class="lop-zone">
+			<?php
+			self::checkbox(
+				'lop_sched_on',
+				$sc['on'],
+				__( 'Αυτόματο ωράριο: online τις μέρες και ώρες παρακάτω', 'live-operator' ),
+				__( 'Μέσα στο ωράριο είσαι online χωρίς να πατήσεις τίποτα. Το «Γίνε offline» κλείνει μόνο το τρέχον διάστημα· το επόμενο ανοίγει κανονικά. Εκτός ωραρίου ο διακόπτης δουλεύει όπως πριν. Χρειάζεται και τον διακόπτη παραπάνω.', 'live-operator' )
+			);
+			self::checkbox(
+				'lop_sched_notify',
+				$sc['notify_start'],
+				__( 'Ειδοποίηση όταν ξεκινά ένα διάστημα', 'live-operator' ),
+				__( 'Ώστε να ξέρεις ότι οι επισκέπτες σε βλέπουν διαθέσιμο. Στο τέλος του διαστήματος έρχεται πάντα ειδοποίηση.', 'live-operator' )
+			);
+			?>
+			<table class="lop-sched" data-lop-sched>
+				<tbody>
+				<?php foreach ( $names as $day => $name ) : ?>
+					<tr data-day="<?php echo esc_attr( (string) $day ); ?>">
+						<th scope="row"><?php echo esc_html( $name ); ?></th>
+						<?php for ( $i = 0; $i < LOP_Schedule::RANGES; $i++ ) : ?>
+							<?php $r = isset( $sc['days'][ $day ][ $i ] ) ? $sc['days'][ $day ][ $i ] : array( '', '' ); ?>
+							<td class="lop-sched__range">
+								<input type="time" name="lop_sched[<?php echo esc_attr( (string) $day ); ?>][<?php echo (int) $i; ?>][0]" value="<?php echo esc_attr( $r[0] ); ?>" aria-label="<?php echo esc_attr( $name . ' ' . __( 'από', 'live-operator' ) ); ?>" />
+								<span class="lop-muted">–</span>
+								<input type="time" name="lop_sched[<?php echo esc_attr( (string) $day ); ?>][<?php echo (int) $i; ?>][1]" value="<?php echo esc_attr( '24:00' === $r[1] ? '00:00' : $r[1] ); ?>" aria-label="<?php echo esc_attr( $name . ' ' . __( 'έως', 'live-operator' ) ); ?>" />
+							</td>
+						<?php endfor; ?>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p><button type="button" class="button" data-lop-copy><?php esc_html_e( 'Αντιγραφή της Δευτέρας σε όλες τις καθημερινές', 'live-operator' ); ?></button></p>
+			<p class="lop-hint lop-hint--under">
+				<?php
+				/* translators: %s: time zone */
+				echo esc_html( sprintf( __( 'Έως 3 διαστήματα τη μέρα, στη ζώνη ώρας του site (%s). Ένα διάστημα που τελειώνει νωρίτερα από την αρχή του (π.χ. 22:00–02:00) τελειώνει την επόμενη μέρα. Κενό: εκείνη τη μέρα δεν ανοίγει.', 'live-operator' ), wp_timezone_string() ) );
+				?>
+			</p>
+			<label class="lop-label" for="lop_sched_closed"><?php esc_html_e( 'Κλειστές ημερομηνίες (μία ανά γραμμή)', 'live-operator' ); ?></label>
+			<textarea class="regular-text code" rows="3" id="lop_sched_closed" name="lop_sched_closed" placeholder="25/12/2026"><?php echo esc_textarea( implode( "\n", array_map( array( __CLASS__, 'dmy' ), $sc['closed'] ) ) ); ?></textarea>
+			<p class="lop-hint lop-hint--under"><?php esc_html_e( 'Αργίες ή άδεια: εκείνες τις μέρες το ωράριο δεν ανοίγει. Έως 30, π.χ. 25/12/2026· οι περασμένες σβήνονται μόνες τους.', 'live-operator' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/** 'Y-m-d' → 'd/m/Y'. */
+	private static function dmy( string $ymd ): string {
+		$p = explode( '-', $ymd );
+		return 3 === count( $p ) ? (int) $p[2] . '/' . (int) $p[1] . '/' . $p[0] : $ymd;
+	}
+
 	/* =====================================================================
 	 * POST routes (admin_init, PRG)
 	 * =================================================================== */
@@ -307,9 +388,9 @@ final class LOP_Admin_UI {
 				if ( ! LOP_Settings::get()['enabled'] ) {
 					self::redirect( array( self::msg( 'error', __( 'Ενεργοποίησε πρώτα τον διακόπτη στις ρυθμίσεις.', 'live-operator' ) ) ) );
 				}
-				$st = LOP_Presence::go_online();
+				LOP_Presence::go_online();
 				/* translators: %s: time */
-				self::redirect( array( self::msg( 'success', sprintf( __( 'Είσαι online έως τις %s.', 'live-operator' ), wp_date( 'H:i', $st['until'] ) ) ) ) );
+				self::redirect( array( self::msg( 'success', sprintf( __( 'Είσαι online έως τις %s.', 'live-operator' ), LOP_Schedule::label( LOP_Presence::until() ) ) ) ) );
 				break;
 			case 'offline':
 				LOP_Presence::go_offline();
@@ -364,8 +445,22 @@ final class LOP_Admin_UI {
 		if ( $was['enabled'] && ! $now['enabled'] ) {
 			LOP_Presence::go_offline();
 		}
-		$msgs = array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'live-operator' ) ) );
-		$bad  = LOP_Settings::count_invalid_fingerprints( $fp );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route(); every value is checked in LOP_Schedule::sanitize().
+		$days    = isset( $_POST['lop_sched'] ) && is_array( $_POST['lop_sched'] ) ? map_deep( wp_unslash( $_POST['lop_sched'] ), 'sanitize_text_field' ) : array();
+		$dropped = LOP_Schedule::save(
+			array(
+				'on'           => '1' === self::post( 'lop_sched_on' ),
+				'notify_start' => '1' === self::post( 'lop_sched_notify' ),
+				'days'         => self::days( $days ),
+				'closed'       => self::post( 'lop_sched_closed' ),
+			)
+		);
+		$msgs    = array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'live-operator' ) ) );
+		if ( $dropped > 0 ) {
+			/* translators: %d: number of entries */
+			$msgs[] = self::msg( 'warning', sprintf( __( '%d ώρες ή ημερομηνίες του ωραρίου αγνοήθηκαν: δεν ήταν έγκυρες (π.χ. ίδια ώρα αρχής και τέλους).', 'live-operator' ), $dropped ) );
+		}
+		$bad = LOP_Settings::count_invalid_fingerprints( $fp );
 		if ( $bad > 0 ) {
 			/* translators: %d: number of lines */
 			$msgs[] = self::msg( 'warning', sprintf( __( '%d γραμμές αποτυπωμάτων αγνοήθηκαν: θέλουν 32 ζεύγη δεκαεξαδικών, π.χ. AB:CD:…', 'live-operator' ), $bad ) );
@@ -374,6 +469,34 @@ final class LOP_Admin_UI {
 			$msgs[] = self::msg( 'warning', __( 'Το πακέτο δεν είναι έγκυρο όνομα Android· έμεινε το προεπιλεγμένο.', 'live-operator' ) );
 		}
 		return $msgs;
+	}
+
+	/**
+	 * The form's rows → LOP_Schedule ranges. Midnight as an end (00:00) is
+	 * the next midnight (00:00–00:00 = the whole day); a row with only one
+	 * time stays, to be counted as not valid.
+	 *
+	 * @param array $posted lop_sched[day][row][0|1].
+	 */
+	private static function days( array $posted ): array {
+		$out = array();
+		foreach ( $posted as $day => $rows ) {
+			if ( ! is_array( $rows ) ) {
+				continue;
+			}
+			foreach ( $rows as $row ) {
+				$from = is_array( $row ) && isset( $row[0] ) && is_scalar( $row[0] ) ? trim( (string) $row[0] ) : '';
+				$to   = is_array( $row ) && isset( $row[1] ) && is_scalar( $row[1] ) ? trim( (string) $row[1] ) : '';
+				if ( '' === $from && '' === $to ) {
+					continue;
+				}
+				if ( '00:00' === $to && '' !== $from ) {
+					$to = '24:00';
+				}
+				$out[ (int) $day ][] = array( $from, $to );
+			}
+		}
+		return $out;
 	}
 
 	private static function msg( string $type, string $text ): array {
