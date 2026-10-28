@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* New: when Viber cannot reach the webhook at /wp-json/broadcast/v1/viber (status 1, no call reached the site), «Connect to Viber» tries the same route as /?rest_route=/broadcast/v1/viber, for hosts whose firewall or CDN keeps callers away from /wp-json/.",
-        "published": "2026-10-27",
+        "changelog": "* New: Viber → «Webhook on another site». When a firewall or CDN you do not control keeps Viber away from this site, set_webhook can point at any https address that answers 200 (e.g. Broadcast on another site). Posts still leave from this site; only the signed-callback note is lost.",
+        "published": "2026-10-28",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "aca2af9f9e7f885d681ecffc6e42bc08fac655a51ce9c53bc3ae11c8775fec10",
-        "signature": "9Vfu2ROfD4EOO4GaQkso7sNRoUyqL8FdwX1f2iinbRbua7ehIldu1S1VccGnUdGjMqm7ol1lhmTDjw4yW/VABA==",
+        "sha256": "9408983737c021995b1b9fea717707016c6c09f7ea9aef3bf7bc8edb03002b48",
+        "signature": "N3HKusEImgUjKsSTr53nkCFtBpNwdQi9yOJKURPEmKF4LjIhSVloy3QNk7ErTVwk2BVnf/3DIWMTG/O4fZEYAA==",
         "tested_wp": "7.1",
-        "version": "1.0.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.3/broadcast.zip"
+        "version": "1.0.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.4/broadcast.zip"
       }
     },
     "checkout-extras": {
