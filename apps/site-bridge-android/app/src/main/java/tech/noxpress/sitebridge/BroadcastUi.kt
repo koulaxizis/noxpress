@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -219,9 +218,9 @@ private fun ItemCard(row: JSONObject, busy: Boolean, onSend: () -> Unit, onEdit:
 /** A post's picture, read once over https and scaled down; nothing when it fails. */
 @Composable
 private fun RemoteImage(url: String) {
-    val bmp by produceState<Bitmap?>(initialValue = null, url) {
-        val loaded = withContext(Dispatchers.IO) { runCatching { fetch(url) }.getOrNull() }
-        this.value = loaded
+    var bmp by remember(url) { mutableStateOf<Bitmap?>(null) }
+    LaunchedEffect(url) {
+        bmp = withContext(Dispatchers.IO) { runCatching { fetch(url) }.getOrNull() }
     }
     bmp?.let {
         Image(
