@@ -53,6 +53,12 @@ final class BRC_Viber {
 		return rest_url( 'broadcast/v1/viber' );
 	}
 
+	/** The webhook set in the settings (on another site), or ''. */
+	public static function webhook_custom(): string {
+		$s = BRC_Settings::get();
+		return isset( $s['vb_hook'] ) ? (string) $s['vb_hook'] : '';
+	}
+
 	/** The same route without /wp-json/ in the path. */
 	public static function webhook_url_alt(): string {
 		return add_query_arg( 'rest_route', '/broadcast/v1/viber', home_url( '/' ) );
@@ -124,7 +130,9 @@ final class BRC_Viber {
 		}
 		// The REST URL first, then the same route through ?rest_route=, for
 		// hosts whose firewall or CDN keeps callers away from /wp-json/.
-		$urls = array_values( array_unique( array( self::webhook_url(), self::webhook_url_alt() ) ) );
+		// A webhook on another site is used alone: Viber only needs a 200 there.
+		$custom = self::webhook_custom();
+		$urls   = '' !== $custom ? array( $custom ) : array_values( array_unique( array( self::webhook_url(), self::webhook_url_alt() ) ) );
 		$used = '';
 		$err  = '';
 		foreach ( $urls as $url ) {
@@ -146,10 +154,12 @@ final class BRC_Viber {
 			}
 			$st   = is_array( $hook['json'] ) && isset( $hook['json']['status'] ) ? (int) $hook['json']['status'] : -1;
 			$hint = '';
-			if ( 1 === $st ) {
+			if ( 1 === $st && '' !== $custom ) {
+				$hint = ' (' . $custom . ' did not answer Viber\'s check call with 200)';
+			} elseif ( 1 === $st ) {
 				$hint = $reached
 					? ' (Viber reached the site but did not accept the answer)'
-					: ' (no call from Viber reached ' . implode( ' or ', $urls ) . ': a firewall, a security plugin or a Cloudflare rule may block it; allow POST to /wp-json/broadcast/)';
+					: ' (no call from Viber reached ' . implode( ' or ', $urls ) . ': a firewall, a security plugin or a Cloudflare rule may block it; allow POST to /wp-json/broadcast/, or set a webhook on another site)';
 			}
 			$err = 'set_webhook: ' . self::why( $hook ) . $hint;
 			if ( 1 !== $st || $reached ) {

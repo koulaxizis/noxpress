@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, mailerlite
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -78,6 +78,9 @@ The plugin reads the feed of the channel's «long videos» list, where YouTube d
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.4 =
+* New: Viber → «Webhook on another site». When a firewall or CDN you do not control keeps Viber away from this site, set_webhook can point at any https address that answers 200 (e.g. Broadcast on another site). Posts still leave from this site; only the signed-callback note is lost.
 
 = 1.0.3 =
 * New: when Viber cannot reach the webhook at /wp-json/broadcast/v1/viber (status 1, no call reached the site), «Connect to Viber» tries the same route as /?rest_route=/broadcast/v1/viber, for hosts whose firewall or CDN keeps callers away from /wp-json/.

@@ -22,6 +22,7 @@
  *  - p_skip_bf     bool   products: skip titles imported by Book Feed (on)
  *  - p_skip_hidden bool   products: skip categories Hide Catalog hides (on)
  *  - nl_link       string newsletter: fixed link for every campaign, or ''
+ *  - vb_hook       string viber: webhook URL on another site, or '' (this site)
  *  - nl_preview    bool   newsletter: use the campaign's preview_url
  *  - yt_channels   str[]  youtube: channel ids UC + 22 characters (max 5)
  *  - yt_shorts     bool   youtube: include Shorts (off)
@@ -99,6 +100,7 @@ final class BRC_Settings {
 			'dg_hour'       => 18,
 			'dg_max'        => 10,
 			'dg_url'        => '',
+			'vb_hook'       => '',
 		);
 		foreach ( self::default_templates() as $src => $tpl ) {
 			$d[ 'tpl_' . $src ] = $tpl;
@@ -223,6 +225,7 @@ final class BRC_Settings {
 
 		$s['nl_link'] = self::clean_url( isset( $raw['nl_link'] ) ? $raw['nl_link'] : '' );
 		$s['dg_url']  = self::clean_url( isset( $raw['dg_url'] ) ? $raw['dg_url'] : '' );
+		$s['vb_hook'] = self::clean_url( isset( $raw['vb_hook'] ) ? $raw['vb_hook'] : '' );
 
 		$s['yt_channels'] = array();
 		foreach ( isset( $raw['yt_channels'] ) && is_array( $raw['yt_channels'] ) ? $raw['yt_channels'] : array() as $c ) {
