@@ -219,8 +219,9 @@ private fun ItemCard(row: JSONObject, busy: Boolean, onSend: () -> Unit, onEdit:
 /** A post's picture, read once over https and scaled down; nothing when it fails. */
 @Composable
 private fun RemoteImage(url: String) {
-    val bmp by produceState<Bitmap?>(null, url) {
-        value = withContext(Dispatchers.IO) { runCatching { fetch(url) }.getOrNull() }
+    val bmp by produceState<Bitmap?>(initialValue = null, url) {
+        val loaded = withContext(Dispatchers.IO) { runCatching { fetch(url) }.getOrNull() }
+        this.value = loaded
     }
     bmp?.let {
         Image(
