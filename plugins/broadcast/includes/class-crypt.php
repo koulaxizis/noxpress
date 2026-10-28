@@ -2,8 +2,9 @@
 /**
  * BRC_Crypt — sealed secrets (Bible §12, 1.42).
  *
- * Secrets: the Viber channel token and the newsletter webhook secret.
- * A constant in wp-config.php wins (BRC_VIBER_TOKEN, BRC_MAILERLITE_SECRET)
+ * Secrets: the Viber channel token, the newsletter webhook secret and the
+ * Instagram token. A constant in wp-config.php wins (BRC_VIBER_TOKEN,
+ * BRC_MAILERLITE_SECRET, BRC_INSTAGRAM_TOKEN)
  * and the settings page says so. Otherwise the secret is kept in the
  * option brc_secret_<name> (autoload off), sealed with AES-256-GCM under a
  * key made from the salts in wp-config.php, so a copy of the database
@@ -20,6 +21,7 @@ final class BRC_Crypt {
 	const SECRETS = array(
 		'viber'      => 'BRC_VIBER_TOKEN',
 		'mailerlite' => 'BRC_MAILERLITE_SECRET',
+		'instagram'  => 'BRC_INSTAGRAM_TOKEN',
 	);
 
 	public static function available(): bool {

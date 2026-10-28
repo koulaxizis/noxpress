@@ -20,6 +20,7 @@ final class BRC_Template {
 			'products'   => array( 'title', 'url', 'price', 'preorder', 'excerpt', 'category', 'site' ),
 			'newsletter' => array( 'title', 'url', 'recipients', 'date', 'site' ),
 			'youtube'    => array( 'title', 'url', 'date', 'site' ),
+			'instagram'  => array( 'text', 'url', 'date', 'site' ),
 			'queue'      => array( 'text', 'url', 'site' ),
 			'digest'     => array( 'count', 'list', 'url', 'site' ),
 		);

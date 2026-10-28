@@ -59,6 +59,7 @@ final class BRC_Admin_UI {
 			'products'   => __( 'Νέα προϊόντα', 'broadcast' ),
 			'newsletter' => __( 'Newsletter', 'broadcast' ),
 			'youtube'    => __( 'YouTube', 'broadcast' ),
+			'instagram'  => __( 'Instagram', 'broadcast' ),
 			'queue'      => __( 'Ουρά αναρτήσεων', 'broadcast' ),
 			'digest'     => __( 'Εβδομαδιαίο digest Book Feed', 'broadcast' ),
 			'viber'      => __( 'Viber Channel', 'broadcast' ),
@@ -226,6 +227,9 @@ final class BRC_Admin_UI {
 		}
 		if ( $src_on && ! BRC_Settings::destinations() ) {
 			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Καμία πηγή δεν έχει πού να στείλει: ενεργοποίησε έναν προορισμό (Viber Channel) στα Modules.', 'broadcast' ) . '</p></div>';
+		}
+		if ( BRC_Settings::module( 'instagram' ) && Broadcast::load_source( 'instagram' ) && BRC_Src_Instagram::expiring() ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Το token του Instagram λήγει μέσα σε 7 ημέρες και δεν ανανεώθηκε. Βάλε νέο token στις Πηγές → Instagram.', 'broadcast' ) . '</p></div>';
 		}
 		if ( BRC_Settings::trial_due() ) {
 			?>
@@ -561,6 +565,7 @@ final class BRC_Admin_UI {
 			'products'   => __( 'Κάθε νέο προϊόν που δημοσιεύεται, με φίλτρο κατηγοριών. Οι τίτλοι του Book Feed μένουν έξω από προεπιλογή.', 'broadcast' ),
 			'newsletter' => __( 'Όταν σταλεί μια καμπάνια στο MailerLite (webhook campaign.sent), ανάρτηση με τον τίτλο και σύνδεσμο. Το orOS Newsletter θα έρθει από το ίδιο σημείο.', 'broadcast' ),
 			'youtube'    => __( 'Νέα βίντεο από τα κανάλια YouTube που ορίζεις, χωρίς κλειδί API. Τα Shorts μένουν έξω από προεπιλογή.', 'broadcast' ),
+			'instagram'  => __( 'Νέες αναρτήσεις του λογαριασμού Instagram σου (Business ή Creator), μέσω δικής σου εφαρμογής Meta. Μόνο φωτογραφίες από προεπιλογή.', 'broadcast' ),
 			'queue'      => __( 'Αναρτήσεις που ετοιμάζει μια ρουτίνα (π.χ. μέσω Site Bridge) ή εσύ, και φεύγουν όταν πατήσεις «Δημοσιεύτηκε».', 'broadcast' ),
 			'digest'     => __( 'Ένα μήνυμα την εβδομάδα με τους νέους τίτλους άλλων εκδοτών από το Book Feed, αντί για ένα ανά τίτλο.', 'broadcast' ),
 			'viber'      => __( 'Αναρτήσεις σε ένα Viber Channel μέσω του Channels Post API, με το token του καναλιού.', 'broadcast' ),
@@ -599,10 +604,6 @@ final class BRC_Admin_UI {
 						<?php endif; ?>
 					</div>
 				<?php endforeach; ?>
-				<div class="brc-mod is-soon">
-					<h3><?php esc_html_e( 'Instagram', 'broadcast' ); ?> <?php echo self::badge( __( 'Σύντομα', 'broadcast' ), 'muted' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?></h3>
-					<p><?php esc_html_e( 'Νέες αναρτήσεις του λογαριασμού Instagram σου (Business), μέσω δικής σου εφαρμογής Meta.', 'broadcast' ); ?></p>
-				</div>
 			</div>
 
 			<h2 class="brc-h2"><?php esc_html_e( 'Προορισμοί', 'broadcast' ); ?></h2>
@@ -709,6 +710,64 @@ final class BRC_Admin_UI {
 		);
 	}
 
+	private static function render_instagram( array $s, array $notes ): void {
+		Broadcast::load_source( 'instagram' );
+		$meta = BRC_Src_Instagram::meta();
+		?>
+		<h2 class="brc-h2"><?php esc_html_e( 'Instagram', 'broadcast' ); ?></h2>
+		<?php self::off_notice( 'instagram' ); ?>
+		<div class="brc-zone">
+			<ol>
+				<li><?php esc_html_e( 'Ο λογαριασμός Instagram πρέπει να είναι Business ή Creator.', 'broadcast' ); ?></li>
+				<li><?php esc_html_e( 'Στο developers.facebook.com: My Apps → Create app, τύπος Business. Στο app: Instagram → API setup with Instagram login.', 'broadcast' ); ?></li>
+				<li><?php esc_html_e( 'Στο «Generate access tokens» πρόσθεσε τον λογαριασμό σου, πάτα «Generate token» και αντέγραψε το token εδώ:', 'broadcast' ); ?></li>
+			</ol>
+			<input type="password" name="brc_ig_token" class="brc-wide" autocomplete="new-password" spellcheck="false" placeholder="<?php esc_attr_e( 'Token του Instagram', 'broadcast' ); ?>" />
+			<?php self::secret_state( 'instagram' ); ?>
+			<?php if ( ! empty( $meta['username'] ) && 'none' !== BRC_Crypt::state( 'instagram' ) ) : ?>
+				<p>
+					<?php echo self::badge( __( 'Συνδέθηκε', 'broadcast' ), 'ok' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?>
+					<strong>@<?php echo esc_html( (string) $meta['username'] ); ?></strong>
+					<?php
+					if ( ! empty( $meta['exp'] ) && ! BRC_Crypt::from_constant( 'instagram' ) ) {
+						/* translators: %s: date */
+						echo esc_html( sprintf( __( '· το token λήγει %s και ανανεώνεται μόνο του', 'broadcast' ), wp_date( get_option( 'date_format' ), (int) $meta['exp'] ) ) );
+					}
+					?>
+				</p>
+			<?php endif; ?>
+			<?php if ( ! empty( $meta['refresh_error'] ) ) : ?>
+				<p class="brc-warn">
+					<?php
+					/* translators: %s: error from Instagram */
+					echo esc_html( sprintf( __( 'Η ανανέωση του token απέτυχε (%s). Ξαναδοκιμάζει αύριο· αν λήξει, βάλε νέο token.', 'broadcast' ), (string) $meta['refresh_error'] ) );
+					?>
+				</p>
+			<?php endif; ?>
+			<?php
+			self::checkbox( 'brc_ig_tags', $s['ig_tags'], __( 'Χωρίς τα hashtags στο τέλος της λεζάντας', 'broadcast' ) );
+			self::checkbox( 'brc_ig_reels', $s['ig_reels'], __( 'Μαζί με βίντεο και Reels (με την εικόνα εξωφύλλου)', 'broadcast' ) );
+			self::number( 'brc_ig_every', $s['ig_every'], 15, 120, __( 'Έλεγχος κάθε', 'broadcast' ), __( 'λεπτά', 'broadcast' ) );
+			?>
+			<p class="description"><?php esc_html_e( 'Στον πρώτο έλεγχο οι αναρτήσεις που υπάρχουν απλώς σημειώνονται· αναρτώνται μόνο οι νέες. Τα Stories δεν αναρτώνται.', 'broadcast' ); ?></p>
+			<?php
+			if ( ! empty( $notes['ig_poll'] ) ) {
+				$st = isset( $notes['ig_state'] ) ? (string) $notes['ig_state'] : '';
+				/* translators: %s: date and time */
+				$line = sprintf( __( 'Τελευταίος έλεγχος: %s', 'broadcast' ), self::when( (int) $notes['ig_poll'] ) );
+				if ( 'ok' !== $st && '' !== $st ) {
+					$line .= ' · ' . $st;
+				}
+				echo '<p class="description">' . esc_html( $line ) . '</p>';
+			}
+			if ( BRC_Settings::module( 'instagram' ) && 'none' !== BRC_Crypt::state( 'instagram' ) ) {
+				echo '<button type="submit" name="brc_action" value="ig_now" class="button">' . esc_html__( 'Έλεγχος τώρα', 'broadcast' ) . '</button>';
+			}
+			?>
+		</div>
+		<?php
+	}
+
 	private static function render_sources(): void {
 		$s     = BRC_Settings::get();
 		$notes = BRC_Queue::notes();
@@ -812,6 +871,8 @@ final class BRC_Admin_UI {
 				?>
 			</div>
 
+			<?php self::render_instagram( $s, $notes ); ?>
+
 			<?php if ( Broadcast::woo() ) : ?>
 				<h2 class="brc-h2"><?php esc_html_e( 'Εβδομαδιαίο digest Book Feed', 'broadcast' ); ?></h2>
 				<?php self::off_notice( 'digest' ); ?>
@@ -871,8 +932,11 @@ final class BRC_Admin_UI {
 					<?php echo self::badge( __( 'Συνδέθηκε', 'broadcast' ), 'ok' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?>
 					<strong><?php echo esc_html( (string) $acc['channel'] ); ?></strong>
 					<?php
-					/* translators: %d: number of subscribers */
-					echo esc_html( sprintf( __( '· %d συνδρομητές', 'broadcast' ), (int) $acc['subs'] ) );
+					// Viber gives 0 for some channels: no number then.
+					if ( (int) $acc['subs'] > 0 ) {
+						/* translators: %d: number of subscribers */
+						echo esc_html( sprintf( __( '· %d συνδρομητές', 'broadcast' ), (int) $acc['subs'] ) );
+					}
 					?>
 				</p>
 				<p class="description">
@@ -1067,6 +1131,19 @@ final class BRC_Admin_UI {
 				}
 				self::redirect( 'sources', $msgs );
 				break;
+			case 'ig_now':
+				$msgs = self::do_save_sources();
+				if ( BRC_Settings::module( 'instagram' ) && Broadcast::load_source( 'instagram' ) ) {
+					BRC_Src_Instagram::maybe_poll( true );
+					$notes  = BRC_Queue::notes();
+					$state  = isset( $notes['ig_state'] ) ? (string) $notes['ig_state'] : '';
+					$msgs[] = 'ok' === $state
+						? self::msg( 'success', __( 'Ο έλεγχος του Instagram έγινε.', 'broadcast' ) )
+						/* translators: %s: error */
+						: self::msg( 'error', sprintf( __( 'Ο έλεγχος του Instagram απέτυχε: %s', 'broadcast' ), $state ) );
+				}
+				self::redirect( 'sources', $msgs );
+				break;
 			case 'save_templates':
 				$s = BRC_Settings::get();
 				foreach ( array_keys( BRC_Settings::default_templates() ) as $src ) {
@@ -1228,7 +1305,27 @@ final class BRC_Admin_UI {
 			$msgs[] = self::msg( 'warning', __( 'Κρατήθηκαν τα πρώτα 5 κανάλια.', 'broadcast' ) );
 		}
 
+		$s['ig_tags']  = '1' === self::post( 'brc_ig_tags' );
+		$s['ig_reels'] = '1' === self::post( 'brc_ig_reels' );
+		$s['ig_every'] = (int) self::post( 'brc_ig_every' );
+
 		BRC_Settings::save( $s );
+
+		$ig = trim( self::post( 'brc_ig_token' ) );
+		if ( '' !== $ig ) {
+			if ( ! preg_match( '/^[A-Za-z0-9_.|-]{20,600}$/', $ig ) ) {
+				$msgs[] = self::msg( 'error', __( 'Το token δεν μοιάζει με token του Instagram. Δεν κρατήθηκε.', 'broadcast' ) );
+			} elseif ( ! BRC_Crypt::put( 'instagram', $ig ) ) {
+				$msgs[] = self::msg( 'error', __( 'Το token δεν αποθηκεύτηκε: λείπει το OpenSSL (aes-256-gcm). Βάλ\' το ως σταθερά στο wp-config.php.', 'broadcast' ) );
+			} else {
+				Broadcast::load_source( 'instagram' );
+				$r = BRC_Src_Instagram::check( true );
+				/* translators: %s: Instagram username */
+				$msgs[] = $r['ok'] ? self::msg( 'success', sprintf( __( '✓ Το token αποθηκεύτηκε σφραγισμένο: λογαριασμός @%s.', 'broadcast' ), $r['username'] ) )
+					/* translators: %s: error from Instagram */
+					: self::msg( 'error', sprintf( __( 'Το token αποθηκεύτηκε, αλλά το Instagram δεν το δέχτηκε: %s', 'broadcast' ), $r['error'] ) );
+			}
+		}
 		return $msgs;
 	}
 
@@ -1274,8 +1371,12 @@ final class BRC_Admin_UI {
 		$r = BRC_Viber::connect();
 		if ( $r['ok'] ) {
 			$acc = BRC_Viber::account();
-			/* translators: 1: channel name, 2: number of subscribers */
-			return self::msg( 'success', sprintf( __( '✓ Συνδέθηκε με το κανάλι «%1$s» (%2$d συνδρομητές).', 'broadcast' ), (string) $acc['channel'], (int) $acc['subs'] ) );
+			if ( (int) $acc['subs'] > 0 ) {
+				/* translators: 1: channel name, 2: number of subscribers */
+				return self::msg( 'success', sprintf( __( '✓ Συνδέθηκε με το κανάλι «%1$s» (%2$d συνδρομητές).', 'broadcast' ), (string) $acc['channel'], (int) $acc['subs'] ) );
+			}
+			/* translators: %s: channel name */
+			return self::msg( 'success', sprintf( __( '✓ Συνδέθηκε με το κανάλι «%s».', 'broadcast' ), (string) $acc['channel'] ) );
 		}
 		/* translators: %s: error from Viber */
 		return self::msg( 'error', sprintf( __( '✗ Η σύνδεση απέτυχε: %s', 'broadcast' ), $r['error'] ) );
