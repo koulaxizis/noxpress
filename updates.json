@@ -145,15 +145,15 @@
     },
     "live-operator": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.\n* The availability is worked out on every check, so it is right even when WP-Cron runs late; one WP-Cron event at the next change only sends the notifications.",
+        "published": "2026-10-28",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "43249d31cb229701f056f761fb8a7fdfebb8f970c56266c93c40db0d412d176d",
-        "signature": "NRloSkJk9FqhCSFMfs7MSeBnrXgw7CLpTYM9rZzrW7qxCh4XqQtfPWlgzqCpQLY9ohQ/PDhd5srUx70JbhM9Aw==",
+        "sha256": "3e10cfdeb08ec4faac4fa6535aaad4f517b0958dd32ad254c8ccc868f9ddc8e4",
+        "signature": "XBQXqCTcjMC+cLrWyFt7vW7pSwhL/vbPqrxrJaxeM355NQQI91WkuBPU7V9+Zlh9nykx6BwxgHWldOabifmxDQ==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.2.0/live-operator.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.0/live-operator.zip"
       }
     },
     "oros-connect": {
