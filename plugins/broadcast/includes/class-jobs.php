@@ -5,7 +5,8 @@
  *
  * Hooks:
  *  - brc_tick           every 5 minutes while a module is on: posts due
- *                       items, checks YouTube, the weekly digest, retention
+ *                       items, checks YouTube and Instagram, the weekly
+ *                       digest, retention
  *  - brc_run            one extra run soon after something was queued
  *  - brc_product_check  ( product id ): a product published p_delay
  *                       minutes ago is checked and queued (products module)
@@ -174,6 +175,9 @@ final class BRC_Jobs {
 				if ( BRC_Settings::module( 'youtube' ) && time() - $start < self::BUDGET && Broadcast::load_source( 'youtube' ) ) {
 					BRC_Src_Youtube::maybe_poll();
 				}
+				if ( BRC_Settings::module( 'instagram' ) && time() - $start < self::BUDGET && Broadcast::load_source( 'instagram' ) ) {
+					BRC_Src_Instagram::maybe_poll();
+				}
 				if ( BRC_Settings::module( 'digest' ) && time() - $start < self::BUDGET && Broadcast::load_source( 'digest' ) ) {
 					BRC_Src_Digest::maybe_run();
 				}
@@ -220,6 +224,9 @@ final class BRC_Jobs {
 			'result' => 'unknown destination',
 			'reason' => 'dest',
 		);
+		if ( 'instagram' === $row['source'] && Broadcast::load_source( 'instagram' ) ) {
+			$row['msg'] = BRC_Src_Instagram::fresh( $row['msg'], $row['skey'] );
+		}
 		if ( 'viber' === $row['dest'] ) {
 			require_once BRC_PATH . 'includes/class-viber.php';
 			$r = BRC_Viber::post( $row['msg'] );

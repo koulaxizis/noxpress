@@ -15,6 +15,7 @@
  *  broadcast/queue-list  items waiting, newest first (read)
  *  broadcast/queue-send  posts one waiting item now, optionally with an
  *                        edited text (= «Δημοσιεύτηκε»)
+ *  broadcast/queue-reject drops one waiting item (= «Απόρριψη»)
  *  broadcast/status      mode, modules, the Viber connection, counts (read)
  */
 
@@ -57,7 +58,7 @@ final class BRC_Src_Queue {
 			'default'              => array(),
 		);
 		$defs = array(
-			'queue-add'  => array(
+			'queue-add'    => array(
 				'label'       => 'Broadcast: add a post to the queue',
 				'description' => 'Adds a post that waits in the queue until the owner presses «Δημοσιεύτηκε»; it is never posted on its own. "text" is the post (up to 2000 characters), "url" a link, "image_url" (https) or "attachment_id" an image of the media library, "ref" a key that makes the call safe to repeat (the same ref is never added twice).',
 				'input'       => array(
@@ -82,14 +83,14 @@ final class BRC_Src_Queue {
 				'ann'         => array( false, false, true ),
 				'run'         => array( __CLASS__, 'add' ),
 			),
-			'queue-list' => array(
+			'queue-list'   => array(
 				'label'       => 'Broadcast: items waiting',
 				'description' => 'Items waiting in the queue (any source), newest first: id, source, title, text, url, image, why it waits (approval, brake, publish, unsure) and when it was added. Changes nothing.',
 				'input'       => $none,
 				'ann'         => array( true, false, true ),
 				'run'         => array( __CLASS__, 'pending' ),
 			),
-			'queue-send' => array(
+			'queue-send'   => array(
 				'label'       => 'Broadcast: post a waiting item now',
 				'description' => 'Posts one waiting item now (the «Δημοσιεύτηκε» / approve button), optionally with an edited "text". In test mode nothing leaves the site.',
 				'input'       => array(
@@ -107,7 +108,21 @@ final class BRC_Src_Queue {
 				'ann'         => array( false, false, true ),
 				'run'         => array( __CLASS__, 'send' ),
 			),
-			'status'     => array(
+			'queue-reject' => array(
+				'label'       => 'Broadcast: drop a waiting item',
+				'description' => 'Drops one waiting item (the «Απόρριψη» button): it is never posted and stays in the history as rejected.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id' => array( 'type' => 'integer' ),
+					),
+					'required'             => array( 'id' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, true, true ),
+				'run'         => array( __CLASS__, 'reject' ),
+			),
+			'status'       => array(
 				'label'       => 'Broadcast: status',
 				'description' => 'Mode (test, live, off), modules on, the Viber channel (name, subscribers, connected), items per status, the last newsletter hook, YouTube check and brake. Changes nothing; no secrets.',
 				'input'       => $none,
@@ -252,6 +267,16 @@ final class BRC_Src_Queue {
 		);
 	}
 
+	/** @return array|WP_Error */
+	public static function reject( $in = null ) {
+		$in = is_array( $in ) ? $in : array();
+		$id = isset( $in['id'] ) ? (int) $in['id'] : 0;
+		if ( ! BRC_Queue::reject( $id ) ) {
+			return new WP_Error( 'brc_state', 'No waiting item with this id.' );
+		}
+		return array( 'id' => $id, 'status' => 'rejected' );
+	}
+
 	public static function status( $in = null ): array {
 		$s      = BRC_Settings::get();
 		$counts = array();
@@ -279,6 +304,7 @@ final class BRC_Src_Queue {
 			'counts'     => $counts,
 			'newsletter' => $t( 'nl_hook' ),
 			'youtube'    => $t( 'yt_poll' ),
+			'instagram'  => $t( 'ig_poll' ),
 			'brake'      => $t( 'brake' ),
 		);
 	}

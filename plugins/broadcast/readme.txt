@@ -1,15 +1,15 @@
 === Broadcast ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: viber, channel, announcements, youtube, mailerlite
+Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos and posts you prepare. A queue with approval, one template per source, no duplicates, a full history.
+Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos, new Instagram posts and posts you prepare. A queue with approval, one template per source, no duplicates, a full history.
 
 == Description ==
 
@@ -20,7 +20,8 @@ Broadcast routes events from sources to destinations through one queue. Every so
 * New products (WooCommerce): every product that becomes published, checked a few minutes later so fixes made right after publishing are in the post. Category filter (in / out, with subcategories), product types, only with an image. Other publishers' titles imported by Book Feed and categories hidden by Hide Catalog are left out by default. Pre-orders from Pre-Orders show their release date.
 * Newsletter: MailerLite's «campaign.sent» webhook, accepted only with a valid signature, posts the campaign's name and a link you choose. orOS Newsletter will use the same route.
 * YouTube: new videos of up to five channels from their public feeds, no API key. Shorts are left out by default (the channel's «long videos» list), with a switch to include them and a separate switch for live streams.
-* Post queue: posts prepared by a routine (for example Claude through Site Bridge, with the broadcast/queue-add ability) or by you in the admin. They wait until you press «Published», on a screen that works on a phone.
+* Instagram: new posts of your Business or Creator account through the Instagram API, with a token from your own Meta app (no app review for your own account). Checked every 30 minutes, so no webhook has to reach the site. Photos and albums by default, videos and Reels with a switch; hashtags at the end of the caption removed by default. The token renews itself every month.
+* Post queue: posts prepared by a routine (for example Claude through Site Bridge, with the broadcast/queue-add ability; queue-list, queue-send and queue-reject let an app work the queue) or by you in the admin. They wait until you press «Published», on a screen that works on a phone.
 * Weekly Book Feed digest (off by default): one message a week with the new titles of other publishers, instead of one post per title.
 
 **Destination**
@@ -36,7 +37,7 @@ Broadcast routes events from sources to destinations through one queue. Every so
 * A brake per source (5 an hour, 20 a day by default): a bulk publish waits for approval instead of flooding the channel.
 * The first time a source runs, what already exists is only noted: nothing old is posted.
 * Posting happens in the background (Action Scheduler or WP-Cron), with three retries, and never during a visitor's request. Nothing runs on the front end.
-* The Viber token and the webhook secret are sealed with the salts of wp-config.php (or set as constants), never exported and never shown in the history.
+* The Viber token, the webhook secret and the Instagram token are sealed with the salts of wp-config.php (or set as constants), never exported and never shown in the history.
 * `define( 'BRC_DISABLE', true );` in wp-config.php stops every source, every post and every webhook.
 * History with filters and a CSV export (Excel Greek or standard), kept 90 days by default.
 * Settings export / import (without the secrets).
@@ -78,6 +79,11 @@ The plugin reads the feed of the channel's «long videos» list, where YouTube d
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: module «Instagram» (source, off by default). New posts of your Instagram account (Business or Creator) through the Instagram API with Instagram Login and a token from your own Meta app, read every 30 minutes (15–120). Photos and albums by default; videos and Reels with a switch. Hashtags at the end of the caption are removed by default. A caption too long for a picture post is cut at a word so the picture and the link stay. The image is asked for again just before posting, since Instagram image links expire. The token is sealed and renewed every month; the admin warns 7 days before it expires.
+* New: ability broadcast/queue-reject (drops a waiting item), for the Site Bridge app.
+* Changed: the Viber connection no longer shows «0 subscribers» when Viber does not report the number.
 
 = 1.0.4 =
 * New: Viber → «Webhook on another site». When a firewall or CDN you do not control keeps Viber away from this site, set_webhook can point at any https address that answers 200 (e.g. Broadcast on another site). Posts still leave from this site; only the signed-callback note is lost.

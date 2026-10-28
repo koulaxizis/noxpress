@@ -28,6 +28,9 @@
  *  - yt_shorts     bool   youtube: include Shorts (off)
  *  - yt_live       bool   youtube: include live streams (off)
  *  - yt_every      int    youtube: minutes between checks (15–120, 30)
+ *  - ig_reels      bool   instagram: also videos and Reels (off)
+ *  - ig_tags       bool   instagram: remove the hashtags at the end (on)
+ *  - ig_every      int    instagram: minutes between checks (15–120, 30)
  *  - dg_day        int    digest: 0 (Sunday) – 6 (Saturday), 5
  *  - dg_hour       int    digest: 0–23, 18
  *  - dg_max        int    digest: titles listed (1–20, 10)
@@ -44,10 +47,10 @@ final class BRC_Settings {
 	const OPT = 'brc_settings';
 
 	/** All modules: sources then destinations. */
-	const MODULES = array( 'products', 'newsletter', 'youtube', 'queue', 'digest', 'viber' );
+	const MODULES = array( 'products', 'newsletter', 'youtube', 'instagram', 'queue', 'digest', 'viber' );
 
 	/** Sources whose items may wait for approval. */
-	const APPROVABLE = array( 'products', 'newsletter', 'youtube', 'digest' );
+	const APPROVABLE = array( 'products', 'newsletter', 'youtube', 'instagram', 'digest' );
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -60,6 +63,7 @@ final class BRC_Settings {
 				'products'   => "Νέο στο κατάστημα: {title}\n{price}{preorder}\n{url}",
 				'newsletter' => "📬 Νέο newsletter: {title}\n{url}",
 				'youtube'    => "🎬 {title}\n{url}",
+				'instagram'  => "{text}\n{url}",
 				'queue'      => "{text}\n{url}",
 				'digest'     => "📚 {count} νέοι τίτλοι από άλλους εκδότες\n{list}\n{url}",
 			);
@@ -68,6 +72,7 @@ final class BRC_Settings {
 			'products'   => "New in the shop: {title}\n{price}{preorder}\n{url}",
 			'newsletter' => "📬 New newsletter: {title}\n{url}",
 			'youtube'    => "🎬 {title}\n{url}",
+			'instagram'  => "{text}\n{url}",
 			'queue'      => "{text}\n{url}",
 			'digest'     => "📚 {count} new titles from other publishers\n{list}\n{url}",
 		);
@@ -96,6 +101,9 @@ final class BRC_Settings {
 			'yt_shorts'     => false,
 			'yt_live'       => false,
 			'yt_every'      => 30,
+			'ig_reels'      => false,
+			'ig_tags'       => true,
+			'ig_every'      => 30,
 			'dg_day'        => 5,
 			'dg_hour'       => 18,
 			'dg_max'        => 10,
@@ -219,7 +227,7 @@ final class BRC_Settings {
 		}
 		$s['p_types'] = array_slice( array_values( array_unique( $s['p_types'] ) ), 0, 20 );
 
-		foreach ( array( 'p_image', 'p_skip_bf', 'p_skip_hidden', 'nl_preview', 'yt_shorts', 'yt_live' ) as $k ) {
+		foreach ( array( 'p_image', 'p_skip_bf', 'p_skip_hidden', 'nl_preview', 'yt_shorts', 'yt_live', 'ig_reels', 'ig_tags' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 
@@ -235,6 +243,7 @@ final class BRC_Settings {
 		}
 		$s['yt_channels'] = array_slice( array_values( array_unique( $s['yt_channels'] ) ), 0, 5 );
 		$s['yt_every']    = self::int_in( $raw, 'yt_every', 15, 120, $d['yt_every'] );
+		$s['ig_every']    = self::int_in( $raw, 'ig_every', 15, 120, $d['ig_every'] );
 
 		$s['dg_day']  = self::int_in( $raw, 'dg_day', 0, 6, $d['dg_day'] );
 		$s['dg_hour'] = self::int_in( $raw, 'dg_hour', 0, 23, $d['dg_hour'] );
