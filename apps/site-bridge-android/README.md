@@ -1,6 +1,6 @@
 # Site Bridge — Android app
 
-Opens and closes the **write window** of the sites of a Site Bridge Hub from your phone, and shows the Hub's log. From 1.2.0 it has a **Book Feed** tab (sync, rules, ISBN lookup and import as a draft, notifications) on sites that have Book Feed 1.11.0+. Design: Noxpress Bible §21 and §13; notes/android-app/03-book-feed-app.md.
+Opens and closes the **write window** of the sites of a Site Bridge Hub from your phone, and shows the Hub's log. From 1.2.0 it has a **Book Feed** tab (sync, rules, ISBN lookup and import as a draft, notifications) on sites that have Book Feed 1.11.0+, and from 1.6.0 a **Broadcast** tab (the posts waiting in the queue: send, edit, reject, notifications) on sites with Broadcast 1.1.0+ and Site Bridge 1.11.0+. Design: Noxpress Bible §21 and §13; notes/android-app/03-book-feed-app.md.
 
 Works with Claude. Not made by or affiliated with Anthropic.
 
@@ -31,7 +31,7 @@ To remove a phone, revoke it in the Hub's App tab, or use **Disconnect** in the 
 On pairing the app makes two ECDSA P-256 keys in the Android Keystore and sends only their public parts:
 
 * **read** — status, log and closing a window; no prompt.
-* **act** — opening or renewing a window, and every plugin action that changes a site (Book Feed: sync, stop, rules, import). The Keystore signs with it only right after a fingerprint (or, from Android 11, the screen lock), once per signature. Adding a fingerprint cancels it, and the app asks to pair again.
+* **act** — opening or renewing a window, and every plugin action that changes a site (Book Feed: sync, stop, rules, import; Broadcast: send, reject). The Keystore signs with it only right after a fingerprint (or, from Android 11, the screen lock), once per signature. Adding a fingerprint cancels it, and the app asks to pair again.
 
 Each request carries `X-SBA-Device`, `X-SBA-Ts`, `X-SBA-Nonce`, `X-SBA-Key` and `X-SBA-Sig`, the signature of
 
@@ -47,7 +47,7 @@ The Hub accepts ±300 s and each nonce once. See `plugins/site-bridge/includes/c
 
 Rule preview (1.3.0): `book-feed/rule-preview` with the read key; the dialog shows it only while its fields are the ones it was made for.
 
-Notifications: WorkManager, about once an hour, `book-feed/notices` with the read key for each site with Book Feed; the first look only sets the starting time.
+Notifications: WorkManager, about once an hour, `book-feed/notices` with the read key for each site with Book Feed; the first look only sets the starting time. Broadcast (1.6.0, on by default): `broadcast/queue-list` with the read key for each site with Broadcast, one notification when items with a higher id than the last look wait.
 
 ## Build
 

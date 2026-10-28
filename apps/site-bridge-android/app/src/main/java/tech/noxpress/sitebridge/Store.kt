@@ -14,6 +14,9 @@ import android.content.SharedPreferences
  *  bf_notify  Book Feed notifications on
  *  bf_sites   sites with Book Feed, "id\tlabel" per line (for the worker)
  *  bf_since_<site>  the Hub time the last notices were read up to
+ *  br_notify  Broadcast notifications on (1.6.0, on by default)
+ *  br_sites   sites with Broadcast, like bf_sites
+ *  br_seen_<site>  the highest queue item id the notifications looked at
  *  upd_at / upd_ver / upd_url  the last look for a newer app (1.4.0)
  *  upd_notified  the version the update notification already told (1.5.0)
  *  upd_asked  the notification permission was asked once for updates (1.5.0)
@@ -67,6 +70,21 @@ class Store(context: Context) {
 
     fun setBfSince(site: String, v: Long) {
         p.edit().putLong("bf_since_$site", v).apply()
+    }
+
+    var brNotify: Boolean
+        get() = p.getBoolean("br_notify", true)
+        set(v) = p.edit().putBoolean("br_notify", v).apply()
+
+    /** Sites with Broadcast: id to label. */
+    var brSites: Map<String, String>
+        get() = (p.getString("br_sites", "") ?: "").lines().filter { '\t' in it }.associate { it.substringBefore('\t') to it.substringAfter('\t') }
+        set(v) = p.edit().putString("br_sites", v.entries.joinToString("\n") { it.key + "\t" + it.value.replace('\n', ' ').replace('\t', ' ') }).apply()
+
+    fun brSeen(site: String): Int = p.getInt("br_seen_$site", 0)
+
+    fun setBrSeen(site: String, v: Int) {
+        p.edit().putInt("br_seen_$site", v).apply()
     }
 
     var updAt: Long

@@ -138,4 +138,32 @@
     <string name="update_get">Λήψη</string>
     <string name="update_channel">Ενημερώσεις εφαρμογής</string>
     <string name="update_tap">Πάτα για λήψη του υπογεγραμμένου APK.</string>
+    <string name="br_waiting">Σε αναμονή για ανάρτηση</string>
+    <string name="br_empty">Τίποτα δεν περιμένει στην ουρά.</string>
+    <string name="br_mode_test">Λειτουργία δοκιμής: η αποστολή σημειώνει «Δοκιμή» και τίποτα δεν φτάνει στο κανάλι.</string>
+    <string name="br_mode_off">Το Broadcast είναι ανενεργό σε αυτό το site: δεν αναρτάται τίποτα.</string>
+    <string name="br_mode_live">Ενεργό: η αποστολή αναρτά στο κανάλι.</string>
+    <string name="br_mode_live_to">Ενεργό: η αποστολή αναρτά στο «%1$s».</string>
+    <string name="br_r_approval">χρειάζεται έγκριση</string>
+    <string name="br_r_brake">φρένο: πολλές αναρτήσεις</string>
+    <string name="br_r_publish">περιμένει «Δημοσιεύτηκε»</string>
+    <string name="br_r_unsure">ίσως Short</string>
+    <string name="br_s_products">Νέο προϊόν</string>
+    <string name="br_s_queue">Ουρά αναρτήσεων</string>
+    <string name="br_s_digest">Digest Book Feed</string>
+    <string name="br_send">Αποστολή</string>
+    <string name="br_reject">Απόρριψη</string>
+    <string name="br_edit_title">Κείμενο της ανάρτησης</string>
+    <string name="br_reject_confirm">Απόρριψη του «%1$s»; Δεν θα αναρτηθεί.</string>
+    <string name="br_confirm_send">Broadcast: αποστολή της ανάρτησης</string>
+    <string name="br_confirm_reject">Broadcast: απόρριψη της ανάρτησης</string>
+    <string name="br_sent">Στάλθηκε: φεύγει μέσα σε ένα λεπτό.</string>
+    <string name="br_sent_test">Λειτουργία δοκιμής: σημειώθηκε «Δοκιμή», τίποτα δεν έφυγε από το site.</string>
+    <string name="br_rejected">Απορρίφθηκε.</string>
+    <string name="br_notify">Ειδοποιήσεις</string>
+    <string name="br_notify_help">Περίπου μία φορά την ώρα, όταν νέες αναρτήσεις περιμένουν στην ουρά.</string>
+    <plurals name="br_n_waiting">
+        <item quantity="one">%1$d νέα ανάρτηση περιμένει</item>
+        <item quantity="other">%1$d νέες αναρτήσεις περιμένουν</item>
+    </plurals>
 </resources>

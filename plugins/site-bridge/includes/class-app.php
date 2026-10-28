@@ -7,6 +7,8 @@
  * shows the Hub's log. From 1.7.0 it also runs the abilities of a short
  * allow-list per plugin (MODULES, e.g. Book Feed), through the Hub's own
  * ability_run, so each site keeps applying its level and its window.
+ * From 1.11.0 also Broadcast's queue: the waiting items, send (with an
+ * edited text) and reject.
  *
  * REST routes (namespace site-bridge/v1), only while the Hub role and the
  * "Mobile app" switch are on (404 otherwise):
@@ -73,6 +75,15 @@ final class SBR_App {
 				'book-feed/rule-save'    => 'write',
 				'book-feed/rule-delete'  => 'write',
 				'book-feed/import'       => 'write',
+			),
+		),
+		'broadcast' => array(
+			'probe'     => 'broadcast/queue-reject',
+			'abilities' => array(
+				'broadcast/queue-list'   => 'read',
+				'broadcast/status'       => 'read',
+				'broadcast/queue-send'   => 'write',
+				'broadcast/queue-reject' => 'write',
 			),
 		),
 	);

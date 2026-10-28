@@ -1,5 +1,10 @@
 # Site Bridge app — changelog
 
+## 1.6.0
+
+* New: a **Broadcast** tab on sites with Site Bridge 1.11.0+ and Broadcast 1.1.0+ (post queue module on). It lists the posts waiting in the queue, with their picture, source and why they wait. **Send** posts one now, **Edit** changes its text and sends it, **Reject** drops it; each asks for the fingerprint (act key), and a closed write window is opened for 15 minutes first when the site allows it. In test mode the tab says so and nothing reaches the channel.
+* New: Broadcast notifications, on by default: about once an hour (`broadcast/queue-list`, read key) one notification per site when new posts wait. The first look only sets the starting point. A switch at the end of the tab turns them off.
+
 ## 1.5.0
 
 * New: a notification for a newer signed app, also while the app is closed. WorkManager looks at the `nox-sba-*` releases every 12 hours; each new version is told once, and a tap (or "Download") downloads its APK in the browser. Android 13+ asks for the notification permission once, at the first start of this version.
