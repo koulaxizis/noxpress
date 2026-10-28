@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* New: Viber → «Webhook on another site». When a firewall or CDN you do not control keeps Viber away from this site, set_webhook can point at any https address that answers 200 (e.g. Broadcast on another site). Posts still leave from this site; only the signed-callback note is lost.",
+        "changelog": "* New: module «Instagram» (source, off by default). New posts of your Instagram account (Business or Creator) through the Instagram API with Instagram Login and a token from your own Meta app, read every 30 minutes (15–120). Photos and albums by default; videos and Reels with a switch. Hashtags at the end of the caption are removed by default. A caption too long for a picture post is cut at a word so the picture and the link stay. The image is asked for again just before posting, since Instagram image links expire. The token is sealed and renewed every month; the admin warns 7 days before it expires.\n* New: ability broadcast/queue-reject (drops a waiting item), for the Site Bridge app.\n* Changed: the Viber connection no longer shows «0 subscribers» when Viber does not report the number.",
         "published": "2026-10-28",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "9408983737c021995b1b9fea717707016c6c09f7ea9aef3bf7bc8edb03002b48",
-        "signature": "N3HKusEImgUjKsSTr53nkCFtBpNwdQi9yOJKURPEmKF4LjIhSVloy3QNk7ErTVwk2BVnf/3DIWMTG/O4fZEYAA==",
+        "sha256": "1356cbb638b0f6fc75d6fb703008ef3e467bd5df2045e4c7ebfceb389243aa84",
+        "signature": "ah4cxKEY8MDRWmoKwXMVNg2LBXpbrLVUiU8sTP54eOBkys7dTVp3oay+h8p0WFp5qnxUluyCNMUQ88wuwTCwBA==",
         "tested_wp": "7.1",
-        "version": "1.0.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.0.4/broadcast.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.0/broadcast.zip"
       }
     },
     "checkout-extras": {
