@@ -886,7 +886,7 @@ final class BRC_Admin_UI {
 					}
 					?>
 				</p>
-				<?php if ( isset( $acc['hook'] ) && ! in_array( $acc['hook'], array( BRC_Viber::webhook_url(), BRC_Viber::webhook_url_alt() ), true ) ) : ?>
+				<?php if ( isset( $acc['hook'] ) && ! in_array( $acc['hook'], array( BRC_Viber::webhook_url(), BRC_Viber::webhook_url_alt(), BRC_Viber::webhook_custom() ), true ) ) : ?>
 					<p class="brc-warn"><?php esc_html_e( 'Η διεύθυνση του site άλλαξε από τη σύνδεση: πάτησε ξανά «Σύνδεση με το Viber».', 'broadcast' ); ?></p>
 				<?php endif; ?>
 			<?php else : ?>
@@ -902,7 +902,10 @@ final class BRC_Admin_UI {
 				<input type="password" name="brc_vb_token" class="brc-wide" autocomplete="new-password" spellcheck="false" placeholder="<?php esc_attr_e( 'Token του καναλιού', 'broadcast' ); ?>" />
 				<?php self::secret_state( 'viber' ); ?>
 				<p class="description"><?php esc_html_e( 'Webhook του site (το δηλώνει η σύνδεση):', 'broadcast' ); ?></p>
-				<?php self::copy_field( rest_url( 'broadcast/v1/viber' ) ); ?>
+				<?php self::copy_field( '' !== BRC_Viber::webhook_custom() ? BRC_Viber::webhook_custom() : rest_url( 'broadcast/v1/viber' ) ); ?>
+				<label><?php esc_html_e( 'Webhook σε άλλο site (προαιρετικό):', 'broadcast' ); ?><br />
+				<input type="url" name="brc_vb_hook" class="brc-wide" value="<?php echo esc_attr( BRC_Viber::webhook_custom() ); ?>" placeholder="https://…" /></label>
+				<p class="description"><?php esc_html_e( 'Μόνο αν το Viber δεν φτάνει σε αυτό το site (firewall ή Cloudflare που δεν ελέγχεις). Το Viber θέλει απλώς μια διεύθυνση https που απαντά 200 σε POST, π.χ. https://άλλο-site/wp-json/broadcast/v1/viber σε ένα site με ενεργό το Broadcast και το module Viber Channel. Οι αναρτήσεις φεύγουν πάντα από εδώ. Άδειο = αυτό το site.', 'broadcast' ); ?></p>
 				<p class="brc-submit">
 					<button type="submit" name="brc_action" value="vb_connect" class="button button-primary"<?php disabled( ! BRC_Settings::module( 'viber' ) ); ?>><?php esc_html_e( 'Σύνδεση με το Viber', 'broadcast' ); ?></button>
 					<button type="submit" name="brc_action" value="vb_save" class="button"><?php esc_html_e( 'Αποθήκευση token', 'broadcast' ); ?></button>
@@ -1081,10 +1084,10 @@ final class BRC_Admin_UI {
 				self::redirect( 'templates', array( self::msg( 'success', __( 'Τα πρότυπα επανήλθαν στα αρχικά.', 'broadcast' ) ) ) );
 				break;
 			case 'vb_save':
-				self::redirect( 'viber', self::do_token() );
+				self::redirect( 'viber', array_merge( self::do_hook(), self::do_token() ) );
 				break;
 			case 'vb_connect':
-				$msgs = self::do_token();
+				$msgs   = array_merge( self::do_hook(), self::do_token() );
 				$msgs[] = self::do_connect();
 				self::redirect( 'viber', $msgs );
 				break;
@@ -1227,6 +1230,25 @@ final class BRC_Admin_UI {
 
 		BRC_Settings::save( $s );
 		return $msgs;
+	}
+
+	/** Saves the optional webhook on another site (Viber form). */
+	private static function do_hook(): array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route().
+		if ( ! isset( $_POST['brc_vb_hook'] ) ) {
+			return array();
+		}
+		$raw = trim( self::post( 'brc_vb_hook' ) );
+		$url = BRC_Settings::clean_url( $raw );
+		if ( '' !== $raw && '' === $url ) {
+			return array( self::msg( 'error', __( 'Το webhook πρέπει να είναι διεύθυνση https. Δεν κρατήθηκε.', 'broadcast' ) ) );
+		}
+		$s = BRC_Settings::get();
+		if ( $s['vb_hook'] !== $url ) {
+			$s['vb_hook'] = $url;
+			BRC_Settings::save( $s );
+		}
+		return array();
 	}
 
 	private static function do_token(): array {
