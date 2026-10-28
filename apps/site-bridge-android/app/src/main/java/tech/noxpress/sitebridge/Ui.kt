@@ -116,6 +116,7 @@ fun SiteBridgeApp(
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit,
     bf: BfActions,
+    br: BrActions,
 ) {
     val scheme = darkColorScheme(
         primary = Nx.accent,
@@ -146,6 +147,8 @@ fun SiteBridgeApp(
                     val tabs = buildList {
                         add("sites" to R.string.tab_sites)
                         if (ui.sites.any { "book-feed" in it.modules }) add("bf" to R.string.tab_bf)
+                        // Broadcast: Site Bridge 1.11.0 and Broadcast 1.1.0 (queue module on) on the site.
+                        if (ui.sites.any { "broadcast" in it.modules }) add("br" to R.string.tab_br)
                         add("log" to R.string.tab_log)
                         add("settings" to R.string.tab_settings)
                     }
@@ -158,6 +161,7 @@ fun SiteBridgeApp(
                                     ui.tab = key
                                     if (key == "log") onLog(ui.logSite)
                                     if (key == "bf") bf.load(ui.bfSite)
+                                    if (key == "br") br.load(ui.brSite)
                                 },
                                 text = { Text(stringResource(label), maxLines = 1) },
                             )
@@ -166,6 +170,7 @@ fun SiteBridgeApp(
                     when (tabs[at].first) {
                         "sites" -> SitesScreen(ui, store, onRefresh, onPick, onOpen, onClose)
                         "bf" -> BookFeedScreen(ui, bf)
+                        "br" -> BroadcastScreen(ui, br)
                         "log" -> LogScreen(ui, onLog)
                         else -> SettingsScreen(ui, store, onTile, onDisconnect)
                     }

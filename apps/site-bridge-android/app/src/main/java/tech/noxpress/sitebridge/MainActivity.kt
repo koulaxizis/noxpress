@@ -34,7 +34,7 @@ import kotlin.coroutines.resumeWithException
 /** What the screens show. */
 class UiState {
     var paired by mutableStateOf(false)
-    /** sites | bf | log | settings */
+    /** sites | bf | br | log | settings */
     var tab by mutableStateOf("sites")
     var busy by mutableStateOf(false)
     var message by mutableStateOf<String?>(null)
@@ -55,6 +55,12 @@ class UiState {
     var bfIsbn by mutableStateOf<JSONObject?>(null)
     var bfPreview by mutableStateOf<JSONObject?>(null)
     var bfNotify by mutableStateOf(false)
+
+    // Broadcast tab (1.6.0)
+    var brSite by mutableStateOf("")
+    var brStatus by mutableStateOf<JSONObject?>(null)
+    var brItems by mutableStateOf<List<JSONObject>>(emptyList())
+    var brNotify by mutableStateOf(false)
     var update by mutableStateOf<Updates.Found?>(null)
 }
 
@@ -75,6 +81,11 @@ class MainActivity : FragmentActivity() {
         if (!granted) ui.message = getString(R.string.bf_notify_denied)
     }
 
+    private val askBrNotify = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        setBrNotify(granted)
+        if (!granted) ui.message = getString(R.string.bf_notify_denied)
+    }
+
     // Asked once (1.5.0), for the new-version notification; a "no" is final here.
     private val askUpdateNotify = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
@@ -86,8 +97,10 @@ class MainActivity : FragmentActivity() {
         ui.picked = store.minutes
         ui.tileSite = store.tileSite
         ui.bfNotify = store.bfNotify && Notify.allowed(this)
+        ui.brNotify = store.brNotify && Notify.allowed(this)
         pendingTileOpen = intent?.action == ACTION_TILE_OPEN
         if (intent?.action == Notify.ACTION_BF) ui.tab = "bf"
+        if (intent?.action == Notify.ACTION_BR) ui.tab = "br"
         UpdateNotice.schedule(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !store.updAsked && !Notify.allowed(this)) {
             store.updAsked = true
@@ -121,6 +134,16 @@ class MainActivity : FragmentActivity() {
                     notify = ::askNotifications,
                     preview = ::bfPreview,
                 ),
+                br = BrActions(
+                    load = ::brLoad,
+                    send = { id, text ->
+                        val input = JSONObject().put("id", id)
+                        if (text != null) input.put("text", text)
+                        brAct("broadcast/queue-send", input, R.string.br_confirm_send)
+                    },
+                    reject = { id -> brAct("broadcast/queue-reject", JSONObject().put("id", id), R.string.br_confirm_reject) },
+                    notify = ::askBrNotifications,
+                ),
             )
         }
     }
@@ -132,6 +155,7 @@ class MainActivity : FragmentActivity() {
             refresh()
         }
         if (intent.action == Notify.ACTION_BF && ui.paired) ui.tab = "bf"
+        if (intent.action == Notify.ACTION_BR && ui.paired) ui.tab = "br"
     }
 
     override fun onResume() {
@@ -206,6 +230,16 @@ class MainActivity : FragmentActivity() {
             ui.bfRules = emptyList()
         }
         if (bf.isEmpty() && ui.tab == "bf") ui.tab = "sites"
+        val br = sites.filter { "broadcast" in it.modules }
+        store.brSites = br.associate { it.id to it.label }
+        if (br.none { it.id == ui.brSite }) {
+            ui.brSite = br.firstOrNull()?.id ?: ""
+            ui.brStatus = null
+            ui.brItems = emptyList()
+        }
+        if (br.isEmpty() && ui.tab == "br") ui.tab = "sites"
+        // On by default (design 02, 13); the worker does nothing without a site.
+        Notify.scheduleBr(this, br.isNotEmpty() && store.brNotify && Notify.allowed(this))
         if (pendingTileOpen) {
             pendingTileOpen = false
             sites.firstOrNull { it.id == store.tileSite && it.canOpen }?.let { setWindow(it, ui.picked) }
@@ -380,6 +414,64 @@ class MainActivity : FragmentActivity() {
         return (0 until a.length()).map { a.optString(it) }.filter { it.isNotEmpty() }
     }
 
+    /* ----- Broadcast ----- */
+
+    private fun brLoad(site: String) {
+        if (site.isEmpty()) return
+        if (site != ui.brSite) {
+            ui.brSite = site
+            ui.brStatus = null
+            ui.brItems = emptyList()
+        }
+        call { brFetch(site) }
+    }
+
+    private suspend fun brFetch(site: String) {
+        ui.brStatus = api.ability(site, "broadcast/status", JSONObject(), null).result
+        val items = list(api.ability(site, "broadcast/queue-list", JSONObject(), null).result, "items")
+        ui.brItems = items
+        // What the app just showed is not news for the hourly notice.
+        val top = items.maxOfOrNull { it.optInt("id") } ?: 0
+        if (top > store.brSeen(site)) store.setBrSeen(site, top)
+    }
+
+    /** Send or reject: fingerprint first (the act key), then a fresh list. */
+    private fun brAct(name: String, input: JSONObject, prompt: Int) {
+        val site = ui.brSite
+        if (site.isEmpty()) return
+        val label = ui.sites.firstOrNull { it.id == site }?.label ?: site
+        call {
+            val signer: suspend (String) -> String = { m -> actSignAs(getString(prompt), m) }
+            val r = api.ability(site, name, input, signer)
+            val done = if (name == "broadcast/queue-reject") {
+                getString(R.string.br_rejected)
+            } else if (ui.brStatus?.optString("mode") == "test") {
+                getString(R.string.br_sent_test)
+            } else {
+                getString(R.string.br_sent)
+            }
+            ui.message = if (r.windowOpened > 0) done + "\n" + getString(R.string.bf_window_opened, label, Ui.time(r.windowOpened)) else done
+            brFetch(site)
+            if (r.windowOpened > 0) refreshNow()
+        }
+    }
+
+    private fun askBrNotifications(on: Boolean) {
+        if (on && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            askBrNotify.launch(Manifest.permission.POST_NOTIFICATIONS)
+            return
+        }
+        setBrNotify(on)
+    }
+
+    private fun setBrNotify(on: Boolean) {
+        store.brNotify = on
+        ui.brNotify = on
+        Notify.scheduleBr(this, on && store.brSites.isNotEmpty())
+    }
+
     /* ----- Log, tile, disconnect ----- */
 
     private fun loadLog(site: String) {
@@ -408,10 +500,12 @@ class MainActivity : FragmentActivity() {
                 // The Hub may be unreachable or the device already revoked: forget locally anyway.
             }
             Notify.schedule(this@MainActivity, false)
+            Notify.scheduleBr(this@MainActivity, false)
             Keys.delete()
             store.clear()
             ui.paired = false
             ui.bfNotify = false
+            ui.brNotify = false
             ui.sites = emptyList()
             ui.log = emptyList()
             ui.tileSite = ""

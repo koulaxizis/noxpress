@@ -17,8 +17,8 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-sba-<versionName>.
-        versionCode = 7
-        versionName = "1.5.0"
+        versionCode = 8
+        versionName = "1.6.0"
     }
 
     signingConfigs {

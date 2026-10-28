@@ -141,4 +141,34 @@
     <string name="update_get">Download</string>
     <string name="update_channel">App updates</string>
     <string name="update_tap">Tap to download the signed APK.</string>
+    <string name="tab_br" translatable="false">Broadcast</string>
+    <string name="br_channel" translatable="false">Broadcast</string>
+    <string name="br_waiting">Waiting to be posted</string>
+    <string name="br_empty">Nothing waits in the queue.</string>
+    <string name="br_mode_test">Test mode: sending marks the post «Test» and nothing reaches the channel.</string>
+    <string name="br_mode_off">Broadcast is off on this site: nothing is posted.</string>
+    <string name="br_mode_live">Live: sending posts to the channel.</string>
+    <string name="br_mode_live_to">Live: sending posts to «%1$s».</string>
+    <string name="br_r_approval">needs approval</string>
+    <string name="br_r_brake">brake: many posts</string>
+    <string name="br_r_publish">waits for «Published»</string>
+    <string name="br_r_unsure">maybe a Short</string>
+    <string name="br_s_products">New product</string>
+    <string name="br_s_queue">Post queue</string>
+    <string name="br_s_digest">Book Feed digest</string>
+    <string name="br_send">Send</string>
+    <string name="br_reject">Reject</string>
+    <string name="br_edit_title">Text of the post</string>
+    <string name="br_reject_confirm">Reject “%1$s”? It will not be posted.</string>
+    <string name="br_confirm_send">Broadcast: send the post</string>
+    <string name="br_confirm_reject">Broadcast: reject the post</string>
+    <string name="br_sent">Sent: it goes out within a minute.</string>
+    <string name="br_sent_test">Test mode: marked «Test», nothing left the site.</string>
+    <string name="br_rejected">Rejected.</string>
+    <string name="br_notify">Notifications</string>
+    <string name="br_notify_help">About once an hour, when new posts wait in the queue.</string>
+    <plurals name="br_n_waiting">
+        <item quantity="one">%1$d new post waits</item>
+        <item quantity="other">%1$d new posts wait</item>
+    </plurals>
 </resources>
