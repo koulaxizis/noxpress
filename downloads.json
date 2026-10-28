@@ -1,6 +1,6 @@
 {
   "display": 500,
-  "total": 503,
+  "total": 505,
   "offset": 5,
   "updated": "2026-10-28",
   "assets": {
@@ -582,7 +582,7 @@
     },
     "677638513": {
       "file": "nox-pq-1.1.0/publishing-quote.zip",
-      "count": 2
+      "count": 3
     },
     "677638635": {
       "file": "nox-po-1.1.0/pre-orders.zip",
@@ -662,6 +662,10 @@
     },
     "684873502": {
       "file": "nox-br-1.1.1/broadcast.zip",
+      "count": 1
+    },
+    "685971457": {
+      "file": "nox-lo-1.3.0/live-operator.zip",
       "count": 0
     }
   }
