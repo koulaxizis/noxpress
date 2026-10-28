@@ -1,6 +1,6 @@
 {
-  "display": 250,
-  "total": 499,
+  "display": 500,
+  "total": 503,
   "offset": 5,
   "updated": "2026-10-28",
   "assets": {
@@ -654,10 +654,14 @@
     },
     "683371598": {
       "file": "nox-sba-1.6.0/site-bridge.apk",
-      "count": 0
+      "count": 4
     },
     "683371602": {
       "file": "nox-sba-1.6.0/site-bridge.apk.sha256",
+      "count": 0
+    },
+    "684873502": {
+      "file": "nox-br-1.1.1/broadcast.zip",
       "count": 0
     }
   }
