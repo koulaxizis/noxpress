@@ -1,6 +1,6 @@
 {
   "display": 250,
-  "total": 495,
+  "total": 499,
   "offset": 5,
   "updated": "2026-10-28",
   "assets": {
@@ -578,7 +578,7 @@
     },
     "677638349": {
       "file": "nox-sb-1.8.0/site-bridge.zip",
-      "count": 3
+      "count": 4
     },
     "677638513": {
       "file": "nox-pq-1.1.0/publishing-quote.zip",
@@ -646,10 +646,18 @@
     },
     "683340995": {
       "file": "nox-br-1.1.0/broadcast.zip",
-      "count": 1
+      "count": 2
     },
     "683365180": {
       "file": "nox-sb-1.11.0/site-bridge.zip",
+      "count": 2
+    },
+    "683371598": {
+      "file": "nox-sba-1.6.0/site-bridge.apk",
+      "count": 0
+    },
+    "683371602": {
+      "file": "nox-sba-1.6.0/site-bridge.apk.sha256",
       "count": 0
     }
   }
