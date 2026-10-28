@@ -273,15 +273,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: Access → \"No window for abilities that only add something that waits\" (off by default). With level write or above, the abilities on that list run through `ability_run` while the write window is closed, so a daily routine can prepare posts without anyone opening the window. The list has one ability: `broadcast/queue-add` (Broadcast 1.0.0), whose posts wait for «Published» on the site. The write scope is still needed, and every call is in the history as before.",
-        "published": "2026-10-27",
+        "changelog": "* New: the mobile app can work Broadcast's queue (Broadcast 1.1.0 with its post queue module on): `broadcast/queue-list` and `broadcast/status` with the read key, `broadcast/queue-send` (send, optionally with an edited text) and `broadcast/queue-reject` with the act key (fingerprint). As with Book Feed, a closed write window is opened for 15 minutes first when the site lets the Hub open it.",
+        "published": "2026-10-28",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "49677f45eb350ba129e8f62c6f47454461757e280eca998c0ea065b4d759c054",
-        "signature": "5X0P2HTlgWtNDjmRLeG+gqill6DLrQbLdAzvvjumWakLXw05SOKIJ3u/LRGzsyhA80vKltc3CTYuDKA7Y6Y5Bg==",
+        "sha256": "210f2f6eac7f549453988332cce4058f1edad1a67ebf59758b8e8d438ea34c10",
+        "signature": "OJh8bQtOaeTKgNnpl/6k3ANW6HcFWPPWdAzcI7gKEtQxJasPD14qMaHFj9594I8gKz29y/RDNnepzZwo7zihAg==",
         "tested_wp": "7.1",
-        "version": "1.10.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.10.0/site-bridge.zip"
+        "version": "1.11.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
