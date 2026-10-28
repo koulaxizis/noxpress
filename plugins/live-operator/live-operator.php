@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Live Operator
  * Plugin URI:           https://noxpress.tech
- * Description:          Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server (με αυτόματο offline), ειδοποιήσεις push για κάθε νέο αίτημα και μήνυμα, και εφαρμογή για ανάληψη και απαντήσεις, που μπαίνει στην αρχική οθόνη ή ανοίγει από την εφαρμογή Android. Χωρίς Firebase και χωρίς λογαριασμό σε τρίτους.
- * Version:              1.2.0
+ * Description:          Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server (με αυτόματο offline), ειδοποιήσεις push για κάθε νέο αίτημα και μήνυμα, και εφαρμογή για ανάληψη και απαντήσεις, που μπαίνει στην αρχική οθόνη ή ανοίγει από την εφαρμογή Android. Με εβδομαδιαίο ωράριο που σε κάνει online μόνο του. Χωρίς Firebase και χωρίς λογαριασμό σε τρίτους.
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -25,6 +25,9 @@
  *  - LOP_Purio     → everything read from PurioChat Pro's Live Chat
  *  - LOP_Presence  → the server-side online / offline switch, automatic
  *                    offline (lop_state, WP-Cron lop_auto_offline)
+ *  - LOP_Schedule  → the weekly schedule: windows in the site's time zone,
+ *                    closed dates, pause (lop_schedule, lop_sched_state,
+ *                    WP-Cron lop_schedule_tick for the notifications)
  *  - LOP_Crypt     → sealed private key (Bible §12)
  *  - LOP_Web_Push  → Web Push protocol: RFC 8291 encryption, RFC 8292 VAPID
  *  - LOP_Push      → keys, subscriptions (user meta lop_push), the
@@ -62,7 +65,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LOP_VERSION', '1.2.0' );
+define( 'LOP_VERSION', '1.3.0' );
 define( 'LOP_FILE', __FILE__ );
 define( 'LOP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LOP_URL', plugin_dir_url( __FILE__ ) );
@@ -78,6 +81,7 @@ require_once LOP_PATH . 'includes/class-crypt.php';
 require_once LOP_PATH . 'includes/class-web-push.php';
 require_once LOP_PATH . 'includes/class-push.php';
 require_once LOP_PATH . 'includes/class-presence.php';
+require_once LOP_PATH . 'includes/class-schedule.php';
 require_once LOP_PATH . 'includes/class-rest.php';
 require_once LOP_PATH . 'includes/class-app.php';
 
@@ -95,6 +99,7 @@ final class Live_Operator {
 
 		if ( ! self::killed() ) {
 			LOP_Presence::init();
+			LOP_Schedule::init();
 			LOP_Push::init();
 			LOP_REST::init();
 		}
@@ -116,10 +121,12 @@ final class Live_Operator {
 		LOP_App::rules();
 		flush_rewrite_rules( false );
 		update_option( 'lop_rules', LOP_VERSION, true );
+		LOP_Schedule::reschedule();
 	}
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( LOP_Presence::CRON );
+		wp_clear_scheduled_hook( LOP_Schedule::CRON );
 		delete_option( 'lop_rules' );
 		// Our rules are still registered in this request: let WordPress
 		// rebuild them on the next one, without the plugin. PurioChat's own
