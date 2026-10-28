@@ -28,6 +28,7 @@ final class BRC_Admin_UI {
 	const NONCE_FIELD = 'brc_nonce';
 	const NONCE_BAK   = 'brc_backup';
 	const NONCE_CSV   = 'brc_csv';
+	const NONCE_IMG   = 'brc_img';
 	const MAX_IMPORT  = 262144;
 	const PER_PAGE    = 50;
 
@@ -357,7 +358,7 @@ final class BRC_Admin_UI {
 					</div>
 					<div class="brc-item-body">
 						<?php if ( '' !== $it['msg']['image'] ) : ?>
-							<img class="brc-thumb" src="<?php echo esc_url( $it['msg']['image'] ); ?>" alt="" loading="lazy" />
+							<img class="brc-thumb" src="<?php echo esc_url( self::thumb_src( $it ) ); ?>" alt="" loading="lazy" />
 						<?php endif; ?>
 						<div class="brc-item-text">
 							<strong><?php echo esc_html( $it['title'] ); ?></strong>
@@ -1432,6 +1433,77 @@ final class BRC_Admin_UI {
 			}
 			self::csv();
 		}
+		if ( '' !== self::q( 'brc_img' ) ) {
+			if ( ! wp_verify_nonce( self::q( '_wpnonce' ), self::NONCE_IMG ) || ! current_user_can( Broadcast::cap() ) ) {
+				status_header( 403 );
+				exit;
+			}
+			self::image( absint( self::q( 'brc_img' ) ) );
+		}
+	}
+
+	/**
+	 * The queue thumbnail. Instagram's CDN refuses to be shown inside other
+	 * sites (Cross-Origin-Resource-Policy), so its pictures go through image().
+	 */
+	private static function thumb_src( array $it ): string {
+		if ( 'instagram' !== $it['source'] ) {
+			return $it['msg']['image'];
+		}
+		return add_query_arg(
+			array(
+				'page'     => self::SLUG,
+				'brc_img'  => (int) $it['id'],
+				'_wpnonce' => wp_create_nonce( self::NONCE_IMG ),
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/** Streams an Instagram item's picture, read on the server; asks for a fresh link once when the stored one has expired. */
+	private static function image( int $id ): void {
+		$it  = $id ? BRC_Queue::get( $id ) : null;
+		$img = $it && 'instagram' === $it['source'] ? self::fetch_image( $it['msg']['image'] ) : null;
+		if ( $it && ! $img && Broadcast::load_source( 'instagram' ) ) {
+			$msg = BRC_Src_Instagram::fresh( $it['msg'], (string) $it['skey'] );
+			$img = $msg['image'] !== $it['msg']['image'] ? self::fetch_image( $msg['image'] ) : null;
+		}
+		if ( ! $img ) {
+			status_header( 404 );
+			exit;
+		}
+		header( 'Content-Type: ' . $img['type'] );
+		header( 'Cache-Control: private, max-age=3600' );
+		header( 'X-Content-Type-Options: nosniff' );
+		echo $img['body']; // phpcs:ignore WordPress.Security.EscapeOutput -- image bytes with a checked image type.
+		exit;
+	}
+
+	/** @return array{type:string,body:string}|null Only from Instagram's CDN hosts, only images, at most 8 MB. */
+	private static function fetch_image( string $url ): ?array {
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+		if ( 0 !== strpos( $url, 'https://' ) || ! preg_match( '/(^|\.)(cdninstagram\.com|fbcdn\.net)$/i', $host ) ) {
+			return null;
+		}
+		$r = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout'             => 10,
+				'limit_response_size' => 8 * MB_IN_BYTES,
+			)
+		);
+		if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
+			return null;
+		}
+		$type = strtolower( trim( explode( ';', (string) wp_remote_retrieve_header( $r, 'content-type' ) )[0] ) );
+		$body = (string) wp_remote_retrieve_body( $r );
+		if ( ! in_array( $type, array( 'image/jpeg', 'image/png', 'image/webp', 'image/gif' ), true ) || '' === $body ) {
+			return null;
+		}
+		return array(
+			'type' => $type,
+			'body' => $body,
+		);
 	}
 
 	/** Formula guard for text cells (Bible §5). */

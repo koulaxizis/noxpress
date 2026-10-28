@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -79,6 +79,10 @@ The plugin reads the feed of the channel's «long videos» list, where YouTube d
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fixed: Instagram pictures showed as broken in the Queue, because Instagram's CDN does not let other sites show its images. The Queue now reads them on the server (only from Instagram's own hosts, only images) and asks for a fresh link once when the stored one has expired.
+* Changed: the default Instagram template is «{text}» without the link to the Instagram post, since the Viber post already carries the picture and the caption. Saved templates stay as they are.
 
 = 1.1.0 =
 * New: module «Instagram» (source, off by default). New posts of your Instagram account (Business or Creator) through the Instagram API with Instagram Login and a token from your own Meta app, read every 30 minutes (15–120). Photos and albums by default; videos and Reels with a switch. Hashtags at the end of the caption are removed by default. A caption too long for a picture post is cut at a word so the picture and the link stay. The image is asked for again just before posting, since Instagram image links expire. The token is sealed and renewed every month; the admin warns 7 days before it expires.

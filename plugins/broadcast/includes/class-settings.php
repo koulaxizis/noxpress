@@ -63,7 +63,7 @@ final class BRC_Settings {
 				'products'   => "Νέο στο κατάστημα: {title}\n{price}{preorder}\n{url}",
 				'newsletter' => "📬 Νέο newsletter: {title}\n{url}",
 				'youtube'    => "🎬 {title}\n{url}",
-				'instagram'  => "{text}\n{url}",
+				'instagram'  => '{text}',
 				'queue'      => "{text}\n{url}",
 				'digest'     => "📚 {count} νέοι τίτλοι από άλλους εκδότες\n{list}\n{url}",
 			);
@@ -72,7 +72,7 @@ final class BRC_Settings {
 			'products'   => "New in the shop: {title}\n{price}{preorder}\n{url}",
 			'newsletter' => "📬 New newsletter: {title}\n{url}",
 			'youtube'    => "🎬 {title}\n{url}",
-			'instagram'  => "{text}\n{url}",
+			'instagram'  => '{text}',
 			'queue'      => "{text}\n{url}",
 			'digest'     => "📚 {count} new titles from other publishers\n{list}\n{url}",
 		);
