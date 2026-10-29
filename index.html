@@ -1086,6 +1086,7 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="sb_li2">Each site decides: off, read, write or admin, plus a write window that only the owner opens for 15 minutes up to 12 hours</li>
 			<li data-i18n="sb_li3">33 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates</li>
 			<li data-i18n="sb_li4">Never PHP, shell or file writes; secrets always come back as ***, personal data masked by default, every call in an audit log on the Hub and the site</li>
+			<li data-i18n="sb_li6">Android app: open, renew or close the write window with your fingerprint, and work Book Feed and the Broadcast queue from your phone. Optionally, abilities that only add something that waits for you (Broadcast’s queue) run without opening the window</li>
 			<li data-i18n="sb_li5">Remote administrator access: install it only on sites you own, keep them at read and open the window only while you work. Bilingual UI and shared «Noxpress» menu</li>
 		</ul>
 		</details>
@@ -1184,6 +1185,45 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+</section>
+
+<section class="plugins" id="apps">
+	<div class="section-title" data-i18n="apps_title">Android apps</div>
+
+	<article class="card" id="site-bridge-app">
+		<h2><a href="#site-bridge-app">Site Bridge app</a></h2>
+		<div class="meta">v1.6.0 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="sba_desc">The Site Bridge Hub in your pocket: open the write window of your sites with your fingerprint only while you work, and handle Book Feed and Broadcast from your phone. It talks only to your own Hub; no account, no Firebase, no analytics.</p>
+		<ul>
+			<li data-i18n="sba_li1">Open, renew or close the write window per site, with a fingerprint for every opening, and the Hub’s log on the phone</li>
+			<li data-i18n="sba_li2">Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+)</li>
+			<li data-i18n="sba_li3">Broadcast tab: the posts waiting in the queue, to send, edit or reject, with a notification for each new one (Broadcast 1.1.0+, Site Bridge 1.11.0+)</li>
+			<li data-i18n="sba_li4">Pair with a QR code from the Hub; device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak</li>
+			<li data-i18n="sba_li5">Updates: a notice in the app, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Site Bridge app</code>)</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sba-1.6.0/site-bridge.apk" rel="nofollow noopener" data-i18n="sba_download">Download v1.6.0 (.apk)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/site-bridge-android#readme" rel="noopener" data-i18n="apps_guide">Install guide</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
+	<article class="card" id="live-operator-app">
+		<h2><a href="#live-operator-app">Live Operator app</a></h2>
+		<div class="meta">v1.3.0 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="loa_desc">The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. The official APK is built for glarolykoi.net; for your own site, build it with your site’s address (two Gradle properties) or add the page to your home screen as a web app.</p>
+		<ul>
+			<li data-i18n="loa_li1">Trusted Web Activity of the plugin’s /live-operator/ page, verified with Digital Asset Links from the plugin’s settings, so there is no address bar</li>
+			<li data-i18n="loa_li2">Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb</li>
+			<li data-i18n="loa_li3">Little code of its own (Google’s androidbrowserhelper); no Firebase, no analytics</li>
+			<li data-i18n="loa_li4">Updates: a notice on the page, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Live Operator app</code>)</li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/tree/main/apps/live-operator-android#readme" rel="noopener" data-i18n="apps_build">Build guide</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/live-operator-android" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
 </section>
 
 <section class="plugins" id="support">
@@ -1502,6 +1542,7 @@ footer .heart { color: var(--accent-bright); }
 		sb_li2: 'Each site decides: off, read, write or admin, plus a write window that only the owner opens for 15 minutes up to 12 hours',
 		sb_li3: '33 tools: settings, read-only SQL, REST, page HTML, files, logs, cron and site health; content, options, media and caches; plugin and theme installs and updates',
 		sb_li4: 'Never PHP, shell or file writes; secrets always come back as ***, personal data masked by default, every call in an audit log on the Hub and the site',
+		sb_li6: 'Android app: open, renew or close the write window with your fingerprint, and work Book Feed and the Broadcast queue from your phone. Optionally, abilities that only add something that waits for you (Broadcast’s queue) run without opening the window',
 		sb_li5: 'Remote administrator access: install it only on sites you own, keep them at read and open the window only while you work. Bilingual UI and shared «Noxpress» menu',
 		sb_download: 'Download v1.11.0 (.zip)',
 		lo_desc: 'The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.',
@@ -1568,6 +1609,21 @@ footer .heart { color: var(--accent-bright); }
 		up_btn: 'Follow on Ko-fi',
 		up_note: 'Following is free. Ko-fi is the only place for noxpress news.',
 		ft_supporters: 'Supporters',
+		apps_title: 'Android apps',
+		apps_guide: 'Install guide',
+		apps_build: 'Build guide',
+		sba_desc: 'The Site Bridge Hub in your pocket: open the write window of your sites with your fingerprint only while you work, and handle Book Feed and Broadcast from your phone. It talks only to your own Hub; no account, no Firebase, no analytics.',
+		sba_li1: 'Open, renew or close the write window per site, with a fingerprint for every opening, and the Hub’s log on the phone',
+		sba_li2: 'Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+)',
+		sba_li3: 'Broadcast tab: the posts waiting in the queue, to send, edit or reject, with a notification for each new one (Broadcast 1.1.0+, Site Bridge 1.11.0+)',
+		sba_li4: 'Pair with a QR code from the Hub; device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak',
+		sba_li5: 'Updates: a notice in the app, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Site Bridge app</code>)',
+		sba_download: 'Download v1.6.0 (.apk)',
+		loa_desc: 'The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. The official APK is built for glarolykoi.net; for your own site, build it with your site’s address (two Gradle properties) or add the page to your home screen as a web app.',
+		loa_li1: 'Trusted Web Activity of the plugin’s /live-operator/ page, verified with Digital Asset Links from the plugin’s settings, so there is no address bar',
+		loa_li2: 'Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb',
+		loa_li3: 'Little code of its own (Google’s androidbrowserhelper); no Firebase, no analytics',
+		loa_li4: 'Updates: a notice on the page, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Live Operator app</code>)',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
@@ -1809,6 +1865,7 @@ footer .heart { color: var(--accent-bright); }
 		sb_li2: 'Κάθε site αποφασίζει: κλειστό, ανάγνωση, εγγραφή ή διαχείριση, και παράθυρο εγγραφής που ανοίγει μόνο ο ιδιοκτήτης, από 15 λεπτά έως 12 ώρες',
 		sb_li3: '33 εργαλεία: ρυθμίσεις, SQL μόνο για ανάγνωση, REST, HTML σελίδων, αρχεία, logs, cron και site health· περιεχόμενο, options, πολυμέσα και caches· εγκατάσταση και ενημέρωση plugins και θεμάτων',
 		sb_li4: 'Ποτέ PHP, shell ή εγγραφή αρχείων· τα μυστικά γυρίζουν πάντα ως ***, προσωπικά δεδομένα με μάσκα από προεπιλογή, κάθε κλήση στο ιστορικό του Hub και του site',
+		sb_li6: 'Εφαρμογή Android: άνοιγμα, ανανέωση ή κλείσιμο του παραθύρου εγγραφής με το δαχτυλικό σου, και Book Feed και ουρά του Broadcast από το κινητό. Προαιρετικά, abilities που μόνο προσθέτουν κάτι που σε περιμένει (η ουρά του Broadcast) τρέχουν χωρίς να ανοίξει το παράθυρο',
 		sb_li5: 'Απομακρυσμένη πρόσβαση διαχειριστή: βάλ\u2019 το μόνο σε δικά σου sites, κράτα τα σε ανάγνωση και άνοιγε το παράθυρο μόνο όσο δουλεύεις. Δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
 		sb_download: 'Λήψη v1.11.0 (.zip)',
 		lo_desc: 'Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server, ειδοποίηση για κάθε αίτημα και μήνυμα, και απαντήσεις από εφαρμογή Android ή web εφαρμογή στην αρχική οθόνη. Χωρίς Firebase, χωρίς λογαριασμό σε τρίτους.',
@@ -1875,6 +1932,21 @@ footer .heart { color: var(--accent-bright); }
 		up_btn: 'Ακολούθησε στο Ko-fi',
 		up_note: 'Το follow είναι δωρεάν. Το Ko-fi είναι η μόνη πηγή νέων του noxpress.',
 		ft_supporters: 'Υποστηρικτές',
+		apps_title: 'Εφαρμογές Android',
+		apps_guide: 'Οδηγός εγκατάστασης',
+		apps_build: 'Οδηγός build',
+		sba_desc: 'Το Hub του Site Bridge στην τσέπη σου: ανοίγεις το παράθυρο εγγραφής των sites σου με το δαχτυλικό σου μόνο όσο δουλεύεις, και χειρίζεσαι Book Feed και Broadcast από το κινητό. Μιλά μόνο με το δικό σου Hub· χωρίς λογαριασμό, χωρίς Firebase, χωρίς analytics.',
+		sba_li1: 'Άνοιγμα, ανανέωση ή κλείσιμο του παραθύρου εγγραφής ανά site, με δαχτυλικό σε κάθε άνοιγμα, και το ιστορικό του Hub στο κινητό',
+		sba_li2: 'Καρτέλα Book Feed: συγχρονισμός, κανόνες, σάρωση ISBN και εισαγωγή ως πρόχειρο, με ειδοποιήσεις (Book Feed 1.11.0+)',
+		sba_li3: 'Καρτέλα Broadcast: οι αναρτήσεις που περιμένουν στην ουρά, για αποστολή, διόρθωση ή απόρριψη, με ειδοποίηση για κάθε νέα (Broadcast 1.1.0+, Site Bridge 1.11.0+)',
+		sba_li4: 'Σύνδεση με QR από το Hub· τα κλειδιά της συσκευής μένουν στο Android Keystore και κάθε αίτημα υπογράφεται, οπότε δεν υπάρχει κωδικός να πληκτρολογηθεί ή να διαρρεύσει',
+		sba_li5: 'Ενημερώσεις: ειδοποίηση μέσα στην εφαρμογή, ή παρακολούθηση με το Obtainium (αυτό το repository, «Include prereleases», φίλτρο τίτλου <code>^Site Bridge app</code>)',
+		sba_download: 'Λήψη v1.6.0 (.apk)',
+		loa_desc: 'Η σελίδα του Live Operator ως εφαρμογή Android: πλήρης οθόνη, δικό της εικονίδιο και ειδοποιήσεις συνομιλίας που ανάβουν την οθόνη. Το επίσημο APK είναι φτιαγμένο για το glarolykoi.net· για το δικό σου site, χτίσ\u2019 το με τη διεύθυνση του site σου (δύο ιδιότητες του Gradle) ή πρόσθεσε τη σελίδα στην αρχική οθόνη ως web εφαρμογή.',
+		loa_li1: 'Trusted Web Activity της σελίδας /live-operator/ του plugin, επαληθευμένη με Digital Asset Links από τις ρυθμίσεις του plugin, χωρίς γραμμή διεύθυνσης',
+		loa_li2: 'Ειδοποιήσεις συνομιλίας heads-up με ήχο σε δικό τους κανάλι, ιδιωτικές στην κλειδωμένη οθόνη, ποτέ μέσα από το «Μην ενοχλείτε»',
+		loa_li3: 'Ελάχιστος δικός της κώδικας (το androidbrowserhelper της Google)· χωρίς Firebase, χωρίς analytics',
+		loa_li4: 'Ενημερώσεις: ειδοποίηση στη σελίδα, ή παρακολούθηση με το Obtainium (αυτό το repository, «Include prereleases», φίλτρο τίτλου <code>^Live Operator app</code>)',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
 	};
