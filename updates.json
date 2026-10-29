@@ -232,17 +232,6 @@
         "tested_wp": "6.8",
         "version": "1.12.0",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.0/revenue-splitter.zip"
-      },
-      "stable": {
-        "changelog": "",
-        "published": "2026-09-25",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "80780010e40f6cb7190289292b0c7aaadbf38ed9626ffe585c2d07eb1cc2c10a",
-        "signature": "OSOj9IfDPOhweIlY0wCqm/wvw8bEB7zQaNQXYYIaBW/WCQQGG7+32pzCEBCohYuuZllmS09LRfCvNTYCb1rUDw==",
-        "tested_wp": "",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.5.0/revenue-splitter.zip"
       }
     },
     "shipping-notes": {
