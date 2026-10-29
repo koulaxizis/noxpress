@@ -8,6 +8,10 @@ For each plugins/<slug>/ with a card (<article class="card" id="<slug>">):
     only: a new plugin may get its video in a later PR).
 A plugin without a card must be listed in --personal (Bible §21).
 
+For each Android app with a card (#<slug>-app, Bible §13) the card meta equals the
+app's versionName, and a download link (nox-<tag>-<version>/<asset>) and both
+{tag}_download strings, when the card has them, name that version too.
+
 Usage: check-site-cards.py [--personal "<slug> ..."]
 Prints one line per problem and exits 1 if there is any (warnings do not fail). Standard library only.
 """
@@ -25,6 +29,39 @@ def header_version(slug):
     with open(path, encoding='utf-8') as f:
         m = re.search(r'^\s*\*\s*Version:\s*(\S+)', f.read(), re.M)
     return m.group(1) if m else None
+
+
+APPS = {
+    # card id: (app directory, tag code)
+    'site-bridge-app': ('site-bridge-android', 'sba'),
+    'live-operator-app': ('live-operator-android', 'loa'),
+}
+
+
+def app_version(folder):
+    path = os.path.join(ROOT, 'apps', folder, 'app', 'build.gradle.kts')
+    with open(path, encoding='utf-8') as f:
+        m = re.search(r'^\s*versionName\s*=\s*"([^"]+)"', f.read(), re.M)
+    return m.group(1) if m else None
+
+
+def check_apps(html, problems):
+    for card_id, (folder, code) in sorted(APPS.items()):
+        start = html.find('<article class="card" id="%s">' % card_id)
+        if start < 0:
+            continue
+        card = html[start:html.index('</article>', start)]
+        ver = app_version(folder)
+        meta = re.search(r'<div class="meta">v([0-9.]+)', card)
+        if not meta or meta.group(1) != ver:
+            problems.append('%s: card meta says %s, app is %s' % (card_id, meta.group(1) if meta else '?', ver))
+        link = re.search(r'/releases/download/nox-%s-([0-9.]+)/' % code, card)
+        if link:
+            if link.group(1) != ver:
+                problems.append('%s: download link is for %s, app is %s' % (card_id, link.group(1), ver))
+            for word in ('Download', 'Λήψη'):
+                if "%s_download: '%s v%s (.apk)'" % (code, word, ver) not in html:
+                    problems.append('%s: %s_download (%s) is not v%s' % (card_id, code, word, ver))
 
 
 def main():
@@ -62,6 +99,7 @@ def main():
         for ext in ('mp4', 'webp'):
             if not os.path.isfile(os.path.join(ROOT, 'media', 'videos', '%s.%s' % (slug, ext))):
                 warnings.append('%s: media/videos/%s.%s is missing' % (slug, slug, ext))
+    check_apps(html, problems)
     for w in warnings:
         print('warning: ' + w)
     for p in problems:
