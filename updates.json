@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fixed: with Shorts off, a YouTube Short could still enter the Queue, because YouTube lets some Shorts into the channel's «long videos» list. Every new video is now also checked: one the feed links as a Short, or that opens at youtube.com/shorts/, is skipped. The check sends the same consent cookies as the @handle lookup, so servers in the EU are not sent to the consent page, and a redirect anywhere other than the video page no longer counts as «not a Short».",
+        "changelog": "* Fixed: when Instagram's list of posts leaves out the caption of a post, a waiting item without text now asks Instagram for that post on its own and takes the caption from there.\n* New: the last check notes, for the five newest posts, their id, type and the length of the caption Instagram returned (no content). This helps support when a caption is missing.",
         "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d4f1e1a2bcdbeb9e85daee381bfbe60398899aa8ec7ee320458a6f7b90e70c88",
-        "signature": "cvflwLBD15Lj9tmgzVbmB4LbzAZ/zQGKqw9oQ0xJykokPUlUdKdZh6kIm9t/v5g+yBogNeZ0T9Ra/AaPtREVCw==",
+        "sha256": "aab4f5b11f394368b64d9e66e56d90f3296bab967c4117e44d831fe0f719beab",
+        "signature": "Oy8XeQj7e8cktjKba7qKrAWIXDh9yoys+BAsnkuPs2+HPCk5Uys+9vihA/U4ryJ5Y4qONRwBEaUi9VzbDFZBCA==",
         "tested_wp": "7.1",
-        "version": "1.1.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.4/broadcast.zip"
+        "version": "1.1.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.5/broadcast.zip"
       }
     },
     "checkout-extras": {
