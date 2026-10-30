@@ -29,6 +29,8 @@
  *  - rate       int    feed calls per hour and account (10–2000)
  *  - contrib    string[] attribute taxonomies (pa_…) that name people,
  *                      in the feed's "contributors" with their labels
+ *  - guide      int    page with the guide for trade accounts (0 = none):
+ *                      linked in their My Account and in the feed e-mail
  *  - t_<key>_el / t_<key>_en  visitor texts (Bible §14.17), keys in texts()
  *
  * Autoloaded: the shop reads it on every request of a logged-in user.
@@ -54,6 +56,8 @@ final class TRA_Settings {
 			'label'   => array( 'Τιμή χονδρικής', 'Trade price', 60 ),
 			'invoice' => array( 'Οι παραγγελίες χονδρικής εκδίδονται με τιμολόγιο. Διάλεξε «Τιμολόγιο» και συμπλήρωσε τα στοιχεία της επιχείρησης.', 'Trade orders are invoiced. Choose «Invoice» and fill in the business details.', 300 ),
 			'coupon'  => array( 'Τα κουπόνια έκπτωσης δεν ισχύουν στις αγορές χονδρικής.', 'Discount coupons do not apply to trade purchases.', 200 ),
+			'guide'   => array( 'Οδηγός χονδρικής', 'Trade guide', 60 ),
+			'guide_note' => array( 'Πώς λειτουργούν οι τιμές χονδρικής, η παραγγελία και το Trade Feed:', 'How trade prices, ordering and the Trade Feed work:', 200 ),
 		);
 	}
 
@@ -75,6 +79,7 @@ final class TRA_Settings {
 			'inv_value' => 'timologio',
 			'rate'      => 120,
 			'contrib'   => array(),
+			'guide'     => 0,
 		);
 		foreach ( self::texts() as $k => $t ) {
 			$d[ 't_' . $k . '_el' ] = $t[0];
@@ -140,6 +145,9 @@ final class TRA_Settings {
 			}
 		}
 
+		$guide      = isset( $raw['guide'] ) && is_numeric( $raw['guide'] ) ? (int) $raw['guide'] : 0;
+		$s['guide'] = $guide > 0 && ( ! did_action( 'init' ) || 'page' === get_post_type( $guide ) ) ? $guide : 0;
+
 		foreach ( self::texts() as $k => $t ) {
 			foreach ( array( 'el', 'en' ) as $l ) {
 				$f       = 't_' . $k . '_' . $l;
@@ -147,8 +155,8 @@ final class TRA_Settings {
 				$s[ $f ] = null === $v ? $d[ $f ] : mb_substr( $v, 0, $t[2] );
 			}
 		}
-		// The invoice and coupon messages never stay empty (the English one may: it falls back to Greek).
-		foreach ( array( 't_invoice_el', 't_coupon_el' ) as $f ) {
+		// The Greek messages never stay empty (the English ones may: they fall back to Greek).
+		foreach ( array( 't_invoice_el', 't_coupon_el', 't_guide_el', 't_guide_note_el' ) as $f ) {
 			if ( '' === $s[ $f ] ) {
 				$s[ $f ] = $d[ $f ];
 			}
@@ -212,7 +220,7 @@ final class TRA_Settings {
 		 * Filters a visitor text (e.g. for WPML / Polylang).
 		 *
 		 * @param string $v    Text.
-		 * @param string $key  label | invoice | coupon.
+		 * @param string $key  label | invoice | coupon | guide | guide_note.
 		 * @param string $lang 'el' | 'en'.
 		 */
 		return (string) apply_filters( 'tra_text', $v, $key, $lang );

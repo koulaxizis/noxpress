@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -81,6 +81,10 @@ They are WordPress's own credentials for APIs: stored hashed, revocable one by o
 The settings, the call log, the plugin's user and product meta, its Application Passwords and the «Χονδρική» role are removed; trade accounts stay as customers. The discount marks stay in the orders, as the shop's record. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: a guide page for trade accounts (Settings → «Οδηγός χονδρικής»). While it is published, trade accounts see it in My Account's menu (before «Log out») and in a line on its dashboard, with Greek / English texts; customers see nothing. The Trade Feed e-mail links to it too.
+* New: ability `trade-accounts/guide-set` chooses the guide page; `status` shows it.
 
 = 1.3.1 =
 * Change: with «No coupons» on, a cart with trade prices no longer shows the coupon field (cart form, the checkout's «Have a coupon?» notice and the Cart / Checkout blocks), since a coupon would be refused anyway.
