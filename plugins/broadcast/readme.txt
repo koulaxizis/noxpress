@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -79,6 +79,10 @@ The plugin reads the feed of the channel's «long videos» list. YouTube still l
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.5 =
+* Fixed: when Instagram's list of posts leaves out the caption of a post, a waiting item without text now asks Instagram for that post on its own and takes the caption from there.
+* New: the last check notes, for the five newest posts, their id, type and the length of the caption Instagram returned (no content). This helps support when a caption is missing.
 
 = 1.1.4 =
 * Fixed: with Shorts off, a YouTube Short could still enter the Queue, because YouTube lets some Shorts into the channel's «long videos» list. Every new video is now also checked: one the feed links as a Short, or that opens at youtube.com/shorts/, is skipped. The check sends the same consent cookies as the @handle lookup, so servers in the EU are not sent to the consent page, and a redirect anywhere other than the video page no longer counts as «not a Short».
