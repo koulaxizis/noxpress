@@ -1,8 +1,8 @@
 {
   "display": 500,
-  "total": 505,
+  "total": 510,
   "offset": 5,
-  "updated": "2026-10-28",
+  "updated": "2026-10-30",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -618,7 +618,7 @@
     },
     "678088885": {
       "file": "nox-fp-1.0.0/fast-pages.zip",
-      "count": 2
+      "count": 3
     },
     "683155716": {
       "file": "nox-br-1.0.0/broadcast.zip",
@@ -650,7 +650,7 @@
     },
     "683365180": {
       "file": "nox-sb-1.11.0/site-bridge.zip",
-      "count": 2
+      "count": 3
     },
     "683371598": {
       "file": "nox-sba-1.6.0/site-bridge.apk",
@@ -662,10 +662,14 @@
     },
     "684873502": {
       "file": "nox-br-1.1.1/broadcast.zip",
-      "count": 1
+      "count": 2
     },
     "685971457": {
       "file": "nox-lo-1.3.0/live-operator.zip",
+      "count": 2
+    },
+    "691400234": {
+      "file": "nox-br-1.1.2/broadcast.zip",
       "count": 0
     }
   }
