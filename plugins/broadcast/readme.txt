@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -79,6 +79,10 @@ The plugin reads the feed of the channel's «long videos» list, where YouTube d
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.3 =
+* Fixed: Instagram pictures did not reach Viber or the Site Bridge app, so a post could go out as a bare link. Instagram's picture links are signed and often longer than 500 characters; they were cut at 500, which broke the signature. Links up to 2048 characters are now kept whole, and a longer one is dropped instead of cut.
+* Changed: every check of Instagram also renews the picture link of waiting Instagram items, since Instagram's links expire.
 
 = 1.1.2 =
 * Fixed: an Instagram post could wait in the Queue with only its link and picture and no text, when Instagram gave the post without its caption at first (a caption added or edited after publishing). A waiting Instagram item without text now gets the caption on the next check, and at the latest just before it is posted. A text you wrote yourself is never replaced.
