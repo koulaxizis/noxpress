@@ -576,6 +576,7 @@ final class TRA_Admin_UI {
 				<li><?php esc_html_e( 'Στέλνεις στο βιβλιοπωλείο το όνομα χρήστη, τον κωδικό και τη διεύθυνση του API.', 'trade-accounts' ); ?></li>
 				<li><?php esc_html_e( 'Το e-shop του καλεί το API με HTTP Basic (όνομα χρήστη και κωδικός), πάντα με HTTPS, σε JSON ή XML.', 'trade-accounts' ); ?></li>
 			</ol>
+			<p class="description"><?php esc_html_e( 'Βιβλιοπωλείο με WooCommerce: το δωρεάν plugin Trade Feed Import κάνει όλη τη σύνδεση με επικόλληση του email του κωδικού, φέρνει τους τίτλους και ενημερώνει τιμές και διαθεσιμότητα κάθε μέρα.', 'trade-accounts' ); ?> <a href="https://noxpress.tech/#trade-feed-import" target="_blank" rel="noopener noreferrer">noxpress.tech</a></p>
 			<table class="widefat striped tra-table">
 				<tbody>
 					<tr><td><code>GET <?php echo esc_html( $base ); ?>account</code></td><td><?php esc_html_e( 'Ο λογαριασμός: έκπτωση, νόμισμα, όριο κλήσεων.', 'trade-accounts' ); ?></td></tr>

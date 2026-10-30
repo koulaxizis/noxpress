@@ -185,6 +185,7 @@ final class TRA_Lang {
 		'Το αρχείο δεν είναι έγκυρο JSON.' => 'The file is not valid JSON.',
 		'Μη έγκυρο αρχείο backup (λείπουν οι ρυθμίσεις του Trade Accounts).' => 'Invalid backup file (the Trade Accounts settings are missing).',
 		'Η εισαγωγή ολοκληρώθηκε.' => 'Import completed.',
+		'Βιβλιοπωλείο με WooCommerce: το δωρεάν plugin Trade Feed Import κάνει όλη τη σύνδεση με επικόλληση του email του κωδικού, φέρνει τους τίτλους και ενημερώνει τιμές και διαθεσιμότητα κάθε μέρα.' => 'A bookstore on WooCommerce: the free Trade Feed Import plugin does the whole connection when the password e-mail is pasted, brings in the titles and updates prices and availability every day.',
 		// Footer (Bible §7).
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',

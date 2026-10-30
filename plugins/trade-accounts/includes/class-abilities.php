@@ -47,6 +47,9 @@ final class TRA_Abilities {
 
 	const CAT = 'noxpress';
 
+	/** Trade Feed Import, the bookshop's side of the feed (linked in the feed e-mail, 1.4.1). */
+	const IMPORT_URL = 'https://noxpress.tech/#trade-feed-import';
+
 	public static function init(): void {
 		add_action( 'wp_abilities_api_categories_init', array( __CLASS__, 'category' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register' ) );
@@ -437,6 +440,8 @@ final class TRA_Abilities {
 				'Η σύνδεση γίνεται με HTTP Basic μέσω HTTPS. Η απάντηση είναι σε JSON· για XML προσθέστε ?output=xml.',
 				'Ο κωδικός ισχύει μόνο για το Trade Feed (όχι για σύνδεση στο site) και αντικαθιστά κάθε προηγούμενο. Φυλάξτε τον με ασφάλεια· αν χαθεί, ζητήστε μας νέο.',
 				'',
+				'Αν το e-shop σας είναι WooCommerce, το δωρεάν plugin Trade Feed Import φέρνει όλους τους τίτλους μας με επικόλληση αυτού του email, και ενημερώνει μόνο του τιμές και διαθεσιμότητα κάθε μέρα: ' . self::IMPORT_URL,
+				'',
 			);
 			if ( '' !== $guide ) {
 				array_push( $lines, 'Οδηγός χρήσης για βιβλιοπωλεία: ' . $guide, '' );
@@ -454,6 +459,8 @@ final class TRA_Abilities {
 				'',
 				'Authentication is HTTP Basic over HTTPS. Answers are JSON; for XML add ?output=xml.',
 				'The password works for the Trade Feed only (not to log in to the site) and replaces any earlier one. Keep it safe; if it is lost, ask us for a new one.',
+				'',
+				'If your e-shop runs WooCommerce, the free Trade Feed Import plugin brings in all our titles when you paste this e-mail, and updates prices and availability by itself every day: ' . self::IMPORT_URL,
 				'',
 			);
 			if ( '' !== $guide ) {
