@@ -152,8 +152,8 @@ final class MGL_Front {
 
 	public static function assets(): void {
 		try {
-			$form = ! is_user_logged_in() && ( ( function_exists( 'is_checkout' ) && is_checkout() ) || ( function_exists( 'is_account_page' ) && is_account_page() ) );
-			if ( ! $form && ! self::confirming() ) {
+			// Only where the button or the confirmation box actually shows.
+			if ( ! self::form_here() && ! self::confirming() ) {
 				return;
 			}
 			wp_register_style( 'mgl-front', false, array(), MGL_VERSION );

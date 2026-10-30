@@ -5,7 +5,7 @@ Tags: passwordless, magic link, login, email, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -78,6 +78,10 @@ The customer can ask again (within the limits) or log in with their password. Th
 The settings, the log, the email's WooCommerce settings, pending links and rate-limit counters are removed. No user, password or order is touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.1 =
+* The log option is created on activation, so a persistent object cache (Redis) never loses the first event.
+* The front-end CSS loads only on a page that shows the button or the confirmation box (not in test mode without ?mgl-test, nor where a login form has the button switched off).
 
 = 1.0.0 =
 * Initial release.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Magic Login — uninstall.php (v1.0.0)
+ * Magic Login — uninstall.php (v1.0.1)
  *
  * Deleted:
  *  - Options mgl_settings (settings), mgl_log (event log) and
