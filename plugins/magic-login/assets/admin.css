@@ -1,0 +1,438 @@
+/**
+ * Magic Login — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors mgl-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.mgl-wrap {
+	--mgl-bg: #101218;
+	--mgl-panel: #14161d;
+	--mgl-panel-2: #1d2029;
+	--mgl-input: #1a1d26;
+	--mgl-border: #2e3240;
+	--mgl-border-input: #3a3f52;
+	--mgl-row-border: #23262f;
+	--mgl-stripe: #181b23;
+	--mgl-hover: #1e212c;
+	--mgl-text: #eae8fa;
+	--mgl-heading: #f6f4ff;
+	--mgl-muted: #b7b2d6;
+	--mgl-link: #beb1ff;
+	--mgl-link-hover: #d4c9ff;
+	--mgl-accent: #6d4aff;
+	--mgl-accent-hover: #8263ff;
+	--mgl-warn: #f5c97e;
+	--mgl-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.mgl-wrap {
+	color-scheme: dark;
+	background: var(--mgl-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--mgl-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.mgl-wrap h1,
+.mgl-wrap h2 {
+	color: var(--mgl-heading);
+}
+
+.mgl-wrap a { color: var(--mgl-link); }
+.mgl-wrap a:hover { color: var(--mgl-link-hover); }
+
+.mgl-wrap .mgl-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--mgl-muted);
+	border-bottom: 1px solid var(--mgl-border);
+	padding-bottom: 6px;
+}
+
+.mgl-wrap .description,
+.mgl-wrap p.description,
+.mgl-wrap .mgl-hint {
+	color: var(--mgl-muted) !important;
+}
+
+.mgl-zone {
+	background: var(--mgl-panel);
+	border: 1px solid var(--mgl-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.mgl-wrap input[type="text"],
+.mgl-wrap input[type="email"],
+.mgl-wrap input[type="url"],
+.mgl-wrap input[type="number"],
+.mgl-wrap input[type="time"],
+.mgl-wrap input[type="date"],
+.mgl-wrap textarea,
+.mgl-wrap select {
+	background-color: var(--mgl-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--mgl-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.mgl-wrap input::placeholder,
+.mgl-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.mgl-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.mgl-wrap input[type="file"] {
+	color: var(--mgl-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.mgl-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.mgl-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.mgl-wrap input[type="checkbox"],
+.mgl-wrap input[type="radio"] {
+	accent-color: var(--mgl-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.mgl-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.mgl-wrap .button:hover:not(:disabled) {
+	border-color: var(--mgl-accent) !important;
+	color: #ffffff !important;
+}
+
+.mgl-wrap .button-primary {
+	background: var(--mgl-accent) !important;
+	border-color: var(--mgl-accent) !important;
+	color: #ffffff !important;
+}
+
+.mgl-wrap .button-primary:hover:not(:disabled) {
+	background: var(--mgl-accent-hover) !important;
+}
+
+.mgl-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.mgl-submit { margin-top: 20px; }
+.mgl-inline-form { display: inline; margin-right: 10px; }
+.mgl-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.mgl-table,
+table.widefat.mgl-table {
+	background: var(--mgl-panel) !important;
+	border: 1px solid var(--mgl-border) !important;
+	border-radius: 6px;
+	color: var(--mgl-text) !important;
+	margin-top: 14px !important;
+}
+
+.mgl-table thead th,
+.mgl-table thead td {
+	background: var(--mgl-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.mgl-table tbody td,
+.mgl-table tbody th {
+	background: var(--mgl-panel) !important;
+	color: var(--mgl-text) !important;
+	border-bottom: 1px solid var(--mgl-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.mgl-table tbody tr:nth-child(2n) td,
+.mgl-table tbody tr:nth-child(2n) th {
+	background: var(--mgl-stripe) !important;
+}
+
+.mgl-table tbody tr:hover td,
+.mgl-table tbody tr:hover th {
+	background: var(--mgl-hover) !important;
+}
+
+.mgl-table td,
+.mgl-table th {
+	padding: 12px 14px;
+}
+
+.mgl-table td code {
+	background: transparent !important;
+	color: var(--mgl-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.mgl-table .mgl-empty {
+	color: var(--mgl-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.mgl-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.mgl-footer a { color: #beb1ff; text-decoration: none; }
+.mgl-footer a:hover { text-decoration: underline; }
+
+.mgl-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.mgl-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.mgl-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.mgl-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.mgl-muted { color: var(--mgl-muted) !important; }
+.mgl-warn { color: var(--mgl-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.mgl-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.mgl-wrap .mgl-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--mgl-heading);
+}
+
+.mgl-status p { margin: 0 0 8px; }
+.mgl-status p:last-child { margin-bottom: 0; }
+.mgl-status code,
+.mgl-wrap .description code,
+.mgl-wrap .mgl-hint code {
+	background: var(--mgl-panel-2);
+	color: var(--mgl-muted);
+	border: 1px solid var(--mgl-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.mgl-suspended { margin: 8px 0 0; }
+.mgl-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.mgl-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--mgl-border);
+	background: var(--mgl-panel-2);
+	color: var(--mgl-text);
+	white-space: nowrap;
+}
+.mgl-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.mgl-badge--muted { color: var(--mgl-muted); }
+.mgl-badge--warn { border-color: #6b5a33; color: var(--mgl-warn); }
+.mgl-badge--danger { border-color: #6b3a3a; color: var(--mgl-danger); }
+
+/* Area fieldsets. */
+.mgl-area {
+	background: var(--mgl-panel);
+	border: 1px solid var(--mgl-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.mgl-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--mgl-heading);
+}
+.mgl-row { margin: 4px 0 8px; }
+
+.mgl-details > summary {
+	cursor: pointer;
+	color: var(--mgl-link);
+	margin: 4px 0;
+}
+.mgl-details[open] > summary { margin-bottom: 12px; }
+
+.mgl-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.mgl-wrap .mgl-label {
+	display: block;
+	font-weight: 600;
+	color: var(--mgl-heading);
+	margin: 8px 0 6px;
+}
+.mgl-grid .mgl-label:first-child { margin-top: 0; }
+
+.mgl-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.mgl-field > span:first-child {
+	min-width: 150px;
+	color: var(--mgl-text);
+}
+.mgl-wrap .mgl-color { width: 96px; font-family: monospace; }
+.mgl-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--mgl-border-input);
+}
+
+.mgl-wrap .mgl-hint { display: block; font-size: 12px; margin-top: 4px; }
+.mgl-wrap td .mgl-hint { display: inline; }
+.mgl-table td.mgl-warn { color: var(--mgl-warn) !important; }
+
+/* Tabs of the main page. */
+.mgl-wrap .mgl-tabs {
+	border-bottom: 1px solid var(--mgl-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.mgl-wrap .mgl-tabs .nav-tab {
+	background: var(--mgl-panel);
+	border-color: var(--mgl-border);
+	color: var(--mgl-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.mgl-wrap .mgl-tabs .nav-tab:hover { color: var(--mgl-link-hover); background: var(--mgl-hover); }
+.mgl-wrap .mgl-tabs .nav-tab-active,
+.mgl-wrap .mgl-tabs .nav-tab-active:hover {
+	background: var(--mgl-bg);
+	border-bottom-color: var(--mgl-bg);
+	color: var(--mgl-heading);
+}
+
+/* One input per line (removal rules). */
+.mgl-wrap .mgl-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.mgl-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--mgl-border);
+	border-radius: 6px;
+	background: var(--mgl-panel-2);
+}
+.mgl-scroll .mgl-field { margin-bottom: 4px; }
+
+/* ===== orOS Connect ===== */
+
+.mgl-wrap .mgl-wide { width: 100%; max-width: 640px; }
+.mgl-wrap .mgl-key { width: 100%; max-width: 360px; font-family: monospace; }
+.mgl-wrap textarea.mgl-wide { min-height: 96px; font-family: monospace; font-size: 12px; }
+
+/* Module cards. */
+.mgl-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.mgl-mod { background: var(--mgl-panel); border: 1px solid var(--mgl-border); border-radius: 6px; padding: 14px 16px; }
+.mgl-mod h3 { margin: 0 0 6px; font-size: 14px; color: var(--mgl-heading); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mgl-mod p { margin: 0 0 10px; color: var(--mgl-muted); }
+.mgl-mod.is-soon { opacity: .7; }
+
+/* Two languages side by side. */
+.mgl-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
+.mgl-pair input[type="text"] { width: 100%; }
+.mgl-pair .mgl-lang { font-size: 12px; color: var(--mgl-muted); display: block; margin-bottom: 2px; }
+
+/* Send log. */
+.mgl-table td.is-ok { color: #9fe0b5 !important; }
+.mgl-table td.is-retry { color: var(--mgl-warn) !important; }
+.mgl-table td.is-fail { color: var(--mgl-danger) !important; }
+
+@media (max-width: 600px) {
+	.mgl-wrap { padding: 20px 14px 18px; }
+	.mgl-field { flex-wrap: wrap; }
+}
+
+/* ===== Magic Login additions ===== */
+.mgl-wrap input[type="number"].mgl-num { width: 90px; }
+.mgl-wrap textarea.mgl-testers { width: 100%; max-width: 520px; min-height: 70px; }
+.mgl-counts { margin: 0 0 6px; }

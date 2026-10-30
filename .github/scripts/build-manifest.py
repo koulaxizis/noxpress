@@ -61,6 +61,7 @@ SLUGS = {
     'ta': 'trade-accounts',
     'fp': 'fast-pages',
     'br': 'broadcast',
+    'ml': 'magic-login',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
