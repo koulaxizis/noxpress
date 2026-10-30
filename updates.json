@@ -353,15 +353,15 @@
     },
     "trade-feed-import": {
       "beta": {
-        "changelog": "* First release: a three-step set-up guide that reads the connection details from the publisher's e-mail, import of every title (or the ones you pick) as simple products with cover, ISBN, contributors, attributes, category, brand, tax class and retail price, linking of books the shop already sells, a daily background sync of price, availability, pre-orders and trade price with field locks for hand edits, a titles tab, a history, settings backup and TFI_DISABLE.",
+        "changelog": "* Fix: a publisher without pretty permalinks (feed address with ?rest_route=) now connects; the plugin tries the other address form by itself and keeps the one that works.\n* Messages with a number now use the singular for one (\"1 book\", \"1 title\").\n* The first step's button now reads «Connect to the publisher», and the «start again» link takes the plugin's link colour.\n* Tested end to end on WordPress 7.1.4 with WooCommerce 11.2.1 against Trade Accounts 1.4.1: connection by pasting the e-mail, first import, linking by ISBN, daily sync of price, availability, pre-orders and cost, locks, titles that leave the feed.",
         "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0217b9b4b6d12c17509aa977ea0fb417e315ef8f0c7164ea2952d07d63f4d498",
-        "signature": "yBqcKoPdOPUxS7N8UqWk2MpcRcHTSydWDZkQnTJbERJEzrK3uHDtXewzYBmL4spHFtnmVTVw5ISsrwSbsM7GCw==",
+        "sha256": "eae000efd6f62ec6712743b68955b3c70597800de2dea357e172c09de6db35f8",
+        "signature": "qmS8h1AdjSw5JefnGembf48Evdf9QPl9h19sNCgv5+CkLHJpTinLKvNQCGX8abpX79n51ZSswCetZ4xChnKxCA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.0/trade-feed-import.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.1/trade-feed-import.zip"
       }
     },
     "variation-picker": {
