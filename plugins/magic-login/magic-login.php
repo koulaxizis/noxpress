@@ -3,7 +3,7 @@
  * Plugin Name:          Magic Login
  * Plugin URI:           https://noxpress.tech
  * Description:          Σύνδεση πελατών χωρίς κωδικό: κουμπί στη φόρμα σύνδεσης του «Ο λογαριασμός μου» και του ταμείου που στέλνει με email σύνδεσμο μίας χρήσης, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης. Ο κωδικός μένει ως εναλλακτική· οι διαχειριστές συνδέονται μόνο με κωδικό.
- * Version:              1.0.0
+ * Version:              1.0.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -81,7 +81,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MGL_VERSION', '1.0.0' );
+define( 'MGL_VERSION', '1.0.1' );
 define( 'MGL_FILE', __FILE__ );
 define( 'MGL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MGL_URL', plugin_dir_url( __FILE__ ) );
@@ -166,3 +166,15 @@ final class Magic_Login {
 }
 
 add_action( 'plugins_loaded', array( 'Magic_Login', 'init' ), 20 );
+
+/*
+ * The log option exists from activation on. Created later by the first
+ * event, a persistent object cache (Redis) can lose that first write to the
+ * shared "notoptions" cache of a parallel request.
+ */
+register_activation_hook(
+	MGL_FILE,
+	static function () {
+		add_option( 'mgl_log', array(), '', false );
+	}
+);
