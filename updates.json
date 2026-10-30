@@ -327,15 +327,15 @@
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* New: abilities to manage trade accounts remotely (e.g. through Site Bridge): `trade-accounts/accounts-list`, `account-create`, `account-update` and `account-remove`, with the same rules as the Accounts tab (staff accounts are never changed). `account-create` sends WordPress's e-mail only when asked.\n* New: `trade-accounts/feed-password-send` makes a new Trade Feed password and e-mails it straight to the account, with its username and the feed URL, in the account's language (Greek or English). The password is never returned to the caller; if the e-mail fails, the new password is revoked.",
+        "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "08200dff6507b0aa732beefb9374c7dcba6eea40e318a619d2eb4d29ca6cb8d5",
-        "signature": "xMhZdfFNJ4tx4/KIM5yaly5CTH6IuQdF1BoN3oC9s5GmgUupq0WqJV83yI0jnaxvkjWrqn62yRkQOH2uu7iuBg==",
+        "sha256": "866fdfa3726be38695f63e5ed5da1582016251df163cb723fc892c7ea6260933",
+        "signature": "dGSv3WK7luzcyQ6Y4tY1JZLR1VxCafEVeMPvegMxUel1qKWttW8pass91kGDCrsIXsIkUYyswYEV1wSnBluVBQ==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.2.0/trade-accounts.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.3.0/trade-accounts.zip"
       }
     },
     "variation-picker": {
