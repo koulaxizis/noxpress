@@ -59,6 +59,7 @@ final class Noxpress_Core {
 		'Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.' => 'Trade accounts for bookstores: a preset discount on the titles you choose, and an API (Trade Feed) in JSON or XML to list the books in their own e-shops.',
 		'Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.' => 'A page cache for visitors with smart purging and preload, CSS / JS minify, lazy load and click-to-play YouTube. Replaces WP Rocket; Claude runs it through Site Bridge.',
 		'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.' => "Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos and posts you prepare, with a queue, approval and a history.",
+		'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.' => 'Passwordless login for customers: a one-time link by email from the login form and the checkout, with expiry, rate limits and a confirmation page.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -314,6 +315,11 @@ final class Noxpress_Core {
 				'name' => 'Broadcast',
 				'desc' => __( 'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.', 'noxpress' ),
 				'page' => 'brc-settings',
+			),
+			'magic-login'       => array(
+				'name' => 'Magic Login',
+				'desc' => __( 'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.', 'noxpress' ),
+				'page' => 'mgl-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
