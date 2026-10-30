@@ -30,7 +30,9 @@
  * Coupons (settings, on by default):
  *  - no_coupons: a cart with a line at a trade price takes no coupon
  *    (woocommerce_coupon_is_valid, so the classic cart, the blocks and the
- *    re-check before payment all refuse it with the same message);
+ *    re-check before payment all refuse it with the same message), and
+ *    the coupon field is hidden for such a cart (woocommerce_coupons_enabled:
+ *    the cart form, the checkout's «Have a coupon?» notice and the blocks);
  *  - no_reward: a trade order (order meta _tra_trade) gets no thank-you
  *    coupon. Thanko Thank You Page Customizer (VillaTheme) is reached
  *    through its own parameter filters: on the thank-you page of a trade
@@ -81,6 +83,7 @@ final class TRA_Pricing {
 		$s = TRA_Settings::get();
 		if ( $s['no_coupons'] ) {
 			add_filter( 'woocommerce_coupon_is_valid', array( __CLASS__, 'coupon_valid' ), 20, 3 );
+			add_filter( 'woocommerce_coupons_enabled', array( __CLASS__, 'coupons_enabled' ), 20 );
 		}
 		if ( $s['no_reward'] ) {
 			add_filter( 'woo_thank_you_page_paramscoupon_type', array( __CLASS__, 'thanko_type' ), 20 );
@@ -271,6 +274,14 @@ final class TRA_Pricing {
 			return $valid;
 		}
 		throw new Exception( esc_html( TRA_Settings::text( 'coupon' ) ), 100 );
+	}
+
+	/** No coupon field for a cart with trade lines: a coupon would be refused anyway. */
+	public static function coupons_enabled( $enabled ) {
+		if ( ! $enabled || ! self::applies() || ! self::trade_cart() ) {
+			return $enabled;
+		}
+		return false;
 	}
 
 	/** Whether an order is a trade order (it has a line at a trade price). */
