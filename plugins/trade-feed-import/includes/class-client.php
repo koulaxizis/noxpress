@@ -8,6 +8,11 @@
  *  - GET /products    a page of titles (per_page up to 100)
  *  - GET /categories  the publisher's eligible categories
  *
+ * The feed is called at <site>/wp-json/tra/v1/…; a publisher without
+ * pretty permalinks answers there with its own 404 page (not JSON) or a
+ * redirect, and then the call is made once more as <site>/?rest_route=/tra/v1/…, which
+ * every WordPress understands. The working form is kept (tfi_route).
+ *
  * A 429 answer is kept as "wait until" (tfi_wait, the Retry-After of the
  * publisher) so no call is made before then. Errors never contain the
  * password: the publisher's message is shortened and passed through
@@ -22,6 +27,7 @@ final class TFI_Client {
 	const TIMEOUT = 25;
 	const PER     = 100;
 	const WAIT    = 'tfi_wait';
+	const ROUTE   = 'tfi_route';
 
 	/** GET /account. */
 	public static function account() {
@@ -96,19 +102,8 @@ final class TFI_Client {
 			return new WP_Error( 'tfi_rate', sprintf( __( 'Ο εκδότης ζήτησε παύση στις κλήσεις (όριο κλήσεων). Ξαναδοκίμασε σε %d δευτερόλεπτα.', 'trade-feed-import' ), $wait ) );
 		}
 
-		$url = add_query_arg( array_map( 'rawurlencode', $args ), $s['url'] . self::NS . $route );
-		$res = wp_safe_remote_get(
-			$url,
-			array(
-				'timeout'     => self::TIMEOUT,
-				'redirection' => 0,
-				'headers'     => array(
-					'Authorization' => 'Basic ' . base64_encode( $s['user'] . ':' . $pw ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions -- HTTP Basic.
-					'Accept'        => 'application/json',
-				),
-				'user-agent'  => 'Trade Feed Import/' . TFI_VERSION . '; ' . home_url( '/' ),
-			)
-		);
+		$plain = 'plain' === get_option( self::ROUTE, '' );
+		$res   = self::call( $s['url'], $route, $args, $s['user'], $pw, $plain );
 		if ( is_wp_error( $res ) ) {
 			/* translators: %s: error message */
 			return new WP_Error( 'tfi_http', sprintf( __( 'Ο εκδότης δεν απάντησε: %s', 'trade-feed-import' ), self::clean( $res->get_error_message() ) ) );
@@ -116,6 +111,17 @@ final class TFI_Client {
 
 		$code = (int) wp_remote_retrieve_response_code( $res );
 		$body = json_decode( (string) wp_remote_retrieve_body( $res ), true );
+
+		if ( ! $plain && ( ( 404 === $code && ! is_array( $body ) ) || ( $code >= 300 && $code < 400 ) ) ) {
+			// No pretty permalinks at the publisher (its 404 page, or a redirect): the same call through ?rest_route=.
+			$again = self::call( $s['url'], $route, $args, $s['user'], $pw, true );
+			if ( ! is_wp_error( $again ) && is_array( json_decode( (string) wp_remote_retrieve_body( $again ), true ) ) ) {
+				update_option( self::ROUTE, 'plain', false );
+				$res  = $again;
+				$code = (int) wp_remote_retrieve_response_code( $res );
+				$body = json_decode( (string) wp_remote_retrieve_body( $res ), true );
+			}
+		}
 
 		if ( 429 === $code ) {
 			$after = (int) wp_remote_retrieve_header( $res, 'retry-after' );
@@ -147,6 +153,31 @@ final class TFI_Client {
 			return new WP_Error( 'tfi_json', __( 'Η απάντηση του εκδότη δεν είναι έγκυρο JSON.', 'trade-feed-import' ) );
 		}
 		return $body;
+	}
+
+	/**
+	 * One HTTP GET to the feed (no redirects, HTTP Basic).
+	 *
+	 * @param bool $plain The ?rest_route= form instead of /wp-json/.
+	 * @return array|WP_Error
+	 */
+	private static function call( string $site, string $route, array $args, string $user, string $pw, bool $plain ) {
+		$args = array_map( 'rawurlencode', $args );
+		$url  = $plain
+			? add_query_arg( array_merge( array( 'rest_route' => '/tra/v1' . $route ), $args ), $site . '/' )
+			: add_query_arg( $args, $site . self::NS . $route );
+		return wp_safe_remote_get(
+			$url,
+			array(
+				'timeout'     => self::TIMEOUT,
+				'redirection' => 0,
+				'headers'     => array(
+					'Authorization' => 'Basic ' . base64_encode( $user . ':' . $pw ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions -- HTTP Basic.
+					'Accept'        => 'application/json',
+				),
+				'user-agent'  => 'Trade Feed Import/' . TFI_VERSION . '; ' . home_url( '/' ),
+			)
+		);
 	}
 
 	/** A message of the other side, safe to show and log. */

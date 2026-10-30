@@ -5,7 +5,7 @@ Tags: bookstores, wholesale, import, sync, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -74,6 +74,12 @@ The retail price of the publisher's books follows the publisher, because books h
 No. A field you change by hand is locked and stays as you wrote it.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: a publisher without pretty permalinks (feed address with ?rest_route=) now connects; the plugin tries the other address form by itself and keeps the one that works.
+* Messages with a number now use the singular for one ("1 book", "1 title").
+* The first step's button now reads «Connect to the publisher», and the «start again» link takes the plugin's link colour.
+* Tested end to end on WordPress 7.1.4 with WooCommerce 11.2.1 against Trade Accounts 1.4.1: connection by pasting the e-mail, first import, linking by ISBN, daily sync of price, availability, pre-orders and cost, locks, titles that leave the feed.
 
 = 1.0.0 =
 * First release: a three-step set-up guide that reads the connection details from the publisher's e-mail, import of every title (or the ones you pick) as simple products with cover, ISBN, contributors, attributes, category, brand, tax class and retail price, linking of books the shop already sells, a daily background sync of price, availability, pre-orders and trade price with field locks for hand edits, a titles tab, a history, settings backup and TFI_DISABLE.

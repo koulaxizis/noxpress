@@ -3,7 +3,7 @@
  * Plugin Name:          Trade Feed Import
  * Plugin URI:           https://noxpress.tech
  * Description:          Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη που έχει Trade Accounts περνούν στο δικό σου WooCommerce με το όνομα χρήστη και τον κωδικό του Trade Feed. Εξώφυλλο, ISBN, συντελεστές, κατηγορία και τιμή λιανικής, καθημερινός συγχρονισμός τιμής, διαθεσιμότητας και προπαραγγελιών, κλείδωμα όσων διορθώνεις με το χέρι.
- * Version:              1.0.0
+ * Version:              1.0.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -65,7 +65,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TFI_VERSION', '1.0.0' );
+define( 'TFI_VERSION', '1.0.1' );
 define( 'TFI_FILE', __FILE__ );
 define( 'TFI_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TFI_URL', plugin_dir_url( __FILE__ ) );

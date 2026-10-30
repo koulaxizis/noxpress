@@ -53,6 +53,8 @@ final class TFI_Lang {
 		'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.' => 'You do not have access to this page.',
 		'Οι τίτλοι του εκδότη σου στο δικό σου κατάστημα, με τιμή και διαθεσιμότητα που ενημερώνονται μόνες τους κάθε μέρα.' => 'Your publisher\'s titles in your own shop, with price and availability that update by themselves every day.',
 		'Σύνδεση' => 'Connection',
+		'Σύνδεση με τον εκδότη' => 'Connect to the publisher',
+		'Σύνδεση προϊόντος' => 'Link',
 		'Εισαγωγή τίτλων' => 'Import the titles',
 		'Έτοιμο' => 'Done',
 		'Βήμα 1: Σύνδεση με τον εκδότη' => 'Step 1: Connect to the publisher',
@@ -63,6 +65,7 @@ final class TFI_Lang {
 		'Όνομα χρήστη' => 'Username',
 		'Κωδικός' => 'Password',
 		'Ο κωδικός φυλάσσεται κρυπτογραφημένος και χρησιμοποιείται μόνο για να διαβάζει τον κατάλογο του εκδότη. Δεν είναι ο κωδικός σύνδεσης στο site του.' => 'The password is kept encrypted and is only used to read the publisher\'s catalogue. It is not the password for logging in to their site.',
+		'Η σύνδεση πέτυχε. Ο εκδότης «%1$s» έχει %2$d τίτλο για σένα.' => 'Connected. The publisher «%1$s» has %2$d title for you.',
 		'Η σύνδεση πέτυχε. Ο εκδότης «%1$s» έχει %2$d τίτλους για σένα.' => 'Connected. The publisher «%1$s» has %2$d titles for you.',
 		'Η σύνδεση πέτυχε (%s).' => 'Connected (%s).',
 		'Η έκπτωσή σου: %s%%.' => 'Your discount: %s%%.',
@@ -80,10 +83,14 @@ final class TFI_Lang {
 		'Φέρνουμε τους τίτλους…' => 'Bringing the titles…',
 		'Διαβάστηκαν %1$d τίτλοι · νέα προϊόντα: %2$d · ενημερώθηκαν: %3$d' => '%1$d titles read · new products: %2$d · updated: %3$d',
 		'Μπορείς να κλείσεις αυτή τη σελίδα: η εισαγωγή συνεχίζει μόνη της. Η σελίδα ανανεώνεται κάθε λίγα δευτερόλεπτα.' => 'You can close this page: the import goes on by itself. The page refreshes every few seconds.',
+		'Ο εκδότης ζήτησε μικρή παύση. Συνεχίζουμε σε περίπου %d λεπτό.' => 'The publisher asked for a short pause. We go on in about %d minute.',
 		'Ο εκδότης ζήτησε μικρή παύση. Συνεχίζουμε σε περίπου %d λεπτά.' => 'The publisher asked for a short pause. We go on in about %d minutes.',
 		'Διακοπή' => 'Stop',
 		'Έτοιμο!' => 'Done!',
-		'Μπήκαν %1$d νέα βιβλία στο κατάστημά σου. %2$d βιβλία που είχες ήδη συνδέθηκαν με τον εκδότη.' => '%1$d new books were added to your shop. %2$d books you already had were linked to the publisher.',
+		'Μπήκε %d νέο βιβλίο στο κατάστημά σου.' => '%d new book was added to your shop.',
+		'Μπήκαν %d νέα βιβλία στο κατάστημά σου.' => '%d new books were added to your shop.',
+		'%d βιβλίο που είχες ήδη συνδέθηκε με τον εκδότη.' => '%d book you already had was linked to the publisher.',
+		'%d βιβλία που είχες ήδη συνδέθηκαν με τον εκδότη.' => '%d books you already had were linked to the publisher.',
 		'Είναι πρόχειρα: οι πελάτες σου δεν τα βλέπουν ακόμα. Άνοιξέ τα, δες ότι είναι όπως τα θέλεις και πάτα «Δημοσίευση» (ή διάλεξέ τα όλα στη λίστα προϊόντων → Μαζική επεξεργασία → Κατάσταση: Δημοσιευμένο).' => 'They are drafts: your customers do not see them yet. Open them, check that they are as you want them and press «Publish» (or select them all in the product list → Bulk actions → Edit → Status: Published).',
 		'Δες τα πρόχειρα προϊόντα' => 'See the draft products',
 		'Δες τα προϊόντα' => 'See the products',
@@ -106,6 +113,7 @@ final class TFI_Lang {
 		'Σε αναμονή' => 'On backorder',
 		'Προπαραγγελία' => 'Pre-order',
 		'Οι τίτλοι του εκδότη' => 'The publisher\'s titles',
+		'%1$d τίτλος, από τον συγχρονισμό της %2$s.' => '%1$d title, from the sync of %2$s.',
 		'%1$d τίτλοι, από τον συγχρονισμό της %2$s.' => '%1$d titles, from the sync of %2$s.',
 		'Όλα' => 'All',
 		'Λιανική' => 'Retail',
@@ -185,6 +193,7 @@ final class TFI_Lang {
 		'Κάνε πρώτα τη σύνδεση.' => 'Connect first.',
 		'Διάλεξε κατηγορία ή γράψε όνομα για νέα.' => 'Choose a category or type a name for a new one.',
 		'Δεν επιλέχθηκε κανένας τίτλος.' => 'No title was selected.',
+		'Έγινε σε %d τίτλο.' => 'Done for %d title.',
 		'Έγινε σε %d τίτλους.' => 'Done for %d titles.',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.' => 'Settings saved.',
 		'Το αρχείο είναι πολύ μεγάλο.' => 'The file is too large.',
@@ -202,6 +211,7 @@ final class TFI_Lang {
 
 	public static function init(): void {
 		add_filter( 'gettext_trade-feed-import', array( __CLASS__, 'filter' ), 10, 3 );
+		add_filter( 'ngettext_trade-feed-import', array( __CLASS__, 'filter_n' ), 10, 5 );
 	}
 
 	/** 'el' | 'en' for a locale string. */
@@ -227,6 +237,15 @@ final class TFI_Lang {
 			self::$lang = $lang;
 		}
 		return $lang;
+	}
+
+	/** ngettext_trade-feed-import filter (Greek and English share the plural rule). */
+	public static function filter_n( $translation, $single, $plural, $number, $domain ) {
+		if ( 'trade-feed-import' !== $domain || 'en' !== self::lang() ) {
+			return $translation;
+		}
+		$key = 1 === (int) $number ? $single : $plural;
+		return isset( self::$dict[ $key ] ) ? self::$dict[ $key ] : $translation;
 	}
 
 	/** gettext_trade-feed-import filter. */

@@ -53,6 +53,8 @@
 
 .tfi-wrap a { color: var(--tfi-link); }
 .tfi-wrap a:hover { color: var(--tfi-link-hover); }
+.tfi-wrap .button-link { color: var(--tfi-link) !important; }
+.tfi-wrap .button-link:hover { color: var(--tfi-link-hover) !important; }
 
 .tfi-wrap .tfi-h2 {
 	margin: 22px 0 10px;

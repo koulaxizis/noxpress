@@ -1,10 +1,11 @@
 <?php
 /**
- * Trade Feed Import — uninstall.php (v1.0.0)
+ * Trade Feed Import — uninstall.php (v1.0.1)
  *
  * Deleted:
  *  - Options tfi_settings, tfi_pass (the sealed password), tfi_cats,
- *    tfi_log, tfi_job, tfi_last, tfi_catalog, tfi_catalog_at, tfi_wait.
+ *    tfi_log, tfi_job, tfi_last, tfi_catalog, tfi_catalog_at, tfi_wait,
+ *    tfi_route.
  *  - Transients tfi_aui_msg_{uid} (PRG notices), tfi_probe (connection
  *    check), tfi_lock.
  *  - Scheduled actions of the group trade-feed-import (Action Scheduler)
@@ -64,7 +65,7 @@ function tfi_uninstall_site(): void {
 		} while ( $ids );
 	}
 
-	foreach ( array( 'tfi_settings', 'tfi_pass', 'tfi_cats', 'tfi_log', 'tfi_job', 'tfi_last', 'tfi_catalog', 'tfi_catalog_at', 'tfi_wait' ) as $tfi_opt ) {
+	foreach ( array( 'tfi_settings', 'tfi_pass', 'tfi_cats', 'tfi_log', 'tfi_job', 'tfi_last', 'tfi_catalog', 'tfi_catalog_at', 'tfi_wait', 'tfi_route' ) as $tfi_opt ) {
 		delete_option( $tfi_opt );
 	}
 	delete_transient( 'tfi_probe' );
