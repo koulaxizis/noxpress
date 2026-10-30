@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fixed: an Instagram post could wait in the Queue with only its link and picture and no text, when Instagram gave the post without its caption at first (a caption added or edited after publishing). A waiting Instagram item without text now gets the caption on the next check, and at the latest just before it is posted. A text you wrote yourself is never replaced.",
+        "changelog": "* Fixed: Instagram pictures did not reach Viber or the Site Bridge app, so a post could go out as a bare link. Instagram's picture links are signed and often longer than 500 characters; they were cut at 500, which broke the signature. Links up to 2048 characters are now kept whole, and a longer one is dropped instead of cut.\n* Changed: every check of Instagram also renews the picture link of waiting Instagram items, since Instagram's links expire.",
         "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "7df9f5bf40422031ec38e0d47cf4ef8709f49b81df4e410ee1a1f3741c25bd4f",
-        "signature": "eNtUhs8Esx5OMIjCipvmWEWcex9tdiHdboDusdnimSLQLWL4wXM1iCrpfPNci29KfIWQ9ynuYuUNzrfff9n0Bw==",
+        "sha256": "6f2de5f7421dd7749a1ba0f0fe40d472a62e4b7226b0b2d7e5671bb28b30fa67",
+        "signature": "SNgg/O+NuNzfSp8EHv1dS4DBY9Zj8Ft4q2bzyTZ7h4C/x66UPZ/sr/mTvNwMTy6P8TxIJBIWI6knANiajmJdAg==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.2/broadcast.zip"
+        "version": "1.1.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.3/broadcast.zip"
       }
     },
     "checkout-extras": {
