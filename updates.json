@@ -340,15 +340,15 @@
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* New: a guide page for trade accounts (Settings → «Οδηγός χονδρικής»). While it is published, trade accounts see it in My Account's menu (before «Log out») and in a line on its dashboard, with Greek / English texts; customers see nothing. The Trade Feed e-mail links to it too.\n* New: ability `trade-accounts/guide-set` chooses the guide page; `status` shows it.",
+        "changelog": "* The Trade Feed e-mail and the Trade Feed tab point bookstores on WooCommerce to the free Trade Feed Import plugin, which connects by pasting that e-mail.",
         "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "cae9ff38d709a77b870975d8b496f2267a37f6f0116091f1e4f839bc50ef1906",
-        "signature": "2VXYVxhYfLDyxxiCkWstwC1Osrv2U3j/r745P/Em50h+rRQmPZeUMgn0rKR1DskPfgzh8Xjq3JEG6r4LnUPhDg==",
+        "sha256": "f09087dea261e2354e9fa190057b8b83de524077847674ef1bef1a9f5048c863",
+        "signature": "9en7muJr/Jah7YddjgX67aKybe+VVBO/Dh5cTX+G1sLVF1db55y0difH/aUARvDWQ9zms/aLW4bV+9ANobkXCA==",
         "tested_wp": "7.1",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.4.0/trade-accounts.zip"
+        "version": "1.4.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.4.1/trade-accounts.zip"
       }
     },
     "trade-feed-import": {
