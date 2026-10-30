@@ -156,6 +156,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.0/live-operator.zip"
       }
     },
+    "magic-login": {
+      "beta": {
+        "changelog": "* Initial release.\n* «Email me a login link» in the My Account and classic checkout login forms, with the email or username of the form.\n* One-time links (256-bit, HMAC stored, 5–60 minutes), a confirmation page with a «Log in» button, back to the page of the request.\n* Neutral answer, limits per account and per IP (hashed), staff never by link, links cancelled by a new link or a password change.\n* WooCommerce email «Magic Login: login link» in the visitor's language (Greek / English), with HTML and plain-text templates.\n* Off / test / live mode with test accounts, Greek and English visitor texts, log, privacy policy text, settings export / import, MGL_DISABLE, Abilities API status.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.3).",
+        "published": "2026-10-30",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "651d0128ac43f3b76dccdcf6b6484195bb0efcf98254c4afde4728eeccac1731",
+        "signature": "CmOTCF0hldzmEn0NqTx2OXPfo5xWyjwHvdC7eXEk2/Do8ImiqlBGgUsdPAo4aLI7T8kJbODLHCUcRddnUXzGDQ==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.0/magic-login.zip"
+      }
+    },
     "oros-connect": {
       "beta": {
         "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
