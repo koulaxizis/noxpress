@@ -3,7 +3,7 @@
  * Plugin Name:          Trade Accounts
  * Plugin URI:           https://noxpress.tech
  * Description:          Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές. Modules που ενεργοποιείς ένα-ένα: Τιμές χονδρικής (ρόλος «Χονδρική» με προκαθορισμένη έκπτωση μόνο στα προϊόντα που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, με υποχρεωτικό τιμολόγιο αν θέλεις) και Trade Feed (API με όνομα χρήστη και Application Password ανά λογαριασμό, JSON ή XML, με φίλτρα, όριο κλήσεων και ημερολόγιο).
- * Version:              1.2.0
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -43,7 +43,7 @@
  *                    Store API and order; order / line marks; invoice
  *  - TRA_Feed      → module "feed": REST tra/v1 (products, one product,
  *                    categories) in JSON or XML, rate limit, call log
- *  - TRA_Abilities → read-only status in the WordPress Abilities API
+ *  - TRA_Abilities → status and accounts in the WordPress Abilities API
  *  - TRA_Admin_UI  → menu, modules, settings, accounts, API, tools
  *
  * Deviations from the Bible (with reason):
@@ -84,7 +84,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TRA_VERSION', '1.2.0' );
+define( 'TRA_VERSION', '1.3.0' );
 define( 'TRA_FILE', __FILE__ );
 define( 'TRA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TRA_URL', plugin_dir_url( __FILE__ ) );
