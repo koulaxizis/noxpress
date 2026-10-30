@@ -122,7 +122,8 @@ final class TFI_Settings {
 	/**
 	 * The publisher's site as https://host[/path] without a trailing slash,
 	 * '' when it is not an https address. A pasted feed address
-	 * (…/wp-json/tra/v1/products) is cut back to the site.
+	 * (…/wp-json/tra/v1/products, or …/index.php?rest_route=/tra/v1/products
+	 * on a site without pretty permalinks) is cut back to the site.
 	 */
 	public static function site_url( string $url ): string {
 		$url = trim( $url );
@@ -141,7 +142,7 @@ final class TFI_Settings {
 		if ( ! preg_match( '/^[a-z0-9.\-]{1,253}$/', $host ) ) {
 			return '';
 		}
-		$path = isset( $p['path'] ) ? rtrim( (string) $p['path'], '/' ) : '';
+		$path = isset( $p['path'] ) ? rtrim( (string) preg_replace( '#/index\.php$#i', '', rtrim( (string) $p['path'], '/' ) ), '/' ) : '';
 		$port = isset( $p['port'] ) ? ':' . (int) $p['port'] : '';
 		return esc_url_raw( 'https://' . $host . $port . $path, array( 'https' ) );
 	}
@@ -161,7 +162,7 @@ final class TFI_Settings {
 			'user' => '',
 			'pass' => '',
 		);
-		if ( preg_match( '#https://[^\s<>"\']+/wp-json/tra/v1[^\s<>"\']*#i', $text, $m ) ) {
+		if ( preg_match( '#https://[^\s<>"\']+(?:/wp-json/tra/v1|[?&]rest_route=/tra/v1)[^\s<>"\']*#i', $text, $m ) ) {
 			$out['url'] = self::site_url( $m[0] );
 		} elseif ( preg_match( '#(?:Διεύθυνση|URL)\s*:\s*(\S+)#iu', $text, $m ) ) {
 			$out['url'] = self::site_url( $m[1] );

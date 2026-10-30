@@ -297,7 +297,7 @@ final class TFI_Admin_UI {
 					<span class="tfi-label"><?php esc_html_e( 'Κωδικός', 'trade-feed-import' ); ?></span>
 					<input type="password" name="tfi_pass" class="regular-text" value="" autocomplete="new-password" />
 				</details>
-				<p class="tfi-submit"><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Σύνδεση', 'trade-feed-import' ); ?></button></p>
+				<p class="tfi-submit"><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Σύνδεση με τον εκδότη', 'trade-feed-import' ); ?></button></p>
 			</form>
 			<p class="description"><?php esc_html_e( 'Ο κωδικός φυλάσσεται κρυπτογραφημένος και χρησιμοποιείται μόνο για να διαβάζει τον κατάλογο του εκδότη. Δεν είναι ο κωδικός σύνδεσης στο site του.', 'trade-feed-import' ); ?></p>
 		</div>
@@ -320,7 +320,7 @@ final class TFI_Admin_UI {
 			echo esc_html(
 				isset( $probe['total'] )
 					/* translators: 1: publisher, 2: number of titles */
-					? sprintf( __( 'Η σύνδεση πέτυχε. Ο εκδότης «%1$s» έχει %2$d τίτλους για σένα.', 'trade-feed-import' ), $pub, (int) $probe['total'] )
+					? sprintf( _n( 'Η σύνδεση πέτυχε. Ο εκδότης «%1$s» έχει %2$d τίτλο για σένα.', 'Η σύνδεση πέτυχε. Ο εκδότης «%1$s» έχει %2$d τίτλους για σένα.', (int) $probe['total'], 'trade-feed-import' ), $pub, (int) $probe['total'] )
 					/* translators: %s: publisher */
 					: sprintf( __( 'Η σύνδεση πέτυχε (%s).', 'trade-feed-import' ), $pub )
 			);
@@ -386,7 +386,8 @@ final class TFI_Admin_UI {
 			$wait = TFI_Client::waiting();
 			if ( $wait > 0 ) {
 				/* translators: %d: minutes */
-				echo '<p class="tfi-warn">' . esc_html( sprintf( __( 'Ο εκδότης ζήτησε μικρή παύση. Συνεχίζουμε σε περίπου %d λεπτά.', 'trade-feed-import' ), (int) ceil( $wait / 60 ) ) ) . '</p>';
+				$mins = (int) ceil( $wait / 60 );
+				echo '<p class="tfi-warn">' . esc_html( sprintf( _n( 'Ο εκδότης ζήτησε μικρή παύση. Συνεχίζουμε σε περίπου %d λεπτό.', 'Ο εκδότης ζήτησε μικρή παύση. Συνεχίζουμε σε περίπου %d λεπτά.', $mins, 'trade-feed-import' ), $mins ) ) . '</p>';
 			}
 			self::form_open( 'cancel' );
 			echo '<p><button type="submit" class="button">' . esc_html__( 'Διακοπή', 'trade-feed-import' ) . '</button></p></form>';
@@ -407,14 +408,14 @@ final class TFI_Admin_UI {
 				<h2 class="tfi-h2"><?php esc_html_e( 'Έτοιμο!', 'trade-feed-import' ); ?></h2>
 				<p class="tfi-big">
 					<?php
-					echo esc_html(
-						sprintf(
-							/* translators: 1: new products, 2: linked products */
-							__( 'Μπήκαν %1$d νέα βιβλία στο κατάστημά σου. %2$d βιβλία που είχες ήδη συνδέθηκαν με τον εκδότη.', 'trade-feed-import' ),
-							(int) $last['n']['created'],
-							(int) ( $last['n']['linked'] ?? 0 )
-						)
-					);
+					$made   = (int) $last['n']['created'];
+					$linked = (int) ( $last['n']['linked'] ?? 0 );
+					/* translators: %d: new products */
+					echo esc_html( sprintf( _n( 'Μπήκε %d νέο βιβλίο στο κατάστημά σου.', 'Μπήκαν %d νέα βιβλία στο κατάστημά σου.', $made, 'trade-feed-import' ), $made ) );
+					if ( $linked > 0 ) {
+						/* translators: %d: linked products */
+						echo ' ' . esc_html( sprintf( _n( '%d βιβλίο που είχες ήδη συνδέθηκε με τον εκδότη.', '%d βιβλία που είχες ήδη συνδέθηκαν με τον εκδότη.', $linked, 'trade-feed-import' ), $linked ) );
+					}
 					?>
 				</p>
 				<?php if ( 'draft' === $s['status'] ) : ?>
@@ -490,7 +491,7 @@ final class TFI_Admin_UI {
 		<p class="description">
 			<?php
 			/* translators: 1: number of titles, 2: date */
-			echo esc_html( sprintf( __( '%1$d τίτλοι, από τον συγχρονισμό της %2$s.', 'trade-feed-import' ), count( $rows ), self::fmt( $at ) ) );
+			echo esc_html( sprintf( _n( '%1$d τίτλος, από τον συγχρονισμό της %2$s.', '%1$d τίτλοι, από τον συγχρονισμό της %2$s.', count( $rows ), 'trade-feed-import' ), count( $rows ), self::fmt( $at ) ) );
 			?>
 		</p>
 		<?php self::form_open( 'titles' ); ?>
@@ -642,7 +643,7 @@ final class TFI_Admin_UI {
 		$log   = TFI_Log::all();
 		$kinds = array(
 			'import' => __( 'Εισαγωγή', 'trade-feed-import' ),
-			'link'   => __( 'Σύνδεση', 'trade-feed-import' ),
+			'link'   => __( 'Σύνδεση προϊόντος', 'trade-feed-import' ),
 			'unlink' => __( 'Αποσύνδεση', 'trade-feed-import' ),
 			'update' => __( 'Ενημέρωση', 'trade-feed-import' ),
 			'locked' => __( 'Δικές σου αλλαγές', 'trade-feed-import' ),
@@ -825,6 +826,7 @@ final class TFI_Admin_UI {
 		}
 		unset( $pass, $found );
 		delete_option( TFI_Client::WAIT );
+		delete_option( TFI_Client::ROUTE );
 
 		$acc = TFI_Client::account();
 		if ( is_wp_error( $acc ) ) {
@@ -971,7 +973,7 @@ final class TFI_Admin_UI {
 			}
 		}
 		/* translators: %d: number of titles */
-		return array( self::msg( $n > 0 ? 'success' : 'info', sprintf( __( 'Έγινε σε %d τίτλους.', 'trade-feed-import' ), $n ) ) );
+		return array( self::msg( $n > 0 ? 'success' : 'info', sprintf( _n( 'Έγινε σε %d τίτλο.', 'Έγινε σε %d τίτλους.', $n, 'trade-feed-import' ), $n ) ) );
 	}
 
 	private static function do_save_settings(): array {
