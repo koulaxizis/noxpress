@@ -1,6 +1,6 @@
 {
   "display": 500,
-  "total": 704,
+  "total": 706,
   "offset": 5,
   "updated": "2026-10-30",
   "assets": {
@@ -694,6 +694,10 @@
     },
     "692172083": {
       "file": "nox-ml-1.0.0/magic-login.zip",
+      "count": 2
+    },
+    "692225122": {
+      "file": "nox-ta-1.4.0/trade-accounts.zip",
       "count": 0
     }
   }
