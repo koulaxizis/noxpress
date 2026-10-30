@@ -365,6 +365,22 @@ final class BRC_Queue {
 		return $ok;
 	}
 
+	/**
+	 * Replaces the message and title of a pending item, when its source
+	 * has more now than when it was queued (an Instagram caption).
+	 */
+	public static function refill( int $id, array $msg, string $title ): bool {
+		$msg = self::clean_msg( $msg );
+		return self::update(
+			$id,
+			array(
+				'msg'   => wp_json_encode( $msg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ),
+				'title' => mb_substr( trim( wp_strip_all_tags( $title ) ), 0, 255 ),
+			),
+			'pending'
+		);
+	}
+
 	/** Saves an edited text of a pending item without approving it. */
 	public static function edit( int $id, string $text ): bool {
 		$row = self::get( $id );

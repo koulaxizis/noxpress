@@ -3,7 +3,7 @@
  * Plugin Name:          Broadcast
  * Plugin URI:           https://noxpress.tech
  * Description:          Ανακοινώνει γεγονότα του site σε κανάλια: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube, αναρτήσεις Instagram και αναρτήσεις που ετοιμάζεις εσύ, σε ένα Viber Channel. Ουρά με έγκριση, πρότυπα ανά πηγή, χωρίς διπλές αναρτήσεις, με ιστορικό. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.1.1
+ * Version:              1.1.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -78,7 +78,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BRC_VERSION', '1.1.1' );
+define( 'BRC_VERSION', '1.1.2' );
 define( 'BRC_FILE', __FILE__ );
 define( 'BRC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BRC_URL', plugin_dir_url( __FILE__ ) );

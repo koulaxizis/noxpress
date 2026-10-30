@@ -15,6 +15,10 @@
  *    so the picture and the link stay.
  *  - Image URLs of Instagram expire, so the image is asked for again just
  *    before the post (fresh()).
+ *  - The API can give a post without its caption at first (a caption
+ *    added or edited after publishing). A pending item without text gets
+ *    the caption on the next checks (refill()) and, at the latest, just
+ *    before the post (fresh()).
  *  - The first read only remembers the posts already there (option
  *    brc_ig_seen, the last 100 ids): nothing old is posted. The same when
  *    the Reels choice changes.
@@ -229,6 +233,7 @@ final class BRC_Src_Instagram {
 			self::queue( $p, $s );
 			++$posted;
 		}
+		self::refill( $items, $s );
 		update_option(
 			self::SEEN_OPT,
 			array(
@@ -313,14 +318,18 @@ final class BRC_Src_Instagram {
 		return $text;
 	}
 
+	/** The item title: the first line of the caption. */
+	private static function title_of( string $caption ): string {
+		$first = trim( (string) strtok( trim( $caption ), "\n" ) );
+		return '' !== $first ? mb_substr( $first, 0, 80 ) : 'Instagram';
+	}
+
 	private static function queue( array $p, array $s ): void {
-		$caption = trim( $p['caption'] );
-		$first   = trim( (string) strtok( $caption, "\n" ) );
 		BRC_Queue::add(
 			'instagram',
 			'ig:' . $p['id'],
 			array(
-				'title' => '' !== $first ? mb_substr( $first, 0, 80 ) : 'Instagram',
+				'title' => self::title_of( $p['caption'] ),
 				'text'  => self::text( $p, $s ),
 				'url'   => $p['url'],
 				'image' => $p['image'],
@@ -330,12 +339,48 @@ final class BRC_Src_Instagram {
 	}
 
 	/**
-	 * The message with a fresh image URL, just before it is posted (the
-	 * URLs in the feed expire). The old one stays when the API does not
-	 * answer.
+	 * Pending items queued without a caption get it once the feed has one.
+	 * A text the owner wrote is never replaced.
+	 */
+	private static function refill( array $items, array $s ): void {
+		$by = array();
+		foreach ( $items as $p ) {
+			if ( '' !== trim( $p['caption'] ) ) {
+				$by[ 'ig:' . $p['id'] ] = $p;
+			}
+		}
+		if ( ! $by ) {
+			return;
+		}
+		$rows = BRC_Queue::list(
+			array(
+				'status' => 'pending',
+				'source' => 'instagram',
+			),
+			50
+		);
+		foreach ( $rows as $row ) {
+			if ( '' !== $row['msg']['text'] || ! isset( $by[ $row['skey'] ] ) ) {
+				continue;
+			}
+			$p           = $by[ $row['skey'] ];
+			$msg         = $row['msg'];
+			$msg['text'] = self::text( array_merge( $p, array( 'image' => $msg['image'] ) ), $s );
+			if ( '' === $msg['image'] && '' !== $p['image'] ) {
+				$msg['image'] = $p['image'];
+				$msg['kind']  = 'picture';
+			}
+			BRC_Queue::refill( (int) $row['id'], $msg, self::title_of( $p['caption'] ) );
+		}
+	}
+
+	/**
+	 * The message just before it is posted: a fresh image URL (the URLs in
+	 * the feed expire) and, when the item has no text yet, the caption.
+	 * What the API does not give stays as it was.
 	 */
 	public static function fresh( array $msg, string $skey ): array {
-		if ( 0 !== strpos( $skey, 'ig:' ) || 'picture' !== $msg['kind'] ) {
+		if ( 0 !== strpos( $skey, 'ig:' ) ) {
 			return $msg;
 		}
 		$id    = substr( $skey, 3 );
@@ -343,12 +388,26 @@ final class BRC_Src_Instagram {
 		if ( '' === $token || ! preg_match( '/^[0-9]{1,30}$/', $id ) ) {
 			return $msg;
 		}
-		$r = self::api( $id, array( 'fields' => 'media_type,media_url,thumbnail_url' ), $token );
-		if ( '' === $r['error'] && is_array( $r['json'] ) ) {
-			$img = self::image_of( $r['json'] );
-			if ( '' !== $img ) {
-				$msg['image'] = $img;
-			}
+		$r = self::api( $id, array( 'fields' => 'caption,media_type,media_url,thumbnail_url,timestamp' ), $token );
+		if ( '' !== $r['error'] || ! is_array( $r['json'] ) ) {
+			return $msg;
+		}
+		$img = self::image_of( $r['json'] );
+		if ( '' !== $img && ( 'picture' === $msg['kind'] || '' === $msg['image'] ) ) {
+			$msg['image'] = $img;
+			$msg['kind']  = 'picture';
+		}
+		$caption = isset( $r['json']['caption'] ) && is_string( $r['json']['caption'] ) ? $r['json']['caption'] : '';
+		if ( '' === $msg['text'] && '' !== trim( $caption ) ) {
+			$msg['text'] = self::text(
+				array(
+					'caption'   => $caption,
+					'url'       => $msg['url'],
+					'image'     => $msg['image'],
+					'published' => isset( $r['json']['timestamp'] ) && is_string( $r['json']['timestamp'] ) ? (int) strtotime( $r['json']['timestamp'] ) : 0,
+				),
+				BRC_Settings::get()
+			);
 		}
 		return $msg;
 	}

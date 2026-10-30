@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -79,6 +79,9 @@ The plugin reads the feed of the channel's «long videos» list, where YouTube d
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.2 =
+* Fixed: an Instagram post could wait in the Queue with only its link and picture and no text, when Instagram gave the post without its caption at first (a caption added or edited after publishing). A waiting Instagram item without text now gets the caption on the next check, and at the latest just before it is posted. A text you wrote yourself is never replaced.
 
 = 1.1.1 =
 * Fixed: Instagram pictures showed as broken in the Queue, because Instagram's CDN does not let other sites show its images. The Queue now reads them on the server (only from Instagram's own hosts, only images) and asks for a fresh link once when the stored one has expired.
