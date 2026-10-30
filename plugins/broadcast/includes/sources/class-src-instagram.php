@@ -204,7 +204,9 @@ final class BRC_Src_Instagram {
 		if ( '' !== $r['error'] ) {
 			return 'error: ' . $r['error'];
 		}
-		$items = self::parse( isset( $r['json']['data'] ) && is_array( $r['json']['data'] ) ? $r['json']['data'] : array() );
+		$data  = isset( $r['json']['data'] ) && is_array( $r['json']['data'] ) ? $r['json']['data'] : array();
+		$items = self::parse( $data );
+		BRC_Queue::note( 'ig_last', self::shape( $data ) );
 
 		$seen  = self::seen();
 		$key   = $s['ig_reels'] ? 'R' : '';
@@ -245,6 +247,26 @@ final class BRC_Src_Instagram {
 			false
 		);
 		return 'ok';
+	}
+
+	/**
+	 * What the API gave for the newest posts, without their content: id,
+	 * type and the caption's length (-1 = no caption field). For support,
+	 * when a post arrives without its caption.
+	 */
+	private static function shape( array $data ): array {
+		$out = array();
+		foreach ( array_slice( $data, 0, 5 ) as $m ) {
+			if ( ! is_array( $m ) || empty( $m['id'] ) || ! is_scalar( $m['id'] ) ) {
+				continue;
+			}
+			$out[] = array(
+				'id'   => mb_substr( (string) $m['id'], 0, 30 ),
+				'type' => isset( $m['media_type'] ) && is_string( $m['media_type'] ) ? mb_substr( $m['media_type'], 0, 20 ) : '',
+				'cap'  => isset( $m['caption'] ) && is_string( $m['caption'] ) ? mb_strlen( $m['caption'] ) : -1,
+			);
+		}
+		return $out;
 	}
 
 	/** Media rows of /me/media: id, type, caption, image, url, published. */
@@ -367,6 +389,10 @@ final class BRC_Src_Instagram {
 			$p     = $by[ $row['skey'] ];
 			$msg   = $row['msg'];
 			$title = $row['title'];
+			if ( '' === $msg['text'] && '' === trim( $p['caption'] ) ) {
+				// The list can leave a caption out; ask for the post itself.
+				$p['caption'] = self::caption_of( $p['id'] );
+			}
 			if ( '' !== $p['image'] && $p['image'] !== $msg['image'] && ( 'picture' === $msg['kind'] || '' === $msg['image'] ) ) {
 				$msg['image'] = $p['image'];
 				$msg['kind']  = 'picture';
@@ -379,6 +405,18 @@ final class BRC_Src_Instagram {
 				BRC_Queue::refill( (int) $row['id'], $msg, $title );
 			}
 		}
+	}
+
+	/** The caption of one post, asked for on its own; '' when there is none. */
+	private static function caption_of( string $id ): string {
+		$token = BRC_Crypt::get( 'instagram' );
+		if ( '' === $token || ! preg_match( '/^[0-9]{1,30}$/', $id ) ) {
+			return '';
+		}
+		$r   = self::api( $id, array( 'fields' => 'id,caption' ), $token );
+		$cap = '' === $r['error'] && isset( $r['json']['caption'] ) && is_string( $r['json']['caption'] ) ? $r['json']['caption'] : '';
+		BRC_Queue::note( 'ig_one', array( 'id' => $id, 'cap' => '' === $r['error'] ? ( isset( $r['json']['caption'] ) ? mb_strlen( $cap ) : -1 ) : -2 ) );
+		return $cap;
 	}
 
 	/**
