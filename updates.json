@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fixed: Instagram pictures did not reach Viber or the Site Bridge app, so a post could go out as a bare link. Instagram's picture links are signed and often longer than 500 characters; they were cut at 500, which broke the signature. Links up to 2048 characters are now kept whole, and a longer one is dropped instead of cut.\n* Changed: every check of Instagram also renews the picture link of waiting Instagram items, since Instagram's links expire.",
+        "changelog": "* Fixed: with Shorts off, a YouTube Short could still enter the Queue, because YouTube lets some Shorts into the channel's «long videos» list. Every new video is now also checked: one the feed links as a Short, or that opens at youtube.com/shorts/, is skipped. The check sends the same consent cookies as the @handle lookup, so servers in the EU are not sent to the consent page, and a redirect anywhere other than the video page no longer counts as «not a Short».",
         "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "6f2de5f7421dd7749a1ba0f0fe40d472a62e4b7226b0b2d7e5671bb28b30fa67",
-        "signature": "SNgg/O+NuNzfSp8EHv1dS4DBY9Zj8Ft4q2bzyTZ7h4C/x66UPZ/sr/mTvNwMTy6P8TxIJBIWI6knANiajmJdAg==",
+        "sha256": "d4f1e1a2bcdbeb9e85daee381bfbe60398899aa8ec7ee320458a6f7b90e70c88",
+        "signature": "cvflwLBD15Lj9tmgzVbmB4LbzAZ/zQGKqw9oQ0xJykokPUlUdKdZh6kIm9t/v5g+yBogNeZ0T9Ra/AaPtREVCw==",
         "tested_wp": "7.1",
-        "version": "1.1.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.3/broadcast.zip"
+        "version": "1.1.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.4/broadcast.zip"
       }
     },
     "checkout-extras": {
