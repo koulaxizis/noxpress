@@ -327,15 +327,15 @@
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* New: abilities to manage trade accounts remotely (e.g. through Site Bridge): `trade-accounts/accounts-list`, `account-create`, `account-update` and `account-remove`, with the same rules as the Accounts tab (staff accounts are never changed). `account-create` sends WordPress's e-mail only when asked.\n* New: `trade-accounts/feed-password-send` makes a new Trade Feed password and e-mails it straight to the account, with its username and the feed URL, in the account's language (Greek or English). The password is never returned to the caller; if the e-mail fails, the new password is revoked.",
+        "changelog": "* Change: with «No coupons» on, a cart with trade prices no longer shows the coupon field (cart form, the checkout's «Have a coupon?» notice and the Cart / Checkout blocks), since a coupon would be refused anyway.",
         "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "866fdfa3726be38695f63e5ed5da1582016251df163cb723fc892c7ea6260933",
-        "signature": "dGSv3WK7luzcyQ6Y4tY1JZLR1VxCafEVeMPvegMxUel1qKWttW8pass91kGDCrsIXsIkUYyswYEV1wSnBluVBQ==",
+        "sha256": "cddc43780bd3cd48a5017e874951e14fdf1b14c51a51432c7f88783384d1f0a6",
+        "signature": "TPcvTZvfkuVsqYQ214IsQJOhDlGe4E1FFPdFPpJ0Tkd0ODUeldquNNsw8sUPbSblyqj7OXkWqUcoxMx2/VLABw==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.3.0/trade-accounts.zip"
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.3.1/trade-accounts.zip"
       }
     },
     "variation-picker": {
