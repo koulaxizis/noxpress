@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -46,7 +46,7 @@ Every module is off after activation. A module that is off loads no code.
 * `define( 'TRA_DISABLE', true );` in wp-config.php stops trade prices and closes the feed (403).
 * Suggested text for your privacy policy (Settings → Privacy).
 * Settings export / import (no accounts, discounts or passwords in the file).
-* Read-only status in the WordPress Abilities API (`trade-accounts/status`, WordPress 6.9+).
+* WordPress Abilities API (WordPress 6.9+): `status` and `accounts-list` (read), `account-create`, `account-update`, `account-remove` and `feed-password-send`, which e-mails a new feed password straight to the account and never returns it.
 * Part of the Noxpress ecosystem: shares the "Noxpress" admin menu and the Noxpress hub; updates come from noxpress.tech (GitHub releases) through WordPress's own update screens, checked with sha256 and an Ed25519 signature.
 
 **For developers**
@@ -81,6 +81,10 @@ They are WordPress's own credentials for APIs: stored hashed, revocable one by o
 The settings, the call log, the plugin's user and product meta, its Application Passwords and the «Χονδρική» role are removed; trade accounts stay as customers. The discount marks stay in the orders, as the shop's record. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: abilities to manage trade accounts remotely (e.g. through Site Bridge): `trade-accounts/accounts-list`, `account-create`, `account-update` and `account-remove`, with the same rules as the Accounts tab (staff accounts are never changed). `account-create` sends WordPress's e-mail only when asked.
+* New: `trade-accounts/feed-password-send` makes a new Trade Feed password and e-mails it straight to the account, with its username and the feed URL, in the account's language (Greek or English). The password is never returned to the caller; if the e-mail fails, the new password is revoked.
 
 = 1.2.0 =
 * New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.
