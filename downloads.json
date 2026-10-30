@@ -1,6 +1,6 @@
 {
   "display": 500,
-  "total": 713,
+  "total": 714,
   "offset": 5,
   "updated": "2026-10-30",
   "assets": {
@@ -706,6 +706,10 @@
     },
     "692884915": {
       "file": "nox-ti-1.0.0/trade-feed-import.zip",
+      "count": 1
+    },
+    "692901450": {
+      "file": "nox-ta-1.4.1/trade-accounts.zip",
       "count": 0
     }
   }
