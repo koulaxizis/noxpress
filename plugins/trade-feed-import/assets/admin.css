@@ -1,0 +1,462 @@
+/**
+ * Trade Feed Import — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors tfi-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.tfi-wrap {
+	--tfi-bg: #101218;
+	--tfi-panel: #14161d;
+	--tfi-panel-2: #1d2029;
+	--tfi-input: #1a1d26;
+	--tfi-border: #2e3240;
+	--tfi-border-input: #3a3f52;
+	--tfi-row-border: #23262f;
+	--tfi-stripe: #181b23;
+	--tfi-hover: #1e212c;
+	--tfi-text: #eae8fa;
+	--tfi-heading: #f6f4ff;
+	--tfi-muted: #b7b2d6;
+	--tfi-link: #beb1ff;
+	--tfi-link-hover: #d4c9ff;
+	--tfi-accent: #6d4aff;
+	--tfi-accent-hover: #8263ff;
+	--tfi-warn: #f5c97e;
+	--tfi-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.tfi-wrap {
+	color-scheme: dark;
+	background: var(--tfi-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--tfi-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.tfi-wrap h1,
+.tfi-wrap h2 {
+	color: var(--tfi-heading);
+}
+
+.tfi-wrap a { color: var(--tfi-link); }
+.tfi-wrap a:hover { color: var(--tfi-link-hover); }
+
+.tfi-wrap .tfi-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--tfi-muted);
+	border-bottom: 1px solid var(--tfi-border);
+	padding-bottom: 6px;
+}
+
+.tfi-wrap .description,
+.tfi-wrap p.description,
+.tfi-wrap .tfi-hint {
+	color: var(--tfi-muted) !important;
+}
+
+.tfi-zone {
+	background: var(--tfi-panel);
+	border: 1px solid var(--tfi-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.tfi-wrap input[type="text"],
+.tfi-wrap input[type="email"],
+.tfi-wrap input[type="url"],
+.tfi-wrap input[type="number"],
+.tfi-wrap input[type="time"],
+.tfi-wrap input[type="date"],
+.tfi-wrap textarea,
+.tfi-wrap select {
+	background-color: var(--tfi-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--tfi-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.tfi-wrap input::placeholder,
+.tfi-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.tfi-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.tfi-wrap input[type="file"] {
+	color: var(--tfi-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.tfi-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.tfi-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.tfi-wrap input[type="checkbox"],
+.tfi-wrap input[type="radio"] {
+	accent-color: var(--tfi-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.tfi-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.tfi-wrap .button:hover:not(:disabled) {
+	border-color: var(--tfi-accent) !important;
+	color: #ffffff !important;
+}
+
+.tfi-wrap .button-primary {
+	background: var(--tfi-accent) !important;
+	border-color: var(--tfi-accent) !important;
+	color: #ffffff !important;
+}
+
+.tfi-wrap .button-primary:hover:not(:disabled) {
+	background: var(--tfi-accent-hover) !important;
+}
+
+.tfi-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.tfi-submit { margin-top: 20px; }
+.tfi-inline-form { display: inline; margin-right: 10px; }
+.tfi-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.tfi-table,
+table.widefat.tfi-table {
+	background: var(--tfi-panel) !important;
+	border: 1px solid var(--tfi-border) !important;
+	border-radius: 6px;
+	color: var(--tfi-text) !important;
+	margin-top: 14px !important;
+}
+
+.tfi-table thead th,
+.tfi-table thead td {
+	background: var(--tfi-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.tfi-table tbody td,
+.tfi-table tbody th {
+	background: var(--tfi-panel) !important;
+	color: var(--tfi-text) !important;
+	border-bottom: 1px solid var(--tfi-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.tfi-table tbody tr:nth-child(2n) td,
+.tfi-table tbody tr:nth-child(2n) th {
+	background: var(--tfi-stripe) !important;
+}
+
+.tfi-table tbody tr:hover td,
+.tfi-table tbody tr:hover th {
+	background: var(--tfi-hover) !important;
+}
+
+.tfi-table td,
+.tfi-table th {
+	padding: 12px 14px;
+}
+
+.tfi-table td code {
+	background: transparent !important;
+	color: var(--tfi-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.tfi-table .tfi-empty {
+	color: var(--tfi-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.tfi-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.tfi-footer a { color: #beb1ff; text-decoration: none; }
+.tfi-footer a:hover { text-decoration: underline; }
+
+.tfi-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.tfi-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.tfi-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.tfi-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.tfi-muted { color: var(--tfi-muted) !important; }
+.tfi-warn { color: var(--tfi-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.tfi-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.tfi-wrap .tfi-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--tfi-heading);
+}
+
+.tfi-status p { margin: 0 0 8px; }
+.tfi-status p:last-child { margin-bottom: 0; }
+.tfi-status code,
+.tfi-wrap .description code,
+.tfi-wrap .tfi-hint code {
+	background: var(--tfi-panel-2);
+	color: var(--tfi-muted);
+	border: 1px solid var(--tfi-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.tfi-suspended { margin: 8px 0 0; }
+.tfi-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.tfi-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--tfi-border);
+	background: var(--tfi-panel-2);
+	color: var(--tfi-text);
+	white-space: nowrap;
+}
+.tfi-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.tfi-badge--muted { color: var(--tfi-muted); }
+.tfi-badge--warn { border-color: #6b5a33; color: var(--tfi-warn); }
+.tfi-badge--danger { border-color: #6b3a3a; color: var(--tfi-danger); }
+
+/* Area fieldsets. */
+.tfi-area {
+	background: var(--tfi-panel);
+	border: 1px solid var(--tfi-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.tfi-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--tfi-heading);
+}
+.tfi-row { margin: 4px 0 8px; }
+
+.tfi-details > summary {
+	cursor: pointer;
+	color: var(--tfi-link);
+	margin: 4px 0;
+}
+.tfi-details[open] > summary { margin-bottom: 12px; }
+
+.tfi-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.tfi-wrap .tfi-label {
+	display: block;
+	font-weight: 600;
+	color: var(--tfi-heading);
+	margin: 8px 0 6px;
+}
+.tfi-grid .tfi-label:first-child { margin-top: 0; }
+
+.tfi-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.tfi-field > span:first-child {
+	min-width: 150px;
+	color: var(--tfi-text);
+}
+.tfi-wrap .tfi-color { width: 96px; font-family: monospace; }
+.tfi-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--tfi-border-input);
+}
+
+.tfi-wrap .tfi-hint { display: block; font-size: 12px; margin-top: 4px; }
+.tfi-wrap td .tfi-hint { display: inline; }
+.tfi-table td.tfi-warn { color: var(--tfi-warn) !important; }
+
+/* Tabs of the main page. */
+.tfi-wrap .tfi-tabs {
+	border-bottom: 1px solid var(--tfi-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.tfi-wrap .tfi-tabs .nav-tab {
+	background: var(--tfi-panel);
+	border-color: var(--tfi-border);
+	color: var(--tfi-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.tfi-wrap .tfi-tabs .nav-tab:hover { color: var(--tfi-link-hover); background: var(--tfi-hover); }
+.tfi-wrap .tfi-tabs .nav-tab-active,
+.tfi-wrap .tfi-tabs .nav-tab-active:hover {
+	background: var(--tfi-bg);
+	border-bottom-color: var(--tfi-bg);
+	color: var(--tfi-heading);
+}
+
+/* One input per line (removal rules). */
+.tfi-wrap .tfi-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.tfi-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--tfi-border);
+	border-radius: 6px;
+	background: var(--tfi-panel-2);
+}
+.tfi-scroll .tfi-field { margin-bottom: 4px; }
+
+/* ===== orOS Connect ===== */
+
+.tfi-wrap .tfi-wide { width: 100%; max-width: 640px; }
+.tfi-wrap .tfi-key { width: 100%; max-width: 360px; font-family: monospace; }
+.tfi-wrap textarea.tfi-wide { min-height: 96px; font-family: monospace; font-size: 12px; }
+
+/* Module cards. */
+.tfi-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.tfi-mod { background: var(--tfi-panel); border: 1px solid var(--tfi-border); border-radius: 6px; padding: 14px 16px; }
+.tfi-mod h3 { margin: 0 0 6px; font-size: 14px; color: var(--tfi-heading); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tfi-mod p { margin: 0 0 10px; color: var(--tfi-muted); }
+.tfi-mod.is-soon { opacity: .7; }
+
+/* Two languages side by side. */
+.tfi-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
+.tfi-pair input[type="text"] { width: 100%; }
+.tfi-pair .tfi-lang { font-size: 12px; color: var(--tfi-muted); display: block; margin-bottom: 2px; }
+
+/* Send log. */
+.tfi-table td.is-ok { color: #9fe0b5 !important; }
+.tfi-table td.is-retry { color: var(--tfi-warn) !important; }
+.tfi-table td.is-fail { color: var(--tfi-danger) !important; }
+
+@media (max-width: 600px) {
+	.tfi-wrap { padding: 20px 14px 18px; }
+	.tfi-field { flex-wrap: wrap; }
+}
+
+/* ===== Trade Feed Import additions ===== */
+/* A new feed password, shown once: easy to select and copy. */
+.tfi-secret code.tfi-key {
+	font-size: 14px;
+	user-select: all;
+	letter-spacing: .5px;
+}
+.tfi-wrap code.tfi-block {
+	white-space: pre-wrap;
+	word-break: break-all;
+	padding: 6px 10px;
+}
+
+/* ===== Trade Feed Import additions ===== */
+
+/* The set-up guide: large, plain, one thing per step. */
+.tfi-steps { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 18px 0 6px; padding: 0; list-style: none; }
+.tfi-steps li { display: flex; align-items: center; gap: 8px; color: var(--tfi-muted); font-size: 15px; margin: 0; }
+.tfi-steps li span { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--tfi-border-input); font-weight: 600; }
+.tfi-steps li.is-now { color: var(--tfi-heading); font-weight: 600; }
+.tfi-steps li.is-now span { background: var(--tfi-accent); border-color: var(--tfi-accent); color: #fff; }
+.tfi-steps li.is-done span { background: #2c6e49; border-color: #2c6e49; color: #fff; }
+.tfi-wrap .tfi-big { font-size: 15px; line-height: 1.6; color: var(--tfi-text); }
+.tfi-wrap textarea.tfi-paste { font-size: 14px; line-height: 1.5; min-height: 180px; }
+.tfi-bar { height: 14px; border-radius: 7px; background: var(--tfi-input); border: 1px solid var(--tfi-border); overflow: hidden; margin: 6px 0 12px; }
+.tfi-bar span { display: block; height: 100%; background: var(--tfi-accent); transition: width .4s ease; }
+.tfi-zone.tfi-done { border-color: #2c6e49; }
+.tfi-scroll-x { overflow-x: auto; }
