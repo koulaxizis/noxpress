@@ -23,6 +23,8 @@
  *                                the account with its username and the feed
  *                                URL; the old one stops working (destructive:
  *                                a message to a third party)
+ *  trade-accounts/guide-set      the guide page for trade accounts (My
+ *                                Account menu and dashboard, feed e-mail)
  *
  * No ability ever returns a password: feed-password-send makes it, mails it
  * and forgets it, so it is never in the caller's answer, a log or a
@@ -179,6 +181,24 @@ final class TRA_Abilities {
 				'ann'         => array( false, true, false ),
 				'run'         => array( __CLASS__, 'feed_password_send' ),
 			),
+			'guide-set'          => array(
+				'label'       => 'Trade Accounts: guide page',
+				'description' => 'Chooses the page with the guide for trade accounts (0 = none). While it is published, trade accounts see it in My Account\'s menu and dashboard, and the feed e-mail links to it. Returns the page id and its URL ("" while it is not shown).',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'page' => array(
+							'type'        => 'integer',
+							'minimum'     => 0,
+							'description' => 'Page id, 0 = none.',
+						),
+					),
+					'required'             => array( 'page' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, true ),
+				'run'         => array( __CLASS__, 'guide_set' ),
+			),
 		);
 		foreach ( $defs as $name => $d ) {
 			wp_register_ability(
@@ -238,6 +258,8 @@ final class TRA_Abilities {
 			'categories'      => $s['cats'],
 			'brands'          => $s['brands'],
 			'invoice'         => $s['invoice'],
+			'guide_page'      => $s['guide'],
+			'guide_url'       => TRA_Guide::url(),
 			'rate_per_hour'   => $s['rate'],
 			'accounts'        => TRA_Accounts::count(),
 			'eligible'        => TRA_Scope::count(),
@@ -342,6 +364,20 @@ final class TRA_Abilities {
 		);
 	}
 
+	public static function guide_set( $in = null ) {
+		$page = is_array( $in ) && isset( $in['page'] ) ? (int) $in['page'] : 0;
+		if ( $page > 0 && 'page' !== get_post_type( $page ) ) {
+			return new WP_Error( 'tra_not_page', 'No page with this id.' );
+		}
+		$s          = TRA_Settings::get();
+		$s['guide'] = $page;
+		TRA_Settings::save( $s );
+		return array(
+			'page' => TRA_Settings::get()['guide'],
+			'url'  => TRA_Guide::url(),
+		);
+	}
+
 	public static function feed_password_send( $in = null ) {
 		$uid = self::trade_id( $in );
 		if ( is_wp_error( $uid ) ) {
@@ -381,11 +417,12 @@ final class TRA_Abilities {
 
 	/** Subject and plain-text body of the feed e-mail, in the account's language. */
 	private static function feed_mail( WP_User $u, string $pw ): array {
-		$shop = (string) get_option( 'woocommerce_email_from_name', '' );
-		$shop = '' !== $shop ? $shop : wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
-		$feed = rest_url( 'tra/v1/products' );
-		$home = home_url( '/' );
-		$el   = 0 === strpos( (string) get_user_locale( $u->ID ), 'el' );
+		$shop  = (string) get_option( 'woocommerce_email_from_name', '' );
+		$shop  = '' !== $shop ? $shop : wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+		$feed  = rest_url( 'tra/v1/products' );
+		$home  = home_url( '/' );
+		$guide = TRA_Guide::url();
+		$el    = 0 === strpos( (string) get_user_locale( $u->ID ), 'el' );
 		if ( $el ) {
 			$subject = 'Πρόσβαση στο Trade Feed – ' . $shop;
 			$lines   = array(
@@ -400,9 +437,10 @@ final class TRA_Abilities {
 				'Η σύνδεση γίνεται με HTTP Basic μέσω HTTPS. Η απάντηση είναι σε JSON· για XML προσθέστε ?output=xml.',
 				'Ο κωδικός ισχύει μόνο για το Trade Feed (όχι για σύνδεση στο site) και αντικαθιστά κάθε προηγούμενο. Φυλάξτε τον με ασφάλεια· αν χαθεί, ζητήστε μας νέο.',
 				'',
-				$shop,
-				$home,
 			);
+			if ( '' !== $guide ) {
+				array_push( $lines, 'Οδηγός χρήσης για βιβλιοπωλεία: ' . $guide, '' );
+			}
 		} else {
 			$subject = 'Trade Feed access – ' . $shop;
 			$lines   = array(
@@ -417,10 +455,12 @@ final class TRA_Abilities {
 				'Authentication is HTTP Basic over HTTPS. Answers are JSON; for XML add ?output=xml.',
 				'The password works for the Trade Feed only (not to log in to the site) and replaces any earlier one. Keep it safe; if it is lost, ask us for a new one.',
 				'',
-				$shop,
-				$home,
 			);
+			if ( '' !== $guide ) {
+				array_push( $lines, 'Guide for trade accounts: ' . $guide, '' );
+			}
 		}
+		array_push( $lines, $shop, $home );
 		return array(
 			'subject' => $subject,
 			'body'    => implode( "\n", $lines ),

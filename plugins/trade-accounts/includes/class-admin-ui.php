@@ -364,6 +364,25 @@ final class TRA_Admin_UI {
 				<?php self::text_pair( 'label', __( 'Κείμενο της ένδειξης', 'trade-accounts' ), $s ); ?>
 			</div>
 
+			<h2 class="tra-h2"><?php esc_html_e( 'Οδηγός χονδρικής', 'trade-accounts' ); ?></h2>
+			<div class="tra-zone">
+				<span class="tra-label"><?php esc_html_e( 'Σελίδα του οδηγού', 'trade-accounts' ); ?></span>
+				<?php
+				wp_dropdown_pages(
+					array(
+						'name'              => 'tra_guide',
+						'selected'          => (int) $s['guide'],
+						'show_option_none'  => __( '— Καμία —', 'trade-accounts' ),
+						'option_none_value' => '0',
+						'post_status'       => array( 'publish', 'draft', 'private' ),
+					)
+				);
+				?>
+				<p class="description"><?php esc_html_e( 'Όταν είναι δημοσιευμένη, οι λογαριασμοί χονδρικής τη βλέπουν στο μενού και στον πίνακα του «Ο λογαριασμός μου», και το email του Trade Feed τη συνδέει.', 'trade-accounts' ); ?></p>
+				<?php self::text_pair( 'guide', __( 'Όνομα στο μενού', 'trade-accounts' ), $s ); ?>
+				<?php self::text_pair( 'guide_note', __( 'Γραμμή στον πίνακα του λογαριασμού', 'trade-accounts' ), $s ); ?>
+			</div>
+
 			<h2 class="tra-h2"><?php esc_html_e( 'Τιμολόγιο', 'trade-accounts' ); ?></h2>
 			<div class="tra-zone">
 				<?php self::checkbox( 'tra_invoice', $s['invoice'], __( 'Οι παραγγελίες χονδρικής θέλουν τιμολόγιο (κλασικό ταμείο)', 'trade-accounts' ) ); ?>
@@ -776,6 +795,7 @@ final class TRA_Admin_UI {
 		$s['no_reward']  = '1' === self::post( 'tra_no_reward' );
 		$s['inv_field'] = self::post( 'tra_inv_field' );
 		$s['inv_value'] = self::post( 'tra_inv_value' );
+		$s['guide']     = (int) self::post( 'tra_guide' );
 		foreach ( array_keys( TRA_Settings::texts() ) as $k ) {
 			foreach ( array( 'el', 'en' ) as $l ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route().
