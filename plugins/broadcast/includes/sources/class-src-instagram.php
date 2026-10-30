@@ -18,7 +18,8 @@
  *  - The API can give a post without its caption at first (a caption
  *    added or edited after publishing). A pending item without text gets
  *    the caption on the next checks (refill()) and, at the latest, just
- *    before the post (fresh()).
+ *    before the post (fresh()). The checks also renew the picture link
+ *    of pending items.
  *  - The first read only remembers the posts already there (option
  *    brc_ig_seen, the last 100 ids): nothing old is posted. The same when
  *    the Reels choice changes.
@@ -339,15 +340,15 @@ final class BRC_Src_Instagram {
 	}
 
 	/**
-	 * Pending items queued without a caption get it once the feed has one.
+	 * Pending items follow the feed: an item queued without a caption gets
+	 * it once the feed has one, and the picture link is renewed (Instagram
+	 * links expire, so the Queue and the app keep showing the picture).
 	 * A text the owner wrote is never replaced.
 	 */
 	private static function refill( array $items, array $s ): void {
 		$by = array();
 		foreach ( $items as $p ) {
-			if ( '' !== trim( $p['caption'] ) ) {
-				$by[ 'ig:' . $p['id'] ] = $p;
-			}
+			$by[ 'ig:' . $p['id'] ] = $p;
 		}
 		if ( ! $by ) {
 			return;
@@ -360,17 +361,23 @@ final class BRC_Src_Instagram {
 			50
 		);
 		foreach ( $rows as $row ) {
-			if ( '' !== $row['msg']['text'] || ! isset( $by[ $row['skey'] ] ) ) {
+			if ( ! isset( $by[ $row['skey'] ] ) ) {
 				continue;
 			}
-			$p           = $by[ $row['skey'] ];
-			$msg         = $row['msg'];
-			$msg['text'] = self::text( array_merge( $p, array( 'image' => $msg['image'] ) ), $s );
-			if ( '' === $msg['image'] && '' !== $p['image'] ) {
+			$p     = $by[ $row['skey'] ];
+			$msg   = $row['msg'];
+			$title = $row['title'];
+			if ( '' !== $p['image'] && $p['image'] !== $msg['image'] && ( 'picture' === $msg['kind'] || '' === $msg['image'] ) ) {
 				$msg['image'] = $p['image'];
 				$msg['kind']  = 'picture';
 			}
-			BRC_Queue::refill( (int) $row['id'], $msg, self::title_of( $p['caption'] ) );
+			if ( '' === $msg['text'] && '' !== trim( $p['caption'] ) ) {
+				$msg['text'] = self::text( array_merge( $p, array( 'image' => $msg['image'] ) ), $s );
+				$title       = self::title_of( $p['caption'] );
+			}
+			if ( $msg !== $row['msg'] ) {
+				BRC_Queue::refill( (int) $row['id'], $msg, $title );
+			}
 		}
 	}
 

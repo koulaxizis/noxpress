@@ -46,6 +46,9 @@ final class BRC_Settings {
 
 	const OPT = 'brc_settings';
 
+	/** Longest link kept (a message's url and image, setting links). */
+	const URL_MAX = 2048;
+
 	/** All modules: sources then destinations. */
 	const MODULES = array( 'products', 'newsletter', 'youtube', 'instagram', 'queue', 'digest', 'viber' );
 
@@ -186,7 +189,9 @@ final class BRC_Settings {
 		if ( ! $p || empty( $p['host'] ) || isset( $p['user'] ) || isset( $p['pass'] ) ) {
 			return '';
 		}
-		return mb_substr( $url, 0, 500 );
+		// Signed CDN links (Instagram) run past 500 characters and break
+		// when cut, so a link that is too long is dropped, never shortened.
+		return strlen( $url ) <= self::URL_MAX ? $url : '';
 	}
 
 	public static function sanitize( array $raw ): array {
