@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -72,13 +72,16 @@ MailerLite's webhook sends the campaign's name, not its subject, and no public w
 
 = How are Shorts left out without an API key? =
 
-The plugin reads the feed of the channel's «long videos» list, where YouTube does not include Shorts. If that list cannot be read for a channel, it reads all uploads and asks youtube.com for each new video whether it is a Short; a video it cannot tell waits for your approval.
+The plugin reads the feed of the channel's «long videos» list. YouTube still lets some Shorts into that list, so each new video is also checked: one the feed links as a Short, or that opens at youtube.com/shorts/, is skipped. If the list cannot be read for a channel, it reads all uploads and checks each new video the same way; a video it cannot tell waits for your approval.
 
 = What happens on uninstall? =
 
 The webhook at Viber is removed, and the queue and history table, the settings, the sealed secrets, the transients and the background jobs are deleted. What was already posted stays in your channel. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.1.4 =
+* Fixed: with Shorts off, a YouTube Short could still enter the Queue, because YouTube lets some Shorts into the channel's «long videos» list. Every new video is now also checked: one the feed links as a Short, or that opens at youtube.com/shorts/, is skipped. The check sends the same consent cookies as the @handle lookup, so servers in the EU are not sent to the consent page, and a redirect anywhere other than the video page no longer counts as «not a Short».
 
 = 1.1.3 =
 * Fixed: Instagram pictures did not reach Viber or the Site Bridge app, so a post could go out as a bare link. Instagram's picture links are signed and often longer than 500 characters; they were cut at 500, which broke the signature. Links up to 2048 characters are now kept whole, and a longer one is dropped instead of cut.

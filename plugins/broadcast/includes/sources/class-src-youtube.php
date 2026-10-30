@@ -5,7 +5,10 @@
  * Every yt_every minutes (from the 5-minute tick) the channel's public
  * feed is read, without an API key:
  *  - Shorts off (default): the feed of the channel's "long videos" playlist,
- *    UULF + the channel id after "UC". Shorts never appear in it.
+ *    UULF + the channel id after "UC". YouTube still lets some Shorts into
+ *    it, so every new video there is checked too: a feed entry that links
+ *    to /shorts/, or a youtube.com/shorts/<id> that answers 200, is a Short
+ *    and is skipped.
  *  - Shorts on: the feed of all uploads, UU + the same part.
  *  - Live streams on: also the UULV playlist.
  * These playlist ids are not documented by YouTube. When the UULF feed
@@ -109,12 +112,13 @@ final class BRC_Src_Youtube {
 				continue;
 			}
 			$reason = '';
-			if ( 'fallback' === $mode ) {
-				$probe = self::is_short( $v['id'] );
+			if ( ! $s['yt_shorts'] ) {
+				$probe = $v['short'] ? 'short' : self::is_short( $v['id'] );
 				if ( 'short' === $probe ) {
 					continue;
 				}
-				$reason = 'unsure' === $probe ? 'unsure' : '';
+				// The long-videos list already says "long"; only the fallback waits.
+				$reason = 'fallback' === $mode && 'unsure' === $probe ? 'unsure' : '';
 			}
 			self::queue( $v, $s, $reason );
 			++$posted;
@@ -186,24 +190,40 @@ final class BRC_Src_Youtube {
 			}
 			$title = preg_match( '#<title>(.*?)</title>#s', $e, $t ) ? html_entity_decode( $t[1], ENT_QUOTES | ENT_XML1, 'UTF-8' ) : '';
 			$pub   = preg_match( '#<published>([^<]+)</published>#', $e, $p ) ? (int) strtotime( $p[1] ) : 0;
+			$short = (bool) preg_match( '#<link[^>]+href="https://(?:www\.)?youtube\.com/shorts/#', $e );
 			$out[] = array(
 				'id'        => $id[1],
 				'title'     => trim( wp_strip_all_tags( $title ) ),
 				'url'       => 'https://www.youtube.com/watch?v=' . $id[1],
 				'published' => $pub,
 				'thumb'     => 'https://i.ytimg.com/vi/' . $id[1] . '/hqdefault.jpg',
+				'short'     => $short,
 			);
 		}
 		return $out;
 	}
 
-	/** 'short' | 'long' | 'unsure', from youtube.com/shorts/<id>. */
+	/** Headers that skip the cookie consent page servers in the EU get. */
+	private static function consent_headers(): array {
+		return array(
+			'Cookie'          => 'SOCS=CAI; CONSENT=YES+1',
+			'Accept-Language' => 'en-US,en;q=0.8',
+			'User-Agent'      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+		);
+	}
+
+	/**
+	 * 'short' | 'long' | 'unsure', from youtube.com/shorts/<id>: 200 is a
+	 * Short, a redirect to /watch a normal video; anything else (the consent
+	 * page, an error) is unsure.
+	 */
 	private static function is_short( string $id ): string {
 		$res = wp_safe_remote_head(
 			self::base() . 'shorts/' . rawurlencode( $id ),
 			array(
 				'timeout'     => 10,
 				'redirection' => 0,
+				'headers'     => self::consent_headers(),
 			)
 		);
 		if ( is_wp_error( $res ) ) {
@@ -213,7 +233,8 @@ final class BRC_Src_Youtube {
 		if ( 200 === $code ) {
 			return 'short';
 		}
-		return in_array( $code, array( 301, 302, 303, 307, 308 ), true ) ? 'long' : 'unsure';
+		$to = (string) wp_remote_retrieve_header( $res, 'location' );
+		return in_array( $code, array( 301, 302, 303, 307, 308 ), true ) && false !== strpos( $to, '/watch' ) ? 'long' : 'unsure';
 	}
 
 	/**
@@ -235,11 +256,7 @@ final class BRC_Src_Youtube {
 				'redirection' => 3,
 				// Servers in the EU get the cookie consent page (consent.youtube.com)
 				// instead of the channel; these cookies skip it.
-				'headers'     => array(
-					'Cookie'          => 'SOCS=CAI; CONSENT=YES+1',
-					'Accept-Language' => 'en-US,en;q=0.8',
-					'User-Agent'      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
-				),
+				'headers'     => self::consent_headers(),
 			)
 		);
 		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
