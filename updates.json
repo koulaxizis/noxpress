@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fixed: Instagram pictures showed as broken in the Queue, because Instagram's CDN does not let other sites show its images. The Queue now reads them on the server (only from Instagram's own hosts, only images) and asks for a fresh link once when the stored one has expired.\n* Changed: the default Instagram template is «{text}» without the link to the Instagram post, since the Viber post already carries the picture and the caption. Saved templates stay as they are.",
-        "published": "2026-10-28",
+        "changelog": "* Fixed: an Instagram post could wait in the Queue with only its link and picture and no text, when Instagram gave the post without its caption at first (a caption added or edited after publishing). A waiting Instagram item without text now gets the caption on the next check, and at the latest just before it is posted. A text you wrote yourself is never replaced.",
+        "published": "2026-10-30",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "5e34e2ff5e5e7cd0732796677c357f35d3ee8e2c197f0bdf4742d082bacfd0a7",
-        "signature": "fIPA331iKQvBJsPkc29NjEuwePWdfnIHZKeUUlnEhueR6dxPPKS4koOxzkAks68ft1pNIwBJQ2NcW/1sN/VWAg==",
+        "sha256": "7df9f5bf40422031ec38e0d47cf4ef8709f49b81df4e410ee1a1f3741c25bd4f",
+        "signature": "eNtUhs8Esx5OMIjCipvmWEWcex9tdiHdboDusdnimSLQLWL4wXM1iCrpfPNci29KfIWQ9ynuYuUNzrfff9n0Bw==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.1/broadcast.zip"
+        "version": "1.1.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.2/broadcast.zip"
       }
     },
     "checkout-extras": {
