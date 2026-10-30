@@ -60,6 +60,7 @@ final class Noxpress_Core {
 		'Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.' => 'A page cache for visitors with smart purging and preload, CSS / JS minify, lazy load and click-to-play YouTube. Replaces WP Rocket; Claude runs it through Site Bridge.',
 		'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.' => "Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos and posts you prepare, with a queue, approval and a history.",
 		'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.' => 'Passwordless login for customers: a one-time link by email from the login form and the checkout, with expiry, rate limits and a confirmation page.',
+		'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.' => "For bookshops: a publisher's titles from its Trade Accounts feed in your own shop, by pasting its e-mail and pressing one button; price, availability and pre-orders update every day without losing your own edits.",
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -320,6 +321,11 @@ final class Noxpress_Core {
 				'name' => 'Magic Login',
 				'desc' => __( 'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.', 'noxpress' ),
 				'page' => 'mgl-settings',
+			),
+			'trade-feed-import' => array(
+				'name' => 'Trade Feed Import',
+				'desc' => __( 'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.', 'noxpress' ),
+				'page' => 'tfi-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

@@ -62,6 +62,7 @@ SLUGS = {
     'fp': 'fast-pages',
     'br': 'broadcast',
     'ml': 'magic-login',
+    'ti': 'trade-feed-import',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
