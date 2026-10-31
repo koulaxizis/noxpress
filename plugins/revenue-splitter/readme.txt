@@ -3,9 +3,9 @@ Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
 Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.0
+Stable tag: 1.12.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -56,6 +56,11 @@ Without `--user` the commands run as a trusted shell context. If you pass `--use
 Only this plugin's own options, transients, cron event, product/order meta and order item meta. The shared `rs_lang` user meta is kept when Store Pulse or Smart Formatter is still installed.
 
 == Changelog ==
+
+= 1.12.1 =
+* Fix: the Author Portal is never stored by a page cache (Fast Pages, WP Rocket, host caches). Its page, and every front page of a visitor with a portal session, now sends DONOTCACHEPAGE and no-cache headers; before, one beneficiary's dashboard could be cached and shown to every visitor.
+* Fix: CSV exports pass every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.
+* Tested up to WordPress 7.1 and WooCommerce 11.2.
 
 = 1.12.0 =
 * New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.

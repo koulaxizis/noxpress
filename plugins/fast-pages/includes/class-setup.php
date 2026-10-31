@@ -193,7 +193,16 @@ final class FPG_Setup {
 			}
 		}
 		$cookies = array();
-		foreach ( FPG_Settings::lines( 'exclude_cookies' ) as $line ) {
+		/**
+		 * Cookies (name prefixes) that mean "this visitor's pages are
+		 * personal": a plugin with its own session cookie (not a WordPress
+		 * login) adds its name here (Bible §14.34).
+		 *
+		 * @param string[] $names Cookie names or prefixes.
+		 */
+		$extra = apply_filters( 'noxpress_private_cookies', array() );
+		$lines = array_merge( FPG_Settings::lines( 'exclude_cookies' ), is_array( $extra ) ? array_map( 'strval', $extra ) : array() );
+		foreach ( $lines as $line ) {
 			$line = rtrim( $line, '*' );
 			if ( '' !== $line && false === strpos( $line, '*' ) ) {
 				$cookies[] = $line;
@@ -239,7 +248,7 @@ final class FPG_Setup {
 		}
 		if ( 'ours' === self::dropin() ) {
 			$drop = (string) @file_get_contents( self::dropin_file() ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions
-			if ( false === strpos( $drop, var_export( FPG_PATH . 'includes/serve.php', true ) ) ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			if ( false === strpos( $drop, var_export( FPG_PATH . 'includes/serve.php', true ) ) || false === strpos( $drop, 'WP_PLUGIN_DIR' ) ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- 1.0.1: also a 1.0.0 drop-in.
 				self::install_dropin();
 			}
 		}
@@ -256,7 +265,10 @@ final class FPG_Setup {
 		$serve = FPG_PATH . 'includes/serve.php';
 		$php   = "<?php\n/**\n * Fast Pages: page cache drop-in (" . self::MARK . ").\n * Written by the Fast Pages plugin (noxpress.tech) and removed when it is\n * deactivated. It loads the plugin's serve.php; without it, nothing happens.\n */\n\n"
 			. "defined( 'ABSPATH' ) || exit;\n\ndefine( 'FPG_DROPIN', 1 );\n\n"
-			. '$fpg_serve = ' . var_export( $serve, true ) . ";\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- a PHP file.
+			// 1.0.1: the plugin inside this site's own plugins folder first, so a
+			// copied site (staging, migration) never runs the original's files.
+			. '$fpg_serve = ( defined( \'WP_PLUGIN_DIR\' ) ? WP_PLUGIN_DIR : WP_CONTENT_DIR . \'/plugins\' ) . ' . var_export( '/' . basename( FPG_PATH ) . '/includes/serve.php', true ) . ";\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- a PHP file.
+			. "if ( ! is_file( \$fpg_serve ) ) {\n\t\$fpg_serve = " . var_export( $serve, true ) . ";\n}\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- a PHP file.
 			. "if ( is_file( \$fpg_serve ) ) {\n\tinclude_once \$fpg_serve;\n}\nunset( \$fpg_serve );\n";
 		return FPG_Files::write( self::dropin_file(), $php );
 	}

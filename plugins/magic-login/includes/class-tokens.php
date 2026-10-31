@@ -13,8 +13,9 @@
  * logins).
  *
  * Rate limits (transients, sliding windows): per account (the e-mail or
- * username as typed, lowercased, hashed) and per IP address (hashed with a
- * salt; never stored as is). They count whether the account exists or
+ * username as typed, lowercased, hashed) and per IP address (REMOTE_ADDR,
+ * or CF-Connecting-IP behind Cloudflare; hashed with a salt, never stored
+ * as is). They count whether the account exists or
  * not, so they say nothing about it.
  *
  * Log: option mgl_log (autoload off), the newest 200 events, each
@@ -201,12 +202,64 @@ final class MGL_Tokens {
 		return 'mgl_ra_' . md5( strtolower( trim( $ident ) ) );
 	}
 
-	private static function key_ip(): string {
-		$ip = class_exists( 'WC_Geolocation' ) ? (string) WC_Geolocation::get_ip_address() : '';
-		if ( '' === $ip && isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( (string) $_SERVER['REMOTE_ADDR'] ) );
+	/** Cloudflare's published ranges (cloudflare.com/ips), for CF-Connecting-IP. */
+	const CF_RANGES = array(
+		'173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22', '141.101.64.0/18',
+		'108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20', '197.234.240.0/22', '198.41.128.0/17',
+		'162.158.0.0/15', '104.16.0.0/13', '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22',
+		'2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32', '2405:8100::/32',
+		'2a06:98c0::/29', '2c0f:f248::/32',
+	);
+
+	/**
+	 * The visitor's address for the rate limit. 1.0.2: REMOTE_ADDR, the
+	 * only value a visitor cannot choose; CF-Connecting-IP only when the
+	 * request really comes from Cloudflare. Headers such as X-Forwarded-For
+	 * are not read: anyone can send them, which made the limit per IP
+	 * easy to get around.
+	 */
+	public static function client_ip(): string {
+		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( (string) $_SERVER['REMOTE_ADDR'] ) ) : '';
+		if ( '' !== $remote && isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) && self::in_ranges( $remote, self::CF_RANGES ) ) {
+			$cf = sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_CF_CONNECTING_IP'] ) );
+			if ( false !== filter_var( $cf, FILTER_VALIDATE_IP ) ) {
+				return $cf;
+			}
 		}
-		return 'mgl_ri_' . md5( $ip . '|' . wp_salt( 'nonce' ) );
+		return $remote;
+	}
+
+	/** True when $ip is inside one of the CIDR ranges (IPv4 or IPv6). */
+	public static function in_ranges( string $ip, array $ranges ): bool {
+		$bin = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- an invalid address is simply not in a range.
+		if ( false === $bin ) {
+			return false;
+		}
+		foreach ( $ranges as $cidr ) {
+			list( $net, $bits ) = explode( '/', $cidr );
+			$nbin               = @inet_pton( $net ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			if ( false === $nbin || strlen( $nbin ) !== strlen( $bin ) ) {
+				continue;
+			}
+			$bits  = (int) $bits;
+			$bytes = intdiv( $bits, 8 );
+			if ( substr( $bin, 0, $bytes ) !== substr( $nbin, 0, $bytes ) ) {
+				continue;
+			}
+			$rest = $bits % 8;
+			if ( 0 === $rest ) {
+				return true;
+			}
+			$mask = ( 0xFF << ( 8 - $rest ) ) & 0xFF;
+			if ( ( ord( $bin[ $bytes ] ) & $mask ) === ( ord( $nbin[ $bytes ] ) & $mask ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static function key_ip(): string {
+		return 'mgl_ri_' . md5( self::client_ip() . '|' . wp_salt( 'nonce' ) );
 	}
 
 	/**

@@ -1085,7 +1085,7 @@ final class PBQ_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="publishing-quote-requests-' . gmdate( 'Y-m-d' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- CSV download stream.
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- BOM for Excel.
-		fputcsv( $out, array( 'id', 'date', 'state', 'name', 'email', 'phone', 'book', 'total', 'lang' ) );
+		fputcsv( $out, array( 'id', 'date', 'state', 'name', 'email', 'phone', 'book', 'total', 'lang' ), ',', '"', '\\' );
 		$page = 1;
 		do {
 			$ids = PBQ_Requests::ids(
@@ -1105,7 +1105,7 @@ final class PBQ_Admin_UI {
 					$v         = (string) $v;
 					$row[ $i ] = '' !== $v && in_array( $v[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ? "'" . $v : $v;
 				}
-				fputcsv( $out, $row );
+				fputcsv( $out, $row, ',', '"', '\\' );
 			}
 			++$page;
 		} while ( count( $ids ) === 200 );

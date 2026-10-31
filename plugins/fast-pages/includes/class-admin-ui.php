@@ -376,7 +376,7 @@ final class FPG_Admin_UI {
 		<h2 class="fpg-h2"><?php esc_html_e( 'Page cache', 'fast-pages' ); ?></h2>
 		<div class="fpg-zone">
 			<?php
-			self::select( 'life', __( 'Διάρκεια μιας σελίδας στην cache', 'fast-pages' ), $lives, __( 'Μετά ξαναφτιάχνεται. Κάτω από 12 ώρες, ώστε οι φόρμες (nonces) να μη μένουν παλιές.', 'fast-pages' ) );
+			self::select( 'life', __( 'Διάρκεια μιας σελίδας στην cache', 'fast-pages' ), $lives, __( 'Μετά ξαναφτιάχνεται. Έως 12 ώρες, ώστε οι φόρμες και τα κουμπιά (nonces) να μη μένουν παλιά.', 'fast-pages' ) );
 			self::checkbox( 'mobile', __( 'Ξεχωριστή cache για κινητά', 'fast-pages' ), __( 'Μόνο αν το θέμα ή κάποιο plugin δείχνει άλλο HTML στα κινητά (wp_is_mobile). Τα responsive θέματα δεν το χρειάζονται.', 'fast-pages' ) );
 			self::textarea( 'exclude_urls', __( 'Σελίδες που δεν μπαίνουν ποτέ στην cache', 'fast-pages' ), __( 'Μία ανά γραμμή, * = οτιδήποτε. Το καλάθι, το ταμείο, ο λογαριασμός, το admin, τα feeds, οι αναζητήσεις και οι διευθύνσεις με παραμέτρους μένουν πάντα έξω.', 'fast-pages' ), "/contact/\n/events/*" );
 			self::textarea( 'exclude_cookies', __( 'Cookies που σημαίνουν προσωπική σελίδα', 'fast-pages' ), __( 'Ένα όνομα (ή αρχή ονόματος) ανά γραμμή. Οι συνδεδεμένοι χρήστες και όσοι έχουν καλάθι ή σχόλιο σε αναμονή μένουν πάντα έξω.', 'fast-pages' ) );

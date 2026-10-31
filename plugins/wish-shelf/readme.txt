@@ -5,7 +5,7 @@ Tags: woocommerce, wishlist, wish list, save for later, favorites
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -108,6 +108,10 @@ Only signed-in customers who ticked "Email me …" under their list, while the e
 Yes. The heart is the same HTML for everyone and the guest list page loads its products after the page. The list of a signed-in customer and shared lists are never cached.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: products in categories that Hide Catalog hides are left out of the lists too (own, shared and guest), as everywhere else in the shop.
+* Fix: the report CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.
 
 = 1.2.0 =
 * New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.

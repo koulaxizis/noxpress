@@ -364,9 +364,14 @@ final class WSH_List {
 	 */
 	private static function resolve( array $rows ): array {
 		$out = array();
+		// 1.2.1: categories hidden by Hide Catalog stay hidden here too.
+		$hidden = function_exists( 'hic_hidden_terms' ) ? hic_hidden_terms( 'listings' ) : array();
 		foreach ( $rows as $r ) {
 			$pair = WSH_Store::valid_pair( (int) $r['p'], (int) $r['v'] );
 			if ( null === $pair ) {
+				continue;
+			}
+			if ( $hidden && array_intersect( $hidden, array_map( 'intval', wc_get_product_term_ids( $pair[0], 'product_cat' ) ) ) ) {
 				continue;
 			}
 			$product = wc_get_product( $pair[0] );

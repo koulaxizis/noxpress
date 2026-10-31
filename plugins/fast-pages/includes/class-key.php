@@ -26,8 +26,12 @@ final class FPG_Key {
 	/** Query parameter of the test mode (Bible §14.2). */
 	const TEST_QS = 'fpg-test';
 
-	/** Cookies (name prefixes) of a visitor whose page is personal. */
-	const COOKIES = array( 'wordpress_logged_in_', 'wp-postpass_', 'comment_author_', 'woocommerce_items_in_cart', 'woocommerce_cart_hash', 'wp_woocommerce_session_', 'wordpress_no_cache' );
+	/**
+	 * Cookies (name prefixes) of a visitor whose page is personal. rs_ptok:
+	 * the Author Portal session of Revenue Splitter (1.0.1). Other plugins
+	 * add theirs with the filter noxpress_private_cookies (FPG_Setup).
+	 */
+	const COOKIES = array( 'wordpress_logged_in_', 'wp-postpass_', 'comment_author_', 'woocommerce_items_in_cart', 'woocommerce_cart_hash', 'wp_woocommerce_session_', 'wordpress_no_cache', 'rs_ptok' );
 
 	/** File name pattern, below <dir>/<host>/. */
 	const PATTERN = '/^[0-9a-f]{32}(-m)?\.html$/';

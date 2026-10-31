@@ -3,11 +3,12 @@
  * Plugin Name:          Store Pulse
  * Plugin URI:           https://noxpress.tech
  * Description:          Εικόνα του καταστήματος με μια ματιά: εκκρεμείς & εξυπηρετημένες παραγγελίες, επιστροφές, ακυρώσεις, χαμηλό/εξαντλημένο στοκ, πωλήσεις ανά προϊόν με εξαγωγή CSV, και κέρδος εκδότη / οφειλές δικαιούχων μέσω του Revenue Splitter (χωρίς μεταφορικά).
- * Version:              1.8.0
+ * Version:              1.8.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
  * WC requires at least: 7.1
+ * WC tested up to:      11.2
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
@@ -34,7 +35,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SP_VERSION', '1.8.0' );
+define( 'SP_VERSION', '1.8.1' );
 define( 'SP_FILE', __FILE__ );
 define( 'SP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SP_URL', plugin_dir_url( __FILE__ ) );

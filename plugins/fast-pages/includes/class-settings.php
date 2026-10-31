@@ -37,8 +37,12 @@ final class FPG_Settings {
 	/** Slug of the settings page. */
 	const PAGE = 'fpg-settings';
 
-	/** Allowed lifespans in hours (0 = until a purge). */
-	const LIVES = array( 1, 2, 4, 6, 8, 10, 12, 24, 48, 0 );
+	/**
+	 * Allowed lifespans in hours. At most 12 (1.0.1): WordPress nonces in
+	 * a cached page stop working after 12 to 24 hours, so a longer life
+	 * breaks visitors' forms and buttons.
+	 */
+	const LIVES = array( 1, 2, 4, 6, 8, 10, 12 );
 
 	/** Allowed preload rates (pages per minute). */
 	const RATES = array( 5, 10, 20, 30, 60 );
@@ -122,7 +126,11 @@ final class FPG_Settings {
 			$s[ $k ] = isset( $raw[ $k ] ) ? self::truthy( $raw[ $k ] ) : $d[ $k ];
 		}
 		$life      = isset( $raw['life'] ) ? (int) $raw['life'] : $d['life'];
-		$s['life'] = in_array( $life, self::LIVES, true ) ? $life : $d['life'];
+		if ( ! in_array( $life, self::LIVES, true ) ) {
+			// 1.0.0 also had 24, 48 and 0 (until a purge): they become 12.
+			$life = ( 0 === $life || $life > 12 ) ? 12 : $d['life'];
+		}
+		$s['life'] = $life;
 		$rate      = isset( $raw['rate'] ) ? (int) $raw['rate'] : $d['rate'];
 		$s['rate'] = in_array( $rate, self::RATES, true ) ? $rate : $d['rate'];
 		$max       = isset( $raw['preload_max'] ) ? (int) $raw['preload_max'] : $d['preload_max'];

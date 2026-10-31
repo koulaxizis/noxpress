@@ -986,14 +986,14 @@ final class SBR_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="site-bridge-log-' . gmdate( 'Ymd-His' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- UTF-8 BOM for spreadsheets.
-		fputcsv( $out, array( 'id', 'ts_utc', 'side', 'grant_id', 'client', 'site', 'tool', 'class', 'args', 'status', 'message', 'bytes', 'ms', 'ip' ) );
+		fputcsv( $out, array( 'id', 'ts_utc', 'side', 'grant_id', 'client', 'site', 'tool', 'class', 'args', 'status', 'message', 'bytes', 'ms', 'ip' ), ',', '"', '\\' );
 		foreach ( $rows as $r ) {
 			$line = array();
 			foreach ( $r as $v ) {
 				$v      = (string) $v;
 				$line[] = preg_match( '/^[=+\-@\t\r]/', $v ) ? "'" . $v : $v;
 			}
-			fputcsv( $out, $line );
+			fputcsv( $out, $line, ',', '"', '\\' );
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		exit;

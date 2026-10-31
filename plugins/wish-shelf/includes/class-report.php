@@ -193,7 +193,9 @@ final class WSH_Report {
 				__( 'Απόθεμα', 'wish-shelf' ),
 				__( 'Τιμή', 'wish-shelf' ),
 			),
-			$sep
+			$sep,
+			'"',
+			'\\'
 		);
 		foreach ( $rows as $r ) {
 			fputcsv(
@@ -207,7 +209,9 @@ final class WSH_Report {
 					'in' === $r['stock'] ? __( 'Σε απόθεμα', 'wish-shelf' ) : __( 'Εξαντλημένο', 'wish-shelf' ),
 					null === $r['price'] ? '' : str_replace( '.', $dec, number_format( $r['price'], wc_get_price_decimals(), '.', '' ) ),
 				),
-				$sep
+				$sep,
+				'"',
+				'\\'
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose

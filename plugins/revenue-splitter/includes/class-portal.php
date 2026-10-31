@@ -67,6 +67,9 @@ final class RS_Portal {
 		// Legacy alias: παλιές σελίδες με [rs_portal].
 		add_shortcode( 'rs_portal', array( __CLASS__, 'shortcode' ) );
 		add_action( 'init', array( __CLASS__, 'route' ) );
+		// v1.12.1: the portal is personal, never in a page cache.
+		add_action( 'template_redirect', array( __CLASS__, 'no_page_cache' ), 1 );
+		add_filter( 'noxpress_private_cookies', array( __CLASS__, 'private_cookie' ) );
 
 		// Ίδια προτεραιότητα με το RS_Admin_UI (9): το top-level «Noxpress»
 		// το έχει ήδη δημιουργήσει το Noxpress Core (priority 5).
@@ -743,6 +746,10 @@ final class RS_Portal {
 
 	public static function shortcode(): string {
 
+		// v1.12.1: also when the shortcode sits outside the post content
+		// (widget, template): page caches check this at the end of the page.
+		self::mark_no_cache();
+
 		ob_start();
 
 		$who = self::current();
@@ -754,6 +761,41 @@ final class RS_Portal {
 		}
 
 		return ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaping εντός render*.
+	}
+
+	/**
+	 * v1.12.1 (audit 2026-10-31 #1): a page with the portal, or any front
+	 * page of a visitor with a portal session, is never stored by a page
+	 * cache (Fast Pages, WP Rocket, host caches): otherwise one
+	 * beneficiary's dashboard could be served to every visitor.
+	 */
+	public static function no_page_cache(): void {
+		if ( is_admin() ) {
+			return;
+		}
+		$post    = is_singular() ? get_post() : null;
+		$content = $post instanceof WP_Post ? (string) $post->post_content : '';
+		$portal  = '' !== $content && ( has_shortcode( $content, self::SHORTCODE ) || has_shortcode( $content, 'rs_portal' ) );
+		if ( $portal || isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+			self::mark_no_cache();
+			if ( ! headers_sent() ) {
+				nocache_headers();
+			}
+		}
+	}
+
+	/** Fast Pages: a visitor with a portal session never gets a cached page (Bible §6). */
+	public static function private_cookie( $names ) {
+		$names   = is_array( $names ) ? $names : array();
+		$names[] = self::COOKIE_NAME;
+		return $names;
+	}
+
+	/** DONOTCACHEPAGE, read by every page cache at the end of the page. */
+	private static function mark_no_cache(): void {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
 	}
 
 	/* ---------- Login form (μόνο κλειδί, κεντραρισμένο — v1.3.5 #3) ---------- */
