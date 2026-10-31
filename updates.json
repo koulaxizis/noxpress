@@ -54,15 +54,15 @@
     },
     "data-migrator": {
       "beta": {
-        "changelog": "* Optional backup encryption (beta), off by default: AES-256 (WinZip AE-2), readable by 7-Zip, WinZip and macOS, with a password stored sealed or set in wp-config.php (`NM_BACKUP_PASSWORD`), and a password generator.\n* Encrypted backups in the analysis, the restore, the installer and WP-CLI (`--password`); uploaded encrypted backups register without the password.\n* `wp data-migrator list` shows whether a backup is encrypted.",
-        "published": "2026-10-18",
+        "changelog": "* Fix: uninstall keeps the suite's shared settings (update channel, version list, hub notices) while any Noxpress plugin is still installed. Its list missed the 12 newest plugins, so uninstalling Data Migrator could switch a site from Beta back to Stable.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a9279c055f5d7b4cd39bbd6a99bb1f1d00c3aef0da74a282c7e380ff5e8a154d",
-        "signature": "iou22Mx00kbtYNmoAGR1FMhnWUyU1s0NhWhuQpbm8udp1vMYf35QiNDtnfQ32zwsqn7kaVF47DZWvD2ZzJ8zCg==",
+        "sha256": "3370e0322a75c3a85d68e955938712f9c363e8762ccc9ae831e7727e16ec554c",
+        "signature": "Bo4jFRMHLcdgducco8i0FE5Ijv1MNZFY/jPemFynpXlM1w+nybx+V0a07aFdR+o1PDouyWx03sO4vRMWgM0ECQ==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.2.0/data-migrator.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.2.1/data-migrator.zip"
       }
     },
     "easy-withdrawal": {
