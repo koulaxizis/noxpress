@@ -782,7 +782,7 @@ final class EWD_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="withdrawals-' . gmdate( 'Y-m-d' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- BOM for Excel.
-		fputcsv( $out, array( 'request', 'submitted_utc', 'submitted_local', 'order', 'order_status', 'name', 'email', 'items', 'amount', 'currency', 'status', 'reason', 'lang' ) );
+		fputcsv( $out, array( 'request', 'submitted_utc', 'submitted_local', 'order', 'order_status', 'name', 'email', 'items', 'amount', 'currency', 'status', 'reason', 'lang' ), ',', '"', '\\' );
 		$page = 1;
 		do {
 			$args['page'] = $page;
@@ -808,7 +808,7 @@ final class EWD_Admin_UI {
 							(string) $r['status'],
 							self::csv_cell( (string) $r['reason'] ),
 							(string) $r['lang'],
-						)
+						), ',', '"', '\\'
 					);
 				}
 			}

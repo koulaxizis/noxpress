@@ -815,7 +815,9 @@ final class POR_Admin_UI {
 				__( 'Ποσό', 'pre-orders' ),
 				__( 'Κυκλοφορία', 'pre-orders' ),
 			),
-			$sep
+			$sep,
+			'"',
+			'\\'
 		);
 		foreach ( $items as $it ) {
 			$p   = wc_get_product( $it['id'] );
@@ -842,7 +844,9 @@ final class POR_Admin_UI {
 						number_format( (float) $item->get_total() + (float) $item->get_total_tax(), 2, $dec, '' ),
 						'' !== $it['date'] ? $it['date'] : self::csv_text( __( 'χωρίς ημερομηνία', 'pre-orders' ) ),
 					),
-					$sep
+					$sep,
+					'"',
+					'\\'
 				);
 			}
 		}

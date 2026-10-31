@@ -3,11 +3,12 @@
  * Plugin Name:          Easy Withdrawal
  * Plugin URI:           https://noxpress.tech
  * Description:          Λειτουργία υπαναχώρησης για WooCommerce (Οδηγία ΕΕ 2023/2673): φόρμα για πελάτες και επισκέπτες, επιλογή προϊόντων και ποσοτήτων, επιβεβαίωση σε δύο βήματα, απόδειξη με email, εξαιρέσεις (εξατομικευμένα, ψηφιακά με συναίνεση), καταγραφή στην παραγγελία και λίστα αιτημάτων στο admin.
- * Version:              1.2.0
+ * Version:              1.2.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
  * WC requires at least: 7.1
+ * WC tested up to:      11.2
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
@@ -62,7 +63,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'EWD_VERSION', '1.2.0' );
+define( 'EWD_VERSION', '1.2.1' );
 define( 'EWD_FILE', __FILE__ );
 define( 'EWD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EWD_URL', plugin_dir_url( __FILE__ ) );

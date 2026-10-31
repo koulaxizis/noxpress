@@ -8,6 +8,7 @@
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
  * WC requires at least: 8.8
+ * WC tested up to:      11.2
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT

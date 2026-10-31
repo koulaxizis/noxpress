@@ -5,7 +5,7 @@ Tags: cache, page cache, performance, minify, lazy load
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,12 @@ Use one page cache. Keep the host's object cache (Memcached, Redis): it works to
 The drop-in (only if it is ours), the `WP_CACHE` line (only if Fast Pages added it), the cache folder, the settings and the scheduled events are removed. WP Rocket's settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: a page lives at most 12 hours in the cache. The 24 h, 48 h and "until the next purge" choices are gone (a saved one becomes 12 h): WordPress nonces in older pages stopped forms and buttons from working.
+* Fix: a site whose drop-in names another copy of the plugin (a staging copy, a moved site, a symlinked plugins folder) no longer stops with "Cannot declare class FPG_Key". The drop-in now loads the plugin from the site's own plugins folder first, and a 1.0.0 drop-in is rewritten on update.
+* Fix: no PHP 8.4 deprecation notice for an implicitly nullable parameter (FPG_Files).
+* New: the Author Portal cookie of Revenue Splitter (rs_ptok) means "personal page", like a login. Other plugins add their own session cookies with the filter noxpress_private_cookies.
 
 = 1.0.0 =
 * First release (beta): page cache with a drop-in and test mode, smart purging, background preload from the sitemap, CSS / JS minify, lazy load for images, iframes and backgrounds, click-to-play YouTube, image dimensions, hover preload, import from WP Rocket, database cleanup, and seven abilities for Site Bridge.

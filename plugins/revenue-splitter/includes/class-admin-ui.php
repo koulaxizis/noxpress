@@ -2714,10 +2714,10 @@ final class RS_Admin_UI {
 		// UTF-8 BOM για σωστή αναγνώριση σε Excel.
 		fwrite( $fh, "\xEF\xBB\xBF" );
 
-		fputcsv( $fh, self::csv_header() );
+		fputcsv( $fh, self::csv_header(), ',', '"', '\\' );
 
 		foreach ( $report['products'] as $p ) {
-			fputcsv( $fh, array_map( array( __CLASS__, 'csv_cell' ), self::product_cells( $p ) ) );
+			fputcsv( $fh, array_map( array( __CLASS__, 'csv_cell' ), self::product_cells( $p ) ), ',', '"', '\\' );
 		}
 
 		// ΣΥΝΟΛΑ row.
@@ -2731,16 +2731,16 @@ final class RS_Admin_UI {
 				number_format( (float) $report['totals']['net'], 2, ',', '.' ),
 				'',
 				'',
-			)
+			), ',', '"', '\\'
 		);
 
 				// ---- v1.3.8: δεύτερο block «Ανά κανάλι» ----
-		fputcsv( $fh, array() );
-		fputcsv( $fh, array( __( 'Ανά κανάλι', 'revenue-splitter' ) ) );
-		fputcsv( $fh, self::channel_csv_header() );
+		fputcsv( $fh, array(), ',', '"', '\\' );
+		fputcsv( $fh, array( __( 'Ανά κανάλι', 'revenue-splitter' ) ), ',', '"', '\\' );
+		fputcsv( $fh, self::channel_csv_header(), ',', '"', '\\' );
 
 		foreach ( $channel_rows as $cr ) {
-			fputcsv( $fh, array_map( array( __CLASS__, 'csv_cell' ), self::channel_cells( $cr ) ) );
+			fputcsv( $fh, array_map( array( __CLASS__, 'csv_cell' ), self::channel_cells( $cr ) ), ',', '"', '\\' );
 		}
 
 		fclose( $fh );

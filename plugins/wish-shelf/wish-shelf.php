@@ -3,11 +3,12 @@
  * Plugin Name:          Wish Shelf
  * Plugin URI:           https://noxpress.tech
  * Description:          Λίστα επιθυμιών για το WooCommerce: καρδούλα στις κάρτες και στη σελίδα προϊόντος, λίστα για επισκέπτες χωρίς cookies, λίστες με όνομα, emails για πτώση τιμής και επιστροφή σε απόθεμα, παραλλαγές, καλάθι για όλα με ένα κλικ, κοινοποίηση με σύνδεσμο, καρτέλα στον λογαριασμό, αναφορά για το τι θέλουν οι πελάτες και εισαγωγή από WishSuite, YITH και TI.
- * Version:              1.2.0
+ * Version:              1.2.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
  * WC requires at least: 7.1
+ * WC tested up to:      11.2
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
@@ -75,7 +76,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WSH_VERSION', '1.2.0' );
+define( 'WSH_VERSION', '1.2.1' );
 define( 'WSH_FILE', __FILE__ );
 define( 'WSH_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WSH_URL', plugin_dir_url( __FILE__ ) );

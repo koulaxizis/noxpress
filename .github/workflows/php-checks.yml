@@ -1,0 +1,87 @@
+# Ελέγχει τον PHP κώδικα των plugins σε κάθε PR (Bible §2, έλεγχος 2026-10-31 #8).
+#
+#  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας) και 8.4 (η νεότερη),
+#             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
+#  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη) και PHPStan
+#             (level 1, stubs WordPress/WooCommerce). Προς το παρόν μόνο
+#             ενημερωτικό (continue-on-error στα βήματα, το job μένει πράσινο):
+#             τα αποτελέσματα φαίνονται στο summary του run, και γίνεται
+#             υποχρεωτικό όταν καθαρίσει.
+name: PHP checks
+
+on:
+  pull_request:
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: php-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+      - name: php -l
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r -d '' f; do
+            out=$(php -d error_reporting=-1 -d display_errors=1 -l "$f" 2>&1) || { echo "$out"; fail=1; continue; }
+            if echo "$out" | grep -qE 'Deprecated|Warning'; then echo "$out"; fail=1; fi
+          done < <(find plugins -name '*.php' -not -path '*/vendor/*' -print0)
+          exit $fail
+      - name: Headers and Core copies
+        if: matrix.php == '8.4'
+        run: python3 .github/scripts/check-plugin-headers.py
+
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+      - name: Install tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/qa" && cd "$RUNNER_TEMP/qa"
+          composer init -n --name noxpress/qa >/dev/null
+          composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer require -n --dev dealerdirect/phpcodesniffer-composer-installer:^1 phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs
+      - name: PHPCS (PHP 7.4+ compatibility)
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/qa/vendor/bin/phpcs" --standard=PHPCompatibilityWP --runtime-set testVersion 7.4- \
+            --extensions=php --ignore='*/vendor/*' -q --report=summary plugins | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: PHPStan (level 1)
+        continue-on-error: true
+        run: |
+          cat > "$RUNNER_TEMP/phpstan.neon" <<EOF
+          includes:
+            - $RUNNER_TEMP/qa/vendor/szepeviktor/phpstan-wordpress/extension.neon
+          parameters:
+            level: 1
+            paths: [ $GITHUB_WORKSPACE/plugins ]
+            excludePaths: [ '*/vendor/*' ]
+            scanFiles: [ $RUNNER_TEMP/qa/vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php ]
+            reportUnmatchedIgnoredErrors: false
+          EOF
+          "$RUNNER_TEMP/qa/vendor/bin/phpstan" analyse -c "$RUNNER_TEMP/phpstan.neon" --no-progress --memory-limit=2G --error-format=table | tail -n 200 | tee -a "$GITHUB_STEP_SUMMARY"

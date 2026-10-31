@@ -3,11 +3,12 @@
  * Plugin Name:          Magic Login
  * Plugin URI:           https://noxpress.tech
  * Description:          Σύνδεση πελατών χωρίς κωδικό: κουμπί στη φόρμα σύνδεσης του «Ο λογαριασμός μου» και του ταμείου που στέλνει με email σύνδεσμο μίας χρήσης, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης. Ο κωδικός μένει ως εναλλακτική· οι διαχειριστές συνδέονται μόνο με κωδικό.
- * Version:              1.0.1
+ * Version:              1.0.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
  * WC requires at least: 7.1
+ * WC tested up to:      11.2
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
@@ -81,7 +82,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MGL_VERSION', '1.0.1' );
+define( 'MGL_VERSION', '1.0.2' );
 define( 'MGL_FILE', __FILE__ );
 define( 'MGL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MGL_URL', plugin_dir_url( __FILE__ ) );

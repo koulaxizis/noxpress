@@ -3,7 +3,7 @@ Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
 Tags: woocommerce, formatting, bulk edit, product description, typography
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.5.0
 License: MIT

@@ -1538,7 +1538,9 @@ final class BRC_Admin_UI {
 				__( 'Προσπάθειες', 'broadcast' ),
 				__( 'Απάντηση', 'broadcast' ),
 			),
-			$sep
+			$sep,
+			'"',
+			'\\'
 		);
 		$names    = self::module_names();
 		$statuses = self::status_names();
@@ -1557,7 +1559,9 @@ final class BRC_Admin_UI {
 					$r['tries'],
 					self::cell( $r['result'] ),
 				),
-				$sep
+				$sep,
+				'"',
+				'\\'
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output.

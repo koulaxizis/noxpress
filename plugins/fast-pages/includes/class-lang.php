@@ -87,7 +87,7 @@ final class FPG_Lang {
 		'Μέχρι το επόμενο καθάρισμα'                       => 'Until the next purge',
 		'%d σελίδες το λεπτό'                              => '%d pages per minute',
 		'Διάρκεια μιας σελίδας στην cache'                 => 'How long a page stays in the cache',
-		'Μετά ξαναφτιάχνεται. Κάτω από 12 ώρες, ώστε οι φόρμες (nonces) να μη μένουν παλιές.' => 'Then it is built again. Under 12 hours, so forms (nonces) do not go stale.',
+		'Μετά ξαναφτιάχνεται. Έως 12 ώρες, ώστε οι φόρμες και τα κουμπιά (nonces) να μη μένουν παλιά.' => 'Then it is built again. At most 12 hours, so forms and buttons (nonces) do not go stale.',
 		'Ξεχωριστή cache για κινητά'                       => 'Separate cache for mobile',
 		'Μόνο αν το θέμα ή κάποιο plugin δείχνει άλλο HTML στα κινητά (wp_is_mobile). Τα responsive θέματα δεν το χρειάζονται.' => 'Only if the theme or a plugin shows different HTML on mobile (wp_is_mobile). Responsive themes do not need it.',
 		'Σελίδες που δεν μπαίνουν ποτέ στην cache'         => 'Pages that never go into the cache',

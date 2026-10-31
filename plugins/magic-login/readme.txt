@@ -5,7 +5,7 @@ Tags: passwordless, magic link, login, email, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -78,6 +78,9 @@ The customer can ask again (within the limits) or log in with their password. Th
 The settings, the log, the email's WooCommerce settings, pending links and rate-limit counters are removed. No user, password or order is touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix: the limit per IP address reads REMOTE_ADDR, and CF-Connecting-IP only when the request comes from Cloudflare. Headers such as X-Forwarded-For, which any visitor can send, are no longer used, so the limit cannot be bypassed by changing them.
 
 = 1.0.1 =
 * The log option is created on activation, so a persistent object cache (Redis) never loses the first event.

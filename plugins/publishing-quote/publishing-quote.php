@@ -3,7 +3,7 @@
  * Plugin Name:          Publishing Quote
  * Plugin URI:           https://noxpress.tech
  * Description:          Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ο επισκέπτης διαλέγει μέγεθος, επιμέλεια, εξώφυλλο, εικονογράφηση, εκτύπωση και έξτρα παροχές, και βλέπει μόνο το ποσό ανά υπηρεσία και ένα σύνολο. Οι συντελεστές μένουν στον server. Με το «Ενδιαφέρομαι» αφήνει τα στοιχεία του και το αίτημα έρχεται σε σένα. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.1.0
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -64,7 +64,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PBQ_VERSION', '1.1.0' );
+define( 'PBQ_VERSION', '1.1.1' );
 define( 'PBQ_FILE', __FILE__ );
 define( 'PBQ_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PBQ_URL', plugin_dir_url( __FILE__ ) );

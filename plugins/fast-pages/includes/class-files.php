@@ -108,7 +108,7 @@ final class FPG_Files {
 	 * Walks every cached page: $fn( string $file, int $mtime, int $size ).
 	 * Returns array( pages, bytes ).
 	 */
-	private static function walk( callable $fn = null ): array {
+	private static function walk( ?callable $fn = null ): array {
 		$pages = 0;
 		$bytes = 0;
 		foreach ( self::hosts() as $host ) {
