@@ -5,7 +5,7 @@ Tags: backup, restore, migration, clone, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -111,6 +111,9 @@ Press **Undo** on the Restore page (or `wp data-migrator undo`). The site goes b
 Settings, jobs, work files, logs and any undo data are deleted. The backups are deleted too, unless "Keep backups" is ticked in DM Settings. The stored encryption password is always deleted: kept encrypted backups need their password typed in. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: uninstall keeps the suite's shared settings (update channel, version list, hub notices) while any Noxpress plugin is still installed. Its list missed the 12 newest plugins, so uninstalling Data Migrator could switch a site from Beta back to Stable.
 
 = 1.2.0 =
 * Optional backup encryption (beta), off by default: AES-256 (WinZip AE-2), readable by 7-Zip, WinZip and macOS, with a password stored sealed or set in wp-config.php (`NM_BACKUP_PASSWORD`), and a password generator.

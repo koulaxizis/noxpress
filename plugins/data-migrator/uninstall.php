@@ -152,7 +152,7 @@ foreach ( (array) glob( rtrim( WP_CONTENT_DIR, '/\\' ) . '/nm-stage-*', GLOB_ONL
 // ---------------------------------------------------------------------
 
 $nm_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'data-migrator' ) as $nm_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed', 'live-operator', 'trade-accounts', 'fast-pages', 'broadcast', 'magic-login', 'trade-feed-import' ) as $nm_slug ) {
 	if ( 'data-migrator' !== $nm_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $nm_slug . '/' . $nm_slug . '.php' ) ) {
 		$nm_suite_left = true;
 		break;
