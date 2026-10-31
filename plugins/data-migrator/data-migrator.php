@@ -3,7 +3,7 @@
  * Plugin Name:          Data Migrator
  * Plugin URI:           https://noxpress.tech
  * Description:          Πλήρες αντίγραφο ασφαλείας του WordPress / WooCommerce site (βάση, uploads, θέματα, plugins, core) και επαναφορά στον ίδιο ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις. Ανάλυση πριν την επαναφορά, αναίρεση με ένα κλικ, installer για άδειο server, WP-CLI. Χωρίς εξωτερικές υπηρεσίες.
- * Version:              1.2.0
+ * Version:              1.2.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -74,7 +74,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NM_VERSION', '1.2.0' );
+define( 'NM_VERSION', '1.2.1' );
 define( 'NM_FILE', __FILE__ );
 define( 'NM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NM_URL', plugin_dir_url( __FILE__ ) );
