@@ -79,6 +79,7 @@ The drop-in (only if it is ours), the `WP_CACHE` line (only if Fast Pages added 
 = 1.0.1 =
 * Fix: a page lives at most 12 hours in the cache. The 24 h, 48 h and "until the next purge" choices are gone (a saved one becomes 12 h): WordPress nonces in older pages stopped forms and buttons from working.
 * Fix: a site whose drop-in names another copy of the plugin (a staging copy, a moved site, a symlinked plugins folder) no longer stops with "Cannot declare class FPG_Key". The drop-in now loads the plugin from the site's own plugins folder first, and a 1.0.0 drop-in is rewritten on update.
+* Fix: no PHP 8.4 deprecation notice for an implicitly nullable parameter (FPG_Files).
 * New: the Author Portal cookie of Revenue Splitter (rs_ptok) means "personal page", like a login. Other plugins add their own session cookies with the filter noxpress_private_cookies.
 
 = 1.0.0 =

@@ -4,8 +4,9 @@
 #             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
 #  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη) και PHPStan
 #             (level 1, stubs WordPress/WooCommerce). Προς το παρόν μόνο
-#             ενημερωτικό (continue-on-error): τα αποτελέσματα φαίνονται στο
-#             summary του run, και γίνεται υποχρεωτικό όταν καθαρίσει.
+#             ενημερωτικό (continue-on-error στα βήματα, το job μένει πράσινο):
+#             τα αποτελέσματα φαίνονται στο summary του run, και γίνεται
+#             υποχρεωτικό όταν καθαρίσει.
 name: PHP checks
 
 on:
@@ -51,7 +52,6 @@ jobs:
   static:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -64,13 +64,15 @@ jobs:
           mkdir -p "$RUNNER_TEMP/qa" && cd "$RUNNER_TEMP/qa"
           composer init -n --name noxpress/qa >/dev/null
           composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-          composer require -n --dev phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs
+          composer require -n --dev dealerdirect/phpcodesniffer-composer-installer:^1 phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs
       - name: PHPCS (PHP 7.4+ compatibility)
+        continue-on-error: true
         run: |
           set -o pipefail
           "$RUNNER_TEMP/qa/vendor/bin/phpcs" --standard=PHPCompatibilityWP --runtime-set testVersion 7.4- \
             --extensions=php --ignore='*/vendor/*' -q --report=summary plugins | tee -a "$GITHUB_STEP_SUMMARY"
       - name: PHPStan (level 1)
+        continue-on-error: true
         run: |
           cat > "$RUNNER_TEMP/phpstan.neon" <<EOF
           includes:
