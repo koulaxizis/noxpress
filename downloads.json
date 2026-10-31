@@ -1,8 +1,8 @@
 {
   "display": 500,
-  "total": 716,
+  "total": 717,
   "offset": 5,
-  "updated": "2026-10-30",
+  "updated": "2026-10-31",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -714,6 +714,46 @@
     },
     "693087420": {
       "file": "nox-ti-1.0.1/trade-feed-import.zip",
+      "count": 1
+    },
+    "695718102": {
+      "file": "nox-rs-1.12.1/revenue-splitter.zip",
+      "count": 0
+    },
+    "695718193": {
+      "file": "nox-sp-1.8.1/store-pulse.zip",
+      "count": 0
+    },
+    "695718401": {
+      "file": "nox-ew-1.2.1/easy-withdrawal.zip",
+      "count": 0
+    },
+    "695718629": {
+      "file": "nox-sb-1.11.1/site-bridge.zip",
+      "count": 0
+    },
+    "695718771": {
+      "file": "nox-pq-1.1.1/publishing-quote.zip",
+      "count": 0
+    },
+    "695718930": {
+      "file": "nox-po-1.1.1/pre-orders.zip",
+      "count": 0
+    },
+    "695719057": {
+      "file": "nox-ws-1.2.1/wish-shelf.zip",
+      "count": 0
+    },
+    "695719229": {
+      "file": "nox-fp-1.0.1/fast-pages.zip",
+      "count": 0
+    },
+    "695719358": {
+      "file": "nox-br-1.1.6/broadcast.zip",
+      "count": 0
+    },
+    "695719451": {
+      "file": "nox-ml-1.0.2/magic-login.zip",
       "count": 0
     }
   }
