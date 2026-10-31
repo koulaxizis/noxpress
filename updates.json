@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fixed: when Instagram's list of posts leaves out the caption of a post, a waiting item without text now asks Instagram for that post on its own and takes the caption from there.\n* New: the last check notes, for the five newest posts, their id, type and the length of the caption Instagram returned (no content). This helps support when a caption is missing.",
-        "published": "2026-10-30",
+        "changelog": "* Fix: the history CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "aab4f5b11f394368b64d9e66e56d90f3296bab967c4117e44d831fe0f719beab",
-        "signature": "Oy8XeQj7e8cktjKba7qKrAWIXDh9yoys+BAsnkuPs2+HPCk5Uys+9vihA/U4ryJ5Y4qONRwBEaUi9VzbDFZBCA==",
+        "sha256": "ac560f1d5628c5bc561e1bc598ef70f091f6ca994fae93884caf0cd8c9fcbc0d",
+        "signature": "aKkwn+e0HB/UND21ZQA1Vkaj/gC+tO1i8Lqw25hlNwHctVroXs69ozGyPeyXCO10m5bceo/RT51n1bXta5xxAQ==",
         "tested_wp": "7.1",
-        "version": "1.1.5",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.5/broadcast.zip"
+        "version": "1.1.6",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.6/broadcast.zip"
       }
     },
     "checkout-extras": {
@@ -67,28 +67,28 @@
     },
     "easy-withdrawal": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: the requests CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f094a1f980e12e5facb0f5f34c53146d463710f4c7b542dd123943c508a40684",
-        "signature": "yRxWRibsyVPD6CyZGfO/p42sb36NEaU23KpQh10IrygqRQenf7288+yONmVr5dfkwVgNIup1e+NR1aUCXfG8Ag==",
+        "sha256": "7e3787c34a6d556031a76fe1307db689bae3928752985e417ae285ad98b710c9",
+        "signature": "8VwqQfCTbajOfkjPNi1OyskslrXLlJXUaN7tNTz5wuSNO66CCd/KmqNFEn1dCG61iaTJBqtOaMXclxrcwtUIDg==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.0/easy-withdrawal.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.1/easy-withdrawal.zip"
       }
     },
     "fast-pages": {
       "beta": {
-        "changelog": "* First release (beta): page cache with a drop-in and test mode, smart purging, background preload from the sitemap, CSS / JS minify, lazy load for images, iframes and backgrounds, click-to-play YouTube, image dimensions, hover preload, import from WP Rocket, database cleanup, and seven abilities for Site Bridge.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: a page lives at most 12 hours in the cache. The 24 h, 48 h and \"until the next purge\" choices are gone (a saved one becomes 12 h): WordPress nonces in older pages stopped forms and buttons from working.\n* Fix: a site whose drop-in names another copy of the plugin (a staging copy, a moved site, a symlinked plugins folder) no longer stops with \"Cannot declare class FPG_Key\". The drop-in now loads the plugin from the site's own plugins folder first, and a 1.0.0 drop-in is rewritten on update.\n* Fix: no PHP 8.4 deprecation notice for an implicitly nullable parameter (FPG_Files).\n* New: the Author Portal cookie of Revenue Splitter (rs_ptok) means \"personal page\", like a login. Other plugins add their own session cookies with the filter noxpress_private_cookies.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a69f9cfc1bd9c088633ffaac68dab8b89cac6fa6bbe313273ad1cfb413071f71",
-        "signature": "diq2Bwma16SQqw8jerQp4Ed8uO7Vkf1Ul7SRBr3tyM3R1DQ5wPd8r1OGjNcLXLHxdEuL1dveXccpAjdMWIsJAA==",
+        "sha256": "16671f5c98b4b753ed87eb527d178da6c67df5adfc8dc307aadd21762527f53e",
+        "signature": "INWA28rwdrKAYTE72AaFxI6l+Ii6PE1VAABAmyKWHhCZ7IpQBLsCxDIrqCjsCd1iS8tVSyM0BQWL78uBAExeBQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.0/fast-pages.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.1/fast-pages.zip"
       }
     },
     "featured-creators": {
@@ -158,15 +158,15 @@
     },
     "magic-login": {
       "beta": {
-        "changelog": "* The log option is created on activation, so a persistent object cache (Redis) never loses the first event.\n* The front-end CSS loads only on a page that shows the button or the confirmation box (not in test mode without ?mgl-test, nor where a login form has the button switched off).",
-        "published": "2026-10-30",
+        "changelog": "* Fix: the limit per IP address reads REMOTE_ADDR, and CF-Connecting-IP only when the request comes from Cloudflare. Headers such as X-Forwarded-For, which any visitor can send, are no longer used, so the limit cannot be bypassed by changing them.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f2d4586b8e47dae2b5afd87a16ff687ebd1864ad0e3947b90c4053859b621089",
-        "signature": "b3QSwvtO4Z0fica7xh8ypMVbJW3/JYb5py60nlFK/IP1uGZZ8q/1wQN0ImfmrvQZ+3bMEo5gVNo2Fa45dORuDw==",
+        "sha256": "79dbe47f82cf2d47dcd3019a197919ed77bef067a7eeb6f3313438b6aa2d6db2",
+        "signature": "pJtSqdW74xBo91Bh1dlcmpQOf6EuamPbc3ngncXpuuxc/WVzb3MzuNLNHXtELOq0i8vn1GFtuNtyQrniZII8Dw==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.1/magic-login.zip"
+        "version": "1.0.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.2/magic-login.zip"
       }
     },
     "oros-connect": {
@@ -184,15 +184,15 @@
     },
     "pre-orders": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: the pre-orders CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "65347ce57a8aeb031673522f9ddae6ece56ec202043da91d0dbef8e7459b4c52",
-        "signature": "f4jyEY4xlQaidVzdmZ5yxqx+k509kDzIHa6NBIYi8LsMHT6sdaYcDKnMYcsqqFzkoEAjmXq3B9R1KRMlGw69Ag==",
+        "sha256": "7c67fc1907a60efee6b5bc7262d07d01e57e30fb2d4f978854b69f2819160826",
+        "signature": "ox9c7nVZQwCbIb/wvH4qL3C6cU4avjaDIF0UknUjy9zOSkSr43wUZaiUWduSHEYWqZIWsQvFxQ8TNBDHhlmrCA==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.0/pre-orders.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.1/pre-orders.zip"
       }
     },
     "product-bundles": {
@@ -223,28 +223,28 @@
     },
     "publishing-quote": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: the requests CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a50b6d23cb0a1a033ada7df4a4b55f48ae2c4122dc9af648aed0303b2ce90b2c",
-        "signature": "stW2fs+5os+dffhrjPNxvf6Oawfuh0RpNxCrGUVFCP20TWo4n12wV/nbeq3CRexQA7210BsvyGa7EBXX77VNAQ==",
+        "sha256": "3facfdbe90c66e653240ad5a93de8377b1510946437e7ca64a4640777e59f50f",
+        "signature": "/3xqTGiUkkEMAnIT2n99brgVZdk2hmzIywLxeIUEPe6xmPFYxUabsupdvGKAUQajE5A76NnMIdQpYsgCHvXFBQ==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.0/publishing-quote.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.1/publishing-quote.zip"
       }
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: the Author Portal is never stored by a page cache (Fast Pages, WP Rocket, host caches). Its page, and every front page of a visitor with a portal session, now sends DONOTCACHEPAGE and no-cache headers; before, one beneficiary's dashboard could be cached and shown to every visitor.\n* Fix: CSV exports pass every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.\n* Tested up to WordPress 7.1 and WooCommerce 11.2.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "63d8b2bf3237bbf9803a6b0b8a6e23e0cc60dfcea38aada9b99a9426b69e100f",
-        "signature": "H8X8YhDJaujVnag278iYDsE6iNTCvdl2MVmOu9A1zwMUdKo2YTmxUscRsQODM+gYXzsP8RfGK9Pqn8Yl06kTBw==",
-        "tested_wp": "6.8",
-        "version": "1.12.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.0/revenue-splitter.zip"
+        "sha256": "0c80dd53b809dab2804958ab26298e64f084a895c9092586f9f5a89c489a1df6",
+        "signature": "qghTk163+sBhReVe1HADBtxZawiTklmKBr+wA+uPd14ggysvpkdI5dSwVfCsJoUiJFBp9HG/XNpFwJ4mG+6IDg==",
+        "tested_wp": "7.1",
+        "version": "1.12.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.1/revenue-splitter.zip"
       }
     },
     "shipping-notes": {
@@ -275,15 +275,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: the mobile app can work Broadcast's queue (Broadcast 1.1.0 with its post queue module on): `broadcast/queue-list` and `broadcast/status` with the read key, `broadcast/queue-send` (send, optionally with an edited text) and `broadcast/queue-reject` with the act key (fingerprint). As with Book Feed, a closed write window is opened for 15 minutes first when the site lets the Hub open it.",
-        "published": "2026-10-28",
+        "changelog": "* Fix: the history CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "210f2f6eac7f549453988332cce4058f1edad1a67ebf59758b8e8d438ea34c10",
-        "signature": "OJh8bQtOaeTKgNnpl/6k3ANW6HcFWPPWdAzcI7gKEtQxJasPD14qMaHFj9594I8gKz29y/RDNnepzZwo7zihAg==",
+        "sha256": "06f832b6ba9d2aaa492537204c53dbe9b57f333712f6f3b692d25d4563043ff7",
+        "signature": "kNoqSklubh78wOo3UfHsf3nliJWeT1GM6Ei0B0QcadUuG8ayCUexTfNQKiPRrZgb19J4c4SOtaNeQCFfo2nQCw==",
         "tested_wp": "7.1",
-        "version": "1.11.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.0/site-bridge.zip"
+        "version": "1.11.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.1/site-bridge.zip"
       }
     },
     "smart-formatter": {
@@ -314,15 +314,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: the sales CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.\n* Tested up to WordPress 7.1 and WooCommerce 11.2.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "6486a333aca4bc8b92717c7ad4a34caa2569cbe034af240d32f2255610722a2b",
-        "signature": "1BPERlppAtJt2L6I4y8byunzLrL4wgd4gYV2IsSaQDEjqaQLSon5tkdn023yMePzxti5IrQn+lm0m/wIMbUjDQ==",
-        "tested_wp": "6.8",
-        "version": "1.8.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.0/store-pulse.zip"
+        "sha256": "f66ac70102be7f72b5ef227f23a4c5f28ac376ace0864120324537508c90b435",
+        "signature": "uV26dHyQftoRYZi5vGW3d//P3wBYpZbS/1DpxNDNoKEhq/Ns8U6SE3N1uYWFkMLPl499VPY7es1N268A2hQYCg==",
+        "tested_wp": "7.1",
+        "version": "1.8.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.1/store-pulse.zip"
       }
     },
     "theme-patcher": {
@@ -379,15 +379,15 @@
     },
     "wish-shelf": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: products in categories that Hide Catalog hides are left out of the lists too (own, shared and guest), as everywhere else in the shop.\n* Fix: the report CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
+        "published": "2026-10-31",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "80734287cdcd323a760f80c916db1c62f3ddd0ab0da05bf1869ec2d17c6d6de5",
-        "signature": "CVNjeKQtBP4u6qd4mNUS6dguYvxc9MsI4NMItru1tQI/SAEBkhWHVmZLVdqiwmOh7ZlMUqTEJ87YMcNQA+1uBg==",
+        "sha256": "989a2c013584997877cd47a06a2abab150b976d7d4b0087e63f97b39af68a8dd",
+        "signature": "AUHPLo11Oai3zgeY5a0NPbnmfDBW+dpCc+whHBW86QIu2F1IxNb+/+AicU+/oV1IblZqQR9lUS880idswyp1DA==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.0/wish-shelf.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.1/wish-shelf.zip"
       }
     }
   }
