@@ -2,7 +2,10 @@
 
 Ενιαίο πρότυπο σχεδιασμού και κώδικα για τα plugins της σουίτας Noxpress (noxpress.tech).
 
-- **Έκδοση:** 1.82 (2026-10-31). Νέο, από τον έλεγχο σε βάθος της 2026-10-31 (Revenue Splitter 1.12.1, Fast Pages 1.0.1, Magic Login 1.0.2, Wish Shelf 1.2.1 και CSV σε 6 ακόμα plugins): plugin με δικό του cookie σύνδεσης (όχι του WordPress) κρατά τις σελίδες του έξω από κάθε page cache και δηλώνει το cookie στο φίλτρο `noxpress_private_cookies`· διάρκεια page cache έως 12 ώρες (§14.34)· όρια ανά IP μόνο από το `REMOTE_ADDR` ή το `CF-Connecting-IP` της Cloudflare (§11)· `fputcsv()` πάντα με όλα τα ορίσματα (§10)· ίδια `Tested up to` και `WC tested up to` σε όλη τη σουίτα, με έλεγχο σε κάθε PR από το workflow «PHP checks» (§10, §13).
+Σύνοψη της εμφάνισης για όποιον σχεδιάζει ή ελέγχει UI: [DESIGN.md](DESIGN.md). Αλλαγή στους §2, §3, §5, §7 ή §14 που αφορά την εμφάνιση αλλάζει και το `DESIGN.md` στο ίδιο PR.
+
+- **Έκδοση:** 1.83 (2026-10-31). Νέο: το `DESIGN.md` στη ρίζα του repo, η γλώσσα σχεδιασμού όλης της σουίτας σε μία σελίδα στα αγγλικά (admin, hub, site)· σε διαφωνία κερδίζει το Bible. Οι βοηθητικές τιμές της παλέτας που ήδη έχουν όλα τα plugins από το Core (§2) και κανόνες τυπογραφίας και εφέ για το admin (§3).
+- **1.82** (2026-10-31). Νέο, από τον έλεγχο σε βάθος της 2026-10-31 (Revenue Splitter 1.12.1, Fast Pages 1.0.1, Magic Login 1.0.2, Wish Shelf 1.2.1 και CSV σε 6 ακόμα plugins): plugin με δικό του cookie σύνδεσης (όχι του WordPress) κρατά τις σελίδες του έξω από κάθε page cache και δηλώνει το cookie στο φίλτρο `noxpress_private_cookies`· διάρκεια page cache έως 12 ώρες (§14.34)· όρια ανά IP μόνο από το `REMOTE_ADDR` ή το `CF-Connecting-IP` της Cloudflare (§11)· `fputcsv()` πάντα με όλα τα ορίσματα (§10)· ίδια `Tested up to` και `WC tested up to` σε όλη τη σουίτα, με έλεγχο σε κάθε PR από το workflow «PHP checks» (§10, §13).
 - **1.81** (2026-10-30). Νέο: Trade Feed Import στη σουίτα (§8, θέση μενού 300· §13, κωδικός `ti`· §16, Core 1.2.4), η πλευρά του βιβλιοπωλείου για το Trade Feed του Trade Accounts· public API `tfi_get_source()` (§6).
 - **1.80** (2026-10-30). Νέο: Magic Login στη σουίτα (§8, θέση μενού 290· §13, κωδικός `ml`· §16, Core 1.2.3)· σύνδεση χωρίς κωδικό με σύνδεσμο μίας χρήσης (§14.35)· φίλτρα `mgl_user_allowed` και `mgl_text`, action `mgl_logged_in` (§6).
 - **1.79** (2026-10-29): οι εφαρμογές Android έχουν κάρτες στην ενότητα `#apps` του site (`#site-bridge-app`, `#live-operator-app`), με την έκδοση του `versionName` που ελέγχει το «Site cards» (§13).
@@ -117,12 +120,27 @@
 | warn | `#f5c97e` | προειδοποιήσεις |
 | danger | `#ff9a9a` | σφάλματα |
 
+Βοηθητικές τιμές (νέο, 1.83· τις έχουν ήδη όλα τα plugins μέσω του Core):
+
+| Τιμή | Χρήση |
+|---|---|
+| `#2b2e36` | περίγραμμα του panel (§3) |
+| `#f0eefc` | κείμενο μέσα σε inputs, selects, textareas |
+| `#8b87a3` | placeholders |
+| `#e6e1fd` | κείμενο thead |
+| `#eeeafc` | κείμενο του σκούρου `.button` |
+| `#ffffff` | κείμενο του `.button-primary` και του pill Ko-fi, έντονα νούμερα πινάκων |
+| `#a29dc0` | κείμενο footer |
+| `#9fe0b5` | επιτυχία / «ok» σε κείμενα και badges |
+| `#3d6b4f` / `#6b5a33` / `#6b3a3a` | περιγράμματα badge ok / warn / danger |
+
 ## §3 Panel σελίδας
 
 - Κάθε σελίδα admin είναι `<div class="wrap {p}-wrap">` με `color-scheme: dark`, φόντο bg, περίγραμμα `#2b2e36`, `border-radius: 8px`, `padding: 32px 36px 28px` και σκιά `0 1px 3px rgba(0,0,0,.35)`.
 - Το panel πιάνει **όλο το πλάτος** της σελίδας: κανένα `max-width` στο `.{p}-wrap` (όπως RS και SP). Όριο πλάτους μπαίνει μόνο σε επιμέρους στοιχεία (π.χ. ένα select ή μια μπάρα προόδου). Ισχύει και για το hub του Core (`.nx-wrap`, §16).
 - Οι τίτλοι ενοτήτων είναι `h2.{p}-h2`: 15px, κεφαλαία, χρώμα muted, με κάτω περίγραμμα.
 - Οι ομάδες πεδίων είναι `.{p}-zone`: φόντο panel, περίγραμμα border, ακτίνα 6px, padding 16/18.
+- **Τυπογραφία και εφέ** (νέο, 1.83): καμία γραμματοσειρά δεν φορτώνεται στο wp-admin (μένει η γραμματοσειρά του WordPress· για κώδικα `Consolas, Monaco, monospace`). Ένα μόνο accent, χωρίς gradients ή glow στο admin. Όποια γραμματοσειρά χρειαστεί ποτέ (site ή frontend) είναι τοπικό woff2 με ελληνικούς χαρακτήρες, ποτέ από υπηρεσία ή CDN.
 
 ## §4 Hardening
 
