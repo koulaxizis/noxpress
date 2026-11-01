@@ -15,15 +15,15 @@
     },
     "book-preview": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: with Fast Pages as the page cache, saving the settings or a sample now clears the cached product pages (through the suite hook noxpress_purge_page_cache); before, only WP Rocket, LiteSpeed and W3 Total Cache were cleared.\n* Noxpress Core 1.2.5.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4a76e269571f0697cadcecab88e201f8e00ea2b246c4e85e66f68beeb743d26b",
-        "signature": "oxTXibmn+NAjTYm2bFUwfd0nB2vJIAAbDr6fSYmRpw7DqF6jKKuhNZU6XqQNFTwoRGWCEQe4YNv3V8WYm5fGBg==",
+        "sha256": "cbff38e21b3ee62e3c5aa57fb41ff75b190303cbb3410938323390876c02576f",
+        "signature": "W8w0/csEVK95YisAgbR3W4YsBKS/BHuWCgdtZ8kPz9KWQQkDcpOGFglpdP9S0JIh+Ez7+TcFlI14dwuiu4gDDA==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.1.0/book-preview.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.1.1/book-preview.zip"
       }
     },
     "broadcast": {
@@ -80,15 +80,15 @@
     },
     "fast-pages": {
       "beta": {
-        "changelog": "* Fix: a page lives at most 12 hours in the cache. The 24 h, 48 h and \"until the next purge\" choices are gone (a saved one becomes 12 h): WordPress nonces in older pages stopped forms and buttons from working.\n* Fix: a site whose drop-in names another copy of the plugin (a staging copy, a moved site, a symlinked plugins folder) no longer stops with \"Cannot declare class FPG_Key\". The drop-in now loads the plugin from the site's own plugins folder first, and a 1.0.0 drop-in is rewritten on update.\n* Fix: no PHP 8.4 deprecation notice for an implicitly nullable parameter (FPG_Files).\n* New: the Author Portal cookie of Revenue Splitter (rs_ptok) means \"personal page\", like a login. Other plugins add their own session cookies with the filter noxpress_private_cookies.",
-        "published": "2026-10-31",
+        "changelog": "* Fix: a plugin activated or updated after Fast Pages was turned on could add a private cookie (noxpress_private_cookies) that the drop-in did not know until the settings were saved again. The drop-in config is now compared with the current one on every admin page and written again when anything differs.\n* Fix: an attribute set by the optimizations (e.g. loading or decoding) is replaced only once per tag, as intended.\n* Noxpress Core 1.2.5.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "16671f5c98b4b753ed87eb527d178da6c67df5adfc8dc307aadd21762527f53e",
-        "signature": "INWA28rwdrKAYTE72AaFxI6l+Ii6PE1VAABAmyKWHhCZ7IpQBLsCxDIrqCjsCd1iS8tVSyM0BQWL78uBAExeBQ==",
+        "sha256": "a9e9e0816d2955a9e8c66675bd4c3f9216e13f436003db6b1d110091b8215030",
+        "signature": "+vb7YET1n2SqW1bl9S8d/IrmmmqRNXDB2pai8fBGmpUVetsXiZwgC6eCXw/lWXIw3kMzfSQzVYajICJ2SNxmCA==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.1/fast-pages.zip"
+        "version": "1.0.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.2/fast-pages.zip"
       }
     },
     "featured-creators": {
@@ -119,41 +119,41 @@
     },
     "hide-catalog": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: with Fast Pages as the page cache, «Clear the page cache» after saving the rules now clears it too (through the suite hook noxpress_purge_page_cache).\n* Noxpress Core 1.2.5.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1eb342269fd69c98b9a83a1c1de40ada652590f2570936b9c2683c3ca9b00e4f",
-        "signature": "jUQu9kytETBXDwYUMwlBSt7oktJG27hJdv8J6DeHK3NYPY1Sn9etTpaLQ8f5I8Omjxw0IT3fjVAd6BOtSF+wDA==",
+        "sha256": "39ce948f50c8c2a7dda5eb456ceab4eebd273a50c35dff451e37d5798ee06d47",
+        "signature": "NNGCLZpkzEJpn6Dk2vYPuthKJjsweaFcBXzTP7Q6v+ND07ObGUC6wumxYyfEa7ABJcGJXGKGBq1g5sE6Wi6rCQ==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.0/hide-catalog.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.1/hide-catalog.zip"
       }
     },
     "home-sections": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: with Fast Pages as the page cache, saving a preset or the settings now clears the cached pages too (through the suite hook noxpress_purge_page_cache), and the notice names Fast Pages.\n* Noxpress Core 1.2.5.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "15cf79f43c811bf2bf649f9fed86f2f7b6ec2661bebbd5f319ba9365b8bdd44d",
-        "signature": "OoRyPUnJp/Fn8DKVG0Hw8pbfaff17CKjU6ihlXtOiJkdvkhqq6VPBJRz4PxF1v1da/IdD8u67TjWcc7oyEmwDg==",
+        "sha256": "29837b8c1fa00e7f6358b5f9b291eec7fb958309799f18da02ac2c31e79f8c4a",
+        "signature": "ckA7EpO6GLaptRFCz4TomxPp0x8VlLnfCtBMtCgHFibjSOGQKZ9rtGi41YrqSU2cncAvTqY2eGDr+60LTGcvAA==",
         "tested_wp": "7.1",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.0/home-sections.zip"
+        "version": "1.4.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.1/home-sections.zip"
       }
     },
     "live-operator": {
       "beta": {
-        "changelog": "* New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.\n* The availability is worked out on every check, so it is right even when WP-Cron runs late; one WP-Cron event at the next change only sends the notifications.",
-        "published": "2026-10-28",
+        "changelog": "* Fix: the app page could miss the «new app version» notice, because it read only the 50 newest releases of the repo and the app's own releases are further down among the plugin releases. It now reads 100 per page, up to 5 pages, until it finds the app's releases.\n* Noxpress Core 1.2.5.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "3e10cfdeb08ec4faac4fa6535aaad4f517b0958dd32ad254c8ccc868f9ddc8e4",
-        "signature": "XBQXqCTcjMC+cLrWyFt7vW7pSwhL/vbPqrxrJaxeM355NQQI91WkuBPU7V9+Zlh9nykx6BwxgHWldOabifmxDQ==",
+        "sha256": "acaf193dc9beb2b87990b3ba8646f73597c9872b8633ead3904f1dfe4faca467",
+        "signature": "ines8Vq+Wlf4pWfi7XNndQDez76NROWSX4pzhXWfJHO1SeG/IhXgMt0S4pE3ZRSoazjHQ0OISXcfhkcyOF6iDw==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.0/live-operator.zip"
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.1/live-operator.zip"
       }
     },
     "magic-login": {
@@ -210,15 +210,15 @@
     },
     "product-formats": {
       "beta": {
-        "changelog": "* New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.",
-        "published": "2026-10-26",
+        "changelog": "* Fix: with Fast Pages as the page cache, a change in a work or in the settings now clears the cached product pages (through the suite hook noxpress_purge_page_cache); before, only WP Rocket and LiteSpeed were cleared.\n* Noxpress Core 1.2.5.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e8c517a9a712670b215cdbe40fe7419c182fee555c0c775be3cec4f9160ce60d",
-        "signature": "nywdQyLCLPRMgQcVjk6jwaTmTyj0WDarh1GIzU/UpOeJ+PgxZAU+DdQFUGeGV8xf9e9JBrPvbKibSSNfs+khAw==",
+        "sha256": "b8a32d31d94f8b5f1283702e4ba45db4b2e9dd539e0f2a70a00936cf80d48f19",
+        "signature": "UfqUlG3JZ2geyWDI4FjJ0dL5iE66WFh97tup2iS92gnrSo8i8CAoS5yW1Q9HgislRlybBmFCpkYY59T+LSbUCg==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.0/product-formats.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.1/product-formats.zip"
       }
     },
     "publishing-quote": {
@@ -236,15 +236,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fix: the Author Portal is never stored by a page cache (Fast Pages, WP Rocket, host caches). Its page, and every front page of a visitor with a portal session, now sends DONOTCACHEPAGE and no-cache headers; before, one beneficiary's dashboard could be cached and shown to every visitor.\n* Fix: CSV exports pass every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.\n* Tested up to WordPress 7.1 and WooCommerce 11.2.",
-        "published": "2026-10-31",
+        "changelog": "* Noxpress Core 1.2.5: the client portal keeps itself out of page caches through the shared Core helper (DONOTCACHEPAGE and no-store headers), the same as before.",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0c80dd53b809dab2804958ab26298e64f084a895c9092586f9f5a89c489a1df6",
-        "signature": "qghTk163+sBhReVe1HADBtxZawiTklmKBr+wA+uPd14ggysvpkdI5dSwVfCsJoUiJFBp9HG/XNpFwJ4mG+6IDg==",
+        "sha256": "503aae20b4ca5dcb5fa27dac0ba5ae282d212b87ab0c7ec76cab11f9e8f20401",
+        "signature": "bSzLezZgTOXe7KaDcp2cf328EJm98CnE/SWyMJvNymtAgjsBArLqy298ljYhbHFUzKMvVhS/5dH8pjeS2fu5Bg==",
         "tested_wp": "7.1",
-        "version": "1.12.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.1/revenue-splitter.zip"
+        "version": "1.12.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.2/revenue-splitter.zip"
       }
     },
     "shipping-notes": {
@@ -275,15 +275,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* Fix: the history CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.",
-        "published": "2026-10-31",
+        "changelog": "* Plugin and theme changes (remote installs and updates, the status check) now follow wp_is_file_mod_allowed() instead of reading DISALLOW_FILE_MODS directly, so a site that blocks file changes through the file_mod_allowed filter is respected too.\n* Noxpress Core 1.2.5 (the hub follows the same check).",
+        "published": "2026-11-01",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "06f832b6ba9d2aaa492537204c53dbe9b57f333712f6f3b692d25d4563043ff7",
-        "signature": "kNoqSklubh78wOo3UfHsf3nliJWeT1GM6Ei0B0QcadUuG8ayCUexTfNQKiPRrZgb19J4c4SOtaNeQCFfo2nQCw==",
+        "sha256": "f1e2adfd370fa1c9e31da7d47e7c0af3f299773c17116f070e7bf506b9bd638d",
+        "signature": "hJWNOzc8VxeCeOUgZny0REeeZpgKWVexNRZRgGQXhbzxqF0QXTbwTLgvkxcmK51jThklcyk3dJdwbii6jc8mBw==",
         "tested_wp": "7.1",
-        "version": "1.11.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.1/site-bridge.zip"
+        "version": "1.11.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.2/site-bridge.zip"
       }
     },
     "smart-formatter": {
