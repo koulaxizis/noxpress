@@ -71,12 +71,12 @@ header { padding: 72px 0 48px; text-align: left; }
 }
 .lang-toggle:hover { border-color: var(--accent); color: #fff; }
 
-.dl-count {
+.download-count {
 	color: var(--muted);
-	margin-top: 8px;
-	font-size: 0.95rem;
+	margin: 10px 0 14px;
+	font-size: 13px;
 }
-.dl-count strong { color: var(--accent-bright); font-weight: 600; }
+.download-count strong { color: var(--text); font-weight: 600; }
 .support-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -484,7 +484,7 @@ footer .heart { color: var(--accent-bright); }
 		<div>
 			<div class="wordmark">noxpress<span class="dot">.</span></div>
 			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
-			<p class="dl-count" id="dlCount" hidden></p>
+			<p class="download-count" id="download-count" hidden></p>
 			<div class="support-row">
 				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" aria-label="Support noxpress on Ko-fi">
 					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
@@ -2179,7 +2179,7 @@ footer .heart { color: var(--accent-bright); }
 	 * downloads.json του ίδιου site, που γράφει το workflow «Count
 	 * downloads». Χωρίς αρχείο ή με 0, η γραμμή μένει κρυφή.
 	 * ------------------------------------------------------------------ */
-	var el = document.getElementById('dlCount');
+	var el = document.getElementById('download-count');
 	if (!el || typeof fetch !== 'function') { return; }
 	var shown = 0;
 	function render() {
