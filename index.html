@@ -373,8 +373,8 @@ footer {
 	font-size: 0.85rem;
 	text-align: center;
 }
-footer a { color: var(--accent-bright); text-decoration: none; }
-footer a:hover { text-decoration: underline; }
+footer a { color: var(--accent-bright); text-decoration: underline; text-underline-offset: 2px; }
+footer a:hover { text-decoration-thickness: 2px; }
 footer .credits, footer .footer-links { margin-top: 6px; }
 footer .heart { color: var(--accent-bright); }
 
@@ -486,7 +486,7 @@ footer .heart { color: var(--accent-bright); }
 			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
 			<p class="download-count" id="download-count" hidden></p>
 			<div class="support-row">
-				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" aria-label="Support noxpress on Ko-fi">
+				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener">
 					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
 						<path fill="currentColor" d="M4 9h12v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9zm13 .5h1a2.5 2.5 0 0 1 0 5h-1.1a6.5 6.5 0 0 0 .1-1v-4zM6.5 2.8a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7zm4.5 0a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7zm4.5 0a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7z"/>
 					</svg>
@@ -496,7 +496,7 @@ footer .heart { color: var(--accent-bright); }
 			</div>
 			<p class="hub-line" data-i18n="hub_line">One «Noxpress» hub in WP admin installs, updates and removes the plugins, one at a time or all at once, from signed releases, on the Stable or Beta channel you choose.</p>
 		</div>
-		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
+		<button type="button" class="lang-toggle" id="langToggle" aria-label="ΕΛ: Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
 	</div>
 </header>
 
@@ -506,7 +506,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
 		<a class="card-video" href="media/videos/revenue-splitter.mp4" data-video="revenue-splitter" data-video-title="Revenue Splitter" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.12.1 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.12.2 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -534,7 +534,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.1/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.12.1 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.2/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.12.2 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -652,7 +652,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="product-formats">
 		<h2><a href="#product-formats">Product Formats</a></h2>
 		<a class="card-video" href="media/videos/product-formats.mp4" data-video="product-formats" data-video-title="Product Formats" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.2.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.2.1 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="pf_desc">Links the products that are the same work in another format (print, e-book, audiobook, film, music) and shows an «Available formats» block with label, price and link on each product page.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -667,7 +667,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.0/product-formats.zip" rel="nofollow noopener" data-i18n="pf_download">Download v1.2.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.1/product-formats.zip" rel="nofollow noopener" data-i18n="pf_download">Download v1.2.1 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/product-formats" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -724,7 +724,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="book-preview">
 		<h2><a href="#book-preview">Book Preview</a></h2>
 		<a class="card-video" href="media/videos/book-preview.mp4" data-video="book-preview" data-video-title="Book Preview" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.1.1 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="bp_desc">A book sample on the product page: the server builds a separate PDF with only the pages you choose, and visitors read it in a full-screen viewer. The full PDF never reaches the browser.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -739,7 +739,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.1.0/book-preview.zip" rel="nofollow noopener" data-i18n="bp_download">Download v1.1.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.1.1/book-preview.zip" rel="nofollow noopener" data-i18n="bp_download">Download v1.1.1 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/book-preview" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -796,7 +796,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="hide-catalog">
 		<h2><a href="#hide-catalog">Hide Catalog</a></h2>
 		<a class="card-video" href="media/videos/hide-catalog.mp4" data-video="hide-catalog" data-video-title="Hide Catalog" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.1.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.1.1 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="hc_desc">Hide product categories and their products from the shop, other listings, search, related products, shortcodes and blocks, with one rule per category and without changing a single product.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -810,7 +810,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.0/hide-catalog.zip" rel="nofollow noopener" data-i18n="hc_download">Download v1.1.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.1/hide-catalog.zip" rel="nofollow noopener" data-i18n="hc_download">Download v1.1.1 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/hide-catalog" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1031,7 +1031,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="home-sections">
 		<h2><a href="#home-sections">Home Sections</a></h2>
 		<a class="card-video" href="media/videos/home-sections.mp4" data-video="home-sections" data-video-title="Home Sections" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.4.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.4.1 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="hs_desc">Smarter [products] shortcodes for your homepage and any page: write a marker class in the shortcode and the section leaves out products, categories or pre-orders, or keeps only products with a word in their title. Products are not changed.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -1046,7 +1046,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.0/home-sections.zip" rel="nofollow noopener" data-i18n="hs_download">Download v1.4.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.1/home-sections.zip" rel="nofollow noopener" data-i18n="hs_download">Download v1.4.1 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/home-sections" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1077,7 +1077,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="site-bridge">
 		<h2><a href="#site-bridge">Site Bridge</a></h2>
 		<a class="card-video" href="media/videos/site-bridge.mp4" data-video="site-bridge" data-video-title="Site Bridge" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.11.1 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.11.2 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sb_desc">Let Claude manage your WordPress and WooCommerce sites over MCP, from your own servers, with no service in between. One Hub takes Claude’s connection and forwards every call, signed, to your sites; each site decides what is allowed. Works with Claude; not affiliated with Anthropic.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -1091,7 +1091,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.1/site-bridge.zip" rel="nofollow noopener" data-i18n="sb_download">Download v1.11.1 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.2/site-bridge.zip" rel="nofollow noopener" data-i18n="sb_download">Download v1.11.2 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/site-bridge" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1100,7 +1100,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="live-operator">
 		<h2><a href="#live-operator">Live Operator</a></h2>
 		<a class="card-video" href="media/videos/live-operator.mp4" data-video="live-operator" data-video-title="Live Operator" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.3.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.3.1 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="lo_desc">The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -1114,7 +1114,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.0/live-operator.zip" rel="nofollow noopener" data-i18n="lo_download">Download v1.3.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.1/live-operator.zip" rel="nofollow noopener" data-i18n="lo_download">Download v1.3.1 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/live-operator" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1145,7 +1145,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="fast-pages">
 		<h2><a href="#fast-pages">Fast Pages</a></h2>
 		<a class="card-video" href="media/videos/fast-pages.mp4" data-video="fast-pages" data-video-title="Fast Pages" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.0.1 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.0.2 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="fp_desc">A page cache for visitors with smart purging and background preload, CSS / JS minify, lazy load and click-to-play YouTube. It replaces WP Rocket with no account or external service, and Claude can run it through Site Bridge.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -1158,7 +1158,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.1/fast-pages.zip" rel="nofollow noopener" data-i18n="fp_download">Download v1.0.1 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.2/fast-pages.zip" rel="nofollow noopener" data-i18n="fp_download">Download v1.0.2 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/fast-pages" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1237,7 +1237,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="site-bridge-app">
 		<h2><a href="#site-bridge-app">Site Bridge app</a></h2>
-		<div class="meta">v1.6.0 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.6.1 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sba_desc">The Site Bridge Hub in your pocket: open the write window of your sites with your fingerprint only while you work, and handle Book Feed and Broadcast from your phone. It talks only to your own Hub; no account, no Firebase, no analytics.</p>
 		<ul>
 			<li data-i18n="sba_li1">Open, renew or close the write window per site, with a fingerprint for every opening, and the Hub’s log on the phone</li>
@@ -1247,7 +1247,7 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="sba_li5">Updates: a notice in the app, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Site Bridge app</code>)</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sba-1.6.0/site-bridge.apk" rel="nofollow noopener" data-i18n="sba_download">Download v1.6.0 (.apk)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sba-1.6.1/site-bridge.apk" rel="nofollow noopener" data-i18n="sba_download">Download v1.6.1 (.apk)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/site-bridge-android#readme" rel="noopener" data-i18n="apps_guide">Install guide</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1255,7 +1255,7 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="live-operator-app">
 		<h2><a href="#live-operator-app">Live Operator app</a></h2>
-		<div class="meta">v1.3.0 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.3.1 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="loa_desc">The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. The official APK is built for glarolykoi.net; for your own site, build it with your site’s address (two Gradle properties) or add the page to your home screen as a web app.</p>
 		<ul>
 			<li data-i18n="loa_li1">Trusted Web Activity of the plugin’s /live-operator/ page, verified with Digital Asset Links from the plugin’s settings, so there is no address bar</li>
@@ -1375,7 +1375,7 @@ footer .heart { color: var(--accent-bright); }
 		rs_li18: 'Admin polish: per-beneficiary colour coding, dark admin theme, bilingual UI (Ελληνικά / English) per user',
 		rs_li19: 'HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind',
 		rs_li20: 'orOS link: the CRM partner card reads each beneficiary\'s balance, this year\'s sales per title and stock through two read-only REST routes, with the shop\'s own WooCommerce keys',
-		rs_download: 'Download v1.12.1 (.zip)',
+		rs_download: 'Download v1.12.2 (.zip)',
 		rs_source: 'Source',
 		rs_releases: 'Releases',
 		sp_desc: 'A store-health dashboard and a WordPress home-screen widget for WooCommerce managers: pending and completed orders, refunds, cancellations and stock at a glance. With Revenue Splitter active, it also shows the publisher\'s profit and what is owed to every other beneficiary for the period.',
@@ -1435,7 +1435,7 @@ footer .heart { color: var(--accent-bright); }
 		pf_li5: 'Old upsells between formats: hide them on the front end, or clean them up for good with preview, batches, snapshots and restore',
 		pf_li6: 'No database writes on visitor requests; theme-proof markup and CSS; public API for other plugins',
 		pf_li7: 'Safe by design: off until enabled, test mode for shop managers, PFM_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
-		pf_download: 'Download v1.2.0 (.zip)',
+		pf_download: 'Download v1.2.1 (.zip)',
 		ew_desc: 'The online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673): a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.',
 		ew_li1: 'Form by shortcode in four steps: find the order, choose products and quantities, confirm, receipt; links in order emails, on the thank-you page and in My Account',
 		ew_li2: 'Recorded the moment it is confirmed, receipt to the order’s billing email in the customer’s language; signed tokens between steps, rate limit, no page cache',
@@ -1462,7 +1462,7 @@ footer .heart { color: var(--accent-bright); }
 		bp_li5: 'Bulk creation per category (first N pages, skip K) with a progress bar; background rebuild when the PDF or the pages change',
 		bp_li6: 'No cookies, no external calls; Greek and English visitor texts; full cleanup on uninstall',
 		bp_li7: 'Safe by design: off until enabled, test mode for shop managers, BPV_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
-		bp_download: 'Download v1.1.0 (.zip)',
+		bp_download: 'Download v1.1.1 (.zip)',
 		cr_desc: 'One page for every creator of your catalog (authors, illustrators, translators, musicians…), filled automatically with their products by role from your WooCommerce attributes, and their name turned into a link across the store.',
 		cr_li1: 'Creator pages with photo, roles, biography, links (Spotify, YouTube, Instagram… recognised from the address) and lists of interviews, videos and reviews',
 		cr_li2: 'Matching by the same slug across the role attributes you choose, with manual fixes for pseudonyms and homonyms and a coverage check',
@@ -1488,7 +1488,7 @@ footer .heart { color: var(--accent-bright); }
 		hc_li4: 'The category page stays open, or turns noindex, 404 or a redirect to the shop; closed pages leave the core and Rank Math sitemaps',
 		hc_li5: 'Counts agree everywhere: WooCommerce’s filter widgets and Shop Filters follow the same rules with no extra setup',
 		hc_li6: 'Safe by design: query-time only (deactivate and everything is back), test mode for shop managers, HIC_DISABLE emergency switch, page cache clearing on save; bilingual UI and shared «Noxpress» menu',
-		hc_download: 'Download v1.1.0 (.zip)',
+		hc_download: 'Download v1.1.1 (.zip)',
 		vp_desc: 'Swatches for WooCommerce variations: buttons, colors, two-tone colors, images or the variation’s own image, with a size guide and swatches on shop cards.',
 		vp_li1: 'Six types per attribute, changeable per product: text button, color (two-tone), image, the variation’s image, radio list or dropdown',
 		vp_li2: 'Missing combinations and out-of-stock values blurred, crossed out or hidden; one click on any value never leaves the customer stuck',
@@ -1574,7 +1574,7 @@ footer .heart { color: var(--accent-bright); }
 		hs_li6: '[hs_video] shows the newest book trailer or book presentation from the video tabs of your products, so a new video reaches the homepage without editing the page; a poster first, YouTube loads only on click',
 		hs_li7: '[hs_stats] adds live store counters (available products, completed orders, buyers, and products per category group such as printed, digital or music), counted in the background, refreshed on cached pages and counted up from 0 when they come into view',
 		hs_li5: 'Safe by design: shortcodes without a marker give exactly the same output, nothing is written to products, HMS_DISABLE emergency switch; no cookies, no tracking; bilingual UI and shared «Noxpress» menu',
-		hs_download: 'Download v1.4.0 (.zip)',
+		hs_download: 'Download v1.4.1 (.zip)',
 		bf_desc: 'Titles of other publishers from the Bookpoint book catalogue (OSDEL web service) as WooCommerce products: search and import, rules per publisher, and a daily sync of price and availability.',
 		bf_li1: 'Search by title, contributor, ISBN, publisher, years, kind and publishing status; import the ticked titles or every result in the background; titles already in the store are marked, and a product with the same ISBN is linked instead of duplicated',
 		bf_li2: 'Complete products: description, ISBN as GTIN and SKU, cover in the media library, publisher and contributors as attributes in the order you choose, mapped categories with their parents, a subcategory per publisher with its logo and a small sliding strip of the logos, tags from subjects, tax class from the VAT rate, weight and dimensions',
@@ -1589,7 +1589,7 @@ footer .heart { color: var(--accent-bright); }
 		sb_li4: 'Never PHP, shell or file writes; secrets always come back as ***, personal data masked by default, every call in an audit log on the Hub and the site',
 		sb_li6: 'Android app: open, renew or close the write window with your fingerprint, and work Book Feed and the Broadcast queue from your phone. Optionally, abilities that only add something that waits for you (Broadcast’s queue) run without opening the window',
 		sb_li5: 'Remote administrator access: install it only on sites you own, keep them at read and open the window only while you work. Bilingual UI and shared «Noxpress» menu',
-		sb_download: 'Download v1.11.1 (.zip)',
+		sb_download: 'Download v1.11.2 (.zip)',
 		lo_desc: 'The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.',
 		lo_li1: 'Online / offline from the phone, kept on the server even with the screen off, with automatic offline after the hours you choose and a notification when it ends',
 		lo_li6: 'Weekly schedule: online by itself on the days and hours you choose, in the site’s time zone, with closed dates and a one-tap pause; set it in the settings or in the app',
@@ -1597,7 +1597,7 @@ footer .heart { color: var(--accent-bright); }
 		lo_li3: 'Inbox, claim, take over from the AI, reply and return to the AI, through PurioChat’s own operator routes',
 		lo_li4: 'Android app (Trusted Web Activity) built in GitHub Actions, verified with Digital Asset Links from the plugin’s settings',
 		lo_li5: 'Administrators only, never cached, LOP_DISABLE stops everything and PurioChat works as before; bilingual UI and shared «Noxpress» menu',
-		lo_download: 'Download v1.3.0 (.zip)',
+		lo_download: 'Download v1.3.1 (.zip)',
 		ta_desc: 'Trade accounts for bookstores and resellers: a preset discount on the titles you choose, in the shop, the cart and the order, and the Trade Feed, an API with a username and password per account to list your books in their own e-shops.',
 		ta_li1: 'A «Χονδρική» (trade) role made by the shop, never by self sign-up; one discount for everyone (default 40%) or an account’s own',
 		ta_li2: 'Only the categories and brands you choose, physical products only; never other publishers’ titles from Book Feed, and a «Not for trade» checkbox per product',
@@ -1611,7 +1611,7 @@ footer .heart { color: var(--accent-bright); }
 		fp_li3: 'Smart purging on post, product, stock, comment and term changes, a suite hook for other plugins, and background preload from the sitemap',
 		fp_li4: 'Optional minify per CSS / JS file (no combining), lazy load for images, iframes and backgrounds, click-to-play YouTube (youtube-nocookie), image dimensions and hover preload',
 		fp_li5: 'Import from WP Rocket, database cleanup, seven abilities for Site Bridge, FPG_DISABLE; bilingual UI and shared «Noxpress» menu',
-		fp_download: 'Download v1.0.1 (.zip)',
+		fp_download: 'Download v1.0.2 (.zip)',
 		br_desc: 'Announces your site’s events on a Viber Channel: new products, a newsletter that went out, new YouTube videos, new Instagram posts and posts you prepare. A queue with approval, one template per source and no duplicates; no Zapier, no account in the middle.',
 		br_li1: 'New WooCommerce products with a category filter, checked a few minutes after publishing; other publishers’ titles from Book Feed and categories hidden by Hide Catalog stay out',
 		br_li2: 'MailerLite’s «campaign sent» webhook (signature checked), YouTube channels without an API key and without Shorts by default, your Instagram account (photos, through your own Meta app), and a post queue that waits for your «Published» on the phone',
@@ -1677,7 +1677,7 @@ footer .heart { color: var(--accent-bright); }
 		sba_li3: 'Broadcast tab: the posts waiting in the queue, to send, edit or reject, with a notification for each new one (Broadcast 1.1.0+, Site Bridge 1.11.0+)',
 		sba_li4: 'Pair with a QR code from the Hub; device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak',
 		sba_li5: 'Updates: a notice in the app, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Site Bridge app</code>)',
-		sba_download: 'Download v1.6.0 (.apk)',
+		sba_download: 'Download v1.6.1 (.apk)',
 		loa_desc: 'The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. The official APK is built for glarolykoi.net; for your own site, build it with your site’s address (two Gradle properties) or add the page to your home screen as a web app.',
 		loa_li1: 'Trusted Web Activity of the plugin’s /live-operator/ page, verified with Digital Asset Links from the plugin’s settings, so there is no address bar',
 		loa_li2: 'Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb',
@@ -1712,7 +1712,7 @@ footer .heart { color: var(--accent-bright); }
 		rs_li18: 'Admin polish: χρώμα ανά δικαιούχο, dark admin theme, δίγλωσσο UI (Ελληνικά / English) ανά χρήστη',
 		rs_li19: 'Συμβατό με HPOS — καμία επαφή με legacy order tables· καθαρό uninstall δεν αφήνει τίποτα πίσω',
 		rs_li20: 'Σύνδεση με το orOS: η καρτέλα συνεργάτη του CRM διαβάζει το υπόλοιπο κάθε δικαιούχου, τις φετινές πωλήσεις ανά τίτλο και το στοκ από δύο REST διαδρομές μόνο για ανάγνωση, με τα κλειδιά WooCommerce του ίδιου του καταστήματος',
-		rs_download: 'Λήψη v1.12.1 (.zip)',
+		rs_download: 'Λήψη v1.12.2 (.zip)',
 		rs_source: 'Πηγαίος κώδικας',
 		rs_releases: 'Εκδόσεις',
 		sp_desc: 'Dashboard υγείας καταστήματος και widget στην αρχική του WordPress για όσους διαχειρίζονται WooCommerce: εκκρεμείς και ολοκληρωμένες παραγγελίες, επιστροφές, ακυρώσεις και στοκ με μια ματιά. Με ενεργό το Revenue Splitter δείχνει επίσης το κέρδος του εκδότη και τις οφειλές προς κάθε άλλον δικαιούχο για την περίοδο.',
@@ -1772,7 +1772,7 @@ footer .heart { color: var(--accent-bright); }
 		pf_li5: 'Παλιά upsells ανάμεσα στις μορφές: απόκρυψη στο front end ή μόνιμος καθαρισμός με προεπισκόπηση, παρτίδες, snapshots και επαναφορά',
 		pf_li6: 'Καμία εγγραφή στη βάση στις επισκέψεις· markup και CSS που αντέχουν τους κανόνες του θέματος· δημόσιο API για άλλα plugins',
 		pf_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης PFM_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		pf_download: 'Λήψη v1.2.0 (.zip)',
+		pf_download: 'Λήψη v1.2.1 (.zip)',
 		ew_desc: 'Η λειτουργία υπαναχώρησης που ζητά η ΕΕ από τις 19 Ιουνίου 2026 (Οδηγία 2023/2673): φόρμα για πελάτες και επισκέπτες, «Επιβεβαίωση υπαναχώρησης» σε δύο βήματα, απόδειξη με email με ημερομηνία και ώρα, και λίστα αιτημάτων για το κατάστημα.',
 		ew_li1: 'Φόρμα με shortcode σε τέσσερα βήματα: εύρεση παραγγελίας, προϊόντα και ποσότητες, επιβεβαίωση, απόδειξη· σύνδεσμοι στα email παραγγελίας, στη σελίδα ευχαριστιών και στον λογαριασμό μου',
 		ew_li2: 'Καταγράφεται τη στιγμή της επιβεβαίωσης, απόδειξη στο email χρέωσης στη γλώσσα του πελάτη· υπογεγραμμένα tokens ανάμεσα στα βήματα, όριο προσπαθειών, χωρίς cache σελίδας',
@@ -1799,7 +1799,7 @@ footer .heart { color: var(--accent-bright); }
 		bp_li5: 'Μαζική δημιουργία ανά κατηγορία (πρώτες Ν σελίδες, παράλειψη Κ) με μπάρα προόδου· αναδημιουργία στο παρασκήνιο όταν αλλάζει το PDF ή οι σελίδες',
 		bp_li6: 'Χωρίς cookies, χωρίς εξωτερικές κλήσεις· κείμενα επισκέπτη σε ελληνικά και αγγλικά· πλήρης καθαρισμός κατά την απεγκατάσταση',
 		bp_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να ενεργοποιηθεί, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης BPV_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		bp_download: 'Λήψη v1.1.0 (.zip)',
+		bp_download: 'Λήψη v1.1.1 (.zip)',
 		cr_desc: 'Μία σελίδα για κάθε δημιουργό του καταλόγου σου (συγγραφείς, εικονογράφους, μεταφραστές, μουσικούς…), που γεμίζει αυτόματα με τα προϊόντα του ανά ρόλο από τα χαρακτηριστικά του WooCommerce, και το όνομά του γίνεται σύνδεσμος σε όλο το κατάστημα.',
 		cr_li1: 'Σελίδες δημιουργών με φωτογραφία, ιδιότητες, βιογραφικό, συνδέσμους (Spotify, YouTube, Instagram… αναγνωρίζονται από τη διεύθυνση) και λίστες με συνεντεύξεις, βίντεο και κριτικές',
 		cr_li2: 'Ταίριασμα με το ίδιο slug σε όσα χαρακτηριστικά-ρόλους διαλέξεις, με χειροκίνητες διορθώσεις για ψευδώνυμα και συνωνυμίες και έλεγχο κάλυψης',
@@ -1825,7 +1825,7 @@ footer .heart { color: var(--accent-bright); }
 		hc_li4: 'Η σελίδα της κατηγορίας μένει ανοιχτή ή γίνεται noindex, 404 ή ανακατεύθυνση στο shop· οι κλειστές σελίδες βγαίνουν από τα sitemaps του WordPress και του Rank Math',
 		hc_li5: 'Ίδιοι μετρητές παντού: τα φίλτρα του WooCommerce και το Shop Filters ακολουθούν τους ίδιους κανόνες χωρίς άλλη ρύθμιση',
 		hc_li6: 'Ασφαλές εκ σχεδιασμού: όλα γίνονται την ώρα της σελίδας (απενεργοποίηση και όλα επιστρέφουν), λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης HIC_DISABLE, καθαρισμός της page cache στην αποθήκευση· δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
-		hc_download: 'Λήψη v1.1.0 (.zip)',
+		hc_download: 'Λήψη v1.1.1 (.zip)',
 		vp_desc: 'Swatches για τις παραλλαγές του WooCommerce: κουμπιά, χρώματα, δίχρωμα, εικόνες ή η εικόνα της ίδιας της παραλλαγής, με οδηγό μεγεθών και swatches στις κάρτες του καταστήματος.',
 		vp_li1: 'Έξι τύποι ανά χαρακτηριστικό, με αλλαγή ανά προϊόν: κουμπί με κείμενο, χρώμα (και δίχρωμο), εικόνα, εικόνα της παραλλαγής, λίστα ή dropdown',
 		vp_li2: 'Συνδυασμοί που δεν υπάρχουν και τιμές εκτός αποθέματος θολές, διαγραμμένες ή κρυφές· ένα κλικ σε οποιαδήποτε τιμή δεν αφήνει ποτέ τον πελάτη κολλημένο',
@@ -1911,7 +1911,7 @@ footer .heart { color: var(--accent-bright); }
 		hs_li6: 'Το [hs_video] δείχνει το νεότερο book trailer ή την πιο πρόσφατη παρουσίαση βιβλίου από τις καρτέλες βίντεο των προϊόντων, ώστε ένα νέο βίντεο να φτάνει στην αρχική χωρίς αλλαγή στη σελίδα· πρώτα εικόνα, και το YouTube φορτώνει μόνο με το πάτημα',
 		hs_li7: 'Το [hs_stats] βάζει ζωντανούς μετρητές του καταστήματος (διαθέσιμα προϊόντα, ολοκληρωμένες παραγγελίες, αγοραστές, και προϊόντα ανά ομάδα κατηγοριών, π.χ. έντυπα, ψηφιακά, μουσική), που μετρώνται στο παρασκήνιο, ανανεώνονται και σε σελίδες από την cache και μετράνε από το 0 όταν φανούν',
 		hs_li5: 'Ασφαλές εκ σχεδιασμού: shortcodes χωρίς marker δίνουν ακριβώς την ίδια έξοδο, τίποτα δεν γράφεται στα προϊόντα, διακόπτης HMS_DISABLE· χωρίς cookies και tracking· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		hs_download: 'Λήψη v1.4.0 (.zip)',
+		hs_download: 'Λήψη v1.4.1 (.zip)',
 		bf_desc: 'Τίτλοι άλλων εκδοτικών από τον κατάλογο βιβλίων Bookpoint (υπηρεσία του ΟΣΔΕΛ) ως προϊόντα WooCommerce: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.',
 		bf_li1: 'Αναζήτηση με τίτλο, συντελεστή, ISBN, εκδότη, έτη, είδος και κατάσταση κυκλοφορίας· εισαγωγή των επιλεγμένων ή όλων των αποτελεσμάτων στο παρασκήνιο· οι τίτλοι που υπάρχουν ήδη στο κατάστημα σημειώνονται, και ένα προϊόν με το ίδιο ISBN συνδέεται αντί να διπλασιαστεί',
 		bf_li2: 'Πλήρη προϊόντα: περιγραφή, ISBN ως GTIN και SKU, εξώφυλλο στη βιβλιοθήκη πολυμέσων, εκδότης και συντελεστές ως χαρακτηριστικά με τη σειρά που θέλεις, αντιστοίχιση κατηγοριών με τις γονικές τους, υποκατηγορία ανά εκδότη με το λογότυπό του και μικρή λωρίδα που κυλά με τα λογότυπα, ετικέτες από τα θέματα, κλάση φόρου από τον συντελεστή ΦΠΑ, βάρος και διαστάσεις',
@@ -1926,7 +1926,7 @@ footer .heart { color: var(--accent-bright); }
 		sb_li4: 'Ποτέ PHP, shell ή εγγραφή αρχείων· τα μυστικά γυρίζουν πάντα ως ***, προσωπικά δεδομένα με μάσκα από προεπιλογή, κάθε κλήση στο ιστορικό του Hub και του site',
 		sb_li6: 'Εφαρμογή Android: άνοιγμα, ανανέωση ή κλείσιμο του παραθύρου εγγραφής με το δαχτυλικό σου, και Book Feed και ουρά του Broadcast από το κινητό. Προαιρετικά, abilities που μόνο προσθέτουν κάτι που σε περιμένει (η ουρά του Broadcast) τρέχουν χωρίς να ανοίξει το παράθυρο',
 		sb_li5: 'Απομακρυσμένη πρόσβαση διαχειριστή: βάλ\u2019 το μόνο σε δικά σου sites, κράτα τα σε ανάγνωση και άνοιγε το παράθυρο μόνο όσο δουλεύεις. Δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
-		sb_download: 'Λήψη v1.11.1 (.zip)',
+		sb_download: 'Λήψη v1.11.2 (.zip)',
 		lo_desc: 'Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server, ειδοποίηση για κάθε αίτημα και μήνυμα, και απαντήσεις από εφαρμογή Android ή web εφαρμογή στην αρχική οθόνη. Χωρίς Firebase, χωρίς λογαριασμό σε τρίτους.',
 		lo_li1: 'Online / offline από το κινητό, που μένει στον server και με σβηστή οθόνη, με αυτόματο offline μετά από όσες ώρες ορίσεις και ειδοποίηση όταν λήξει',
 		lo_li6: 'Εβδομαδιαίο ωράριο: online μόνο του τις μέρες και ώρες που διαλέγεις, στη ζώνη ώρας του site, με κλειστές ημερομηνίες και παύση με ένα πάτημα· ρυθμίζεται στις ρυθμίσεις ή στην εφαρμογή',
@@ -1934,7 +1934,7 @@ footer .heart { color: var(--accent-bright); }
 		lo_li3: 'Εισερχόμενα, ανάληψη, ανάληψη από το AI, απάντηση και επιστροφή στο AI, μέσα από τις διαδρομές χειριστή του ίδιου του PurioChat',
 		lo_li4: 'Εφαρμογή Android (Trusted Web Activity) που χτίζεται στο GitHub Actions και επαληθεύεται με Digital Asset Links από τις ρυθμίσεις του plugin',
 		lo_li5: 'Μόνο για διαχειριστές, χωρίς cache, το LOP_DISABLE σταματά τα πάντα και το PurioChat δουλεύει όπως πριν· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		lo_download: 'Λήψη v1.3.0 (.zip)',
+		lo_download: 'Λήψη v1.3.1 (.zip)',
 		ta_desc: 'Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, και το Trade Feed, ένα API με όνομα χρήστη και κωδικό ανά λογαριασμό για να περνούν τα βιβλία σου στα δικά τους e-shops.',
 		ta_li1: 'Ρόλος «Χονδρική» που τον δίνει το κατάστημα, χωρίς αυτόματη εγγραφή· μία έκπτωση για όλους (προεπιλογή 40%) ή δική του για κάθε λογαριασμό',
 		ta_li2: 'Μόνο οι κατηγορίες και τα brands που διαλέγεις, μόνο φυσικά προϊόντα· ποτέ τίτλοι άλλων εκδοτών από το Book Feed, και κουτάκι «Εκτός χονδρικής» ανά προϊόν',
@@ -1948,7 +1948,7 @@ footer .heart { color: var(--accent-bright); }
 		fp_li3: 'Έξυπνο καθάρισμα σε αλλαγές άρθρων, προϊόντων, αποθέματος, σχολίων και όρων, hook της σουίτας για τα άλλα plugins, και preload στο παρασκήνιο από το sitemap',
 		fp_li4: 'Προαιρετικά minify ανά αρχείο CSS / JS (χωρίς ένωση), lazy load για εικόνες, iframes και φόντα, YouTube με κλικ (youtube-nocookie), διαστάσεις εικόνων και preload στο hover',
 		fp_li5: 'Εισαγωγή από το WP Rocket, καθαρισμός βάσης, επτά abilities για το Site Bridge, FPG_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		fp_download: 'Λήψη v1.0.1 (.zip)',
+		fp_download: 'Λήψη v1.0.2 (.zip)',
 		br_desc: 'Ανακοινώνει γεγονότα του site σου σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube, νέες αναρτήσεις Instagram και αναρτήσεις που ετοιμάζεις. Ουρά με έγκριση, πρότυπο ανά πηγή και καμία διπλή ανάρτηση· χωρίς Zapier, χωρίς λογαριασμό στη μέση.',
 		br_li1: 'Νέα προϊόντα WooCommerce με φίλτρο κατηγοριών, λίγα λεπτά μετά τη δημοσίευση· οι τίτλοι άλλων εκδοτών από το Book Feed και οι κατηγορίες που κρύβει το Hide Catalog μένουν έξω',
 		br_li2: 'Webhook «campaign sent» του MailerLite (με έλεγχο υπογραφής), κανάλια YouTube χωρίς κλειδί API και χωρίς Shorts από προεπιλογή, ο λογαριασμός σου στο Instagram (φωτογραφίες, μέσω δικής σου εφαρμογής Meta) και ουρά αναρτήσεων που περιμένει το «Δημοσιεύτηκε» από το κινητό',
@@ -2014,7 +2014,7 @@ footer .heart { color: var(--accent-bright); }
 		sba_li3: 'Καρτέλα Broadcast: οι αναρτήσεις που περιμένουν στην ουρά, για αποστολή, διόρθωση ή απόρριψη, με ειδοποίηση για κάθε νέα (Broadcast 1.1.0+, Site Bridge 1.11.0+)',
 		sba_li4: 'Σύνδεση με QR από το Hub· τα κλειδιά της συσκευής μένουν στο Android Keystore και κάθε αίτημα υπογράφεται, οπότε δεν υπάρχει κωδικός να πληκτρολογηθεί ή να διαρρεύσει',
 		sba_li5: 'Ενημερώσεις: ειδοποίηση μέσα στην εφαρμογή, ή παρακολούθηση με το Obtainium (αυτό το repository, «Include prereleases», φίλτρο τίτλου <code>^Site Bridge app</code>)',
-		sba_download: 'Λήψη v1.6.0 (.apk)',
+		sba_download: 'Λήψη v1.6.1 (.apk)',
 		loa_desc: 'Η σελίδα του Live Operator ως εφαρμογή Android: πλήρης οθόνη, δικό της εικονίδιο και ειδοποιήσεις συνομιλίας που ανάβουν την οθόνη. Το επίσημο APK είναι φτιαγμένο για το glarolykoi.net· για το δικό σου site, χτίσ\u2019 το με τη διεύθυνση του site σου (δύο ιδιότητες του Gradle) ή πρόσθεσε τη σελίδα στην αρχική οθόνη ως web εφαρμογή.',
 		loa_li1: 'Trusted Web Activity της σελίδας /live-operator/ του plugin, επαληθευμένη με Digital Asset Links από τις ρυθμίσεις του plugin, χωρίς γραμμή διεύθυνσης',
 		loa_li2: 'Ειδοποιήσεις συνομιλίας heads-up με ήχο σε δικό τους κανάλι, ιδιωτικές στην κλειδωμένη οθόνη, ποτέ μέσα από το «Μην ενοχλείτε»',
@@ -2044,6 +2044,8 @@ footer .heart { color: var(--accent-bright); }
 		}
 
 		toggle.textContent = (lang === 'el') ? 'EN' : 'ΕΛ';
+		// The accessible name starts with the visible text (WCAG 2.5.3).
+		toggle.setAttribute('aria-label', (lang === 'el') ? 'EN: Switch language / Εναλλαγή γλώσσας' : 'ΕΛ: Εναλλαγή γλώσσας / Switch language');
 
 		var nodes = document.querySelectorAll('[data-i18n]');
 		for (var i = 0; i < nodes.length; i++) {

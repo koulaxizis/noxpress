@@ -57,7 +57,7 @@ final class CKE_Coupon {
 		// Redemption tracking runs in every mode: it only records what happened.
 		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'track_redeem' ), 20, 4 );
 		add_action( 'woocommerce_email_after_order_table', array( __CLASS__, 'email_block' ), 20, 4 );
-		add_action( self::HOOK_CLEAN, array( __CLASS__, 'cleanup' ) );
+		add_action( self::HOOK_CLEAN, array( __CLASS__, 'on_cleanup' ) );
 		add_action( self::HOOK_REMIND, array( __CLASS__, 'remind' ) );
 		add_action( 'admin_init', array( __CLASS__, 'schedule' ) );
 	}
@@ -536,6 +536,11 @@ final class CKE_Coupon {
 	 *
 	 * @return int Coupons deleted.
 	 */
+	/** HOOK_CLEAN (Action Scheduler): an action callback returns nothing. */
+	public static function on_cleanup(): void {
+		self::cleanup();
+	}
+
 	public static function cleanup(): int {
 		$s = CKE_Settings::get();
 		if ( ! $s['c_cleanup'] ) {

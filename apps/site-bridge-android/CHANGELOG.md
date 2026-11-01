@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.6.1
+
+* Fix: the "new version" check could miss a newer app. It read only the 50 newest releases of the repo, which also holds every plugin release; it now reads 100 per page, up to 5 pages, until it finds the app's own releases.
+
 ## 1.6.0
 
 * New: a **Broadcast** tab on sites with Site Bridge 1.11.0+ and Broadcast 1.1.0+ (post queue module on). It lists the posts waiting in the queue, with their picture, source and why they wait. **Send** posts one now, **Edit** changes its text and sends it, **Reject** drops it; each asks for the fingerprint (act key), and a closed write window is opened for 15 minutes first when the site allows it. In test mode the tab says so and nothing reaches the channel.

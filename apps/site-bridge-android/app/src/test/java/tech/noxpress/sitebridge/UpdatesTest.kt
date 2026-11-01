@@ -30,4 +30,15 @@ class UpdatesTest {
         assertEquals("https://g/1.4.0.apk", f?.url)
         assertNull(Updates.pick(json, "1.4.0"))
     }
+
+    @Test
+    fun findsThePageWithAppReleases() {
+        val plugins = """[{"tag_name":"nox-bf-9.0.0","draft":false},{"tag_name":"nox-rs-1.0.0","draft":false}]"""
+        val app = """[{"tag_name":"nox-bf-9.0.0","draft":false},{"tag_name":"nox-sba-1.0.0","draft":false}]"""
+        val draft = """[{"tag_name":"nox-sba-2.0.0","draft":true}]"""
+        assertFalse(Updates.hasApp(plugins))
+        assertTrue(Updates.hasApp(app))
+        assertFalse(Updates.hasApp(draft))
+        assertFalse(Updates.hasApp("[]"))
+    }
 }

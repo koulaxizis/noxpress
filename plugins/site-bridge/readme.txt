@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.1
+Stable tag: 1.11.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,10 @@ Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.11.2 =
+* Plugin and theme changes (remote installs and updates, the status check) now follow wp_is_file_mod_allowed() instead of reading DISALLOW_FILE_MODS directly, so a site that blocks file changes through the file_mod_allowed filter is respected too.
+* Noxpress Core 1.2.5 (the hub follows the same check).
 
 = 1.11.1 =
 * Fix: the history CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.

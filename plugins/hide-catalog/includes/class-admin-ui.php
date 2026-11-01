@@ -460,28 +460,7 @@ final class HIC_Admin_UI {
 	 * @return string[] Names of the caches cleared.
 	 */
 	private static function purge_caches(): array {
-		$done = array();
-		try {
-			if ( function_exists( 'rocket_clean_domain' ) ) {
-				rocket_clean_domain();
-				$done[] = 'WP Rocket';
-			}
-			if ( defined( 'LSCWP_V' ) ) {
-				do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- LiteSpeed Cache's own action.
-				$done[] = 'LiteSpeed Cache';
-			}
-			if ( function_exists( 'w3tc_flush_all' ) ) {
-				w3tc_flush_all();
-				$done[] = 'W3 Total Cache';
-			}
-			if ( function_exists( 'wp_cache_clear_cache' ) ) {
-				wp_cache_clear_cache();
-				$done[] = 'WP Super Cache';
-			}
-		} catch ( \Throwable $e ) {
-			return $done;
-		}
-		return $done;
+		return Noxpress_Core::purge_page_cache(); // Fast Pages, WP Rocket and the others (Core 1.2.5).
 	}
 
 	private static function do_save_rules(): array {

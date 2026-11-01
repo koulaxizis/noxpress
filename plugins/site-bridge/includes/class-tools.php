@@ -483,7 +483,7 @@ final class SBR_Tools {
 			'permalinks'    => (string) get_option( 'permalink_structure' ),
 			'memory_limit'  => (string) ini_get( 'memory_limit' ),
 			'object_cache'  => wp_using_ext_object_cache(),
-			'file_mods'     => ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ),
+			'file_mods'     => wp_is_file_mod_allowed( 'site_bridge' ),
 			'theme'         => array(
 				'name'    => $theme->get( 'Name' ),
 				'version' => $theme->get( 'Version' ),

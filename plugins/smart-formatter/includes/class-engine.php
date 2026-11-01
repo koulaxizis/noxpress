@@ -174,6 +174,8 @@ final class SF_Engine {
 		$len      = strlen( $text );
 		$i        = 0;
 
+		// By reference: $stack and $segments change after the closure is made.
+		// @phpstan-ignore-next-line PHPStan reports by-reference uses as unused.
 		$flush = static function () use ( &$segments, &$buf, &$stack ) {
 			if ( '' === $buf ) {
 				return;

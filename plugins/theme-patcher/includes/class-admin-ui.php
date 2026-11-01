@@ -1503,6 +1503,7 @@ final class TP_Admin_UI {
 			$back .= '&tab=' . $tab;
 		}
 
+		$msgs = array();
 		switch ( $action ) {
 			case 'probe':
 				self::do_probe(); // Redirects to the front end (exits).

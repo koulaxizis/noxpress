@@ -778,9 +778,6 @@ final class RS_Portal {
 		$portal  = '' !== $content && ( has_shortcode( $content, self::SHORTCODE ) || has_shortcode( $content, 'rs_portal' ) );
 		if ( $portal || isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
 			self::mark_no_cache();
-			if ( ! headers_sent() ) {
-				nocache_headers();
-			}
 		}
 	}
 
@@ -793,9 +790,7 @@ final class RS_Portal {
 
 	/** DONOTCACHEPAGE, read by every page cache at the end of the page. */
 	private static function mark_no_cache(): void {
-		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-			define( 'DONOTCACHEPAGE', true );
-		}
+		Noxpress_Core::no_page_cache(); // Core 1.2.5: DONOTCACHEPAGE + no-store while headers can be sent.
 	}
 
 	/* ---------- Login form (μόνο κλειδί, κεντραρισμένο — v1.3.5 #3) ---------- */

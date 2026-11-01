@@ -10,3 +10,5 @@ Thumbs.db
 # Build artifacts — φτιάχνονται από το Action, δεν commit-αρούν ποτέ
 dist/
 *.zip
+# Runtime files
+*.pid

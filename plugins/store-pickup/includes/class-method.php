@@ -42,6 +42,8 @@ class PKP_Method extends WC_Shipping_Method {
 		$this->instance_form_fields = $this->fields();
 		$this->title                = (string) $this->get_option( 'title' );
 		$this->tax_status           = 'taxable' === $this->get_option( 'tax_status' ) ? 'taxable' : 'none';
+		// WooCommerce's own pattern for shipping methods (process_admin_options returns bool).
+		// @phpstan-ignore-next-line
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 

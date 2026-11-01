@@ -5,7 +5,7 @@ Tags: cache, page cache, performance, minify, lazy load
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,11 @@ Use one page cache. Keep the host's object cache (Memcached, Redis): it works to
 The drop-in (only if it is ours), the `WP_CACHE` line (only if Fast Pages added it), the cache folder, the settings and the scheduled events are removed. WP Rocket's settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix: a plugin activated or updated after Fast Pages was turned on could add a private cookie (noxpress_private_cookies) that the drop-in did not know until the settings were saved again. The drop-in config is now compared with the current one on every admin page and written again when anything differs.
+* Fix: an attribute set by the optimizations (e.g. loading or decoding) is replaced only once per tag, as intended.
+* Noxpress Core 1.2.5.
 
 = 1.0.1 =
 * Fix: a page lives at most 12 hours in the cache. The 24 h, 48 h and "until the next purge" choices are gone (a saved one becomes 12 h): WordPress nonces in older pages stopped forms and buttons from working.

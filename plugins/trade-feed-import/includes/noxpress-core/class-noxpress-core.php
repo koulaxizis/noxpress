@@ -7,7 +7,8 @@
  * WooCommerce, so a site can always reach the hub and receive updates.
  *
  * Dispatch map:
- *  - Noxpress_Core     → catalog of suite plugins, top-level menu, language
+ *  - Noxpress_Core     → catalog of suite plugins, top-level menu, language,
+ *                        page-cache helpers (no_page_cache, purge_page_cache)
  *  - Noxpress_Updater  → updates.json, update transient, plugin details,
  *                        package verification (sha256 + Ed25519)
  *  - Noxpress_Hub      → the "Noxpress" landing page, channel setting
@@ -418,6 +419,91 @@ final class Noxpress_Core {
 			self::$lang = $lang;
 		}
 		return $lang;
+	}
+
+	/* =====================================================================
+	 * Page caches (Bible §6, §14.34), since Core 1.2.5
+	 * =================================================================== */
+
+	/**
+	 * Keeps the current response out of every page cache: DONOTCACHEPAGE
+	 * (Fast Pages, WP Rocket, LiteSpeed, W3TC, WP Super Cache) and no-store
+	 * headers for proxies and CDNs while headers can still be sent.
+	 */
+	public static function no_page_cache(): void {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+		if ( ! headers_sent() ) {
+			nocache_headers();
+		}
+	}
+
+	/**
+	 * Clears the page caches we know: Fast Pages through the suite hook
+	 * noxpress_purge_page_cache, the others through their own public
+	 * functions. Never throws.
+	 *
+	 * @param int[] $post_ids Only the pages of these posts; empty = everything.
+	 * @return string[] Names of the page caches cleared.
+	 */
+	public static function purge_page_cache( array $post_ids = array() ): array {
+		$ids  = array_values( array_unique( array_filter( array_map( 'intval', $post_ids ), static function ( $id ) { return $id > 0; } ) ) );
+		$done = array();
+		try {
+			if ( $ids ) {
+				$urls = array();
+				foreach ( $ids as $id ) {
+					$link = get_permalink( $id );
+					if ( $link ) {
+						$urls[] = $link;
+					}
+				}
+				if ( $urls ) {
+					do_action( 'noxpress_purge_page_cache', $urls );
+				}
+			} else {
+				do_action( 'noxpress_purge_page_cache', array() );
+			}
+			if ( class_exists( 'FPG_Purge', false ) ) {
+				$done[] = 'Fast Pages';
+			}
+			// Each cache through its own public functions, when it is there.
+			if ( $ids && function_exists( 'rocket_clean_post' ) ) {
+				array_map( 'rocket_clean_post', $ids );
+				$done[] = 'WP Rocket';
+			} elseif ( ! $ids && function_exists( 'rocket_clean_domain' ) ) {
+				rocket_clean_domain();
+				$done[] = 'WP Rocket';
+			}
+			if ( defined( 'LSCWP_V' ) ) {
+				if ( $ids ) {
+					foreach ( $ids as $id ) {
+						do_action( 'litespeed_purge_post', $id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- LiteSpeed Cache's own action.
+					}
+				} else {
+					do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- LiteSpeed Cache's own action.
+				}
+				$done[] = 'LiteSpeed Cache';
+			}
+			if ( $ids && function_exists( 'w3tc_flush_post' ) ) {
+				array_map( 'w3tc_flush_post', $ids );
+				$done[] = 'W3 Total Cache';
+			} elseif ( ! $ids && function_exists( 'w3tc_flush_all' ) ) {
+				w3tc_flush_all();
+				$done[] = 'W3 Total Cache';
+			}
+			if ( $ids && function_exists( 'wpsc_delete_post_cache' ) ) {
+				array_map( 'wpsc_delete_post_cache', $ids );
+				$done[] = 'WP Super Cache';
+			} elseif ( ! $ids && function_exists( 'wp_cache_clear_cache' ) ) {
+				wp_cache_clear_cache();
+				$done[] = 'WP Super Cache';
+			}
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+		return $done;
 	}
 
 	/** ngettext_noxpress filter: both Greek forms are dictionary keys. */

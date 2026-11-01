@@ -234,8 +234,11 @@ final class FPG_Setup {
 	}
 
 	/**
-	 * The config or our drop-in on disk is from another version or another
-	 * folder (the site was moved, e.g. with Data Migrator): write it again.
+	 * The config on disk differs from the one the site would write now:
+	 * another version or folder (the site was moved, e.g. with Data
+	 * Migrator), or a plugin activated or updated since the last write
+	 * added a private cookie (noxpress_private_cookies, 1.0.2). Write it
+	 * again. Same for our drop-in.
 	 */
 	public static function maybe_refresh(): void {
 		$f = FPG_Files::dir() . '/config.php';
@@ -243,7 +246,8 @@ final class FPG_Setup {
 			return;
 		}
 		$head = is_file( $f ) ? (string) @file_get_contents( $f ) : ''; // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions
-		if ( false === strpos( $head, "'v' => '" . FPG_VERSION . "'" ) || false === strpos( $head, var_export( FPG_Files::dir(), true ) ) ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- compared with the written file.
+		self::$config = null;
+		if ( false === strpos( $head, 'return ' . var_export( self::config(), true ) . ';' ) ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- compared with the written file.
 			self::write_config();
 		}
 		if ( 'ours' === self::dropin() ) {

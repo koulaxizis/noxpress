@@ -1,17 +1,22 @@
-# Ελέγχει τον PHP κώδικα των plugins σε κάθε PR (Bible §2, έλεγχος 2026-10-31 #8).
+# Ελέγχει τον PHP κώδικα των plugins σε κάθε PR και σε κάθε push στο main
+# (Bible §2, έλεγχος 2026-10-31 #8· push στο main και bootstrap PHPStan από
+# τον έλεγχο 2026-11).
 #
 #  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας) και 8.4 (η νεότερη),
 #             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
-#  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη) και PHPStan
-#             (level 1, stubs WordPress/WooCommerce). Προς το παρόν μόνο
-#             ενημερωτικό (continue-on-error στα βήματα, το job μένει πράσινο):
-#             τα αποτελέσματα φαίνονται στο summary του run, και γίνεται
-#             υποχρεωτικό όταν καθαρίσει.
+#  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη), ενημερωτικό
+#             (continue-on-error), και PHPStan (level 1, stubs WordPress,
+#             WooCommerce, WP-CLI, Action Scheduler, bootstrap σταθερών στο
+#             .github/phpstan/). Το PHPStan μπλοκάρει από τον έλεγχο 2026-11
+#             (Bible 1.85)· τα αποτελέσματα φαίνονται στο summary του run.
 name: PHP checks
 
 on:
   pull_request:
-    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py']
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/phpstan/**']
+  push:
+    branches: [main]
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/phpstan/**']
   workflow_dispatch:
 
 permissions:
@@ -64,7 +69,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/qa" && cd "$RUNNER_TEMP/qa"
           composer init -n --name noxpress/qa >/dev/null
           composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-          composer require -n --dev dealerdirect/phpcodesniffer-composer-installer:^1 phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs
+          composer require -n --dev dealerdirect/phpcodesniffer-composer-installer:^1 phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs php-stubs/wp-cli-stubs
       - name: PHPCS (PHP 7.4+ compatibility)
         continue-on-error: true
         run: |
@@ -72,16 +77,39 @@ jobs:
           "$RUNNER_TEMP/qa/vendor/bin/phpcs" --standard=PHPCompatibilityWP --runtime-set testVersion 7.4- \
             --extensions=php --ignore='*/vendor/*' -q --report=summary plugins | tee -a "$GITHUB_STEP_SUMMARY"
       - name: PHPStan (level 1)
-        continue-on-error: true
         run: |
+          # The 29 copies of Noxpress Core are identical to Revenue Splitter's
+          # (checked by the lint job): analyse that one only, but keep scanning
+          # all, as WordPress loads whichever copy is newest.
+          skip=$(for d in plugins/*/includes/noxpress-core; do
+            [ "$d" = plugins/revenue-splitter/includes/noxpress-core ] || printf '      - %s/%s\n' "$GITHUB_WORKSPACE" "$d"
+          done)
           cat > "$RUNNER_TEMP/phpstan.neon" <<EOF
           includes:
             - $RUNNER_TEMP/qa/vendor/szepeviktor/phpstan-wordpress/extension.neon
           parameters:
             level: 1
             paths: [ $GITHUB_WORKSPACE/plugins ]
-            excludePaths: [ '*/vendor/*' ]
-            scanFiles: [ $RUNNER_TEMP/qa/vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php ]
+            excludePaths:
+              analyse:
+                - '*/vendor/*'
+          $skip
+            bootstrapFiles: [ $GITHUB_WORKSPACE/.github/phpstan/bootstrap.php ]
+            scanFiles:
+              - $RUNNER_TEMP/qa/vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+              - $GITHUB_WORKSPACE/.github/phpstan/action-scheduler-stubs.php
+            scanDirectories:
+              - $RUNNER_TEMP/qa/vendor/php-stubs/wp-cli-stubs
+            ignoreErrors:
+              # WooCommerce e-mail templates get their variables from wc_get_template().
+              - message: '#^Variable \\\$[a-z_]+ might not be defined\.\$#'
+                path: '*/templates/*'
             reportUnmatchedIgnoredErrors: false
           EOF
-          "$RUNNER_TEMP/qa/vendor/bin/phpstan" analyse -c "$RUNNER_TEMP/phpstan.neon" --no-progress --memory-limit=2G --error-format=table | tail -n 200 | tee -a "$GITHUB_STEP_SUMMARY"
+          set +e
+          "$RUNNER_TEMP/qa/vendor/bin/phpstan" analyse -c "$RUNNER_TEMP/phpstan.neon" --no-progress --memory-limit=2G --error-format=table > "$RUNNER_TEMP/phpstan.txt" 2>&1
+          rc=$?
+          set -e
+          { echo '### PHPStan'; grep -E '\[(OK|ERROR)\]' "$RUNNER_TEMP/phpstan.txt" || echo "exit $rc"; echo '```'; tail -n 300 "$RUNNER_TEMP/phpstan.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/phpstan.txt"
+          exit $rc

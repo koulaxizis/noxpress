@@ -414,18 +414,15 @@ final class PFM_Works {
 
 	/** Page caches of products whose "Available formats" block changed. */
 	public static function purge( array $ids ): void {
-		foreach ( array_unique( array_map( 'intval', $ids ) ) as $id ) {
-			if ( $id <= 0 ) {
-				continue;
-			}
+		$ids = array_values( array_filter( array_unique( array_map( 'intval', $ids ) ), static function ( $id ) { return $id > 0; } ) );
+		foreach ( $ids as $id ) {
 			clean_post_cache( $id );
 			if ( function_exists( 'wc_delete_product_transients' ) ) {
 				wc_delete_product_transients( $id );
 			}
-			if ( function_exists( 'rocket_clean_post' ) ) {
-				rocket_clean_post( $id );
-			}
-			do_action( 'litespeed_purge_post', $id );
+		}
+		if ( $ids ) {
+			Noxpress_Core::purge_page_cache( $ids ); // Fast Pages, WP Rocket and the others (Core 1.2.5).
 		}
 	}
 
