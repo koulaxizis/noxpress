@@ -32,7 +32,7 @@ function tfi_uninstall_site(): void {
 	$delete   = is_array( $settings ) && ! empty( $settings['purge'] );
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( '', array(), 'trade-feed-import' );
+		as_unschedule_all_actions( '', array(), 'trade-feed-import', 'lean-images' );
 	}
 	foreach ( array( 'tfi_step', 'tfi_safety', 'tfi_daily' ) as $tfi_hook ) {
 		wp_clear_scheduled_hook( $tfi_hook );
@@ -106,7 +106,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $tfi_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed', 'live-operator', 'trade-accounts', 'fast-pages', 'broadcast', 'magic-login', 'trade-feed-import' ) as $tfi_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'shipping-notes', 'book-preview', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed', 'live-operator', 'trade-accounts', 'fast-pages', 'broadcast', 'magic-login', 'trade-feed-import', 'lean-images' ) as $tfi_slug ) {
 	if ( 'trade-feed-import' !== $tfi_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $tfi_slug . '/' . $tfi_slug . '.php' ) ) {
 		$tfi_suite_left = true;
 		break;

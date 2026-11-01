@@ -1,0 +1,440 @@
+/**
+ * Lean Images — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5): the Greeklish Permalinks / RS panel,
+ * prefix lim-*. Palette #101218 / #6d4aff / #eae8fa, no max-width.
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.lim-wrap {
+	--lim-bg: #101218;
+	--lim-panel: #14161d;
+	--lim-panel-2: #1d2029;
+	--lim-input: #1a1d26;
+	--lim-border: #2e3240;
+	--lim-border-input: #3a3f52;
+	--lim-row-border: #23262f;
+	--lim-stripe: #181b23;
+	--lim-hover: #1e212c;
+	--lim-text: #eae8fa;
+	--lim-heading: #f6f4ff;
+	--lim-muted: #b7b2d6;
+	--lim-link: #beb1ff;
+	--lim-link-hover: #d4c9ff;
+	--lim-accent: #6d4aff;
+	--lim-accent-hover: #8263ff;
+	--lim-warn: #f5c97e;
+	--lim-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.lim-wrap {
+	color-scheme: dark;
+	background: var(--lim-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--lim-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.lim-wrap h1,
+.lim-wrap h2 {
+	color: var(--lim-heading);
+}
+
+.lim-wrap a { color: var(--lim-link); }
+.lim-wrap a:hover { color: var(--lim-link-hover); }
+
+.lim-wrap .lim-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--lim-muted);
+	border-bottom: 1px solid var(--lim-border);
+	padding-bottom: 6px;
+}
+
+.lim-wrap .description,
+.lim-wrap p.description,
+.lim-wrap .lim-hint {
+	color: var(--lim-muted) !important;
+}
+
+.lim-zone {
+	background: var(--lim-panel);
+	border: 1px solid var(--lim-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.lim-wrap input[type="text"],
+.lim-wrap input[type="url"],
+.lim-wrap input[type="number"],
+.lim-wrap input[type="time"],
+.lim-wrap input[type="date"],
+.lim-wrap textarea,
+.lim-wrap select {
+	background-color: var(--lim-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--lim-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.lim-wrap input::placeholder,
+.lim-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.lim-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.lim-wrap input[type="file"] {
+	color: var(--lim-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.lim-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.lim-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.lim-wrap input[type="checkbox"],
+.lim-wrap input[type="radio"] {
+	accent-color: var(--lim-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.lim-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.lim-wrap .button:hover:not(:disabled) {
+	border-color: var(--lim-accent) !important;
+	color: #ffffff !important;
+}
+
+.lim-wrap .button-primary {
+	background: var(--lim-accent) !important;
+	border-color: var(--lim-accent) !important;
+	color: #ffffff !important;
+}
+
+.lim-wrap .button-primary:hover:not(:disabled) {
+	background: var(--lim-accent-hover) !important;
+}
+
+.lim-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.lim-submit { margin-top: 20px; }
+.lim-inline-form { display: inline; margin-right: 10px; }
+.lim-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.lim-table,
+table.widefat.lim-table {
+	background: var(--lim-panel) !important;
+	border: 1px solid var(--lim-border) !important;
+	border-radius: 6px;
+	color: var(--lim-text) !important;
+	margin-top: 14px !important;
+}
+
+.lim-table thead th,
+.lim-table thead td {
+	background: var(--lim-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.lim-table tbody td,
+.lim-table tbody th {
+	background: var(--lim-panel) !important;
+	color: var(--lim-text) !important;
+	border-bottom: 1px solid var(--lim-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.lim-table tbody tr:nth-child(2n) td,
+.lim-table tbody tr:nth-child(2n) th {
+	background: var(--lim-stripe) !important;
+}
+
+.lim-table tbody tr:hover td,
+.lim-table tbody tr:hover th {
+	background: var(--lim-hover) !important;
+}
+
+.lim-table td,
+.lim-table th {
+	padding: 12px 14px;
+}
+
+.lim-table td code {
+	background: transparent !important;
+	color: var(--lim-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.lim-table .lim-empty {
+	color: var(--lim-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.lim-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.lim-footer a { color: #beb1ff; text-decoration: none; }
+.lim-footer a:hover { text-decoration: underline; }
+
+.lim-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.lim-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.lim-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.lim-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.lim-muted { color: var(--lim-muted) !important; }
+.lim-warn { color: var(--lim-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.lim-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.lim-wrap .lim-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--lim-heading);
+}
+
+.lim-status p { margin: 0 0 8px; }
+.lim-status p:last-child { margin-bottom: 0; }
+.lim-status code,
+.lim-wrap .description code,
+.lim-wrap .lim-hint code {
+	background: var(--lim-panel-2);
+	color: var(--lim-muted);
+	border: 1px solid var(--lim-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.lim-suspended { margin: 8px 0 0; }
+.lim-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.lim-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--lim-border);
+	background: var(--lim-panel-2);
+	color: var(--lim-text);
+	white-space: nowrap;
+}
+.lim-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.lim-badge--muted { color: var(--lim-muted); }
+.lim-badge--warn { border-color: #6b5a33; color: var(--lim-warn); }
+.lim-badge--danger { border-color: #6b3a3a; color: var(--lim-danger); }
+
+/* Area fieldsets. */
+.lim-area {
+	background: var(--lim-panel);
+	border: 1px solid var(--lim-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.lim-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--lim-heading);
+}
+.lim-row { margin: 4px 0 8px; }
+
+.lim-details > summary {
+	cursor: pointer;
+	color: var(--lim-link);
+	margin: 4px 0;
+}
+.lim-details[open] > summary { margin-bottom: 12px; }
+
+.lim-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.lim-wrap .lim-label {
+	display: block;
+	font-weight: 600;
+	color: var(--lim-heading);
+	margin: 8px 0 6px;
+}
+.lim-grid .lim-label:first-child { margin-top: 0; }
+
+.lim-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.lim-field > span:first-child {
+	min-width: 150px;
+	color: var(--lim-text);
+}
+.lim-wrap .lim-color { width: 96px; font-family: monospace; }
+.lim-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--lim-border-input);
+}
+
+.lim-wrap .lim-hint { display: block; font-size: 12px; margin-top: 4px; }
+.lim-wrap td .lim-hint { display: inline; }
+.lim-table td.lim-warn { color: var(--lim-warn) !important; }
+
+/* Tabs of the main page. */
+.lim-wrap .lim-tabs {
+	border-bottom: 1px solid var(--lim-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.lim-wrap .lim-tabs .nav-tab {
+	background: var(--lim-panel);
+	border-color: var(--lim-border);
+	color: var(--lim-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.lim-wrap .lim-tabs .nav-tab:hover { color: var(--lim-link-hover); background: var(--lim-hover); }
+.lim-wrap .lim-tabs .nav-tab-active,
+.lim-wrap .lim-tabs .nav-tab-active:hover {
+	background: var(--lim-bg);
+	border-bottom-color: var(--lim-bg);
+	color: var(--lim-heading);
+}
+
+/* One input per line (removal rules). */
+.lim-wrap .lim-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.lim-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--lim-border);
+	border-radius: 6px;
+	background: var(--lim-panel-2);
+}
+.lim-scroll .lim-field { margin-bottom: 4px; }
+
+
+/* ===== Lean Images additions ===== */
+.lim-wrap .lim-status p { margin: 6px 0; }
+.lim-wrap .lim-status .lim-hint { display: block; margin: 2px 0 0; }
+.lim-wrap .lim-inline-form { display: inline-block; margin: 0 6px 6px 0; }
+.lim-wrap .lim-hint--under { margin: 2px 0 12px; }
+.lim-wrap .lim-enable { margin-top: 12px; }
+.lim-wrap .lim-enable .lim-check { margin-bottom: 10px; }
+.lim-wrap textarea.code { width: 100%; max-width: 760px; font-family: monospace; }
+.lim-wrap code { word-break: break-all; }
+
+/* ===== Lean Images: progress bar, danger zone ===== */
+.lim-wrap .lim-bar {
+	display: inline-block;
+	vertical-align: middle;
+	width: 180px;
+	height: 8px;
+	margin-left: 10px;
+	border-radius: 4px;
+	background: var(--lim-panel-2);
+	overflow: hidden;
+}
+.lim-wrap .lim-bar > span {
+	display: block;
+	height: 100%;
+	background: var(--lim-accent);
+}
+.lim-wrap .lim-zone--danger {
+	border-color: var(--lim-danger) !important;
+}
+.lim-wrap .lim-actions .lim-inline-form { margin-bottom: 6px; }
+
+/* ===== Form-table (Ρυθμίσεις), as the RS ===== */
+.lim-wrap .form-table th,
+.lim-wrap .form-table th label {
+	color: var(--lim-text) !important;
+	font-weight: 600;
+}
+.lim-wrap .form-table td,
+.lim-wrap .form-table td label {
+	color: var(--lim-text) !important;
+}
