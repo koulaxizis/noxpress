@@ -120,7 +120,12 @@ final class Redirects {
 
 		RDR_Watch::init();
 		RDR_Abilities::init();
-		add_action( self::CRON, array( 'RDR_Log', 'cleanup' ) );
+		add_action(
+			self::CRON,
+			static function () {
+				RDR_Log::cleanup(); // Returns the number of files deleted; an action returns nothing.
+			}
+		);
 
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( __CLASS__, 'upkeep' ) );
