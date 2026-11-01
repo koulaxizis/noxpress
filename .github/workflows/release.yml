@@ -178,9 +178,24 @@ jobs:
               li) echo "Lean Images" ;;
             esac
           }
+          header_field() {
+            grep -m1 -E "^\s*\*\s*$2:" "plugins/$1/$1.php" \
+              | sed -E "s/.*$2:\s*//; s/\s+\$//"
+          }
           header_version() {
-            grep -m1 -E '^\s*\*\s*Version:' "plugins/$1/$1.php" \
-              | sed -E 's/.*Version:\s*//; s/\s+$//'
+            header_field "$1" Version
+          }
+          # "Requires WordPress 6.0+, PHP 7.4+ and WooCommerce." from the
+          # plugin header, so WordPress-only plugins do not claim WooCommerce.
+          requires_line() {
+            local wp php
+            wp="$(header_field "$1" 'Requires at least')"
+            php="$(header_field "$1" 'Requires PHP')"
+            if header_field "$1" 'Requires Plugins' | grep -qw woocommerce; then
+              echo "Requires WordPress ${wp:-6.0}+, PHP ${php:-7.4}+ and WooCommerce."
+            else
+              echo "Requires WordPress ${wp:-6.0}+ and PHP ${php:-7.4}+."
+            fi
           }
 
           release_one() {
@@ -208,7 +223,7 @@ jobs:
             {
               echo "**Beta**: under testing before it is marked stable."
               echo
-              echo "Requires WordPress 6.0+, PHP 7.4+ and WooCommerce."
+              requires_line "$slug"
               echo
               echo "### Changes"
               if [ -f "plugins/$slug/readme.txt" ]; then
