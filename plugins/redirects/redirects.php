@@ -3,7 +3,7 @@
  * Plugin Name:          Redirects
  * Plugin URI:           https://noxpress.tech
  * Description:          Ανακατευθύνσεις 301 / 302 / 307 και 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και καταγραφή των 404 σε ιδιωτικό αρχείο (όχι στη βάση), χωρίς IP και χωρίς τα bots. Προτείνει στόχο για κάθε σπασμένο link, εισάγει κανόνες από Rank Math, Redirection, Yoast Premium, Simple 301 Redirects και CSV, και συνεργάζεται με το Greeklish Permalinks.
- * Version:              1.0.0
+ * Version:              1.0.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -69,7 +69,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RDR_VERSION', '1.0.0' );
+define( 'RDR_VERSION', '1.0.1' );
 define( 'RDR_FILE', __FILE__ );
 define( 'RDR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RDR_URL', plugin_dir_url( __FILE__ ) );
