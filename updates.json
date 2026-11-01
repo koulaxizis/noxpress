@@ -143,6 +143,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.1/home-sections.zip"
       }
     },
+    "lean-images": {
+      "beta": {
+        "changelog": "* First release: local WebP / AVIF conversion with Imagick or GD in background batches (Action Scheduler or WP-Cron) with a size, time and memory budget, a lock and an optional night window; `<picture>` output for attachment images, featured images and content, optional whole-page pass; test mode, `LIM_DISABLE`, sample test, retry, one image, orphans, delete all; media library column; Imagify detection and adoption of its WebP files; page cache purge through Noxpress Core; abilities for Site Bridge.",
+        "published": "2026-11-01",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "87de8f19337160e08771908c033cc51806dd55eb0b567539f5e91bc9b87601c3",
+        "signature": "y5mCU+H4ZKcBiiCjYQDp/098uNRCchuIkV5zf0ddZ3dqBlMTn5HZF3y9cvlkxlFwsFlpZ4EuKKSY7VgzvOQRBA==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.0/lean-images.zip"
+      }
+    },
     "live-operator": {
       "beta": {
         "changelog": "* Fix: the app page could miss the «new app version» notice, because it read only the 50 newest releases of the repo and the app's own releases are further down among the plugin releases. It now reads 100 per page, up to 5 pages, until it finds the app's releases.\n* Noxpress Core 1.2.5.",
