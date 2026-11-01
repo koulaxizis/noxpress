@@ -143,19 +143,6 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.1/home-sections.zip"
       }
     },
-    "lean-images": {
-      "beta": {
-        "changelog": "* First release: local WebP / AVIF conversion with Imagick or GD in background batches (Action Scheduler or WP-Cron) with a size, time and memory budget, a lock and an optional night window; `<picture>` output for attachment images, featured images and content, optional whole-page pass; test mode, `LIM_DISABLE`, sample test, retry, one image, orphans, delete all; media library column; Imagify detection and adoption of its WebP files; page cache purge through Noxpress Core; abilities for Site Bridge.",
-        "published": "2026-11-01",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "87de8f19337160e08771908c033cc51806dd55eb0b567539f5e91bc9b87601c3",
-        "signature": "y5mCU+H4ZKcBiiCjYQDp/098uNRCchuIkV5zf0ddZ3dqBlMTn5HZF3y9cvlkxlFwsFlpZ4EuKKSY7VgzvOQRBA==",
-        "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.0/lean-images.zip"
-      }
-    },
     "live-operator": {
       "beta": {
         "changelog": "* Fix: the app page could miss the «new app version» notice, because it read only the 50 newest releases of the repo and the app's own releases are further down among the plugin releases. It now reads 100 per page, up to 5 pages, until it finds the app's releases.\n* Noxpress Core 1.2.5.",
@@ -167,19 +154,17 @@
         "tested_wp": "7.1",
         "version": "1.3.1",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.1/live-operator.zip"
-      }
-    },
-    "magic-login": {
-      "beta": {
-        "changelog": "* Fix: the limit per IP address reads REMOTE_ADDR, and CF-Connecting-IP only when the request comes from Cloudflare. Headers such as X-Forwarded-For, which any visitor can send, are no longer used, so the limit cannot be bypassed by changing them.",
-        "published": "2026-10-31",
+      },
+      "stable": {
+        "changelog": "* New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.\n* The availability is worked out on every check, so it is right even when WP-Cron runs late; one WP-Cron event at the next change only sends the notifications.",
+        "published": "2026-10-28",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "79dbe47f82cf2d47dcd3019a197919ed77bef067a7eeb6f3313438b6aa2d6db2",
-        "signature": "pJtSqdW74xBo91Bh1dlcmpQOf6EuamPbc3ngncXpuuxc/WVzb3MzuNLNHXtELOq0i8vn1GFtuNtyQrniZII8Dw==",
+        "sha256": "3e10cfdeb08ec4faac4fa6535aaad4f517b0958dd32ad254c8ccc868f9ddc8e4",
+        "signature": "XBQXqCTcjMC+cLrWyFt7vW7pSwhL/vbPqrxrJaxeM355NQQI91WkuBPU7V9+Zlh9nykx6BwxgHWldOabifmxDQ==",
         "tested_wp": "7.1",
-        "version": "1.0.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.2/magic-login.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.0/live-operator.zip"
       }
     },
     "oros-connect": {
@@ -245,19 +230,6 @@
         "tested_wp": "7.1",
         "version": "1.1.1",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.1/publishing-quote.zip"
-      }
-    },
-    "redirects": {
-      "beta": {
-        "changelog": "* Initial release.\n* Exact, «starts with» and regex rules with 301 / 302 / 307 / 410, only on 404, before WordPress's guesses and Greeklish Permalinks; targets kept by post or term ID.\n* Checks for protected addresses, loops, chains and duplicates; «Test an address».\n* New 301 rules start as 302 and are suggested for 301 after 7 days; test mode for administrators first.\n* 404 log and rule hits in a private file (no IP, user agent or query string), scanner filter, limits, retention, HTTP self-test.\n* Target suggestions (old slugs, Greeklish Permalinks, similar slugs and files) with one-click rules; trashed posts and changed term addresses as suggestions.\n* Import from Rank Math, Redirection, Yoast SEO Premium, Simple 301 Redirects and CSV; CSV export; JSON backup and restore.\n* Abilities redirects/list, top-404, test-url and add; RDR_DISABLE; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.7).",
-        "published": "2026-11-01",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "2132895f97fc722f62249333843fb9eb60b55e202fcf71f2c3f4a784a0d34428",
-        "signature": "0OLtlNlhHjLK6QBDHUSHdi+Tfw49kA6QApMHb02LQudH+C2IO6rg0f0bcFYNjqFBS6dkBfG02j0h2FArPrdLAw==",
-        "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.0/redirects.zip"
       }
     },
     "revenue-splitter": {
@@ -375,19 +347,6 @@
         "tested_wp": "7.1",
         "version": "1.4.1",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.4.1/trade-accounts.zip"
-      }
-    },
-    "trade-feed-import": {
-      "beta": {
-        "changelog": "* Fix: a publisher without pretty permalinks (feed address with ?rest_route=) now connects; the plugin tries the other address form by itself and keeps the one that works.\n* Messages with a number now use the singular for one (\"1 book\", \"1 title\").\n* The first step's button now reads «Connect to the publisher», and the «start again» link takes the plugin's link colour.\n* Tested end to end on WordPress 7.1.4 with WooCommerce 11.2.1 against Trade Accounts 1.4.1: connection by pasting the e-mail, first import, linking by ISBN, daily sync of price, availability, pre-orders and cost, locks, titles that leave the feed.",
-        "published": "2026-10-30",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "eae000efd6f62ec6712743b68955b3c70597800de2dea357e172c09de6db35f8",
-        "signature": "qmS8h1AdjSw5JefnGembf48Evdf9QPl9h19sNCgv5+CkLHJpTinLKvNQCGX8abpX79n51ZSswCetZ4xChnKxCA==",
-        "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.1/trade-feed-import.zip"
       }
     },
     "variation-picker": {
