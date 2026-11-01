@@ -1,6 +1,6 @@
 {
   "display": 500,
-  "total": 761,
+  "total": 763,
   "offset": 5,
   "updated": "2026-11-01",
   "assets": {
@@ -810,10 +810,14 @@
     },
     "697878247": {
       "file": "nox-li-1.0.0/lean-images.zip",
-      "count": 0
+      "count": 1
     },
     "697920894": {
       "file": "nox-rd-1.0.0/redirects.zip",
+      "count": 1
+    },
+    "697991003": {
+      "file": "nox-rd-1.0.1/redirects.zip",
       "count": 0
     }
   }
