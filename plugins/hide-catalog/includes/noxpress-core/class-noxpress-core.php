@@ -62,6 +62,7 @@ final class Noxpress_Core {
 		'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.' => "Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos and posts you prepare, with a queue, approval and a history.",
 		'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.' => 'Passwordless login for customers: a one-time link by email from the login form and the checkout, with expiry, rate limits and a confirmation page.',
 		'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.' => "For bookshops: a publisher's titles from its Trade Accounts feed in your own shop, by pasting its e-mail and pressing one button; price, availability and pre-orders update every day without losing your own edits.",
+		'Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.' => 'JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches. The originals never change; no account, quota or external service.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -327,6 +328,11 @@ final class Noxpress_Core {
 				'name' => 'Trade Feed Import',
 				'desc' => __( 'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.', 'noxpress' ),
 				'page' => 'tfi-settings',
+			),
+			'lean-images'       => array(
+				'name' => 'Lean Images',
+				'desc' => __( 'Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.', 'noxpress' ),
+				'page' => 'lim-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

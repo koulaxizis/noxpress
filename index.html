@@ -1230,6 +1230,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="lean-images">
+		<h2><a href="#lean-images">Lean Images</a></h2>
+		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="li_desc">Lighter images without an external service: your JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches, and browsers that accept them get them. The originals never change; no account, no quota.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="li_li1">Conversion with the image editor WordPress already uses (Imagick or GD): the full image and every size, saved next to the original; a copy is kept only when it is clearly smaller</li>
+			<li data-i18n="li_li2">Gentle on shared hosting: one small batch every 5 minutes with a limit on images, seconds and memory, an optional night window, and a test on 20 images that estimates time and space first</li>
+			<li data-i18n="li_li3">Served with &lt;picture&gt;: the same HTML for every visitor, so page caches and Cloudflare stay correct; old browsers keep the original, and a missing file never shows a broken image</li>
+			<li data-i18n="li_li4">New uploads wait for the next batch, edited or regenerated images are made again, deleted ones take their copies with them; Imagify’s WebP files are adopted, not made again</li>
+			<li data-i18n="li_li5">Test mode for administrators, LIM_DISABLE, a column in the media library, «Delete all» and a clean uninstall; Claude runs it through Site Bridge; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.0/lean-images.zip" rel="nofollow noopener" data-i18n="li_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/lean-images" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="apps">
@@ -1633,6 +1654,13 @@ footer .heart { color: var(--accent-bright); }
 		ti_li4: 'Fields you edit by hand are locked and never written over; titles that leave the feed go out of stock, and a day when the feed lists nothing changes nothing',
 		ti_li5: 'A sealed password, HTTPS only, the publisher’s rate limit respected, a titles tab and a history, settings backup, TFI_DISABLE, nothing on the front end; bilingual UI and shared «Noxpress» menu',
 		ti_download: 'Download v1.0.1 (.zip)',
+		li_desc: 'Lighter images without an external service: your JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches, and browsers that accept them get them. The originals never change; no account, no quota.',
+		li_li1: 'Conversion with the image editor WordPress already uses (Imagick or GD): the full image and every size, saved next to the original; a copy is kept only when it is clearly smaller',
+		li_li2: 'Gentle on shared hosting: one small batch every 5 minutes with a limit on images, seconds and memory, an optional night window, and a test on 20 images that estimates time and space first',
+		li_li3: 'Served with &lt;picture&gt;: the same HTML for every visitor, so page caches and Cloudflare stay correct; old browsers keep the original, and a missing file never shows a broken image',
+		li_li4: 'New uploads wait for the next batch, edited or regenerated images are made again, deleted ones take their copies with them; Imagify’s WebP files are adopted, not made again',
+		li_li5: 'Test mode for administrators, LIM_DISABLE, a column in the media library, «Delete all» and a clean uninstall; Claude runs it through Site Bridge; bilingual UI and shared «Noxpress» menu',
+		li_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -1970,6 +1998,13 @@ footer .heart { color: var(--accent-bright); }
 		ti_li4: 'Ό,τι αλλάζεις με το χέρι κλειδώνει και δεν ξαναγράφεται ποτέ· τίτλοι που φεύγουν από το feed γίνονται εξαντλημένοι, και μια μέρα που το feed δεν δίνει τίποτα δεν αλλάζει τίποτα',
 		ti_li5: 'Σφραγισμένος κωδικός, μόνο HTTPS, σεβασμός στο όριο κλήσεων του εκδότη, καρτέλα τίτλων και ιστορικό, αντίγραφο ρυθμίσεων, TFI_DISABLE, τίποτα στο frontend· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ti_download: 'Λήψη v1.0.1 (.zip)',
+		li_desc: 'Ελαφρύτερες εικόνες χωρίς εξωτερική υπηρεσία: οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο, και τις παίρνουν οι browsers που τις δέχονται. Τα πρωτότυπα δεν αλλάζουν ποτέ· χωρίς λογαριασμό, χωρίς όριο.',
+		li_li1: 'Μετατροπή με τον επεξεργαστή εικόνων που ήδη χρησιμοποιεί το WordPress (Imagick ή GD): η πλήρης εικόνα και κάθε μέγεθος, δίπλα στο πρωτότυπο· ένα αντίγραφο κρατιέται μόνο αν είναι σαφώς μικρότερο',
+		li_li2: 'Ήπιο με το shared hosting: μία μικρή παρτίδα κάθε 5 λεπτά με όριο εικόνων, δευτερολέπτων και μνήμης, προαιρετικά μόνο τη νύχτα, και δοκιμή σε 20 εικόνες που εκτιμά πρώτα χρόνο και χώρο',
+		li_li3: 'Σερβίρισμα με &lt;picture&gt;: το ίδιο HTML για κάθε επισκέπτη, άρα σωστό για κάθε page cache και την Cloudflare· οι παλιοί browsers κρατούν το πρωτότυπο, και ένα αρχείο που λείπει δεν δείχνει ποτέ σπασμένη εικόνα',
+		li_li4: 'Νέες εικόνες περιμένουν την επόμενη παρτίδα, όσες επεξεργάζεσαι ή ξαναφτιάχνεις μετατρέπονται ξανά, όσες σβήνεις παίρνουν μαζί τα αντίγραφά τους· τα WebP του Imagify υιοθετούνται χωρίς νέα μετατροπή',
+		li_li5: 'Λειτουργία δοκιμής για διαχειριστές, LIM_DISABLE, στήλη στη βιβλιοθήκη πολυμέσων, «Διαγραφή όλων» και καθαρό uninstall· ο Claude το χειρίζεται μέσω Site Bridge· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		li_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
