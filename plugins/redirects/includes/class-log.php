@@ -312,7 +312,19 @@ final class RDR_Log {
 				return $y['hits'] <=> $x['hits'] ?: $y['last'] <=> $x['last'];
 			}
 		);
-		foreach ( $agg as &$a ) {
+		// Paths that a rule answers now (made after these visits) are done.
+		$done = RDR_Rules::covered( array_keys( $agg ) );
+		$tot  = 0;
+		$bots = 0;
+		$self = 0;
+		foreach ( $agg as $p => &$a ) {
+			if ( isset( $done[ $p ] ) ) {
+				unset( $agg[ $p ] );
+				continue;
+			}
+			$tot  += $a['hits'];
+			$bots += $a['bots'];
+			$self += $a['self'];
 			arsort( $a['hosts'] );
 			$a['hosts'] = array_slice( $a['hosts'], 0, 3, true );
 		}

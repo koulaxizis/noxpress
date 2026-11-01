@@ -283,6 +283,40 @@ final class RDR_Rules {
 	}
 
 	/**
+	 * Which of these normalised paths an active rule now answers (one query
+	 * for the exact rules, the cached patterns for the rest).
+	 *
+	 * @param string[] $paths Normalised paths.
+	 * @return array<string, true>
+	 */
+	public static function covered( array $paths ): array {
+		global $wpdb;
+		$out = array();
+		if ( ! $paths || ! self::ready() ) {
+			return $out;
+		}
+		$t = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- own table, admin only.
+		$exact = array_flip( (array) $wpdb->get_col( "SELECT src FROM {$t} WHERE match_type = 'exact' AND active = 1" ) );
+		$pats  = self::patterns();
+		foreach ( $paths as $p ) {
+			$p = (string) $p;
+			if ( isset( $exact[ $p ] ) ) {
+				$out[ $p ] = true;
+				continue;
+			}
+			foreach ( $pats as $r ) {
+				$hit = 'prefix' === $r['match'] ? self::prefix_hit( $r['src'], $p ) : 1 === @preg_match( self::regex( $r['src'] ), $p ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- a bad pattern is skipped.
+				if ( $hit ) {
+					$out[ $p ] = true;
+					break;
+				}
+			}
+		}
+		return $out;
+	}
+
+	/**
 	 * The URL a rule sends to now ('' = nothing: 410, or a target that is
 	 * gone, which leaves the 404).
 	 *

@@ -5,7 +5,7 @@ Tags: redirect, 301, 404, 410, broken links
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -99,6 +99,9 @@ Yes. Redirects and 404s are not stored by page caches (Fast Pages, WP Rocket and
 The rules table, the options and the log files are removed (only files that match the plugin's names; the folder only if it is empty), unless you ticked «Keep the rules and the log». The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.0.1 =
+* The 404 tab and redirects/top-404 leave out addresses that a rule now answers: after «301 here» the address no longer stays in the list, and the totals count only what is still broken.
 
 = 1.0.0 =
 * Initial release.
