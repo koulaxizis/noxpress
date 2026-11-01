@@ -367,13 +367,7 @@ final class BPV_Samples {
 		if ( function_exists( 'wc_delete_product_transients' ) ) {
 			wc_delete_product_transients( $product_id );
 		}
-		if ( function_exists( 'rocket_clean_post' ) ) {
-			rocket_clean_post( $product_id );
-		}
-		do_action( 'litespeed_purge_post', $product_id );
-		if ( function_exists( 'w3tc_flush_post' ) ) {
-			w3tc_flush_post( $product_id );
-		}
+		Noxpress_Core::purge_page_cache( array( $product_id ) ); // Fast Pages, WP Rocket and the others (Core 1.2.5).
 	}
 }
 

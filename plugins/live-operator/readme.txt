@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -79,6 +79,10 @@ The fingerprint is missing or wrong, or the server does not pass `/.well-known/a
 The settings, the switch state, the push keys, the devices and the transients are removed. PurioChat Pro's data and settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Changelog ==
+
+= 1.3.1 =
+* Fix: the app page could miss the «new app version» notice, because it read only the 50 newest releases of the repo and the app's own releases are further down among the plugin releases. It now reads 100 per page, up to 5 pages, until it finds the app's releases.
+* Noxpress Core 1.2.5.
 
 = 1.3.0 =
 * New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.

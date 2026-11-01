@@ -1,4 +1,6 @@
-# Ελέγχει τον PHP κώδικα των plugins σε κάθε PR (Bible §2, έλεγχος 2026-10-31 #8).
+# Ελέγχει τον PHP κώδικα των plugins σε κάθε PR και σε κάθε push στο main
+# (Bible §2, έλεγχος 2026-10-31 #8· push στο main και bootstrap PHPStan από
+# τον έλεγχο 2026-11).
 #
 #  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας) και 8.4 (η νεότερη),
 #             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
@@ -11,7 +13,10 @@ name: PHP checks
 
 on:
   pull_request:
-    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py']
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/phpstan/**']
+  push:
+    branches: [main]
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/phpstan/**']
   workflow_dispatch:
 
 permissions:
@@ -74,14 +79,32 @@ jobs:
       - name: PHPStan (level 1)
         continue-on-error: true
         run: |
+          # The 29 copies of Noxpress Core are identical to Revenue Splitter's
+          # (checked by the lint job): analyse that one only, but keep scanning
+          # all, as WordPress loads whichever copy is newest.
+          skip=$(for d in plugins/*/includes/noxpress-core; do
+            [ "$d" = plugins/revenue-splitter/includes/noxpress-core ] || printf '      - %s/%s\n' "$GITHUB_WORKSPACE" "$d"
+          done)
           cat > "$RUNNER_TEMP/phpstan.neon" <<EOF
           includes:
             - $RUNNER_TEMP/qa/vendor/szepeviktor/phpstan-wordpress/extension.neon
           parameters:
             level: 1
             paths: [ $GITHUB_WORKSPACE/plugins ]
-            excludePaths: [ '*/vendor/*' ]
-            scanFiles: [ $RUNNER_TEMP/qa/vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php ]
+            excludePaths:
+              analyse:
+                - '*/vendor/*'
+          $skip
+            bootstrapFiles: [ $GITHUB_WORKSPACE/.github/phpstan/bootstrap.php ]
+            scanFiles:
+              - $RUNNER_TEMP/qa/vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+              - $GITHUB_WORKSPACE/.github/phpstan/action-scheduler-stubs.php
             reportUnmatchedIgnoredErrors: false
           EOF
-          "$RUNNER_TEMP/qa/vendor/bin/phpstan" analyse -c "$RUNNER_TEMP/phpstan.neon" --no-progress --memory-limit=2G --error-format=table | tail -n 200 | tee -a "$GITHUB_STEP_SUMMARY"
+          set +e
+          "$RUNNER_TEMP/qa/vendor/bin/phpstan" analyse -c "$RUNNER_TEMP/phpstan.neon" --no-progress --memory-limit=2G --error-format=table > "$RUNNER_TEMP/phpstan.txt" 2>&1
+          rc=$?
+          set -e
+          { echo '### PHPStan'; grep -E '\[(OK|ERROR)\]' "$RUNNER_TEMP/phpstan.txt" || echo "exit $rc"; echo '```'; tail -n 300 "$RUNNER_TEMP/phpstan.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/phpstan.txt"
+          exit $rc

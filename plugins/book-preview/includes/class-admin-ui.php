@@ -651,8 +651,8 @@ final class BPV_Admin_UI {
 
 	/** Purges the pages of every product with a sample (settings changed). */
 	private static function purge_all(): void {
-		if ( function_exists( 'rocket_clean_domain' ) ) {
-			rocket_clean_domain();
+		if ( function_exists( 'rocket_clean_domain' ) || class_exists( 'FPG_Purge', false ) ) {
+			Noxpress_Core::purge_page_cache(); // Fast Pages, WP Rocket and the others (Core 1.2.5).
 			return;
 		}
 		foreach ( self::products() as $id ) {

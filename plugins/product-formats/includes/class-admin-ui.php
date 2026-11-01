@@ -1009,8 +1009,8 @@ final class PFM_Admin_UI {
 
 	/** Purges the page cache of every product in a work (settings changed). */
 	private static function purge_all(): void {
-		if ( function_exists( 'rocket_clean_domain' ) ) {
-			rocket_clean_domain();
+		if ( function_exists( 'rocket_clean_domain' ) || class_exists( 'FPG_Purge', false ) ) {
+			Noxpress_Core::purge_page_cache(); // Fast Pages, WP Rocket and the others (Core 1.2.5).
 			return;
 		}
 		$ids = get_objects_in_term( wp_list_pluck( get_terms( array( 'taxonomy' => PFM_Works::TAX, 'hide_empty' => false ) ), 'term_id' ), PFM_Works::TAX );

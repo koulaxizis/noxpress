@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.1
+Stable tag: 1.12.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -56,6 +56,9 @@ Without `--user` the commands run as a trusted shell context. If you pass `--use
 Only this plugin's own options, transients, cron event, product/order meta and order item meta. The shared `rs_lang` user meta is kept when Store Pulse or Smart Formatter is still installed.
 
 == Changelog ==
+
+= 1.12.2 =
+* Noxpress Core 1.2.5: the client portal keeps itself out of page caches through the shared Core helper (DONOTCACHEPAGE and no-store headers), the same as before.
 
 = 1.12.1 =
 * Fix: the Author Portal is never stored by a page cache (Fast Pages, WP Rocket, host caches). Its page, and every front page of a visitor with a portal session, now sends DONOTCACHEPAGE and no-cache headers; before, one beneficiary's dashboard could be cached and shown to every visitor.

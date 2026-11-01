@@ -5,7 +5,7 @@ Tags: woocommerce, product formats, ebook, audiobook, linked products
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -77,6 +77,10 @@ The product's own price HTML, as WooCommerce (and plugins that change it) prints
 The plugin's options, works, product meta and transients are removed, including the upsell snapshots. **Upsells removed by the cleanup are not restored on uninstall**: restore them from the Upsells tab first if you want them back. Nothing else was ever changed.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: with Fast Pages as the page cache, a change in a work or in the settings now clears the cached product pages (through the suite hook noxpress_purge_page_cache); before, only WP Rocket and LiteSpeed were cleared.
+* Noxpress Core 1.2.5.
 
 = 1.2.0 =
 * New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.

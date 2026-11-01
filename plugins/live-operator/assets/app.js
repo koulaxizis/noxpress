@@ -933,12 +933,23 @@
 		if (cached && Date.now() - (cached.at || 0) < 12 * 3600 * 1000) {
 			return;
 		}
-		fetch('https://api.github.com/repos/koulaxizis/noxpress/releases?per_page=50', {
-			credentials: 'omit',
-			headers: { Accept: 'application/vnd.github+json' }
-		}).then(function (r) {
-			return r.ok ? r.json() : Promise.reject(r.status);
-		}).then(function (list) {
+		// The repo also holds every plugin release: read pages (newest first)
+		// until the first one with any app release, at most 5 (1.3.1).
+		function page(n) {
+			return fetch('https://api.github.com/repos/koulaxizis/noxpress/releases?per_page=100&page=' + n, {
+				credentials: 'omit',
+				headers: { Accept: 'application/vnd.github+json' }
+			}).then(function (r) {
+				return r.ok ? r.json() : Promise.reject(r.status);
+			}).then(function (list) {
+				list = Array.isArray(list) ? list : [];
+				var hasApp = list.some(function (r) {
+					return r && !r.draft && ((r.tag_name || '').indexOf('nox-loa-') === 0);
+				});
+				return hasApp || !list.length || n >= 5 ? list : page(n + 1);
+			});
+		}
+		page(1).then(function (list) {
 			var found = pickRelease(list);
 			sset('localStorage', 'lop_upd', JSON.stringify({ at: Date.now(), found: found }));
 			showUpdate(found, current);
