@@ -312,7 +312,7 @@ final class SBR_Admin_UI {
 		if ( SBR_Settings::v( 'site' ) ) {
 			$out[] = SBR_Settings::run_as_user() ? array( 'ok', __( 'Ο χρήστης εκτέλεσης είναι διαχειριστής.', 'site-bridge' ) ) : array( 'bad', __( 'Δεν έχει οριστεί διαχειριστής για την εκτέλεση των εργαλείων (Πρόσβαση).', 'site-bridge' ) );
 			require_once ABSPATH . 'wp-admin/includes/file.php';
-			$mods  = ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) && 'direct' === get_filesystem_method();
+			$mods  = wp_is_file_mod_allowed( 'site_bridge' ) && 'direct' === get_filesystem_method();
 			$out[] = $mods ? array( 'ok', __( 'Τα plugins και τα θέματα μπορούν να εγκατασταθούν και να ενημερωθούν από μακριά.', 'site-bridge' ) ) : array( 'warn', __( 'Τα plugins και τα θέματα δεν μπορούν να αλλάξουν από μακριά (DISALLOW_FILE_MODS ή ο server θέλει FTP).', 'site-bridge' ) );
 			$out[] = SBR_Site::trust() || SBR_Settings::v( 'hub' ) ? array( 'ok', __( 'Το site έχει Hub.', 'site-bridge' ) ) : array( 'warn', __( 'Το site δεν έχει γίνει ακόμα σύζευξη με Hub (Πρόσβαση → Σύζευξη).', 'site-bridge' ) );
 		}

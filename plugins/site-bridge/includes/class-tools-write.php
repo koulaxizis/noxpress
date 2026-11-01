@@ -166,7 +166,7 @@ final class SBR_Tools_Write {
 	 * =================================================================== */
 
 	private static function upgrader_ready() {
-		if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+		if ( ! wp_is_file_mod_allowed( 'site_bridge' ) ) {
 			return new WP_Error( 'sbr_files', 'DISALLOW_FILE_MODS is set on this site: plugins and themes cannot change.' );
 		}
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';

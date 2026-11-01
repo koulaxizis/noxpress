@@ -78,6 +78,7 @@ The drop-in (only if it is ours), the `WP_CACHE` line (only if Fast Pages added 
 
 = 1.0.2 =
 * Fix: a plugin activated or updated after Fast Pages was turned on could add a private cookie (noxpress_private_cookies) that the drop-in did not know until the settings were saved again. The drop-in config is now compared with the current one on every admin page and written again when anything differs.
+* Fix: an attribute set by the optimizations (e.g. loading or decoding) is replaced only once per tag, as intended.
 * Noxpress Core 1.2.5.
 
 = 1.0.1 =

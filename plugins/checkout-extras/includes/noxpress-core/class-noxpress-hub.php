@@ -55,7 +55,7 @@ final class Noxpress_Hub {
 
 	/** Bulk actions: file changes allowed, and on multisite only in the network admin. */
 	private static function bulk_allowed(): bool {
-		return ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) && ( ! is_multisite() || is_network_admin() );
+		return wp_is_file_mod_allowed( 'noxpress_hub' ) && ( ! is_multisite() || is_network_admin() );
 	}
 
 	/** Capability for (de)activating suite plugins: network-wide on multisite. */
@@ -216,7 +216,7 @@ final class Noxpress_Hub {
 
 		$rows       = self::rows();
 		$can_update = current_user_can( 'update_plugins' );
-		$file_mods  = defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS;
+		$file_mods  = ! wp_is_file_mod_allowed( 'noxpress_hub' );
 		$checked    = Noxpress_Updater::last_checked();
 		$have_list  = (bool) Noxpress_Updater::manifest();
 		$auto_ok    = function_exists( 'wp_is_auto_update_enabled_for_type' ) && wp_is_auto_update_enabled_for_type( 'plugin' );
@@ -441,7 +441,7 @@ final class Noxpress_Hub {
 			return;
 		}
 		if ( ! self::bulk_allowed() ) {
-			if ( is_multisite() && ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) ) {
+			if ( is_multisite() && wp_is_file_mod_allowed( 'noxpress_hub' ) ) {
 				echo '<p class="nx-muted">' . esc_html__( 'Οι μαζικές ενέργειες γίνονται από το network admin.', 'noxpress' ) . '</p>';
 			}
 			return;

@@ -76,8 +76,8 @@ final class FPG_Optimize {
 	}
 
 	/** preg_replace_callback that throws instead of returning null (PCRE limits). */
-	private static function cb( string $re, callable $fn, string $subject ): string {
-		$out = preg_replace_callback( $re, $fn, $subject );
+	private static function cb( string $re, callable $fn, string $subject, int $limit = -1 ): string {
+		$out = preg_replace_callback( $re, $fn, $subject, $limit );
 		if ( null === $out ) {
 			throw new \RuntimeException( 'pcre' );
 		}

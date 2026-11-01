@@ -4,11 +4,11 @@
 #
 #  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας) και 8.4 (η νεότερη),
 #             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
-#  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη) και PHPStan
-#             (level 1, stubs WordPress/WooCommerce). Προς το παρόν μόνο
-#             ενημερωτικό (continue-on-error στα βήματα, το job μένει πράσινο):
-#             τα αποτελέσματα φαίνονται στο summary του run, και γίνεται
-#             υποχρεωτικό όταν καθαρίσει.
+#  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη), ενημερωτικό
+#             (continue-on-error), και PHPStan (level 1, stubs WordPress,
+#             WooCommerce, WP-CLI, Action Scheduler, bootstrap σταθερών στο
+#             .github/phpstan/). Το PHPStan μπλοκάρει από τον έλεγχο 2026-11
+#             (Bible 1.85)· τα αποτελέσματα φαίνονται στο summary του run.
 name: PHP checks
 
 on:
@@ -77,7 +77,6 @@ jobs:
           "$RUNNER_TEMP/qa/vendor/bin/phpcs" --standard=PHPCompatibilityWP --runtime-set testVersion 7.4- \
             --extensions=php --ignore='*/vendor/*' -q --report=summary plugins | tee -a "$GITHUB_STEP_SUMMARY"
       - name: PHPStan (level 1)
-        continue-on-error: true
         run: |
           # The 29 copies of Noxpress Core are identical to Revenue Splitter's
           # (checked by the lint job): analyse that one only, but keep scanning

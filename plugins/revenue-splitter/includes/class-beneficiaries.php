@@ -378,7 +378,7 @@ class RS_Beneficiaries {
 	 * τέτοιο όνομα έσπαγε το explode του portal και μπερδευόταν μόνο
 	 * στο settings textarea. Reject εδώ = κεντρικός, έγκαιρος έλεγχος.
 	 *
-	 * @param  array[] $list Σχέδιο input, ΚΑΘΑΡΟ (unslashed) από κάθε πηγή.
+	 * @param  mixed $list Σχέδιο input (array[]), ΚΑΘΑΡΟ (unslashed) από κάθε πηγή· ελέγχεται εδώ.
 	 * @return array[]|null null όταν η λίστα είναι άκυρη (Σ ≠ 100, κενά ονόματα, αρνητικά ποσοστά, '|' σε όνομα).
 	 */
 	public static function sanitize_list( $list ): ?array {
