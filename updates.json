@@ -247,6 +247,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.1/publishing-quote.zip"
       }
     },
+    "redirects": {
+      "beta": {
+        "changelog": "* Initial release.\n* Exact, «starts with» and regex rules with 301 / 302 / 307 / 410, only on 404, before WordPress's guesses and Greeklish Permalinks; targets kept by post or term ID.\n* Checks for protected addresses, loops, chains and duplicates; «Test an address».\n* New 301 rules start as 302 and are suggested for 301 after 7 days; test mode for administrators first.\n* 404 log and rule hits in a private file (no IP, user agent or query string), scanner filter, limits, retention, HTTP self-test.\n* Target suggestions (old slugs, Greeklish Permalinks, similar slugs and files) with one-click rules; trashed posts and changed term addresses as suggestions.\n* Import from Rank Math, Redirection, Yoast SEO Premium, Simple 301 Redirects and CSV; CSV export; JSON backup and restore.\n* Abilities redirects/list, top-404, test-url and add; RDR_DISABLE; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.7).",
+        "published": "2026-11-01",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "2132895f97fc722f62249333843fb9eb60b55e202fcf71f2c3f4a784a0d34428",
+        "signature": "0OLtlNlhHjLK6QBDHUSHdi+Tfw49kA6QApMHb02LQudH+C2IO6rg0f0bcFYNjqFBS6dkBfG02j0h2FArPrdLAw==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.0/redirects.zip"
+      }
+    },
     "revenue-splitter": {
       "beta": {
         "changelog": "* Noxpress Core 1.2.5: the client portal keeps itself out of page caches through the shared Core helper (DONOTCACHEPAGE and no-store headers), the same as before.",
