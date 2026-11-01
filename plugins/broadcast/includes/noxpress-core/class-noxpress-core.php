@@ -63,6 +63,7 @@ final class Noxpress_Core {
 		'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.' => 'Passwordless login for customers: a one-time link by email from the login form and the checkout, with expiry, rate limits and a confirmation page.',
 		'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.' => "For bookshops: a publisher's titles from its Trade Accounts feed in your own shop, by pasting its e-mail and pressing one button; price, availability and pre-orders update every day without losing your own edits.",
 		'Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.' => 'JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches. The originals never change; no account, quota or external service.',
+		'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.' => '301 / 410 redirects for old addresses, only where the site answers 404, and a 404 log in a private file without IPs or bots, with suggested targets and import from Rank Math, Redirection, Yoast and CSV.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -333,6 +334,11 @@ final class Noxpress_Core {
 				'name' => 'Lean Images',
 				'desc' => __( 'Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.', 'noxpress' ),
 				'page' => 'lim-settings',
+			),
+			'redirects'         => array(
+				'name' => 'Redirects',
+				'desc' => __( 'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.', 'noxpress' ),
+				'page' => 'rdr-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

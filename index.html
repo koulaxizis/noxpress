@@ -1251,6 +1251,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="redirects">
+		<h2><a href="#redirects">Redirects</a></h2>
+		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="rd_desc">301 and 410 for old addresses, only where your site answers 404, and a 404 log in a private file instead of the database, without IPs and without bots. See which links are broken and fix them with one click.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="rd_li1">Exact, «starts with» and regex rules with 301, 302, 307 or 410; Greek, encoded, upper or lower case and the final slash all count as the same address</li>
+			<li data-i18n="rd_li2">Rules run only on a 404, so a page that exists is never hidden; a new 301 starts as 302 and becomes permanent after 7 days; test mode for administrators first</li>
+			<li data-i18n="rd_li3">Loops refused, chains flattened, home, admin, login, cart and checkout protected; targets kept by post or term ID, so they follow a changed slug</li>
+			<li data-i18n="rd_li4">404 log in a private file: only the path, time and referrer host, never an IP, user agent or query string; scanner paths skipped; up to 3 suggested targets per address, with Greeklish Permalinks</li>
+			<li data-i18n="rd_li5">Import from Rank Math, Redirection, Yoast Premium, Simple 301 Redirects and CSV with a preview; CSV export, JSON backup, abilities for Site Bridge, RDR_DISABLE; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.0/redirects.zip" rel="nofollow noopener" data-i18n="rd_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/redirects" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="apps">
@@ -1661,6 +1682,13 @@ footer .heart { color: var(--accent-bright); }
 		li_li4: 'New uploads wait for the next batch, edited or regenerated images are made again, deleted ones take their copies with them; Imagify’s WebP files are adopted, not made again',
 		li_li5: 'Test mode for administrators, LIM_DISABLE, a column in the media library, «Delete all» and a clean uninstall; Claude runs it through Site Bridge; bilingual UI and shared «Noxpress» menu',
 		li_download: 'Download v1.0.0 (.zip)',
+		rd_desc: '301 and 410 for old addresses, only where your site answers 404, and a 404 log in a private file instead of the database, without IPs and without bots. See which links are broken and fix them with one click.',
+		rd_li1: 'Exact, «starts with» and regex rules with 301, 302, 307 or 410; Greek, encoded, upper or lower case and the final slash all count as the same address',
+		rd_li2: 'Rules run only on a 404, so a page that exists is never hidden; a new 301 starts as 302 and becomes permanent after 7 days; test mode for administrators first',
+		rd_li3: 'Loops refused, chains flattened, home, admin, login, cart and checkout protected; targets kept by post or term ID, so they follow a changed slug',
+		rd_li4: '404 log in a private file: only the path, time and referrer host, never an IP, user agent or query string; scanner paths skipped; up to 3 suggested targets per address, with Greeklish Permalinks',
+		rd_li5: 'Import from Rank Math, Redirection, Yoast Premium, Simple 301 Redirects and CSV with a preview; CSV export, JSON backup, abilities for Site Bridge, RDR_DISABLE; bilingual UI and shared «Noxpress» menu',
+		rd_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2005,6 +2033,13 @@ footer .heart { color: var(--accent-bright); }
 		li_li4: 'Νέες εικόνες περιμένουν την επόμενη παρτίδα, όσες επεξεργάζεσαι ή ξαναφτιάχνεις μετατρέπονται ξανά, όσες σβήνεις παίρνουν μαζί τα αντίγραφά τους· τα WebP του Imagify υιοθετούνται χωρίς νέα μετατροπή',
 		li_li5: 'Λειτουργία δοκιμής για διαχειριστές, LIM_DISABLE, στήλη στη βιβλιοθήκη πολυμέσων, «Διαγραφή όλων» και καθαρό uninstall· ο Claude το χειρίζεται μέσω Site Bridge· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		li_download: 'Λήψη v1.0.0 (.zip)',
+		rd_desc: '301 και 410 για παλιές διευθύνσεις, μόνο εκεί που το site σου απαντά 404, και log των 404 σε ιδιωτικό αρχείο αντί για τη βάση, χωρίς IP και χωρίς bots. Βλέπεις ποιοι σύνδεσμοι είναι σπασμένοι και τους διορθώνεις με ένα κλικ.',
+		rd_li1: 'Κανόνες ακριβούς διεύθυνσης, «ξεκινά με» και regex με 301, 302, 307 ή 410· ελληνικά, κωδικοποιημένα, κεφαλαία ή πεζά και η τελική κάθετος μετρούν ως η ίδια διεύθυνση',
+		rd_li2: 'Οι κανόνες τρέχουν μόνο σε 404, άρα μια σελίδα που υπάρχει δεν κρύβεται ποτέ· νέο 301 ξεκινά ως 302 και γίνεται μόνιμο μετά από 7 ημέρες· πρώτα λειτουργία δοκιμής για διαχειριστές',
+		rd_li3: 'Βρόχοι απορρίπτονται, αλυσίδες ισιώνουν, αρχική, admin, σύνδεση, καλάθι και ταμείο προστατεύονται· στόχοι με το ID του άρθρου ή του όρου, ώστε να ακολουθούν ένα νέο slug',
+		rd_li4: 'Log των 404 σε ιδιωτικό αρχείο: μόνο path, ώρα και host του referrer, ποτέ IP, user agent ή query string· τα paths των σαρωτών δεν γράφονται· έως 3 προτεινόμενοι στόχοι ανά διεύθυνση, και με το Greeklish Permalinks',
+		rd_li5: 'Εισαγωγή από Rank Math, Redirection, Yoast Premium, Simple 301 Redirects και CSV με προεπισκόπηση· εξαγωγή CSV, αντίγραφο JSON, abilities για το Site Bridge, RDR_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		rd_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
