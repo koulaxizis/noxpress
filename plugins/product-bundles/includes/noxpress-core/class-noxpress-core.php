@@ -468,12 +468,12 @@ final class Noxpress_Core {
 			if ( class_exists( 'FPG_Purge', false ) ) {
 				$done[] = 'Fast Pages';
 			}
-			if ( $ids ? function_exists( 'rocket_clean_post' ) : function_exists( 'rocket_clean_domain' ) ) {
-				if ( $ids ) {
-					array_map( 'rocket_clean_post', $ids );
-				} else {
-					rocket_clean_domain();
-				}
+			// Each cache through its own public functions, when it is there.
+			if ( $ids && function_exists( 'rocket_clean_post' ) ) {
+				array_map( 'rocket_clean_post', $ids );
+				$done[] = 'WP Rocket';
+			} elseif ( ! $ids && function_exists( 'rocket_clean_domain' ) ) {
+				rocket_clean_domain();
 				$done[] = 'WP Rocket';
 			}
 			if ( defined( 'LSCWP_V' ) ) {
@@ -486,20 +486,18 @@ final class Noxpress_Core {
 				}
 				$done[] = 'LiteSpeed Cache';
 			}
-			if ( $ids ? function_exists( 'w3tc_flush_post' ) : function_exists( 'w3tc_flush_all' ) ) {
-				if ( $ids ) {
-					array_map( 'w3tc_flush_post', $ids );
-				} else {
-					w3tc_flush_all();
-				}
+			if ( $ids && function_exists( 'w3tc_flush_post' ) ) {
+				array_map( 'w3tc_flush_post', $ids );
+				$done[] = 'W3 Total Cache';
+			} elseif ( ! $ids && function_exists( 'w3tc_flush_all' ) ) {
+				w3tc_flush_all();
 				$done[] = 'W3 Total Cache';
 			}
-			if ( $ids ? function_exists( 'wpsc_delete_post_cache' ) : function_exists( 'wp_cache_clear_cache' ) ) {
-				if ( $ids ) {
-					array_map( 'wpsc_delete_post_cache', $ids );
-				} else {
-					wp_cache_clear_cache();
-				}
+			if ( $ids && function_exists( 'wpsc_delete_post_cache' ) ) {
+				array_map( 'wpsc_delete_post_cache', $ids );
+				$done[] = 'WP Super Cache';
+			} elseif ( ! $ids && function_exists( 'wp_cache_clear_cache' ) ) {
+				wp_cache_clear_cache();
 				$done[] = 'WP Super Cache';
 			}
 		} catch ( \Throwable $e ) {
