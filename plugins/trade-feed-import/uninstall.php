@@ -32,7 +32,7 @@ function tfi_uninstall_site(): void {
 	$delete   = is_array( $settings ) && ! empty( $settings['purge'] );
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( '', array(), 'trade-feed-import', 'lean-images' );
+		as_unschedule_all_actions( '', array(), 'trade-feed-import' );
 	}
 	foreach ( array( 'tfi_step', 'tfi_safety', 'tfi_daily' ) as $tfi_hook ) {
 		wp_clear_scheduled_hook( $tfi_hook );
