@@ -69,7 +69,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/qa" && cd "$RUNNER_TEMP/qa"
           composer init -n --name noxpress/qa >/dev/null
           composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-          composer require -n --dev dealerdirect/phpcodesniffer-composer-installer:^1 phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs
+          composer require -n --dev dealerdirect/phpcodesniffer-composer-installer:^1 phpcompatibility/phpcompatibility-wp:^2.1 phpstan/phpstan:^2 szepeviktor/phpstan-wordpress:^2 php-stubs/woocommerce-stubs php-stubs/wp-cli-stubs
       - name: PHPCS (PHP 7.4+ compatibility)
         continue-on-error: true
         run: |
@@ -99,6 +99,12 @@ jobs:
             scanFiles:
               - $RUNNER_TEMP/qa/vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
               - $GITHUB_WORKSPACE/.github/phpstan/action-scheduler-stubs.php
+            scanDirectories:
+              - $RUNNER_TEMP/qa/vendor/php-stubs/wp-cli-stubs
+            ignoreErrors:
+              # WooCommerce e-mail templates get their variables from wc_get_template().
+              - message: '#^Variable \\\$[a-z_]+ might not be defined\.\$#'
+                path: '*/templates/*'
             reportUnmatchedIgnoredErrors: false
           EOF
           set +e
