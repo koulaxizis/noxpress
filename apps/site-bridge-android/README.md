@@ -26,6 +26,8 @@ The app looks at the repository's releases when it comes to the front, at most e
 
 From 1.5.0 the same check also runs in the background every 12 hours (WorkManager): a newer version brings one notification, whose tap or **Download** downloads the APK in the browser, also while the app is closed. Android 13+ asks for the notification permission once.
 
+From 1.7.0 the bar and the notification stay quiet when F-Droid, Droid-ify or Obtainium installed the app (Android's installer record), since the store tells about new versions itself.
+
 With F-Droid or Droid-ify, updates come from the Noxpress repository: it holds the newest stable version and, when newer, the newest beta, which F-Droid offers as an "unstable update" (turn on unstable updates to get betas early). While no stable version exists, the newest beta is the suggested one.
 
 Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Site Bridge app` (the repository also publishes plugins and the Live Operator app). The APK asset is `site-bridge.apk`.

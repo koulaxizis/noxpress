@@ -166,6 +166,7 @@ class MainActivity : FragmentActivity() {
 
     /** A newer signed app on GitHub, looked up at most every 12 hours; never an error on screen. */
     private fun checkUpdate() {
+        if (Installer.fromStore(this)) return // the store tells (1.7.0)
         val current = BuildConfig.VERSION_NAME
         if (store.updVer.isNotEmpty() && Updates.newer(store.updVer, current)) ui.update = Updates.Found(store.updVer, store.updUrl)
         val now = System.currentTimeMillis() / 1000

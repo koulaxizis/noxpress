@@ -1,5 +1,10 @@
 # Site Bridge app — changelog
 
+## 1.7.0
+
+* New: the app is also in the Noxpress F-Droid repository (https://koulaxizis.github.io/noxpress-fdroid/), for F-Droid and Droid-ify.
+* Change: when F-Droid, Droid-ify or Obtainium installed the app, its own "New version" bar and notification stay quiet, since the store already tells about new versions. Installed from the APK, the app tells as before.
+
 ## 1.6.1
 
 * Fix: the "new version" check could miss a newer app. It read only the 50 newest releases of the repo, which also holds every plugin release; it now reads 100 per page, up to 5 pages, until it finds the app's own releases.
