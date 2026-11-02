@@ -116,6 +116,12 @@ final class FPG_Setup {
 			return 'none';
 		}
 		$head = (string) @file_get_contents( $f, false, null, 0, 2048 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions
+		// 1.0.4: an empty file (WP Rocket empties advanced-cache.php on
+		// deactivation instead of deleting it) belongs to nobody, so it is
+		// treated as missing and can be replaced by our drop-in.
+		if ( '' === trim( $head ) && (int) @filesize( $f ) <= 2048 ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			return 'none';
+		}
 		return false !== strpos( $head, self::MARK ) ? 'ours' : 'foreign';
 	}
 
