@@ -1,0 +1,170 @@
+# Publishes the public Noxpress Android apps as a self-hosted F-Droid
+# repository, so F-Droid, Droid-ify and Obtainium keep them up to date:
+#   https://koulaxizis.github.io/noxpress-fdroid/repo
+# (front page with the add button and QR code: https://koulaxizis.github.io/noxpress-fdroid/)
+#
+# What goes in: every app with apps/<app>/fdroid/store.json (public apps
+# only; an app built for one site stays out). Per app the newest stable
+# release and, when newer, the newest beta, as the signed APKs of the
+# GitHub releases, copied as they are. .github/scripts/fdroid-repo.py does
+# the work; see its header.
+#
+# When: after each Android app build on main (a new release), when Chris
+# marks a release stable or beta by hand, when the store texts change, once
+# a day as a safety net, and by hand (Actions → F-Droid repository → Run
+# workflow, "force" to publish even when nothing changed). It publishes only
+# when the chosen releases or the store files differ from the published
+# state.json.
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   FDROID_KEYSTORE_B64       base64 of the repository signing keystore
+#                             (PKCS12, alias "noxpressrepo"; NOT the APK key)
+#   FDROID_KEYSTORE_PASSWORD  its password (store and key)
+#   FDROID_DEPLOY_TOKEN       fine-grained token: koulaxizis/noxpress-fdroid
+#                             only, Contents read and write
+# Without them the job stops with a notice. A new repository key means every
+# phone has to add the repository again: keep a backup of the keystore.
+
+name: F-Droid repository
+
+on:
+  workflow_run:
+    workflows: ['Android app', 'Android app (Live Operator)']
+    types: [completed]
+    branches: [main]
+  release:
+    types: [released, prereleased, edited, deleted]
+  push:
+    branches: [main]
+    paths: ['apps/*/fdroid/**', 'apps/fdroid/**', '.github/scripts/fdroid-repo.py', '.github/workflows/fdroid.yml']
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Publish even if nothing changed'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fdroid
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Only real app releases and Android-app releases edited by hand
+    if: >-
+      (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')) &&
+      (github.event_name != 'release' || startsWith(github.event.release.tag_name, 'nox-sba-') || startsWith(github.event.release.tag_name, 'nox-loa-'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SITE: https://koulaxizis.github.io/noxpress-fdroid
+      DEST: koulaxizis/noxpress-fdroid
+      ALIAS: noxpressrepo
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+
+      - name: What to publish
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+          HAS_SECRETS: ${{ secrets.FDROID_KEYSTORE_B64 != '' && secrets.FDROID_KEYSTORE_PASSWORD != '' && secrets.FDROID_DEPLOY_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          if [ "$HAS_SECRETS" != "true" ]; then
+            echo "::notice::No F-Droid secrets (FDROID_KEYSTORE_B64, FDROID_KEYSTORE_PASSWORD, FDROID_DEPLOY_TOKEN): nothing published."
+            echo "go=0" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          python3 .github/scripts/fdroid-repo.py plan > "$RUNNER_TEMP/plan.json"
+          cat "$RUNNER_TEMP/plan.json"
+          if ! python3 -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))["apps"] else 1)' "$RUNNER_TEMP/plan.json"; then
+            echo "::notice::No app release to publish yet."
+            echo "go=0" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          curl -fsSL "https://raw.githubusercontent.com/$DEST/main/state.json" -o "$RUNNER_TEMP/published.json" 2>/dev/null || echo '{}' > "$RUNNER_TEMP/published.json"
+          same=$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1])) == json.load(open(sys.argv[2]))))' "$RUNNER_TEMP/plan.json" "$RUNNER_TEMP/published.json")
+          if [ "$FORCE" != "1" ] && [ "$same" = "1" ]; then
+            echo "::notice::The published repository is up to date."
+            echo "go=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the repository
+        if: steps.plan.outputs.go == '1'
+        env:
+          KS_B64: ${{ secrets.FDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.FDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet fdroidserver==2.4.5
+          fd="$RUNNER_TEMP/fd"
+          mkdir -p "$fd/repo"
+          "$RUNNER_TEMP/venv/bin/python" .github/scripts/fdroid-repo.py build "$fd" "$RUNNER_TEMP/plan.json"
+          # fdroid reads repo_icon from its working directory
+          cp apps/fdroid/icon.png "$fd/icon.png"
+          umask 077
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/repo.keystore"
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          cat > "$fd/config.yml" <<EOF
+          repo_url: $SITE/repo
+          repo_name: Noxpress
+          repo_description: "The public Android apps of Noxpress, the free WordPress / WooCommerce plugin suite. New versions ship as beta first. Free and open source (MIT), free forever."
+          repo_icon: icon.png
+          archive_older: 0
+          keystore: $RUNNER_TEMP/repo.keystore
+          keystorepass: "$KS_PASS"
+          keypass: "$KS_PASS"
+          repo_keyalias: $ALIAS
+          keydname: CN=Noxpress F-Droid repo, O=Noxpress
+          apksigner: $apksigner
+          EOF
+          (cd "$fd" && "$RUNNER_TEMP/venv/bin/fdroid" update --pretty)
+          # The repository key's fingerprint, for the add link and the front page
+          fp=$(keytool -exportcert -alias "$ALIAS" -keystore "$RUNNER_TEMP/repo.keystore" -storetype PKCS12 -storepass "$KS_PASS" | sha256sum | cut -d' ' -f1 | tr 'a-f' 'A-F')
+          rm -f "$RUNNER_TEMP/repo.keystore" "$fd/config.yml"
+          python3 .github/scripts/fdroid-repo.py site "$fd" "$SITE/repo" "$fp"
+          {
+            echo "### F-Droid repository"
+            echo
+            echo "$SITE/repo"
+            echo
+            echo "Fingerprint (SHA-256): \`$fp\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish to koulaxizis/noxpress-fdroid
+        if: steps.plan.outputs.go == '1'
+        env:
+          TOKEN: ${{ secrets.FDROID_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          fd="$RUNNER_TEMP/fd"
+          site="$RUNNER_TEMP/site"
+          mkdir -p "$site"
+          cp -r "$fd/repo" "$site/repo"
+          cp -r "$fd/site/." "$site/"
+          cp "$RUNNER_TEMP/plan.json" "$site/state.json"
+          prev="$RUNNER_TEMP/prev"
+          if git clone -q --depth 1 "https://github.com/$DEST.git" "$prev" 2>/dev/null; then
+            python3 .github/scripts/fdroid-repo.py keep "$prev" "$site"
+          else
+            echo "::warning::Could not read the published repository: earlier APKs not kept."
+          fi
+          touch "$site/.nojekyll"
+          cd "$site"
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Noxpress F-Droid repository from $GITHUB_REPOSITORY@${GITHUB_SHA::7}"
+          # One commit, replaced each time: the APKs never pile up in history
+          git push -q --force "https://x-access-token:$TOKEN@github.com/$DEST.git" main
+          echo "Published $(ls repo/*.apk | wc -l) APKs to $SITE/repo"

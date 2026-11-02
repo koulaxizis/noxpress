@@ -21,16 +21,19 @@
 # Το ίδιο κλειδί πρέπει να υπογράφει κάθε έκδοση: αν χαθεί, το Android δεν
 # δέχεται ενημέρωση πάνω από την παλιά εφαρμογή.
 #
+# Τα κείμενα του F-Droid (fdroid/) δεν χτίζουν την εφαρμογή: τα δημοσιεύει το
+# fdroid.yml.
+#
 # Το tag nox-sba-* δεν είναι plugin: το release.yml και το updates.json το
 # αγνοούν (κανένας κωδικός plugin δεν είναι «sba»).
 name: Android app
 
 on:
   pull_request:
-    paths: ['apps/site-bridge-android/**', '.github/workflows/android.yml', '.github/workflows/android-app.yml']
+    paths: ['apps/site-bridge-android/**', '!apps/site-bridge-android/fdroid/**', '.github/workflows/android.yml', '.github/workflows/android-app.yml']
   push:
     branches: [main]
-    paths: ['apps/site-bridge-android/**', '.github/workflows/android.yml', '.github/workflows/android-app.yml']
+    paths: ['apps/site-bridge-android/**', '!apps/site-bridge-android/fdroid/**', '.github/workflows/android.yml', '.github/workflows/android-app.yml']
   workflow_dispatch:
 
 permissions:

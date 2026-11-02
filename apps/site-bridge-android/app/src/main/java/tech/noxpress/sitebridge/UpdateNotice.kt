@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit
  * A notification for a newer signed app (1.5.0), also while the app is
  * closed: WorkManager looks at the releases every 12 hours, and a newer
  * version is told once, with a tap that downloads its APK in the browser.
- * The bar under the header (1.4.0) stays as it is.
+ * The bar under the header (1.4.0) stays as it is. Both stay quiet when
+ * F-Droid, Droid-ify or Obtainium installed the app (1.7.0, [Installer]).
  */
 object UpdateNotice {
 
@@ -31,6 +32,11 @@ object UpdateNotice {
     private const val ID = 0x5BA
 
     fun schedule(context: Context) {
+        // 1.7.0: a store that follows the releases tells about them itself.
+        if (Installer.fromStore(context)) {
+            WorkManager.getInstance(context).cancelUniqueWork(WORK)
+            return
+        }
         val req = PeriodicWorkRequestBuilder<UpdateWorker>(12, TimeUnit.HOURS)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .build()
@@ -71,6 +77,7 @@ object UpdateNotice {
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        if (Installer.fromStore(applicationContext)) return Result.success()
         val store = Store(applicationContext)
         val f = try {
             Updates.check(BuildConfig.VERSION_NAME)
