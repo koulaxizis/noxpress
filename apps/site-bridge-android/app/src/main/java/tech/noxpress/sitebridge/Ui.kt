@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -153,7 +154,7 @@ fun SiteBridgeApp(
                         add("settings" to R.string.tab_settings)
                     }
                     val at = tabs.indexOfFirst { it.first == ui.tab }.coerceAtLeast(0)
-                    TabRow(selectedTabIndex = at, containerColor = Nx.panel, contentColor = Nx.heading) {
+                    val tabItems: @Composable () -> Unit = {
                         tabs.forEach { (key, label) ->
                             Tab(
                                 selected = tabs[at].first == key,
@@ -163,9 +164,23 @@ fun SiteBridgeApp(
                                     if (key == "bf") bf.load(ui.bfSite)
                                     if (key == "br") br.load(ui.brSite)
                                 },
-                                text = { Text(stringResource(label), maxLines = 1) },
+                                text = { Text(stringResource(label), maxLines = 1, softWrap = false) },
                             )
                         }
+                    }
+                    // Up to 3 tabs share the width; with Book Feed and Broadcast (4-5 tabs)
+                    // the labels no longer fit a narrow phone, so the row scrolls instead
+                    // of cutting them ("Broad", "Settin").
+                    if (tabs.size <= 3) {
+                        TabRow(selectedTabIndex = at, containerColor = Nx.panel, contentColor = Nx.heading, tabs = tabItems)
+                    } else {
+                        ScrollableTabRow(
+                            selectedTabIndex = at,
+                            containerColor = Nx.panel,
+                            contentColor = Nx.heading,
+                            edgePadding = 0.dp,
+                            tabs = tabItems,
+                        )
                     }
                     when (tabs[at].first) {
                         "sites" -> SitesScreen(ui, store, onRefresh, onPick, onOpen, onClose)
