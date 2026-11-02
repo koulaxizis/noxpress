@@ -184,15 +184,19 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -q -m "Noxpress F-Droid repository from $GITHUB_REPOSITORY@${GITHUB_SHA::7}"
-          url="https://x-access-token:$TOKEN@github.com/$DEST.git"
+          # The token goes in a header, not in the URL, so a stray character
+          # in the secret cannot break the URL; whitespace around it is dropped.
+          auth=$(printf 'x-access-token:%s' "$(printf '%s' "$TOKEN" | tr -d '[:space:]')" | base64 -w0)
+          echo "::add-mask::$auth"
+          url="https://github.com/$DEST.git"
           if [ "$DRY" = 1 ]; then
             # the token can reach the repository; nothing is sent
-            git ls-remote "$url" > /dev/null
-            git push --dry-run --force "$url" main
+            git -c http.extraHeader="Authorization: Basic $auth" ls-remote "$url" > /dev/null
+            git -c http.extraHeader="Authorization: Basic $auth" push --dry-run --force "$url" main
             echo "Dry run: $(ls repo/*.apk | wc -l) APKs, not published"; exit 0
           fi
           # One commit, replaced each time: the APKs never pile up in history
-          git push -q --force "$url" main
+          git -c http.extraHeader="Authorization: Basic $auth" push -q --force "$url" main
           echo "Published $(ls repo/*.apk | wc -l) APKs to $SITE/repo"
 
       - name: Keep the repository (dry run)
