@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.7.1
+
+* Fix: with the Book Feed and Broadcast tabs (4-5 tabs) the top labels were cut on narrow phones ("Broad", "Settin"). The tab row now scrolls sideways when it has more than 3 tabs, so every label shows in full; with 3 tabs it stays as before.
+
 ## 1.7.0
 
 * New: the app is also in the Noxpress F-Droid repository (https://koulaxizis.github.io/noxpress-fdroid/), for F-Droid and Droid-ify.
