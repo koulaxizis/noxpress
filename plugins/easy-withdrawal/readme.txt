@@ -5,7 +5,7 @@ Tags: woocommerce, withdrawal, right of withdrawal, eu directive 2023/2673, retu
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -82,7 +82,14 @@ No. Version 1.0 opens WooCommerce's refund form pre-filled; you confirm the refu
 
 The settings, the email settings, the transients and the "personalised" flags are removed. The requests and the digital-content consent stay in the order meta: they are your record of what customers declared and agreed to, and they go away with their orders.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.2.2 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.2.1 =
 * Fix: the requests CSV passes every fputcsv() argument, so PHP 8.4 prints no deprecation notice into the file.

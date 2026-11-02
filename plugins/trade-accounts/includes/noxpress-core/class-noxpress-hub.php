@@ -282,6 +282,8 @@ final class Noxpress_Hub {
 				</tbody>
 			</table>
 
+			<p class="nx-muted nx-small nx-disclaimer"><?php esc_html_e( 'Χρήση με δική σου ευθύνη: τα plugins του Noxpress είναι δωρεάν λογισμικό που παρέχεται «ως έχει», χωρίς καμία εγγύηση. Δοκίμασέ τα πρώτα σε αντίγραφο του site και κράτα πλήρες backup του site και της βάσης πριν από κάθε εγκατάσταση, ενημέρωση ή αφαίρεση. Στο μέγιστο βαθμό που επιτρέπει ο νόμος, δεν υπάρχει καμία ευθύνη για απώλεια δεδομένων, παραγγελιών, εσόδων ή οποιαδήποτε άλλη ζημιά.', 'noxpress' ); ?></p>
+
 			<?php if ( $can_update && ! $file_mods ) : ?>
 				<h2 class="nx-h2"><?php esc_html_e( 'Ενημερώσεις', 'noxpress' ); ?></h2>
 				<div class="nx-zone">

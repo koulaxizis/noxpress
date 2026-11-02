@@ -5,7 +5,7 @@ Tags: webp, avif, images, performance, picture
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -71,7 +71,14 @@ It depends on the originals. From PNG covers the WebP copies are often 10–25% 
 
 Lower the batch size or the time limit, or turn on «Only at night». AVIF stays off unless you turn it on.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.0.1 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.0.0 =
 * First release: local WebP / AVIF conversion with Imagick or GD in background batches (Action Scheduler or WP-Cron) with a size, time and memory budget, a lock and an optional night window; `<picture>` output for attachment images, featured images and content, optional whole-page pass; test mode, `LIM_DISABLE`, sample test, retry, one image, orphans, delete all; media library column; Imagify detection and adoption of its WebP files; page cache purge through Noxpress Core; abilities for Site Bridge.

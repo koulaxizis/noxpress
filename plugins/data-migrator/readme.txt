@@ -5,7 +5,7 @@ Tags: backup, restore, migration, clone, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -110,7 +110,14 @@ Press **Undo** on the Restore page (or `wp data-migrator undo`). The site goes b
 
 Settings, jobs, work files, logs and any undo data are deleted. The backups are deleted too, unless "Keep backups" is ticked in DM Settings. The stored encryption password is always deleted: kept encrypted backups need their password typed in. The shared Noxpress options stay while another Noxpress plugin is installed.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.2.2 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.2.1 =
 * Fix: uninstall keeps the suite's shared settings (update channel, version list, hub notices) while any Noxpress plugin is still installed. Its list missed the 12 newest plugins, so uninstalling Data Migrator could switch a site from Beta back to Stable.

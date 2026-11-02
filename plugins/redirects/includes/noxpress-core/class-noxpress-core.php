@@ -102,6 +102,7 @@ final class Noxpress_Core {
 		'Οι εγκαταστάσεις και οι ενημερώσεις γίνονται από διαχειριστή του site.' => 'Installs and updates are done by a site administrator.',
 		'Το κανάλι ενημερώσεων αποθηκεύτηκε.'                   => 'The update channel was saved.',
 		'Ο έλεγχος για ενημερώσεις ολοκληρώθηκε.'               => 'The update check is complete.',
+		'Χρήση με δική σου ευθύνη: τα plugins του Noxpress είναι δωρεάν λογισμικό που παρέχεται «ως έχει», χωρίς καμία εγγύηση. Δοκίμασέ τα πρώτα σε αντίγραφο του site και κράτα πλήρες backup του site και της βάσης πριν από κάθε εγκατάσταση, ενημέρωση ή αφαίρεση. Στο μέγιστο βαθμό που επιτρέπει ο νόμος, δεν υπάρχει καμία ευθύνη για απώλεια δεδομένων, παραγγελιών, εσόδων ή οποιαδήποτε άλλη ζημιά.' => 'Use at your own risk: Noxpress plugins are free software, provided "as is", without warranty of any kind. Test them on a staging copy first and keep a full backup of your site and database before any install, update or removal. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage.',
 		'Κάθε πακέτο ελέγχεται με sha256 και ψηφιακή υπογραφή πριν από την εγκατάσταση.' => 'Every package is checked with sha256 and a digital signature before it is installed.',
 
 		// Other channel (hub).

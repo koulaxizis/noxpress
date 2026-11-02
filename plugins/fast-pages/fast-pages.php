@@ -3,7 +3,7 @@
  * Plugin Name:          Fast Pages
  * Plugin URI:           https://noxpress.tech
  * Description:          Page cache για επισκέπτες με έξυπνο καθάρισμα και preload από το sitemap, minify CSS / JS, lazy load εικόνων, iframes και backgrounds, YouTube με κλικ, διαστάσεις εικόνων και preload στο hover. Ο Claude το χειρίζεται μέσω Site Bridge. Χωρίς λογαριασμό και χωρίς εξωτερική υπηρεσία.
- * Version:              1.0.2
+ * Version:              1.0.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -68,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FPG_VERSION', '1.0.2' );
+define( 'FPG_VERSION', '1.0.3' );
 define( 'FPG_FILE', __FILE__ );
 define( 'FPG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FPG_URL', plugin_dir_url( __FILE__ ) );

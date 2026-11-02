@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.2
+Stable tag: 1.11.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -95,7 +95,14 @@ Revoke it in the Hub's **App** tab (or turn the app off there). The phone's keys
 
 Every setting, key, pairing, connection and the audit log are deleted, so no token or pairing outlives the plugin. The shared Noxpress options stay while another Noxpress plugin is installed.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.11.3 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.11.2 =
 * Plugin and theme changes (remote installs and updates, the status check) now follow wp_is_file_mod_allowed() instead of reading DISALLOW_FILE_MODS directly, so a site that blocks file changes through the file_mod_allowed filter is respected too.
