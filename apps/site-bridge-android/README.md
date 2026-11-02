@@ -12,7 +12,11 @@ Works with Claude. Not made by or affiliated with Anthropic.
 
 ## Install and pair
 
-1. Download `site-bridge.apk` from the latest `nox-sba-*` release and install it (allow installs from your browser or file manager once). Check the SHA-256 in the release notes if you like.
+1. Install the app, one of two ways:
+   * **F-Droid or Droid-ify:** open [the Noxpress F-Droid repository](https://koulaxizis.github.io/noxpress-fdroid/) on your phone and tap **Add the Noxpress repository** (or scan its QR code), then install **Site Bridge**. Updates then come through the store. The page shows the repository's fingerprint.
+   * **APK:** download `site-bridge.apk` from the latest `nox-sba-*` release and install it (allow installs from your browser or file manager once). Check the SHA-256 in the release notes if you like.
+
+   Both are the same APK, signed with the same key, so one updates over the other.
 2. On the Hub: **App** → **New code for a phone**.
 3. In the app: **Scan QR** (or paste the code). The code works for 15 minutes, once.
 
@@ -21,6 +25,8 @@ Works with Claude. Not made by or affiliated with Anthropic.
 The app looks at the repository's releases when it comes to the front, at most every 12 hours, and shows **New version X — Download** under the header when a newer `nox-sba-*` release exists. It only opens the APK link; Android asks before installing. A signed release installs over the previous one only when both are signed with the same key (a debug build does not update a signed one).
 
 From 1.5.0 the same check also runs in the background every 12 hours (WorkManager): a newer version brings one notification, whose tap or **Download** downloads the APK in the browser, also while the app is closed. Android 13+ asks for the notification permission once.
+
+With F-Droid or Droid-ify, updates come from the Noxpress repository: it holds the newest stable version and, when newer, the newest beta, which F-Droid offers as an "unstable update" (turn on unstable updates to get betas early). While no stable version exists, the newest beta is the suggested one.
 
 Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Site Bridge app` (the repository also publishes plugins and the Live Operator app). The APK asset is `site-bridge.apk`.
 

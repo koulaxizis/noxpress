@@ -1,0 +1,23 @@
+{
+  "package": "tech.noxpress.sitebridge",
+  "apk": "site-bridge.apk",
+  "tag_prefix": "nox-sba",
+  "category": "Internet",
+  "anti_features": {
+    "NonFreeDep": {
+      "en-US": "Scans QR codes and ISBN barcodes with the Google Play services code scanner, which is not open source.",
+      "el": "Σαρώνει κωδικούς QR και ISBN με το code scanner των Google Play services, που δεν είναι ανοιχτού κώδικα."
+    }
+  },
+  "web": "https://noxpress.tech/#site-bridge-app",
+  "en-US": {
+    "name": "Site Bridge",
+    "summary": "Open the write window of your WordPress sites with your fingerprint",
+    "description": "The Site Bridge Hub in your pocket. Site Bridge is a free Noxpress plugin that lets an AI assistant work on your WordPress / WooCommerce sites, but only while a write window is open. This app opens, renews or closes that window per site with your fingerprint, and shows the Hub's log.\n\nOn sites with the Noxpress Book Feed or Broadcast plugins it also has their tabs: sync, rules, ISBN scan and import as a draft, the posts waiting in the Broadcast queue, with notifications.\n\nIt talks only to your own Hub. Pair it once with a QR code from the Hub; its keys stay in the Android Keystore and every request is signed, so there is no password to type or leak. No account, no Firebase, no analytics.\n\nNeeds a Hub with Site Bridge 1.6.0+ over HTTPS and its App tab switched on.\n\nNew versions ship as beta first. Free and open source (MIT), free forever."
+  },
+  "el": {
+    "name": "Site Bridge",
+    "summary": "Άνοιξε το παράθυρο εγγραφής των sites σου με το δαχτυλικό σου",
+    "description": "Το Hub του Site Bridge στην τσέπη σου. Το Site Bridge είναι δωρεάν plugin του Noxpress που αφήνει έναν βοηθό AI να δουλεύει στα WordPress / WooCommerce sites σου, μόνο όσο είναι ανοιχτό ένα παράθυρο εγγραφής. Η εφαρμογή ανοίγει, ανανεώνει ή κλείνει αυτό το παράθυρο ανά site με το δαχτυλικό σου και δείχνει το ιστορικό του Hub.\n\nΣε sites με τα plugins Book Feed ή Broadcast του Noxpress έχει και τις καρτέλες τους: συγχρονισμός, κανόνες, σάρωση ISBN και εισαγωγή ως πρόχειρο, οι αναρτήσεις που περιμένουν στην ουρά του Broadcast, με ειδοποιήσεις.\n\nΜιλά μόνο με το δικό σου Hub. Τη συνδέεις μία φορά με QR από το Hub· τα κλειδιά της μένουν στο Android Keystore και κάθε αίτημα υπογράφεται, οπότε δεν υπάρχει κωδικός να πληκτρολογηθεί ή να διαρρεύσει. Χωρίς λογαριασμό, χωρίς Firebase, χωρίς analytics.\n\nΧρειάζεται Hub με Site Bridge 1.6.0+ σε HTTPS και την καρτέλα App ανοιχτή.\n\nΟι νέες εκδόσεις βγαίνουν πρώτα ως beta. Δωρεάν και ανοιχτού κώδικα (MIT), δωρεάν για πάντα."
+  }
+}
