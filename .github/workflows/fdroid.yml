@@ -186,7 +186,12 @@ jobs:
           git commit -q -m "Noxpress F-Droid repository from $GITHUB_REPOSITORY@${GITHUB_SHA::7}"
           # The token goes in a header, not in the URL, so a stray character
           # in the secret cannot break the URL; whitespace around it is dropped.
-          auth=$(printf 'x-access-token:%s' "$(printf '%s' "$TOKEN" | tr -d '[:space:]')" | base64 -w0)
+          token=$(printf '%s' "$TOKEN" | tr -d '[:space:]')
+          if ! printf '%s' "$token" | grep -qE '^(github_pat_|ghp_)[A-Za-z0-9_]+$'; then
+            echo "::error::FDROID_DEPLOY_TOKEN does not look like a GitHub token (github_pat_… or ghp_…): paste only the token itself."
+            exit 1
+          fi
+          auth=$(printf 'x-access-token:%s' "$token" | base64 -w0)
           echo "::add-mask::$auth"
           url="https://github.com/$DEST.git"
           if [ "$DRY" = 1 ]; then
