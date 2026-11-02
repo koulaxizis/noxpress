@@ -8,7 +8,8 @@
  *   live-operator/sw.js                 service worker (scope /live-operator/)
  *   live-operator/manifest.webmanifest  web app manifest
  *   .well-known/assetlinks.json         Digital Asset Links for the Android
- *                                       app, only when fingerprints are set
+ *                                       app (the official app's certificate
+ *                                       always, for the default package)
  * The same answers with ?lop_app=page|sw|manifest|assetlinks (plain
  * permalinks; the service worker then needs pretty permalinks for its scope).
  *
@@ -67,6 +68,14 @@ final class LOP_App {
 
 	public static function manifest_url(): string {
 		return self::pretty() ? home_url( '/' . self::PATH . '/manifest.webmanifest' ) : add_query_arg( self::QV, 'manifest', home_url( '/' ) );
+	}
+
+	/**
+	 * Link that opens the Android app (2.0.0+) on its connect screen with
+	 * this site filled in (1.4.0). The app still asks before it connects.
+	 */
+	public static function connect_url(): string {
+		return 'liveoperator://connect?site=' . rawurlencode( self::url() );
 	}
 
 	public static function assetlinks_url(): string {
@@ -161,8 +170,9 @@ final class LOP_App {
 	}
 
 	private static function serve_assetlinks(): void {
-		$s = LOP_Settings::get();
-		if ( ! $s['fingerprints'] ) {
+		$s   = LOP_Settings::get();
+		$fps = LOP_Settings::served_fingerprints();
+		if ( ! $fps ) {
 			status_header( 404 );
 			self::no_store();
 			return;
@@ -177,7 +187,7 @@ final class LOP_App {
 					'target'   => array(
 						'namespace'                => 'android_app',
 						'package_name'             => $s['package'],
-						'sha256_cert_fingerprints' => $s['fingerprints'],
+						'sha256_cert_fingerprints' => $fps,
 					),
 				),
 			),

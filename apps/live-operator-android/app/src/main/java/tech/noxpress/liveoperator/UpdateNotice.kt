@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit
  * closed: WorkManager looks at the releases every 12 hours, and a newer
  * version is told once, with a tap that downloads its APK in the browser.
  * The permission is the one the app asks for the chat notifications.
+ * Quiet when F-Droid, Droid-ify or Obtainium installed the app (2.0.0).
  */
 object UpdateNotice {
 
@@ -36,6 +37,11 @@ object UpdateNotice {
     private const val PREFS = "lo_update"
 
     fun schedule(context: Context) {
+        // 2.0.0: a store that follows the releases tells about them itself.
+        if (Installer.fromStore(context)) {
+            WorkManager.getInstance(context).cancelUniqueWork(WORK)
+            return
+        }
         val req = PeriodicWorkRequestBuilder<UpdateWorker>(12, TimeUnit.HOURS)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .build()
@@ -81,6 +87,7 @@ object UpdateNotice {
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        if (Installer.fromStore(applicationContext)) return Result.success()
         val f = try {
             Updates.check(BuildConfig.VERSION_NAME)
         } catch (e: Exception) {

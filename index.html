@@ -268,6 +268,9 @@ section.plugins { padding-bottom: 40px; }
 }
 
 .actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.fdroid-qr { display: block; float: right; margin: 0 0 12px 16px; background: #fff; padding: 6px; border-radius: 10px; width: 148px; height: 148px; }
+.card code.fp { word-break: break-all; }
+@media (max-width: 480px) { .fdroid-qr { float: none; margin: 12px auto; } }
 .btn {
 	display: inline-block;
 	padding: 8px 16px;
@@ -1115,7 +1118,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="live-operator">
 		<h2><a href="#live-operator">Live Operator</a></h2>
 		<a class="card-video" href="media/videos/live-operator.mp4" data-video="live-operator" data-video-title="Live Operator" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.3.2 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.4.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="lo_desc">The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -1124,12 +1127,12 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="lo_li6">Weekly schedule: online by itself on the days and hours you choose, in the site’s time zone, with closed dates and a one-tap pause; set it in the settings or in the app</li>
 			<li data-i18n="lo_li2">Web Push straight from your site (VAPID, end-to-end encrypted), for every new request and every visitor message; no Firebase and no Telegram needed</li>
 			<li data-i18n="lo_li3">Inbox, claim, take over from the AI, reply and return to the AI, through PurioChat’s own operator routes</li>
-			<li data-i18n="lo_li4">Android app (Trusted Web Activity) built in GitHub Actions, verified with Digital Asset Links from the plugin’s settings</li>
+			<li data-i18n="lo_li4">Android app for every site (Trusted Web Activity), connected with one tap from the settings; the site lists the official app in Digital Asset Links by itself</li>
 			<li data-i18n="lo_li5">Administrators only, never cached, LOP_DISABLE stops everything and PurioChat works as before; bilingual UI and shared «Noxpress» menu</li>
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.3.2/live-operator.zip" rel="nofollow noopener" data-i18n="lo_download">Download v1.3.2 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.4.0/live-operator.zip" rel="nofollow noopener" data-i18n="lo_download">Download v1.4.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/live-operator" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1307,7 +1310,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		<div class="actions">
 			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sba-1.7.0/site-bridge.apk" rel="nofollow noopener" data-i18n="sba_download">Download v1.7.0 (.apk)</a>
-			<a class="btn" href="https://koulaxizis.github.io/noxpress-fdroid/" rel="noopener" data-i18n="apps_fdroid">F-Droid / Droid-ify</a>
+			<a class="btn" href="#fdroid" data-i18n="apps_fdroid">F-Droid / Droid-ify</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/site-bridge-android#readme" rel="noopener" data-i18n="apps_guide">Install guide</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1315,18 +1318,36 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="live-operator-app">
 		<h2><a href="#live-operator-app">Live Operator app</a></h2>
-		<div class="meta">v1.3.1 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
-		<p data-i18n="loa_desc">The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. The official APK is built for glarolykoi.net; for your own site, build it with your site’s address (two Gradle properties) or add the page to your home screen as a web app.</p>
+		<div class="meta">v2.0.0 · Android 9+ · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="loa_desc">The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. One app for every site with the Live Operator plugin: connect it with «Connect the app» in the plugin’s settings, or type your site’s address.</p>
 		<ul>
-			<li data-i18n="loa_li1">Trusted Web Activity of the plugin’s /live-operator/ page, verified with Digital Asset Links from the plugin’s settings, so there is no address bar</li>
+			<li data-i18n="loa_li1">Trusted Web Activity of the plugin’s /live-operator/ page; Live Operator 1.4.0+ lists the app by itself, so there is no address bar. Change the site from the icon’s «Change site»</li>
 			<li data-i18n="loa_li2">Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb</li>
 			<li data-i18n="loa_li3">Little code of its own (Google’s androidbrowserhelper); no Firebase, no analytics</li>
-			<li data-i18n="loa_li4">Updates: a notice on the page, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Live Operator app</code>)</li>
+			<li data-i18n="loa_li4">Updates: from F-Droid or Droid-ify (the Noxpress repository), Obtainium (this repository, «Include prereleases», title filter <code>^Live Operator app</code>) or a notice on the page</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/tree/main/apps/live-operator-android#readme" rel="noopener" data-i18n="apps_build">Build guide</a>
-			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/live-operator-android" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-loa-2.0.0/live-operator.apk" rel="nofollow noopener" data-i18n="loa_download">Download v2.0.0 (.apk)</a>
+			<a class="btn" href="#fdroid" data-i18n="apps_fdroid">F-Droid / Droid-ify</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/live-operator-android#readme" rel="noopener" data-i18n="apps_guide">Install guide</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
+	<article class="card" id="fdroid">
+		<h2><a href="#fdroid" data-i18n="fdr_title">F-Droid repository</a></h2>
+		<div class="meta">F-Droid · Droid-ify · Obtainium</div>
+		<p data-i18n="fdr_desc">Add the Noxpress repository once and install the apps from F-Droid, Droid-ify or Obtainium; their updates then come by themselves. The APKs are the same signed files as on the releases.</p>
+		<img class="fdroid-qr" src="media/fdroid/repo-qr.svg" alt="QR code of the Noxpress F-Droid repository" width="148" height="148" loading="lazy">
+		<ul>
+			<li data-i18n="fdr_li1">On your phone: tap «Add the repository», or scan the QR code with F-Droid or Droid-ify</li>
+			<li data-i18n="fdr_li2">New versions ship as beta first: turn on «unstable updates» to get them early</li>
+			<li><span data-i18n="fdr_addr">Address:</span> <code class="fp">https://koulaxizis.github.io/noxpress-fdroid/repo</code></li>
+			<li><span data-i18n="fdr_fp">Fingerprint (SHA-256):</span> <code class="fp">21441E31A60A89708C6CECE649390C1863EC8CA147F08DA7399AE7646E02EE4E</code></li>
+		</ul>
+		<div class="actions">
+			<a class="btn primary" href="https://fdroid.link/#https://koulaxizis.github.io/noxpress-fdroid/repo?fingerprint=21441E31A60A89708C6CECE649390C1863EC8CA147F08DA7399AE7646E02EE4E" rel="nofollow noopener" data-i18n="fdr_add">Add the repository</a>
+			<a class="btn" href="https://koulaxizis.github.io/noxpress-fdroid/" rel="noopener" data-i18n="fdr_page">Repository page</a>
 		</div>
 	</article>
 </section>
@@ -1688,9 +1709,9 @@ footer .heart { color: var(--accent-bright); }
 		lo_li6: 'Weekly schedule: online by itself on the days and hours you choose, in the site’s time zone, with closed dates and a one-tap pause; set it in the settings or in the app',
 		lo_li2: 'Web Push straight from your site (VAPID, end-to-end encrypted), for every new request and every visitor message; no Firebase and no Telegram needed',
 		lo_li3: 'Inbox, claim, take over from the AI, reply and return to the AI, through PurioChat’s own operator routes',
-		lo_li4: 'Android app (Trusted Web Activity) built in GitHub Actions, verified with Digital Asset Links from the plugin’s settings',
+		lo_li4: 'Android app for every site (Trusted Web Activity), connected with one tap from the settings; the site lists the official app in Digital Asset Links by itself',
 		lo_li5: 'Administrators only, never cached, LOP_DISABLE stops everything and PurioChat works as before; bilingual UI and shared «Noxpress» menu',
-		lo_download: 'Download v1.3.2 (.zip)',
+		lo_download: 'Download v1.4.0 (.zip)',
 		ta_desc: 'Trade accounts for bookstores and resellers: a preset discount on the titles you choose, in the shop, the cart and the order, and the Trade Feed, an API with a username and password per account to list your books in their own e-shops.',
 		ta_li1: 'A «Χονδρική» (trade) role made by the shop, never by self sign-up; one discount for everyone (default 40%) or an account’s own',
 		ta_li2: 'Only the categories and brands you choose, physical products only; never other publishers’ titles from Book Feed, and a «Not for trade» checkbox per product',
@@ -1788,6 +1809,14 @@ footer .heart { color: var(--accent-bright); }
 		apps_guide: 'Install guide',
 		apps_build: 'Build guide',
 		apps_fdroid: 'F-Droid / Droid-ify',
+		fdr_title: 'F-Droid repository',
+		fdr_desc: 'Add the Noxpress repository once and install the apps from F-Droid, Droid-ify or Obtainium; their updates then come by themselves. The APKs are the same signed files as on the releases.',
+		fdr_li1: 'On your phone: tap «Add the repository», or scan the QR code with F-Droid or Droid-ify',
+		fdr_li2: 'New versions ship as beta first: turn on «unstable updates» to get them early',
+		fdr_addr: 'Address:',
+		fdr_fp: 'Fingerprint (SHA-256):',
+		fdr_add: 'Add the repository',
+		fdr_page: 'Repository page',
 		sba_desc: 'The Site Bridge Hub in your pocket: open the write window of your sites with your fingerprint only while you work, and handle Book Feed and Broadcast from your phone. It talks only to your own Hub; no account, no Firebase, no analytics.',
 		sba_li1: 'Open, renew or close the write window per site, with a fingerprint for every opening, and the Hub’s log on the phone',
 		sba_li2: 'Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+)',
@@ -1795,11 +1824,12 @@ footer .heart { color: var(--accent-bright); }
 		sba_li4: 'Pair with a QR code from the Hub; device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak',
 		sba_li5: 'Updates: from F-Droid or Droid-ify (the Noxpress repository), Obtainium (this repository, «Include prereleases», title filter <code>^Site Bridge app</code>) or a notice in the app',
 		sba_download: 'Download v1.7.0 (.apk)',
-		loa_desc: 'The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. The official APK is built for glarolykoi.net; for your own site, build it with your site’s address (two Gradle properties) or add the page to your home screen as a web app.',
-		loa_li1: 'Trusted Web Activity of the plugin’s /live-operator/ page, verified with Digital Asset Links from the plugin’s settings, so there is no address bar',
+		loa_download: 'Download v2.0.0 (.apk)',
+		loa_desc: 'The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. One app for every site with the Live Operator plugin: connect it with «Connect the app» in the plugin’s settings, or type your site’s address.',
+		loa_li1: 'Trusted Web Activity of the plugin’s /live-operator/ page; Live Operator 1.4.0+ lists the app by itself, so there is no address bar. Change the site from the icon’s «Change site»',
 		loa_li2: 'Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb',
 		loa_li3: 'Little code of its own (Google’s androidbrowserhelper); no Firebase, no analytics',
-		loa_li4: 'Updates: a notice on the page, or follow it with Obtainium (this repository, «Include prereleases», title filter <code>^Live Operator app</code>)',
+		loa_li4: 'Updates: from F-Droid or Droid-ify (the Noxpress repository), Obtainium (this repository, «Include prereleases», title filter <code>^Live Operator app</code>) or a notice on the page',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		disclaimer: '<strong>Use at your own risk.</strong> noxpress plugins are free software, provided “as is”, without warranty of any kind. Test them on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from their use.',
 		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
@@ -2050,9 +2080,9 @@ footer .heart { color: var(--accent-bright); }
 		lo_li6: 'Εβδομαδιαίο ωράριο: online μόνο του τις μέρες και ώρες που διαλέγεις, στη ζώνη ώρας του site, με κλειστές ημερομηνίες και παύση με ένα πάτημα· ρυθμίζεται στις ρυθμίσεις ή στην εφαρμογή',
 		lo_li2: 'Web Push κατευθείαν από το site σου (VAPID, κρυπτογραφημένο από άκρο σε άκρο), για κάθε νέο αίτημα και κάθε μήνυμα επισκέπτη· χωρίς Firebase και χωρίς Telegram',
 		lo_li3: 'Εισερχόμενα, ανάληψη, ανάληψη από το AI, απάντηση και επιστροφή στο AI, μέσα από τις διαδρομές χειριστή του ίδιου του PurioChat',
-		lo_li4: 'Εφαρμογή Android (Trusted Web Activity) που χτίζεται στο GitHub Actions και επαληθεύεται με Digital Asset Links από τις ρυθμίσεις του plugin',
+		lo_li4: 'Εφαρμογή Android για κάθε site (Trusted Web Activity), που συνδέεται με ένα πάτημα από τις ρυθμίσεις· το site δηλώνει μόνο του την επίσημη εφαρμογή στα Digital Asset Links',
 		lo_li5: 'Μόνο για διαχειριστές, χωρίς cache, το LOP_DISABLE σταματά τα πάντα και το PurioChat δουλεύει όπως πριν· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		lo_download: 'Λήψη v1.3.2 (.zip)',
+		lo_download: 'Λήψη v1.4.0 (.zip)',
 		ta_desc: 'Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, και το Trade Feed, ένα API με όνομα χρήστη και κωδικό ανά λογαριασμό για να περνούν τα βιβλία σου στα δικά τους e-shops.',
 		ta_li1: 'Ρόλος «Χονδρική» που τον δίνει το κατάστημα, χωρίς αυτόματη εγγραφή· μία έκπτωση για όλους (προεπιλογή 40%) ή δική του για κάθε λογαριασμό',
 		ta_li2: 'Μόνο οι κατηγορίες και τα brands που διαλέγεις, μόνο φυσικά προϊόντα· ποτέ τίτλοι άλλων εκδοτών από το Book Feed, και κουτάκι «Εκτός χονδρικής» ανά προϊόν',
@@ -2150,6 +2180,14 @@ footer .heart { color: var(--accent-bright); }
 		apps_guide: 'Οδηγός εγκατάστασης',
 		apps_build: 'Οδηγός build',
 		apps_fdroid: 'F-Droid / Droid-ify',
+		fdr_title: 'Αποθετήριο F-Droid',
+		fdr_desc: 'Πρόσθεσε μία φορά το αποθετήριο του Noxpress και εγκατέστησε τις εφαρμογές από το F-Droid, το Droid-ify ή το Obtainium· οι ενημερώσεις τους έρχονται μετά μόνες τους. Τα APK είναι τα ίδια υπογεγραμμένα αρχεία με αυτά των releases.',
+		fdr_li1: 'Στο κινητό: πάτα «Προσθήκη αποθετηρίου» ή σκάναρε τον κωδικό QR με το F-Droid ή το Droid-ify',
+		fdr_li2: 'Οι νέες εκδόσεις βγαίνουν πρώτα ως beta: άνοιξε τις «unstable updates» για να τις παίρνεις νωρίς',
+		fdr_addr: 'Διεύθυνση:',
+		fdr_fp: 'Fingerprint (SHA-256):',
+		fdr_add: 'Προσθήκη αποθετηρίου',
+		fdr_page: 'Σελίδα αποθετηρίου',
 		sba_desc: 'Το Hub του Site Bridge στην τσέπη σου: ανοίγεις το παράθυρο εγγραφής των sites σου με το δαχτυλικό σου μόνο όσο δουλεύεις, και χειρίζεσαι Book Feed και Broadcast από το κινητό. Μιλά μόνο με το δικό σου Hub· χωρίς λογαριασμό, χωρίς Firebase, χωρίς analytics.',
 		sba_li1: 'Άνοιγμα, ανανέωση ή κλείσιμο του παραθύρου εγγραφής ανά site, με δαχτυλικό σε κάθε άνοιγμα, και το ιστορικό του Hub στο κινητό',
 		sba_li2: 'Καρτέλα Book Feed: συγχρονισμός, κανόνες, σάρωση ISBN και εισαγωγή ως πρόχειρο, με ειδοποιήσεις (Book Feed 1.11.0+)',
@@ -2157,11 +2195,12 @@ footer .heart { color: var(--accent-bright); }
 		sba_li4: 'Σύνδεση με QR από το Hub· τα κλειδιά της συσκευής μένουν στο Android Keystore και κάθε αίτημα υπογράφεται, οπότε δεν υπάρχει κωδικός να πληκτρολογηθεί ή να διαρρεύσει',
 		sba_li5: 'Ενημερώσεις: από το F-Droid ή το Droid-ify (το αποθετήριο του Noxpress), το Obtainium (αυτό το repository, «Include prereleases», φίλτρο τίτλου <code>^Site Bridge app</code>) ή ειδοποίηση μέσα στην εφαρμογή',
 		sba_download: 'Λήψη v1.7.0 (.apk)',
-		loa_desc: 'Η σελίδα του Live Operator ως εφαρμογή Android: πλήρης οθόνη, δικό της εικονίδιο και ειδοποιήσεις συνομιλίας που ανάβουν την οθόνη. Το επίσημο APK είναι φτιαγμένο για το glarolykoi.net· για το δικό σου site, χτίσ\u2019 το με τη διεύθυνση του site σου (δύο ιδιότητες του Gradle) ή πρόσθεσε τη σελίδα στην αρχική οθόνη ως web εφαρμογή.',
-		loa_li1: 'Trusted Web Activity της σελίδας /live-operator/ του plugin, επαληθευμένη με Digital Asset Links από τις ρυθμίσεις του plugin, χωρίς γραμμή διεύθυνσης',
+		loa_download: 'Λήψη v2.0.0 (.apk)',
+		loa_desc: 'Η σελίδα του Live Operator ως εφαρμογή Android: πλήρης οθόνη, δικό της εικονίδιο και ειδοποιήσεις συνομιλίας που ανάβουν την οθόνη. Μία εφαρμογή για κάθε site με το plugin Live Operator: τη συνδέεις με «Σύνδεση της εφαρμογής» στις ρυθμίσεις του plugin ή γράφοντας τη διεύθυνση του site σου.',
+		loa_li1: 'Trusted Web Activity της σελίδας /live-operator/ του plugin· το Live Operator 1.4.0+ δηλώνει μόνο του την εφαρμογή, χωρίς γραμμή διεύθυνσης. Αλλαγή site από τη «Αλλαγή site» του εικονιδίου',
 		loa_li2: 'Ειδοποιήσεις συνομιλίας heads-up με ήχο σε δικό τους κανάλι, ιδιωτικές στην κλειδωμένη οθόνη, ποτέ μέσα από το «Μην ενοχλείτε»',
 		loa_li3: 'Ελάχιστος δικός της κώδικας (το androidbrowserhelper της Google)· χωρίς Firebase, χωρίς analytics',
-		loa_li4: 'Ενημερώσεις: ειδοποίηση στη σελίδα, ή παρακολούθηση με το Obtainium (αυτό το repository, «Include prereleases», φίλτρο τίτλου <code>^Live Operator app</code>)',
+		loa_li4: 'Ενημερώσεις: από το F-Droid ή το Droid-ify (το αποθετήριο του Noxpress), το Obtainium (αυτό το repository, «Include prereleases», φίλτρο τίτλου <code>^Live Operator app</code>) ή ειδοποίηση στη σελίδα',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		disclaimer: '<strong>Χρήση με δική σου ευθύνη.</strong> Τα plugins του noxpress είναι δωρεάν λογισμικό που παρέχεται «ως έχει», χωρίς καμία εγγύηση. Δοκίμασέ τα πρώτα σε αντίγραφο του site και κράτα πλήρες backup του site και της βάσης πριν εγκαταστήσεις, ενημερώσεις ή αφαιρέσεις οποιοδήποτε plugin. Στο μέγιστο βαθμό που επιτρέπει ο νόμος, δεν υπάρχει καμία ευθύνη για απώλεια δεδομένων, παραγγελιών, εσόδων ή οποιαδήποτε άλλη ζημιά από τη χρήση τους.',
 		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'

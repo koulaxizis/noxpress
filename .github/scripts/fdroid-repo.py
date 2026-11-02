@@ -9,8 +9,9 @@ GitHub releases, copied as they are (never rebuilt or signed again).
 
 An app is published only when apps/<app>/fdroid/store.json exists (public
 apps only: an app built for one site stays out). store.json holds its
-package, APK asset name, release tag prefix, category, anti-features and
-the English and Greek store texts; icon.png (512 px) sits next to it, and
+package, APK asset name, release tag prefix, category, anti-features,
+optionally min_version (older releases never go in, e.g. builds that were
+tied to one site) and the English and Greek store texts; icon.png (512 px) sits next to it, and
 phone screenshots as <lang>-<n>.png|jpg (lang: en-US, el).
 
 Per app the repository holds the newest stable release and, when newer,
@@ -99,12 +100,16 @@ def releases():
 def choose(store, rels):
     """The newest stable release of an app and, when newer, the newest beta."""
     prefix = store["tag_prefix"] + "-"
+    m = SEMVER.match(store.get("min_version", "0.0.0"))
+    if not m:
+        sys.exit("%s: min_version is not x.y.z" % store["package"])
+    floor = tuple(int(x) for x in m.groups())
     found = []
     for r in rels:
         tag = r.get("tag_name", "")
         m = SEMVER.match(tag[len(prefix):]) if tag.startswith(prefix) else None
         asset = next((a for a in r.get("assets", []) if a.get("name") == store["apk"]), None)
-        if m and asset:
+        if m and asset and tuple(int(x) for x in m.groups()) >= floor:
             found.append({
                 "tag": tag,
                 "version": tag[len(prefix):],
