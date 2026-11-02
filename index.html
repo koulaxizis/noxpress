@@ -186,6 +186,11 @@ section.plugins { padding-bottom: 40px; }
 	background: rgba(224, 168, 79, 0.14);
 }
 .card p { color: var(--text); max-width: 46em; }
+.mk-shots { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; margin: 10px 0 12px; align-items: start; }
+.mk-shots img { width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
+@media (max-width: 640px) { .mk-shots { grid-template-columns: 1fr; } }
+.card p.mk-terms { color: var(--muted); font-size: .9em; margin-top: 12px; }
+#media-kit .card p a { color: var(--accent-bright); }
 .card ul {
 	margin: 14px 0 0;
 	padding-left: 1.2em;
@@ -1362,6 +1367,37 @@ footer .heart { color: var(--accent-bright); }
 	</article>
 </section>
 
+<section class="plugins" id="media-kit">
+	<div class="section-title" data-i18n="mk_title">Media kit</div>
+
+	<article class="card" id="media-kit-noxpress">
+		<h2><a href="#media-kit-noxpress">noxpress media kit</a></h2>
+		<div class="mk-shots">
+			<img src="media/media-kit/noxpress-wallpaper.jpg" width="960" height="540" loading="lazy" alt="noxpress desktop wallpaper: the violet n mark on a dark background">
+			<img src="media/media-kit/noxpress-phone.jpg" width="680" height="480" loading="lazy" alt="Three noxpress phone wallpapers: mark, pattern and minimal">
+		</div>
+		<p data-i18n="mk_nox_desc">Wallpapers for desktop, phone and tablet (4K, 5K, 16:10, ultrawide, Android, iPhone), logos and icons, banners for social profiles, print files for t-shirts, mugs and stickers, the colour palette, the Inter font, brand guidelines and the press release in English and Greek.</p>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/null-jsfx/releases/download/media-kit/noxpress-Media-Kit.zip" rel="nofollow noopener" data-i18n="mk_nox_btn">Download the kit (.zip, 16 MB)</a>
+			<a class="btn" href="https://github.com/koulaxizis/null-jsfx/releases/download/media-kit/noxpress-Wallpapers.zip" rel="nofollow noopener" data-i18n="mk_walls">Wallpapers only</a>
+		</div>
+	</article>
+
+	<article class="card" id="media-kit-all">
+		<h2><a href="#media-kit-all" data-i18n="mk_all_title">noxpress, NULL JSFX and orOS together</a></h2>
+		<div class="mk-shots">
+			<img src="media/media-kit/all-three-wallpaper.jpg" width="960" height="540" loading="lazy" alt="Desktop wallpaper with the NULL JSFX, orOS and noxpress icons side by side">
+			<img src="media/media-kit/all-three-phone.jpg" width="680" height="480" loading="lazy" alt="Three phone wallpapers with the three projects together">
+		</div>
+		<p data-i18n="mk_all_desc">The kits of all three projects, plus the wallpapers, logos, banners and print files that show them together. The kits of <a href="https://nulljsfx.tech/media-kit/">NULL JSFX</a> and <a href="https://useoros.online/media-kit/">orOS</a> on their own are on their sites.</p>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/null-jsfx/releases/download/media-kit/NULL-JSFX-orOS-noxpress-Media-Kit.zip" rel="nofollow noopener" data-i18n="mk_all_btn">Download the combined kit (.zip, 63 MB)</a>
+			<a class="btn" href="https://github.com/koulaxizis/null-jsfx/releases/download/media-kit/NULL-JSFX-orOS-noxpress-Wallpapers.zip" rel="nofollow noopener" data-i18n="mk_walls">Wallpapers only</a>
+		</div>
+		<p class="mk-terms" data-i18n="mk_terms">Free to use to present, review or write about the projects, and to show your support. Please don’t change the marks, their colours or proportions, and don’t sell the kit or products made from it. The fonts are under the SIL Open Font License. Press and interviews: <a href="mailto:koulaxizis@glarolykoi.net">koulaxizis@glarolykoi.net</a></p>
+	</article>
+</section>
+
 <section class="updates-box" id="updates" aria-labelledby="updates-title">
 	<div class="updates-title" id="updates-title" data-i18n="up_title">Stay in the loop ✦</div>
 	<p data-i18n="up_text">Every new plugin, release and fix is announced on Ko-fi. Follow noxpress there to see them first.</p>
@@ -1734,6 +1770,14 @@ footer .heart { color: var(--accent-bright); }
 		ms_btn: 'Become a supporter',
 		ms_list: 'See the supporters',
 		ms_once: 'One-off coffee ☕',
+		mk_title: 'Media kit',
+		mk_nox_desc: 'Wallpapers for desktop, phone and tablet (4K, 5K, 16:10, ultrawide, Android, iPhone), logos and icons, banners for social profiles, print files for t-shirts, mugs and stickers, the colour palette, the Inter font, brand guidelines and the press release in English and Greek.',
+		mk_nox_btn: 'Download the kit (.zip, 16 MB)',
+		mk_walls: 'Wallpapers only',
+		mk_all_title: 'noxpress, NULL JSFX and orOS together',
+		mk_all_desc: 'The kits of all three projects, plus the wallpapers, logos, banners and print files that show them together. The kits of <a href="https://nulljsfx.tech/media-kit/">NULL JSFX</a> and <a href="https://useoros.online/media-kit/">orOS</a> on their own are on their sites.',
+		mk_all_btn: 'Download the combined kit (.zip, 63 MB)',
+		mk_terms: 'Free to use to present, review or write about the projects, and to show your support. Please don’t change the marks, their colours or proportions, and don’t sell the kit or products made from it. The fonts are under the SIL Open Font License. Press and interviews: <a href="mailto:koulaxizis@glarolykoi.net">koulaxizis@glarolykoi.net</a>',
 		up_title: 'Stay in the loop ✦',
 		up_text: 'Every new plugin, release and fix is announced on Ko-fi. Follow noxpress there to see them first.',
 		up_btn: 'Follow on Ko-fi',
@@ -2087,6 +2131,14 @@ footer .heart { color: var(--accent-bright); }
 		ms_btn: 'Γίνε υποστηρικτής',
 		ms_list: 'Δες τους υποστηρικτές',
 		ms_once: 'Ένας καφές, μία φορά ☕',
+		mk_title: 'Media kit',
+		mk_nox_desc: 'Wallpapers για υπολογιστή, κινητό και tablet (4K, 5K, 16:10, ultrawide, Android, iPhone), λογότυπα και εικονίδια, banners για προφίλ στα social, αρχεία εκτύπωσης για μπλουζάκια, κούπες και αυτοκόλλητα, η χρωματική παλέτα, η γραμματοσειρά Inter, ο οδηγός ταυτότητας και το δελτίο τύπου στα αγγλικά και στα ελληνικά.',
+		mk_nox_btn: 'Λήψη του πακέτου (.zip, 16 MB)',
+		mk_walls: 'Μόνο τα wallpapers',
+		mk_all_title: 'noxpress, NULL JSFX και orOS μαζί',
+		mk_all_desc: 'Τα πακέτα και των τριών projects, μαζί με wallpapers, λογότυπα, banners και αρχεία εκτύπωσης που τα δείχνουν μαζί. Τα πακέτα του <a href="https://nulljsfx.tech/media-kit/">NULL JSFX</a> και του <a href="https://useoros.online/media-kit/?lang=el">orOS</a> μόνα τους βρίσκονται στις σελίδες τους.',
+		mk_all_btn: 'Λήψη του ενιαίου πακέτου (.zip, 63 MB)',
+		mk_terms: 'Ελεύθερο για να παρουσιάσεις, να κάνεις κριτική ή να γράψεις για τα projects, και για να δείξεις τη στήριξή σου. Μην αλλάζεις τα σήματα, τα χρώματα ή τις αναλογίες τους και μην πουλάς το πακέτο ή προϊόντα που φτιάχνονται από αυτό. Οι γραμματοσειρές έχουν την άδεια SIL Open Font License. Για τον Τύπο και συνεντεύξεις: <a href="mailto:koulaxizis@glarolykoi.net">koulaxizis@glarolykoi.net</a>',
 		up_title: 'Μείνε ενήμερος ✦',
 		up_text: 'Κάθε νέο plugin, έκδοση και διόρθωση ανακοινώνεται στο Ko-fi. Ακολούθησε το noxpress εκεί για να τα βλέπεις πρώτος.',
 		up_btn: 'Ακολούθησε στο Ko-fi',
