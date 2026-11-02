@@ -1,0 +1,212 @@
+# Το δικό μας αποθετήριο F-Droid για τις εφαρμογές Android του Noxpress
+# (Bible §13), ώστε F-Droid, Droid-ify και Obtainium να τις εγκαθιστούν
+# και να τις ενημερώνουν:
+#   https://koulaxizis.github.io/noxpress-fdroid/repo
+#
+# Μέσα μπαίνουν τα ίδια ακριβώς APK των releases του GitHub (καμία δεύτερη
+# build), τα 3 νεότερα κάθε εφαρμογής του APPS στο
+# .github/scripts/fdroid-repo.py, ελεγμένα με το .sha256 τους. Το index
+# υπογράφεται με το ίδιο κλειδί με τα APK (SBA_*): απόφαση του Christos,
+# 2026-11-02, κανένα νέο κλειδί. Έτσι ένα κινητό περνά από το APK του
+# GitHub στο F-Droid και πίσω χωρίς απεγκατάσταση.
+#
+# Πότε τρέχει:
+#  - μετά από κάθε «Android app» στο main (νέο release nox-sba-*),
+#  - σε push στο main που αλλάζει τα κείμενα του καταστήματος, το εικονίδιο,
+#    το script ή αυτό το αρχείο,
+#  - χειροκίνητα (Actions → F-Droid repository → Run workflow).
+# Δημοσιεύει μόνο όταν άλλαξε κάτι (stamp.txt στο noxpress-fdroid)· με
+# «force» δημοσιεύει πάντα. Σε PR: tests του script και δοκιμαστική
+# build του αποθετηρίου με τα πραγματικά APK και ένα κλειδί μιας χρήσης,
+# χωρίς δημοσίευση.
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   SBA_KEYSTORE_B64, SBA_KEYSTORE_PASSWORD, SBA_KEY_ALIAS, SBA_KEY_PASSWORD
+#                         το κλειδί των APK (όπως στο android-app.yml)·
+#                         υπογράφει και το index του αποθετηρίου
+#   FDROID_DEPLOY_TOKEN   fine-grained token: koulaxizis/noxpress-fdroid,
+#                         Contents read and write
+# Χωρίς αυτά το run το λέει και δεν δημοσιεύει τίποτα. Νέο κλειδί σημαίνει
+# ότι κάθε κινητό ξαναπροσθέτει το αποθετήριο (και ξαναεγκαθιστά).
+name: F-Droid repository
+
+on:
+  workflow_run:
+    workflows: ['Android app']
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'apps/*/fastlane/**'
+      - '.github/fdroid/**'
+      - '.github/scripts/fdroid-repo.py'
+      - '.github/workflows/fdroid-repo.yml'
+  pull_request:
+    paths:
+      - 'apps/*/fastlane/**'
+      - '.github/fdroid/**'
+      - '.github/scripts/fdroid-repo.py'
+      - '.github/scripts/test-fdroid-repo.py'
+      - '.github/workflows/fdroid-repo.yml'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Publish even if nothing changed'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fdroid-repo-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SITE: https://koulaxizis.github.io/noxpress-fdroid
+      DEST: koulaxizis/noxpress-fdroid
+    steps:
+      - name: Secrets
+        id: pre
+        env:
+          HAS: ${{ secrets.SBA_KEYSTORE_B64 != '' && secrets.SBA_KEYSTORE_PASSWORD != '' && secrets.SBA_KEY_ALIAS != '' && secrets.FDROID_DEPLOY_TOKEN != '' }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            # dry run: the real APKs, a throwaway key, nothing published
+            echo "go=1" >> "$GITHUB_OUTPUT"; echo "dry=1" >> "$GITHUB_OUTPUT"
+          elif [ "$HAS" != "true" ]; then
+            echo "::notice::No SBA_* or FDROID_DEPLOY_TOKEN secret: nothing published."
+            echo "go=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: steps.pre.outputs.go == '1'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Test the F-Droid script
+        if: steps.pre.outputs.dry == '1'
+        run: python3 .github/scripts/test-fdroid-repo.py
+
+      - name: APKs, store texts, did anything change?
+        id: get
+        if: steps.pre.outputs.go == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ (inputs.force || github.event_name == 'pull_request') && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          fd="$RUNNER_TEMP/fd"
+          mkdir -p "$fd"
+          python3 .github/scripts/fdroid-repo.py fetch "$fd" 3
+          python3 .github/scripts/fdroid-repo.py meta "$fd"
+          stamp=$(python3 .github/scripts/fdroid-repo.py stamp "$fd")
+          echo "$stamp" > "$fd/stamp.txt"
+          last=$(curl -fsSL "https://raw.githubusercontent.com/$DEST/main/stamp.txt" 2>/dev/null || true)
+          if [ "$FORCE" != "1" ] && [ "$stamp" = "$last" ]; then
+            echo "::notice::Nothing changed since the last publish."
+            echo "go=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the repository
+        if: steps.get.outputs.go == '1'
+        env:
+          KS_B64: ${{ secrets.SBA_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.SBA_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SBA_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.SBA_KEY_PASSWORD }}
+          DRY: ${{ steps.pre.outputs.dry }}
+        run: |
+          set -euo pipefail
+          fd="$RUNNER_TEMP/fd"
+          ks="$RUNNER_TEMP/repo.keystore"
+          umask 077
+          trap 'rm -f "$ks" "$fd/config.yml"' EXIT
+          bt="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          if [ "$DRY" = "1" ]; then
+            KS_PASS=dryrun-$RANDOM$RANDOM; KEY_PASS=$KS_PASS; KEY_ALIAS=dryrun
+            keytool -genkeypair -keystore "$ks" -storetype PKCS12 -storepass "$KS_PASS" -keypass "$KEY_PASS" \
+              -alias "$KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 1 -dname CN=dryrun > /dev/null
+          else
+            echo "$KS_B64" | tr -d '[:space:]' | base64 -d > "$ks"
+          fi
+
+          # Every APK must carry the certificate of the key that signs the index
+          key=$(keytool -list -v -keystore "$ks" -storepass "$KS_PASS" -alias "$KEY_ALIAS" \
+            | sed -n 's/^[[:space:]]*SHA256: //p' | head -1 | tr -d ':' | tr 'A-F' 'a-f')
+          [ -n "$key" ] || { echo "::error::No SHA-256 for alias in the keystore"; exit 1; }
+          for apk in "$fd"/repo/*.apk; do
+            [ "$DRY" = "1" ] && break
+            cert=$("$bt/apksigner" verify --print-certs "$apk" | grep -m1 'SHA-256 digest' | sed -E 's/.*: //')
+            if [ "$cert" != "$key" ]; then
+              echo "::error::$(basename "$apk") is signed with $cert, not with the SBA key"; exit 1
+            fi
+          done
+          echo "All APKs signed with $key"
+
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet fdroidserver==2.4.5
+          cp .github/fdroid/icon.png "$fd/icon.png"
+          cat > "$fd/config.yml" <<EOF
+          repo_url: $SITE/repo
+          repo_name: Noxpress
+          repo_description: "The Noxpress Android apps for WordPress and WooCommerce sites. Free and open source (MIT), free forever. https://noxpress.tech"
+          repo_icon: icon.png
+          archive_older: 0
+          keystore: $ks
+          keystorepass: "$KS_PASS"
+          keypass: "$KEY_PASS"
+          repo_keyalias: "$KEY_ALIAS"
+          keydname: CN=Noxpress, O=Noxpress
+          apksigner: $bt/apksigner
+          EOF
+          (cd "$fd" && "$RUNNER_TEMP/venv/bin/fdroid" update --pretty)
+          python3 - "$fd/repo/index-v2.json" <<'PY'
+          import json, sys
+          idx = json.load(open(sys.argv[1]))
+          for pkg, p in idx["packages"].items():
+              print(pkg, sorted(v["manifest"]["versionName"] for v in p["versions"].values()))
+          PY
+
+      - name: Publish to koulaxizis/noxpress-fdroid
+        if: steps.get.outputs.go == '1' && steps.pre.outputs.dry != '1'
+        env:
+          TOKEN: ${{ secrets.FDROID_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          site="$RUNNER_TEMP/site"
+          mkdir -p "$site"
+          cp -r "$RUNNER_TEMP/fd/repo" "$site/repo"
+          cp "$RUNNER_TEMP/fd/stamp.txt" "$site/stamp.txt"
+          touch "$site/.nojekyll"
+          cat > "$site/README.md" <<EOF
+          # Noxpress F-Droid repository
+
+          The Noxpress Android apps, kept up to date by F-Droid, Droid-ify or Obtainium.
+          Add this repository: $SITE/repo
+
+          Built by [koulaxizis/noxpress](https://github.com/koulaxizis/noxpress)
+          (.github/workflows/fdroid-repo.yml) from the app releases; do not edit by hand.
+          EOF
+          cd "$site"
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Noxpress F-Droid repository ($GITHUB_SHA)"
+          # one commit, replaced each time: the APKs never pile up in history
+          git push -q --force "https://x-access-token:$TOKEN@github.com/$DEST.git" main
+          echo "Published $(ls repo/*.apk | wc -l) APKs to $SITE/repo"

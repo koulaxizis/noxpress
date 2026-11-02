@@ -24,6 +24,8 @@ From 1.5.0 the same check also runs in the background every 12 hours (WorkManage
 
 Or let [Obtainium](https://github.com/ImranR98/Obtainium) follow it: **Add app** → `https://github.com/koulaxizis/noxpress` → turn on **Include prereleases** and set **Filter release titles by regular expression** to `^Site Bridge app` (the repository also publishes plugins and the Live Operator app). The APK asset is `site-bridge.apk`.
 
+Or install and update it from our **F-Droid repository** with [F-Droid](https://f-droid.org) or [Droid-ify](https://github.com/Droid-ify/client): add the repository `https://koulaxizis.github.io/noxpress-fdroid/repo` (in F-Droid: **Settings → Repositories → +**). It holds the same APKs as the releases, signed with the same key, so you can move between the release APK and the F-Droid one without reinstalling; the repository index is signed with that key too (certificate SHA-256 in the release notes). Obtainium can also use it as a source (**F-Droid Third-Party Repo**, app ID `tech.noxpress.sitebridge`). Built by `.github/workflows/fdroid-repo.yml` after every app release; the store texts and icon are in `fastlane/metadata/android/`.
+
 To remove a phone, revoke it in the Hub's App tab, or use **Disconnect** in the app's Settings.
 
 ## How it signs

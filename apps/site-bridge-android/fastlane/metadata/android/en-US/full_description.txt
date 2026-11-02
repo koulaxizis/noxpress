@@ -1,0 +1,9 @@
+<p>The Site Bridge Hub of the Noxpress suite in your pocket. Open the write window of your WordPress sites with your fingerprint, only while you work, and handle Book Feed and Broadcast from your phone. Beta: under testing before it is marked stable.</p>
+<ul>
+<li>Open, renew or close the write window per site, with a fingerprint for every opening, and the Hub's log on the phone.</li>
+<li>Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+).</li>
+<li>Broadcast tab: the posts waiting in the queue, to send, edit or reject, with a notification for each new one (Broadcast 1.1.0+, Site Bridge 1.11.0+).</li>
+<li>Pair with a QR code from the Hub. The device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak.</li>
+</ul>
+<p>Needs a Hub with the Site Bridge plugin 1.6.0+ over HTTPS, with the App tab switched on. The app talks only to your own Hub: no account, no Firebase, no analytics.</p>
+<p>Free and open source (MIT), free forever. Install guide: https://github.com/koulaxizis/noxpress/tree/main/apps/site-bridge-android</p>
