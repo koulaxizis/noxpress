@@ -3,7 +3,7 @@
  * Plugin Name:          Checkout Extras
  * Plugin URI:           https://noxpress.tech
  * Description:          Τρία μικρά πράγματα γύρω από το ταμείο, σε ένα plugin: «Είναι δώρο» με αφιέρωση και προαιρετική χρέωση συσκευασίας, μήνυμα και προτεινόμενα προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία, μόνο σε πληρωμένες παραγγελίες, με μέτρηση χρήσης και καθαρισμό των ληγμένων.
- * Version:              1.1.0
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -67,7 +67,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CKE_VERSION', '1.1.0' );
+define( 'CKE_VERSION', '1.1.1' );
 define( 'CKE_FILE', __FILE__ );
 define( 'CKE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CKE_URL', plugin_dir_url( __FILE__ ) );

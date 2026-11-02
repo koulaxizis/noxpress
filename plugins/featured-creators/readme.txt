@@ -5,7 +5,7 @@ Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -106,7 +106,14 @@ Yes. The index filter uses plain links, and when the products of a creator chang
 
 Settings, notices and the term ownership meta are deleted. Creators are kept by default, because they are content you wrote; tick "Delete the creators" on the **Tools** tab before deleting the plugin to remove them too. Photos always stay in the media library. Products and attributes are never touched.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.2.1 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.2.0 =
 * New: Noxpress Core 1.2.0 adds Install all, Update all and Uninstall all to the Noxpress hub. Each opens a checklist to confirm and then works one plugin at a time through WordPress's own installer, with the usual sha256 and signature check. Install all follows the update channel and does not activate unless ticked; Uninstall all deactivates and deletes (each plugin's own uninstall runs), needs a typed word, and leaves Site Bridge and Data Migrator unticked by default.

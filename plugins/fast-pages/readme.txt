@@ -5,7 +5,7 @@ Tags: cache, page cache, performance, minify, lazy load
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -74,7 +74,14 @@ Use one page cache. Keep the host's object cache (Memcached, Redis): it works to
 
 The drop-in (only if it is ours), the `WP_CACHE` line (only if Fast Pages added it), the cache folder, the settings and the scheduled events are removed. WP Rocket's settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.0.3 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.0.2 =
 * Fix: a plugin activated or updated after Fast Pages was turned on could add a private cookie (noxpress_private_cookies) that the drop-in did not know until the settings were saved again. The drop-in config is now compared with the current one on every admin page and written again when anything differs.

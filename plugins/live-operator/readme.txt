@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -78,7 +78,14 @@ The fingerprint is missing or wrong, or the server does not pass `/.well-known/a
 
 The settings, the switch state, the push keys, the devices and the transients are removed. PurioChat Pro's data and settings are never touched. The shared Noxpress options stay while another Noxpress plugin is installed.
 
+== Disclaimer ==
+
+Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
+
 == Changelog ==
+
+= 1.3.2 =
+* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
 
 = 1.3.1 =
 * Fix: the app page could miss the «new app version» notice, because it read only the 50 newest releases of the repo and the app's own releases are further down among the plugin releases. It now reads 100 per page, up to 5 pages, until it finds the app's releases.
