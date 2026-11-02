@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Live Operator</string>
+    <string name="shortcut_change">Change site</string>
+    <string name="setup_intro">Connect the app to your site. On this phone, open Noxpress → Live Operator in your site\'s admin and tap «Connect the app», or type the site\'s address. The site needs the Live Operator plugin.</string>
+    <string name="setup_hint">example.com</string>
+    <string name="setup_connect">Connect</string>
+    <string name="setup_connect_anyway">Connect anyway</string>
+    <string name="setup_checking">Checking…</string>
+    <string name="setup_invalid">Type the site\'s address, e.g. example.com (https only).</string>
+    <string name="setup_from_link">Connect to %1$s? Check the address and tap Connect.</string>
+    <string name="setup_bad_link">The link does not hold a valid https address. Type the site\'s address.</string>
+    <string name="setup_current">Connected to %1$s. Type another address to change it.</string>
+    <string name="setup_not_listed">%1$s does not list this app yet (Live Operator 1.4.0+ does it by itself). The app will work with an address bar at the top.</string>
+    <string name="setup_unreachable">Could not reach %1$s. Check the address and the connection, and try again.</string>
     <string name="update_channel">App updates</string>
     <string name="update_available">New version %1$s</string>
     <string name="update_tap">Tap to download the signed APK.</string>

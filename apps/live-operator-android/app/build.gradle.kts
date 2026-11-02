@@ -1,18 +1,10 @@
-import java.net.URI
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
-// The app is a Trusted Web Activity of the Live Operator page of one site.
-// Another site: ./gradlew assembleRelease -PliveOperatorUrl=https://example.com/live-operator/ -PliveOperatorName="Example Live"
-val customUrl: String? = findProperty("liveOperatorUrl") as String?
-val appUrl: String = customUrl ?: "https://glarolykoi.net/live-operator/"
-val appName: String = (findProperty("liveOperatorName") as String?) ?: "Live Operator"
-val appUri: URI = URI(appUrl)
-require(appUri.scheme == "https" && !appUri.host.isNullOrEmpty()) { "liveOperatorUrl must be an https URL" }
-val appOrigin = "https://" + appUri.host + (if (appUri.port > 0) ":" + appUri.port else "")
+// The app is a Trusted Web Activity of the Live Operator page of the site
+// it is connected to (2.0.0: one app for every site, set on its connect screen).
 
 // Release signing comes from the environment (GitHub secrets, see
 // .github/workflows/android-live-operator.yml): the same key as the Site
@@ -28,23 +20,8 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-loa-<versionName>.
-        versionCode = 6
-        versionName = "1.3.1"
-
-        manifestPlaceholders["hostName"] = appUri.host
-        manifestPlaceholders["appPath"] = appUri.path.ifEmpty { "/" }
-        resValue("string", "app_name", appName)
-        // The official build opens the page with ?app=<version>, so the
-        // Live Operator plugin (1.1.0+) can say when a newer nox-loa-*
-        // release exists. Builds for other sites leave it out.
-        resValue("string", "launch_url", if (customUrl == null) "$appUrl?app=$versionName" else appUrl)
-        // Only the official build looks for newer nox-loa-* releases (1.2.0).
-        buildConfigField("boolean", "UPDATES", (customUrl == null).toString())
-        resValue(
-            "string",
-            "asset_statements",
-            "[{\\\"relation\\\": [\\\"delegate_permission/common.handle_all_urls\\\"], \\\"target\\\": {\\\"namespace\\\": \\\"web\\\", \\\"site\\\": \\\"$appOrigin\\\"}}]"
-        )
+        versionCode = 7
+        versionName = "2.0.0"
     }
 
     signingConfigs {

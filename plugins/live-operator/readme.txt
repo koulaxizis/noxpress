@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -42,8 +42,8 @@ PurioChat Pro shows «talk to a human» only while an operator is present, and i
 
 **Android app**
 
-* `apps/live-operator-android` in the Noxpress repository: a Trusted Web Activity of `/live-operator/`, built and signed in GitHub Actions (release tag `nox-loa-<version>`, asset `live-operator.apk`).
-* Paste the certificate fingerprint from the release notes into the plugin's settings: the site then serves `/.well-known/assetlinks.json` and the app opens full screen. Notifications show as the app's own.
+* One app for every site (2.0.0+): install it from the Noxpress F-Droid repository (F-Droid, Droid-ify), Obtainium or as `live-operator.apk` from the latest `nox-loa-*` release, then connect it to your site with «Connect the app» in the settings (open them on the phone) or by typing the site's address in the app.
+* The plugin (1.4.0+) serves `/.well-known/assetlinks.json` with the official app's certificate by itself, so the app opens full screen with nothing to paste. Notifications show as the app's own. A fingerprint field stays for your own builds.
 
 **Safe by design**
 
@@ -58,7 +58,7 @@ PurioChat Pro shows «talk to a human» only while an operator is present, and i
 2. In PurioChat › Live Chat, set the availability to «online». A waiting time of 300 seconds is recommended, so a request waits long enough for you to reach the phone.
 3. Open **Noxpress → Live Operator**, tick «The app's switch decides when I am online» and save.
 4. On the phone, open the app (or `https://your-site/live-operator/`), log in, tap «Turn on notifications» and then «Test».
-5. For the Android app: install `live-operator.apk` from the latest `nox-loa-*` release and paste the certificate fingerprint from its notes into the settings.
+5. For the Android app: install it (https://noxpress.tech/#fdroid), then open the settings on the phone and tap «Connect the app».
 
 == Frequently Asked Questions ==
 
@@ -72,7 +72,7 @@ Yes. The Authorization header is sent by your site to the push service, not rece
 
 = The Android app shows an address bar. =
 
-The fingerprint is missing or wrong, or the server does not pass `/.well-known/assetlinks.json` to WordPress. The settings page links the file; if it gives a 404, upload it by hand with the same content.
+For the official app the plugin 1.4.0+ serves the fingerprint by itself; for your own build add its fingerprint in the settings. Otherwise the server does not pass `/.well-known/assetlinks.json` to WordPress. The settings page links the file; if it gives a 404, upload it by hand with the same content.
 
 = What happens on uninstall? =
 
@@ -83,6 +83,10 @@ The settings, the switch state, the push keys, the devices and the transients ar
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: the Live Operator Android app 2.0.0 works with any site. The settings' Android app section has «Connect the app», which opens the app on the phone with this site filled in (the app asks before it connects), and a link to install it from F-Droid, Droid-ify or as an APK.
+* New: `/.well-known/assetlinks.json` always lists the official app's signing certificate for the default package, so the app opens full screen without pasting a fingerprint. The field stays for extra fingerprints of your own builds; fingerprints already saved keep working.
 
 = 1.3.2 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

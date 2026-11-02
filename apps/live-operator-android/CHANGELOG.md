@@ -1,5 +1,12 @@
 # Live Operator app — changelog
 
+## 2.0.0
+
+* New: one app for every site. The official app no longer opens glarolykoi.net by itself: on the first start it shows a connect screen, filled in by «Connect the app» in the plugin's settings (Live Operator 1.4.0+, `liveoperator://connect?site=…`) or by typing the site's address. It checks the site's `/.well-known/assetlinks.json` before it connects, and asks before every change; long-press the icon → «Change site» to switch.
+* New: in the Noxpress F-Droid repository (F-Droid, Droid-ify). When F-Droid, Droid-ify or Obtainium installed the app, its own new-version notification and the page's line stay quiet.
+* Removed: the `liveOperatorUrl` / `liveOperatorName` build properties and the fixed App Links host; one build serves every site.
+* After updating from 1.x, connect once (on glarolykoi: «Connect the app» in the settings); the login and notifications stay as they were.
+
 ## 1.3.1
 
 * Fix: the "new version" check would miss a newer app. It read only the 50 newest releases of the repo, and the app's own releases are already further down among the plugin releases; it now reads 100 per page, up to 5 pages, until it finds them.

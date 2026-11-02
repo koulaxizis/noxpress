@@ -285,14 +285,20 @@ final class LOP_Admin_UI {
 
 			<h2 class="lop-h2"><?php esc_html_e( 'Εφαρμογή Android', 'live-operator' ); ?></h2>
 			<div class="lop-zone">
-				<p class="lop-hint"><?php esc_html_e( 'Η εφαρμογή Android του Live Operator ανοίγει αυτή τη σελίδα σε πλήρη οθόνη. Για να μη φαίνεται η γραμμή διεύθυνσης, το site δηλώνει την εφαρμογή στο assetlinks.json με το αποτύπωμα του πιστοποιητικού της (γράφεται στις σημειώσεις κάθε έκδοσης της εφαρμογής).', 'live-operator' ); ?></p>
+				<p class="lop-hint"><?php esc_html_e( 'Η εφαρμογή Android του Live Operator ανοίγει αυτή τη σελίδα σε πλήρη οθόνη, με τις ειδοποιήσεις ως δικές της. Είναι μία για όλα τα sites: την εγκαθιστάς από το F-Droid, το Droid-ify, το Obtainium ή ως APK, και τη συνδέεις με αυτό το site.', 'live-operator' ); ?></p>
+				<p class="lop-actions">
+					<a class="button button-primary" href="<?php echo esc_url( LOP_App::connect_url(), array( 'liveoperator' ) ); ?>"><?php esc_html_e( 'Σύνδεση της εφαρμογής', 'live-operator' ); ?></a>
+					<a class="button" href="https://noxpress.tech/#fdroid" target="_blank" rel="noopener"><?php esc_html_e( 'Εγκατάσταση (F-Droid, Droid-ify, APK)', 'live-operator' ); ?></a>
+				</p>
+				<p class="lop-hint lop-hint--under"><?php esc_html_e( 'Άνοιξε αυτή τη σελίδα στο κινητό που έχει την εφαρμογή και πάτα «Σύνδεση της εφαρμογής»· η εφαρμογή ρωτά πριν συνδεθεί. Ή γράψε στην εφαρμογή τη διεύθυνση του site.', 'live-operator' ); ?></p>
+				<p class="lop-hint"><?php esc_html_e( 'Το site δηλώνει την επίσημη εφαρμογή στο assetlinks.json μόνο του, ώστε να μη φαίνεται γραμμή διεύθυνσης. Τα πεδία παρακάτω χρειάζονται μόνο για δική σου build της εφαρμογής.', 'live-operator' ); ?></p>
 				<label class="lop-label" for="lop_package"><?php esc_html_e( 'Πακέτο εφαρμογής', 'live-operator' ); ?></label>
 				<input type="text" class="regular-text code" id="lop_package" name="lop_package" value="<?php echo esc_attr( $s['package'] ); ?>" />
-				<label class="lop-label" for="lop_fingerprints"><?php esc_html_e( 'Αποτυπώματα SHA-256 πιστοποιητικού (ένα ανά γραμμή)', 'live-operator' ); ?></label>
+				<label class="lop-label" for="lop_fingerprints"><?php esc_html_e( 'Επιπλέον αποτυπώματα SHA-256 πιστοποιητικού (ένα ανά γραμμή)', 'live-operator' ); ?></label>
 				<textarea class="large-text code" rows="3" id="lop_fingerprints" name="lop_fingerprints" placeholder="AB:CD:…"><?php echo esc_textarea( implode( "\n", $s['fingerprints'] ) ); ?></textarea>
 				<p class="lop-hint lop-hint--under">
 					<?php
-					if ( $s['fingerprints'] ) {
+					if ( LOP_Settings::served_fingerprints() ) {
 						esc_html_e( 'Το site δίνει:', 'live-operator' );
 						echo ' <a href="' . esc_url( LOP_App::assetlinks_url() ) . '" target="_blank" rel="noopener">' . esc_html( LOP_App::assetlinks_url() ) . '</a> ';
 						esc_html_e( '(αν ανοίγει 404, ο server δεν στέλνει το /.well-known/ στο WordPress: ανέβασε το αρχείο με το χέρι).', 'live-operator' );

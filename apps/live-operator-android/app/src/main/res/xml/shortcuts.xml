@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2.0.0: long press on the icon → «Change site» opens the connect screen. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="change_site"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_change"
+        android:shortcutLongLabel="@string/shortcut_change">
+        <intent
+            android:action="tech.noxpress.liveoperator.CHANGE"
+            android:targetPackage="tech.noxpress.liveoperator"
+            android:targetClass="tech.noxpress.liveoperator.Setup" />
+    </shortcut>
+</shortcuts>

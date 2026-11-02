@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Live Operator</string>
+    <string name="shortcut_change">Αλλαγή site</string>
+    <string name="setup_intro">Σύνδεσε την εφαρμογή με το site σου. Σε αυτό το κινητό άνοιξε Noxpress → Live Operator στη διαχείριση του site και πάτα «Σύνδεση της εφαρμογής», ή γράψε τη διεύθυνση του site. Το site χρειάζεται το plugin Live Operator.</string>
+    <string name="setup_hint">example.com</string>
+    <string name="setup_connect">Σύνδεση</string>
+    <string name="setup_connect_anyway">Σύνδεση παρ\' όλα αυτά</string>
+    <string name="setup_checking">Έλεγχος…</string>
+    <string name="setup_invalid">Γράψε τη διεύθυνση του site, π.χ. example.com (μόνο https).</string>
+    <string name="setup_from_link">Σύνδεση με το %1$s; Έλεγξε τη διεύθυνση και πάτα Σύνδεση.</string>
+    <string name="setup_bad_link">Ο σύνδεσμος δεν έχει έγκυρη διεύθυνση https. Γράψε τη διεύθυνση του site.</string>
+    <string name="setup_current">Συνδεδεμένη με το %1$s. Γράψε άλλη διεύθυνση για αλλαγή.</string>
+    <string name="setup_not_listed">Το %1$s δεν δηλώνει ακόμα αυτή την εφαρμογή (το Live Operator 1.4.0+ το κάνει μόνο του). Η εφαρμογή θα δουλέψει με γραμμή διεύθυνσης στο πάνω μέρος.</string>
+    <string name="setup_unreachable">Δεν βρέθηκε το %1$s. Έλεγξε τη διεύθυνση και τη σύνδεση και δοκίμασε ξανά.</string>
     <string name="update_channel">Ενημερώσεις εφαρμογής</string>
     <string name="update_available">Νέα έκδοση %1$s</string>
     <string name="update_tap">Πάτα για λήψη του υπογεγραμμένου APK.</string>

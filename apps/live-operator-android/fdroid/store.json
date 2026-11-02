@@ -1,0 +1,18 @@
+{
+  "package": "tech.noxpress.liveoperator",
+  "apk": "live-operator.apk",
+  "tag_prefix": "nox-loa",
+  "min_version": "2.0.0",
+  "category": "Internet",
+  "web": "https://noxpress.tech/#live-operator-app",
+  "en-US": {
+    "name": "Live Operator",
+    "summary": "Answer your WordPress site's live chat from your phone",
+    "description": "The live chat of your WordPress site on your phone. Live Operator is a free Noxpress plugin for PurioChat Pro: an online / offline switch kept on the server (with automatic offline and a weekly schedule), push notifications for every new request and message, and a page to claim chats, take over from the AI, reply and hand back.\n\nThis app opens that page full screen, with its own icon and chat notifications that show as heads-up and light the screen. Connect it to your site once: tap «Connect the app» in the plugin's settings on the phone, or type the site's address. One app for every site; change the site from the icon's «Change site» shortcut.\n\nNeeds the Live Operator plugin on the site (1.4.0+ declares the app by itself, so there is no address bar) and Chrome or another browser with Trusted Web Activities. No Firebase, no analytics.\n\nNew versions ship as beta first. Free and open source (MIT), free forever."
+  },
+  "el": {
+    "name": "Live Operator",
+    "summary": "Απάντα στο live chat του WordPress site σου από το κινητό",
+    "description": "Το live chat του WordPress site σου στο κινητό. Το Live Operator είναι δωρεάν plugin του Noxpress για το PurioChat Pro: διακόπτης online / offline που μένει στον server (με αυτόματο offline και εβδομαδιαίο ωράριο), ειδοποιήσεις push για κάθε νέο αίτημα και μήνυμα, και σελίδα για ανάληψη συνομιλιών, ανάληψη από το AI, απαντήσεις και επιστροφή.\n\nΗ εφαρμογή ανοίγει αυτή τη σελίδα σε πλήρη οθόνη, με δικό της εικονίδιο και ειδοποιήσεις συνομιλίας που εμφανίζονται στο πάνω μέρος και ανάβουν την οθόνη. Τη συνδέεις μία φορά με το site σου: πατάς «Σύνδεση της εφαρμογής» στις ρυθμίσεις του plugin από το κινητό, ή γράφεις τη διεύθυνση του site. Μία εφαρμογή για όλα τα sites· αλλάζεις site από τη συντόμευση «Αλλαγή site» του εικονιδίου.\n\nΧρειάζεται το plugin Live Operator στο site (το 1.4.0+ δηλώνει μόνο του την εφαρμογή, οπότε δεν υπάρχει γραμμή διεύθυνσης) και Chrome ή άλλον browser με Trusted Web Activities. Χωρίς Firebase, χωρίς analytics.\n\nΟι νέες εκδόσεις βγαίνουν πρώτα ως beta. Δωρεάν και ανοιχτού κώδικα (MIT), δωρεάν για πάντα."
+  }
+}

@@ -15,16 +15,19 @@
 # ένα αποτύπωμα πιστοποιητικού να ισχύει και για τις δύο. Χωρίς αυτά το job
 # «release» σταματά με μήνυμα· το debug APK βγαίνει πάντα.
 #
+# Τα κείμενα του F-Droid (fdroid/) δεν χτίζουν την εφαρμογή: τα δημοσιεύει το
+# fdroid.yml.
+#
 # Το tag nox-loa-* δεν είναι plugin: το release.yml και το updates.json το
 # αγνοούν (κανένας κωδικός plugin δεν είναι τριών γραμμάτων).
 name: Android app (Live Operator)
 
 on:
   pull_request:
-    paths: ['apps/live-operator-android/**', '.github/workflows/android-live-operator.yml', '.github/workflows/android-app.yml']
+    paths: ['apps/live-operator-android/**', '!apps/live-operator-android/fdroid/**', '.github/workflows/android-live-operator.yml', '.github/workflows/android-app.yml']
   push:
     branches: [main]
-    paths: ['apps/live-operator-android/**', '.github/workflows/android-live-operator.yml', '.github/workflows/android-app.yml']
+    paths: ['apps/live-operator-android/**', '!apps/live-operator-android/fdroid/**', '.github/workflows/android-live-operator.yml', '.github/workflows/android-app.yml']
   workflow_dispatch:
 
 permissions:
@@ -44,8 +47,8 @@ jobs:
       apk: live-operator
       tag_prefix: nox-loa
       title: Live Operator app
-      requires: Android 9+ with Chrome. Needs the Live Operator plugin 1.0.0+ on the site.
-      cert_hint: paste it in Noxpress → Live Operator → Android app
+      requires: Android 9+ with Chrome. One app for every site (2.0.0+); needs the Live Operator plugin on the site, and 1.4.0+ lists the app by itself.
+      cert_hint: Live Operator 1.4.0+ serves it by itself; for older versions paste it in Noxpress → Live Operator → Android app
     secrets:
       SBA_KEYSTORE_B64: ${{ secrets.SBA_KEYSTORE_B64 }}
       SBA_KEYSTORE_PASSWORD: ${{ secrets.SBA_KEYSTORE_PASSWORD }}

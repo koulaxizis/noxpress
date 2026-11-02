@@ -11,7 +11,9 @@
  *  preview      the visitor's message text in the notifications
  *  app_name     name of the installed app (web manifest)
  *  package      Android package of the companion app (assetlinks.json)
- *  fingerprints SHA-256 signing certificate fingerprints of that app
+ *  fingerprints SHA-256 signing certificate fingerprints of other builds of
+ *               that app; the official app's (OFFICIAL_FP) is always served
+ *               for the default package (1.4.0)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -24,6 +26,13 @@ final class LOP_Settings {
 	const HOURS = array( 1, 2, 4, 8, 12, 24 );
 
 	const PACKAGE = 'tech.noxpress.liveoperator';
+
+	/**
+	 * Signing certificate of the official Live Operator app (the Noxpress
+	 * releases, F-Droid repository and Obtainium): served in assetlinks.json
+	 * for the default package without pasting it (1.4.0).
+	 */
+	const OFFICIAL_FP = '21:44:1E:31:A6:0A:89:70:8C:6C:EC:E6:49:39:0C:18:63:EC:8C:A1:47:F0:8D:A7:39:9A:E7:64:6E:02:EE:4E';
 
 	/** Slug of the settings page (used outside the admin too). */
 	const PAGE = 'lop-settings';
@@ -98,6 +107,16 @@ final class LOP_Settings {
 			}
 		}
 		return array_slice( array_values( array_unique( $out ) ), 0, 5 );
+	}
+
+	/**
+	 * Fingerprints for assetlinks.json: the official app's for the default
+	 * package, then the ones from the settings (1.4.0).
+	 */
+	public static function served_fingerprints(): array {
+		$s   = self::get();
+		$out = self::PACKAGE === $s['package'] ? array( self::OFFICIAL_FP ) : array();
+		return array_values( array_unique( array_merge( $out, $s['fingerprints'] ) ) );
 	}
 
 	/** Lines of the fingerprints field that are not a valid fingerprint. */
