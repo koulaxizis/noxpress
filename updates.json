@@ -80,15 +80,15 @@
     },
     "fast-pages": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
+        "changelog": "* Fix: an empty wp-content/advanced-cache.php (WP Rocket leaves one behind when it is deactivated) no longer counts as another plugin's drop-in. «Turn on page cache» now replaces it, so no server access is needed after moving from WP Rocket.",
         "published": "2026-11-02",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "c87d9ce4fafa2f358d097205d91f7997caac8a11a52d8a531e394aa5c44c93a5",
-        "signature": "eQQVUgD4U5FsuSu354hfYOGVQ32K+okPPalLQ2CZx5jOf3kC7K7aOUyLaB4Sq11SoKYUkXOd4PXoELZ3g0FHCA==",
+        "sha256": "2f6addf6e76bb0aecfb9673bbaa91874f8a7ba12c7270852987a36793dc7c313",
+        "signature": "IFgqU4K6RMnHP74rnJByDUK48Y7YVUh/4MkJMDwTHa9jc7Wq3Psw0zCEV0xMHZY8F9GrHRp8jFlZc6YTUI38Bg==",
         "tested_wp": "7.1",
-        "version": "1.0.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.3/fast-pages.zip"
+        "version": "1.0.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.4/fast-pages.zip"
       }
     },
     "featured-creators": {
