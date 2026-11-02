@@ -163,8 +163,14 @@ class Setup : Activity() {
         open()
     }
 
+    /**
+     * Starts the Trusted Web Activity in a task of its own (2.0.1). Without
+     * FLAG_ACTIVITY_NEW_TASK, androidbrowserhelper's LauncherActivity restarts
+     * itself in a new task; the second instance then sees the first still
+     * alive, takes it for a running TWA and closes, so the app shut at once.
+     */
     private fun open() {
-        startActivity(Intent(this, Launcher::class.java))
+        startActivity(Intent(this, Launcher::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         finish()
     }
 

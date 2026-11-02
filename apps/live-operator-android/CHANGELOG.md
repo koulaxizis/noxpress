@@ -1,5 +1,9 @@
 # Live Operator app — changelog
 
+## 2.0.1
+
+* Fix: the app closed as soon as a site was connected, and then on every start. The connect screen started the site's page in its own task, so the web-app launcher restarted itself, saw its first copy still open and closed. It now starts in a new task.
+
 ## 2.0.0
 
 * New: one app for every site. The official app no longer opens glarolykoi.net by itself: on the first start it shows a connect screen, filled in by «Connect the app» in the plugin's settings (Live Operator 1.4.0+, `liveoperator://connect?site=…`) or by typing the site's address. It checks the site's `/.well-known/assetlinks.json` before it connects, and asks before every change; long-press the icon → «Change site» to switch.
