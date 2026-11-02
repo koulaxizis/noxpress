@@ -59,7 +59,7 @@ Supporting values (Bible §2, used by every plugin through Noxpress Core):
 ## Typography
 
 - Admin: the WordPress admin font stack; no fonts are loaded into wp-admin. Code and ids: `Consolas, Monaco, monospace`.
-- Site: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`, 16px/1.65; headings bold, `clamp(2rem, 5vw, 3rem)` for the hero.
+- Site and brand: **Inter** (SIL OFL 1.1), self-hosted as `fonts/inter.woff2` (variable, weights 400–800, Latin and Greek subset, licence in `fonts/OFL.txt`), preloaded on every page; stack `"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`, 16px/1.65; headings bold, `clamp(2rem, 5vw, 3rem)` for the hero. The "noxpress." wordmark is Inter Bold.
 - No web-font services or CDNs. Any added font is self-hosted woff2 and must contain Greek glyphs.
 
 ## Layout and components (admin)
