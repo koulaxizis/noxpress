@@ -158,15 +158,15 @@
     },
     "live-operator": {
       "beta": {
-        "changelog": "* New: the Live Operator Android app 2.0.0 works with any site. The settings' Android app section has «Connect the app», which opens the app on the phone with this site filled in (the app asks before it connects), and a link to install it from F-Droid, Droid-ify or as an APK.\n* New: `/.well-known/assetlinks.json` always lists the official app's signing certificate for the default package, so the app opens full screen without pasting a fingerprint. The field stays for extra fingerprints of your own builds; fingerprints already saved keep working.",
-        "published": "2026-11-02",
+        "changelog": "* New: the hours for visitors. The `[lop_hours]` shortcode shows the weekly schedule in a page, post or widget, merging consecutive days with the same hours, with `format=\"list\"`, `closed=\"1\"` and `before=\"…\"`. Off after activation («Hours for visitors» in the settings).\n* New: optional `hoursAvailable` on the contact points of Rank Math's JSON-LD, from the same schedule.",
+        "published": "2026-11-03",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "fd09809a84d95521a24ca224fc359c3499e4e6f28ec2b94ad7c16e26e5d50d69",
-        "signature": "HInqOzJ9DRRRXrO/UAkOEZsFHdj5YU9mmlBcvzwzTdUskYOSA2hPQkq6OKCaPkKLOFOjof1rH/41dsjEvdbDDg==",
+        "sha256": "f0fd0db2e2d3c7cf4bde84364eb5a29d2de5b5b733f65b0410a79b657eed9024",
+        "signature": "i94JVkt8CXoy/OpzwYgQy0c1cUl9YERiVT2H9CAk52oSskVfkLGPZe7xwQEN7nO7N8933vyQMPLpqqrWPJoQBA==",
         "tested_wp": "7.1",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.4.0/live-operator.zip"
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.0/live-operator.zip"
       },
       "stable": {
         "changelog": "* New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.\n* The availability is worked out on every check, so it is right even when WP-Cron runs late; one WP-Cron event at the next change only sends the notifications.",
