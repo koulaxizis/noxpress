@@ -64,6 +64,7 @@ final class Noxpress_Core {
 		'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.' => "For bookshops: a publisher's titles from its Trade Accounts feed in your own shop, by pasting its e-mail and pressing one button; price, availability and pre-orders update every day without losing your own edits.",
 		'Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.' => 'JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches. The originals never change; no account, quota or external service.',
 		'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.' => '301 / 410 redirects for old addresses, only where the site answers 404, and a 404 log in a private file without IPs or bots, with suggested targets and import from Rank Math, Redirection, Yoast and CSV.',
+		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -340,6 +341,11 @@ final class Noxpress_Core {
 				'name' => 'Redirects',
 				'desc' => __( 'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.', 'noxpress' ),
 				'page' => 'rdr-settings',
+			),
+			'search-signals'    => array(
+				'name' => 'Search Signals',
+				'desc' => __( 'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.', 'noxpress' ),
+				'page' => 'ssg-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

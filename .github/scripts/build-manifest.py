@@ -65,6 +65,7 @@ SLUGS = {
     'ti': 'trade-feed-import',
     'li': 'lean-images',
     'rd': 'redirects',
+    'ss': 'search-signals',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

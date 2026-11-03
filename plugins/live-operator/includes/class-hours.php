@@ -17,8 +17,9 @@
  * no range are left out.
  *
  * With lop_settings['public_schema'] on, the same hours are added as
- * hoursAvailable to the contact points of Rank Math's JSON-LD, for search
- * engines. Nothing is written on a visitor request (Bible §14.6) and any
+ * hoursAvailable to the contact points of the JSON-LD of Rank Math
+ * (rank_math/json_ld) or Search Signals (noxpress_seo_graph, 1.5.1), for
+ * search engines. Nothing is written on a visitor request (Bible §14.6) and any
  * error leaves the page exactly as it was (§14.31).
  */
 
@@ -36,6 +37,8 @@ final class LOP_Hours {
 
 		if ( LOP_Settings::get()['public_schema'] ) {
 			add_filter( 'rank_math/json_ld', array( __CLASS__, 'json_ld' ), 20 );
+			// Search Signals (Bible §14.38): the same keyed graph shape.
+			add_filter( 'noxpress_seo_graph', array( __CLASS__, 'json_ld' ), 20 );
 		}
 	}
 
@@ -226,10 +229,11 @@ final class LOP_Hours {
 	}
 
 	/**
-	 * Rank Math's JSON-LD: the hours on every contact point that has none.
+	 * The JSON-LD of Rank Math (rank_math/json_ld) or Search Signals
+	 * (noxpress_seo_graph): the hours on every contact point that has none.
 	 * Anything else in the graph is left untouched.
 	 *
-	 * @param mixed $data The entities Rank Math prints.
+	 * @param mixed $data The entities the SEO plugin prints.
 	 * @return mixed
 	 */
 	public static function json_ld( $data ) {
