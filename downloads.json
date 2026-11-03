@@ -1,6 +1,6 @@
 {
   "display": 500,
-  "total": 867,
+  "total": 872,
   "offset": 5,
   "updated": "2026-11-03",
   "assets": {
@@ -946,7 +946,7 @@
     },
     "701321036": {
       "file": "nox-rd-1.0.2/redirects.zip",
-      "count": 1
+      "count": 2
     },
     "702003262": {
       "file": "nox-fp-1.0.4/fast-pages.zip",
@@ -962,7 +962,7 @@
     },
     "702603333": {
       "file": "nox-lo-1.4.0/live-operator.zip",
-      "count": 1
+      "count": 2
     },
     "702605853": {
       "file": "nox-loa-2.0.0/live-operator.apk.sha256",
@@ -974,7 +974,7 @@
     },
     "702834347": {
       "file": "nox-sba-1.7.1/site-bridge.apk",
-      "count": 7
+      "count": 8
     },
     "702834351": {
       "file": "nox-sba-1.7.1/site-bridge.apk.sha256",
@@ -986,10 +986,26 @@
     },
     "702856852": {
       "file": "nox-loa-2.0.1/live-operator.apk",
-      "count": 6
+      "count": 7
     },
     "706229306": {
       "file": "nox-lo-1.5.0/live-operator.zip",
+      "count": 1
+    },
+    "707086955": {
+      "file": "nox-sh-1.3.2/shop-filters.zip",
+      "count": 0
+    },
+    "707087149": {
+      "file": "nox-cr-1.2.2/featured-creators.zip",
+      "count": 0
+    },
+    "707087563": {
+      "file": "nox-lo-1.5.1/live-operator.zip",
+      "count": 0
+    },
+    "707087829": {
+      "file": "nox-ss-1.0.0/search-signals.zip",
       "count": 0
     }
   }
