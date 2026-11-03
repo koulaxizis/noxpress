@@ -3,7 +3,7 @@
  * Plugin Name:          Live Operator
  * Plugin URI:           https://noxpress.tech
  * Description:          Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server (με αυτόματο offline), ειδοποιήσεις push για κάθε νέο αίτημα και μήνυμα, και εφαρμογή για ανάληψη και απαντήσεις, που μπαίνει στην αρχική οθόνη ή ανοίγει από την εφαρμογή Android. Με εβδομαδιαίο ωράριο που σε κάνει online μόνο του. Χωρίς Firebase και χωρίς λογαριασμό σε τρίτους.
- * Version:              1.4.0
+ * Version:              1.5.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -35,6 +35,8 @@
  *  - LOP_REST      → live-operator/v1 for the app page
  *  - LOP_App       → /live-operator/ (app, service worker, manifest) and
  *                    /.well-known/assetlinks.json for the Android app
+ *  - LOP_Hours     → the public service hours: [lop_hours] and the hours
+ *                    in Rank Math's JSON-LD (a module, off by default)
  *  - LOP_Admin_UI  → menu, settings, status checks, test, footer
  *
  * Deviations from the Bible (with reason):
@@ -50,7 +52,9 @@
  *  - §14.4 (no own front-end output, no own REST): /live-operator/ and the
  *    live-operator/v1 routes are the plugin's purpose, for logged-in
  *    administrators only; the service worker and the Android app's
- *    verified link need the site's origin.
+ *    verified link need the site's origin. The [lop_hours] shortcode
+ *    (1.5.0) prints for visitors where the editor puts it, reads only the
+ *    schedule option and writes nothing; it is a module, off by default.
  *  - §21 (one mobile app for the suite, the Site Bridge app): the live chat
  *    needs a reply within seconds and per-message notifications; the Site
  *    Bridge app goes through the Hub with a fingerprint for every write and
@@ -58,14 +62,16 @@
  *    (apps/live-operator-android) is a Trusted Web Activity of
  *    /live-operator/: notifications by Web Push, without Firebase.
  *
- * Front end (Bible §14): nothing for visitors. LOP_DISABLE in wp-config.php
+ * Front end (Bible §14): nothing for visitors but the [lop_hours]
+ * shortcode, and only with the public-hours module on. LOP_DISABLE in
+ * wp-config.php
  * stops the switch filters, the notifications, the app and the REST routes;
  * PurioChat then works exactly as without the plugin.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LOP_VERSION', '1.4.0' );
+define( 'LOP_VERSION', '1.5.0' );
 define( 'LOP_FILE', __FILE__ );
 define( 'LOP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LOP_URL', plugin_dir_url( __FILE__ ) );
@@ -98,6 +104,11 @@ final class Live_Operator {
 		);
 
 		if ( ! self::killed() ) {
+			// A module: an off module loads no code (Bible §20).
+			if ( LOP_Settings::get()['public_hours'] ) {
+				require_once LOP_PATH . 'includes/class-hours.php';
+				LOP_Hours::init();
+			}
 			LOP_Presence::init();
 			LOP_Schedule::init();
 			LOP_Push::init();

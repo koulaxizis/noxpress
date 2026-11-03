@@ -9,6 +9,10 @@
  *  inbox        the PurioChat Live Chat page, while open, also counts as
  *               online (off: only the switch decides)
  *  preview      the visitor's message text in the notifications
+ *  public_hours the [lop_hours] shortcode shows the schedule to visitors
+ *               (off after activation: a module, Bible §20) (1.5.0)
+ *  public_schema the same hours as hoursAvailable in Rank Math's JSON-LD
+ *               (needs public_hours) (1.5.0)
  *  app_name     name of the installed app (web manifest)
  *  package      Android package of the companion app (assetlinks.json)
  *  fingerprints SHA-256 signing certificate fingerprints of other builds of
@@ -46,6 +50,8 @@ final class LOP_Settings {
 			'hours'        => 8,
 			'inbox'        => false,
 			'preview'      => true,
+			'public_hours' => false,
+			'public_schema' => false,
 			'app_name'     => '',
 			'package'      => self::PACKAGE,
 			'fingerprints' => array(),
@@ -70,7 +76,7 @@ final class LOP_Settings {
 		$d   = self::defaults();
 		$out = array();
 
-		foreach ( array( 'enabled', 'inbox', 'preview' ) as $k ) {
+		foreach ( array( 'enabled', 'inbox', 'preview', 'public_hours', 'public_schema' ) as $k ) {
 			$out[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 
@@ -84,6 +90,11 @@ final class LOP_Settings {
 		$out['package'] = preg_match( '/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/', $pkg ) && strlen( $pkg ) <= 120 ? $pkg : $d['package'];
 
 		$out['fingerprints'] = self::fingerprints( isset( $raw['fingerprints'] ) ? $raw['fingerprints'] : array() );
+
+		// The structured data comes from the public hours (1.5.0).
+		if ( ! $out['public_hours'] ) {
+			$out['public_schema'] = false;
+		}
 
 		return $out;
 	}

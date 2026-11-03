@@ -8,6 +8,7 @@
  *             time, the switch, push support, this user's devices, links
  *  - settings the switch, automatic offline, inbox, preview, app name
  *  - schedule the weekly schedule, closed dates (1.3.0)
+ *  - public   the hours for visitors: [lop_hours], structured data (1.5.0)
  *  - android  package and certificate fingerprints for assetlinks.json
  *
  * Every state change: POST on admin_init (slug + nonce + capability, PRG,
@@ -362,6 +363,25 @@ final class LOP_Admin_UI {
 			<textarea class="regular-text code" rows="3" id="lop_sched_closed" name="lop_sched_closed" placeholder="25/12/2026"><?php echo esc_textarea( implode( "\n", array_map( array( __CLASS__, 'dmy' ), $sc['closed'] ) ) ); ?></textarea>
 			<p class="lop-hint lop-hint--under"><?php esc_html_e( 'Αργίες ή άδεια: εκείνες τις μέρες το ωράριο δεν ανοίγει. Έως 30, π.χ. 25/12/2026· οι περασμένες σβήνονται μόνες τους.', 'live-operator' ); ?></p>
 		</div>
+
+		<h2 class="lop-h2"><?php esc_html_e( 'Ωράριο για τους επισκέπτες', 'live-operator' ); ?></h2>
+		<div class="lop-zone">
+			<?php
+			$st = LOP_Settings::get();
+			self::checkbox(
+				'lop_public_hours',
+				$st['public_hours'],
+				__( 'Δημόσιο ωράριο: το shortcode [lop_hours] δείχνει το ωράριο στο site', 'live-operator' ),
+				__( 'Βάλε το [lop_hours] σε σελίδα, άρθρο ή widget και δείχνει το ωράριο παραπάνω, όπως «Δευτέρα–Παρασκευή 10:00–20:00 · Σάββατο–Κυριακή 12:00–20:00». Αλλάζεις το ωράριο εδώ και αλλάζει μόνο του. Επιλογές: format="list" για λίστα, closed="1" για τις κλειστές ημερομηνίες, before="Εξυπηρέτηση:" για κείμενο μπροστά.', 'live-operator' )
+			);
+			self::checkbox(
+				'lop_public_schema',
+				$st['public_schema'],
+				__( 'Το ίδιο ωράριο και στα δομημένα δεδομένα (Rank Math)', 'live-operator' ),
+				__( 'Προσθέτει το hoursAvailable στα σημεία επικοινωνίας του JSON-LD, ώστε να το βλέπουν οι μηχανές αναζήτησης. Χρειάζεται ενεργό το Rank Math και το δημόσιο ωράριο παραπάνω.', 'live-operator' )
+			);
+			?>
+		</div>
 		<?php
 	}
 
@@ -442,6 +462,8 @@ final class LOP_Admin_UI {
 				'hours'        => (int) self::post( 'lop_hours' ),
 				'inbox'        => '1' === self::post( 'lop_inbox' ),
 				'preview'      => '1' === self::post( 'lop_preview' ),
+				'public_hours' => '1' === self::post( 'lop_public_hours' ),
+				'public_schema' => '1' === self::post( 'lop_public_schema' ),
 				'app_name'     => self::post( 'lop_app_name' ),
 				'package'      => self::post( 'lop_package' ),
 				'fingerprints' => $fp,
