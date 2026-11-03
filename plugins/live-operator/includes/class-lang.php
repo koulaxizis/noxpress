@@ -197,6 +197,21 @@ final class LOP_Lang {
 		'Παρ' => 'Fri',
 		'Σαβ' => 'Sat',
 		'Κυρ' => 'Sun',
+		// Public hours (1.5.0).
+		'Ωράριο για τους επισκέπτες' => 'Hours for visitors',
+		'Δημόσιο ωράριο: το shortcode [lop_hours] δείχνει το ωράριο στο site' => 'Public hours: the [lop_hours] shortcode shows the schedule on the site',
+		'Βάλε το [lop_hours] σε σελίδα, άρθρο ή widget και δείχνει το ωράριο παραπάνω, όπως «Δευτέρα–Παρασκευή 10:00–20:00 · Σάββατο–Κυριακή 12:00–20:00». Αλλάζεις το ωράριο εδώ και αλλάζει μόνο του. Επιλογές: format="list" για λίστα, closed="1" για τις κλειστές ημερομηνίες, before="Εξυπηρέτηση:" για κείμενο μπροστά.' => 'Put [lop_hours] in a page, post or widget and it shows the hours above, like «Monday–Friday 10:00–20:00 · Saturday–Sunday 12:00–20:00». Change the hours here and it follows. Options: format="list" for a list, closed="1" for the closed dates, before="Service:" for a text in front.',
+		'Το ίδιο ωράριο και στα δομημένα δεδομένα (Rank Math)' => 'The same hours in the structured data (Rank Math)',
+		'Προσθέτει το hoursAvailable στα σημεία επικοινωνίας του JSON-LD, ώστε να το βλέπουν οι μηχανές αναζήτησης. Χρειάζεται ενεργό το Rank Math και το δημόσιο ωράριο παραπάνω.' => 'Adds hoursAvailable to the contact points of the JSON-LD, so search engines see it. Needs Rank Math active and the public hours above.',
+		'Δευτέρα' => 'Monday',
+		'Τρίτη' => 'Tuesday',
+		'Τετάρτη' => 'Wednesday',
+		'Πέμπτη' => 'Thursday',
+		'Παρασκευή' => 'Friday',
+		'Σάββατο' => 'Saturday',
+		'Κυριακή' => 'Sunday',
+		'και' => 'and',
+		'Κλειστά: %s' => 'Closed: %s',
 	);
 
 	public static function init(): void {

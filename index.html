@@ -1118,13 +1118,14 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="live-operator">
 		<h2><a href="#live-operator">Live Operator</a></h2>
 		<a class="card-video" href="media/videos/live-operator.mp4" data-video="live-operator" data-video-title="Live Operator" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.4.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.5.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="lo_desc">The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
 		<ul>
 			<li data-i18n="lo_li1">Online / offline from the phone, kept on the server even with the screen off, with automatic offline after the hours you choose and a notification when it ends</li>
 			<li data-i18n="lo_li6">Weekly schedule: online by itself on the days and hours you choose, in the site’s time zone, with closed dates and a one-tap pause; set it in the settings or in the app</li>
+			<li data-i18n="lo_li7">The same hours for visitors: the [lop_hours] shortcode prints them in a page, post or widget, and they can go into the structured data as hoursAvailable; change the schedule once and the site follows</li>
 			<li data-i18n="lo_li2">Web Push straight from your site (VAPID, end-to-end encrypted), for every new request and every visitor message; no Firebase and no Telegram needed</li>
 			<li data-i18n="lo_li3">Inbox, claim, take over from the AI, reply and return to the AI, through PurioChat’s own operator routes</li>
 			<li data-i18n="lo_li4">Android app for every site (Trusted Web Activity), connected with one tap from the settings; the site lists the official app in Digital Asset Links by itself</li>
@@ -1132,7 +1133,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.4.0/live-operator.zip" rel="nofollow noopener" data-i18n="lo_download">Download v1.4.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.0/live-operator.zip" rel="nofollow noopener" data-i18n="lo_download">Download v1.5.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/live-operator" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1707,11 +1708,12 @@ footer .heart { color: var(--accent-bright); }
 		lo_desc: 'The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an Android app or a home-screen web app. No Firebase, no third-party account.',
 		lo_li1: 'Online / offline from the phone, kept on the server even with the screen off, with automatic offline after the hours you choose and a notification when it ends',
 		lo_li6: 'Weekly schedule: online by itself on the days and hours you choose, in the site’s time zone, with closed dates and a one-tap pause; set it in the settings or in the app',
+		lo_li7: 'The same hours for visitors: the [lop_hours] shortcode prints them in a page, post or widget, and they can go into the structured data as hoursAvailable; change the schedule once and the site follows',
 		lo_li2: 'Web Push straight from your site (VAPID, end-to-end encrypted), for every new request and every visitor message; no Firebase and no Telegram needed',
 		lo_li3: 'Inbox, claim, take over from the AI, reply and return to the AI, through PurioChat’s own operator routes',
 		lo_li4: 'Android app for every site (Trusted Web Activity), connected with one tap from the settings; the site lists the official app in Digital Asset Links by itself',
 		lo_li5: 'Administrators only, never cached, LOP_DISABLE stops everything and PurioChat works as before; bilingual UI and shared «Noxpress» menu',
-		lo_download: 'Download v1.4.0 (.zip)',
+		lo_download: 'Download v1.5.0 (.zip)',
 		ta_desc: 'Trade accounts for bookstores and resellers: a preset discount on the titles you choose, in the shop, the cart and the order, and the Trade Feed, an API with a username and password per account to list your books in their own e-shops.',
 		ta_li1: 'A «Χονδρική» (trade) role made by the shop, never by self sign-up; one discount for everyone (default 40%) or an account’s own',
 		ta_li2: 'Only the categories and brands you choose, physical products only; never other publishers’ titles from Book Feed, and a «Not for trade» checkbox per product',
@@ -2078,11 +2080,12 @@ footer .heart { color: var(--accent-bright); }
 		lo_desc: 'Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server, ειδοποίηση για κάθε αίτημα και μήνυμα, και απαντήσεις από εφαρμογή Android ή web εφαρμογή στην αρχική οθόνη. Χωρίς Firebase, χωρίς λογαριασμό σε τρίτους.',
 		lo_li1: 'Online / offline από το κινητό, που μένει στον server και με σβηστή οθόνη, με αυτόματο offline μετά από όσες ώρες ορίσεις και ειδοποίηση όταν λήξει',
 		lo_li6: 'Εβδομαδιαίο ωράριο: online μόνο του τις μέρες και ώρες που διαλέγεις, στη ζώνη ώρας του site, με κλειστές ημερομηνίες και παύση με ένα πάτημα· ρυθμίζεται στις ρυθμίσεις ή στην εφαρμογή',
+		lo_li7: 'Το ίδιο ωράριο και για τους επισκέπτες: το shortcode [lop_hours] το δείχνει σε σελίδα, άρθρο ή widget, και μπορεί να μπει και στα δομημένα δεδομένα ως hoursAvailable· αλλάζεις το ωράριο μία φορά και ακολουθεί και το site',
 		lo_li2: 'Web Push κατευθείαν από το site σου (VAPID, κρυπτογραφημένο από άκρο σε άκρο), για κάθε νέο αίτημα και κάθε μήνυμα επισκέπτη· χωρίς Firebase και χωρίς Telegram',
 		lo_li3: 'Εισερχόμενα, ανάληψη, ανάληψη από το AI, απάντηση και επιστροφή στο AI, μέσα από τις διαδρομές χειριστή του ίδιου του PurioChat',
 		lo_li4: 'Εφαρμογή Android για κάθε site (Trusted Web Activity), που συνδέεται με ένα πάτημα από τις ρυθμίσεις· το site δηλώνει μόνο του την επίσημη εφαρμογή στα Digital Asset Links',
 		lo_li5: 'Μόνο για διαχειριστές, χωρίς cache, το LOP_DISABLE σταματά τα πάντα και το PurioChat δουλεύει όπως πριν· δίγλωσσο UI και κοινό μενού «Noxpress»',
-		lo_download: 'Λήψη v1.4.0 (.zip)',
+		lo_download: 'Λήψη v1.5.0 (.zip)',
 		ta_desc: 'Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, και το Trade Feed, ένα API με όνομα χρήστη και κωδικό ανά λογαριασμό για να περνούν τα βιβλία σου στα δικά τους e-shops.',
 		ta_li1: 'Ρόλος «Χονδρική» που τον δίνει το κατάστημα, χωρίς αυτόματη εγγραφή· μία έκπτωση για όλους (προεπιλογή 40%) ή δική του για κάθε λογαριασμό',
 		ta_li2: 'Μόνο οι κατηγορίες και τα brands που διαλέγεις, μόνο φυσικά προϊόντα· ποτέ τίτλοι άλλων εκδοτών από το Book Feed, και κουτάκι «Εκτός χονδρικής» ανά προϊόν',

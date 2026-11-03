@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -27,6 +27,13 @@ PurioChat Pro shows «talk to a human» only while an operator is present, and i
 * «Go offline» inside a window pauses only that window; the next one opens as usual. Outside the schedule the switch works as before.
 * Closed dates (holidays, leave), up to 30; past ones are removed by themselves.
 * A notification when a window starts (can be turned off) and when it ends. Set it in the settings or in the app.
+
+**The hours for visitors**
+
+* The `[lop_hours]` shortcode prints the same schedule in a page, post or widget: «Monday–Friday 10:00–20:00 · Saturday–Sunday 12:00–20:00». Consecutive days with the same hours are merged by themselves, and days without hours are left out.
+* `format="list"` for a list, `closed="1"` for the next closed dates, `before="Service:"` for a text in front.
+* Optional: the same hours in the structured data as `hoursAvailable` on the contact points of Rank Math's JSON-LD, so search engines show them.
+* A module: off after activation, and an off module loads no code. Change the schedule once and the site follows, so the hours shown are the hours the chat keeps.
 
 **Notifications for every request and message**
 
@@ -83,6 +90,10 @@ The settings, the switch state, the push keys, the devices and the transients ar
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.5.0 =
+* New: the hours for visitors. The `[lop_hours]` shortcode shows the weekly schedule in a page, post or widget, merging consecutive days with the same hours, with `format="list"`, `closed="1"` and `before="…"`. Off after activation («Hours for visitors» in the settings).
+* New: optional `hoursAvailable` on the contact points of Rank Math's JSON-LD, from the same schedule.
 
 = 1.4.0 =
 * New: the Live Operator Android app 2.0.0 works with any site. The settings' Android app section has «Connect the app», which opens the app on the phone with this site filled in (the app asks before it connects), and a link to install it from F-Droid, Droid-ify or as an APK.
