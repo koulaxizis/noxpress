@@ -93,15 +93,15 @@
     },
     "featured-creators": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Search Signals: the creator page (ProfilePage + Person) goes inside its JSON-LD graph through the `noxpress_seo_graph` filter, as it does with Rank Math, so there is one graph after the switch.",
+        "published": "2026-11-03",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "23352950a76c23f4f25ea324d9b845df8a36b4de3904f1dd17022deb1aecf2c3",
-        "signature": "C4kBGmAfe0RGq4u/fsLZlUk/jhrTtzYJMjVaCGBWW+wCYXYeh3y8WeGA3ift72Gyo4HUeEb/EA4uUg72fxkVDg==",
+        "sha256": "18a47a80a0f34c2965bed90091f54ab0b98d797c732e48564ec43722f368e056",
+        "signature": "0H8md8hEAOLArHPwiLTtaHnAhp4YYlfYV5B1J2A+gz//fcQiEaspfc91SuGJW43tiDxbSZvPk6U3xexnMfaJAQ==",
         "tested_wp": "7.1",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.2.1/featured-creators.zip"
+        "version": "1.2.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.2.2/featured-creators.zip"
       }
     },
     "greeklish-permalinks": {
@@ -158,15 +158,15 @@
     },
     "live-operator": {
       "beta": {
-        "changelog": "* New: the hours for visitors. The `[lop_hours]` shortcode shows the weekly schedule in a page, post or widget, merging consecutive days with the same hours, with `format=\"list\"`, `closed=\"1\"` and `before=\"…\"`. Off after activation («Hours for visitors» in the settings).\n* New: optional `hoursAvailable` on the contact points of Rank Math's JSON-LD, from the same schedule.",
+        "changelog": "* The opening hours in the structured data work with Search Signals too (the `noxpress_seo_graph` filter), so they stay after the switch from Rank Math.",
         "published": "2026-11-03",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f0fd0db2e2d3c7cf4bde84364eb5a29d2de5b5b733f65b0410a79b657eed9024",
-        "signature": "i94JVkt8CXoy/OpzwYgQy0c1cUl9YERiVT2H9CAk52oSskVfkLGPZe7xwQEN7nO7N8933vyQMPLpqqrWPJoQBA==",
+        "sha256": "4183a0e7ec9647bda4fb117e1917565f522c213c141cefa78350785eb4487b32",
+        "signature": "nKsKOcvGgZ+DkUlHGf74Ke095yA7EdV7JRxswktFGlLuLRoEneVc8XGUwdcHw91Dl/P0dlUMLN02rMjnUejZAQ==",
         "tested_wp": "7.1",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.0/live-operator.zip"
+        "version": "1.5.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.1/live-operator.zip"
       },
       "stable": {
         "changelog": "* New: weekly schedule. Online by itself on the days and hours you choose (up to 3 windows a day, in the site's time zone, also past midnight), with closed dates for holidays. «Go offline» inside a window pauses it until its end, and the next window opens as usual; «Go online» outside it works as before. A notification when a window starts (optional, on by default) and when it ends. Set it in Noxpress › Live Operator or from the app («Schedule»); the Android app shows it without a new version. Off by default.\n* The availability is worked out on every check, so it is right even when WP-Cron runs late; one WP-Cron event at the next change only sends the notifications.",
@@ -284,6 +284,19 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.3/revenue-splitter.zip"
       }
     },
+    "search-signals": {
+      "beta": {
+        "changelog": "* Initial release.\n* Title and description templates with per-object overrides, robots through wp_robots, canonical and pagination.\n* One JSON-LD graph (Organization, WebSite with product SearchAction, WebPage, BreadcrumbList, Article, Product from WooCommerce) with the noxpress_seo_graph filter; Open Graph and Twitter cards.\n* Sitemaps at Rank Math's addresses (/sitemap_index.xml, /{type}-sitemap{N}.xml) with images and the robots.txt line; /llms.txt without personal data, /llms-full.txt 410; static llms files moved to a backup on a click, with restore.\n* Import from Rank Math with dry run and undo; Compare with the live page and the sitemaps; Switch over and Switch back in one click.\n* Test mode, passive while another SEO plugin is active, SSG_DISABLE; no external calls and no cookies.\n* Abilities search-signals/status, get-meta, set-meta, json-ld, sitemap-status and compare; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.9).",
+        "published": "2026-11-03",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "0f2fba94ea82f4c55d7137ade91312febe60c379a19d0f964bb33865ce5f949c",
+        "signature": "ilQQi8gaN6uII3sO9/56slLP4vGgtvYbZ6Yr4NqfEd7eXQhWM7uErmhJeHxBIYm3DeCfxIKIkwRM2LliPoNLBg==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.0/search-signals.zip"
+      }
+    },
     "shipping-notes": {
       "beta": {
         "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
@@ -299,15 +312,15 @@
     },
     "shop-filters": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Search Signals: filtered listing pages get noindex, follow through its robots, and the plugin's own canonical tag is left out while Search Signals prints the SEO tags, so a page never has two.",
+        "published": "2026-11-03",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "6e242c18539caec5e15a4eb95c937fcfd7f44470cc7979e14d228856413b738a",
-        "signature": "Ph8lXMdM/nViK+2y2veKHFuxW/dUIzxlLqAdymgpBIjoeG8X6K5cOV+Fei+ynyeUNKByBmkVm6MoxeS+eYcRBw==",
+        "sha256": "2d75e3e8617adb8106cf168db2447f8a428640ea2892917113a935be60e095ae",
+        "signature": "UU3aHYMyGXIFVYgo2fDCBOXKTrr7tGoOukBRr+/ldFSBLNbVpPOKs6wtB2DPSD5F/urb8dOVEHm7bOjZ5nEiDA==",
         "tested_wp": "7.1",
-        "version": "1.3.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.1/shop-filters.zip"
+        "version": "1.3.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.2/shop-filters.zip"
       }
     },
     "site-bridge": {
