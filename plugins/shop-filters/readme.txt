@@ -5,7 +5,7 @@ Tags: woocommerce, product filters, layered navigation, attributes, classic them
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -37,7 +37,7 @@ Shop Filters is not another all-purpose filter plugin. It solves two things the 
 
 * Counts come from WooCommerce's attributes lookup table (kept up to date by WooCommerce on every product change), with the stock of each variation: "Pink" counts only products with a pink variation in stock. Without the table, product terms are used.
 * No database writes on visitor requests; results are kept in the object cache when the site has one.
-* Clean links that work without JavaScript and can be shared: `?shf_age=0-6m,1-3y`. Filter links are `rel="nofollow"`; filtered pages get `noindex, follow` and a canonical to the unfiltered page (works with Yoast SEO and Rank Math).
+* Clean links that work without JavaScript and can be shared: `?shf_age=0-6m,1-3y`. Filter links are `rel="nofollow"`; filtered pages get `noindex, follow` and a canonical to the unfiltered page (works with Yoast SEO, Rank Math and Search Signals).
 * Markup that survives theme rules: no `ul / li`, no checkbox inputs, no icon font; collapsible parts are `<details>`. One small CSS and one small JS file, only on product listing pages. No jQuery, no select2, no Font Awesome.
 * Apply mode: immediate, with an "Apply" button, or immediate on desktop and with a button on narrow screens.
 
@@ -85,6 +85,9 @@ The plugin's options (`shf_settings`, `shf_sets`, `shf_groups_*`, `widget_shf_fi
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.2 =
+* Search Signals: filtered listing pages get noindex, follow through its robots, and the plugin's own canonical tag is left out while Search Signals prints the SEO tags, so a page never has two.
 
 = 1.3.1 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

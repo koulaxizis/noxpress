@@ -3,7 +3,7 @@
  * Plugin Name:          Live Operator
  * Plugin URI:           https://noxpress.tech
  * Description:          Το live chat του PurioChat Pro στο κινητό: διακόπτης online / offline που μένει στον server (με αυτόματο offline), ειδοποιήσεις push για κάθε νέο αίτημα και μήνυμα, και εφαρμογή για ανάληψη και απαντήσεις, που μπαίνει στην αρχική οθόνη ή ανοίγει από την εφαρμογή Android. Με εβδομαδιαίο ωράριο που σε κάνει online μόνο του. Χωρίς Firebase και χωρίς λογαριασμό σε τρίτους.
- * Version:              1.5.0
+ * Version:              1.5.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -36,7 +36,8 @@
  *  - LOP_App       → /live-operator/ (app, service worker, manifest) and
  *                    /.well-known/assetlinks.json for the Android app
  *  - LOP_Hours     → the public service hours: [lop_hours] and the hours
- *                    in Rank Math's JSON-LD (a module, off by default)
+ *                    in the JSON-LD of Rank Math or Search Signals (a
+ *                    module, off by default)
  *  - LOP_Admin_UI  → menu, settings, status checks, test, footer
  *
  * Deviations from the Bible (with reason):
@@ -71,7 +72,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LOP_VERSION', '1.5.0' );
+define( 'LOP_VERSION', '1.5.1' );
 define( 'LOP_FILE', __FILE__ );
 define( 'LOP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LOP_URL', plugin_dir_url( __FILE__ ) );

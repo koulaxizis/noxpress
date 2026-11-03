@@ -7,7 +7,10 @@
  *  - With Rank Math: inside its graph (rank_math/json_ld). Its WebPage
  *    node becomes ProfilePage, its Article node for the page (and the
  *    article's author) is dropped, our Person is added. One graph.
- *  - Without it (or when Rank Math printed no graph on the page): our
+ *  - With Search Signals (1.2.2): the same, inside its graph
+ *    (noxpress_seo_graph, Bible §14.38). Its Product node is built by
+ *    WooCommerce, so the product part comes from wc_product() below.
+ *  - Without either (or when no graph was printed on the page): our
  *    own <script type="application/ld+json"> in wp_head.
  *
  * Products: schema.org Product has no author / contributor. When a
@@ -35,11 +38,12 @@ final class CRT_Schema {
 		'MusicAlbum' => array( 'byArtist' ),
 	);
 
-	/** Whether Rank Math's graph already carries the creator (this request). */
+	/** Whether the SEO plugin's graph already carries the creator (this request). */
 	private static $in_graph = false;
 
 	public static function init(): void {
 		add_filter( 'rank_math/json_ld', array( __CLASS__, 'rank_math' ), 99, 2 );
+		add_filter( 'noxpress_seo_graph', array( __CLASS__, 'seo_graph' ), 99, 2 );
 		add_action( 'wp_head', array( __CLASS__, 'own_jsonld' ), 30 );
 		add_filter( 'woocommerce_structured_data_product', array( __CLASS__, 'wc_product' ), 20, 2 );
 	}
@@ -257,12 +261,46 @@ final class CRT_Schema {
 	}
 
 	/* =====================================================================
-	 * Without Rank Math
+	 * Search Signals
 	 * =================================================================== */
 
 	/**
-	 * Rank Math prints its graph at wp_head priority 1 (rank_math/head).
-	 * When it did not (its head output or schema module off), ours is printed.
+	 * Search Signals' graph: keyed nodes, the same shape as Rank Math's.
+	 * The context says which page the graph is for, also when it is built
+	 * outside the page itself (its Compare screen, its abilities).
+	 *
+	 * @param array $data Graph nodes, keyed.
+	 * @param mixed $c    SSG_Context.
+	 */
+	public static function seo_graph( $data, $c = null ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+		try {
+			if ( is_object( $c ) && isset( $c->post_type, $c->post_id ) ) {
+				$cid = (int) $c->post_id;
+				if ( CRT_CPT::PT !== $c->post_type || ! $cid || ! CRT_Settings::get()['schema'] || ! CRT_Front::visible() || ! CRT_CPT::is_public( $cid ) ) {
+					return $data;
+				}
+			} else {
+				$cid = self::current_creator();
+			}
+			if ( $cid ) {
+				return self::rank_math_creator( $data, $cid );
+			}
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+		return $data;
+	}
+
+	/* =====================================================================
+	 * Without an SEO graph
+	 * =================================================================== */
+
+	/**
+	 * Rank Math and Search Signals print their graph at wp_head priority 1.
+	 * When neither did (head output or schema module off), ours is printed.
 	 */
 	public static function own_jsonld(): void {
 		if ( self::$in_graph ) {

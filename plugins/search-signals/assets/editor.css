@@ -1,0 +1,13 @@
+/* Search Signals — editor fields (meta box and term screen). Scoped to .ssg-ed. */
+.ssg-ed .ssg-ed-preview { border: 1px solid #dcdcde; border-radius: 4px; padding: 12px 14px; margin: 6px 0 14px; background: #fff; max-width: 640px; }
+.ssg-ed .ssg-ed-url { color: #3c4043; font-size: 12px; word-break: break-all; }
+.ssg-ed .ssg-ed-title { color: #1a0dab; font-size: 18px; line-height: 1.3; margin: 2px 0; }
+.ssg-ed .ssg-ed-desc { color: #4d5156; font-size: 13px; line-height: 1.5; }
+.ssg-ed .ssg-ed-note { color: #646970; font-size: 11px; margin: 6px 0 0; }
+.ssg-ed .ssg-ed-row { margin: 0 0 14px; }
+.ssg-ed .ssg-ed-row label strong { display: inline-block; margin-bottom: 4px; }
+.ssg-ed .ssg-counter { font-variant-numeric: tabular-nums; }
+.ssg-ed .ssg-counter.ssg-over { color: #b32d2e; font-weight: 600; }
+.ssg-ed .ssg-image-preview img { display: block; max-width: 120px; height: auto; margin: 6px 0; border-radius: 3px; }
+.ssg-ed .ssg-image-clear { margin-left: 8px; color: #b32d2e; }
+.ssg-term .ssg-ed textarea, .ssg-term .ssg-ed input[type="text"], .ssg-term .ssg-ed input[type="url"] { max-width: 640px; }

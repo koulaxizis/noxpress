@@ -5,7 +5,7 @@ Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -49,7 +49,7 @@ One page for every creator of your catalog (authors, illustrators, translators, 
 **SEO**
 
 * Creator pages: ProfilePage with a Person (name, photo, description, roles as jobTitle, links as sameAs).
-* With Rank Math active, the data goes into Rank Math's own graph: its WebPage becomes ProfilePage and the Article it would add for the page is removed. Title, description and sitemap stay with Rank Math. Without Rank Math the plugin prints its own JSON-LD.
+* With Rank Math active, the data goes into Rank Math's own graph: its WebPage becomes ProfilePage and the Article it would add for the page is removed. Title, description and sitemap stay with Rank Math. The same inside Search Signals' graph. Without either, the plugin prints its own JSON-LD.
 * Products: schema.org Product has no author, so you map product categories to a work type (Book, Audiobook, MusicAlbum, Movie). The product is then declared as both, with each role as its property (author, illustrator, translator, readBy, director, byArtist…); a property the type does not have becomes contributor. Works with Rank Math's product markup and with WooCommerce's own.
 * Creator pages are in the sitemaps only when the plugin is live.
 
@@ -111,6 +111,9 @@ Settings, notices and the term ownership meta are deleted. Creators are kept by 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.2 =
+* Search Signals: the creator page (ProfilePage + Person) goes inside its JSON-LD graph through the `noxpress_seo_graph` filter, as it does with Rank Math, so there is one graph after the switch.
 
 = 1.2.1 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

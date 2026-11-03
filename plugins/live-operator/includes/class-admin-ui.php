@@ -377,8 +377,8 @@ final class LOP_Admin_UI {
 			self::checkbox(
 				'lop_public_schema',
 				$st['public_schema'],
-				__( 'Το ίδιο ωράριο και στα δομημένα δεδομένα (Rank Math)', 'live-operator' ),
-				__( 'Προσθέτει το hoursAvailable στα σημεία επικοινωνίας του JSON-LD, ώστε να το βλέπουν οι μηχανές αναζήτησης. Χρειάζεται ενεργό το Rank Math και το δημόσιο ωράριο παραπάνω.', 'live-operator' )
+				__( 'Το ίδιο ωράριο και στα δομημένα δεδομένα (Rank Math ή Search Signals)', 'live-operator' ),
+				__( 'Προσθέτει το hoursAvailable στα σημεία επικοινωνίας του JSON-LD, ώστε να το βλέπουν οι μηχανές αναζήτησης. Χρειάζεται ενεργό το Rank Math ή το Search Signals και το δημόσιο ωράριο παραπάνω.', 'live-operator' )
 			);
 			?>
 		</div>
