@@ -3,7 +3,7 @@
  * Plugin Name:          Broadcast
  * Plugin URI:           https://noxpress.tech
  * Description:          Ανακοινώνει γεγονότα του site σε κανάλια: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube, αναρτήσεις Instagram και αναρτήσεις που ετοιμάζεις εσύ, σε ένα Viber Channel. Ουρά με έγκριση, πρότυπα ανά πηγή, χωρίς διπλές αναρτήσεις, με ιστορικό. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.1.7
+ * Version:              1.2.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -39,7 +39,8 @@
  *                        post through the Channels Post API
  *  - BRC_Rest          → REST broadcast/v1: Viber webhook, newsletter hook
  *  - BRC_Src_Products  → module "products" (WooCommerce): new products
- *  - BRC_Src_Newsletter→ module "newsletter": MailerLite campaign.sent
+ *  - BRC_Src_Newsletter→ module "newsletter": MailerLite campaign.sent,
+ *                        orOS Newsletter issue.sent
  *  - BRC_Src_Youtube   → module "youtube": channel feeds, Shorts off
  *  - BRC_Src_Instagram → module "instagram": the owner's account through
  *                        the Instagram API (own Meta app), photos only
@@ -52,9 +53,9 @@
  *
  * Deviations from the Bible (with reason):
  *  - §20 (one plugin per external system): Broadcast talks to Viber,
- *    MailerLite, YouTube and Instagram (Meta). It is one function, a router
- *    of announcements, and every system is a module behind one option, one
- *    page and one menu entry (Bible 1.76, §20 «Plugins-δρομολογητές»).
+ *    MailerLite, orOS Newsletter, YouTube and Instagram (Meta). It is one
+ *    function, a router of announcements, and every system is a module
+ *    behind one option, one page and one menu entry (Bible 1.76, §20 «Plugins-δρομολογητές»).
  *  - §1.2 (WooCommerce required): sources other than products work on any
  *    WordPress site (no "Requires Plugins"); the products and digest
  *    modules load only with WooCommerce (Bible 1.20 exception).
@@ -78,7 +79,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BRC_VERSION', '1.1.7' );
+define( 'BRC_VERSION', '1.2.0' );
 define( 'BRC_FILE', __FILE__ );
 define( 'BRC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BRC_URL', plugin_dir_url( __FILE__ ) );

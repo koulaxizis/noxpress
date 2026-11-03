@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          orOS Connect
  * Plugin URI:           https://noxpress.tech
- * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter· και οι Προσφορές: τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.2.1
+ * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget, popup) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter· και οι Προσφορές: τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Δουλεύει με ή χωρίς WooCommerce.
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -35,6 +35,8 @@
  *  - ORC_Newsletter → module "newsletter": form (shortcode, block, widget),
  *                     checkout consent (classic and block checkout), the
  *                     send queue (Action Scheduler), order screen line
+ *  - ORC_Popup      → the newsletter form in a popup (nl_popup), loaded
+ *                     only when it is on
  *  - ORC_Offers     → module "offers": REST orc/v1/offers that orOS pulls
  *                     (Publishing Quote requests → draft offers), with the
  *                     shop's WooCommerce REST keys or an Application Password
@@ -61,12 +63,13 @@
  * wp-config.php stops every front-end hook and every send.
  *
  * Cooperation (Bible §6): fires orc_newsletter_sent( $order_id, $result )
- * after each checkout sign-up attempt; filter orc_text for visitor texts.
+ * after each checkout sign-up attempt; filter orc_text for visitor texts,
+ * orc_popup_show to hide the popup on a page.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ORC_VERSION', '1.2.1' );
+define( 'ORC_VERSION', '1.3.0' );
 define( 'ORC_FILE', __FILE__ );
 define( 'ORC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ORC_URL', plugin_dir_url( __FILE__ ) );

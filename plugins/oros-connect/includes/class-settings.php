@@ -16,6 +16,12 @@
  *                       (off by default: the checkout consent is enough)
  *  - nl_key      string shop key, 32 letters/digits, or '' (signs checkout
  *                       sign-ups so orOS can skip the confirmation)
+ *  - nl_popup    bool   the form in a popup too (1.3.0, off)
+ *  - nl_pop_delay  int  seconds before it opens, 5–300 (20)
+ *  - nl_pop_scroll int  or after this % of the page, 0 (time only) or
+ *                       10–100 (50)
+ *  - nl_pop_days   int  at most once in this many days per browser,
+ *                       1–365 (30)
  *  - t_<key>_el / t_<key>_en  visitor texts (Bible §14.17), keys in texts()
  *
  * Autoloaded: the front end reads it on every request where a form or the
@@ -40,26 +46,34 @@ final class ORC_Settings {
 	 */
 	public static function texts(): array {
 		return array(
-			'title'    => array( 'Newsletter', 'Newsletter', 120 ),
-			'intro'    => array( 'Νέα και προσφορές στο email σου.', 'News and offers in your inbox.', 300 ),
-			'email'    => array( 'Το email σου', 'Your email', 80 ),
-			'name'     => array( 'Όνομα (προαιρετικό)', 'Name (optional)', 80 ),
-			'button'   => array( 'Εγγραφή', 'Subscribe', 40 ),
-			'note'     => array( 'Θα λάβεις email επιβεβαίωσης. Μπορείς να διαγραφείς όποτε θέλεις.', 'You will get a confirmation email. You can unsubscribe at any time.', 300 ),
-			'checkbox' => array( 'Θέλω να λαμβάνω το newsletter με νέα και προσφορές.', 'I want to receive the newsletter with news and offers.', 300 ),
+			'title'     => array( 'Newsletter', 'Newsletter', 120 ),
+			'intro'     => array( 'Νέα και προσφορές στο email σου.', 'News and offers in your inbox.', 300 ),
+			'email'     => array( 'Το email σου', 'Your email', 80 ),
+			'name'      => array( 'Όνομα (προαιρετικό)', 'Name (optional)', 80 ),
+			'button'    => array( 'Εγγραφή', 'Subscribe', 40 ),
+			'note'      => array( 'Θα λάβεις email επιβεβαίωσης. Μπορείς να διαγραφείς όποτε θέλεις.', 'You will get a confirmation email. You can unsubscribe at any time.', 300 ),
+			'checkbox'  => array( 'Θέλω να λαμβάνω το newsletter με νέα και προσφορές.', 'I want to receive the newsletter with news and offers.', 300 ),
+			// Popup (1.3.0): empty title / intro = the form's.
+			'pop_title' => array( '', '', 120 ),
+			'pop_intro' => array( '', '', 300 ),
+			'close'     => array( 'Κλείσιμο', 'Close', 40 ),
 		);
 	}
 
 	public static function defaults(): array {
 		$d = array(
-			'mods'        => array_fill_keys( self::MODULES, false ),
-			'mode'        => 'test',
-			'lang'        => 'auto',
-			'nl_url'      => '',
-			'nl_name'     => true,
-			'nl_checkout' => false,
-			'nl_doi'      => false,
-			'nl_key'      => '',
+			'mods'          => array_fill_keys( self::MODULES, false ),
+			'mode'          => 'test',
+			'lang'          => 'auto',
+			'nl_url'        => '',
+			'nl_name'       => true,
+			'nl_checkout'   => false,
+			'nl_doi'        => false,
+			'nl_key'        => '',
+			'nl_popup'      => false,
+			'nl_pop_delay'  => 20,
+			'nl_pop_scroll' => 50,
+			'nl_pop_days'   => 30,
 		);
 		foreach ( self::texts() as $k => $t ) {
 			$d[ 't_' . $k . '_el' ] = $t[0];
@@ -98,9 +112,16 @@ final class ORC_Settings {
 		$url         = isset( $raw['nl_url'] ) && is_string( $raw['nl_url'] ) ? $raw['nl_url'] : '';
 		$s['nl_url'] = ORC_Relay::parse_link( $url );
 
-		foreach ( array( 'nl_name', 'nl_checkout', 'nl_doi' ) as $k ) {
+		foreach ( array( 'nl_name', 'nl_checkout', 'nl_doi', 'nl_popup' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
+
+		$s['nl_pop_delay']  = self::int_in( $raw, 'nl_pop_delay', 5, 300, $d['nl_pop_delay'] );
+		$s['nl_pop_scroll'] = self::int_in( $raw, 'nl_pop_scroll', 0, 100, $d['nl_pop_scroll'] );
+		if ( $s['nl_pop_scroll'] > 0 && $s['nl_pop_scroll'] < 10 ) {
+			$s['nl_pop_scroll'] = 10;
+		}
+		$s['nl_pop_days'] = self::int_in( $raw, 'nl_pop_days', 1, 365, $d['nl_pop_days'] );
 
 		$key         = isset( $raw['nl_key'] ) && is_string( $raw['nl_key'] ) ? trim( $raw['nl_key'] ) : '';
 		$s['nl_key'] = preg_match( '/^[A-Za-z0-9]{32}$/', $key ) ? $key : '';
@@ -113,13 +134,22 @@ final class ORC_Settings {
 			}
 		}
 		// Required texts never stay empty (the English one may: it falls back to Greek).
-		foreach ( array( 'email', 'button', 'checkbox' ) as $k ) {
+		foreach ( array( 'email', 'button', 'checkbox', 'close' ) as $k ) {
 			if ( '' === $s[ 't_' . $k . '_el' ] ) {
 				$s[ 't_' . $k . '_el' ] = $d[ 't_' . $k . '_el' ];
 			}
 		}
 
 		return $s;
+	}
+
+	/** A whole number within [min, max]; anything else → the default. */
+	private static function int_in( array $raw, string $k, int $min, int $max, int $def ): int {
+		if ( ! isset( $raw[ $k ] ) || ! is_scalar( $raw[ $k ] ) || ! preg_match( '/^\d{1,4}$/', trim( (string) $raw[ $k ] ) ) ) {
+			return $def;
+		}
+		$v = (int) trim( (string) $raw[ $k ] );
+		return $v < $min || $v > $max ? $def : $v;
 	}
 
 	/** True when the module is switched on (and the plugin is not killed). */
@@ -168,7 +198,8 @@ final class ORC_Settings {
 		 * Filters a visitor text (e.g. for WPML / Polylang).
 		 *
 		 * @param string $v    Text.
-		 * @param string $key  title | intro | email | name | button | note | checkbox.
+		 * @param string $key  title | intro | email | name | button | note | checkbox |
+		 *                     pop_title | pop_intro | close.
 		 * @param string $lang 'el' | 'en'.
 		 */
 		return (string) apply_filters( 'orc_text', $v, $key, $lang );

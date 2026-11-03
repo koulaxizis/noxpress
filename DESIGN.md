@@ -84,6 +84,7 @@ Supporting values (Bible §2, used by every plugin through Noxpress Core):
 - The theme's look wins: plugin output inherits the theme's fonts and buttons (`class="button"` plus `wc_wp_theme_get_element_class_name( 'button' )`, §14.16). A scoped reset protects plugin markup from hostile theme rules (§14.13).
 - Inline SVG icons, no icon fonts; `<details>` for anything that opens and closes.
 - Visitor-facing texts are store settings with Greek and English values (§14.17).
+- Popups (§14.39) are a `<dialog>` with the theme's form inside: up to 28rem wide, 8px radius, colours from the block theme palette (`--wp--preset--color--base` / `contrast`, white / near-black fallback), a 50% black backdrop and a 44px close button.
 
 ## Do / don't
 

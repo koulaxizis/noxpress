@@ -100,6 +100,7 @@ final class ORC_Admin_UI {
 			return;
 		}
 		$text  = '<p>' . esc_html__( 'Όταν γράφεσαι στο newsletter μας (φόρμα εγγραφής ή κουτάκι στο ταμείο), το email σου, το όνομά σου αν το δώσεις και η γλώσσα σου στέλνονται στη λίστα μας στο orOS Newsletter μέσω του relay του orOS (Cloudflare Workers). Εκεί κρατιούνται κρυπτογραφημένα μέχρι να τα παραλάβουμε, και μετά διαγράφονται από το relay. Θα λάβεις email επιβεβαίωσης, και κάθε email μας έχει σύνδεσμο διαγραφής.', 'oros-connect' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Αν το site δείχνει τη φόρμα σε αναδυόμενο παράθυρο, ο browser σου κρατά τοπικά (localStorage) πότε το είδες, για να μην ξαναφανεί για λίγο καιρό. Δεν είναι cookie και δεν στέλνεται πουθενά.', 'oros-connect' ) . '</p>';
 		$text .= '<p>' . esc_html__( 'Στις παραγγελίες κρατάμε πότε δόθηκε η συναίνεση στο ταμείο και το κείμενό της, ως απόδειξη της συναίνεσης.', 'oros-connect' ) . '</p>';
 		wp_add_privacy_policy_content( 'orOS Connect', wp_kses_post( $text ) );
 	}
@@ -304,6 +305,26 @@ final class ORC_Admin_UI {
 				</p>
 			</div>
 
+			<h2 class="orc-h2"><?php esc_html_e( 'Αναδυόμενο παράθυρο (popup)', 'oros-connect' ); ?></h2>
+			<div class="orc-zone">
+				<?php self::checkbox( 'orc_nl_popup', $s['nl_popup'], __( 'Η φόρμα και σε αναδυόμενο παράθυρο, σε όλες τις σελίδες του site', 'oros-connect' ) ); ?>
+				<div class="orc-pair">
+					<label><span class="orc-lang"><?php esc_html_e( 'Ανοίγει μετά από (δευτερόλεπτα, 5–300)', 'oros-connect' ); ?></span>
+						<input type="number" name="orc_nl_pop_delay" value="<?php echo (int) $s['nl_pop_delay']; ?>" min="5" max="300" step="1" /></label>
+					<label><span class="orc-lang"><?php esc_html_e( 'ή όταν διαβαστεί το (% της σελίδας, 0 = μόνο ο χρόνος)', 'oros-connect' ); ?></span>
+						<input type="number" name="orc_nl_pop_scroll" value="<?php echo (int) $s['nl_pop_scroll']; ?>" min="0" max="100" step="5" /></label>
+					<label><span class="orc-lang"><?php esc_html_e( 'Το πολύ μία φορά κάθε (ημέρες, 1–365)', 'oros-connect' ); ?></span>
+						<input type="number" name="orc_nl_pop_days" value="<?php echo (int) $s['nl_pop_days']; ?>" min="1" max="365" step="1" /></label>
+				</div>
+				<?php
+				self::text_pair( 'pop_title', __( 'Τίτλος του popup (κενό = ο τίτλος της φόρμας)', 'oros-connect' ), $s );
+				self::text_pair( 'pop_intro', __( 'Κείμενο του popup (κενό = το κείμενο της φόρμας)', 'oros-connect' ), $s );
+				self::text_pair( 'close', __( 'Κουμπί κλεισίματος (για αναγνώστες οθόνης)', 'oros-connect' ), $s );
+				?>
+				<p class="description orc-mt-8"><?php esc_html_e( 'Δεν ανοίγει στο καλάθι, στο ταμείο, στον λογαριασμό του πελάτη ούτε σε σελίδα που έχει ήδη τη φόρμα. Ο browser του επισκέπτη θυμάται πότε το είδε (localStorage, χωρίς cookie και χωρίς τίποτα στον server)· μετά την εγγραφή δεν ξαναφαίνεται. Για δοκιμή: πρόσθεσε ?orc_popup=1 στη διεύθυνση μιας σελίδας.', 'oros-connect' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Δίνεις κουπόνι καλωσορίσματος; Γράψ\' το στο κείμενο του popup και βάλε το κουπόνι στο email καλωσορίσματος της λίστας στο orOS Newsletter.', 'oros-connect' ); ?></p>
+			</div>
+
 			<?php if ( Oros_Connect::woo() ) : ?>
 				<h2 class="orc-h2"><?php esc_html_e( 'Ταμείο', 'oros-connect' ); ?></h2>
 				<div class="orc-zone">
@@ -313,7 +334,7 @@ final class ORC_Admin_UI {
 
 					<span class="orc-label"><?php esc_html_e( 'Επιβεβαίωση', 'oros-connect' ); ?></span>
 					<?php self::checkbox( 'orc_nl_doi', $s['nl_doi'], __( 'Email επιβεβαίωσης και για όσους γράφονται από το ταμείο (double opt-in)', 'oros-connect' ) ); ?>
-					<p class="description"><?php esc_html_e( 'Κλειστό: η συναίνεση στο ταμείο αρκεί και ο πελάτης γράφεται κατευθείαν. Για να το δεχτεί το orOS, η εγγραφή υπογράφεται με το κλειδί καταστήματος· όσο το orOS δεν το υποστηρίζει ακόμα, στέλνεται email επιβεβαίωσης σε όλους.', 'oros-connect' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Κλειστό: η συναίνεση στο ταμείο αρκεί και ο πελάτης γράφεται κατευθείαν. Για να το δεχτεί το orOS, η εγγραφή υπογράφεται με το κλειδί καταστήματος, που μπαίνει και στη λίστα στο orOS· χωρίς κλειδί, στέλνεται email επιβεβαίωσης σε όλους.', 'oros-connect' ); ?></p>
 
 					<span class="orc-label"><?php esc_html_e( 'Κλειδί καταστήματος', 'oros-connect' ); ?></span>
 					<input type="text" name="orc_nl_key" class="orc-key" value="<?php echo esc_attr( $s['nl_key'] ); ?>" maxlength="32" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e( '32 γράμματα και αριθμοί', 'oros-connect' ); ?>" />
@@ -538,6 +559,10 @@ final class ORC_Admin_UI {
 		$raw_url    = self::post( 'orc_nl_url' );
 		$s['nl_url'] = $raw_url;
 		$s['nl_name'] = '1' === self::post( 'orc_nl_name' );
+		$s['nl_popup']      = '1' === self::post( 'orc_nl_popup' );
+		$s['nl_pop_delay']  = self::post( 'orc_nl_pop_delay' );
+		$s['nl_pop_scroll'] = self::post( 'orc_nl_pop_scroll' );
+		$s['nl_pop_days']   = self::post( 'orc_nl_pop_days' );
 		if ( Oros_Connect::woo() ) {
 			$s['nl_checkout'] = '1' === self::post( 'orc_nl_checkout' );
 			$s['nl_doi']      = '1' === self::post( 'orc_nl_doi' );
@@ -560,6 +585,9 @@ final class ORC_Admin_UI {
 		}
 		if ( Oros_Connect::woo() && '' !== trim( self::post( 'orc_nl_key' ) ) && '' === $after['nl_key'] ) {
 			$msgs[] = self::msg( 'error', __( 'Το κλειδί καταστήματος θέλει ακριβώς 32 λατινικά γράμματα ή αριθμούς. Δεν κρατήθηκε.', 'oros-connect' ) );
+		}
+		if ( $after['nl_popup'] && '' === $after['nl_url'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Το popup δεν φαίνεται μέχρι να μπει η διεύθυνση εγγραφής του orOS.', 'oros-connect' ) );
 		}
 		if ( $after['nl_checkout'] && '' === $after['nl_url'] ) {
 			$msgs[] = self::msg( 'warning', __( 'Το κουτάκι στο ταμείο δεν φαίνεται μέχρι να μπει η διεύθυνση εγγραφής του orOS.', 'oros-connect' ) );
