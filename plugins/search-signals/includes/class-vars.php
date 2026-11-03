@@ -46,7 +46,7 @@ final class SSG_Vars {
 		$sep = SSG_Settings::get()['sep'];
 		$out = preg_replace_callback(
 			'/%([a-z_]+)(?:\([^%)]*\))?%/',
-			static function ( $m ) use ( $c, $sep ) {
+			static function ( $m ) use ( $c ) {
 				return 'sep' === $m[1] ? "\x01" : self::value( (string) $m[1], $c );
 			},
 			$tpl
