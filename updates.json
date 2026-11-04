@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Newsletter: orOS Newsletter as a second provider. Route `/wp-json/broadcast/v1/hook/newsletter/oros` takes the «issue.sent» notice that orOS sends through its relay when an issue has gone out, checks X-Oros-Signature (HMAC-SHA256 of the timestamp and the raw body with the list's notice key, `hash_equals`) and a timestamp at most 5 minutes off, and queues one post per issue with the subject as its title. Placeholder {list} (the list's name) in the newsletter template.\n* The notice key is sealed like the other secrets (or `BRC_OROS_SECRET` in wp-config.php) and removed on uninstall.",
+        "published": "2026-11-04",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "78cdc1b2c51b0c9d8d5f19a944164401619b334d24ba81d35ce593154ee71fd4",
-        "signature": "N6c99YB2d+ZlslV6B3eqfzSDuS/QykQ7HXoXo1uARw8UfA6moBs4juxtVVkJ4iMrxDEgVsPYXg/e2JDZ/5INAw==",
+        "sha256": "ea0b2bb5b055922ecc64d67120ba9a0057bffba1b6442fbe08a4ace53acfcd95",
+        "signature": "BGnz8BuYIz9a685rUjkCnoLi1QdpJifUsLjrMWL8XavCjlY7EtCRHETeK5Gt7CcdqAsy0hdPX9KdwouVN/9gBw==",
         "tested_wp": "7.1",
-        "version": "1.1.7",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.1.7/broadcast.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.2.0/broadcast.zip"
       }
     },
     "checkout-extras": {
@@ -195,15 +195,15 @@
     },
     "oros-connect": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Newsletter: the form in a popup too (off by default). Opens after 20 seconds or half the page, at most once every 30 days per browser and never after a sign-up; not on the cart, the checkout, the account pages or a page that has the form. localStorage only, no cookie; the same HTML for every visitor. Its own title, text and close label in Greek and English; filter `orc_popup_show`; `?orc_popup=1` to test.\n* Newsletter: the shop key is now checked by orOS (Subscribe link → Shop key), so signed checkout sign-ups join without a confirmation email; texts updated.\n* Privacy policy text mentions the popup's localStorage entry.",
+        "published": "2026-11-04",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e251fa62d6508d44716a4ab11c4f35ccdb556bf3af9e97ff026b35f6146f0938",
-        "signature": "7qqa5hxgvc0v77dIRUxlskMzfyuVawDw4G/3zn65upVxUht409PX0iNjJRtuo4IKbuyBsp4J48XMR+QIqmDbAA==",
+        "sha256": "a63978826d1f3bfdbd957d7766cb3eacaa652fac2e47863d7e1dbc3d9234e4f3",
+        "signature": "8++CrCXk2nC5KajejnIXHGggPI+ZTHsG7EpR032k9354eemFFtctXLy3EYSP08PHfQs2hEhWr+ANPkBIXjrLBg==",
         "tested_wp": "7.1",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.2.1/oros-connect.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.3.0/oros-connect.zip"
       }
     },
     "pre-orders": {
