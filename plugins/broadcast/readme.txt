@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -18,7 +18,7 @@ Broadcast routes events from sources to destinations through one queue. Every so
 **Sources**
 
 * New products (WooCommerce): every product that becomes published, checked a few minutes later so fixes made right after publishing are in the post. Category filter (in / out, with subcategories), product types, only with an image. Other publishers' titles imported by Book Feed and categories hidden by Hide Catalog are left out by default. Pre-orders from Pre-Orders show their release date.
-* Newsletter: MailerLite's «campaign.sent» webhook, accepted only with a valid signature, posts the campaign's name and a link you choose. orOS Newsletter will use the same route.
+* Newsletter: MailerLite's «campaign.sent» webhook, accepted only with a valid signature, posts the campaign's name and a link you choose. orOS Newsletter's «issue sent» notice (1.2.0) posts the issue's subject, the list and how many received it; it is signed with the list's notice key and must be at most 5 minutes old. One post per issue or campaign, even if a notice arrives twice.
 * YouTube: new videos of up to five channels from their public feeds, no API key. Shorts are left out by default (the channel's «long videos» list), with a switch to include them and a separate switch for live streams.
 * Instagram: new posts of your Business or Creator account through the Instagram API, with a token from your own Meta app (no app review for your own account). Checked every 30 minutes, so no webhook has to reach the site. Photos and albums by default, videos and Reels with a switch; hashtags at the end of the caption removed by default. The token renews itself every month.
 * Post queue: posts prepared by a routine (for example Claude through Site Bridge, with the broadcast/queue-add ability; queue-list, queue-send and queue-reject let an app work the queue) or by you in the admin. They wait until you press «Published», on a screen that works on a phone.
@@ -48,7 +48,7 @@ Broadcast routes events from sources to destinations through one queue. Every so
 * Abilities (WordPress 6.9+): `broadcast/queue-add` ( text, url, image_url or attachment_id, ref ), `broadcast/queue-list`, `broadcast/queue-send` ( id, text ), `broadcast/status`.
 * `brc_message` filter ( array $message, string $source, string $key ): change a message before it is queued; an empty array drops it.
 * `brc_item_sent` action ( int $id, array $item ): after each post.
-* REST `POST /wp-json/broadcast/v1/hook/newsletter/mailerlite` (signed) and `POST /wp-json/broadcast/v1/viber` (Viber callbacks, signed).
+* REST `POST /wp-json/broadcast/v1/hook/newsletter/mailerlite` (signed), `POST /wp-json/broadcast/v1/hook/newsletter/oros` (X-Oros-Signature: sha256=HMAC-SHA256 of X-Oros-Timestamp "." body) and `POST /wp-json/broadcast/v1/viber` (Viber callbacks, signed).
 * Constants `BRC_VIBER_TOKEN` and `BRC_MAILERLITE_SECRET` in wp-config.php take precedence over the saved secrets.
 
 == Installation ==
@@ -57,7 +57,7 @@ Broadcast routes events from sources to destinations through one queue. Every so
 2. Activate the plugin and open **Noxpress → Broadcast**.
 3. In **Modules**, switch on Viber Channel and the sources you want. The mode stays «Test» until you change it.
 4. In **Viber**, paste the channel token (Viber → channel info → Settings → Developer Tools) and press **Connect to Viber**.
-5. In **Sources**, set the categories, the MailerLite webhook (address and secret) and the YouTube channels. Adjust the texts in **Templates**.
+5. In **Sources**, set the categories, the MailerLite webhook (address and secret) or the orOS Newsletter notice (address and key) and the YouTube channels. Adjust the texts in **Templates**.
 6. Watch the **Queue** and the **History** in test mode, then switch the mode to live.
 
 == Frequently Asked Questions ==
@@ -68,7 +68,7 @@ No. A product is posted only when it becomes published while the module is on, a
 
 = Why does the newsletter post not have the subject? =
 
-MailerLite's webhook sends the campaign's name, not its subject, and no public web-version link. The post uses the name and the fixed link you set (for example your newsletter archive).
+MailerLite's webhook sends the campaign's name, not its subject, and no public web-version link. The post uses the name and the fixed link you set (for example your newsletter archive). orOS Newsletter's notice carries the subject, so its posts show it.
 
 = How are Shorts left out without an API key? =
 
@@ -83,6 +83,10 @@ The webhook at Viber is removed, and the queue and history table, the settings, 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.0 =
+* Newsletter: orOS Newsletter as a second provider. Route `/wp-json/broadcast/v1/hook/newsletter/oros` takes the «issue.sent» notice that orOS sends through its relay when an issue has gone out, checks X-Oros-Signature (HMAC-SHA256 of the timestamp and the raw body with the list's notice key, `hash_equals`) and a timestamp at most 5 minutes off, and queues one post per issue with the subject as its title. Placeholder {list} (the list's name) in the newsletter template.
+* The notice key is sealed like the other secrets (or `BRC_OROS_SECRET` in wp-config.php) and removed on uninstall.
 
 = 1.1.7 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

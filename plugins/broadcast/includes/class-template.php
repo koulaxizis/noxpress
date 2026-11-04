@@ -3,9 +3,11 @@
  * BRC_Template — placeholders in the per-source templates.
  *
  * {title} {url} {text} {price} {preorder} {excerpt} {category} {date}
- * {count} {list} {recipients} {site}. A placeholder a source does not
- * fill becomes empty; a line that only had placeholders and ends up empty
- * is dropped, so "{price}{preorder}" without a price leaves no blank line.
+ * {count} {list} {recipients} {site}. {list} is the titles of a digest,
+ * or the list's name of an orOS Newsletter issue. A placeholder a source
+ * does not fill becomes empty; a line that only had placeholders and ends
+ * up empty is dropped, so "{price}{preorder}" without a price leaves no
+ * blank line.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,7 +20,7 @@ final class BRC_Template {
 	public static function keys_for( string $src ): array {
 		$map = array(
 			'products'   => array( 'title', 'url', 'price', 'preorder', 'excerpt', 'category', 'site' ),
-			'newsletter' => array( 'title', 'url', 'recipients', 'date', 'site' ),
+			'newsletter' => array( 'title', 'url', 'recipients', 'date', 'list', 'site' ),
 			'youtube'    => array( 'title', 'url', 'date', 'site' ),
 			'instagram'  => array( 'text', 'url', 'date', 'site' ),
 			'queue'      => array( 'text', 'url', 'site' ),

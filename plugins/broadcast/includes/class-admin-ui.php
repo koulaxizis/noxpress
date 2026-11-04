@@ -830,6 +830,27 @@ final class BRC_Admin_UI {
 				<?php self::checkbox( 'brc_nl_preview', $s['nl_preview'], __( 'Χωρίς σταθερό σύνδεσμο: χρήση του preview_url της καμπάνιας (μόνο αν ανοίγει χωρίς σύνδεση στο MailerLite)', 'broadcast' ) ); ?>
 			</div>
 
+			<h2 class="brc-h2"><?php esc_html_e( 'Newsletter (orOS Newsletter)', 'broadcast' ); ?></h2>
+			<?php self::off_notice( 'newsletter' ); ?>
+			<div class="brc-zone">
+				<ol>
+					<li><?php esc_html_e( 'Στο orOS: Newsletter → Λίστες → Επεξεργασία στη λίστα σου → «Όταν φεύγει τεύχος, ειδοποίησε».', 'broadcast' ); ?></li>
+					<li><?php esc_html_e( 'Διεύθυνση:', 'broadcast' ); ?> <?php self::copy_field( rest_url( 'broadcast/v1/hook/newsletter/oros' ) ); ?></li>
+					<li><?php esc_html_e( 'Πάτα «Νέο κλειδί» στο «Κλειδί ειδοποίησης», αποθήκευσε τη λίστα και αντέγραψε το κλειδί εδώ:', 'broadcast' ); ?></li>
+				</ol>
+				<input type="password" name="brc_oros_secret" class="brc-wide" autocomplete="new-password" spellcheck="false" maxlength="32" placeholder="<?php esc_attr_e( 'Κλειδί ειδοποίησης (32 γράμματα και αριθμοί)', 'broadcast' ); ?>" />
+				<?php self::secret_state( 'oros' ); ?>
+				<?php if ( ! empty( $notes['nl_hook_oros'] ) ) : ?>
+					<p class="description">
+						<?php
+						/* translators: %s: date and time */
+						echo esc_html( sprintf( __( 'Τελευταίο υπογεγραμμένο αίτημα από το orOS: %s', 'broadcast' ), self::when( (int) $notes['nl_hook_oros'] ) ) );
+						?>
+					</p>
+				<?php endif; ?>
+				<p class="description"><?php esc_html_e( 'Η ανάρτηση παίρνει το θέμα του τεύχους ως τίτλο ({title}), τη λίστα ({list}), πόσοι το έλαβαν ({recipients}) και τον «Σύνδεσμο της ανάρτησης» από πάνω. Μία ανάρτηση ανά τεύχος, ακόμα κι αν η ειδοποίηση έρθει δύο φορές.', 'broadcast' ); ?></p>
+			</div>
+
 			<h2 class="brc-h2"><?php esc_html_e( 'YouTube', 'broadcast' ); ?></h2>
 			<?php self::off_notice( 'youtube' ); ?>
 			<div class="brc-zone">
@@ -1062,6 +1083,7 @@ final class BRC_Admin_UI {
 					<tr><td><code>brc_message</code> <?php esc_html_e( '(φίλτρο)', 'broadcast' ); ?></td><td><?php esc_html_e( 'Αλλάζει ένα μήνυμα πριν μπει στην ουρά: ( $message, $source, $key ). Κενός πίνακας = δεν μπαίνει.', 'broadcast' ); ?></td></tr>
 					<tr><td><code>brc_item_sent</code> <?php esc_html_e( '(action)', 'broadcast' ); ?></td><td><?php esc_html_e( 'Μετά από κάθε ανάρτηση: ( $id, $item ).', 'broadcast' ); ?></td></tr>
 					<tr><td><code>POST /wp-json/broadcast/v1/hook/newsletter/mailerlite</code></td><td><?php esc_html_e( 'Webhook «campaign.sent» του MailerLite, μόνο με σωστή υπογραφή.', 'broadcast' ); ?></td></tr>
+					<tr><td><code>POST /wp-json/broadcast/v1/hook/newsletter/oros</code></td><td><?php esc_html_e( 'Ειδοποίηση «issue.sent» του orOS Newsletter, μόνο με σωστή υπογραφή και πρόσφατη ώρα.', 'broadcast' ); ?></td></tr>
 					<tr><td><code>BRC_VIBER_TOKEN</code>, <code>BRC_MAILERLITE_SECRET</code></td><td><?php esc_html_e( 'Στο wp-config.php: τα μυστικά από εκεί, με προτεραιότητα.', 'broadcast' ); ?></td></tr>
 					<tr><td><code>BRC_DISABLE</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά κάθε πηγή, κάθε ανάρτηση και κάθε webhook.', 'broadcast' ); ?></td></tr>
 				</tbody>
@@ -1274,6 +1296,16 @@ final class BRC_Admin_UI {
 			$msgs[] = BRC_Crypt::put( 'mailerlite', mb_substr( $secret, 0, 200 ) )
 				? self::msg( 'success', __( 'Το secret του newsletter αποθηκεύτηκε σφραγισμένο.', 'broadcast' ) )
 				: self::msg( 'error', __( 'Το secret δεν αποθηκεύτηκε: λείπει το OpenSSL (aes-256-gcm). Βάλ\' το ως σταθερά στο wp-config.php.', 'broadcast' ) );
+		}
+		$oros = trim( self::post( 'brc_oros_secret' ) );
+		if ( '' !== $oros ) {
+			if ( ! preg_match( '/^[A-Za-z0-9]{32}$/', $oros ) ) {
+				$msgs[] = self::msg( 'error', __( 'Το κλειδί ειδοποίησης του orOS έχει ακριβώς 32 λατινικά γράμματα ή αριθμούς. Δεν κρατήθηκε.', 'broadcast' ) );
+			} else {
+				$msgs[] = BRC_Crypt::put( 'oros', $oros )
+					? self::msg( 'success', __( 'Το κλειδί ειδοποίησης του orOS αποθηκεύτηκε σφραγισμένο.', 'broadcast' ) )
+					: self::msg( 'error', __( 'Το secret δεν αποθηκεύτηκε: λείπει το OpenSSL (aes-256-gcm). Βάλ\' το ως σταθερά στο wp-config.php.', 'broadcast' ) );
+			}
 		}
 
 		$channels = array();

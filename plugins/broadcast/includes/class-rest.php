@@ -4,11 +4,14 @@
  * bootstrap docblock).
  *
  *  POST /broadcast/v1/viber                          Viber callbacks (module viber)
- *  POST /broadcast/v1/hook/newsletter/<provider>     "campaign sent" (module newsletter)
+ *  POST /broadcast/v1/hook/newsletter/<provider>     "campaign sent" (module newsletter),
+ *                                                    provider mailerlite or oros
  *
  * Both are public routes that accept only signed requests: Viber's
  * X-Viber-Content-Signature, MailerLite's Signature (HMAC-SHA256 of the raw
- * body with the webhook secret). A valid request writes one queue row at
+ * body with the webhook secret), orOS Newsletter's X-Oros-Signature
+ * (sha256=HMAC-SHA256 of timestamp "." raw body with the list's notice key,
+ * X-Oros-Timestamp within 5 minutes). A valid request writes one queue row at
  * most and answers at once; posting happens in the background. Answers are
  * not cached, errors are in English, BRC_DISABLE answers 403.
  */
@@ -75,17 +78,25 @@ final class BRC_Rest {
 			return self::answer( array( 'error' => 'disabled' ), 403 );
 		}
 		$provider = (string) $req->get_param( 'provider' );
-		if ( 'mailerlite' !== $provider ) {
+		if ( 'mailerlite' !== $provider && 'oros' !== $provider ) {
 			return self::answer( array( 'error' => 'unknown provider' ), 404 );
 		}
 		if ( ! Broadcast::load_source( 'newsletter' ) ) {
 			return self::answer( array( 'error' => 'off' ), 404 );
 		}
-		$res = BRC_Src_Newsletter::mailerlite( (string) $req->get_body(), (string) $req->get_header( 'signature' ) );
+		if ( 'oros' === $provider ) {
+			$res = BRC_Src_Newsletter::oros(
+				(string) $req->get_body(),
+				(string) $req->get_header( 'x_oros_timestamp' ),
+				(string) $req->get_header( 'x_oros_signature' )
+			);
+		} else {
+			$res = BRC_Src_Newsletter::mailerlite( (string) $req->get_body(), (string) $req->get_header( 'signature' ) );
+		}
 		if ( 'bad_signature' === $res ) {
 			return self::answer( array( 'error' => 'bad signature' ), 401 );
 		}
-		// Always 200 otherwise, also for events we ignore: MailerLite
+		// Always 200 otherwise, also for events we ignore: the provider
 		// retries any other answer and would send duplicates.
 		return self::answer( array( 'ok' => true ), 200 );
 	}

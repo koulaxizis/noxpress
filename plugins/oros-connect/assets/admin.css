@@ -420,6 +420,7 @@ a.orc-kofi:hover {
 /* Two languages side by side. */
 .orc-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
 .orc-pair input[type="text"] { width: 100%; }
+.orc-pair input[type="number"] { width: 100%; max-width: 160px; }
 .orc-pair .orc-lang { font-size: 12px; color: var(--orc-muted); display: block; margin-bottom: 2px; }
 
 /* Send log. */

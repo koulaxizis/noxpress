@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -24,7 +24,8 @@ Every module is off after activation. A module that is off loads no code.
 * The form posts straight from the visitor's browser to the orOS relay, like orOS's own HTML: no script, a hidden field against bots, the visitor's language. Nothing is stored on your site, so page caches are fine. orOS sends the confirmation email; the visitor then sees the thank-you page you set in orOS.
 * Texts in Greek and English (title, intro, fields, button, note), language automatic from the site or fixed.
 * WooCommerce: an unticked "I want to receive the newsletter" checkbox at checkout, in the classic checkout and the Checkout block (WooCommerce 8.9+). When the order is paid, the billing email and name are sent to your orOS list in the background, with retries, an order note and a send log. The consent (time and text) stays in the order.
-* Checkout sign-ups can skip the confirmation email (the default) or get one too (double opt-in). Skipping it needs a shop key that orOS will check; until orOS supports it, everyone gets the confirmation email.
+* Checkout sign-ups can skip the confirmation email (the default) or get one too (double opt-in). Skipping it needs a shop key: the same key goes into your list in orOS (Subscribe link → Shop key), which checks each signed sign-up. Without a key, everyone gets the confirmation email.
+* Popup (1.3.0, off by default): the same form in a popup, after 20 seconds or half the page (both adjustable), at most once every 30 days per browser and never again after a sign-up. Never on the cart, the checkout, the customer's account or a page that already has the form. The browser remembers it in localStorage: no cookie, nothing on the server, page caches are fine. Its own title and text in Greek and English (empty = the form's), for example to promise the welcome coupon that orOS sends with the welcome email. `?orc_popup=1` opens it at once for testing.
 
 **Offers module** (1.1.0)
 
@@ -51,7 +52,8 @@ Every module is off after activation. A module that is off loads no code.
 
 **For developers**
 
-* `orc_text` filter ( string $text, string $key, string $lang ): change a visitor text (keys title, intro, email, name, button, note, checkbox).
+* `orc_text` filter ( string $text, string $key, string $lang ): change a visitor text (keys title, intro, email, name, button, note, checkbox, pop_title, pop_intro, close).
+* `orc_popup_show` filter ( bool $show ): hide the popup on a page.
 * REST `GET /wp-json/orc/v1/offers` (state=new|contact|oros|closed|all, limit, page), `GET /wp-json/orc/v1/offers/<id>` and `POST /wp-json/orc/v1/offers/<id>` ( { state, note } ), managers only.
 * `orc_newsletter_sent` action ( int $order_id, string $result ): after each checkout sign-up attempt (`ok`, `bad`, `gone`, `busy`, `off`, `error`, `network`).
 
@@ -72,7 +74,7 @@ In orOS, on your own devices. The orOS relay keeps a new sign-up encrypted for y
 
 = Why do subscribers from the checkout get a confirmation email? =
 
-Until orOS can check the shop key, it cannot tell a checkout sign-up from the public form, so it confirms everyone. Turn on "Confirmation email for checkout sign-ups too" if you want that to stay so.
+Without the same shop key here and in your orOS list, orOS cannot tell a checkout sign-up from the public form, so it confirms everyone. Set the key on both sides (orOS from November 2026), or turn on "Confirmation email for checkout sign-ups too" if you want everyone to confirm.
 
 = What happens on uninstall? =
 
@@ -83,6 +85,11 @@ The settings, the send log, queued sends, the last offers import and the transie
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* Newsletter: the form in a popup too (off by default). Opens after 20 seconds or half the page, at most once every 30 days per browser and never after a sign-up; not on the cart, the checkout, the account pages or a page that has the form. localStorage only, no cookie; the same HTML for every visitor. Its own title, text and close label in Greek and English; filter `orc_popup_show`; `?orc_popup=1` to test.
+* Newsletter: the shop key is now checked by orOS (Subscribe link → Shop key), so signed checkout sign-ups join without a confirmation email; texts updated.
+* Privacy policy text mentions the popup's localStorage entry.
 
 = 1.2.1 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

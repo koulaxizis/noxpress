@@ -22,6 +22,7 @@ final class BRC_Crypt {
 		'viber'      => 'BRC_VIBER_TOKEN',
 		'mailerlite' => 'BRC_MAILERLITE_SECRET',
 		'instagram'  => 'BRC_INSTAGRAM_TOKEN',
+		'oros'       => 'BRC_OROS_SECRET',
 	);
 
 	public static function available(): bool {

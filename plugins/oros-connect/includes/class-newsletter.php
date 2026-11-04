@@ -21,6 +21,8 @@
  *    says how it went (_orc_nl_done = time, or _orc_nl_fail = reason).
  *    Without the confirmation for checkout sign-ups (default) and with a
  *    shop key, the post is signed (ORC_Relay::fields) so orOS can skip it.
+ *  - Popup (nl_popup, 1.3.0): the same form in a <dialog>, ORC_Popup
+ *    (includes/class-popup.php, loaded only when the popup is on).
  *
  * Front-end parts follow the mode (test: managers only) and ORC_DISABLE.
  */
@@ -58,6 +60,11 @@ final class ORC_Newsletter {
 		add_shortcode( self::SHORTCODE, array( __CLASS__, 'shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'maybe_css' ) );
 
+		if ( ORC_Settings::get()['nl_popup'] && ! is_admin() ) {
+			require_once ORC_PATH . 'includes/class-popup.php';
+			ORC_Popup::init();
+		}
+
 		if ( Oros_Connect::woo() ) {
 			add_action( 'woocommerce_review_order_before_submit', array( __CLASS__, 'classic_field' ), 20 );
 			add_action( 'woocommerce_checkout_create_order', array( __CLASS__, 'classic_save' ), 10, 2 );
@@ -83,7 +90,7 @@ final class ORC_Newsletter {
 	/**
 	 * The form HTML ('' when it does not show).
 	 *
-	 * @param array $args title (bool), name (bool|null = setting).
+	 * @param array $args title (bool), intro (bool), name (bool|null = setting).
 	 */
 	public static function form( array $args = array() ): string {
 		try {
@@ -93,6 +100,7 @@ final class ORC_Newsletter {
 			$s     = ORC_Settings::get();
 			$lang  = ORC_Settings::visitor_lang();
 			$title = ! isset( $args['title'] ) || $args['title'];
+			$intro = ! isset( $args['intro'] ) || $args['intro'];
 			$name  = isset( $args['name'] ) && null !== $args['name'] ? (bool) $args['name'] : (bool) $s['nl_name'];
 			$uid   = 'orc-nl-' . wp_unique_id();
 
@@ -107,7 +115,7 @@ final class ORC_Newsletter {
 			if ( $title && '' !== $t( 'title' ) ) {
 				$h .= '<p class="orc-nl__title"><strong>' . esc_html( $t( 'title' ) ) . '</strong></p>';
 			}
-			if ( '' !== $t( 'intro' ) ) {
+			if ( $intro && '' !== $t( 'intro' ) ) {
 				$h .= '<p class="orc-nl__intro">' . esc_html( $t( 'intro' ) ) . '</p>';
 			}
 			$h .= '<p class="orc-nl__row">';
