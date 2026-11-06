@@ -1,8 +1,8 @@
 {
   "display": 500,
-  "total": 885,
+  "total": 941,
   "offset": 5,
-  "updated": "2026-11-04",
+  "updated": "2026-11-06",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -822,19 +822,19 @@
     },
     "701314827": {
       "file": "nox-rs-1.12.3/revenue-splitter.zip",
-      "count": 2
+      "count": 4
     },
     "701315019": {
       "file": "nox-sp-1.8.2/store-pulse.zip",
-      "count": 2
+      "count": 5
     },
     "701315190": {
       "file": "nox-sf-1.5.1/smart-formatter.zip",
-      "count": 2
+      "count": 4
     },
     "701315426": {
       "file": "nox-tp-1.6.1/theme-patcher.zip",
-      "count": 3
+      "count": 5
     },
     "701315664": {
       "file": "nox-sh-1.3.1/shop-filters.zip",
@@ -842,19 +842,19 @@
     },
     "701315830": {
       "file": "nox-pf-1.2.2/product-formats.zip",
-      "count": 2
+      "count": 5
     },
     "701315994": {
       "file": "nox-ew-1.2.2/easy-withdrawal.zip",
-      "count": 1
+      "count": 3
     },
     "701316221": {
       "file": "nox-sn-1.2.1/shipping-notes.zip",
-      "count": 1
+      "count": 3
     },
     "701316480": {
       "file": "nox-bp-1.1.2/book-preview.zip",
-      "count": 2
+      "count": 5
     },
     "701316748": {
       "file": "nox-cr-1.2.1/featured-creators.zip",
@@ -862,59 +862,59 @@
     },
     "701316994": {
       "file": "nox-pk-1.2.1/store-pickup.zip",
-      "count": 2
+      "count": 3
     },
     "701317191": {
       "file": "nox-hc-1.1.2/hide-catalog.zip",
-      "count": 1
+      "count": 3
     },
     "701317454": {
       "file": "nox-vp-1.1.1/variation-picker.zip",
-      "count": 1
+      "count": 4
     },
     "701317637": {
       "file": "nox-gl-1.2.1/greeklish-permalinks.zip",
-      "count": 1
+      "count": 3
     },
     "701317826": {
       "file": "nox-oc-1.2.1/oros-connect.zip",
-      "count": 2
+      "count": 3
     },
     "701317989": {
       "file": "nox-pb-1.1.1/product-bundles.zip",
-      "count": 1
+      "count": 3
     },
     "701318196": {
       "file": "nox-sb-1.11.3/site-bridge.zip",
-      "count": 2
+      "count": 4
     },
     "701318344": {
       "file": "nox-pq-1.1.2/publishing-quote.zip",
-      "count": 2
+      "count": 4
     },
     "701318495": {
       "file": "nox-po-1.1.2/pre-orders.zip",
-      "count": 2
+      "count": 4
     },
     "701318692": {
       "file": "nox-ws-1.2.2/wish-shelf.zip",
-      "count": 2
+      "count": 4
     },
     "701318886": {
       "file": "nox-ce-1.1.1/checkout-extras.zip",
-      "count": 1
+      "count": 2
     },
     "701319147": {
       "file": "nox-nm-1.2.2/data-migrator.zip",
-      "count": 2
+      "count": 3
     },
     "701319334": {
       "file": "nox-hs-1.4.2/home-sections.zip",
-      "count": 2
+      "count": 5
     },
     "701319553": {
       "file": "nox-bf-1.13.1/book-feed.zip",
-      "count": 1
+      "count": 4
     },
     "701319709": {
       "file": "nox-lo-1.3.2/live-operator.zip",
@@ -922,7 +922,7 @@
     },
     "701319913": {
       "file": "nox-ta-1.4.2/trade-accounts.zip",
-      "count": 2
+      "count": 3
     },
     "701320151": {
       "file": "nox-fp-1.0.3/fast-pages.zip",
@@ -930,11 +930,11 @@
     },
     "701320332": {
       "file": "nox-br-1.1.7/broadcast.zip",
-      "count": 1
+      "count": 2
     },
     "701320517": {
       "file": "nox-ml-1.0.3/magic-login.zip",
-      "count": 2
+      "count": 3
     },
     "701320690": {
       "file": "nox-ti-1.0.2/trade-feed-import.zip",
@@ -994,11 +994,11 @@
     },
     "707086955": {
       "file": "nox-sh-1.3.2/shop-filters.zip",
-      "count": 3
+      "count": 5
     },
     "707087149": {
       "file": "nox-cr-1.2.2/featured-creators.zip",
-      "count": 2
+      "count": 3
     },
     "707087563": {
       "file": "nox-lo-1.5.1/live-operator.zip",
@@ -1006,14 +1006,22 @@
     },
     "707087829": {
       "file": "nox-ss-1.0.0/search-signals.zip",
-      "count": 3
+      "count": 4
     },
     "708774223": {
       "file": "nox-oc-1.3.0/oros-connect.zip",
-      "count": 0
+      "count": 2
     },
     "708774624": {
       "file": "nox-br-1.2.0/broadcast.zip",
+      "count": 1
+    },
+    "716439599": {
+      "file": "nox-sb-1.11.4/site-bridge.zip",
+      "count": 0
+    },
+    "716439961": {
+      "file": "nox-br-1.2.1/broadcast.zip",
       "count": 0
     }
   }
