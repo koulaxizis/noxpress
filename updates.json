@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Newsletter: orOS Newsletter as a second provider. Route `/wp-json/broadcast/v1/hook/newsletter/oros` takes the «issue.sent» notice that orOS sends through its relay when an issue has gone out, checks X-Oros-Signature (HMAC-SHA256 of the timestamp and the raw body with the list's notice key, `hash_equals`) and a timestamp at most 5 minutes off, and queues one post per issue with the subject as its title. Placeholder {list} (the list's name) in the newsletter template.\n* The notice key is sealed like the other secrets (or `BRC_OROS_SECRET` in wp-config.php) and removed on uninstall.",
-        "published": "2026-11-04",
+        "changelog": "* Fix: the ability `broadcast/queue-reject` is no longer marked destructive (it only marks the item as rejected; it stays in the history). Site Bridge classed it \"admin\", so Reject in the Site Bridge app, which runs read and write abilities only, was refused.",
+        "published": "2026-11-06",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ea0b2bb5b055922ecc64d67120ba9a0057bffba1b6442fbe08a4ace53acfcd95",
-        "signature": "BGnz8BuYIz9a685rUjkCnoLi1QdpJifUsLjrMWL8XavCjlY7EtCRHETeK5Gt7CcdqAsy0hdPX9KdwouVN/9gBw==",
+        "sha256": "810fcd100194f2d5bebe615eb7d26d39a7c56b14d195a17d24083b32ffd1142f",
+        "signature": "UjE8pYUy8l+FnOOldeIBKPyihJgz69z2hgTPDu1e1yERY8Wi49cymrzcvtLgzfQpCcVJAjh32KtO1VLk1eGNDA==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.2.0/broadcast.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.2.1/broadcast.zip"
       }
     },
     "checkout-extras": {
@@ -325,15 +325,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Fix: when a site refuses or fails an app call (/app/ability, /app/window), the Hub answers 409 instead of 502. Hosts and proxies replace 5xx bodies with their own error page, so the app showed only \"HTTP 502\" instead of the reason.",
+        "published": "2026-11-06",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "96c26de3cef3731eb56c7e24672beac4be566030588acd30d34f5e125528b85b",
-        "signature": "eutTFiAE0SCMTjJmvY/rY59sPjEHM1c6Lof1re///MuGTJGB2QB1Fnvxo6Z8s1NZCBJ6unIjgzeKkBDhSv30Ag==",
+        "sha256": "9b2cc8af5a6c36c51d64606ab4b49368ddd7af7503574d729a623edd4681a25f",
+        "signature": "wOkPvkGziik/NGxorKAWSJ2VcRiORUVc5yb2kO41i1a7uO85YMQKCVBAN25FnH6ZXJ01UQU3vw/+cMWG7WWzBA==",
         "tested_wp": "7.1",
-        "version": "1.11.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.3/site-bridge.zip"
+        "version": "1.11.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.11.4/site-bridge.zip"
       }
     },
     "smart-formatter": {
