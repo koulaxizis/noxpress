@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -83,6 +83,9 @@ The webhook at Viber is removed, and the queue and history table, the settings, 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: the ability `broadcast/queue-reject` is no longer marked destructive (it only marks the item as rejected; it stays in the history). Site Bridge classed it "admin", so Reject in the Site Bridge app, which runs read and write abilities only, was refused.
 
 = 1.2.0 =
 * Newsletter: orOS Newsletter as a second provider. Route `/wp-json/broadcast/v1/hook/newsletter/oros` takes the «issue.sent» notice that orOS sends through its relay when an issue has gone out, checks X-Oros-Signature (HMAC-SHA256 of the timestamp and the raw body with the list's notice key, `hash_equals`) and a timestamp at most 5 minutes off, and queues one post per issue with the subject as its title. Placeholder {list} (the list's name) in the newsletter template.
