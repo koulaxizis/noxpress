@@ -345,7 +345,7 @@ final class SBR_App {
 		$r    = SBR_Hub::window( $sites[ $id ], $min );
 		if ( is_wp_error( $r ) ) {
 			self::audit( $tool, 'error', $r->get_error_message(), $args, $dev );
-			return self::fail( 502, 'site', $r->get_error_message() );
+			return self::fail( 409, 'site', $r->get_error_message() );
 		}
 		self::audit( $tool, 'ok', '', $args, $dev );
 		if ( $min > 0 && SBR_Settings::v( 'app_email' ) ) {
@@ -400,7 +400,7 @@ final class SBR_App {
 			);
 			if ( is_wp_error( $w ) ) {
 				self::audit( 'app_window_open', 'error', $w->get_error_message(), $w_args, $dev );
-				return self::fail( 502, 'site', $w->get_error_message() );
+				return self::fail( 409, 'site', $w->get_error_message() );
 			}
 			$opened = (int) ( $w['window_until'] ?? 0 );
 			self::audit( 'app_window_open', 'ok', '', $w_args, $dev );
@@ -424,7 +424,7 @@ final class SBR_App {
 			)
 		);
 		if ( empty( $r['ok'] ) ) {
-			return self::fail( 502, 'site', (string) ( $r['error'] ?? 'Error.' ), array( 'window_opened' => $opened ) );
+			return self::fail( 409, 'site', (string) ( $r['error'] ?? 'Error.' ), array( 'window_opened' => $opened ) );
 		}
 		$res = is_array( $r['result'] ) && array_key_exists( 'result', $r['result'] ) ? $r['result']['result'] : $r['result'];
 		return self::ok(

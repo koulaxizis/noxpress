@@ -119,7 +119,9 @@ final class BRC_Src_Queue {
 					'required'             => array( 'id' ),
 					'additionalProperties' => false,
 				),
-				'ann'         => array( false, true, true ),
+				// Not destructive: the item stays in the history as rejected, nothing is deleted.
+				// Destructive would make Site Bridge class it "admin", which the app (read + write) may not run.
+				'ann'         => array( false, false, true ),
 				'run'         => array( __CLASS__, 'reject' ),
 			),
 			'status'       => array(
