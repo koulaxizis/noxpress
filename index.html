@@ -1313,6 +1313,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="production-ledger">
+		<h2><a href="#production-ledger">Production Ledger</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="pl_desc">What each product really earned: production costs by category, shipping, consumables and payment fees spread over the month’s orders, creator payouts and general expenses, down to a net result and a break-even point. Every amount net, with VAT in its own column.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="pl_li1">One entry per invoice line: printing, editing, design, mastering, ISBNs, promotion, events and more, with supplier, invoice number, VAT and a link to the document; soft delete with undo</li>
+			<li data-i18n="pl_li2">A carrier’s invoice falls equally on its parcels, consumables on every shipped order, payment fees on the orders paid through that provider; general expenses in their own ledger</li>
+			<li data-i18n="pl_li3">Report per month or year: retail and trade revenue, creator payouts from Revenue Splitter, costs, net per product, final result and how many units are left to break even</li>
+			<li data-i18n="pl_li4">CSV of the entries and of the summary (Excel Greek or standard), and a read-only feed that orOS Budget pulls, with stable ids so nothing is ever counted twice</li>
+			<li data-i18n="pl_li5">Optional Printful module: each completed Printful order becomes printing costs of its products, with a read-only key stored encrypted; abilities for Site Bridge; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.0.0/production-ledger.zip" rel="nofollow noopener" data-i18n="pl_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/production-ledger" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="apps">
@@ -1790,6 +1811,13 @@ footer .heart { color: var(--accent-bright); }
 		ss_li4: 'Import from Rank Math with a dry run and undo, a field-by-field comparison with the live pages, then switch over and back in one click; Rank Math’s data is only read',
 		ss_li5: 'Off until you enable it, test mode for administrators, passive while another SEO plugin runs, SSG_DISABLE; no external calls, no cookies; abilities for Site Bridge; bilingual UI and shared «Noxpress» menu',
 		ss_download: 'Download v1.0.0 (.zip)',
+		pl_desc: 'What each product really earned: production costs by category, shipping, consumables and payment fees spread over the month’s orders, creator payouts and general expenses, down to a net result and a break-even point. Every amount net, with VAT in its own column.',
+		pl_li1: 'One entry per invoice line: printing, editing, design, mastering, ISBNs, promotion, events and more, with supplier, invoice number, VAT and a link to the document; soft delete with undo',
+		pl_li2: 'A carrier’s invoice falls equally on its parcels, consumables on every shipped order, payment fees on the orders paid through that provider; general expenses in their own ledger',
+		pl_li3: 'Report per month or year: retail and trade revenue, creator payouts from Revenue Splitter, costs, net per product, final result and how many units are left to break even',
+		pl_li4: 'CSV of the entries and of the summary (Excel Greek or standard), and a read-only feed that orOS Budget pulls, with stable ids so nothing is ever counted twice',
+		pl_li5: 'Optional Printful module: each completed Printful order becomes printing costs of its products, with a read-only key stored encrypted; abilities for Site Bridge; bilingual UI and shared «Noxpress» menu',
+		pl_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2169,6 +2197,13 @@ footer .heart { color: var(--accent-bright); }
 		ss_li4: 'Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση και αναίρεση, σύγκριση πεδίο προς πεδίο με τις ζωντανές σελίδες και μετά μετάβαση και επιστροφή με ένα κλικ· τα δεδομένα του Rank Math μόνο διαβάζονται',
 		ss_li5: 'Κλειστό μέχρι να το ανοίξεις, λειτουργία δοκιμής για διαχειριστές, παθητικό όσο τρέχει άλλο SEO plugin, SSG_DISABLE· χωρίς εξωτερικές κλήσεις και cookies· abilities για το Site Bridge· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ss_download: 'Λήψη v1.0.0 (.zip)',
+		pl_desc: 'Τι έφερε πραγματικά κάθε προϊόν: κόστη παραγωγής ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών και γενικά έξοδα, ως το καθαρό αποτέλεσμα και το νεκρό σημείο. Όλα τα ποσά καθαρά, με τον ΦΠΑ σε δική του στήλη.',
+		pl_li1: 'Μία καταχώριση ανά γραμμή τιμολογίου: εκτύπωση, επιμέλεια, σχέδιο, mastering, ISBN, προώθηση, εκδηλώσεις και άλλα, με προμηθευτή, αριθμό παραστατικού, ΦΠΑ και σύνδεσμο στο έγγραφο· διαγραφή με αναίρεση',
+		pl_li2: 'Το τιμολόγιο του μεταφορέα πέφτει ίσα στα δέματά του, τα αναλώσιμα σε κάθε αποστολή, οι προμήθειες πληρωμών στις παραγγελίες που πέρασαν από εκείνον τον πάροχο· τα γενικά έξοδα σε δικό τους βιβλίο',
+		pl_li3: 'Αναφορά ανά μήνα ή έτος: έσοδα λιανικής και χονδρικής, αμοιβές δημιουργών από το Revenue Splitter, κόστη, καθαρό ανά προϊόν, τελικό αποτέλεσμα και πόσα τεμάχια μένουν ως το νεκρό σημείο',
+		pl_li4: 'CSV των καταχωρίσεων και της σύνοψης (Excel ελληνικά ή τυπικό), και ροή μόνο για ανάγνωση που τραβά το orOS Budget, με σταθερά ids ώστε τίποτα να μη μετρηθεί δύο φορές',
+		pl_li5: 'Προαιρετικό module Printful: κάθε ολοκληρωμένη παραγγελία Printful γίνεται κόστος εκτύπωσης των προϊόντων της, με κλειδί μόνο για ανάγνωση που αποθηκεύεται κρυπτογραφημένο· abilities για το Site Bridge· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		pl_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
