@@ -18,7 +18,8 @@
  *    del = 1 rows for what it gave before (for the period asked).
  *  - ledger entries
  *      id  e<entry>               k o (cost) | i (off-site income)
- *    A soft-deleted entry gives del = 1.
+ *    A soft-deleted, historical or (without test=1) test entry gives
+ *    del = 1, so a row pulled before the change is removed in orOS.
  *
  * Amounts in integer cents: a = net, v = VAT (gross = a + v). Dates are
  * local Y-m-d (orders: the day they were paid, as the report and the bank).
@@ -305,16 +306,16 @@ final class PL_Rest {
 				'from'  => $from,
 				'to'    => $to,
 				'all'   => true,
+				'hist'  => null,
 				'limit' => 5000,
 			)
 		)['rows'];
 		foreach ( $entries as $e ) {
-			if ( $e['is_test'] && ! $test ) {
-				continue;
-			}
 			$id = 'e' . $e['id'];
 			$m  = (int) ( strtotime( $e['updated_at'] . ' UTC' ) * 1000 );
-			if ( null !== $e['deleted_at'] ) {
+			// Deleted, historical, or test (unless asked for): a del row, so
+			// an entry pulled before it changed is removed in orOS too.
+			if ( null !== $e['deleted_at'] || $e['is_hist'] || ( $e['is_test'] && ! $test ) ) {
 				$rows[ $id ] = array(
 					'id'  => $id,
 					'm'   => $m,
