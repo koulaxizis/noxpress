@@ -66,6 +66,7 @@ SLUGS = {
     'li': 'lean-images',
     'rd': 'redirects',
     'ss': 'search-signals',
+    'pl': 'production-ledger',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
