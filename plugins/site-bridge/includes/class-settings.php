@@ -1,6 +1,7 @@
 <?php
 /**
- * SBR_Settings — the sbr_settings option and the write window.
+ * SBR_Settings — the sbr_settings option and the write window (opened by
+ * hand, or by SBR_Schedule from 1.12.0).
  *
  * Every value is validated against a whitelist on save; get() merges the
  * stored array over the defaults, so a missing or broken option always
@@ -42,6 +43,8 @@ final class SBR_Settings {
 			'log_days'      => 90,
 			'app'           => false,
 			'app_email'     => true,
+			// 1.12.0: an e-mail for every change of the write window.
+			'window_email'  => true,
 		);
 	}
 
@@ -71,7 +74,7 @@ final class SBR_Settings {
 	public static function sanitize( array $in ): array {
 		$d   = self::defaults();
 		$out = array();
-		foreach ( array( 'hub', 'site', 'remote_window', 'nowin', 'pii_mask', 'email_admin', 'dcr', 'app', 'app_email' ) as $k ) {
+		foreach ( array( 'hub', 'site', 'remote_window', 'nowin', 'pii_mask', 'email_admin', 'dcr', 'app', 'app_email', 'window_email' ) as $k ) {
 			$out[ $k ] = isset( $in[ $k ] ) ? (bool) $in[ $k ] : $d[ $k ];
 		}
 		$out['level']  = isset( $in['level'] ) && in_array( $in['level'], self::LEVELS, true ) ? $in['level'] : $d['level'];
@@ -137,21 +140,72 @@ final class SBR_Settings {
 	 * Write window
 	 * =================================================================== */
 
-	/** Unix time the window closes, 0 when closed. */
+	/**
+	 * Unix time the window closes, 0 when closed: the later of the window
+	 * opened by hand and the stretch of the schedule we are in (1.12.0).
+	 */
 	public static function window_until(): int {
+		return max( self::manual_until(), SBR_Schedule::open_until() );
+	}
+
+	/** The window opened by hand only. */
+	public static function manual_until(): int {
 		$t = (int) get_option( self::WINDOW, 0 );
 		return $t > time() ? $t : 0;
 	}
 
-	public static function open_window( int $minutes ): int {
+	/** What keeps the window open now: 'schedule', 'manual' or ''. */
+	public static function window_source(): string {
+		$m = self::manual_until();
+		$s = SBR_Schedule::open_until();
+		if ( $s && $s >= $m ) {
+			return 'schedule';
+		}
+		return $m ? 'manual' : '';
+	}
+
+	/**
+	 * Opens the window by hand.
+	 *
+	 * @param int    $minutes One of WINDOW_MINUTES (else 30).
+	 * @param string $source  Who opened it, for the e-mail: admin, hub, app, claude.
+	 * @param string $who     User or device name, for the e-mail.
+	 */
+	public static function open_window( int $minutes, string $source = 'admin', string $who = '' ): int {
 		$minutes = in_array( $minutes, self::WINDOW_MINUTES, true ) ? $minutes : 30;
 		$until   = time() + 60 * $minutes;
 		update_option( self::WINDOW, $until, false );
+		SBR_Notify::change(
+			'open',
+			$source,
+			array(
+				'until'   => self::window_until(),
+				'minutes' => $minutes,
+				'who'     => $who,
+			)
+		);
 		return $until;
 	}
 
-	public static function close_window(): void {
+	/**
+	 * Closes the window now. Inside a stretch of the schedule it is paused
+	 * until the stretch ends; the next one opens as planned (1.12.0).
+	 */
+	public static function close_window( string $source = 'admin', string $who = '' ): void {
+		$was = self::window_until();
 		update_option( self::WINDOW, 0, false );
+		$paused = SBR_Schedule::pause();
+		if ( $was ) {
+			SBR_Notify::change(
+				'close',
+				$source,
+				array(
+					'paused' => $paused,
+					'next'   => SBR_Schedule::next_open(),
+					'who'    => $who,
+				)
+			);
+		}
 	}
 
 	/** The user tools run as: a valid administrator, or null. */

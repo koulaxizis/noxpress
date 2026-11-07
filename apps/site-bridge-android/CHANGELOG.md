@@ -1,5 +1,10 @@
 # Site Bridge app — changelog
 
+## 1.8.0
+
+* New: a notification for every change of a site's write window, without Firebase: opened or closed (from WP admin, the Hub, Claude or the schedule), its end moved, paused, the automatic schedule turned on, off or edited. The phone checks the Hub every 15 minutes (Android's shortest) and once more right after the next planned change, so the schedule's own openings and closings are told on time. Own channel "Write window", which can be silenced in Android's settings. Changes made from the app itself are not told back.
+* New: each site card shows "Opened by the site's schedule", a pause of the schedule and the next scheduled opening. Needs Site Bridge 1.12.0+ on the Hub and on the site; older sites look as before.
+
 ## 1.7.1
 
 * Fix: with the Book Feed and Broadcast tabs (4-5 tabs) the top labels were cut on narrow phones ("Broad", "Settin"). The tab row now scrolls sideways when it has more than 3 tabs, so every label shows in full; with 3 tabs it stays as before.

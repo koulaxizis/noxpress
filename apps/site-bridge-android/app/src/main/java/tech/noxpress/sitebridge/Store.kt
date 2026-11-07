@@ -20,6 +20,8 @@ import android.content.SharedPreferences
  *  upd_at / upd_ver / upd_url  the last look for a newer app (1.4.0)
  *  upd_notified  the version the update notification already told (1.5.0)
  *  upd_asked  the notification permission was asked once for updates (1.5.0)
+ *  wn_notify  write-window notifications on (1.8.0, on by default)
+ *  wn_<site>  the window state of a site at the last look (WindowWatch)
  */
 class Store(context: Context) {
 
@@ -106,6 +108,16 @@ class Store(context: Context) {
     var updAsked: Boolean
         get() = p.getBoolean("upd_asked", false)
         set(v) = p.edit().putBoolean("upd_asked", v).apply()
+
+    var wnNotify: Boolean
+        get() = p.getBoolean("wn_notify", true)
+        set(v) = p.edit().putBoolean("wn_notify", v).apply()
+
+    fun wnState(site: String): String = p.getString("wn_$site", "") ?: ""
+
+    fun setWnState(site: String, v: String) {
+        p.edit().putString("wn_$site", v).apply()
+    }
 
     val paired: Boolean get() = base.isNotEmpty() && device.isNotEmpty()
 

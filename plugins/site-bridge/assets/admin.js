@@ -2,6 +2,8 @@
  * Site Bridge — admin JS (vanilla, zero dependencies).
  *  1. data-sbr-copy="<id>": copies the text of that element (code or textarea).
  *  2. data-sbr-confirm="<question>": asks before the form is submitted.
+ *  3. data-sbr-copy-weekdays: copies Monday's ranges of the write-window
+ *     schedule to Tuesday … Friday (1.12.0).
  */
 (function () {
 	'use strict';
@@ -52,5 +54,19 @@
 		if (ask && !window.confirm(ask.getAttribute('data-sbr-confirm'))) {
 			e.preventDefault();
 		}
+	});
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest ? e.target.closest('[data-sbr-copy-weekdays]') : null;
+		if (!btn) {
+			return;
+		}
+		var table = btn.closest('form').querySelector('.sbr-sched');
+		var mon = table ? table.querySelectorAll('tr[data-sbr-day="1"] input[type="time"]') : [];
+		['2', '3', '4', '5'].forEach(function (d) {
+			var row = table.querySelectorAll('tr[data-sbr-day="' + d + '"] input[type="time"]');
+			for (var i = 0; i < row.length && i < mon.length; i++) {
+				row[i].value = mon[i].value;
+			}
+		});
 	});
 })();

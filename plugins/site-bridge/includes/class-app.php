@@ -342,13 +342,14 @@ final class SBR_App {
 			'site'    => $id,
 			'minutes' => $min,
 		);
-		$r    = SBR_Hub::window( $sites[ $id ], $min );
+		$r    = SBR_Hub::window( $sites[ $id ], $min, 'app', (string) $dev['name'] );
 		if ( is_wp_error( $r ) ) {
 			self::audit( $tool, 'error', $r->get_error_message(), $args, $dev );
 			return self::fail( 409, 'site', $r->get_error_message() );
 		}
 		self::audit( $tool, 'ok', '', $args, $dev );
-		if ( $min > 0 && SBR_Settings::v( 'app_email' ) ) {
+		// The Hub's own site already mails every change itself (1.12.0).
+		if ( $min > 0 && SBR_Settings::v( 'app_email' ) && ! ( ! empty( $sites[ $id ]['self'] ) && SBR_Settings::v( 'window_email' ) ) ) {
 			self::mail_open( $dev, (string) $row['label'], (int) ( $r['window_until'] ?? 0 ) );
 		}
 		$fresh = self::site_row( array_merge( $sites[ $id ], array( 'status' => $r ) ), false );
@@ -392,7 +393,7 @@ final class SBR_App {
 				self::audit( 'app_ability', 'denied', 'Window closed and the Hub may not open it', $args, $dev );
 				return self::fail( 403, 'window_closed', 'The write window of this site is closed, and it does not let the Hub open it. Open it on the site (Site Bridge → Access).' );
 			}
-			$w      = SBR_Hub::window( $sites[ $id ], self::AUTO_WINDOW );
+			$w      = SBR_Hub::window( $sites[ $id ], self::AUTO_WINDOW, 'app', (string) $dev['name'] );
 			$w_args = array(
 				'site'    => $id,
 				'minutes' => self::AUTO_WINDOW,
@@ -509,6 +510,11 @@ final class SBR_App {
 			'self'         => $self,
 			'level'        => $level,
 			'window_until' => $until > time() ? $until : 0,
+			// 1.12.0 (older sites send nothing: '' / false / 0).
+			'source'       => $until > time() ? (string) ( $st['window_source'] ?? '' ) : '',
+			'schedule_on'  => ! empty( $st['schedule_on'] ),
+			'next_open'    => (int) ( $st['next_open'] ?? 0 ),
+			'paused_until' => (int) ( $st['paused_until'] ?? 0 ),
 			// The Hub's own site follows the Sites tab: the owner is here.
 			'can_open'     => $self || ! empty( $st['remote_window'] ),
 			'reachable'    => '' === $error,

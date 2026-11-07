@@ -55,6 +55,8 @@ The Hub accepts ±300 s and each nonce once. See `plugins/site-bridge/includes/c
 
 Rule preview (1.3.0): `book-feed/rule-preview` with the read key; the dialog shows it only while its fields are the ones it was made for.
 
+Write-window notifications (1.8.0, on by default, channel "Write window"): WorkManager every 15 minutes plus one run right after the next planned change of any site (window end, the schedule's next opening, end of a pause), reading `/app/sites` with the read key and telling what changed since the last look (opened, closed, end moved, paused, schedule on / off / edited). Needs Site Bridge 1.12.0+ for the schedule fields.
+
 Notifications: WorkManager, about once an hour, `book-feed/notices` with the read key for each site with Book Feed; the first look only sets the starting time. Broadcast (1.6.0, on by default): `broadcast/queue-list` with the read key for each site with Broadcast, one notification when items with a higher id than the last look wait.
 
 ## Build

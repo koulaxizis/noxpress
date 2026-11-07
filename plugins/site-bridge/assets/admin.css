@@ -414,6 +414,10 @@ a.sbr-kofi:hover {
 .sbr-levels .sbr-hint { margin-left: 24px; }
 .sbr-window { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .sbr-window form { display: inline; }
+.sbr-wrap .sbr-sched { max-width: 760px; margin: 8px 0; }
+.sbr-wrap .sbr-sched td { white-space: nowrap; }
+.sbr-wrap .sbr-sched input[type="time"] { width: 7.5em; }
+@media (max-width: 782px) { .sbr-wrap .sbr-sched { display: block; overflow-x: auto; } }
 .sbr-checks { list-style: none; margin: 0; padding: 0; }
 .sbr-checks li { margin: 0 0 6px; }
 .sbr-checks .ok { color: #9fe0b5; }

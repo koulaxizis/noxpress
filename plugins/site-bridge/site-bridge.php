@@ -3,7 +3,7 @@
  * Plugin Name:          Site Bridge
  * Plugin URI:           https://noxpress.tech
  * Description:          Το Claude διαχειρίζεται τα WordPress / WooCommerce sites σου μέσω MCP, από τους δικούς σου servers. Ένα Hub δέχεται τη σύνδεση του Claude (OAuth 2.1) και προωθεί κάθε κλήση, υπογεγραμμένη, στα sites. Κάθε site αποφασίζει μόνο του: ανάγνωση, εγγραφή ή διαχείριση, με παράθυρο εγγραφής που ανοίγεις εσύ. Ιστορικό κάθε κλήσης. Δουλεύει με το Claude, δεν σχετίζεται με την Anthropic.
- * Version:              1.11.4
+ * Version:              1.12.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -23,6 +23,8 @@
  *  - SBR_Lang      → EN dictionary + gettext filter (rs_lang, Bible §9)
  *  - SBR_Settings  → the sbr_settings option, strict validation, the
  *                    write window
+ *  - SBR_Schedule  → weekly schedule of the write window (1.12.0)
+ *  - SBR_Notify    → an e-mail for every change of the window (1.12.0)
  *  - SBR_Crypto    → Ed25519 keys (secret key sealed with the site's
  *                    salts), signatures, random tokens
  *  - SBR_Store     → tables sbr_log (audit) and sbr_grants (OAuth),
@@ -60,7 +62,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SBR_VERSION', '1.11.4' );
+define( 'SBR_VERSION', '1.12.0' );
 define( 'SBR_FILE', __FILE__ );
 define( 'SBR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SBR_URL', plugin_dir_url( __FILE__ ) );
@@ -71,6 +73,8 @@ require_once SBR_PATH . 'includes/noxpress-core/loader.php';
 
 require_once SBR_PATH . 'includes/class-lang.php';
 require_once SBR_PATH . 'includes/class-settings.php';
+require_once SBR_PATH . 'includes/class-schedule.php';
+require_once SBR_PATH . 'includes/class-notify.php';
 require_once SBR_PATH . 'includes/class-crypto.php';
 require_once SBR_PATH . 'includes/class-store.php';
 require_once SBR_PATH . 'includes/class-guard.php';
@@ -104,6 +108,7 @@ final class Site_Bridge {
 		);
 
 		if ( ! self::killed() ) {
+			SBR_Schedule::init();
 			SBR_Site::init();
 			SBR_Hub::init();
 			SBR_OAuth::init();
@@ -173,10 +178,12 @@ final class Site_Bridge {
 		SBR_Settings::first_run();
 		SBR_Crypto::keys();
 		SBR_Store::schedule();
+		SBR_Schedule::reschedule();
 	}
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( SBR_Store::CRON );
+		wp_clear_scheduled_hook( SBR_Schedule::CRON );
 	}
 }
 
