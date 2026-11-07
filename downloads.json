@@ -1,6 +1,6 @@
 {
   "display": 500,
-  "total": 949,
+  "total": 952,
   "offset": 5,
   "updated": "2026-11-07",
   "assets": {
@@ -1030,10 +1030,14 @@
     },
     "720875081": {
       "file": "nox-pl-1.0.0/production-ledger.zip",
-      "count": 0
+      "count": 2
     },
     "720887793": {
       "file": "nox-pl-1.0.1/production-ledger.zip",
+      "count": 1
+    },
+    "721227734": {
+      "file": "nox-sb-1.12.0/site-bridge.zip",
       "count": 0
     }
   }
