@@ -230,7 +230,7 @@ final class PL_Settings {
 
 	public static function pf_key(): string {
 		if ( self::pf_key_from_constant() ) {
-			return (string) PL_PRINTFUL_KEY;
+			return (string) constant( 'PL_PRINTFUL_KEY' ); // Read by name: the constant lives only in wp-config.php.
 		}
 		$raw = (string) get_option( self::SECRET, '' );
 		return '' === $raw ? '' : self::open( $raw );
