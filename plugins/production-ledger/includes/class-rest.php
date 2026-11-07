@@ -31,6 +31,17 @@
  * carry t = 1. «months» gives the site's monthly totals so orOS can check
  * that its own sums match to the cent.
  *
+ *  GET /wp-json/wc/v3/pl/report?from=Y-m-d&to=Y-m-d          (1.1.0)
+ *
+ * The same report as the admin screen and the report ability (PL_Report:
+ * per product revenue, direct costs by category, its shares of the pooled
+ * shipping, consumables and payment fees, shipping charged, creator
+ * payouts from Revenue Splitter, VAT out and in, net, break-even), for
+ * orOS Publishing's «Cost & result» per title. from defaults to the start
+ * date, to to today; amounts in integer cents; plus the publisher's own
+ * names (whose Revenue Splitter shares are not a cost) and the general
+ * expenses that no product carries.
+ *
  * Authentication: under wc/v3, so WooCommerce authenticates the shop's
  * REST keys (a read key is enough) or an Application Password; the route
  * also checks manage_woocommerce. Deviation from §20 (own namespace
@@ -51,6 +62,7 @@ final class PL_Rest {
 	}
 
 	public static function routes(): void {
+		self::report_route();
 		$date = array(
 			'type'    => 'string',
 			'pattern' => '^\d{4}-\d{2}-\d{2}$',
@@ -81,6 +93,100 @@ final class PL_Rest {
 						'default' => false,
 					),
 				),
+			)
+		);
+	}
+
+	/** The report route (1.1.0): registered with the records route. */
+	public static function report_route(): void {
+		$date = array(
+			'type'    => 'string',
+			'pattern' => '^\d{4}-\d{2}-\d{2}$',
+		);
+		register_rest_route(
+			self::NS,
+			'/pl/report',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'report' ),
+				'permission_callback' => array( __CLASS__, 'allowed' ),
+				'args'                => array(
+					'from' => $date,
+					'to'   => $date,
+				),
+			)
+		);
+	}
+
+	/** @param WP_REST_Request $req Request. */
+	public static function report( $req ) {
+		$start = PL_Settings::start();
+		$from  = (string) $req->get_param( 'from' );
+		$to    = (string) $req->get_param( 'to' );
+		$from  = PL_Settings::valid_date( $from ) ? max( $from, $start ) : $start;
+		$to    = PL_Settings::valid_date( $to ) ? $to : wp_date( 'Y-m-d' );
+		if ( $from > $to ) {
+			$from = $to;
+		}
+		$rep = PL_Report::get( $from, $to );
+		if ( is_wp_error( $rep ) ) {
+			return new WP_Error( $rep->get_error_code(), $rep->get_error_message(), array( 'status' => 400 ) );
+		}
+		$money = array( 'retail', 'trade', 'offsite', 'revenue', 'vat_out', 'vat_in', 'creators_rs', 'shipping_charged', 'shipping_cost', 'consumables', 'payment_fees', 'costs_total', 'net' );
+		$products = array();
+		foreach ( $rep['products'] as $p ) {
+			$row = array(
+				'pid'          => (int) $p['product_id'],
+				'title'        => (string) $p['title'],
+				'units_retail' => (int) $p['units_retail'],
+				'units_trade'  => (int) $p['units_trade'],
+				'costs'        => array(),
+				'break_even'   => null === $p['break_even'] ? null : (int) $p['break_even'],
+			);
+			foreach ( $money as $k ) {
+				$row[ $k ] = self::cents( (float) $p[ $k ] );
+			}
+			foreach ( (array) $p['costs'] as $cat => $v ) {
+				if ( (float) $v != 0.0 ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- float.
+					$row['costs'][ (string) $cat ] = self::cents( (float) $v );
+				}
+			}
+			if ( isset( $p['net_since_start'] ) ) {
+				$row['net_since_start'] = self::cents( (float) $p['net_since_start'] );
+			}
+			$products[] = $row;
+		}
+		$general = array();
+		foreach ( (array) $rep['general']['by_category'] as $cat => $v ) {
+			$general[ (string) $cat ] = self::cents( (float) $v );
+		}
+		$unalloc = array();
+		foreach ( (array) $rep['general']['unallocated'] as $k => $v ) {
+			$unalloc[ (string) $k ] = self::cents( (float) $v );
+		}
+		$totals = array();
+		foreach ( (array) $rep['totals'] as $k => $v ) {
+			$totals[ (string) $k ] = 'units' === $k ? (int) $v : self::cents( (float) $v );
+		}
+		return self::nocache(
+			array(
+				'source'      => 'production-ledger',
+				'version'     => PL_VERSION,
+				'currency'    => (string) $rep['currency'],
+				'start'       => $start,
+				'from'        => $from,
+				'to'          => $to,
+				'orders'      => (int) $rep['orders'],
+				'house'       => array_values( array_map( 'strval', (array) $rep['rs']['house'] ) ),
+				'rs'          => (bool) $rep['rs']['available'],
+				'products'    => $products,
+				'totals'      => $totals,
+				'general'     => array(
+					'by_category' => $general,
+					'unallocated' => $unalloc,
+					'total'       => self::cents( (float) $rep['general']['total'] ),
+				),
+				'grand_total' => self::cents( (float) $rep['grand_total'] ),
 			)
 		);
 	}
