@@ -21,7 +21,7 @@
  *    A soft-deleted entry gives del = 1.
  *
  * Amounts in integer cents: a = net, v = VAT (gross = a + v). Dates are
- * local Y-m-d (orders: when created, as the report; paid = when paid).
+ * local Y-m-d (orders: the day they were paid, as the report and the bank).
  * For bank reconciliation an order row carries its payment method, the
  * gateway's transaction id and the order number; an entry its supplier
  * and invoice number. Test entries are left out unless test=1, and then
@@ -194,21 +194,18 @@ final class PL_Rest {
 			$months[ $m ][ 'i' === $k ? 'income_vat' : 'expense_vat' ] += $v;
 		};
 
-		// Orders of every status except drafts: paid ones give rows,
-		// the others give del rows (so an earlier pull is undone).
-		try {
-			$tz    = wp_timezone();
-			$range = ( new DateTimeImmutable( $from . ' 00:00:00', $tz ) )->getTimestamp() . '...' . ( new DateTimeImmutable( $to . ' 23:59:59', $tz ) )->getTimestamp();
-		} catch ( \Exception $e ) {
-			$range = '';
-		}
+		// Orders PAID in the range (the bank's date), whatever their status
+		// now: paid ones give rows, the others (cancelled, refunded after
+		// payment) give del rows, so an earlier pull is undone.
+		$range  = PL_Report::paid_range( $from, $to );
+		$paid_s = PL_Report::paid_statuses();
 		$orders = '' === $range ? array() : wc_get_orders(
 			array(
-				'limit'        => -1,
-				'type'         => 'shop_order',
-				'status'       => array_diff( array_keys( wc_get_order_statuses() ), array( 'wc-checkout-draft' ) ),
-				'return'       => 'objects',
-				'date_created' => $range,
+				'limit'     => -1,
+				'type'      => 'shop_order',
+				'status'    => array_diff( array_keys( wc_get_order_statuses() ), array( 'wc-checkout-draft' ) ),
+				'return'    => 'objects',
+				'date_paid' => $range,
 			)
 		);
 		foreach ( $orders as $order ) {
@@ -216,8 +213,8 @@ final class PL_Rest {
 				continue;
 			}
 			$oid   = (int) $order->get_id();
-			$paid  = in_array( 'wc-' . $order->get_status(), PL_Report::STATUSES, true );
-			$day   = self::day( $order->get_date_created() );
+			$paid  = in_array( 'wc-' . $order->get_status(), $paid_s, true );
+			$day   = self::day( $order->get_date_paid() ? $order->get_date_paid() : $order->get_date_created() );
 			$m     = self::ms( $order->get_date_modified() );
 			$parts = PL_Report::order_parts( $order, $s );
 			$base  = array(

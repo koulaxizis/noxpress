@@ -101,6 +101,7 @@ final class PL_Entries {
   source varchar(10) NOT NULL DEFAULT 'manual',
   ext_ref varchar(80) NOT NULL DEFAULT '',
   is_test tinyint(1) NOT NULL DEFAULT 0,
+  is_hist tinyint(1) NOT NULL DEFAULT 0,
   created_by bigint(20) unsigned NOT NULL DEFAULT 0,
   created_at datetime NOT NULL,
   updated_at datetime NOT NULL,
@@ -142,7 +143,13 @@ final class PL_Entries {
 		if ( ! PL_Settings::valid_date( $date ) ) {
 			return new WP_Error( 'pl_date', 'date must be YYYY-MM-DD.' );
 		}
-		if ( $date < PL_Settings::start() ) {
+		// Historical entries (costs from before the start date, kept only for
+		// statistics) must be dated before it; every other entry on or after.
+		$hist = ! empty( $get( 'historical', ! empty( $old['is_hist'] ) ) );
+		if ( $hist && $date >= PL_Settings::start() ) {
+			return new WP_Error( 'pl_hist_date', 'a historical entry must be dated before the ledger start date (' . PL_Settings::start() . ').' );
+		}
+		if ( ! $hist && $date < PL_Settings::start() ) {
 			return new WP_Error( 'pl_early', 'date is before the ledger start date (' . PL_Settings::start() . ').' );
 		}
 		$today = wp_date( 'Y-m-d' );
@@ -232,6 +239,7 @@ final class PL_Entries {
 			'qty_basis'      => $qty,
 			'attachment_url' => $url,
 			'is_test'        => ! empty( $get( 'test', ! empty( $old['is_test'] ) ) ) ? 1 : 0,
+			'is_hist'        => $hist ? 1 : 0,
 		);
 	}
 
@@ -317,6 +325,7 @@ final class PL_Entries {
 			'qty_basis'      => $old['qty_basis'],
 			'attachment_url' => $old['attachment_url'],
 			'test'           => $old['is_test'],
+			'historical'     => $old['is_hist'],
 		);
 		// A new net or rate without a new VAT amount recomputes the VAT.
 		if ( ! array_key_exists( 'vat', $in ) && ! array_key_exists( 'net', $in ) && ! array_key_exists( 'vat_rate', $in ) ) {
@@ -423,6 +432,7 @@ final class PL_Entries {
 			'source'         => (string) $r['source'],
 			'ext_ref'        => (string) $r['ext_ref'],
 			'is_test'        => (int) $r['is_test'],
+			'is_hist'        => isset( $r['is_hist'] ) ? (int) $r['is_hist'] : 0,
 			'created_by'     => (int) $r['created_by'],
 			'created_at'     => (string) $r['created_at'],
 			'updated_at'     => (string) $r['updated_at'],
@@ -452,7 +462,9 @@ final class PL_Entries {
 	 *
 	 * @param array $f from, to (Y-m-d), product_id (int|null), scope
 	 *                 (product | pool | general | ''), category, deleted
-	 *                 (bool: only deleted), test (null all | bool), search,
+	 *                 (bool: only deleted), test (null all | bool),
+	 *                 hist (bool, default false: historical entries are
+	 *                 left out unless asked for; null = both), search,
 	 *                 changed_after (mysql GMT), limit, offset.
 	 * @return array{rows: array[], total: int}
 	 */
@@ -496,6 +508,11 @@ final class PL_Entries {
 		if ( isset( $f['test'] ) && null !== $f['test'] ) {
 			$w[]    = 'is_test = %d';
 			$args[] = $f['test'] ? 1 : 0;
+		}
+		$hist = array_key_exists( 'hist', $f ) ? $f['hist'] : false;
+		if ( null !== $hist ) {
+			$w[]    = 'is_hist = %d';
+			$args[] = $hist ? 1 : 0;
 		}
 		if ( ! empty( $f['search'] ) ) {
 			$like   = '%' . $wpdb->esc_like( (string) $f['search'] ) . '%';
@@ -564,6 +581,7 @@ final class PL_Entries {
 			'attachment_url' => $r['attachment_url'],
 			'source'         => $r['source'],
 			'test'           => (bool) $r['is_test'],
+			'historical'     => (bool) $r['is_hist'],
 			'deleted'        => null !== $r['deleted_at'],
 			'updated'        => $r['updated_at'],
 		);

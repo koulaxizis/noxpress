@@ -107,6 +107,10 @@ final class PL_Abilities {
 				'type'        => 'boolean',
 				'description' => 'A test row: never in the report or the orOS feed; purgeable.',
 			),
+			'historical'     => array(
+				'type'        => 'boolean',
+				'description' => 'A cost from before the ledger start date, kept only for statistics: must be dated before the start date; never in the report, totals, break-even, the orOS feed or the monthly CSV.',
+			),
 		);
 		if ( $for_update ) {
 			$props = array_merge(
@@ -177,6 +181,10 @@ final class PL_Abilities {
 						),
 						'deleted'    => array( 'type' => 'boolean' ),
 						'test'       => array( 'type' => 'boolean' ),
+						'historical' => array(
+							'type'        => 'boolean',
+							'description' => 'true = only historical entries (before the start date); default: left out.',
+						),
 						'limit'      => array(
 							'type'    => 'integer',
 							'minimum' => 1,
@@ -197,7 +205,7 @@ final class PL_Abilities {
 			),
 			'export-csv'   => array(
 				'label'       => 'Production Ledger: export CSV',
-				'description' => 'A month as CSV text (UTF-8 with BOM): what = entries (one row per entry) or summary (one row per product, then general expenses and totals); format = excel (; and decimal comma) or standard (, and decimal point).',
+				'description' => 'A month as CSV text (UTF-8 with BOM): what = entries (one row per entry), summary (one row per product, then general expenses and totals) or historical (every entry from before the start date, kept only for statistics; month is ignored); format = excel (; and decimal comma) or standard (, and decimal point).',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -207,7 +215,7 @@ final class PL_Abilities {
 						),
 						'what'   => array(
 							'type'    => 'string',
-							'enum'    => array( 'entries', 'summary' ),
+							'enum'    => array( 'entries', 'summary', 'historical' ),
 							'default' => 'entries',
 						),
 						'format' => array(
@@ -357,7 +365,8 @@ final class PL_Abilities {
 		if ( isset( $in['test'] ) ) {
 			$f['test'] = (bool) $in['test'];
 		}
-		$q    = PL_Entries::query( $f );
+		$f['hist'] = ! empty( $in['historical'] );
+		$q         = PL_Entries::query( $f );
 		$rows = array();
 		foreach ( $q['rows'] as $r ) {
 			$rows[] = PL_Entries::out( $r );

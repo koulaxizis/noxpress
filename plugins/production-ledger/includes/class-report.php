@@ -24,9 +24,14 @@
  *                        date, at the average net per unit after creator
  *                        payouts (null when already ≥ 0 or nothing sold)
  *
- * Orders are read with wc_get_orders, by date_created in local-day
- * timestamps (Bible §1.3), the same window Revenue Splitter uses, so the
- * creator payouts match its own report. Refunds are netted out per line
+ * Orders count in the month they were PAID (date_paid, local-day
+ * timestamps, Bible §1.3), the same day the money reaches the bank;
+ * pre-orders too, without waiting for shipment (Christos, 2026-11-07).
+ * Paid = WooCommerce's own paid statuses (wc_get_is_paid_statuses, which
+ * pre-order plugins can extend). Creator payouts come from Revenue
+ * Splitter's report for the same dates, which RS counts by creation date:
+ * an order created in one month and paid in the next moves its payout
+ * with RS, not with the revenue (rare: card payments are paid at once). Refunds are netted out per line
  * (_refunded_item_id); an amount-only refund is spread over the lines in
  * proportion, as RS_Reports::collect_refunds() does.
  *
@@ -44,6 +49,26 @@ final class PL_Report {
 	const TTL      = 300;
 	const STATUSES = array( 'wc-completed', 'wc-processing' );
 	const VER      = 'pl_cache_ver';
+
+	/** Paid order statuses with the wc- prefix. */
+	public static function paid_statuses(): array {
+		$list = function_exists( 'wc_get_is_paid_statuses' ) ? (array) wc_get_is_paid_statuses() : array();
+		$out  = array();
+		foreach ( $list as $st ) {
+			$out[] = 0 === strpos( (string) $st, 'wc-' ) ? (string) $st : 'wc-' . $st;
+		}
+		return $out ? array_values( array_unique( $out ) ) : self::STATUSES;
+	}
+
+	/** The wc_get_orders date range (local days) for paid dates, or ''. */
+	public static function paid_range( string $from, string $to ): string {
+		try {
+			$tz = wp_timezone();
+			return ( new DateTimeImmutable( $from . ' 00:00:00', $tz ) )->getTimestamp() . '...' . ( new DateTimeImmutable( $to . ' 23:59:59', $tz ) )->getTimestamp();
+		} catch ( \Exception $e ) {
+			return '';
+		}
+	}
 
 	public static function init(): void {
 		add_action( 'rs_invalidate_cache', array( __CLASS__, 'bump' ) );
@@ -320,19 +345,17 @@ final class PL_Report {
 		if ( ! function_exists( 'wc_get_orders' ) ) {
 			return array();
 		}
-		try {
-			$tz    = wp_timezone();
-			$range = ( new DateTimeImmutable( $from . ' 00:00:00', $tz ) )->getTimestamp() . '...' . ( new DateTimeImmutable( $to . ' 23:59:59', $tz ) )->getTimestamp();
-		} catch ( \Exception $e ) {
+		$range = self::paid_range( $from, $to );
+		if ( '' === $range ) {
 			return array();
 		}
 		$orders = wc_get_orders(
 			array(
-				'limit'        => -1,
-				'status'       => self::STATUSES,
-				'type'         => 'shop_order',
-				'return'       => 'objects',
-				'date_created' => $range,
+				'limit'     => -1,
+				'status'    => self::paid_statuses(),
+				'type'      => 'shop_order',
+				'return'    => 'objects',
+				'date_paid' => $range,
 			)
 		);
 		$out = array();

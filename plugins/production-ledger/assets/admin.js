@@ -177,6 +177,21 @@
 			} );
 		}
 
+		/* Historical entries may be dated before the start date. */
+		var hist = $( '.pl-hist', form );
+		var date = $( '.pl-date', form );
+		if ( hist && date ) {
+			hist.addEventListener( 'change', function () {
+				if ( hist.checked ) {
+					date.removeAttribute( 'min' );
+					date.setAttribute( 'max', date.getAttribute( 'data-start' ) );
+				} else {
+					date.removeAttribute( 'max' );
+					date.setAttribute( 'min', date.getAttribute( 'data-start' ) );
+				}
+			} );
+		}
+
 		/* VAT from the rate, until the VAT field is typed in. */
 		var net = $( '.pl-net', form );
 		var rate = $( '.pl-rate', form );

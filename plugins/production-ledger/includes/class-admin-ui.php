@@ -377,7 +377,7 @@ final class PL_Admin_UI {
 			<?php endif; ?>
 			<div class="pl-grid">
 				<label><span><?php esc_html_e( 'Ημερομηνία παραστατικού', 'production-ledger' ); ?></span>
-					<input type="date" name="pl_date" required min="<?php echo esc_attr( $start ); ?>" value="<?php echo esc_attr( $row ? $row['entry_date'] : max( $start, wp_date( 'Y-m-d' ) ) ); ?>" /></label>
+					<input type="date" name="pl_date" required class="pl-date" data-start="<?php echo esc_attr( $start ); ?>"<?php echo ( $row && $row['is_hist'] ) ? '' : ' min="' . esc_attr( $start ) . '"'; ?> value="<?php echo esc_attr( $row ? $row['entry_date'] : max( $start, wp_date( 'Y-m-d' ) ) ); ?>" /></label>
 				<?php if ( 'general' !== $mode ) : ?>
 				<label class="pl-only-product"><span><?php esc_html_e( 'Προϊόν', 'production-ledger' ); ?></span>
 					<input type="text" name="pl_product" class="pl-product-search" list="pl-product-list" autocomplete="off" placeholder="<?php esc_attr_e( 'Γράψε 3 γράμματα ή το ID', 'production-ledger' ); ?>" value="<?php echo esc_attr( $row ? self::product_label( $row['product_id'] ) : '' ); ?>" />
@@ -429,6 +429,7 @@ final class PL_Admin_UI {
 			</div>
 			<p>
 				<label class="pl-check"><input type="checkbox" name="pl_test" value="1"<?php checked( $row && $row['is_test'] ); ?> /> <?php esc_html_e( 'Δοκιμαστική (δεν μετρά στην αναφορά ούτε πάει στο orOS)', 'production-ledger' ); ?></label>
+				<label class="pl-check"><input type="checkbox" name="pl_hist" value="1" class="pl-hist"<?php checked( $row && $row['is_hist'] ); ?> /> <?php esc_html_e( 'Ιστορική: έξοδο πριν από την αρχή της καταγραφής, μόνο για στατιστικά (δεν μετρά πουθενά και δεν πάει στο orOS)', 'production-ledger' ); ?></label>
 			</p>
 			<p>
 				<button type="submit" class="button button-primary"><?php echo esc_html( $row ? __( 'Αποθήκευση', 'production-ledger' ) : __( 'Προσθήκη', 'production-ledger' ) ); ?></button>
@@ -445,6 +446,7 @@ final class PL_Admin_UI {
 		$f_mon  = self::q( 'f_month' );
 		$f_mon  = preg_match( '/^\d{4}-(0[1-9]|1[0-2])$/', $f_mon ) ? $f_mon : '';
 		$f_del  = '1' === self::q( 'f_deleted' );
+		$f_hist = '1' === self::q( 'f_hist' );
 		$f_srch = self::q( 'f_search' );
 		$paged  = max( 1, (int) self::q( 'paged' ) );
 		$per    = 50;
@@ -467,6 +469,7 @@ final class PL_Admin_UI {
 			<?php endif; ?>
 			<input type="search" name="f_search" value="<?php echo esc_attr( $f_srch ); ?>" placeholder="<?php esc_attr_e( 'Προμηθευτής, περιγραφή, αρ. παραστατικού', 'production-ledger' ); ?>" />
 			<label class="pl-check"><input type="checkbox" name="f_deleted" value="1"<?php checked( $f_del ); ?> /> <?php esc_html_e( 'Διαγραμμένες', 'production-ledger' ); ?></label>
+			<label class="pl-check"><input type="checkbox" name="f_hist" value="1"<?php checked( $f_hist ); ?> /> <?php esc_html_e( 'Ιστορικές', 'production-ledger' ); ?></label>
 			<button type="submit" class="button"><?php esc_html_e( 'Φίλτρο', 'production-ledger' ); ?></button>
 		</form>
 		<?php
@@ -474,6 +477,7 @@ final class PL_Admin_UI {
 			'scope'    => 'general' === $scope ? 'general' : 'costs',
 			'category' => $f_cat,
 			'deleted'  => $f_del,
+			'hist'     => $f_hist,
 			'search'   => $f_srch,
 			'limit'    => $per,
 			'offset'   => ( $paged - 1 ) * $per,
@@ -525,6 +529,9 @@ final class PL_Admin_UI {
 				if ( $e['is_test'] ) {
 					echo ' ' . self::badge( __( 'δοκιμή', 'production-ledger' ), 'warn' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
+				if ( $e['is_hist'] ) {
+					echo ' ' . self::badge( __( 'ιστορική', 'production-ledger' ), 'info' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
 				if ( 'auto' === $e['source'] ) {
 					echo ' ' . self::badge( __( 'αυτόματη', 'production-ledger' ), 'ok' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
@@ -564,6 +571,7 @@ final class PL_Admin_UI {
 						'f_product' => $f_prod > 0 ? $f_prod : '',
 						'f_search'  => $f_srch,
 						'f_deleted' => $f_del ? '1' : '',
+						'f_hist'    => $f_hist ? '1' : '',
 						'paged'     => $i,
 					)
 				);
@@ -728,8 +736,10 @@ final class PL_Admin_UI {
 			<p>
 				<button type="submit" name="pl_get" value="entries" class="button button-primary"><?php esc_html_e( 'Καταχωρίσεις του μήνα', 'production-ledger' ); ?></button>
 				<button type="submit" name="pl_get" value="summary" class="button"><?php esc_html_e( 'Σύνοψη ανά προϊόν', 'production-ledger' ); ?></button>
+				<button type="submit" name="pl_get" value="historical" class="button"><?php esc_html_e( 'Ιστορικές καταχωρίσεις (όλες)', 'production-ledger' ); ?></button>
 			</p>
 			<p class="pl-hint"><?php esc_html_e( 'Δύο αρχεία: ένα με κάθε καταχώριση και ένα με το αποτέλεσμα κάθε προϊόντος, τα γενικά έξοδα και το τελικό σύνολο. Ανοίγουν στο Excel, στο Υπολογιστικό φύλλο και στην εισαγωγή του orOS Budget.', 'production-ledger' ); ?></p>
+			<p class="pl-hint"><?php esc_html_e( 'Οι ιστορικές καταχωρίσεις (έξοδα πριν από την αρχή της καταγραφής) βγαίνουν μόνο στο δικό τους αρχείο, όλες μαζί, ανεξάρτητα από τον μήνα.', 'production-ledger' ); ?></p>
 		</form>
 		<?php
 	}
@@ -763,7 +773,7 @@ final class PL_Admin_UI {
 			echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a JSON download.
 			exit;
 		}
-		if ( 'entries' === $what || 'summary' === $what ) {
+		if ( 'entries' === $what || 'summary' === $what || 'historical' === $what ) {
 			$month = self::q( 'pl_month' );
 			$csv   = PL_Export::csv( $what, $month, 'standard' === self::q( 'pl_format' ) ? 'standard' : 'excel' );
 			if ( is_wp_error( $csv ) ) {
@@ -878,6 +888,7 @@ final class PL_Admin_UI {
 			'qty_basis'      => self::post( 'pl_qty' ),
 			'attachment_url' => self::post( 'pl_url' ),
 			'test'           => '1' === self::post( 'pl_test' ),
+			'historical'     => '1' === self::post( 'pl_hist' ),
 		);
 		$r  = $id > 0 ? PL_Entries::update( $id, $in ) : PL_Entries::add( $in );
 		if ( is_wp_error( $r ) ) {
@@ -892,6 +903,8 @@ final class PL_Admin_UI {
 			'pl_date'    => __( 'Η ημερομηνία δεν είναι έγκυρη.', 'production-ledger' ),
 			/* translators: %s: start date */
 			'pl_early'   => sprintf( __( 'Η ημερομηνία είναι πριν από την αρχή της καταγραφής (%s).', 'production-ledger' ), PL_Settings::start() ),
+			/* translators: %s: start date */
+			'pl_hist_date' => sprintf( __( 'Μια ιστορική καταχώριση έχει ημερομηνία πριν από την αρχή της καταγραφής (%s).', 'production-ledger' ), PL_Settings::start() ),
 			'pl_late'    => __( 'Η ημερομηνία είναι πάνω από ένα χρόνο μπροστά.', 'production-ledger' ),
 			'pl_cat'     => __( 'Άκυρη κατηγορία.', 'production-ledger' ),
 			'pl_product' => __( 'Το προϊόν δεν υπάρχει στο κατάστημα.', 'production-ledger' ),

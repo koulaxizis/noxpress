@@ -57,12 +57,18 @@ final class PL_Export {
 	/**
 	 * CSV text.
 	 *
-	 * @param string $what   entries | summary.
-	 * @param string $month  Y-m.
+	 * @param string $what   entries | summary | historical (every historical
+	 *                       entry, whatever the month: costs from before the
+	 *                       start date, kept only for statistics).
+	 * @param string $month  Y-m (ignored for historical).
 	 * @param string $format excel | standard.
 	 * @return string|WP_Error
 	 */
 	public static function csv( string $what, string $month, string $format ) {
+		if ( 'historical' === $what ) {
+			list( $sep, $dec ) = self::fmt( $format );
+			return self::entries( null, $sep, $dec );
+		}
 		$range = self::month_range( $month );
 		if ( null === $range ) {
 			return new WP_Error( 'pl_month', 'month must be YYYY-MM.' );
@@ -71,7 +77,8 @@ final class PL_Export {
 		return 'summary' === $what ? self::summary( $range, $sep, $dec ) : self::entries( $range, $sep, $dec );
 	}
 
-	private static function entries( array $range, string $sep, string $dec ): string {
+	/** @param array|null $range [from, to], or null for the historical entries. */
+	private static function entries( ?array $range, string $sep, string $dec ): string {
 		$rows   = array();
 		$rows[] = array(
 			__( 'Α/Α', 'production-ledger' ),
@@ -97,7 +104,11 @@ final class PL_Export {
 			'general' => __( 'Γενικό', 'production-ledger' ),
 		);
 		$all    = PL_Entries::query(
-			array(
+			null === $range ? array(
+				'hist'  => true,
+				'test'  => false,
+				'limit' => 5000,
+			) : array(
 				'from'  => $range[0],
 				'to'    => $range[1],
 				'test'  => false,
@@ -202,6 +213,9 @@ final class PL_Export {
 
 	/** File name per §5: <slug>-<what>-<from>_<to>.csv. */
 	public static function filename( string $what, string $month ): string {
+		if ( 'historical' === $what ) {
+			return 'production-ledger-historical-' . wp_date( 'Y-m-d' ) . '.csv';
+		}
 		$r = self::month_range( $month );
 		return 'production-ledger-' . ( 'summary' === $what ? 'summary' : 'entries' ) . '-' . ( $r ? $r[0] . '_' . $r[1] : $month ) . '.csv';
 	}

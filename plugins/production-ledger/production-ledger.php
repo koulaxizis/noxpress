@@ -55,6 +55,11 @@
  *  - entry_date is a DATE column, not a timestamp: an invoice date is a
  *    calendar day with no time zone. Order ranges are still local-day
  *    timestamps (§1.3).
+ *  - Revenue counts on the PAID date (date_paid), not the creation date
+ *    (§1.3 still: local-day timestamps): it must match the bank day by day
+ *    (Christos, 2026-11-07). Historical entries (before the start date,
+ *    is_hist = 1) are kept for statistics only and left out of every
+ *    total, the orOS feed and the monthly CSV.
  *  - §20 «under wc/v3»: the records route lives at wc/v3/pl/records because
  *    orOS knows the shop only from its /wp-json/wc/v3 root (as RS 1.11.0).
  *

@@ -25,11 +25,12 @@ The unit is each WooCommerce product (a variation counts as its parent). Every a
 * General expenses (rent, software, accountant) in a separate ledger: they lower the final result, not a product.
 * Deleting an entry is a soft delete with «Undo»; deleted entries can be listed and restored. Test entries never count and can be erased in one go.
 * A start date: nothing before it counts and no entry can be dated earlier, so a half-entered past never distorts the numbers.
+* Historical entries: costs from before the start date can still be kept, ticked «Historical», for statistics only. They never count in the report, totals, break-even, the orOS feed or the monthly CSV, and export in a file of their own.
 
 **Report («Costs & Returns»)**
 
 * A month or a year: revenue (retail and trade apart), shipping paid by customers, creator payouts, production costs, shipping ±, consumables and fees, net per product and the final result after general expenses.
-* Orders counted are completed and processing, by creation date; refunds come off the line they refund (an amount-only refund is spread in proportion).
+* Orders count in the month they were paid, the same day the money reaches the bank (pre-orders too, without waiting for shipment), with WooCommerce's own paid statuses; refunds come off the line they refund (an amount-only refund is spread in proportion).
 * Creator payouts come from Revenue Splitter's own report for the same orders. Tick which beneficiary names are the publisher itself: their share stays in the result, everyone else's is a cost. Without Revenue Splitter, payouts count only from «Creators» entries.
 * Trade orders are recognised from the flag Trade Accounts writes on them.
 * Break-even per product: how many more units must sell to cover everything spent on it since the start date.
