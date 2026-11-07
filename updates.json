@@ -247,15 +247,15 @@
     },
     "production-ledger": {
       "beta": {
-        "changelog": "* orOS feed: an entry that is deleted, marked historical or marked test after orOS pulled it now comes back as a deletion, so orOS Budget removes its copy instead of keeping it.",
+        "changelog": "* orOS: the report per product is also readable at wc/v3/pl/report (read only, amounts in cents), so orOS Publishing shows each title's cost and result with the same figures as the report screen: direct costs, its shares of shipping, consumables and payment fees, shipping charged, creator payouts, VAT and break-even.",
         "published": "2026-11-07",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "7c973bb63784d606aa0cbd6e0799a7cf482f5780999a5635abac373184fe42bc",
-        "signature": "yjqpm0jlgDoSMoVck30VReRghDra8qpbr9rl1eYVbOKB0+i5wIp78WDRZG7sSZDCPFKA1yS1EQXrHC0mZ/+3CQ==",
+        "sha256": "48b5e6486f822645c7a6875ea1cdc9213c736c18ebd87d44ab63afd9623f0573",
+        "signature": "omCm3reSnwP1u3QpOLq7g6m0nVMhzok76HMYtC9O3ZblEf82mHmnqJGT5cBr5i4sILd33Ri7BHQTcmeADutWAQ==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.0.1/production-ledger.zip"
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.0/production-ledger.zip"
       }
     },
     "publishing-quote": {
