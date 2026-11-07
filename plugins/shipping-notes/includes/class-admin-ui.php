@@ -328,6 +328,18 @@ final class SHN_Admin_UI {
 				</p>
 			</div>
 
+			<h2 class="shn-h2"><?php esc_html_e( 'Προτάσεις προϊόντων', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<?php self::checkbox( 'shn_fs_sg', $s['fs_sg'], __( 'Προτάσεις κάτω από τη μπάρα όσο λείπει ποσό (μόνο στο καλάθι)', 'shipping-notes' ) ); ?>
+				<p class="shn-field"><span><?php esc_html_e( 'IDs προϊόντων', 'shipping-notes' ); ?></span>
+					<input type="text" name="shn_fs_sg_ids" value="<?php echo esc_attr( implode( ', ', $s['fs_sg_ids'] ) ); ?>" placeholder="85761, 84834, 79437" class="regular-text" />
+					<span class="shn-hint"><?php esc_html_e( 'Χωρισμένα με κόμμα, με τη σειρά που προτιμάς (έως 20). Πρώτα δείχνονται όσα καλύπτουν το ποσό που λείπει, από το φθηνότερο. Παραλείπονται όσα είναι ήδη στο καλάθι ή εξαντλημένα.', 'shipping-notes' ); ?></span>
+				</p>
+				<p class="shn-field"><span><?php esc_html_e( 'Πόσες προτάσεις', 'shipping-notes' ); ?></span>
+					<input type="number" name="shn_fs_sg_max" value="<?php echo (int) $s['fs_sg_max']; ?>" min="1" max="6" step="1" class="small-text" />
+				</p>
+			</div>
+
 			<h2 class="shn-h2"><?php esc_html_e( 'Κείμενα', 'shipping-notes' ); ?></h2>
 			<div class="shn-zone">
 				<?php
@@ -337,7 +349,9 @@ final class SHN_Admin_UI {
 					array(
 						'fs_t_empty' => __( 'Άδειο καλάθι', 'shipping-notes' ),
 						'fs_t_left'  => __( 'Απομένει ποσό', 'shipping-notes' ),
-						'fs_t_won'   => __( 'Κερδίσατε', 'shipping-notes' ),
+						'fs_t_won'      => __( 'Κερδίσατε', 'shipping-notes' ),
+						'fs_t_sg_title' => __( 'Τίτλος προτάσεων', 'shipping-notes' ),
+						'fs_t_sg_add'   => __( 'Κουμπί προσθήκης', 'shipping-notes' ),
 					)
 				);
 				?>
@@ -854,11 +868,13 @@ final class SHN_Admin_UI {
 			$raw['fs_zones'][ $zid ] = is_string( $v ) ? self::local_amount( $v ) : 0;
 		}
 		$raw['fs_cart_pos'] = sanitize_key( self::post( 'shn_fs_cart_pos' ) );
-		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won' ) as $k ) {
+		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won', 'fs_sg' ) as $k ) {
 			$raw[ $k ] = '1' === self::post( 'shn_' . $k );
 		}
-		$raw['fs_color'] = self::post( 'shn_fs_color' );
-		$raw             = self::posted_texts( $raw, array( 'fs_t_empty', 'fs_t_left', 'fs_t_won' ) );
+		$raw['fs_color']  = self::post( 'shn_fs_color' );
+		$raw['fs_sg_ids'] = array_filter( array_map( 'trim', explode( ',', self::post( 'shn_fs_sg_ids' ) ) ), 'strlen' );
+		$raw['fs_sg_max'] = self::post( 'shn_fs_sg_max' );
+		$raw              = self::posted_texts( $raw, array( 'fs_t_empty', 'fs_t_left', 'fs_t_won', 'fs_t_sg_title', 'fs_t_sg_add' ) );
 
 		SHN_Settings::save( $raw );
 		$s    = SHN_Settings::get();

@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -17,6 +17,8 @@ Two messages for your customers: how much is left for free shipping (with a prog
 
 * "€15.00 left for free shipping" with a progress bar, and "You've got free shipping!" once the cart qualifies. An optional message for an empty cart.
 * The threshold comes from WooCommerce itself: the "Free shipping" method of the customer's shipping zone (minimum order amount, or "minimum amount or coupon"). You can also set a fixed amount.
+* Carrier methods with their own "free over X" setting count too (BOX NOW Delivery), when the zone has no Free shipping method with an amount.
+* Optional product suggestions under the bar in the cart, from a list you choose.
 * The amount is counted exactly like WooCommerce counts it: coupons, tax display and the method's "apply minimum before coupon discount" option. The "won" state is confirmed by WooCommerce's own method, so the message never promises what checkout will not give.
 * Hidden for carts that need no shipping (virtual or downloadable products only).
 * Classic cart, mini-cart and checkout, and the Cart and Checkout blocks. Refreshes with WooCommerce's own cart fragments and the Store API; the plugin adds no AJAX endpoints of its own.
@@ -59,6 +61,7 @@ Two messages for your customers: how much is left for free shipping (with a prog
 **For developers**
 
 * `shn_threshold` ( float $threshold, WC_Shipping_Zone $zone ): change the free shipping threshold.
+* `shn_carrier_threshold` ( float $over, WC_Shipping_Method $method ): the "free over X" amount of a carrier method (BOX NOW Delivery is read by default).
 * `shn_available_from` ( string $date, WC_Product $product ): a release date (`YYYY-MM-DD`) for pre-order plugins.
 * `shn_text` ( string $text, string $key, string $lang ): change any customer text.
 * `shn_partner_package` ( bool $partner, array $package ), `shn_partner_rate` ( bool $partner, string $method_id ) and `shn_partner_product` ( bool $partner, WC_Product $product ): which parcels, rates and products belong to the partner.
@@ -104,6 +107,10 @@ The free shipping bar does. The parcel names, the "two parcels" message and the 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: product suggestions under the free-shipping bar while an amount is left. Up to 6 products from a list you choose; the ones that cover the amount left come first, cheapest first; products already in the cart or out of stock are skipped. Simple products add to the cart in place, variable ones open their page. Shown in the cart, hidden in the mini-cart and checkout. Off by default, with editable title and button texts.
+* New: the threshold is also read from a carrier method that turns free over an amount of its own: BOX NOW Delivery's "free delivery threshold", when the zone has no Free shipping method with an amount. Filter `shn_carrier_threshold` for other carriers.
 
 = 1.2.1 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

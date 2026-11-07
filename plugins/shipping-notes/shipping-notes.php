@@ -3,7 +3,7 @@
  * Plugin Name:          Shipping Notes
  * Plugin URI:           https://noxpress.tech
  * Description:          Μηνύματα αποστολής για τον πελάτη, χωρίς plugins τρίτων: «Απομένουν Χ € για δωρεάν αποστολή» με μπάρα προόδου σε καλάθι, mini-cart και ταμείο (όριο από τις ζώνες αποστολής του WooCommerce, κλασικό και block καλάθι), και «Παράδοση σε Χ–Ψ εργάσιμες» στη σελίδα προϊόντος, ανά μέθοδο αποστολής, κατηγορία και προϊόν, με cut-off, εργάσιμες και αργίες. Για καλάθια σε δύο δέματα (π.χ. Printful): ονόματα δεμάτων, μήνυμα, ελληνικές ετικέτες και τα δέματα στην παραγγελία.
- * Version:              1.2.1
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -50,7 +50,7 @@
  * WooCommerce is creating at checkout).
  *
  * Cooperation (Bible §6): fires nothing. Filters for others: shn_text,
- * shn_threshold, shn_available_from (pre-order plugins), shn_partner_package,
+ * shn_threshold, shn_carrier_threshold, shn_available_from (pre-order plugins), shn_partner_package,
  * shn_partner_rate, shn_partner_product. Reads the $package['printful']
  * flag the Printful plugin sets on its package (no option of another plugin).
  *
@@ -64,7 +64,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SHN_VERSION', '1.2.1' );
+define( 'SHN_VERSION', '1.3.0' );
 define( 'SHN_FILE', __FILE__ );
 define( 'SHN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SHN_URL', plugin_dir_url( __FILE__ ) );

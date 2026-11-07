@@ -9,6 +9,10 @@
  *    methods that ask for an amount ('min_amount', 'either', 'both');
  *    'both' counts only while a free-shipping coupon is applied. Manual
  *    sources: an amount per zone without free shipping, or one amount.
+ *  - Carrier methods with a "free over X" of their own (BOX NOW Delivery,
+ *    1.3.0; filter shn_carrier_threshold) count when the zone has no
+ *    free_shipping method with an amount. Their amount is compared like
+ *    the Free shipping method's (subtotal minus coupon discounts).
  *  - Amount that counts: a line-by-line copy of
  *    WC_Shipping_Free_Shipping::is_available() — the displayed subtotal
  *    (with or without tax, as the cart shows prices), minus coupon
@@ -95,8 +99,14 @@ final class SHN_Threshold {
 		$ignore    = 'no';
 		$always    = false;
 
+		$carrier = 0.0; // Lowest "free over X" of a carrier method (1.3.0).
+
 		foreach ( $zone->get_shipping_methods( true ) as $method ) {
 			if ( ! $method instanceof WC_Shipping_Free_Shipping ) {
+				$over = self::carrier_threshold( $method );
+				if ( $over > 0 && ( 0.0 === $carrier || $over < $carrier ) ) {
+					$carrier = $over;
+				}
 				continue;
 			}
 			$requires = (string) $method->requires;
@@ -120,6 +130,13 @@ final class SHN_Threshold {
 				$threshold = $min;
 				$ignore    = 'yes' === $method->ignore_discounts ? 'yes' : 'no';
 			}
+		}
+
+		// No free-shipping method with an amount: a carrier method that turns
+		// free over an amount of its own (BOX NOW "free_delivery_threshold").
+		if ( $threshold <= 0 && $carrier > 0 && 'fixed' !== $s['fs_source'] ) {
+			$threshold = $carrier;
+			$ignore    = 'no';
 		}
 
 		$source = $s['fs_source'];
@@ -149,6 +166,29 @@ final class SHN_Threshold {
 			'source'           => $source,
 			'zone_id'          => $zone_id,
 		);
+	}
+
+	/**
+	 * "Free over X" of a carrier method that is not WooCommerce's Free
+	 * shipping, read from its own settings (no option of another plugin is
+	 * written). Known keys: BOX NOW Delivery's free_delivery_threshold. The
+	 * filter shn_carrier_threshold adds others.
+	 *
+	 * @param WC_Shipping_Method $method Method instance of a zone.
+	 */
+	public static function carrier_threshold( $method ): float {
+		$over = 0.0;
+		if ( $method instanceof WC_Shipping_Method && 'box_now_delivery' === $method->id ) {
+			$over = (float) wc_format_decimal( (string) $method->get_option( 'free_delivery_threshold', '' ) );
+		}
+		/**
+		 * Filters the "free over X" amount of a carrier method (0 = none).
+		 *
+		 * @param float              $over   Amount in the store currency.
+		 * @param WC_Shipping_Method $method Method instance.
+		 */
+		$over = (float) apply_filters( 'shn_carrier_threshold', $over, $method );
+		return $over > 0 ? $over : 0.0;
 	}
 
 	/** Copy of the amount WC_Shipping_Free_Shipping::is_available() compares. */

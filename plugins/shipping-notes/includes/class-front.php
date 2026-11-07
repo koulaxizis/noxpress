@@ -172,7 +172,77 @@ final class SHN_Front {
 			$html .= '<div class="shn-fs__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' . (int) $st['percent'] . '" aria-label="' . esc_attr( $plain ) . '">'
 				. '<span class="shn-fs__fill" style="width:' . (int) $st['percent'] . '%"></span></div>';
 		}
+		if ( 'left' === $st['state'] && $s['fs_sg'] ) {
+			$html .= self::suggestions_html( (float) $st['remaining'] );
+		}
 		return $html . '</div>';
+	}
+
+	/**
+	 * Product suggestions under the bar (1.3.0): up to fs_sg_max products of
+	 * the store's list that can be bought now and are not in the cart.
+	 * Products that cover the amount left come first (cheapest first), then
+	 * the rest in the store's order. Variable products link to their page;
+	 * simple ones use WooCommerce's own add-to-cart link. The mini-cart and
+	 * checkout hide the list with CSS (front.css); the cart shows it.
+	 *
+	 * @param float $remaining Amount left for free shipping.
+	 */
+	public static function suggestions_html( float $remaining ): string {
+		$s = SHN_Settings::get();
+		if ( ! $s['fs_sg_ids'] || ! function_exists( 'wc_get_product' ) ) {
+			return '';
+		}
+		$in_cart = array();
+		if ( function_exists( 'WC' ) && WC()->cart instanceof WC_Cart ) {
+			foreach ( WC()->cart->get_cart() as $item ) {
+				$in_cart[ (int) ( $item['product_id'] ?? 0 ) ] = true;
+			}
+		}
+		$cover = array();
+		$rest  = array();
+		foreach ( $s['fs_sg_ids'] as $pid ) {
+			$p = wc_get_product( $pid );
+			if ( ! $p instanceof WC_Product || isset( $in_cart[ $p->get_id() ] ) || 'publish' !== $p->get_status()
+				|| ! $p->is_purchasable() || ! $p->is_in_stock() || ! $p->is_visible() ) {
+				continue;
+			}
+			$price = (float) wc_get_price_to_display( $p );
+			if ( $price <= 0 ) {
+				continue;
+			}
+			if ( $price >= $remaining ) {
+				$cover[] = array( $price, $p );
+			} else {
+				$rest[] = array( $price, $p );
+			}
+		}
+		usort(
+			$cover,
+			static function ( $a, $b ) {
+				return $a[0] <=> $b[0];
+			}
+		);
+		$list = array_slice( array_merge( $cover, $rest ), 0, (int) $s['fs_sg_max'] );
+		if ( ! $list ) {
+			return '';
+		}
+		$add  = SHN_Settings::text( 'fs_t_sg_add' );
+		$html = '<div class="shn-sg"><p class="shn-sg__title">' . esc_html( SHN_Settings::text( 'fs_t_sg_title' ) ) . '</p><ul class="shn-sg__list">';
+		foreach ( $list as $row ) {
+			$p      = $row[1];
+			$simple = $p->is_type( 'simple' ) && $p->supports( 'ajax_add_to_cart' );
+			$url    = $simple ? $p->add_to_cart_url() : $p->get_permalink();
+			$btn    = $simple
+				? '<a href="' . esc_url( $url ) . '" data-quantity="1" data-product_id="' . (int) $p->get_id() . '" data-product_sku="' . esc_attr( $p->get_sku() ) . '" class="button shn-sg__add add_to_cart_button ajax_add_to_cart" rel="nofollow" aria-label="' . esc_attr( $add . ': ' . $p->get_name() ) . '">' . esc_html( $add ) . '</a>'
+				: '<a href="' . esc_url( $url ) . '" class="button shn-sg__add">' . esc_html( $add ) . '</a>';
+			$html  .= '<li class="shn-sg__item">'
+				. '<a class="shn-sg__img" href="' . esc_url( $p->get_permalink() ) . '">' . $p->get_image( 'woocommerce_gallery_thumbnail', array( 'loading' => 'lazy' ) ) . '</a>'
+				. '<span class="shn-sg__info"><a class="shn-sg__name" href="' . esc_url( $p->get_permalink() ) . '">' . esc_html( $p->get_name() ) . '</a>'
+				. '<span class="shn-sg__price">' . wp_kses_post( $p->get_price_html() ) . '</span></span>'
+				. $btn . '</li>';
+		}
+		return $html . '</ul></div>';
 	}
 
 	/** The wrapper every classic place prints (kept even when empty, so a fragment can fill it). */

@@ -20,6 +20,10 @@
  *  - fs_show_empty     message with an empty cart; fs_show_won "won" message
  *  - fs_color          bar colour (#hex, '' = the theme's link colour)
  *  - fs_t_empty / fs_t_left / fs_t_won   { el, en } texts
+ *  - fs_sg             product suggestions under the bar while an amount
+ *                      is left (1.3.0, off); fs_sg_ids product ids in the
+ *                      store's order of preference (max 20); fs_sg_max how
+ *                      many show (1–6); fs_t_sg_title / fs_t_sg_add texts
  *
  * Delivery time (dl_*):
  *  - dl_mode           'off' (default) | 'test' | 'live'
@@ -70,6 +74,9 @@ final class SHN_Settings {
 	const TERM_PREP_MIN = 'shn_prep_min';
 	const TERM_PREP_MAX = 'shn_prep_max';
 
+	/** Most product suggestions under the free-shipping bar. */
+	const MAX_SUGGEST = 20;
+
 	/** Upper limit of every day count. */
 	const MAX_DAYS = 90;
 
@@ -78,6 +85,8 @@ final class SHN_Settings {
 		'fs_t_empty'      => 200,
 		'fs_t_left'       => 200,
 		'fs_t_won'        => 200,
+		'fs_t_sg_title'   => 120,
+		'fs_t_sg_add'     => 40,
 		'dl_t_est'        => 200,
 		'dl_t_item'       => 200,
 		'dl_t_title'      => 100,
@@ -131,6 +140,17 @@ final class SHN_Settings {
 			'fs_t_won'          => array(
 				'el' => 'Κερδίσατε δωρεάν αποστολή!',
 				'en' => 'You have free shipping!',
+			),
+			'fs_sg'             => false,
+			'fs_sg_ids'         => array(),
+			'fs_sg_max'         => 3,
+			'fs_t_sg_title'     => array(
+				'el' => 'Συμπληρώστε το καλάθι σας',
+				'en' => 'Complete your cart',
+			),
+			'fs_t_sg_add'       => array(
+				'el' => 'Προσθήκη',
+				'en' => 'Add',
 			),
 
 			'dl_mode'           => 'off',
@@ -280,9 +300,19 @@ final class SHN_Settings {
 				}
 			}
 		}
-		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won' ) as $k ) {
+		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won', 'fs_sg' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
+		$s['fs_sg_ids'] = array();
+		if ( isset( $raw['fs_sg_ids'] ) && is_array( $raw['fs_sg_ids'] ) ) {
+			foreach ( $raw['fs_sg_ids'] as $pid ) {
+				$pid = is_int( $pid ) || ( is_string( $pid ) && ctype_digit( trim( $pid ) ) ) ? (int) $pid : 0;
+				if ( $pid > 0 && ! in_array( $pid, $s['fs_sg_ids'], true ) && count( $s['fs_sg_ids'] ) < self::MAX_SUGGEST ) {
+					$s['fs_sg_ids'][] = $pid;
+				}
+			}
+		}
+		$s['fs_sg_max'] = isset( $raw['fs_sg_max'] ) && is_numeric( $raw['fs_sg_max'] ) ? min( 6, max( 1, (int) $raw['fs_sg_max'] ) ) : $d['fs_sg_max'];
 		$color         = isset( $raw['fs_color'] ) && is_string( $raw['fs_color'] ) ? sanitize_hex_color( trim( $raw['fs_color'] ) ) : '';
 		$s['fs_color'] = is_string( $color ) ? $color : '';
 
