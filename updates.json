@@ -247,15 +247,15 @@
     },
     "production-ledger": {
       "beta": {
-        "changelog": "* Initial release.\n* Cost entries per product and category, shared entries spread over the month's orders (carrier, consumables, payment provider), general expenses ledger, off-site revenue.\n* Report per product for a month or a year: retail and trade revenue, creator payouts from Revenue Splitter, production costs, shipping ±, net, final result and break-even.\n* CSV export (entries and summary) per Noxpress §5.\n* Module orOS Budget: read-only records feed at wc/v3/pl/records with stable ids and reconciliation fields.\n* Module Printful: completed Printful orders become «Printing» entries (read-only key, background look-ups with retries).\n* Abilities report, entries, export-csv, add-entry, update-entry, delete-entry; PL_DISABLE; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.10).",
+        "changelog": "* orOS feed: an entry that is deleted, marked historical or marked test after orOS pulled it now comes back as a deletion, so orOS Budget removes its copy instead of keeping it.",
         "published": "2026-11-07",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a006539f66aa2b69c2695b5c601cbd0c8d91e92c352da999fac3e69b7d119848",
-        "signature": "JQL2Lk29gxRpt3nvba6B0E3foC7veVax2M99fjSB5Kls2r8AmguTx88G/vEB+cXb8mambzNkaeFrVBF09Y8uBA==",
+        "sha256": "7c973bb63784d606aa0cbd6e0799a7cf482f5780999a5635abac373184fe42bc",
+        "signature": "yjqpm0jlgDoSMoVck30VReRghDra8qpbr9rl1eYVbOKB0+i5wIp78WDRZG7sSZDCPFKA1yS1EQXrHC0mZ/+3CQ==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.0.0/production-ledger.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.0.1/production-ledger.zip"
       }
     },
     "publishing-quote": {
