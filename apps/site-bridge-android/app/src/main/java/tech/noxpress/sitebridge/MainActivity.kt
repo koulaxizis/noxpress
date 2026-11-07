@@ -241,6 +241,10 @@ class MainActivity : FragmentActivity() {
         if (br.isEmpty() && ui.tab == "br") ui.tab = "sites"
         // On by default (design 02, 13); the worker does nothing without a site.
         Notify.scheduleBr(this, br.isNotEmpty() && store.brNotify && Notify.allowed(this))
+        // Write-window notifications (1.8.0): what the screen shows now is known, not news.
+        WindowWatch.remember(store, sites, store.now())
+        WindowWatch.schedule(this, sites.isNotEmpty() && store.wnNotify && Notify.allowed(this))
+        WindowWatch.planNext(this, sites, store.now())
         if (pendingTileOpen) {
             pendingTileOpen = false
             sites.firstOrNull { it.id == store.tileSite && it.canOpen }?.let { setWindow(it, ui.picked) }
@@ -251,6 +255,8 @@ class MainActivity : FragmentActivity() {
         call {
             val fresh = api.window(site.id, minutes, if (minutes > 0) ::actSign else null)
             ui.sites = ui.sites.map { if (it.id == fresh.id) fresh else it }
+            WindowWatch.remember(store, listOf(fresh), store.now())
+            WindowWatch.planNext(this@MainActivity, ui.sites, store.now())
             if (fresh.id == store.tileSite) store.tileUntil = fresh.windowUntil
             updateTile()
             ui.message = if (minutes > 0) getString(R.string.opened, Ui.time(fresh.windowUntil)) else getString(R.string.closed_msg)
@@ -502,6 +508,7 @@ class MainActivity : FragmentActivity() {
             }
             Notify.schedule(this@MainActivity, false)
             Notify.scheduleBr(this@MainActivity, false)
+            WindowWatch.schedule(this@MainActivity, false)
             Keys.delete()
             store.clear()
             ui.paired = false

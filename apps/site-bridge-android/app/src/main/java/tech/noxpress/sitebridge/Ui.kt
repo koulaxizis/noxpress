@@ -326,8 +326,18 @@ private fun SiteCard(s: Site, now: Long, busy: Boolean, picked: Int, onOpen: (Si
                 color = Nx.warn,
                 fontWeight = FontWeight.SemiBold,
             )
+            if (s.source == "schedule") {
+                Text(stringResource(R.string.wn_by_schedule), color = Nx.muted, fontSize = 13.sp)
+            }
         } else {
             Text(stringResource(R.string.closed), color = Nx.ok, fontWeight = FontWeight.SemiBold)
+        }
+        // The site's schedule (Site Bridge 1.12.0+ on it): a pause and the next opening.
+        if (s.pausedUntil > now) {
+            Text(stringResource(R.string.wn_paused, Ui.time(s.pausedUntil)), color = Nx.muted, fontSize = 13.sp)
+        }
+        if (s.scheduleOn && s.nextOpen > now) {
+            Text(stringResource(R.string.wn_next, WindowWatch.at(s.nextOpen)), color = Nx.muted, fontSize = 13.sp)
         }
         if (!s.reachable) {
             Spacer(Modifier.height(6.dp))

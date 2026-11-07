@@ -279,13 +279,17 @@ final class SBR_Hub {
 		return ! empty( $r['ok'] ) ? (array) $r['result'] : new WP_Error( 'sbr_refused', (string) ( $r['error']['message'] ?? 'Error.' ) );
 	}
 
-	/** Opens (minutes > 0) or closes a site's write window from the Hub admin. */
-	public static function window( array $site, int $minutes ) {
+	/**
+	 * Opens (minutes > 0) or closes a site's write window from the Hub admin
+	 * or the app ($via 'hub' | 'app': the site names it in its e-mail).
+	 */
+	public static function window( array $site, int $minutes, string $via = 'hub', string $who = '' ) {
+		$via = 'app' === $via ? 'app' : 'hub';
 		if ( ! empty( $site['self'] ) ) {
 			if ( $minutes > 0 ) {
-				SBR_Settings::open_window( $minutes );
+				SBR_Settings::open_window( $minutes, $via, $who );
 			} else {
-				SBR_Settings::close_window();
+				SBR_Settings::close_window( $via, $who );
 			}
 			return SBR_Site::status();
 		}
@@ -294,6 +298,8 @@ final class SBR_Hub {
 			array(
 				'op'      => 'window',
 				'minutes' => $minutes,
+				'via'     => $via,
+				'who'     => substr( $who, 0, 60 ),
 			),
 			10
 		);
@@ -481,7 +487,13 @@ final class SBR_Hub {
 			} else {
 				$row['online']       = true;
 				$row['level']        = $st['level'] ?? '';
-				$row['write_window'] = ! empty( $st['window_until'] ) ? 'open until ' . gmdate( 'c', (int) $st['window_until'] ) : 'closed';
+				$row['write_window'] = ! empty( $st['window_until'] ) ? 'open until ' . gmdate( 'c', (int) $st['window_until'] ) . ( 'schedule' === ( $st['window_source'] ?? '' ) ? ' (schedule)' : '' ) : 'closed';
+				if ( ! empty( $st['schedule_on'] ) ) {
+					$row['schedule'] = array(
+						'next_open'    => ! empty( $st['next_open'] ) ? gmdate( 'c', (int) $st['next_open'] ) : null,
+						'paused_until' => ! empty( $st['paused_until'] ) ? gmdate( 'c', (int) $st['paused_until'] ) : null,
+					);
+				}
 				$row['woocommerce']  = ! empty( $st['woocommerce'] );
 			}
 			$out[] = $row;

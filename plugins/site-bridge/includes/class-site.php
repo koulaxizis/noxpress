@@ -219,6 +219,12 @@ final class SBR_Site {
 			'level'         => SBR_Settings::v( 'level' ),
 			'window_until'  => SBR_Settings::window_until(),
 			'remote_window' => (bool) SBR_Settings::v( 'remote_window' ),
+			// 1.12.0: what keeps the window open (manual / schedule / ''), the
+			// schedule's next opening and the end of a paused stretch.
+			'window_source' => SBR_Settings::window_source(),
+			'schedule_on'   => SBR_Schedule::enabled(),
+			'next_open'     => SBR_Schedule::next_open(),
+			'paused_until'  => SBR_Schedule::paused_until(),
 			'woocommerce'   => function_exists( 'WC' ),
 			// Plugins whose abilities the Hub's phone app can use (1.7.0).
 			'modules'       => SBR_App::modules_here(),
@@ -279,10 +285,12 @@ final class SBR_Site {
 					return self::answer( $nonce, array( 'ok' => false, 'error' => array( 'code' => 'remote_window', 'message' => 'This site does not let the Hub open its write window.' ) ) );
 				}
 				$min = (int) ( $data['minutes'] ?? 0 );
+				$via = 'app' === ( $data['via'] ?? '' ) ? 'app' : 'hub';
+				$who = sanitize_text_field( substr( (string) ( $data['who'] ?? '' ), 0, 60 ) );
 				if ( $min <= 0 ) {
-					SBR_Settings::close_window();
+					SBR_Settings::close_window( $via, $who );
 				} else {
-					SBR_Settings::open_window( $min );
+					SBR_Settings::open_window( $min, $via, $who );
 				}
 				SBR_Store::log(
 					array(

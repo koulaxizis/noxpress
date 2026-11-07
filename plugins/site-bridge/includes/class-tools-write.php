@@ -153,7 +153,7 @@ final class SBR_Tools_Write {
 	/** Closes the write window now (it never opens or extends it). */
 	public static function tool_write_window_close( array $a ): array {
 		$was = SBR_Settings::window_until();
-		SBR_Settings::close_window();
+		SBR_Settings::close_window( 'claude' );
 		return array(
 			'closed'     => true,
 			'was_until'  => $was ? gmdate( 'c', $was ) : null,

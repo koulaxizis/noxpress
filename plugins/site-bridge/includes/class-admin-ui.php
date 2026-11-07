@@ -332,6 +332,62 @@ final class SBR_Admin_UI {
 		return sprintf( __( '%d λεπτά', 'site-bridge' ), $m );
 	}
 
+	/* ----- Write-window schedule (1.12.0) ----- */
+
+	private static function render_schedule(): void {
+		$sc    = SBR_Schedule::get();
+		$names = SBR_Schedule::day_names();
+		?>
+		<h2 class="sbr-h2"><?php esc_html_e( 'Ωράριο παραθύρου', 'site-bridge' ); ?></h2>
+		<?php self::form_open( 'save_schedule' ); ?>
+		<div class="sbr-zone">
+			<label class="sbr-check"><input type="checkbox" name="sbr_sched_on" value="1" <?php checked( $sc['on'] ); ?>>
+				<strong><?php esc_html_e( 'Αυτόματο ωράριο', 'site-bridge' ); ?></strong></label>
+			<p class="description"><?php esc_html_e( 'Το παράθυρο εγγραφής ανοίγει και κλείνει μόνο του τις μέρες και ώρες πιο κάτω. Κάθε συνεχόμενο άνοιγμα κρατά έως 12 ώρες. Όσο είναι ανοιχτό, το site δέχεται αλλαγές και όταν δεν κοιτάς: βάλε μόνο τις ώρες που δουλεύεις. Κλειστό για sites πελατών.', 'site-bridge' ); ?></p>
+			<?php if ( ! in_array( SBR_Settings::v( 'level' ), array( 'write', 'admin' ), true ) ) : ?>
+				<p class="description sbr-warn"><?php esc_html_e( 'Το επίπεδο του site δεν είναι «Εγγραφή» ή «Διαχείριση»: το ωράριο δεν έχει αποτέλεσμα.', 'site-bridge' ); ?></p>
+			<?php endif; ?>
+			<table class="widefat sbr-table sbr-sched">
+				<thead><tr>
+					<th><?php esc_html_e( 'Μέρα', 'site-bridge' ); ?></th>
+					<?php for ( $i = 1; $i <= SBR_Schedule::RANGES; $i++ ) : ?>
+						<?php /* translators: %d: 1, 2, 3 */ ?>
+						<th><?php echo esc_html( sprintf( __( 'Διάστημα %d', 'site-bridge' ), $i ) ); ?></th>
+					<?php endfor; ?>
+				</tr></thead>
+				<tbody>
+				<?php foreach ( $names as $d => $label ) : ?>
+					<tr data-sbr-day="<?php echo esc_attr( $d ); ?>">
+						<th scope="row"><?php echo esc_html( $label ); ?></th>
+						<?php for ( $i = 0; $i < SBR_Schedule::RANGES; $i++ ) : ?>
+							<?php $r = $sc['days'][ $d ][ $i ] ?? array( '', '' ); ?>
+							<td>
+								<input type="time" name="sbr_sched[<?php echo esc_attr( $d ); ?>][<?php echo (int) $i; ?>][0]" value="<?php echo esc_attr( $r[0] ); ?>" aria-label="<?php echo esc_attr( $label . ' ' . __( 'από', 'site-bridge' ) ); ?>">
+								–
+								<input type="time" name="sbr_sched[<?php echo esc_attr( $d ); ?>][<?php echo (int) $i; ?>][1]" value="<?php echo esc_attr( '24:00' === $r[1] ? '00:00' : $r[1] ); ?>" aria-label="<?php echo esc_attr( $label . ' ' . __( 'έως', 'site-bridge' ) ); ?>">
+							</td>
+						<?php endfor; ?>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p><button type="button" class="button" data-sbr-copy-weekdays><?php esc_html_e( 'Αντιγραφή της Δευτέρας σε όλες τις καθημερινές', 'site-bridge' ); ?></button></p>
+			<span class="sbr-hint">
+				<?php
+				/* translators: %s: time zone, e.g. Europe/Athens */
+				echo esc_html( sprintf( __( 'Ζώνη ώρας του site: %s. Ένα διάστημα που τελειώνει πριν αρχίσει (22:00–02:00) περνά τα μεσάνυχτα.', 'site-bridge' ), wp_timezone_string() ) );
+				?>
+			</span>
+
+			<label class="sbr-label" for="sbr_sched_closed"><?php esc_html_e( 'Κλειστές ημερομηνίες (έως 30, μία ανά γραμμή, 25/12/2026 ή 2026-12-25)', 'site-bridge' ); ?></label>
+			<textarea id="sbr_sched_closed" name="sbr_sched_closed" class="sbr-lines"><?php echo esc_textarea( implode( "\n", $sc['closed'] ) ); ?></textarea>
+			<span class="sbr-hint"><?php esc_html_e( 'Αυτές τις μέρες το ωράριο δεν ανοίγει. Οι περασμένες σβήνονται μόνες τους.', 'site-bridge' ); ?></span>
+		</div>
+		<p class="sbr-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ωραρίου', 'site-bridge' ); ?></button></p>
+		</form>
+		<?php
+	}
+
 	/* ----- Access (Site role) ----- */
 
 	private static function render_access(): void {
@@ -348,12 +404,26 @@ final class SBR_Admin_UI {
 				if ( $until ) {
 					/* translators: %s: time */
 					echo '<span class="sbr-badge sbr-badge--warn">' . esc_html( sprintf( __( 'Ανοιχτό ως %s', 'site-bridge' ), wp_date( 'H:i', $until ) ) ) . '</span>';
+					if ( 'schedule' === SBR_Settings::window_source() ) {
+						echo ' <span class="sbr-badge sbr-badge--muted">' . esc_html__( 'ωράριο', 'site-bridge' ) . '</span>';
+					}
 				} else {
 					echo '<span class="sbr-badge sbr-badge--ok">' . esc_html__( 'Κλειστό', 'site-bridge' ) . '</span>';
+				}
+				if ( SBR_Schedule::paused_until() ) {
+					/* translators: %s: time */
+					echo ' <span class="sbr-hint">' . esc_html( sprintf( __( 'Το ωράριο είναι σε παύση ως %s.', 'site-bridge' ), wp_date( 'H:i', SBR_Schedule::paused_until() ) ) ) . '</span>';
+				}
+				if ( SBR_Schedule::next_open() ) {
+					/* translators: %s: day and time, e.g. Τρι 09:00 */
+					echo ' <span class="sbr-hint">' . esc_html( sprintf( __( 'Επόμενο άνοιγμα από το ωράριο: %s', 'site-bridge' ), SBR_Schedule::label( SBR_Schedule::next_open() ) ) ) . '</span>';
 				}
 				?>
 			</p>
 			<p class="description"><?php esc_html_e( 'Τα εργαλεία εγγραφής και διαχείρισης δουλεύουν μόνο όσο είναι ανοιχτό, και μόνο αν το επιτρέπει το επίπεδο πιο κάτω. Κλείνει μόνο του.', 'site-bridge' ); ?></p>
+			<?php if ( SBR_Schedule::open_until() ) : ?>
+				<p class="description"><?php esc_html_e( 'Το «Κλείσιμο τώρα» μέσα στο ωράριο κλείνει μόνο το τρέχον διάστημα· το επόμενο ανοίγει κανονικά.', 'site-bridge' ); ?></p>
+			<?php endif; ?>
 			<div class="sbr-window">
 				<?php foreach ( SBR_Settings::WINDOW_MINUTES as $m ) : ?>
 					<?php self::form_open( 'window_open' ); ?>
@@ -371,6 +441,8 @@ final class SBR_Admin_UI {
 				<?php endif; ?>
 			</div>
 		</div>
+
+		<?php self::render_schedule(); ?>
 
 		<?php self::form_open( 'save_access' ); ?>
 		<h2 class="sbr-h2"><?php esc_html_e( 'Επίπεδο', 'site-bridge' ); ?></h2>
@@ -415,6 +487,8 @@ final class SBR_Admin_UI {
 				<?php esc_html_e( 'Μάσκα σε προσωπικά δεδομένα (email, τηλέφωνο, διεύθυνση, ΤΚ, IP) σε κάθε αποτέλεσμα', 'site-bridge' ); ?></label>
 			<label class="sbr-check"><input type="checkbox" name="sbr_email_admin" value="1" <?php checked( $s['email_admin'] ); ?>>
 				<?php esc_html_e( 'Email στη διεύθυνση διαχειριστή μετά από κάθε εργαλείο διαχείρισης (plugins, θέματα, κανάλι)', 'site-bridge' ); ?></label>
+			<label class="sbr-check"><input type="checkbox" name="sbr_window_email" value="1" <?php checked( $s['window_email'] ); ?>>
+				<?php esc_html_e( 'Email στη διεύθυνση διαχειριστή για κάθε αλλαγή του παραθύρου εγγραφής (άνοιγμα, κλείσιμο, παύση, ωράριο)', 'site-bridge' ); ?></label>
 
 			<label class="sbr-label" for="sbr_site_ips"><?php esc_html_e( 'IP που δέχεται το site (μία ανά γραμμή, CIDR)', 'site-bridge' ); ?></label>
 			<textarea id="sbr_site_ips" name="sbr_site_ips" class="sbr-lines"><?php echo esc_textarea( $s['site_ips'] ); ?></textarea>
@@ -488,7 +562,15 @@ final class SBR_Admin_UI {
 				}
 				echo '</td><td>' . esc_html( (string) ( $st['level'] ?? '—' ) ) . '</td>';
 				/* translators: %s: time */
-				echo '<td>' . ( $w > time() ? esc_html( sprintf( __( 'ανοιχτό ως %s', 'site-bridge' ), wp_date( 'H:i', $w ) ) ) : esc_html__( 'κλειστό', 'site-bridge' ) ) . '</td>';
+				echo '<td>' . ( $w > time() ? esc_html( sprintf( __( 'ανοιχτό ως %s', 'site-bridge' ), wp_date( 'H:i', $w ) ) ) : esc_html__( 'κλειστό', 'site-bridge' ) );
+				if ( $w > time() && 'schedule' === ( $st['window_source'] ?? '' ) ) {
+					echo ' <span class="sbr-badge sbr-badge--muted">' . esc_html__( 'ωράριο', 'site-bridge' ) . '</span>';
+				}
+				if ( ! empty( $st['schedule_on'] ) && ! empty( $st['next_open'] ) && (int) $st['next_open'] > time() ) {
+					/* translators: %s: day and time, e.g. Τρι 09:00 */
+					echo '<br><span class="sbr-hint">' . esc_html( sprintf( __( 'Επόμενο: %s', 'site-bridge' ), SBR_Schedule::label( (int) $st['next_open'] ) ) ) . '</span>';
+				}
+				echo '</td>';
 				echo '<td>' . esc_html( ! empty( $site['self'] ) ? '—' : self::when( (int) ( $site['last_seen'] ?? 0 ) ) ) . '</td><td>';
 				if ( empty( $site['self'] ) ) {
 					self::form_open( 'site_refresh', 'sbr-inline-form' );
@@ -835,6 +917,7 @@ final class SBR_Admin_UI {
 				$s['run_as']      = (int) self::post( 'sbr_run_as' );
 				$s['pii_mask']    = '1' === self::post( 'sbr_pii_mask' );
 				$s['email_admin'] = '1' === self::post( 'sbr_email_admin' );
+				$s['window_email'] = '1' === self::post( 'sbr_window_email' );
 				$s['site_ips']    = self::post( 'sbr_site_ips' );
 				$s['zip_hosts']   = self::post( 'sbr_zip_hosts' );
 				SBR_Settings::save( $s );
@@ -847,13 +930,47 @@ final class SBR_Admin_UI {
 				self::redirect( 'access', $msgs );
 				break;
 			case 'window_open':
-				$until = SBR_Settings::open_window( (int) self::post( 'sbr_minutes' ) );
+				$until = SBR_Settings::open_window( (int) self::post( 'sbr_minutes' ), 'admin', wp_get_current_user()->user_login );
 				self::audit( 'window_open', array( 'until' => gmdate( 'c', $until ) ) );
 				/* translators: %s: time */
 				self::redirect( 'access', array( self::msg( 'warning', sprintf( __( 'Το παράθυρο εγγραφής είναι ανοιχτό ως %s.', 'site-bridge' ), wp_date( 'H:i', $until ) ) ) ) );
 				break;
+			case 'save_schedule':
+				$old  = SBR_Schedule::get();
+				$days = array();
+				$raw  = isset( $_POST['sbr_sched'] ) && is_array( $_POST['sbr_sched'] ) ? wp_unslash( $_POST['sbr_sched'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- SBR_Schedule::sanitize() keeps only HH:MM.
+				for ( $d = 1; $d <= 7; $d++ ) {
+					$days[ (string) $d ] = isset( $raw[ $d ] ) && is_array( $raw[ $d ] ) ? array_values( $raw[ $d ] ) : array();
+				}
+				$dropped = SBR_Schedule::save(
+					array(
+						'on'     => '1' === self::post( 'sbr_sched_on' ),
+						'days'   => $days,
+						'closed' => self::post( 'sbr_sched_closed' ),
+					)
+				);
+				$new = SBR_Schedule::get();
+				if ( $new !== $old ) {
+					SBR_Notify::change(
+						'schedule_saved',
+						'admin',
+						array(
+							'who'  => wp_get_current_user()->user_login,
+							'old'  => SBR_Schedule::summary( $old ),
+							'new'  => SBR_Schedule::summary( $new ),
+							'next' => SBR_Schedule::next_open(),
+						)
+					);
+				}
+				$msgs = $saved;
+				if ( $dropped ) {
+					/* translators: %d: number of ranges and dates */
+					$msgs[] = self::msg( 'warning', sprintf( __( 'Αγνοήθηκαν %d διαστήματα ή ημερομηνίες: λάθος μορφή, πάνω από 3 τη μέρα, ή συνεχόμενο άνοιγμα πάνω από 12 ώρες.', 'site-bridge' ), $dropped ) );
+				}
+				self::redirect( 'access', $msgs );
+				break;
 			case 'window_close':
-				SBR_Settings::close_window();
+				SBR_Settings::close_window( 'admin', wp_get_current_user()->user_login );
 				self::audit( 'window_close', array() );
 				self::redirect( 'access', array( self::msg( 'success', __( 'Το παράθυρο εγγραφής έκλεισε.', 'site-bridge' ) ) ) );
 				break;
@@ -889,7 +1006,7 @@ final class SBR_Admin_UI {
 				} else {
 					$min = (int) self::post( 'sbr_minutes' );
 					$min = in_array( $min, SBR_Settings::WINDOW_MINUTES, true ) ? $min : 30;
-					$r   = SBR_Hub::window( $sites[ $id ], 'site_window_open' === $act ? $min : 0 );
+					$r   = SBR_Hub::window( $sites[ $id ], 'site_window_open' === $act ? $min : 0, 'hub', wp_get_current_user()->user_login );
 					self::audit( $act, 'site_window_open' === $act ? array( 'site' => $id, 'minutes' => $min ) : array( 'site' => $id ) );
 				}
 				self::redirect( 'sites', array( is_wp_error( $r ) ? self::msg( 'error', $r->get_error_message() ) : self::msg( 'success', __( 'Έγινε.', 'site-bridge' ) ) ) );

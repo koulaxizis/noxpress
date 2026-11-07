@@ -171,4 +171,19 @@
         <item quantity="one">%1$d new post waits</item>
         <item quantity="other">%1$d new posts wait</item>
     </plurals>
+    <!-- Write-window notifications (1.8.0) -->
+    <string name="wn_channel">Write window</string>
+    <string name="wn_title">Write window · %1$s</string>
+    <string name="wn_opened">Opened until %1$s</string>
+    <string name="wn_opened_sched">Opened by the schedule until %1$s</string>
+    <string name="wn_changed">Now open until %1$s</string>
+    <string name="wn_changed_sched">Now open until %1$s (schedule)</string>
+    <string name="wn_closed">Closed</string>
+    <string name="wn_ended">Closed: its time ended</string>
+    <string name="wn_paused">Schedule paused until %1$s</string>
+    <string name="wn_next">Next scheduled opening: %1$s</string>
+    <string name="wn_sched_on">The automatic schedule was turned on</string>
+    <string name="wn_sched_off">The automatic schedule was turned off</string>
+    <string name="wn_sched_edited">The schedule was changed</string>
+    <string name="wn_by_schedule">Opened by the site’s schedule</string>
 </resources>

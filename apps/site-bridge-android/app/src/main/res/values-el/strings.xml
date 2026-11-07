@@ -166,4 +166,19 @@
         <item quantity="one">%1$d νέα ανάρτηση περιμένει</item>
         <item quantity="other">%1$d νέες αναρτήσεις περιμένουν</item>
     </plurals>
+    <!-- Write-window notifications (1.8.0) -->
+    <string name="wn_channel">Παράθυρο εγγραφής</string>
+    <string name="wn_title">Παράθυρο εγγραφής · %1$s</string>
+    <string name="wn_opened">Άνοιξε ως τις %1$s</string>
+    <string name="wn_opened_sched">Άνοιξε από το ωράριο ως τις %1$s</string>
+    <string name="wn_changed">Ανοιχτό πλέον ως τις %1$s</string>
+    <string name="wn_changed_sched">Ανοιχτό πλέον ως τις %1$s (ωράριο)</string>
+    <string name="wn_closed">Έκλεισε</string>
+    <string name="wn_ended">Έκλεισε: τελείωσε ο χρόνος του</string>
+    <string name="wn_paused">Το ωράριο είναι σε παύση ως τις %1$s</string>
+    <string name="wn_next">Επόμενο άνοιγμα από το ωράριο: %1$s</string>
+    <string name="wn_sched_on">Το αυτόματο ωράριο ενεργοποιήθηκε</string>
+    <string name="wn_sched_off">Το αυτόματο ωράριο απενεργοποιήθηκε</string>
+    <string name="wn_sched_edited">Το ωράριο άλλαξε</string>
+    <string name="wn_by_schedule">Άνοιξε από το ωράριο του site</string>
 </resources>

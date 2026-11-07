@@ -7,12 +7,13 @@
  *    Ed25519 key pair), sbr_key_reset, sbr_hub_trust, sbr_pairing,
  *    sbr_hub_seen, sbr_sites (the Hub's paired sites), sbr_dcr_clients,
  *    sbr_app_devices and sbr_app_pairing (the Android app, 1.6.0),
+ *    sbr_schedule and sbr_sched_state (write-window schedule, 1.12.0),
  *    sbr_db_version.
  *  - Every sbr_* transient (OAuth requests and codes, nonces, rate
  *    counters, CIMD cache, PRG notices).
  *  - The tables {prefix}sbr_log (audit log) and {prefix}sbr_grants
  *    (connections): every token stops working at once.
- *  - The daily cron sbr_purge.
+ *  - The daily cron sbr_purge and the schedule's sbr_schedule_tick.
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * Nothing is kept: a connection or pairing must never outlive the plugin.
@@ -41,6 +42,7 @@ function sbr_uninstall_site(): void {
 	// phpcs:enable
 
 	wp_clear_scheduled_hook( 'sbr_purge' );
+	wp_clear_scheduled_hook( 'sbr_schedule_tick' );
 	wp_cache_flush();
 }
 

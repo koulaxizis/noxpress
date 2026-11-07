@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.4
+Stable tag: 1.12.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,10 +23,11 @@ Claude manages your WordPress / WooCommerce sites over MCP, from your own server
 
 * Level per site: off, read, write or admin. New sites start at read.
 * Write and admin tools only run while the site's **write window** is open (15, 30 or 60 minutes, 3, 5 or 12 hours, opened by the site's owner in WP admin; the Hub may open it only when the site allows that, off by default).
+* Optional **window schedule** per site (off by default): the write window opens and closes by itself on chosen days and hours (up to 3 ranges a day, past midnight too, 30 closed dates), in the site's time zone. No open stretch is longer than 12 hours. "Close now" inside a stretch pauses it until it ends. Set only in the site's own WP admin; no tool can change it.
 * Tools run as an administrator chosen on the site, so WordPress's own permissions and hooks apply.
 * Personal data (email, phone, address, postcode, IP) is masked by default; secrets (passwords, keys, tokens, salts) are always returned as `***`.
 * Optional IP lists for the site endpoint and the MCP endpoint.
-* An email to the admin address after every admin-class call.
+* An email to the admin address after every admin-class call, and one for every change of the write window (opened, closed, paused, schedule start and end, schedule edited), on by default.
 
 **Tools**
 
@@ -100,6 +101,13 @@ Every setting, key, pairing, connection and the audit log are deleted, so no tok
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.12.0 =
+* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.
+* New: "Close now" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.
+* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.
+* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.
+* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.
 
 = 1.11.4 =
 * Fix: when a site refuses or fails an app call (/app/ability, /app/window), the Hub answers 409 instead of 502. Hosts and proxies replace 5xx bodies with their own error page, so the app showed only "HTTP 502" instead of the reason.

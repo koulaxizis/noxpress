@@ -21,6 +21,13 @@ data class Site(
     val error: String,
     /** Noxpress plugins the app can use on this site (Site Bridge 1.7.0+ on it), e.g. "book-feed". */
     val modules: List<String> = emptyList(),
+    /** What keeps the window open: "schedule", "manual" or "" (Site Bridge 1.12.0+ on the site). */
+    val source: String = "",
+    val scheduleOn: Boolean = false,
+    /** The schedule's next opening, 0: none. */
+    val nextOpen: Long = 0,
+    /** End of a paused stretch of the schedule, 0: none. */
+    val pausedUntil: Long = 0,
 )
 
 /** An ability's answer, and the window the Hub opened first for it (0: none). */
@@ -115,6 +122,10 @@ class Api(private val store: Store) {
         reachable = o.optBoolean("reachable", true),
         error = o.optString("error"),
         modules = o.optJSONArray("modules")?.let { a -> (0 until a.length()).map { a.optString(it) } } ?: emptyList(),
+        source = o.optString("source"),
+        scheduleOn = o.optBoolean("schedule_on"),
+        nextOpen = o.optLong("next_open"),
+        pausedUntil = o.optLong("paused_until"),
     )
 
     /**
