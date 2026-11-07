@@ -23,7 +23,9 @@
  * Amounts in integer cents: a = net, v = VAT (gross = a + v). Dates are
  * local Y-m-d (orders: the day they were paid, as the report and the bank).
  * For bank reconciliation an order row carries its payment method, the
- * gateway's transaction id and the order number; an entry its supplier
+ * gateway's transaction id, the order number and the sales receipt number
+ * (rcpt: order meta _pl_receipt or filter pl_order_receipt; empty = no
+ * receipt); an entry its supplier
  * and invoice number. Test entries are left out unless test=1, and then
  * carry t = 1. «months» gives the site's monthly totals so orOS can check
  * that its own sums match to the cent.
@@ -224,6 +226,9 @@ final class PL_Rest {
 				'pmt'    => (string) $order->get_payment_method_title(),
 				'tx'     => (string) $order->get_transaction_id(),
 				'paid'   => self::day( $order->get_date_paid() ),
+				// Sales receipt number (e.g. from app.timologisi.online), when one
+				// was recorded; empty = «no receipt» in the orOS reconciliation.
+				'rcpt'   => mb_substr( (string) apply_filters( 'pl_order_receipt', (string) $order->get_meta( '_pl_receipt' ), $order ), 0, 60 ),
 				'status' => (string) $order->get_status(),
 			);
 			$line_ids = array();
