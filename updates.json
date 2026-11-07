@@ -377,15 +377,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Ships Noxpress Core 1.2.10, so the Noxpress hub lists and installs Production Ledger. No other change.",
+        "published": "2026-11-07",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "9f4eb8d9635dfa327e0267d13507c7ba3af962f5aedf890e54f23609ad33ac1f",
-        "signature": "/Pa73iDRiCoz9jrXCK+JzaaHWzaN3LmdMtVhovH/ZBuH8aetdrcxpETEETBoqu64vN7YEom5IO7T04gLgzUNBg==",
+        "sha256": "d2a12d12c3a7c81b61d8b408869f66b28664f3672b3c2c4f9fa70b5d0ee845d9",
+        "signature": "3i28cfv1NRJ7TjCE5h9D6YPLIHiQoVQMGsk6TGetvCVuZr5WOYYbMndMgH22qZEjzYT+hUP/nm7XsFMhADIxBw==",
         "tested_wp": "7.1",
-        "version": "1.8.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.2/store-pulse.zip"
+        "version": "1.8.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.3/store-pulse.zip"
       }
     },
     "theme-patcher": {
