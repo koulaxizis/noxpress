@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.3
+Stable tag: 1.13.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -60,6 +60,9 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.13.0 =
+* New: abilities revenue-splitter/ledger-add and revenue-splitter/ledger-delete. A remote tool (e.g. Site Bridge) can add other income or payments to the Ledger, several at once, with the same validation as the Ledger form, all-or-nothing, a dry run and protection against adding the same entry twice; and delete entries by id to undo an add.
 
 = 1.12.3 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.
