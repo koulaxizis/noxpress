@@ -52,6 +52,7 @@ final class CRT_Settings {
 		't_reviews'    => 80,
 		't_more'       => 80,
 		't_all'        => 40,
+		't_strip'      => 80,
 		't_formats'    => 80,
 		't_box'        => 80,
 		't_tab_m'      => 80,
@@ -115,6 +116,10 @@ final class CRT_Settings {
 			't_all'           => array(
 				'el' => 'Όλοι',
 				'en' => 'All',
+			),
+			't_strip'         => array(
+				'el' => 'Όλοι οι δημιουργοί',
+				'en' => 'All creators',
 			),
 			't_formats'       => array(
 				'el' => 'Σε {n} μορφές',

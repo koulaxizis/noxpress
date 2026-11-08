@@ -158,6 +158,7 @@ final class CRT_Lang {
 		'Τίτλος πλαισίου στο προϊόν' => 'Product box title',
 		'Σύνδεσμος «όλα τα έργα»' => '"All works" link',
 		'Φίλτρο ευρετηρίου «όλοι»' => 'Index filter "all"',
+		'Λωρίδα δημιουργών: σύνδεσμος προς το ευρετήριο' => 'Creators strip: link to the index',
 		'Μορφές ενός έργου ({n} = πλήθος)' => 'Formats of a work ({n} = count)',
 		'Κείμενα επισκέπτη' => 'Visitor texts',
 		'Κείμενο' => 'Text',

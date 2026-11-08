@@ -1,7 +1,7 @@
 /**
- * Featured Creators — front.css (v1.1.0)
+ * Featured Creators — front.css (v1.3.0)
  *
- * Scoped to .crt-root (creator page, creator box, creator tab, index). The
+ * Scoped to .crt-root (creator page, creator box, creator tab, index, strip). The
  * product cards inside .crt-products are WooCommerce's and the theme's own
  * and are not styled here. Layout properties of our own elements carry !important
  * so theme rules with an id cannot rearrange them (Bible §14, rule 13).
@@ -254,6 +254,49 @@ body.crt-creator-page #primary.content-area { width: 100% !important; max-width:
 	.crt-page .crt-head { flex-direction: column !important; align-items: flex-start !important; }
 	.crt-page .crt-head__photo { width: 140px !important; }
 	.crt-tab { --crt-avatar: 88px; }
+}
+
+/* ===== Strip (1.3.0): [nox_creators_strip] ===== */
+
+.crt-strip { margin: .5em 0 1.25em !important; }
+.crt-strip .crt-strip__view {
+	display: block !important;
+	overflow: hidden !important;
+	-webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+	mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.crt-strip ul { display: flex !important; align-items: flex-start !important; margin: 0 !important; padding: 0 !important; list-style: none !important; }
+.crt-strip li { margin: 0 !important; padding: 0 !important; list-style: none !important; }
+.crt-strip li::before, .crt-strip li::marker { content: none !important; }
+.crt-strip .crt-strip__track { width: max-content !important; animation: crt-strip-run var(--crt-strip-t, 100s) linear infinite; }
+.crt-strip .crt-strip__view:hover .crt-strip__track,
+.crt-strip .crt-strip__view:focus-within .crt-strip__track { animation-play-state: paused; }
+.crt-strip .crt-strip__item { flex: 0 0 auto !important; width: calc(var(--crt-avatar) + 3.5em) !important; margin: 0 .5em !important; }
+.crt-strip .crt-strip__a {
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: center !important;
+	gap: .5em !important;
+	padding: .25em 0 !important;
+	text-align: center !important;
+	text-decoration: none !important;
+	color: inherit;
+}
+.crt-strip .crt-strip__img { display: block !important; width: var(--crt-avatar) !important; height: var(--crt-avatar) !important; line-height: 0; transition: transform .25s; }
+.crt-strip .crt-strip__a:hover .crt-strip__img,
+.crt-strip .crt-strip__a:focus .crt-strip__img { transform: scale(1.06); }
+.crt-strip .crt-strip__name { display: block !important; font-size: .85em; line-height: 1.25; overflow-wrap: anywhere; }
+.crt-strip .crt-strip__a:hover .crt-strip__name,
+.crt-strip .crt-strip__a:focus .crt-strip__name { text-decoration: underline; }
+.crt-root .crt-avatar--silhouette { color: rgba(127, 127, 127, .55); overflow: hidden !important; align-items: flex-end !important; }
+.crt-root .crt-avatar--silhouette svg { display: block !important; width: 78% !important; height: 78% !important; max-width: none !important; }
+.crt-strip .crt-strip__more { margin: .75em 0 0 !important; padding: 0 !important; text-align: center !important; }
+.crt-strip .crt-strip__more a { font-weight: 600; }
+@keyframes crt-strip-run { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+	.crt-strip .crt-strip__view { overflow-x: auto !important; -webkit-mask-image: none; mask-image: none; }
+	.crt-strip .crt-strip__track { animation: none !important; }
+	.crt-strip .crt-strip__half[aria-hidden] { display: none !important; }
 }
 
 /* Last, and doubled for specificity: hidden always wins over the layout rules above. */
