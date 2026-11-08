@@ -23,6 +23,15 @@
  *    fails, the payload's own fields are used. The title is the subject
  *    when known, otherwise the campaign's name.
  *
+ * Picture (1.4.0): neither MailerLite nor orOS sends an image, and Viber
+ * shows no preview for a link inside a text message, so a newsletter post
+ * went out as bare text. Now, with "picture from the email" (nl_img_email)
+ * on and the API token set, the first real picture of the email's HTML
+ * (https, .jpg/.jpeg/.png/.gif, not a 1×1 tracker or a small icon) is the
+ * post's picture; otherwise the fixed newsletter picture of the settings
+ * (nl_image, an attachment of the media library); otherwise text as before.
+ * orOS issues get the fixed picture only.
+ *
  * orOS Newsletter (1.2.0): the list's "When an issue goes out, tell"
  * address is /wp-json/broadcast/v1/hook/newsletter/oros and its notice key
  * (32 letters and digits, made in orOS) is the secret here. orOS posts
@@ -120,7 +129,8 @@ final class BRC_Src_Newsletter {
 			$t    = strtotime( $e['at'] );
 			$date = $t ? wp_date( get_option( 'date_format' ), $t ) : '';
 		}
-		$text = BRC_Template::render(
+		$image = self::default_image();
+		$text  = BRC_Template::render(
 			$s['tpl_newsletter'],
 			array(
 				'title'      => $subject,
@@ -137,7 +147,8 @@ final class BRC_Src_Newsletter {
 				'title' => '' !== $subject ? $subject : ( '' !== $list ? $list : 'Newsletter' ),
 				'text'  => $text,
 				'url'   => $s['nl_link'],
-				'kind'  => 'text',
+				'image' => $image,
+				'kind'  => '' !== $image ? 'picture' : 'text',
 			),
 			array( 'same_url' => false )
 		);
@@ -157,13 +168,17 @@ final class BRC_Src_Newsletter {
 
 		$info = self::details( $c );
 		$api  = self::from_api( $id );
-		foreach ( array( 'subject', 'link' ) as $k ) {
+		foreach ( array( 'subject', 'link', 'image' ) as $k ) {
 			if ( '' !== $api[ $k ] ) {
 				$info[ $k ] = $api[ $k ];
 			}
 		}
 		$url   = $s['nl_preview'] && '' !== $info['link'] ? $info['link'] : $s['nl_link'];
 		$title = '' !== $info['subject'] ? $info['subject'] : $name;
+		$image = $s['nl_img_email'] ? $info['image'] : '';
+		if ( '' === $image ) {
+			$image = self::default_image();
+		}
 
 		$date = '';
 		if ( isset( $c['date'] ) && is_string( $c['date'] ) ) {
@@ -186,22 +201,25 @@ final class BRC_Src_Newsletter {
 				'title' => '' !== $title ? $title : 'Newsletter',
 				'text'  => $text,
 				'url'   => $url,
-				'kind'  => 'text',
+				'image' => $image,
+				'kind'  => '' !== $image ? 'picture' : 'text',
 			),
 			array( 'same_url' => false )
 		);
 	}
 
 	/**
-	 * Subject and public link from a campaign record (webhook payload or
-	 * API answer): top level first, then the first of its emails.
+	 * Subject, public link and first picture from a campaign record
+	 * (webhook payload or API answer): top level first, then the first of
+	 * its emails.
 	 *
-	 * @return array{subject:string,link:string}
+	 * @return array{subject:string,link:string,image:string}
 	 */
 	public static function details( array $c ): array {
 		$out    = array(
 			'subject' => '',
 			'link'    => '',
+			'image'   => '',
 		);
 		$places = array( $c );
 		if ( isset( $c['emails'] ) && is_array( $c['emails'] ) ) {
@@ -217,8 +235,57 @@ final class BRC_Src_Newsletter {
 			if ( '' === $out['link'] && isset( $p['preview_url'] ) ) {
 				$out['link'] = self::public_link( $p['preview_url'] );
 			}
+			if ( '' === $out['image'] && isset( $p['content'] ) && is_string( $p['content'] ) ) {
+				$out['image'] = self::first_image( $p['content'] );
+			}
 		}
 		return $out;
+	}
+
+	/** Smallest width or height (attribute) a picture may declare. */
+	const IMG_MIN = 120;
+
+	/**
+	 * The first real picture of an email's HTML, or ''.
+	 * Skips non-https sources, other file types (Viber takes JPEG, PNG and
+	 * GIF), merge tags and pictures that declare a width or height under
+	 * IMG_MIN (trackers, icons, spacers).
+	 */
+	public static function first_image( string $html ): string {
+		if ( ! preg_match_all( '/<img\b[^>]*>/i', substr( $html, 0, 500000 ), $tags ) ) {
+			return '';
+		}
+		foreach ( array_slice( $tags[0], 0, 50 ) as $tag ) {
+			if ( ! preg_match( '/\ssrc\s*=\s*(["\'])(.*?)\1/i', $tag, $m ) ) {
+				continue;
+			}
+			$url = BRC_Settings::clean_url( html_entity_decode( $m[2], ENT_QUOTES ) );
+			if ( '' === $url || false !== strpos( $url, '{' ) ) {
+				continue;
+			}
+			$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+			if ( ! preg_match( '/\.(jpe?g|png|gif)$/i', $path ) ) {
+				continue;
+			}
+			foreach ( array( 'width', 'height' ) as $dim ) {
+				if ( preg_match( '/\s' . $dim . '\s*=\s*["\']?(\d+)/i', $tag, $d ) && (int) $d[1] < self::IMG_MIN ) {
+					continue 2;
+				}
+			}
+			return $url;
+		}
+		return '';
+	}
+
+	/** The fixed newsletter picture (large size), or ''. */
+	public static function default_image(): string {
+		$s  = BRC_Settings::get();
+		$id = (int) $s['nl_image'];
+		if ( $id <= 0 || ! wp_attachment_is_image( $id ) ) {
+			return '';
+		}
+		$url = wp_get_attachment_image_url( $id, 'large' );
+		return is_string( $url ) ? BRC_Settings::clean_url( $url ) : '';
 	}
 
 	/**
@@ -244,14 +311,15 @@ final class BRC_Src_Newsletter {
 	}
 
 	/**
-	 * Subject and link from the MailerLite API, when a token is set.
+	 * Subject, link and picture from the MailerLite API, when a token is set.
 	 *
-	 * @return array{subject:string,link:string}
+	 * @return array{subject:string,link:string,image:string}
 	 */
 	private static function from_api( string $id ): array {
 		$none  = array(
 			'subject' => '',
 			'link'    => '',
+			'image'   => '',
 		);
 		$token = BRC_Crypt::get( 'mailerlite_api' );
 		if ( '' === $token ) {

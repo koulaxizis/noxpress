@@ -141,7 +141,12 @@ final class BRC_Admin_UI {
 			return;
 		}
 		wp_enqueue_style( 'brc-admin', BRC_URL . 'assets/admin.css', array(), BRC_VERSION );
-		wp_enqueue_script( 'brc-admin', BRC_URL . 'assets/admin.js', array(), BRC_VERSION, true );
+		$deps = array();
+		if ( 'sources' === self::current_tab() && current_user_can( 'upload_files' ) ) {
+			wp_enqueue_media();
+			$deps[] = 'media-editor';
+		}
+		wp_enqueue_script( 'brc-admin', BRC_URL . 'assets/admin.js', $deps, BRC_VERSION, true );
 	}
 
 	private static function url( string $tab, array $args = array() ): string {
@@ -832,6 +837,21 @@ final class BRC_Admin_UI {
 					<input type="password" name="brc_ml_api" class="brc-wide" autocomplete="new-password" spellcheck="false" placeholder="<?php esc_attr_e( 'Integrations → API → Generate new token', 'broadcast' ); ?>" /></label>
 				<?php self::secret_state( 'mailerlite_api' ); ?>
 				<p class="description"><?php esc_html_e( 'Με το token η ανάρτηση παίρνει το θέμα του email αντί για το όνομα της καμπάνιας και τον σύνδεσμο κατευθείαν από το MailerLite. Χωρίς token χρησιμοποιούνται όσα στέλνει το webhook.', 'broadcast' ); ?></p>
+				<?php self::checkbox( 'brc_nl_img_email', $s['nl_img_email'], __( 'Εικόνα από το email: η πρώτη εικόνα του newsletter (θέλει το API token)', 'broadcast' ) ); ?>
+				<?php
+				Broadcast::load_source( 'newsletter' );
+				$nl_img = BRC_Src_Newsletter::default_image();
+				?>
+				<div class="brc-field">
+					<span class="brc-label"><?php esc_html_e( 'Σταθερή εικόνα newsletter', 'broadcast' ); ?></span>
+					<input type="hidden" name="brc_nl_image" id="brc-nl-image" value="<?php echo esc_attr( (string) (int) $s['nl_image'] ); ?>" />
+					<img id="brc-nl-image-preview" class="brc-thumb" src="<?php echo esc_url( $nl_img ); ?>" alt=""<?php echo '' === $nl_img ? ' hidden' : ''; ?> />
+					<p>
+						<button type="button" class="button" data-brc-media="brc-nl-image" data-brc-media-title="<?php esc_attr_e( 'Εικόνα για τις αναρτήσεις newsletter', 'broadcast' ); ?>"><?php esc_html_e( 'Επιλογή εικόνας', 'broadcast' ); ?></button>
+						<button type="button" class="button" data-brc-media-clear="brc-nl-image"><?php esc_html_e( 'Αφαίρεση', 'broadcast' ); ?></button>
+					</p>
+				</div>
+				<p class="description"><?php esc_html_e( 'Μπαίνει όταν το email δεν έχει εικόνα, χωρίς API token και σε κάθε τεύχος του orOS Newsletter. Χωρίς εικόνα η ανάρτηση φεύγει ως σκέτο κείμενο, χωρίς προεπισκόπηση στο Viber.', 'broadcast' ); ?></p>
 				<?php if ( ! empty( $notes['nl_api'] ) && is_array( $notes['nl_api'] ) && isset( $notes['nl_api']['at'] ) ) : ?>
 					<p class="<?php echo empty( $notes['nl_api']['ok'] ) ? 'brc-warn' : 'description'; ?>">
 						<?php
@@ -1305,6 +1325,9 @@ final class BRC_Admin_UI {
 
 		$s['nl_link']    = self::post( 'brc_nl_link' );
 		$s['nl_preview'] = '1' === self::post( 'brc_nl_preview' );
+		$s['nl_img_email'] = '1' === self::post( 'brc_nl_img_email' );
+		$nl_image          = (int) self::post( 'brc_nl_image' );
+		$s['nl_image']     = $nl_image > 0 && wp_attachment_is_image( $nl_image ) ? $nl_image : 0;
 		if ( '' !== trim( self::post( 'brc_nl_link' ) ) && '' === BRC_Settings::clean_url( self::post( 'brc_nl_link' ) ) ) {
 			$msgs[] = self::msg( 'error', __( 'Ο σύνδεσμος του newsletter θέλει https://. Δεν κρατήθηκε.', 'broadcast' ) );
 		}
