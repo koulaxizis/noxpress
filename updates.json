@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* New: abilities revenue-splitter/ledger-add and revenue-splitter/ledger-delete. A remote tool (e.g. Site Bridge) can add other income or payments to the Ledger, several at once, with the same validation as the Ledger form, all-or-nothing, a dry run and protection against adding the same entry twice; and delete entries by id to undo an add.",
+        "published": "2026-11-08",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "3c28ce2df8af8b3958883bb6c062970446a42712fd61f7477f5bd822177c39a2",
-        "signature": "6gLNUiXb3YePlM50pNd2ond79mAUNEZ8VAXTwowvu7zkoeb2pmNg8FbvJg73UYPYSSF/DgnfU/nyZ57GutucDw==",
+        "sha256": "a0078b8e7b03e01f0d020d5130e31be1a6093ade1fcdea60dcc27ffe26eda188",
+        "signature": "9tRXGlmp8RcoAY7VgEHiV4/xNPfzShczx6h6YrCndc+C6vGiUybYJ7Oia3OO//nZXyHrI3lEcpg/J1KFRSUiBg==",
         "tested_wp": "7.1",
-        "version": "1.12.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.12.3/revenue-splitter.zip"
+        "version": "1.13.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.13.0/revenue-splitter.zip"
       }
     },
     "search-signals": {
