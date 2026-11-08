@@ -171,6 +171,17 @@ body.crt-creator-page #primary.content-area { width: 100% !important; max-width:
 	object-fit: cover !important;
 	border-radius: 50% !important;
 	margin: 0 !important;
+	overflow: hidden !important;
+}
+/* Image optimisers (Imagify, WebP plugins) wrap the thumbnail in <picture> and move the class there. */
+.crt-root picture.crt-avatar img {
+	display: block !important;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	object-fit: cover !important;
+	border-radius: 50% !important;
+	margin: 0 !important;
 }
 .crt-root .crt-avatar--empty {
 	display: flex !important;
