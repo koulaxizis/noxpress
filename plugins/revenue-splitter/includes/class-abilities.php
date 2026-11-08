@@ -17,8 +17,14 @@
  *  revenue-splitter/send-test        a test email to the site's admin address
  *  revenue-splitter/monthly-send     last month's reports, now (destructive:
  *                                    emails leave the site)
+ *  revenue-splitter/ledger-add       other income or payments, several at
+ *                                    once, validated as the Ledger form,
+ *                                    all-or-nothing, with a dry run (1.13.0)
+ *  revenue-splitter/ledger-delete    ledger entries by id, to undo an add
+ *                                    (destructive, 1.13.0)
  *
- * Nothing here returns an email address, a portal key or a ledger note.
+ * Nothing here returns an email address or a portal key. Ledger notes are
+ * returned only by ledger-add, for the entries the caller just gave.
  * Registered only on WordPress 6.9+, where the Abilities API exists.
  */
 
@@ -154,6 +160,67 @@ final class RS_Abilities {
 				),
 				'ann'         => array( false, true, false ),
 				'run'         => array( __CLASS__, 'monthly_send' ),
+			),
+			'ledger-add'      => array(
+				'label'       => 'Revenue Splitter: add ledger entries',
+				'description' => 'Adds other income (type income; negative amounts are corrections) or payments (type payment; always positive) to the Ledger, as the Ledger form does: date YYYY-MM-DD, a known beneficiary, a non-zero amount and a required note; channel optional, from the Settings list. At most 100 entries; all-or-nothing (one invalid entry and nothing is written). An entry equal to an existing one (type, date, beneficiary, amount, note) is refused unless allow_duplicates. dry_run validates and shows what would be added without writing. Returns the new entries with their ids (for ledger-delete).',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'entries'          => array(
+							'type'     => 'array',
+							'minItems' => 1,
+							'maxItems' => 100,
+							'items'    => array(
+								'type'                 => 'object',
+								'properties'           => array(
+									'type'        => array(
+										'type' => 'string',
+										'enum' => array( 'income', 'payment' ),
+									),
+									'date'        => $date,
+									'beneficiary' => array( 'type' => 'string' ),
+									'amount'      => array( 'type' => 'number' ),
+									'note'        => array( 'type' => 'string' ),
+									'channel'     => array( 'type' => 'string' ),
+								),
+								'required'             => array( 'type', 'date', 'beneficiary', 'amount', 'note' ),
+								'additionalProperties' => false,
+							),
+						),
+						'dry_run'          => array(
+							'type'    => 'boolean',
+							'default' => false,
+						),
+						'allow_duplicates' => array(
+							'type'    => 'boolean',
+							'default' => false,
+						),
+					),
+					'required'             => array( 'entries' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'ledger_add' ),
+			),
+			'ledger-delete'   => array(
+				'label'       => 'Revenue Splitter: delete ledger entries',
+				'description' => 'Deletes Ledger entries by id (the ids ledger-add returned), as the Ledger screen\'s delete button does. At most 100 ids. Reports which ids were deleted and which were not found. Cannot be undone, except by adding the entries again.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'ids' => array(
+							'type'     => 'array',
+							'minItems' => 1,
+							'maxItems' => 100,
+							'items'    => array( 'type' => 'integer' ),
+						),
+					),
+					'required'             => array( 'ids' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, true, true ),
+				'run'         => array( __CLASS__, 'ledger_delete' ),
 			),
 		);
 		foreach ( $defs as $id => $d ) {
@@ -319,6 +386,45 @@ final class RS_Abilities {
 			$r['reason'] = 'Already sent for this month; pass resend to send it again.';
 		}
 		return $r;
+	}
+
+	public static function ledger_add( $in = null ) {
+		$in      = is_array( $in ) ? $in : array();
+		$entries = isset( $in['entries'] ) && is_array( $in['entries'] ) ? $in['entries'] : array();
+		if ( empty( $entries ) || count( $entries ) > 100 ) {
+			return new WP_Error( 'rs_entries', 'Give 1 to 100 entries.' );
+		}
+		$dry = ! empty( $in['dry_run'] );
+		$r   = RS_Ledger::add_many( $entries, $dry, ! empty( $in['allow_duplicates'] ) );
+		if ( ! $r['ok'] ) {
+			return new WP_Error( 'rs_ledger', 'Nothing was written. ' . implode( ' ', $r['errors'] ), array( 'errors' => $r['errors'] ) );
+		}
+		return array(
+			'dry_run' => $dry,
+			'added'   => $dry ? 0 : count( $r['entries'] ),
+			'entries' => $r['entries'],
+		);
+	}
+
+	public static function ledger_delete( $in = null ) {
+		$in  = is_array( $in ) ? $in : array();
+		$ids = isset( $in['ids'] ) && is_array( $in['ids'] ) ? array_values( array_unique( array_filter( array_map( 'absint', $in['ids'] ) ) ) ) : array();
+		if ( empty( $ids ) || count( $ids ) > 100 ) {
+			return new WP_Error( 'rs_ids', 'Give 1 to 100 entry ids.' );
+		}
+		$deleted   = array();
+		$not_found = array();
+		foreach ( $ids as $id ) {
+			if ( RS_Ledger::delete( $id ) ) {
+				$deleted[] = $id;
+			} else {
+				$not_found[] = $id;
+			}
+		}
+		return array(
+			'deleted'   => $deleted,
+			'not_found' => $not_found,
+		);
 	}
 
 	/* ---------------------------------------------------------------------

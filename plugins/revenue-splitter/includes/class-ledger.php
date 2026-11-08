@@ -403,6 +403,92 @@ final class RS_Ledger {
 		return true;
 	}
 
+	/**
+	 * Append several entries at once (1.13.0, for the ledger-add ability).
+	 *
+	 * Every entry goes through validate_entry(), the same rules as the
+	 * admin form. All-or-nothing: if one entry fails, nothing is written.
+	 * An entry equal to an existing one (same type, date, beneficiary,
+	 * amount and note) is refused unless $allow_duplicates, so a repeated
+	 * run cannot count a balance twice. With $dry_run nothing is written
+	 * and the result shows what would be added.
+	 *
+	 * @param array[] $entries          {type, date, beneficiary, amount, note, channel?}
+	 * @param bool    $dry_run          Validate only.
+	 * @param bool    $allow_duplicates Accept entries equal to existing ones.
+	 * @return array {ok: bool, errors: string[], entries: array[]} the new
+	 *               entries with their ids (ids are 0 on a dry run).
+	 */
+	public static function add_many( array $entries, bool $dry_run = false, bool $allow_duplicates = false ): array {
+
+		$all    = self::all();
+		$seen   = array();
+		$clean  = array();
+		$errors = array();
+
+		$key = static function ( array $e ): string {
+			return implode( '|', array( $e['type'], $e['date'], $e['beneficiary'], number_format( (float) $e['amount'], 2, '.', '' ), $e['note'] ) );
+		};
+
+		foreach ( $all as $e ) {
+			$seen[ $key( $e ) ] = true;
+		}
+
+		foreach ( array_values( $entries ) as $i => $e ) {
+			if ( ! is_array( $e ) ) {
+				$errors[] = sprintf( 'Entry %d: not an object.', $i + 1 );
+				continue;
+			}
+			$v = self::validate_entry( $e );
+			if ( ! $v['ok'] ) {
+				$errors[] = sprintf( 'Entry %d: %s', $i + 1, $v['error'] );
+				continue;
+			}
+			$k = $key( $v['entry'] );
+			if ( ! $allow_duplicates && isset( $seen[ $k ] ) ) {
+				$errors[] = sprintf( 'Entry %d: the same entry already exists (pass allow_duplicates to add it again).', $i + 1 );
+				continue;
+			}
+			$seen[ $k ] = true;
+			$clean[]    = $v['entry'];
+		}
+
+		if ( ! empty( $errors ) || empty( $clean ) ) {
+			if ( empty( $errors ) ) {
+				$errors[] = 'No entries given.';
+			}
+			return array(
+				'ok'      => false,
+				'errors'  => $errors,
+				'entries' => array(),
+			);
+		}
+
+		$next = 0;
+		foreach ( $all as $e ) {
+			$next = max( $next, (int) $e['id'] );
+		}
+
+		$out = array();
+		foreach ( $clean as $c ) {
+			$out[] = array( 'id' => $dry_run ? 0 : ++$next ) + $c;
+		}
+
+		if ( ! $dry_run ) {
+			$all = array_merge( $all, $out );
+			update_option( self::OPT_LEDGER, wp_json_encode( $all ), false );
+			self::$all_cache = null; // Re-read and re-sort on the next all().
+
+			do_action( 'rs_invalidate_cache' );
+		}
+
+		return array(
+			'ok'      => true,
+			'errors'  => array(),
+			'entries' => $out,
+		);
+	}
+
 	/* -----------------------------------------------------------------
 	 * Routing (v1.3.0 FIX #5 + v1.3.1 FIX #11) — POST στο admin_init + PRG
 	 * ----------------------------------------------------------------- */
