@@ -93,15 +93,15 @@
     },
     "featured-creators": {
       "beta": {
-        "changelog": "* New: `[nox_creators_strip]`, a strip of the public creators' photos with their names that drifts slowly sideways, each linking to the creator page, with an \"All creators\" link to the index page (new visitor text). Creators without a photo get a neutral silhouette. Attributes: `size` (photo px, 40–200, default 88), `speed` (seconds per round, 0 = by the number of creators), `order` (random, name, or photos = creators with a photo first), `role` (one role attribute), `more=\"0\"` (no link), `limit`. Stops on hover and focus; stands still and scrolls by hand for visitors who ask for reduced motion; the repeated half is hidden from screen readers and the keyboard.",
+        "changelog": "* Fix: photos stay round when an image optimiser (Imagify, WebP plugins) wraps them in `<picture>`; they showed square in the strip, the index and the tab.",
         "published": "2026-11-08",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8c4d0f3ff5557d3c258dc7cf4698ddbb74dd089eb221b9a6e1483deeab2b879b",
-        "signature": "vApGlh/AhK7bxntbENCCCOvBkeIFRstpQF6Km7tgO2AuCTcUjqOttgbhHBXLAAvBfcJefktagy8cn7N153wBDA==",
+        "sha256": "2cb8a8bd5611b2c35b676af693bf4874869ed9754da10248259cfb31aa3e9bce",
+        "signature": "oXsdirp5IKpWXoBjayByTI5HGMig4tbD6xp0bKQlIaz6dlDjms3Lc7iVBitxUMGzrcf5K3Uc+uL3aYPDWyHTCg==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.0/featured-creators.zip"
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.1/featured-creators.zip"
       }
     },
     "greeklish-permalinks": {
