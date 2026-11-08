@@ -28,15 +28,15 @@
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Fix: the ability `broadcast/queue-reject` is no longer marked destructive (it only marks the item as rejected; it stays in the history). Site Bridge classed it \"admin\", so Reject in the Site Bridge app, which runs read and write abilities only, was refused.",
-        "published": "2026-11-06",
+        "changelog": "* Fix: a MailerLite post linked to the fixed link of the settings for every campaign, even with «use the campaign's preview_url» ticked, because a fixed link always won. With the box on (now the default), the post links to the campaign's public preview (`preview.mailerlite.io/preview/<account>/emails/<email>`), and the fixed link is only the fallback. A preview link on connect./dashboard.mailerlite.com, which needs signing in, is rewritten to the public host; any other link is not used.\n* New: optional MailerLite API token (sealed like the other secrets, or `BRC_MAILERLITE_API_TOKEN` in wp-config.php). With it, each «campaign.sent» reads the campaign from the API (6 s, no redirects) and the post takes the email's subject instead of the campaign's internal name, and the preview link straight from MailerLite. The settings page shows the last call and its result. Without a token, or when the call fails, the webhook's own fields are used.",
+        "published": "2026-11-08",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "810fcd100194f2d5bebe615eb7d26d39a7c56b14d195a17d24083b32ffd1142f",
-        "signature": "UjE8pYUy8l+FnOOldeIBKPyihJgz69z2hgTPDu1e1yERY8Wi49cymrzcvtLgzfQpCcVJAjh32KtO1VLk1eGNDA==",
+        "sha256": "8cf02f720f226b541d744b42e822ebc94c521b5edfed1f995edb8e159139b1c0",
+        "signature": "7Hw0s+jOdRAXALgBnDfI0Wb44VQSC3LNzb7HzZydPf+ABdTrGmcoMVreVIDKxtCh2glvkFn8DEUU3ia+qtq9Dw==",
         "tested_wp": "7.1",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.2.1/broadcast.zip"
+        "version": "1.3.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.3.0/broadcast.zip"
       }
     },
     "checkout-extras": {
