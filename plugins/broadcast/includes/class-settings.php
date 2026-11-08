@@ -23,7 +23,8 @@
  *  - p_skip_hidden bool   products: skip categories Hide Catalog hides (on)
  *  - nl_link       string newsletter: fixed link for every campaign, or ''
  *  - vb_hook       string viber: webhook URL on another site, or '' (this site)
- *  - nl_preview    bool   newsletter: use the campaign's preview_url
+ *  - nl_preview    bool   newsletter: link to the campaign's public preview
+ *                         first, nl_link only as the fallback (on; 1.3.0)
  *  - yt_channels   str[]  youtube: channel ids UC + 22 characters (max 5)
  *  - yt_shorts     bool   youtube: include Shorts (off)
  *  - yt_live       bool   youtube: include live streams (off)
@@ -99,7 +100,7 @@ final class BRC_Settings {
 			'p_skip_bf'     => true,
 			'p_skip_hidden' => true,
 			'nl_link'       => '',
-			'nl_preview'    => false,
+			'nl_preview'    => true,
 			'yt_channels'   => array(),
 			'yt_shorts'     => false,
 			'yt_live'       => false,

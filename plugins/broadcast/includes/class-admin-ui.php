@@ -824,10 +824,27 @@ final class BRC_Admin_UI {
 						?>
 					</p>
 				<?php endif; ?>
-				<label class="brc-field"><span class="brc-label"><?php esc_html_e( 'Σύνδεσμος της ανάρτησης', 'broadcast' ); ?></span>
+				<?php self::checkbox( 'brc_nl_preview', $s['nl_preview'], __( 'Σύνδεσμος προς την ίδια την καμπάνια (δημόσια προβολή στο preview.mailerlite.io)', 'broadcast' ) ); ?>
+				<label class="brc-field"><span class="brc-label"><?php esc_html_e( 'Σταθερός σύνδεσμος (εφεδρικός)', 'broadcast' ); ?></span>
 					<input type="url" name="brc_nl_link" class="brc-wide" value="<?php echo esc_attr( $s['nl_link'] ); ?>" placeholder="https://…" /></label>
-				<p class="description"><?php esc_html_e( 'Το MailerLite δεν στέλνει θέμα ούτε δημόσιο σύνδεσμο της καμπάνιας. Βάλε έναν σταθερό σύνδεσμο (π.χ. αρχείο newsletter ή σελίδα εγγραφής). Κενό = η ανάρτηση έχει μόνο τον τίτλο.', 'broadcast' ); ?></p>
-				<?php self::checkbox( 'brc_nl_preview', $s['nl_preview'], __( 'Χωρίς σταθερό σύνδεσμο: χρήση του preview_url της καμπάνιας (μόνο αν ανοίγει χωρίς σύνδεση στο MailerLite)', 'broadcast' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Μπαίνει όταν δεν βρεθεί σύνδεσμος της καμπάνιας ή όταν το κουτάκι από πάνω είναι κλειστό (π.χ. σελίδα εγγραφής). Κενό = η ανάρτηση έχει μόνο τον τίτλο.', 'broadcast' ); ?></p>
+				<label class="brc-field"><span class="brc-label"><?php esc_html_e( 'API token του MailerLite (προαιρετικό)', 'broadcast' ); ?></span>
+					<input type="password" name="brc_ml_api" class="brc-wide" autocomplete="new-password" spellcheck="false" placeholder="<?php esc_attr_e( 'Integrations → API → Generate new token', 'broadcast' ); ?>" /></label>
+				<?php self::secret_state( 'mailerlite_api' ); ?>
+				<p class="description"><?php esc_html_e( 'Με το token η ανάρτηση παίρνει το θέμα του email αντί για το όνομα της καμπάνιας και τον σύνδεσμο κατευθείαν από το MailerLite. Χωρίς token χρησιμοποιούνται όσα στέλνει το webhook.', 'broadcast' ); ?></p>
+				<?php if ( ! empty( $notes['nl_api'] ) && is_array( $notes['nl_api'] ) && isset( $notes['nl_api']['at'] ) ) : ?>
+					<p class="<?php echo empty( $notes['nl_api']['ok'] ) ? 'brc-warn' : 'description'; ?>">
+						<?php
+						echo esc_html(
+							empty( $notes['nl_api']['ok'] )
+								/* translators: 1: date and time, 2: HTTP code */
+								? sprintf( __( 'Τελευταία κλήση στο API του MailerLite: %1$s, απέτυχε (HTTP %2$d). Μπήκαν όσα έστειλε το webhook.', 'broadcast' ), self::when( (int) $notes['nl_api']['at'] ), (int) $notes['nl_api']['code'] )
+								/* translators: %s: date and time */
+								: sprintf( __( 'Τελευταία κλήση στο API του MailerLite: %s, εντάξει.', 'broadcast' ), self::when( (int) $notes['nl_api']['at'] ) )
+						);
+						?>
+					</p>
+				<?php endif; ?>
 			</div>
 
 			<h2 class="brc-h2"><?php esc_html_e( 'Newsletter (orOS Newsletter)', 'broadcast' ); ?></h2>
@@ -1084,7 +1101,7 @@ final class BRC_Admin_UI {
 					<tr><td><code>brc_item_sent</code> <?php esc_html_e( '(action)', 'broadcast' ); ?></td><td><?php esc_html_e( 'Μετά από κάθε ανάρτηση: ( $id, $item ).', 'broadcast' ); ?></td></tr>
 					<tr><td><code>POST /wp-json/broadcast/v1/hook/newsletter/mailerlite</code></td><td><?php esc_html_e( 'Webhook «campaign.sent» του MailerLite, μόνο με σωστή υπογραφή.', 'broadcast' ); ?></td></tr>
 					<tr><td><code>POST /wp-json/broadcast/v1/hook/newsletter/oros</code></td><td><?php esc_html_e( 'Ειδοποίηση «issue.sent» του orOS Newsletter, μόνο με σωστή υπογραφή και πρόσφατη ώρα.', 'broadcast' ); ?></td></tr>
-					<tr><td><code>BRC_VIBER_TOKEN</code>, <code>BRC_MAILERLITE_SECRET</code></td><td><?php esc_html_e( 'Στο wp-config.php: τα μυστικά από εκεί, με προτεραιότητα.', 'broadcast' ); ?></td></tr>
+					<tr><td><code>BRC_VIBER_TOKEN</code>, <code>BRC_MAILERLITE_SECRET</code>, <code>BRC_MAILERLITE_API_TOKEN</code></td><td><?php esc_html_e( 'Στο wp-config.php: τα μυστικά από εκεί, με προτεραιότητα.', 'broadcast' ); ?></td></tr>
 					<tr><td><code>BRC_DISABLE</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά κάθε πηγή, κάθε ανάρτηση και κάθε webhook.', 'broadcast' ); ?></td></tr>
 				</tbody>
 			</table>
@@ -1296,6 +1313,12 @@ final class BRC_Admin_UI {
 			$msgs[] = BRC_Crypt::put( 'mailerlite', mb_substr( $secret, 0, 200 ) )
 				? self::msg( 'success', __( 'Το secret του newsletter αποθηκεύτηκε σφραγισμένο.', 'broadcast' ) )
 				: self::msg( 'error', __( 'Το secret δεν αποθηκεύτηκε: λείπει το OpenSSL (aes-256-gcm). Βάλ\' το ως σταθερά στο wp-config.php.', 'broadcast' ) );
+		}
+		$ml_api = trim( self::post( 'brc_ml_api' ) );
+		if ( '' !== $ml_api ) {
+			$msgs[] = BRC_Crypt::put( 'mailerlite_api', mb_substr( $ml_api, 0, 2000 ) )
+				? self::msg( 'success', __( 'Το API token του MailerLite αποθηκεύτηκε σφραγισμένο.', 'broadcast' ) )
+				: self::msg( 'error', __( 'Το token δεν αποθηκεύτηκε: λείπει το OpenSSL (aes-256-gcm). Βάλ\' το ως σταθερά στο wp-config.php.', 'broadcast' ) );
 		}
 		$oros = trim( self::post( 'brc_oros_secret' ) );
 		if ( '' !== $oros ) {

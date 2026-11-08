@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -18,7 +18,7 @@ Broadcast routes events from sources to destinations through one queue. Every so
 **Sources**
 
 * New products (WooCommerce): every product that becomes published, checked a few minutes later so fixes made right after publishing are in the post. Category filter (in / out, with subcategories), product types, only with an image. Other publishers' titles imported by Book Feed and categories hidden by Hide Catalog are left out by default. Pre-orders from Pre-Orders show their release date.
-* Newsletter: MailerLite's «campaign.sent» webhook, accepted only with a valid signature, posts the campaign's name and a link you choose. orOS Newsletter's «issue sent» notice (1.2.0) posts the issue's subject, the list and how many received it; it is signed with the list's notice key and must be at most 5 minutes old. One post per issue or campaign, even if a notice arrives twice.
+* Newsletter: MailerLite's «campaign.sent» webhook, accepted only with a valid signature, posts the email's subject (with an optional MailerLite API token; otherwise the campaign's name) and a link to the campaign's public preview, with a fixed link of your choice as the fallback. orOS Newsletter's «issue sent» notice (1.2.0) posts the issue's subject, the list and how many received it; it is signed with the list's notice key and must be at most 5 minutes old. One post per issue or campaign, even if a notice arrives twice.
 * YouTube: new videos of up to five channels from their public feeds, no API key. Shorts are left out by default (the channel's «long videos» list), with a switch to include them and a separate switch for live streams.
 * Instagram: new posts of your Business or Creator account through the Instagram API, with a token from your own Meta app (no app review for your own account). Checked every 30 minutes, so no webhook has to reach the site. Photos and albums by default, videos and Reels with a switch; hashtags at the end of the caption removed by default. The token renews itself every month.
 * Post queue: posts prepared by a routine (for example Claude through Site Bridge, with the broadcast/queue-add ability; queue-list, queue-send and queue-reject let an app work the queue) or by you in the admin. They wait until you press «Published», on a screen that works on a phone.
@@ -83,6 +83,10 @@ The webhook at Viber is removed, and the queue and history table, the settings, 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* Fix: a MailerLite post linked to the fixed link of the settings for every campaign, even with «use the campaign's preview_url» ticked, because a fixed link always won. With the box on (now the default), the post links to the campaign's public preview (`preview.mailerlite.io/preview/<account>/emails/<email>`), and the fixed link is only the fallback. A preview link on connect./dashboard.mailerlite.com, which needs signing in, is rewritten to the public host; any other link is not used.
+* New: optional MailerLite API token (sealed like the other secrets, or `BRC_MAILERLITE_API_TOKEN` in wp-config.php). With it, each «campaign.sent» reads the campaign from the API (6 s, no redirects) and the post takes the email's subject instead of the campaign's internal name, and the preview link straight from MailerLite. The settings page shows the last call and its result. Without a token, or when the call fails, the webhook's own fields are used.
 
 = 1.2.1 =
 * Fix: the ability `broadcast/queue-reject` is no longer marked destructive (it only marks the item as rejected; it stays in the history). Site Bridge classed it "admin", so Reject in the Site Bridge app, which runs read and write abilities only, was refused.
