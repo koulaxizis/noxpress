@@ -7,7 +7,8 @@
  *    a token can still be read), so Viber stops calling a route that is gone.
  *  - Table {prefix}brc_items (queue and history) and its schema option brc_db.
  *  - Options brc_settings, brc_viber (connection), brc_secret_viber,
- *    brc_secret_mailerlite, brc_secret_instagram, brc_secret_oros (sealed secrets),
+ *    brc_secret_mailerlite, brc_secret_mailerlite_api, brc_secret_instagram,
+ *    brc_secret_oros (sealed secrets),
  *    brc_status, brc_yt_seen, brc_ig_seen, brc_ig_meta, brc_lock.
  *  - Transients brc_aui_msg_{uid} (PRG notices), the user option brc_csv
  *    (last CSV format).
@@ -71,7 +72,7 @@ function brc_uninstall_site(): void {
 		);
 	}
 
-	foreach ( array( 'brc_settings', 'brc_viber', 'brc_secret_viber', 'brc_secret_mailerlite', 'brc_secret_instagram', 'brc_secret_oros', 'brc_status', 'brc_yt_seen', 'brc_ig_seen', 'brc_ig_meta', 'brc_lock', 'brc_db' ) as $opt ) {
+	foreach ( array( 'brc_settings', 'brc_viber', 'brc_secret_viber', 'brc_secret_mailerlite', 'brc_secret_mailerlite_api', 'brc_secret_instagram', 'brc_secret_oros', 'brc_status', 'brc_yt_seen', 'brc_ig_seen', 'brc_ig_meta', 'brc_lock', 'brc_db' ) as $opt ) {
 		delete_option( $opt );
 	}
 

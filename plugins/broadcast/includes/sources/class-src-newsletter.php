@@ -5,11 +5,23 @@
  * MailerLite: a webhook for the event campaign.sent to
  * /wp-json/broadcast/v1/hook/newsletter/mailerlite, signed with the
  * webhook's secret (header Signature = HMAC-SHA256 of the raw body). The
- * payload has the campaign id, name, total_recipients, preview_url (a
- * MailerLite dashboard link) and date, but no subject and no public
- * web-version link, so the link of the post is a fixed one from the
- * settings (e.g. the newsletter archive), or the preview_url when the
- * owner ticks it. Batched deliveries ({ events: [...] }) are read too.
+ * payload has the campaign id, name, total_recipients, preview_url and
+ * date. Batched deliveries ({ events: [...] }) are read too.
+ *
+ * Link and title (1.3.0):
+ *  - With "use the campaign's link" (nl_preview) on, the post links to the
+ *    campaign's public preview, https://preview.mailerlite.io/preview/
+ *    <account>/emails/<email>, and the fixed link (nl_link) is only the
+ *    fallback. Before 1.3.0 a fixed link always won, so every campaign
+ *    linked to the same page. A connect./dashboard.mailerlite.com preview
+ *    link (sign-in needed) is rewritten to the public host; any other link
+ *    is not used.
+ *  - With an optional MailerLite API token (sealed like the other
+ *    secrets, or BRC_MAILERLITE_API_TOKEN), the campaign is read from the
+ *    API (GET /api/campaigns/<id>, 6 s, no redirects) for the email's
+ *    subject and its preview link. Without a token, or when the call
+ *    fails, the payload's own fields are used. The title is the subject
+ *    when known, otherwise the campaign's name.
  *
  * orOS Newsletter (1.2.0): the list's "When an issue goes out, tell"
  * address is /wp-json/broadcast/v1/hook/newsletter/oros and its notice key
@@ -132,6 +144,9 @@ final class BRC_Src_Newsletter {
 		return 'ok';
 	}
 
+	/** MailerLite API base (no trailing slash). */
+	const ML_API = 'https://connect.mailerlite.com/api';
+
 	private static function campaign( array $c ): void {
 		$id = isset( $c['id'] ) && is_scalar( $c['id'] ) ? preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $c['id'] ) : '';
 		if ( '' === $id ) {
@@ -139,10 +154,17 @@ final class BRC_Src_Newsletter {
 		}
 		$s    = BRC_Settings::get();
 		$name = isset( $c['name'] ) && is_scalar( $c['name'] ) ? sanitize_text_field( (string) $c['name'] ) : '';
-		$url  = $s['nl_link'];
-		if ( '' === $url && $s['nl_preview'] && isset( $c['preview_url'] ) ) {
-			$url = BRC_Settings::clean_url( $c['preview_url'] );
+
+		$info = self::details( $c );
+		$api  = self::from_api( $id );
+		foreach ( array( 'subject', 'link' ) as $k ) {
+			if ( '' !== $api[ $k ] ) {
+				$info[ $k ] = $api[ $k ];
+			}
 		}
+		$url   = $s['nl_preview'] && '' !== $info['link'] ? $info['link'] : $s['nl_link'];
+		$title = '' !== $info['subject'] ? $info['subject'] : $name;
+
 		$date = '';
 		if ( isset( $c['date'] ) && is_string( $c['date'] ) ) {
 			$t    = strtotime( $c['date'] );
@@ -151,7 +173,7 @@ final class BRC_Src_Newsletter {
 		$text = BRC_Template::render(
 			$s['tpl_newsletter'],
 			array(
-				'title'      => $name,
+				'title'      => $title,
 				'url'        => $url,
 				'recipients' => isset( $c['total_recipients'] ) ? (string) (int) $c['total_recipients'] : '',
 				'date'       => $date,
@@ -161,12 +183,103 @@ final class BRC_Src_Newsletter {
 			'newsletter',
 			'ml:' . $id,
 			array(
-				'title' => '' !== $name ? $name : 'Newsletter',
+				'title' => '' !== $title ? $title : 'Newsletter',
 				'text'  => $text,
 				'url'   => $url,
 				'kind'  => 'text',
 			),
 			array( 'same_url' => false )
 		);
+	}
+
+	/**
+	 * Subject and public link from a campaign record (webhook payload or
+	 * API answer): top level first, then the first of its emails.
+	 *
+	 * @return array{subject:string,link:string}
+	 */
+	public static function details( array $c ): array {
+		$out    = array(
+			'subject' => '',
+			'link'    => '',
+		);
+		$places = array( $c );
+		if ( isset( $c['emails'] ) && is_array( $c['emails'] ) ) {
+			$first = reset( $c['emails'] );
+			if ( is_array( $first ) ) {
+				$places[] = $first;
+			}
+		}
+		foreach ( $places as $p ) {
+			if ( '' === $out['subject'] && isset( $p['subject'] ) && is_string( $p['subject'] ) ) {
+				$out['subject'] = sanitize_text_field( mb_substr( $p['subject'], 0, 300 ) );
+			}
+			if ( '' === $out['link'] && isset( $p['preview_url'] ) ) {
+				$out['link'] = self::public_link( $p['preview_url'] );
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * The public preview link of a MailerLite email, or ''.
+	 * preview.mailerlite.io is kept; a connect./dashboard.mailerlite.com
+	 * preview (sign-in needed) is rewritten to it; anything else is ''.
+	 */
+	public static function public_link( $v ): string {
+		$url = BRC_Settings::clean_url( $v );
+		if ( '' === $url ) {
+			return '';
+		}
+		$p    = wp_parse_url( $url );
+		$host = isset( $p['host'] ) ? strtolower( $p['host'] ) : '';
+		$path = isset( $p['path'] ) ? $p['path'] : '';
+		if ( ! preg_match( '#^/preview/(\d+)/emails/(\d+)/?$#', $path, $m ) ) {
+			return '';
+		}
+		if ( ! in_array( $host, array( 'preview.mailerlite.io', 'connect.mailerlite.com', 'dashboard.mailerlite.com' ), true ) ) {
+			return '';
+		}
+		return 'https://preview.mailerlite.io/preview/' . $m[1] . '/emails/' . $m[2];
+	}
+
+	/**
+	 * Subject and link from the MailerLite API, when a token is set.
+	 *
+	 * @return array{subject:string,link:string}
+	 */
+	private static function from_api( string $id ): array {
+		$none  = array(
+			'subject' => '',
+			'link'    => '',
+		);
+		$token = BRC_Crypt::get( 'mailerlite_api' );
+		if ( '' === $token ) {
+			return $none;
+		}
+		$res = wp_safe_remote_get(
+			self::ML_API . '/campaigns/' . rawurlencode( $id ),
+			array(
+				'timeout'     => 6,
+				'redirection' => 0,
+				'headers'     => array(
+					'Authorization' => 'Bearer ' . $token,
+					'Accept'        => 'application/json',
+				),
+			)
+		);
+		$code = is_wp_error( $res ) ? 0 : (int) wp_remote_retrieve_response_code( $res );
+		$json = 200 === $code ? json_decode( (string) wp_remote_retrieve_body( $res ), true ) : null;
+		$ok   = is_array( $json ) && isset( $json['data'] ) && is_array( $json['data'] );
+		// Last call for the settings page: when and the HTTP code (0 = no answer).
+		BRC_Queue::note(
+			'nl_api',
+			array(
+				'at'   => time(),
+				'code' => $code,
+				'ok'   => $ok,
+			)
+		);
+		return $ok ? self::details( $json['data'] ) : $none;
 	}
 }
