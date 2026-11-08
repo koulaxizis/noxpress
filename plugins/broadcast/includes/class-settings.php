@@ -25,6 +25,8 @@
  *  - vb_hook       string viber: webhook URL on another site, or '' (this site)
  *  - nl_preview    bool   newsletter: link to the campaign's public preview
  *                         first, nl_link only as the fallback (on; 1.3.0)
+ *  - nl_img_email  bool   newsletter: picture from the email's HTML (on; 1.4.0)
+ *  - nl_image      int    newsletter: fixed picture, attachment id, 0 = none
  *  - yt_channels   str[]  youtube: channel ids UC + 22 characters (max 5)
  *  - yt_shorts     bool   youtube: include Shorts (off)
  *  - yt_live       bool   youtube: include live streams (off)
@@ -101,6 +103,8 @@ final class BRC_Settings {
 			'p_skip_hidden' => true,
 			'nl_link'       => '',
 			'nl_preview'    => true,
+			'nl_img_email'  => true,
+			'nl_image'      => 0,
 			'yt_channels'   => array(),
 			'yt_shorts'     => false,
 			'yt_live'       => false,
@@ -233,11 +237,12 @@ final class BRC_Settings {
 		}
 		$s['p_types'] = array_slice( array_values( array_unique( $s['p_types'] ) ), 0, 20 );
 
-		foreach ( array( 'p_image', 'p_skip_bf', 'p_skip_hidden', 'nl_preview', 'yt_shorts', 'yt_live', 'ig_reels', 'ig_tags' ) as $k ) {
+		foreach ( array( 'p_image', 'p_skip_bf', 'p_skip_hidden', 'nl_preview', 'nl_img_email', 'yt_shorts', 'yt_live', 'ig_reels', 'ig_tags' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 
-		$s['nl_link'] = self::clean_url( isset( $raw['nl_link'] ) ? $raw['nl_link'] : '' );
+		$s['nl_link']  = self::clean_url( isset( $raw['nl_link'] ) ? $raw['nl_link'] : '' );
+		$s['nl_image'] = isset( $raw['nl_image'] ) && is_numeric( $raw['nl_image'] ) && (int) $raw['nl_image'] > 0 ? (int) $raw['nl_image'] : 0;
 		$s['dg_url']  = self::clean_url( isset( $raw['dg_url'] ) ? $raw['dg_url'] : '' );
 		$s['vb_hook'] = self::clean_url( isset( $raw['vb_hook'] ) ? $raw['vb_hook'] : '' );
 
