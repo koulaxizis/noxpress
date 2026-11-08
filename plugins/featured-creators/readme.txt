@@ -5,7 +5,7 @@ Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -37,7 +37,8 @@ One page for every creator of your catalog (authors, illustrators, translators, 
 * A creator box under the product description (or after the tabs): photo, role, two lines of biography and a link, for the roles you tick, up to a maximum number of cards.
 * A creator tab on the product, for the roles you tick: photo, short biography, links and the three newest interviews, videos or reviews, with a link to the creator page. The title follows the creator and the role: «Ο συγγραφέας», «Η εικονογράφος», «Συγγραφέας» (no article), «Οι συγγραφείς» for several authors, «Οι δημιουργοί» for mixed roles.
 * An index of creators with a role filter (plain links that also work with page caches, and without reload with JavaScript) and A–Z order by a "sort name" (e.g. surname first). Greek and Latin names are sorted with accents ignored.
-* Shortcodes `[nox_creators]` (or `[nox_creators role="pa_…"]`) and `[nox_creator_box]` (or `[nox_creator_box id="123"]`), and the blocks "Creators", "Creator box" and "Creator page".
+* A strip of creators' photos (`[nox_creators_strip]`) that drifts slowly sideways, with a neutral silhouette for creators without a photo and a link to the index.
+* Shortcodes `[nox_creators]` (or `[nox_creators role="pa_…"]`), `[nox_creators_strip]` and `[nox_creator_box]` (or `[nox_creator_box id="123"]`), and the blocks "Creators", "Creator box" and "Creator page".
 
 **Admin**
 
@@ -111,6 +112,9 @@ Settings, notices and the term ownership meta are deleted. Creators are kept by 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: `[nox_creators_strip]`, a strip of the public creators' photos with their names that drifts slowly sideways, each linking to the creator page, with an "All creators" link to the index page (new visitor text). Creators without a photo get a neutral silhouette. Attributes: `size` (photo px, 40–200, default 88), `speed` (seconds per round, 0 = by the number of creators), `order` (random, name, or photos = creators with a photo first), `role` (one role attribute), `more="0"` (no link), `limit`. Stops on hover and focus; stands still and scrolls by hand for visitors who ask for reduced motion; the repeated half is hidden from screen readers and the keyboard.
 
 = 1.2.2 =
 * Search Signals: the creator page (ProfilePage + Person) goes inside its JSON-LD graph through the `noxpress_seo_graph` filter, as it does with Rank Math, so there is one graph after the switch.

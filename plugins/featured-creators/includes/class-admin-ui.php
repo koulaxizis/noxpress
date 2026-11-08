@@ -519,6 +519,7 @@ final class CRT_Admin_UI {
 			't_tab_mixed'  => __( 'Τίτλος καρτέλας: πολλοί, διαφορετικοί ρόλοι', 'featured-creators' ),
 			't_more'       => __( 'Σύνδεσμος «όλα τα έργα»', 'featured-creators' ),
 			't_all'        => __( 'Φίλτρο ευρετηρίου «όλοι»', 'featured-creators' ),
+			't_strip'      => __( 'Λωρίδα δημιουργών: σύνδεσμος προς το ευρετήριο', 'featured-creators' ),
 			't_formats'    => __( 'Μορφές ενός έργου ({n} = πλήθος)', 'featured-creators' ),
 		);
 		self::form_open( 'save_texts' );

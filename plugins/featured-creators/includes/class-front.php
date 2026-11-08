@@ -19,6 +19,11 @@
  *    («Ο συγγραφέας», «Η εικονογράφος», «Οι συγγραφείς»).
  *  - Index: [nox_creators] / block, role filter by link (?crt_role=…) and,
  *    with JavaScript, without reload; no AJAX.
+ *  - Strip (1.3.0): [nox_creators_strip], the public creators' photos (a
+ *    neutral silhouette when there is none) with their names, drifting
+ *    slowly sideways, each linking to its page, with an "All creators"
+ *    link to the index page. Stops on hover and focus; stands still
+ *    (scrolls by hand) for visitors who ask for reduced motion.
  *
  * Rules: test mode after activation (shop managers only); 'off' hides
  * everything; CRT_DISABLE stops every hook; creator pages answer 404 to
@@ -35,6 +40,7 @@ final class CRT_Front {
 
 	const SC_INDEX = 'nox_creators';
 	const SC_BOX   = 'nox_creator_box';
+	const SC_STRIP = 'nox_creators_strip';
 	const QV_ROLE  = 'crt_role';
 
 	/** Per-request state. */
@@ -49,6 +55,7 @@ final class CRT_Front {
 	public static function init(): void {
 		add_shortcode( self::SC_INDEX, array( __CLASS__, 'shortcode_index' ) );
 		add_shortcode( self::SC_BOX, array( __CLASS__, 'shortcode_box' ) );
+		add_shortcode( self::SC_STRIP, array( __CLASS__, 'shortcode_strip' ) );
 		add_action( 'init', array( __CLASS__, 'register_blocks' ) );
 		add_action( 'init', array( __CLASS__, 'register_block_template' ), 20 );
 
@@ -149,7 +156,7 @@ final class CRT_Front {
 				$need = true;
 			} elseif ( is_singular() ) {
 				$post = get_post();
-				if ( $post instanceof WP_Post && ( has_shortcode( $post->post_content, self::SC_INDEX ) || has_shortcode( $post->post_content, self::SC_BOX ) || has_block( 'noxpress/creators', $post ) || has_block( 'noxpress/creator-box', $post ) ) ) {
+				if ( $post instanceof WP_Post && ( has_shortcode( $post->post_content, self::SC_INDEX ) || has_shortcode( $post->post_content, self::SC_BOX ) || has_shortcode( $post->post_content, self::SC_STRIP ) || has_block( 'noxpress/creators', $post ) || has_block( 'noxpress/creator-box', $post ) ) ) {
 					$need = true;
 				}
 				if ( function_exists( 'is_product' ) && is_product() ) {
@@ -1078,6 +1085,153 @@ final class CRT_Front {
 		}
 		$h .= $body . '</div>';
 		return $h;
+	}
+
+	/* =====================================================================
+	 * Strip (1.3.0)
+	 * =================================================================== */
+
+	/** Copies of the list in one half of the strip, so a short list still fills it. */
+	const STRIP_MIN = 12;
+
+	/**
+	 * [nox_creators_strip size="88" speed="0" order="random" role="" more="1" limit="0"]
+	 *
+	 * size  photo size in px (40–200); speed seconds per round (10–600,
+	 * 0 = by the number of creators); order random | name | photos
+	 * (creators with a photo first); role only one role attribute (pa_…);
+	 * more "0" hides the "All creators" link; limit at most this many
+	 * creators (0 = all).
+	 */
+	public static function shortcode_strip( $atts = array() ): string {
+		if ( ! self::visible() ) {
+			return '';
+		}
+		try {
+			$a = shortcode_atts(
+				array(
+					'size'  => 88,
+					'speed' => 0,
+					'order' => 'random',
+					'role'  => '',
+					'more'  => '1',
+					'limit' => 0,
+				),
+				is_array( $atts ) ? $atts : array(),
+				self::SC_STRIP
+			);
+			return self::render_strip( $a );
+		} catch ( \Throwable $e ) {
+			self::fail();
+			return '';
+		}
+	}
+
+	/** A neutral person silhouette for creators without a photo. */
+	private static function silhouette(): string {
+		return '<span class="crt-avatar crt-avatar--empty crt-avatar--silhouette" aria-hidden="true">'
+			. '<svg viewBox="0 0 64 64" width="64" height="64" focusable="false" aria-hidden="true"><circle cx="32" cy="24" r="12" fill="currentColor"/><path d="M10 58c0-12.2 9.8-21 22-21s22 8.8 22 21z" fill="currentColor"/></svg>'
+			. '</span>';
+	}
+
+	public static function render_strip( array $a ): string {
+		$size  = max( 40, min( 200, (int) $a['size'] ) );
+		$speed = (int) $a['speed'];
+		$order = in_array( $a['order'], array( 'random', 'name', 'photos' ), true ) ? $a['order'] : 'random';
+		$role  = sanitize_key( (string) $a['role'] );
+		$more  = ! in_array( strtolower( trim( (string) $a['more'] ) ), array( '0', 'no', 'false', 'off' ), true );
+		$limit = max( 0, (int) $a['limit'] );
+		$taxes = CRT_Settings::role_taxes();
+		if ( '' !== $role && ! in_array( $role, $taxes, true ) ) {
+			$role = '';
+		}
+
+		$ids = get_posts(
+			array(
+				'post_type'        => CRT_CPT::PT,
+				'post_status'      => 'publish',
+				'has_password'     => false,
+				'posts_per_page'   => -1,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			)
+		);
+		if ( ! $ids ) {
+			return '';
+		}
+		update_postmeta_cache( $ids );
+
+		$people = array();
+		$thumbs = array();
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+			if ( '' !== $role && ! in_array( $role, (array) CRT_CPT::json_meta( $id, CRT_CPT::M_ROLES ), true ) ) {
+				continue;
+			}
+			$t = (int) get_post_meta( $id, '_thumbnail_id', true );
+			if ( $t ) {
+				$thumbs[] = $t;
+			}
+			$people[] = array(
+				'id'    => $id,
+				'name'  => (string) get_the_title( $id ),
+				'key'   => self::sort_key( CRT_CPT::sort_name( $id ) ),
+				'photo' => $t > 0,
+			);
+		}
+		if ( ! $people ) {
+			return '';
+		}
+		if ( $thumbs ) {
+			_prime_post_caches( $thumbs, false, true );
+		}
+
+		if ( 'random' === $order ) {
+			shuffle( $people );
+		} else {
+			usort(
+				$people,
+				static function ( $x, $y ) use ( $order ) {
+					if ( 'photos' === $order && $x['photo'] !== $y['photo'] ) {
+						return $x['photo'] ? -1 : 1;
+					}
+					return strcmp( $x['key'], $y['key'] );
+				}
+			);
+		}
+		if ( $limit > 0 ) {
+			$people = array_slice( $people, 0, $limit );
+		}
+
+		$items = '';
+		foreach ( $people as $p ) {
+			$img    = $p['photo'] ? self::avatar( $p['id'] ) : self::silhouette();
+			$items .= '<li class="crt-strip__item"><a class="crt-strip__a" href="' . esc_url( get_permalink( $p['id'] ) ) . '">'
+				. '<span class="crt-strip__img">' . $img . '</span>'
+				. '<span class="crt-strip__name">' . esc_html( $p['name'] ) . '</span></a></li>';
+		}
+
+		if ( $speed <= 0 ) {
+			$speed = (int) round( count( $people ) * 2.5 );
+		}
+		$copies = max( 1, (int) ceil( self::STRIP_MIN / count( $people ) ) );
+		$speed  = max( 10, min( 600, $speed * $copies ) );
+		$half   = str_repeat( $items, $copies );
+		// The second half repeats the first for a seamless loop; hidden
+		// from screen readers and the keyboard.
+		$hidden = str_replace( '<a class="crt-strip__a" href=', '<a class="crt-strip__a" tabindex="-1" href=', $half );
+
+		self::css();
+		$h  = '<div class="crt-root crt-strip" style="--crt-avatar:' . $size . 'px;--crt-strip-t:' . $speed . 's">';
+		$h .= '<div class="crt-strip__view" role="region" aria-label="' . esc_attr( CRT_Settings::text( 't_strip' ) ) . '">';
+		$h .= '<ul class="crt-strip__track"><li class="crt-strip__half"><ul>' . $half . '</ul></li>';
+		$h .= '<li class="crt-strip__half" aria-hidden="true"><ul>' . $hidden . '</ul></li></ul></div>';
+		$index = (int) CRT_Settings::get()['index_page'];
+		if ( $more && $index > 0 && 'publish' === get_post_status( $index ) ) {
+			$h .= '<p class="crt-strip__more"><a href="' . esc_url( get_permalink( $index ) ) . '">' . esc_html( CRT_Settings::text( 't_strip' ) ) . ' <span aria-hidden="true">→</span></a></p>';
+		}
+		return $h . '</div>';
 	}
 
 	/* =====================================================================
