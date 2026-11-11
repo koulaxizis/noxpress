@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: creators' contract expiries in the Author Portal. orOS sends the list of contracts (POST wc/v3/rs/contracts, full replacement, strict per-row checks, answer with saved and skipped rows); each beneficiary sees only their own under «Your contracts», with signing and end date (dd/mm/yyyy), days left and a coloured status, recomputed from today's date. Open-ended contracts show as «Open-ended».\n* New: «I'd like to discuss it / renew» request per contract, with an optional note, rate-limited (one open request per contract, 3 per beneficiary per day, 10 per IP per hour). orOS pulls the requests (GET wc/v3/rs/contract-requests) and marks them (POST wc/v3/rs/contract-requests/<id>). No email is sent.\n* New: Noxpress → RS Contracts (read-only): last list received, skipped rows with reasons, beneficiaries without a portal key, open requests (with Close), all contracts, and one-click restore of the previous list.\n* New: ability revenue-splitter/contracts (read-only), and GET wc/v3/rs/contracts.",
+        "changelog": "* Changed: the contracts routes moved from wc/v3/rs/… to rs/v1/… (contracts, contract-requests) and take their own narrow key instead of a WooCommerce Read/Write key. RS Contracts makes the key (shown once, stored as sha256), shows when it was last used, and can replace or revoke it. orOS sends it as \"Authorization: Bearer rsc_…\" (or X-RS-Key); after 10 failed keys from one IP in 15 minutes, wrong keys get 429 (the right key always works). The key opens these four routes only. Nothing used the 1.14.0 routes yet.",
         "published": "2026-11-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8d9cd98b4ac03a26c7b0094bc10398e5aa79b01f534ad3f6c448ca55909bc9f7",
-        "signature": "84rr94I+fK05tEAyyz8lw7UhRPWeVTY4tUjeQ7kbwQLA/B/4oLeU7EDleMwpuzgUfUJQmwBM5DcLbC5Iso/0BQ==",
+        "sha256": "5c6a9f1e00e9d991fc6fad3c184e2181bd6b8c0eab347427e752da06fbbaed8b",
+        "signature": "rZ0TDqjr9f/EO5/qRJWEpF+Upm6dW3yGx6GrFN1CMutPBw+XgjNd/QgRj2mk3B0r+RXrMEpoWT2O2YJ2wSd5Ag==",
         "tested_wp": "7.1",
-        "version": "1.14.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.0/revenue-splitter.zip"
+        "version": "1.14.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.1/revenue-splitter.zip"
       }
     },
     "search-signals": {
