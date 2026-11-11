@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: abilities revenue-splitter/ledger-add and revenue-splitter/ledger-delete. A remote tool (e.g. Site Bridge) can add other income or payments to the Ledger, several at once, with the same validation as the Ledger form, all-or-nothing, a dry run and protection against adding the same entry twice; and delete entries by id to undo an add.",
-        "published": "2026-11-08",
+        "changelog": "* New: creators' contract expiries in the Author Portal. orOS sends the list of contracts (POST wc/v3/rs/contracts, full replacement, strict per-row checks, answer with saved and skipped rows); each beneficiary sees only their own under «Your contracts», with signing and end date (dd/mm/yyyy), days left and a coloured status, recomputed from today's date. Open-ended contracts show as «Open-ended».\n* New: «I'd like to discuss it / renew» request per contract, with an optional note, rate-limited (one open request per contract, 3 per beneficiary per day, 10 per IP per hour). orOS pulls the requests (GET wc/v3/rs/contract-requests) and marks them (POST wc/v3/rs/contract-requests/<id>). No email is sent.\n* New: Noxpress → RS Contracts (read-only): last list received, skipped rows with reasons, beneficiaries without a portal key, open requests (with Close), all contracts, and one-click restore of the previous list.\n* New: ability revenue-splitter/contracts (read-only), and GET wc/v3/rs/contracts.",
+        "published": "2026-11-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a0078b8e7b03e01f0d020d5130e31be1a6093ade1fcdea60dcc27ffe26eda188",
-        "signature": "9tRXGlmp8RcoAY7VgEHiV4/xNPfzShczx6h6YrCndc+C6vGiUybYJ7Oia3OO//nZXyHrI3lEcpg/J1KFRSUiBg==",
+        "sha256": "8d9cd98b4ac03a26c7b0094bc10398e5aa79b01f534ad3f6c448ca55909bc9f7",
+        "signature": "84rr94I+fK05tEAyyz8lw7UhRPWeVTY4tUjeQ7kbwQLA/B/4oLeU7EDleMwpuzgUfUJQmwBM5DcLbC5Iso/0BQ==",
         "tested_wp": "7.1",
-        "version": "1.13.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.13.0/revenue-splitter.zip"
+        "version": "1.14.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.0/revenue-splitter.zip"
       }
     },
     "search-signals": {
