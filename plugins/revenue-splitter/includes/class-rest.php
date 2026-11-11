@@ -29,20 +29,22 @@
  * in English. Nothing here returns an email address, a portal key or a
  * ledger note.
  *
- * 1.14.0, contracts (RS_Contracts; source of truth: the orOS CRM):
- *  POST /wp-json/wc/v3/rs/contracts
+ * Contracts (RS_Contracts; source of truth: the orOS CRM), namespace
+ * rs/v1 since 1.14.1 (1.14.0 had them under wc/v3, which needed a
+ * WooCommerce Read/Write key; Chris chose a narrow key instead):
+ *  POST /wp-json/rs/v1/contracts
  *      orOS sends the whole list of creators' contracts (full, idempotent
  *      replacement); answer { saved, skipped: [ { id, why } ] }
- *  GET  /wp-json/wc/v3/rs/contracts?ben=<beneficiary>
+ *  GET  /wp-json/rs/v1/contracts?ben=<beneficiary>
  *      the stored list, for orOS to check
- *  GET  /wp-json/wc/v3/rs/contract-requests?state=new|oros|closed|all
+ *  GET  /wp-json/rs/v1/contract-requests?state=new|oros|closed|all
  *      the Author Portal's renewal requests, newest first
- *  POST /wp-json/wc/v3/rs/contract-requests/<id>  { state: oros|closed }
+ *  POST /wp-json/rs/v1/contract-requests/<id>  { state: oros|closed }
  *      orOS marks a request after importing it (Bible §20 pull pattern)
- * Deviation from Bible §20 1.71 (read-only under wc/v3): these two POSTs
- * write only data whose source of truth is orOS itself (Bible 1.99). Under
- * wc/v3 WooCommerce checks the key's permission, so they need a
- * Read/Write key; a Read key gets 401.
+ * Authentication: the contracts key (contracts_allowed()). Deviation from
+ * Bible §20 («κανένα δικό μας token»): a key that can only touch the
+ * contracts, so no WooCommerce key with write rights lives in orOS
+ * (Bible 1.101).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -51,8 +53,60 @@ final class RS_REST {
 
 	const NS = 'wc/v3';
 
+	/** 1.14.1: the contracts routes, with their own narrow key (Chris 2026-11-11). */
+	const NS_CT = 'rs/v1';
+
+	const KEY_FAIL_MAX = 10;  // Failed contracts-key attempts per IP…
+	const KEY_FAIL_WIN = 900; // …per 15 minutes.
+
 	public static function init(): void {
 		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
+		add_filter( 'rest_allowed_cors_headers', array( __CLASS__, 'cors_headers' ) );
+	}
+
+	/** orOS calls from the browser: let it send the fallback key header. */
+	public static function cors_headers( $headers ) {
+		$headers   = is_array( $headers ) ? $headers : array();
+		$headers[] = 'X-RS-Key';
+		return $headers;
+	}
+
+	/**
+	 * 1.14.1: the contracts routes take the contracts key that «RS
+	 * Συμφωνητικά» makes (Authorization: Bearer rsc_…, or X-RS-Key). It
+	 * can do nothing but these four routes, so orOS keeps a Read-only
+	 * WooCommerce key. A logged-in shop manager (cookie + nonce or an
+	 * Application Password) is let in too, for tests. Failed keys are
+	 * counted per IP (hashed): 10 per 15 minutes, then 429.
+	 */
+	public static function contracts_allowed( WP_REST_Request $req ) {
+		if ( is_user_logged_in() && current_user_can( RS_Admin_UI::CAP ) ) {
+			return true;
+		}
+		$tok  = '';
+		$auth = (string) $req->get_header( 'authorization' );
+		if ( 0 === stripos( $auth, 'Bearer ' ) ) {
+			$tok = trim( substr( $auth, 7 ) );
+		}
+		if ( '' === $tok ) {
+			$tok = trim( (string) $req->get_header( 'x_rs_key' ) );
+		}
+		if ( '' === $tok ) {
+			return new WP_Error( 'rs_key', 'Authentication required: the contracts key from Revenue Splitter (Authorization: Bearer rsc_...).', array( 'status' => 401 ) );
+		}
+		// The right key always gets in, so failures from a shared IP (e.g. a
+		// relay) cannot lock orOS out; a 48-character random key cannot be
+		// guessed anyway, the limit only cuts the noise.
+		if ( RS_Contracts::check_key( $tok ) ) {
+			return true;
+		}
+		$rl = 'rs_rl_k_' . substr( hash( 'sha256', wp_salt( 'nonce' ) . '|' . RS_Portal::client_ip() ), 0, 32 );
+		$n  = (int) get_transient( $rl );
+		if ( $n >= self::KEY_FAIL_MAX ) {
+			return new WP_Error( 'rs_key_rl', 'Too many failed attempts; try again in 15 minutes.', array( 'status' => 429 ) );
+		}
+		set_transient( $rl, $n + 1, self::KEY_FAIL_WIN );
+		return new WP_Error( 'rs_key_bad', 'Invalid contracts key.', array( 'status' => 401 ) );
 	}
 
 	public static function routes(): void {
@@ -89,29 +143,29 @@ final class RS_REST {
 			)
 		);
 		register_rest_route(
-			self::NS,
-			'/rs/contracts',
+			self::NS_CT,
+			'/contracts',
 			array(
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( __CLASS__, 'contracts_get' ),
-					'permission_callback' => array( __CLASS__, 'allowed' ),
+					'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
 					'args'                => array( 'ben' => $name ),
 				),
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( __CLASS__, 'contracts_post' ),
-					'permission_callback' => array( __CLASS__, 'allowed' ),
+					'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
 				),
 			)
 		);
 		register_rest_route(
-			self::NS,
-			'/rs/contract-requests',
+			self::NS_CT,
+			'/contract-requests',
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'requests_get' ),
-				'permission_callback' => array( __CLASS__, 'allowed' ),
+				'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
 				'args'                => array(
 					'state' => array(
 						'type'    => 'string',
@@ -122,12 +176,12 @@ final class RS_REST {
 			)
 		);
 		register_rest_route(
-			self::NS,
-			'/rs/contract-requests/(?P<id>[A-Za-z0-9_-]{1,64})',
+			self::NS_CT,
+			'/contract-requests/(?P<id>[A-Za-z0-9_-]{1,64})',
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'requests_post' ),
-				'permission_callback' => array( __CLASS__, 'allowed' ),
+				'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
 				'args'                => array(
 					'state' => array(
 						'type'     => 'string',
