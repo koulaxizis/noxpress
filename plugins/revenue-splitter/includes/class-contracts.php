@@ -14,7 +14,13 @@
  *   { "v": 1, "sent": "Y-m-d", "contracts": [ { "id", "ben", "title",
  *     "fmt": "print"|"ebook"|"", "from": "Y-m-d", "to": "Y-m-d"|"",
  *     "state": "on"|"soon"|"ended"|"ended_by_agreement",
- *     "renewed": [ "Y-m-d", … ] } ] }
+ *     "renewed": [ "Y-m-d", … ],
+ *     "renewals": [ { "on", "prev_to", "to" }, … ] } ] }
+ * "renewed" holds the end days before each renewal (1.14.0). "renewals"
+ * (optional, 1.14.2, Chris 2026-11-11: «και τα δύο») holds, per renewal,
+ * the day it was made, the end day before it and the new end day; it is
+ * stored and returned only when sent. Unknown keys are ignored, never
+ * refused, so newer orOS versions can send more than a site knows.
  * Every row is checked on its own; a bad row is skipped with a reason and
  * never stops the rest. "ben" must be a beneficiary RS knows, so a typo in
  * orOS can never put a contract in someone else's portal. An empty "to" is
@@ -274,7 +280,7 @@ final class RS_Contracts {
 		$renewed = array_values( array_unique( $renewed ) );
 		sort( $renewed );
 
-		return array(
+		$out = array(
 			'id'      => $id,
 			'ben'     => $ben,
 			'title'   => $title,
@@ -284,6 +290,54 @@ final class RS_Contracts {
 			'state'   => $state,
 			'renewed' => $renewed,
 		);
+
+		// 1.14.2: optional renewals with all three dates.
+		if ( array_key_exists( 'renewals', $row ) ) {
+			$rn = $row['renewals'];
+			if ( ! is_array( $rn ) || count( $rn ) > self::MAX_RENEWED || ( array() !== $rn && array_keys( $rn ) !== range( 0, count( $rn ) - 1 ) ) ) {
+				return 'bad_renewed';
+			}
+			$clean = array();
+			foreach ( $rn as $r ) {
+				if ( ! is_array( $r ) ) {
+					return 'bad_renewed';
+				}
+				$one = array();
+				foreach ( array( 'on', 'prev_to', 'to' ) as $k ) {
+					if ( ! isset( $r[ $k ] ) || ! self::is_date( $r[ $k ] ) ) {
+						return 'bad_renewed';
+					}
+					$one[ $k ] = $r[ $k ];
+				}
+				$clean[] = $one;
+			}
+			usort(
+				$clean,
+				static function ( $a, $b ) {
+					return strcmp( $a['on'], $b['on'] );
+				}
+			);
+			$out['renewals'] = $clean;
+		}
+
+		return $out;
+	}
+
+	/** One display line per renewal: the 1.14.2 renewals, else the old end days. */
+	public static function renewal_lines( array $c ): array {
+		$lines = array();
+		if ( ! empty( $c['renewals'] ) && is_array( $c['renewals'] ) ) {
+			foreach ( $c['renewals'] as $r ) {
+				/* translators: 1: renewal day, 2: end day before it, 3: new end day */
+				$lines[] = sprintf( __( 'Ανανεώθηκε στις %1$s (έληγε %2$s, τώρα λήγει %3$s)', 'revenue-splitter' ), self::dmy( (string) $r['on'] ), self::dmy( (string) $r['prev_to'] ), self::dmy( (string) $r['to'] ) );
+			}
+			return $lines;
+		}
+		if ( ! empty( $c['renewed'] ) ) {
+			/* translators: %s: list of dates */
+			$lines[] = sprintf( __( 'Ανανεώθηκε: %s', 'revenue-splitter' ), implode( ', ', array_map( array( __CLASS__, 'dmy' ), (array) $c['renewed'] ) ) );
+		}
+		return $lines;
 	}
 
 	public static function is_date( $d ): bool {
@@ -726,14 +780,9 @@ final class RS_Contracts {
 				<tr>
 					<td>
 						<strong><?php echo esc_html( (string) $c['title'] ); ?></strong>
-						<?php if ( ! empty( $c['renewed'] ) ) : ?>
-							<br /><small>
-							<?php
-							/* translators: %s: list of dates */
-							echo esc_html( sprintf( __( 'Ανανεώθηκε: %s', 'revenue-splitter' ), implode( ', ', array_map( array( __CLASS__, 'dmy' ), (array) $c['renewed'] ) ) ) );
-							?>
-							</small>
-						<?php endif; ?>
+						<?php foreach ( self::renewal_lines( $c ) as $line ) : ?>
+							<br /><small class="rs-ct-renewal"><?php echo esc_html( $line ); ?></small>
+						<?php endforeach; ?>
 						<?php if ( null !== $open ) : ?>
 							<br /><small class="rs-ct-asked">
 							<?php
@@ -1021,7 +1070,7 @@ final class RS_Contracts {
 							<td><?php echo esc_html( '' === $c['to'] ? '—' : self::dmy( (string) $c['to'] ) ); ?></td>
 							<td><?php echo esc_html( self::left_label( $c, $today ) ); ?></td>
 							<td><span class="rs-ct-badge rs-ct-<?php echo esc_attr( $st ); ?>"><?php echo esc_html( self::status_label( $st ) ); ?></span></td>
-							<td><?php echo esc_html( implode( ', ', array_map( array( __CLASS__, 'dmy' ), (array) $c['renewed'] ) ) ); ?></td>
+							<td><?php echo implode( '<br />', array_map( 'esc_html', self::renewal_lines( $c ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- each line escaped. ?></td>
 						</tr>
 					<?php endforeach; ?>
 					</tbody>
