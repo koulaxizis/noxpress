@@ -143,9 +143,6 @@ final class SP_Lang {
 		'Χθες'                                             => 'Yesterday',
 		'Τελευταίες 7 ημέρες'                              => 'Last 7 days',
 		'Τελευταίες 15 ημέρες'                             => 'Last 15 days',
-		'Τελευταίες 30 ημέρες'                             => 'Last 30 days',
-		'Τρέχων μήνας'                                     => 'This month',
-		'Τρέχον έτος'                                      => 'This year',
 		'Ποσά χωρίς ΦΠΑ, μετά τις κινήσεις του ledger, χωρίς μεταφορικά.' => 'Amounts without VAT, after ledger entries, without shipping.',
 
 		// --- Κάρτες (dashboards + widget) ---
