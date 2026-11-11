@@ -60,7 +60,7 @@ final class SP_Abilities {
 		$defs = array(
 			'overview' => array(
 				'label'       => 'Store Pulse: overview',
-				'description' => 'The dashboard for a period (period: today, yesterday, 7d, 15d, month = last 30 days; default month; or from/to local dates): pending orders (and those older than 7 days), completed orders (count, gross after refunds, customers as a count, average order, top 10 products), refunds, cancelled, low/out of stock counts and, with Revenue Splitter, the publisher\'s share and what is owed to the others. Changes nothing.',
+				'description' => 'The dashboard for a period (period: today, yesterday, 7d, 15d, month = last 30 days, this_month = from the 1st of this month, year = from 1 January; default month; or from/to local dates): pending orders (and those older than 7 days), completed orders (count, gross after refunds, customers as a count, average order, top 10 products), refunds, cancelled, low/out of stock counts and, with Revenue Splitter, the publisher\'s share and what is owed to the others. Changes nothing.',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array(

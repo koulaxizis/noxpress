@@ -838,7 +838,7 @@ final class RS_Admin_UI {
 				<thead>
 					<tr>
 						<th><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th>
-						<th class="num"><?php esc_html_e( 'Πωλήσεις', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Μερίδιο (χωρίς ΦΠΑ)', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Έσοδα εκτός πωλήσεων', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Πληρωμές', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Υπόλοιπο (περιόδου)', 'revenue-splitter' ); ?></th>
@@ -2901,7 +2901,7 @@ final class RS_Admin_UI {
 				<thead>
 					<tr>
 						<th><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th>
-						<th class="num"><?php esc_html_e( 'Πωλήσεις', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Μερίδιο (χωρίς ΦΠΑ)', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Υπόλοιπο', 'revenue-splitter' ); ?></th>
 					</tr>
 				</thead>

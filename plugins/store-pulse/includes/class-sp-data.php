@@ -56,7 +56,7 @@ final class SP_Data {
 	const LOOKBACK_CANCELLED = '180 days';
 
 	/** Έγκυρα presets ρυθμίσεων (labels στο SP_Admin/SP_Lang). */
-	const PRESETS = array( 'today', 'yesterday', '7d', '15d', 'month' );
+	const PRESETS = array( 'today', 'yesterday', '7d', '15d', 'month', 'this_month', 'year' );
 
 	/** Μέγεθος σελίδας για τα paginated queries (orders/products). */
 	const BATCH = 200;
@@ -175,6 +175,16 @@ final class SP_Data {
 				break;
 			case '15d':
 				$s = $now->modify( '-14 days' )->format( 'Y-m-d' );
+				$e = $now->format( 'Y-m-d' );
+				break;
+			case 'this_month':
+				// 1.8.4: από την 1η του τρέχοντος μήνα έως σήμερα.
+				$s = $now->format( 'Y-m-01' );
+				$e = $now->format( 'Y-m-d' );
+				break;
+			case 'year':
+				// 1.8.4: τρέχον έτος (01/01 → σήμερα), ίδιο με το «Τρέχον έτος» του Revenue Splitter.
+				$s = $now->format( 'Y-01-01' );
 				$e = $now->format( 'Y-m-d' );
 				break;
 			case 'month':
@@ -804,6 +814,10 @@ final class SP_Data {
 	 *  - net: share + ledger income − payments του εκδότη (περίοδος).
 	 *  - others: κάθε μη-εκδότης δικαιούχος → share + owed (= share
 	 *    + ledger income − payments περιόδου).
+	 *  - others_sum: Σ share των υπολοίπων (μόνο πωλήσεις).
+	 *  - others_owed_sum (1.8.4): Σ owed των υπολοίπων — ίδια σημασιολογία
+	 *    με το «net» του εκδότη (share + ledger), αυτό δείχνουν οι κάρτες
+	 *    «Οφειλές προς άλλους».
 	 *
 	 * @return array|null
 	 */
@@ -851,6 +865,7 @@ final class SP_Data {
 				// ---- Οι υπόλοιποι ----
 				$others     = array();
 				$others_sum = 0.0;
+				$owed_sum   = 0.0;
 
 				foreach ( $shares as $name => $share ) {
 					if ( $name === $publisher ) {
@@ -865,6 +880,7 @@ final class SP_Data {
 					);
 
 					$others_sum += $share;
+					$owed_sum   += $owed;
 
 					$others[] = array(
 						'name'  => (string) $name,
@@ -886,6 +902,7 @@ final class SP_Data {
 					'net'             => $pub_net,
 					'others'          => $others,
 					'others_sum'      => round( $others_sum, 2 ),
+					'others_owed_sum' => round( $owed_sum, 2 ),
 				);
 			}
 		);
