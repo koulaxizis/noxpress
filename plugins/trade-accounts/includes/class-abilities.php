@@ -25,6 +25,10 @@
  *                                a message to a third party)
  *  trade-accounts/guide-set      the guide page for trade accounts (My
  *                                Account menu and dashboard, feed e-mail)
+ *  trade-accounts/consignments-list, consignment-create,
+ *                consignment-settle, consignment-paid, consignment-extend
+ *                                books on consignment (module "consign",
+ *                                definitions in TRA_Consign::ability_defs())
  *
  * No ability ever returns a password: feed-password-send makes it, mails it
  * and forgets it, so it is never in the caller's answer, a log or a
@@ -203,6 +207,9 @@ final class TRA_Abilities {
 				'run'         => array( __CLASS__, 'guide_set' ),
 			),
 		);
+		if ( class_exists( 'TRA_Consign' ) ) {
+			$defs = array_merge( $defs, TRA_Consign::ability_defs() );
+		}
 		foreach ( $defs as $name => $d ) {
 			wp_register_ability(
 				'trade-accounts/' . $name,
@@ -263,6 +270,7 @@ final class TRA_Abilities {
 			'invoice'         => $s['invoice'],
 			'guide_page'      => $s['guide'],
 			'guide_url'       => TRA_Guide::url(),
+			'consignments'    => class_exists( 'TRA_Consign' ) ? TRA_Consign::summary() : null,
 			'rate_per_hour'   => $s['rate'],
 			'accounts'        => TRA_Accounts::count(),
 			'eligible'        => TRA_Scope::count(),

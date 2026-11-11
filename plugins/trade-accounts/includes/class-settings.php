@@ -4,7 +4,7 @@
  * (Bible §11, whitelists; unknown keys dropped, bad values → defaults).
  *
  * Keys:
- *  - mods       array  module => bool ("pricing", "feed"); every module is
+ *  - mods       array  module => bool ("pricing", "feed", "consign"); every module is
  *                      off until switched on
  *  - mode       string 'test' (wholesale prices only for managers, as a
  *                      preview; default) | 'live' (trade accounts) | 'off'
@@ -31,6 +31,11 @@
  *                      in the feed's "contributors" with their labels
  *  - guide      int    page with the guide for trade accounts (0 = none):
  *                      linked in their My Account and in the feed e-mail
+ *  - c_days     int    consignments: default days to settle (7–730, 90)
+ *  - c_check    int    consignments: a check with the bookstore every so
+ *                      many days while copies are out (0 = none, 30)
+ *  - c_mail     bool   consignments: WooCommerce's «completed» e-mail to
+ *                      the bookstore when a settlement is paid (default off)
  *  - t_<key>_el / t_<key>_en  visitor texts (Bible §14.17), keys in texts()
  *
  * Autoloaded: the shop reads it on every request of a logged-in user.
@@ -42,7 +47,7 @@ final class TRA_Settings {
 
 	const OPT = 'tra_settings';
 
-	const MODULES = array( 'pricing', 'feed' );
+	const MODULES = array( 'pricing', 'feed', 'consign' );
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -80,6 +85,9 @@ final class TRA_Settings {
 			'rate'      => 120,
 			'contrib'   => array(),
 			'guide'     => 0,
+			'c_days'    => 90,
+			'c_check'   => 30,
+			'c_mail'    => false,
 		);
 		foreach ( self::texts() as $k => $t ) {
 			$d[ 't_' . $k . '_el' ] = $t[0];
@@ -121,7 +129,7 @@ final class TRA_Settings {
 		$s['cats']   = self::ids( isset( $raw['cats'] ) ? $raw['cats'] : array(), 'product_cat' );
 		$s['brands'] = self::ids( isset( $raw['brands'] ) ? $raw['brands'] : array(), 'product_brand' );
 
-		foreach ( array( 'physical', 'label', 'invoice', 'no_coupons', 'no_reward' ) as $k ) {
+		foreach ( array( 'physical', 'label', 'invoice', 'no_coupons', 'no_reward', 'c_mail' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 
@@ -144,6 +152,11 @@ final class TRA_Settings {
 				$s['contrib'][] = $tax;
 			}
 		}
+
+		$days        = isset( $raw['c_days'] ) && is_numeric( $raw['c_days'] ) ? (int) $raw['c_days'] : $d['c_days'];
+		$s['c_days']  = max( 7, min( 730, $days ) );
+		$check       = isset( $raw['c_check'] ) && is_numeric( $raw['c_check'] ) ? (int) $raw['c_check'] : $d['c_check'];
+		$s['c_check'] = max( 0, min( 180, $check ) );
 
 		$guide      = isset( $raw['guide'] ) && is_numeric( $raw['guide'] ) ? (int) $raw['guide'] : 0;
 		$s['guide'] = $guide > 0 && ( ! did_action( 'init' ) || 'page' === get_post_type( $guide ) ) ? $guide : 0;
