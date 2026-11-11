@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Changed: the contracts routes moved from wc/v3/rs/… to rs/v1/… (contracts, contract-requests) and take their own narrow key instead of a WooCommerce Read/Write key. RS Contracts makes the key (shown once, stored as sha256), shows when it was last used, and can replace or revoke it. orOS sends it as \"Authorization: Bearer rsc_…\" (or X-RS-Key); after 10 failed keys from one IP in 15 minutes, wrong keys get 429 (the right key always works). The key opens these four routes only. Nothing used the 1.14.0 routes yet.",
+        "changelog": "* New: optional \"renewals\" on each contract, [ { on, prev_to, to } ] (the day of the renewal, the end day before it and the new end day; all YYYY-MM-DD, at most 50, a bad entry skips the row with bad_renewed). Stored and returned by GET only when sent. The Author Portal and RS Contracts show each renewal as «Renewed on … (was ending …, now ends …)»; without it they show \"renewed\" as before. \"renewed\" is unchanged, and unknown keys are still ignored.",
         "published": "2026-11-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "5c6a9f1e00e9d991fc6fad3c184e2181bd6b8c0eab347427e752da06fbbaed8b",
-        "signature": "rZ0TDqjr9f/EO5/qRJWEpF+Upm6dW3yGx6GrFN1CMutPBw+XgjNd/QgRj2mk3B0r+RXrMEpoWT2O2YJ2wSd5Ag==",
+        "sha256": "897176b8ba7a6a826628782d3e8661dd57addc9d78dda498fac6825af8184c86",
+        "signature": "Wb/RvwbWrnOU7CHH06cRXt0cnEIGgR21x3Zm1pIGTEGWPfKF+wqwh8JPE9kJOVJzbKAieLvc/MN+IIqDSMNJDg==",
         "tested_wp": "7.1",
-        "version": "1.14.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.1/revenue-splitter.zip"
+        "version": "1.14.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.2/revenue-splitter.zip"
       }
     },
     "search-signals": {
