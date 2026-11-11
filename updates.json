@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: optional \"renewals\" on each contract, [ { on, prev_to, to } ] (the day of the renewal, the end day before it and the new end day; all YYYY-MM-DD, at most 50, a bad entry skips the row with bad_renewed). Stored and returned by GET only when sent. The Author Portal and RS Contracts show each renewal as «Renewed on … (was ending …, now ends …)»; without it they show \"renewed\" as before. \"renewed\" is unchanged, and unknown keys are still ignored.",
+        "changelog": "* Changed: the «Sales» column in the dashboard widget and in the dashboard's beneficiary accounts is now «Share (excl. VAT)», because it shows each beneficiary's share of net sales, not the sales. No amount changes.",
         "published": "2026-11-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "897176b8ba7a6a826628782d3e8661dd57addc9d78dda498fac6825af8184c86",
-        "signature": "Wb/RvwbWrnOU7CHH06cRXt0cnEIGgR21x3Zm1pIGTEGWPfKF+wqwh8JPE9kJOVJzbKAieLvc/MN+IIqDSMNJDg==",
+        "sha256": "4f0757ca5eec3f0bb2f25955cd87dacf5702b96ba7bb2629a94ade85db071933",
+        "signature": "mT5szZGnVZkkfORDXI4qtMpdWKslPs0l+sEzma8NAS3VKUOGC8VIGU2M0CoOz4AlnkQv4TZV1e4ZRYH8wHGJBA==",
         "tested_wp": "7.1",
-        "version": "1.14.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.2/revenue-splitter.zip"
+        "version": "1.14.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.3/revenue-splitter.zip"
       }
     },
     "search-signals": {
@@ -377,15 +377,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Ships Noxpress Core 1.2.10, so the Noxpress hub lists and installs Production Ledger. No other change.",
-        "published": "2026-11-07",
+        "changelog": "* New: two more periods, «This month» (from the 1st) and «This year» (from 1 January), for every period setting. «This year» matches the Revenue Splitter widget.\n* Changed: «Last month» is now called «Last 30 days», which is what it always counted.\n* Changed: the Quick View widget shows the period next to «Publisher profit» and «Owed to others», and a note that the amounts are without VAT, after ledger entries and without shipping.\n* Changed: «Owed to others» now counts like the publisher's profit: share plus ledger income minus payments in the period (it was the share only). The per-beneficiary table on the dashboard shows that total under «Net (after deductions)».\n* The abilities' period input accepts this_month and year.",
+        "published": "2026-11-11",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d2a12d12c3a7c81b61d8b408869f66b28664f3672b3c2c4f9fa70b5d0ee845d9",
-        "signature": "3i28cfv1NRJ7TjCE5h9D6YPLIHiQoVQMGsk6TGetvCVuZr5WOYYbMndMgH22qZEjzYT+hUP/nm7XsFMhADIxBw==",
+        "sha256": "46c5fefd49bc6a77c460dfec0c021bcaf42089c2d6d714c3ebea8656655340a3",
+        "signature": "+BkFzq0pkHtfHYGZLX9b+sF1CykHF3aiGhzZkmvb19bQQm9sYC5E5ZeOY2DvETo+pzxjN+GtkflqPxACgsFADA==",
         "tested_wp": "7.1",
-        "version": "1.8.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.3/store-pulse.zip"
+        "version": "1.8.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.4/store-pulse.zip"
       }
     },
     "theme-patcher": {
