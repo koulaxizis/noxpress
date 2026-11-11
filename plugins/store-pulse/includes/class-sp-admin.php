@@ -38,11 +38,13 @@ final class SP_Admin {
 
 	/** Labels των presets — msgids που υπάρχουν στο SP_Lang. */
 	const PRESET_LABELS = array(
-		'today'     => 'Σήμερα',
-		'yesterday' => 'Χθες',
-		'7d'        => 'Τελευταίες 7 ημέρες',
-		'15d'       => 'Τελευταίες 15 ημέρες',
-		'month'     => 'Τον τελευταίο μήνα',
+		'today'      => 'Σήμερα',
+		'yesterday'  => 'Χθες',
+		'7d'         => 'Τελευταίες 7 ημέρες',
+		'15d'        => 'Τελευταίες 15 ημέρες',
+		'month'      => 'Τελευταίες 30 ημέρες',
+		'this_month' => 'Τρέχων μήνας',
+		'year'       => 'Τρέχον έτος',
 	);
 
 	/** Whitelist των Quick View καρτών → msgid labels (SP_Lang). */

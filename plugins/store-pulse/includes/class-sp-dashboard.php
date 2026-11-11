@@ -191,14 +191,16 @@ final class SP_Dashboard {
 					self::card(
 						'others',
 						__( 'Οφειλές προς άλλους', 'store-pulse' ),
-						sp_money( $money['others_sum'] ),
-						( $money['others_sum'] > 0 ) ? 'sp-info' : ''
+						sp_money( $money['others_owed_sum'] ),
+						( $money['others_owed_sum'] > 0 ) ? 'sp-info' : '',
+						SP_Lang::fmt_date( $r_money[0] ) . ' → '
+							. SP_Lang::fmt_date( $r_money[1] )
 					);
 					?>
 				</div>
 
 				<p class="sp-note">
-					<?php esc_html_e( 'Το μεταφορικό ΔΕΝ υπολογίζεται στα ποσά.', 'store-pulse' ); ?>
+					<?php esc_html_e( 'Ποσά χωρίς ΦΠΑ, μετά τις κινήσεις του ledger, χωρίς μεταφορικά.', 'store-pulse' ); ?>
 				</p>
 
 				<?php if ( array() !== $money['others'] ) : ?>
@@ -228,7 +230,9 @@ final class SP_Dashboard {
 								<th class="sp-num">
 									<?php echo esc_html( sp_money( $money['others_sum'] ) ); ?>
 								</th>
-								<th class="sp-num">&nbsp;</th>
+								<th class="sp-num">
+									<?php echo esc_html( sp_money( $money['others_owed_sum'] ) ); ?>
+								</th>
 							</tr>
 						</tfoot>
 					</table>
@@ -359,6 +363,14 @@ final class SP_Dashboard {
 			$money = SP_Data::money( $r_money[0], $r_money[1], $publisher );
 		}
 
+		$money_label = static function ( string $label ) use ( $p_money ): string {
+			return sprintf(
+				'%s (%s)',
+				$label,
+				__( SP_Admin::PRESET_LABELS[ $p_money ], 'store-pulse' ) // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgids στο SP_Lang.
+			);
+		};
+
 		echo '<div class="sp-wrap sp-widget">';
 
 		echo '<ul class="sp-widget-list">';
@@ -417,15 +429,17 @@ final class SP_Dashboard {
 				$pub_value = sp_money( $money['net'] );
 			}
 
-			self::widget_row( __( 'Κέρδος εκδότη', 'store-pulse' ), $pub_value );
+			// 1.8.4: η περίοδος στην ετικέτα, όπως στις «Εξυπηρετημένες παραγγελίες».
+			self::widget_row( $money_label( __( 'Κέρδος εκδότη', 'store-pulse' ) ), $pub_value );
 		}
 
 		if ( in_array( 'others', $cards, true ) ) {
 			if ( null !== $money ) {
+				// 1.8.4: ίδια σημασιολογία με τον εκδότη (μερίδιο + ledger).
 				self::widget_row(
-					__( 'Οφειλές προς άλλους', 'store-pulse' ),
-					sp_money( $money['others_sum'] ),
-					( $money['others_sum'] > 0 )
+					$money_label( __( 'Οφειλές προς άλλους', 'store-pulse' ) ),
+					sp_money( $money['others_owed_sum'] ),
+					( $money['others_owed_sum'] > 0 )
 				);
 			} else {
 				self::widget_row(
@@ -437,6 +451,12 @@ final class SP_Dashboard {
 		}
 
 		echo '</ul>';
+
+		if ( null !== $money && ( in_array( 'publisher', $cards, true ) || in_array( 'others', $cards, true ) ) ) {
+			echo '<p class="sp-note">'
+				. esc_html__( 'Ποσά χωρίς ΦΠΑ, μετά τις κινήσεις του ledger, χωρίς μεταφορικά.', 'store-pulse' )
+				. '</p>';
+		}
 
 		echo '<p class="sp-widget-footer">';
 		printf(

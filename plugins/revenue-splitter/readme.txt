@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.14.2
+Stable tag: 1.14.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -61,6 +61,9 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.14.3 =
+* Changed: the «Sales» column in the dashboard widget and in the dashboard's beneficiary accounts is now «Share (excl. VAT)», because it shows each beneficiary's share of net sales, not the sales. No amount changes.
 
 = 1.14.2 =
 * New: optional "renewals" on each contract, [ { on, prev_to, to } ] (the day of the renewal, the end day before it and the new end day; all YYYY-MM-DD, at most 50, a bad entry skips the row with bad_renewed). Stored and returned by GET only when sent. The Author Portal and RS Contracts show each renewal as «Renewed on … (was ending …, now ends …)»; without it they show "renewed" as before. "renewed" is unchanged, and unknown keys are still ignored.

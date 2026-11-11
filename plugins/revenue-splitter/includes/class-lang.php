@@ -283,7 +283,7 @@ class RS_Lang {
 		'Έκπτωση'                                                => 'Discount',
 
 		// --- Dashboard: λογοδοσία περιόδου + λογιστική ---
-		'Πωλήσεις'                                               => 'Sales',
+		'Μερίδιο (χωρίς ΦΠΑ)'                                     => 'Share (excl. VAT)',
 		'Υπόλοιπο (περιόδου)'                                    => 'Remaining (period)',
 		'Υπόλοιπο'                                               => 'Remaining',
 		'Συνολικό υπόλοιπο'                                      => 'Lifetime balance',

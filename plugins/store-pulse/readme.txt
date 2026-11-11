@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.3
+Stable tag: 1.8.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -61,6 +61,13 @@ VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.8.4 =
+* New: two more periods, «This month» (from the 1st) and «This year» (from 1 January), for every period setting. «This year» matches the Revenue Splitter widget.
+* Changed: «Last month» is now called «Last 30 days», which is what it always counted.
+* Changed: the Quick View widget shows the period next to «Publisher profit» and «Owed to others», and a note that the amounts are without VAT, after ledger entries and without shipping.
+* Changed: «Owed to others» now counts like the publisher's profit: share plus ledger income minus payments in the period (it was the share only). The per-beneficiary table on the dashboard shows that total under «Net (after deductions)».
+* The abilities' period input accepts this_month and year.
 
 = 1.8.3 =
 * Ships Noxpress Core 1.2.10, so the Noxpress hub lists and installs Production Ledger. No other change.

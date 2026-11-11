@@ -143,7 +143,10 @@ final class SP_Lang {
 		'Χθες'                                             => 'Yesterday',
 		'Τελευταίες 7 ημέρες'                              => 'Last 7 days',
 		'Τελευταίες 15 ημέρες'                             => 'Last 15 days',
-		'Τον τελευταίο μήνα'                               => 'Last month',
+		'Τελευταίες 30 ημέρες'                             => 'Last 30 days',
+		'Τρέχων μήνας'                                     => 'This month',
+		'Τρέχον έτος'                                      => 'This year',
+		'Ποσά χωρίς ΦΠΑ, μετά τις κινήσεις του ledger, χωρίς μεταφορικά.' => 'Amounts without VAT, after ledger entries, without shipping.',
 
 		// --- Κάρτες (dashboards + widget) ---
 		'Εκκρεμείς παραγγελίες'                            => 'Pending orders',
@@ -164,7 +167,6 @@ final class SP_Lang {
 		'Καθαρό (μετά κρατήσεων)'                          => 'Net (after deductions)',
 		'ΣΥΝΟΛΑ'                                           => 'TOTALS',
 		'Δικαιούχος'                                       => 'Beneficiary',
-		'Το μεταφορικό ΔΕΝ υπολογίζεται στα ποσά.'         => 'Shipping is NOT included in the amounts.',
 		'Καμία οφειλή στην περίοδο.'                       => 'Nothing owed in this period.',
 		'Δεν έχεις επιλέξει εκδότη — πήγαινε στις Ρυθμίσεις.' => 'You have not picked a publisher — go to Settings.',
 		'Ο εκδότης δεν είναι γνωστός δικαιούχος του Revenue Splitter.' => 'The publisher is not a known Revenue Splitter beneficiary.',
