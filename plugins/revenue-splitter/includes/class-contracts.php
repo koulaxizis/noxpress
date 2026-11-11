@@ -5,7 +5,7 @@
  * The source of truth is the orOS CRM (useoros.online), which keeps each
  * partner's contracts (title, format, signing and end date, state,
  * renewals) in the browser. orOS cannot be written to by the site, so orOS
- * sends the whole list here while it is open (POST wc/v3/rs/contracts, a
+ * sends the whole list here while it is open (POST rs/v1/contracts, a
  * full, idempotent replacement) and the site shows each beneficiary only
  * their own contracts in the Author Portal. Design:
  * notes/rs-contracts/01-sxediasmos.md, approved by Christos 2026-11-11.
@@ -30,6 +30,11 @@
  * «Δεδομένα που τραβά η υπηρεσία»): GET, then an explicit POST of the new
  * state after the import. The site sends no email.
  *
+ * 1.14.1: the routes moved to rs/v1 and take a narrow «contracts key»
+ * (rsc_ + 44 characters) made here, shown once, stored as sha256 and
+ * revocable, so orOS needs no WooCommerce key with write rights (Chris
+ * 2026-11-11). Option rs_contracts_key: { hash, created, used }.
+ *
  * Storage (all autoload = no, JSON with JSON_UNESCAPED_UNICODE):
  *   rs_contracts          the current list
  *   rs_contracts_prev     the list before the last push (one-click restore)
@@ -47,6 +52,7 @@ final class RS_Contracts {
 	const OPT_PREV = 'rs_contracts_prev';
 	const OPT_META = 'rs_contracts_meta';
 	const OPT_REQ  = 'rs_contract_requests';
+	const OPT_KEY  = 'rs_contracts_key';
 
 	const SLUG_ADMIN = 'revenue-splitter-contracts';
 
@@ -138,7 +144,7 @@ final class RS_Contracts {
 	}
 
 	/* =====================================================================
-	 * Ingest (POST wc/v3/rs/contracts)
+	 * Ingest (POST rs/v1/contracts)
 	 * =================================================================== */
 
 	/**
@@ -301,6 +307,50 @@ final class RS_Contracts {
 		$meta['saved']    = count( self::read_json( self::OPT ) );
 		self::write_json( self::OPT_META, $meta );
 		self::$cache = null;
+		return true;
+	}
+
+	/* =====================================================================
+	 * The contracts key (1.14.1)
+	 * =================================================================== */
+
+	/** @return array{hash?:string,created?:string,used?:string} */
+	public static function key_info(): array {
+		return self::read_json( self::OPT_KEY );
+	}
+
+	/** Makes (or replaces) the key; returns it in plain text, once. */
+	public static function new_key(): string {
+		$plain = 'rsc_' . wp_generate_password( 44, false, false );
+		self::write_json(
+			self::OPT_KEY,
+			array(
+				'hash'    => hash( 'sha256', $plain ),
+				'created' => gmdate( 'c' ),
+				'used'    => '',
+			)
+		);
+		return $plain;
+	}
+
+	public static function revoke_key(): void {
+		delete_option( self::OPT_KEY );
+	}
+
+	/** Timing-safe check; records the last use (at most once a minute). */
+	public static function check_key( string $plain ): bool {
+		if ( ! preg_match( '/^rsc_[A-Za-z0-9]{44}$/', $plain ) ) {
+			return false;
+		}
+		$k = self::key_info();
+		if ( empty( $k['hash'] ) || ! is_string( $k['hash'] ) || ! hash_equals( $k['hash'], hash( 'sha256', $plain ) ) ) {
+			return false;
+		}
+		$last = isset( $k['used'] ) ? strtotime( (string) $k['used'] ) : false;
+		if ( ! $last || time() - $last > 60 ) {
+			$k['used'] = gmdate( 'c' );
+			self::write_json( self::OPT_KEY, $k );
+		}
 		return true;
 	}
 
@@ -769,7 +819,14 @@ final class RS_Contracts {
 		}
 		$act  = sanitize_key( wp_unslash( $_POST['rs_ct_admin'] ) );
 		$done = 'none';
-		if ( 'restore' === $act ) {
+		if ( 'key' === $act ) {
+			// The plain key travels in a one-shot transient (60 s), never in a URL.
+			set_transient( 'rs_ct_newkey_' . get_current_user_id(), self::new_key(), 60 );
+			$done = 'key';
+		} elseif ( 'revoke' === $act ) {
+			self::revoke_key();
+			$done = 'revoked';
+		} elseif ( 'restore' === $act ) {
 			$done = self::restore_prev() ? 'restored' : 'none';
 		} elseif ( 'close' === $act ) {
 			$id   = isset( $_POST['rs_ct_rid'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ct_rid'] ) ) : '';
@@ -802,7 +859,16 @@ final class RS_Contracts {
 				$no_key[] = (string) $b;
 			}
 		}
-		$rest = rest_url( 'wc/v3/rs/' );
+		$rest    = rest_url( 'rs/v1/' );
+		$key     = self::key_info();
+		$new_key = '';
+		if ( 'key' === $done ) {
+			$t = get_transient( 'rs_ct_newkey_' . get_current_user_id() );
+			if ( is_string( $t ) && '' !== $t ) {
+				$new_key = $t;
+				delete_transient( 'rs_ct_newkey_' . get_current_user_id() );
+			}
+		}
 		?>
 		<div class="wrap rs-wrap">
 			<h1><?php esc_html_e( 'Revenue Splitter — Συμφωνητικά', 'revenue-splitter' ); ?></h1>
@@ -811,6 +877,17 @@ final class RS_Contracts {
 				<div class="notice notice-success"><p><?php esc_html_e( 'Επανήλθε η προηγούμενη λίστα.', 'revenue-splitter' ); ?></p></div>
 			<?php elseif ( 'closed' === $done ) : ?>
 				<div class="notice notice-success"><p><?php esc_html_e( 'Το αίτημα έκλεισε.', 'revenue-splitter' ); ?></p></div>
+			<?php elseif ( 'revoked' === $done ) : ?>
+				<div class="notice notice-success"><p><?php esc_html_e( 'Το κλειδί ανακλήθηκε. Το orOS δεν μπορεί πια να στείλει συμφωνητικά.', 'revenue-splitter' ); ?></p></div>
+			<?php endif; ?>
+			<?php if ( '' !== $new_key ) : ?>
+				<div class="notice notice-success rs-newkey">
+					<p>
+						<strong><?php esc_html_e( 'Νέο κλειδί συμφωνητικών:', 'revenue-splitter' ); ?></strong><br />
+						<code><?php echo esc_html( $new_key ); ?></code><br />
+						<?php esc_html_e( 'Αντιγράψε το ΤΩΡΑ στο orOS — δεν θα εμφανιστεί ξανά (αποθηκεύεται μόνο sha256). Το παλιό κλειδί, αν υπήρχε, δεν ισχύει πια.', 'revenue-splitter' ); ?>
+					</p>
+				</div>
 			<?php endif; ?>
 
 			<p class="description">
@@ -951,8 +1028,31 @@ final class RS_Contracts {
 				</table>
 			<?php endif; ?>
 
+			<h2 class="rs-h2"><?php esc_html_e( 'Κλειδί για το orOS', 'revenue-splitter' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Ένα κλειδί που ανοίγει μόνο τα συμφωνητικά: το orOS το στέλνει ως «Authorization: Bearer …». Δεν δίνει πρόσβαση σε παραγγελίες, προϊόντα ή ρυθμίσεις, και το κλειδί WooCommerce του orOS μένει «Ανάγνωση».', 'revenue-splitter' ); ?></p>
+			<?php if ( empty( $key['hash'] ) ) : ?>
+				<p class="rs-muted"><?php esc_html_e( 'Δεν υπάρχει κλειδί.', 'revenue-splitter' ); ?></p>
+			<?php else : ?>
+				<p>
+				<?php
+				/* translators: 1: date, 2: date or "—" */
+				echo esc_html( sprintf( __( 'Δημιουργήθηκε: %1$s · Τελευταία χρήση: %2$s', 'revenue-splitter' ), wp_date( 'd/m/Y H:i', (int) strtotime( (string) $key['created'] ) ), empty( $key['used'] ) ? '—' : wp_date( 'd/m/Y H:i', (int) strtotime( (string) $key['used'] ) ) ) );
+				?>
+				</p>
+			<?php endif; ?>
+			<form method="post" class="rs-ct-key">
+				<?php wp_nonce_field( 'rs_ct_admin', 'rs_ct_admin_nonce' ); ?>
+				<?php if ( empty( $key['hash'] ) ) : ?>
+					<button type="submit" name="rs_ct_admin" value="key" class="button button-primary"><?php esc_html_e( 'Δημιουργία κλειδιού', 'revenue-splitter' ); ?></button>
+				<?php else : ?>
+					<button type="submit" name="rs_ct_admin" value="key" class="button" onclick="return confirm(this.dataset.q);"
+						data-q="<?php esc_attr_e( 'Νέο κλειδί; Το τρέχον σταματά να ισχύει αμέσως.', 'revenue-splitter' ); ?>"><?php esc_html_e( 'Νέο κλειδί', 'revenue-splitter' ); ?></button>
+					<button type="submit" name="rs_ct_admin" value="revoke" class="button" onclick="return confirm(this.dataset.q);"
+						data-q="<?php esc_attr_e( 'Ανάκληση του κλειδιού; Το orOS δεν θα μπορεί να στείλει μέχρι να φτιάξεις νέο.', 'revenue-splitter' ); ?>"><?php esc_html_e( 'Ανάκληση', 'revenue-splitter' ); ?></button>
+				<?php endif; ?>
+			</form>
+
 			<h2 class="rs-h2"><?php esc_html_e( 'Διευθύνσεις για το orOS', 'revenue-splitter' ); ?></h2>
-			<p class="description"><?php esc_html_e( 'Κλειδιά WooCommerce REST του καταστήματος: η αποστολή (POST) θέλει κλειδί «Ανάγνωση/Εγγραφή»· οι αναγνώσεις (GET) αρκούνται σε «Ανάγνωση».', 'revenue-splitter' ); ?></p>
 			<ul class="rs-ct-routes">
 				<li><code>POST <?php echo esc_html( $rest . 'contracts' ); ?></code></li>
 				<li><code>GET <?php echo esc_html( $rest . 'contracts' ); ?></code></li>

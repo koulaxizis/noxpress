@@ -67,6 +67,7 @@ $rs_uninstall_options = array(
 	'rs_contracts_prev',     // 1.14.0: η λίστα πριν από την τελευταία αποστολή.
 	'rs_contracts_meta',     // 1.14.0: πότε ήρθε η τελευταία λίστα.
 	'rs_contract_requests',  // 1.14.0: αιτήματα ανανέωσης από το portal.
+	'rs_contracts_key',      // 1.14.1: hash του κλειδιού συμφωνητικών (orOS).
 );
 
 foreach ( $rs_uninstall_options as $rs_opt ) {
@@ -140,6 +141,7 @@ $rs_transient_prefixes = array(
 	'rs_split_error_',           // Validation notices (metabox).
 	'rs_split_warn_',            // v1.7.0: email warnings (metabox).
 	'rs_newkey_',                // One-shot plaintext portal keys.
+	'rs_ct_newkey_',             // 1.14.1: one-shot plaintext contracts key.
 	'rs_block_checkout_warned_', // Blocks-checkout warning suppression flags.
 );
 
