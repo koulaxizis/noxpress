@@ -487,6 +487,7 @@ class RS_Lang {
 		'[Revenue Splitter] Δοκιμαστικό email — %s' => '[Revenue Splitter] Test email — %s',
 
 		// --- 1.14.0: Συμφωνητικά (portal + admin) ---
+		'Ανανεώθηκε στις %1$s (έληγε %2$s, τώρα λήγει %3$s)' => 'Renewed on %1$s (was ending %2$s, now ends %3$s)',
 		'Ένα κλειδί που ανοίγει μόνο τα συμφωνητικά: το orOS το στέλνει ως «Authorization: Bearer …». Δεν δίνει πρόσβαση σε παραγγελίες, προϊόντα ή ρυθμίσεις, και το κλειδί WooCommerce του orOS μένει «Ανάγνωση».' => 'A key that opens the contracts only: orOS sends it as "Authorization: Bearer …". It gives no access to orders, products or settings, and orOS\'s WooCommerce key stays "Read".',
 		'Ανάκληση' => 'Revoke',
 		'Ανάκληση του κλειδιού; Το orOS δεν θα μπορεί να στείλει μέχρι να φτιάξεις νέο.' => 'Revoke the key? orOS will not be able to send until you make a new one.',

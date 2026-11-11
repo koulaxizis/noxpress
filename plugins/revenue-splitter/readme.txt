@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.14.1
+Stable tag: 1.14.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -27,7 +27,7 @@ Revenue Splitter is built for publishers and shops that owe a share of each sale
 * **WP-CLI** – `wp rs report`, `wp rs ledger-add`, `wp rs ledger-list`, `wp rs ledger-delete`, `wp rs balance`, `wp rs backup`.
 * **Abilities** – on WordPress 6.9+, the reports, balances and monthly emails are also WordPress abilities (`revenue-splitter/report`, `balances`, `monthly-status`, `monthly-preview`, `send-test`, `monthly-send`) for AI and remote tools such as Site Bridge, with the same capability. They never return email addresses, portal keys or ledger notes.
 * **REST for orOS** – two read-only routes under the WooCommerce REST API, `GET /wp-json/wc/v3/rs/balances` (per beneficiary: sales share, other income, payments, remaining) and `GET /wp-json/wc/v3/rs/report` (products sold in a period, this year by default, with splits and current stock; `name` keeps one beneficiary's titles). They take the shop's WooCommerce REST keys (a read key is enough) or an Application Password, need `manage_woocommerce`, answer in integer cents and never return email addresses, portal keys or ledger notes. orOS's CRM shows them on a partner's card.
-* **Contract expiries (orOS)** – the orOS CRM sends the whole list of creators' contracts to `POST /wp-json/rs/v1/contracts` (a full, idempotent replacement, at most 2000; each row is checked, and a bad row is skipped with a reason; the beneficiary must be one Revenue Splitter knows). The Author Portal shows each beneficiary only their own contracts: title, format, signing and end date, days left and a colour status (in force, ending soon at 90 days or fewer, ended, terminated), worked out from today's date. A "let's talk / renew" button stores a request that orOS pulls (`GET /wp-json/rs/v1/contract-requests`, then `POST …/<id>`); no email is sent. The routes take a narrow contracts key made in **Noxpress → RS Contracts** (shown once, stored as sha256, revocable), which opens nothing else, so orOS keeps a read-only WooCommerce key. The same page shows when the last list came, what was skipped and the requests, and can restore the previous list. Ability `revenue-splitter/contracts`.
+* **Contract expiries (orOS)** – the orOS CRM sends the whole list of creators' contracts to `POST /wp-json/rs/v1/contracts` (a full, idempotent replacement, at most 2000; each row is checked, and a bad row is skipped with a reason; optional `renewals` with the renewal day, the old and the new end day; the beneficiary must be one Revenue Splitter knows). The Author Portal shows each beneficiary only their own contracts: title, format, signing and end date, days left and a colour status (in force, ending soon at 90 days or fewer, ended, terminated), worked out from today's date. A "let's talk / renew" button stores a request that orOS pulls (`GET /wp-json/rs/v1/contract-requests`, then `POST …/<id>`); no email is sent. The routes take a narrow contracts key made in **Noxpress → RS Contracts** (shown once, stored as sha256, revocable), which opens nothing else, so orOS keeps a read-only WooCommerce key. The same page shows when the last list came, what was skipped and the requests, and can restore the previous list. Ability `revenue-splitter/contracts`.
 * **Bilingual UI** – Greek and English, chosen per user (or following the WordPress locale).
 * **Noxpress hub** – the "Noxpress" menu opens the Noxpress hub: one page for the whole suite with status, installed and available version, and update, install, activate, changelog and auto-update links.
 * **Updates** – updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
@@ -61,6 +61,9 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.14.2 =
+* New: optional "renewals" on each contract, [ { on, prev_to, to } ] (the day of the renewal, the end day before it and the new end day; all YYYY-MM-DD, at most 50, a bad entry skips the row with bad_renewed). Stored and returned by GET only when sent. The Author Portal and RS Contracts show each renewal as «Renewed on … (was ending …, now ends …)»; without it they show "renewed" as before. "renewed" is unchanged, and unknown keys are still ignored.
 
 = 1.14.1 =
 * Changed: the contracts routes moved from wc/v3/rs/… to rs/v1/… (contracts, contract-requests) and take their own narrow key instead of a WooCommerce Read/Write key. RS Contracts makes the key (shown once, stored as sha256), shows when it was last used, and can replace or revoke it. orOS sends it as "Authorization: Bearer rsc_…" (or X-RS-Key); after 10 failed keys from one IP in 15 minutes, wrong keys get 429 (the right key always works). The key opens these four routes only. Nothing used the 1.14.0 routes yet.
