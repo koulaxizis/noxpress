@@ -688,3 +688,18 @@ select.rs-prod-multi option:checked {
 	border-radius: 3px;
 	vertical-align: -1px;
 }
+/* ---- 1.14.0: «RS Συμφωνητικά» — status badges -------------------------- */
+.rs-wrap .rs-ct-badge {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+	border: 1px solid transparent;
+}
+.rs-wrap .rs-ct-on { color: #8fe6ab !important; background: rgba(143, 230, 171, 0.12) !important; border-color: rgba(143, 230, 171, 0.4); }
+.rs-wrap .rs-ct-soon { color: #f5c97e !important; background: rgba(245, 201, 126, 0.12) !important; border-color: rgba(245, 201, 126, 0.45); }
+.rs-wrap .rs-ct-ended { color: #ff9a9a !important; background: rgba(255, 154, 154, 0.12) !important; border-color: rgba(255, 154, 154, 0.45); }
+.rs-wrap .rs-ct-ended_by_agreement { color: #b7b2d6 !important; background: rgba(183, 178, 214, 0.10) !important; border-color: rgba(183, 178, 214, 0.35); }
+.rs-wrap .rs-ct-routes code { font-size: 12px; }

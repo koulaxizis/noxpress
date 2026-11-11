@@ -31,6 +31,10 @@
  * ΦΠΑ/συντελεστή + KPI δ% + chart 6/12 + ιστορικό + CSV με φίλτρα.
  * v1.3.5 (#3): Login μόνο με κλειδί, φόρμα κεντραρισμένη.
  *
+ * 1.14.0: «Τα συμφωνητικά σου» after the KPIs (RS_Contracts::render_portal,
+ * filtered by the session's beneficiary only); portal_url(), client_ip()
+ * and has_key() are public for RS_Contracts.
+ *
  * v1.3.8 (#1–#5): default Τρέχον έτος, multi-select προϊόντων με αναζήτηση, d/m/Y στα el (ήδη μέσω fmt_date), custom χρώμα ονόματος στο head.
  */
 
@@ -250,6 +254,11 @@ final class RS_Portal {
 		$raw     = (string) get_option( 'rs_portal_keys', '' );
 		$decoded = '' !== $raw ? json_decode( $raw, true ) : null;
 		return is_array( $decoded ) ? $decoded : array();
+	}
+
+	/** 1.14.0: true when the beneficiary has a portal key (for «RS Συμφωνητικά»). */
+	public static function has_key( string $who ): bool {
+		return '' !== $who && isset( self::all_keys()[ $who ] );
 	}
 
 	private static function hash_key( string $plain ): string {
@@ -572,7 +581,7 @@ final class RS_Portal {
 	/**
 	 * Πραγματική IP επισκέπτη (behind-proxy aware — δες v1.3.2 FIX #5).
 	 */
-	private static function client_ip(): string {
+	public static function client_ip(): string {
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- IP addresses.
 		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
@@ -1041,6 +1050,11 @@ final class RS_Portal {
 				</div>
 			</div>
 
+			<?php
+			// 1.14.0: «Τα συμφωνητικά σου» — only the signed-in beneficiary's own (RS_Contracts).
+			RS_Contracts::render_portal( $who );
+			?>
+
 			<div class="rs-pt-chart-head">
 				<h3><?php esc_html_e( 'Τελευταίοι μήνες', 'revenue-splitter' ); ?></h3>
 				<form method="get" class="rs-pt-chart-range">
@@ -1454,7 +1468,10 @@ document.addEventListener('input', function (e) {
 	var q = String(e.target.value || '').trim().toLowerCase();
 	for (var i = 0; i < sel.options.length; i++) {
 		var t = sel.options[i].textContent.toLowerCase();
-		sel.options[i].hidden = (q !== '' && t.indexOf(q) === -1);
+		// 1.14.0: no logical AND operator here: block themes (e.g. Twenty
+		// Twenty-Five) escape the ampersands inside post content, a syntax
+		// error that broke the product search.
+		sel.options[i].hidden = q === '' ? false : t.indexOf(q) === -1;
 	}
 });
 </script>
@@ -1476,7 +1493,7 @@ document.addEventListener('input', function (e) {
 	}
 
 	/** URL της σελίδας που τρέχει το shortcode (referer-aware). */
-	private static function portal_url(): string {
+	public static function portal_url(): string {
 
 		$ref = wp_get_raw_referer();
 		$url = $ref ? wp_validate_redirect( $ref, '' ) : '';

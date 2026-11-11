@@ -63,6 +63,10 @@ $rs_uninstall_options = array(
 	'rs_beneficiary_emails', // Emails δικαιούχων.
 	'rs_email_reports',      // Opt-in μηνιαίας αναφοράς.
 	'rs_last_report_run',    // Dedup του cron μηνιαίας αναφοράς.
+	'rs_contracts',          // 1.14.0: συμφωνητικά από το orOS CRM.
+	'rs_contracts_prev',     // 1.14.0: η λίστα πριν από την τελευταία αποστολή.
+	'rs_contracts_meta',     // 1.14.0: πότε ήρθε η τελευταία λίστα.
+	'rs_contract_requests',  // 1.14.0: αιτήματα ανανέωσης από το portal.
 );
 
 foreach ( $rs_uninstall_options as $rs_opt ) {

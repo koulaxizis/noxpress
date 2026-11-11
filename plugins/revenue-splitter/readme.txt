@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.13.0
+Stable tag: 1.14.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -27,6 +27,7 @@ Revenue Splitter is built for publishers and shops that owe a share of each sale
 * **WP-CLI** – `wp rs report`, `wp rs ledger-add`, `wp rs ledger-list`, `wp rs ledger-delete`, `wp rs balance`, `wp rs backup`.
 * **Abilities** – on WordPress 6.9+, the reports, balances and monthly emails are also WordPress abilities (`revenue-splitter/report`, `balances`, `monthly-status`, `monthly-preview`, `send-test`, `monthly-send`) for AI and remote tools such as Site Bridge, with the same capability. They never return email addresses, portal keys or ledger notes.
 * **REST for orOS** – two read-only routes under the WooCommerce REST API, `GET /wp-json/wc/v3/rs/balances` (per beneficiary: sales share, other income, payments, remaining) and `GET /wp-json/wc/v3/rs/report` (products sold in a period, this year by default, with splits and current stock; `name` keeps one beneficiary's titles). They take the shop's WooCommerce REST keys (a read key is enough) or an Application Password, need `manage_woocommerce`, answer in integer cents and never return email addresses, portal keys or ledger notes. orOS's CRM shows them on a partner's card.
+* **Contract expiries (orOS)** – the orOS CRM sends the whole list of creators' contracts to `POST /wp-json/wc/v3/rs/contracts` (a full, idempotent replacement, at most 2000; each row is checked, and a bad row is skipped with a reason; the beneficiary must be one Revenue Splitter knows). The Author Portal shows each beneficiary only their own contracts: title, format, signing and end date, days left and a colour status (in force, ending soon at 90 days or fewer, ended, terminated), worked out from today's date. A "let's talk / renew" button stores a request that orOS pulls (`GET /wp-json/wc/v3/rs/contract-requests`, then `POST …/<id>`); no email is sent. Sending needs a WooCommerce Read/Write key. **Noxpress → RS Contracts** shows when the last list came, what was skipped and the requests, and can restore the previous list. Ability `revenue-splitter/contracts`.
 * **Bilingual UI** – Greek and English, chosen per user (or following the WordPress locale).
 * **Noxpress hub** – the "Noxpress" menu opens the Noxpress hub: one page for the whole suite with status, installed and available version, and update, install, activate, changelog and auto-update links.
 * **Updates** – updates come from noxpress.tech (GitHub releases), not WordPress.org, through WordPress's own update screens. Stable or Beta channel (Stable by default, in the hub); every package is checked with sha256 and an Ed25519 signature before it is installed.
@@ -60,6 +61,12 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.14.0 =
+* New: creators' contract expiries in the Author Portal. orOS sends the list of contracts (POST wc/v3/rs/contracts, full replacement, strict per-row checks, answer with saved and skipped rows); each beneficiary sees only their own under «Your contracts», with signing and end date (dd/mm/yyyy), days left and a coloured status, recomputed from today's date. Open-ended contracts show as «Open-ended».
+* New: «I'd like to discuss it / renew» request per contract, with an optional note, rate-limited (one open request per contract, 3 per beneficiary per day, 10 per IP per hour). orOS pulls the requests (GET wc/v3/rs/contract-requests) and marks them (POST wc/v3/rs/contract-requests/<id>). No email is sent.
+* New: Noxpress → RS Contracts (read-only): last list received, skipped rows with reasons, beneficiaries without a portal key, open requests (with Close), all contracts, and one-click restore of the previous list.
+* New: ability revenue-splitter/contracts (read-only), and GET wc/v3/rs/contracts.
 
 = 1.13.0 =
 * New: abilities revenue-splitter/ledger-add and revenue-splitter/ledger-delete. A remote tool (e.g. Site Bridge) can add other income or payments to the Ledger, several at once, with the same validation as the Ledger form, all-or-nothing, a dry run and protection against adding the same entry twice; and delete entries by id to undo an add.

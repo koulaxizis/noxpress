@@ -195,7 +195,7 @@ final class RS_Admin_UI {
 		// είτε όχι (καμία εικασία πάνω στο hook suffix).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page slug.
 		$page    = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-		$own     = array( self::SLUG_DASH, self::SLUG_SET, 'revenue-splitter-portal' );
+		$own     = array( self::SLUG_DASH, self::SLUG_SET, 'revenue-splitter-portal', 'revenue-splitter-contracts' );
 		$is_ours = ( '' !== $page && in_array( $page, $own, true ) );
 
 		// Metabox προϊόντος: μόνο σε οθόνες επεξεργασίας product.

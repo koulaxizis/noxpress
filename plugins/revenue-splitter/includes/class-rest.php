@@ -27,7 +27,22 @@
  *
  * Amounts are integer cents, answers are not cached (nocache), errors are
  * in English. Nothing here returns an email address, a portal key or a
- * ledger note, and nothing is stored.
+ * ledger note.
+ *
+ * 1.14.0, contracts (RS_Contracts; source of truth: the orOS CRM):
+ *  POST /wp-json/wc/v3/rs/contracts
+ *      orOS sends the whole list of creators' contracts (full, idempotent
+ *      replacement); answer { saved, skipped: [ { id, why } ] }
+ *  GET  /wp-json/wc/v3/rs/contracts?ben=<beneficiary>
+ *      the stored list, for orOS to check
+ *  GET  /wp-json/wc/v3/rs/contract-requests?state=new|oros|closed|all
+ *      the Author Portal's renewal requests, newest first
+ *  POST /wp-json/wc/v3/rs/contract-requests/<id>  { state: oros|closed }
+ *      orOS marks a request after importing it (Bible §20 pull pattern)
+ * Deviation from Bible §20 1.71 (read-only under wc/v3): these two POSTs
+ * write only data whose source of truth is orOS itself (Bible 1.99). Under
+ * wc/v3 WooCommerce checks the key's permission, so they need a
+ * Read/Write key; a Read key gets 401.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -70,6 +85,55 @@ final class RS_REST {
 					'date_start' => $date,
 					'date_end'   => $date,
 					'name'       => $name,
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/rs/contracts',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'contracts_get' ),
+					'permission_callback' => array( __CLASS__, 'allowed' ),
+					'args'                => array( 'ben' => $name ),
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'contracts_post' ),
+					'permission_callback' => array( __CLASS__, 'allowed' ),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/rs/contract-requests',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'requests_get' ),
+				'permission_callback' => array( __CLASS__, 'allowed' ),
+				'args'                => array(
+					'state' => array(
+						'type'    => 'string',
+						'enum'    => array( 'new', 'oros', 'closed', 'all' ),
+						'default' => 'new',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/rs/contract-requests/(?P<id>[A-Za-z0-9_-]{1,64})',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'requests_post' ),
+				'permission_callback' => array( __CLASS__, 'allowed' ),
+				'args'                => array(
+					'state' => array(
+						'type'     => 'string',
+						'enum'     => array( 'oros', 'closed' ),
+						'required' => true,
+					),
 				),
 			)
 		);
@@ -190,6 +254,44 @@ final class RS_REST {
 			$out['share'] = $total;
 		}
 		return self::nocache( $out );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Contracts (1.14.0)
+	 * ------------------------------------------------------------------- */
+
+	public static function contracts_post( WP_REST_Request $req ) {
+		if ( strlen( (string) $req->get_body() ) > RS_Contracts::MAX_BODY ) {
+			return new WP_Error( 'rs_contracts_size', 'The body is larger than 1 MB; nothing was saved.', array( 'status' => 413 ) );
+		}
+		$body = $req->get_json_params();
+		if ( null === $body ) {
+			return new WP_Error( 'rs_contracts_json', 'The body must be JSON (Content-Type: application/json).', array( 'status' => 400 ) );
+		}
+		$r = RS_Contracts::ingest( $body );
+		if ( is_wp_error( $r ) ) {
+			return $r;
+		}
+		return self::nocache( $r );
+	}
+
+	public static function contracts_get( WP_REST_Request $req ) {
+		$v = $req->get_param( 'ben' );
+		$b = null === $v ? '' : trim( (string) $v );
+		return self::nocache( RS_Contracts::export( $b ) );
+	}
+
+	public static function requests_get( WP_REST_Request $req ) {
+		$state = (string) $req->get_param( 'state' );
+		return self::nocache( array( 'requests' => RS_Contracts::requests( '' === $state ? 'new' : $state ) ) );
+	}
+
+	public static function requests_post( WP_REST_Request $req ) {
+		$id = (string) $req->get_param( 'id' );
+		if ( ! RS_Contracts::set_request_state( $id, (string) $req->get_param( 'state' ) ) ) {
+			return new WP_Error( 'rs_request', 'Unknown request.', array( 'status' => 404 ) );
+		}
+		return self::nocache( array( 'request' => RS_Contracts::request( $id ) ) );
 	}
 
 	/* ---------------------------------------------------------------------

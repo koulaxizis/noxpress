@@ -524,7 +524,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
 		<a class="card-video" href="media/videos/revenue-splitter.mp4" data-video="revenue-splitter" data-video-title="Revenue Splitter" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.13.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.14.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -541,6 +541,7 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="rs_li10">Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in</li>
 			<li data-i18n="rs_li11">Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 48-char access key (stored sha256-only) and see only their own earnings — enriched with discount stats, VAT per rate, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit</li>
 			<li data-i18n="rs_li12">Portal analytics: period presets &amp; custom ranges, per-product filtering, month-over-month KPI deltas, 6/12-month trend chart</li>
+			<li data-i18n="rs_li20">Contract expiries in the portal: the orOS CRM sends each creator's contracts, and the beneficiary sees their own with signing and end dates, days left, a colour status (in force / ending soon / ended / terminated) and a «let's talk / renew» request that orOS picks up</li>
 			<li data-i18n="rs_li13">One-click «settle all» per period: payments recorded with reason for every beneficiary, idempotent on re-run</li>
 			<li data-i18n="rs_li14">Reporting start date: reports and balances start from a clean slate</li>
 			<li data-i18n="rs_li15">Full state backup &amp; restore (JSON): atomic import with strict validation, HPOS-aware</li>
@@ -552,7 +553,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.13.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.13.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.14.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1523,6 +1524,7 @@ footer .heart { color: var(--accent-bright); }
 		rs_li10: 'Exports: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) and JSON — served clean via <code>admin_init</code>, no admin HTML mixed in',
 		rs_li11: 'Author Portal (<code>[rs_portal]</code>): beneficiaries log in with a personal 48-char access key (stored sha256-only) and see only their own earnings — enriched with discount stats, VAT per rate, stock, ledger history and their own CSV — no WP accounts, no IP logs, 5-attempts/15-min rate limit',
 		rs_li12: 'Portal analytics: period presets &amp; custom ranges, per-product filtering, month-over-month KPI deltas, 6/12-month trend chart',
+		rs_li20: "Contract expiries in the portal: the orOS CRM sends each creator's contracts, and the beneficiary sees their own with signing and end dates, days left, a colour status (in force / ending soon / ended / terminated) and a «let's talk / renew» request that orOS picks up",
 		rs_li13: 'One-click «settle all» per period: payments recorded with reason for every beneficiary, idempotent on re-run',
 		rs_li14: 'Reporting start date: reports and balances start from a clean slate',
 		rs_li15: 'Full state backup &amp; restore (JSON): atomic import with strict validation, HPOS-aware',
@@ -1531,7 +1533,7 @@ footer .heart { color: var(--accent-bright); }
 		rs_li18: 'Admin polish: per-beneficiary colour coding, dark admin theme, bilingual UI (Ελληνικά / English) per user',
 		rs_li19: 'HPOS-compatible — no legacy order tables touched; clean uninstall leaves nothing behind',
 		rs_li20: 'orOS link: the CRM partner card reads each beneficiary\'s balance, this year\'s sales per title and stock through two read-only REST routes, with the shop\'s own WooCommerce keys',
-		rs_download: 'Download v1.13.0 (.zip)',
+		rs_download: 'Download v1.14.0 (.zip)',
 		rs_source: 'Source',
 		rs_releases: 'Releases',
 		sp_desc: 'A store-health dashboard and a WordPress home-screen widget for WooCommerce managers: pending and completed orders, refunds, cancellations and stock at a glance. With Revenue Splitter active, it also shows the publisher\'s profit and what is owed to every other beneficiary for the period.',
@@ -1909,6 +1911,7 @@ footer .heart { color: var(--accent-bright); }
 		rs_li10: 'Εξαγωγές: CSV (UTF-8 BOM), Excel (XLS), HTML (print → PDF) και JSON — καθαρά μέσω <code>admin_init</code>, χωρίς ανάμειξη admin HTML',
 		rs_li11: 'Author Portal (<code>[rs_portal]</code>): οι δικαιούχοι συνδέονται με προσωπικό κλειδί 48 χαρακτήρων (αποθηκεύεται μόνο sha256) και βλέπουν ΜΟΝΟ τα δικά τους έσοδα — με στατιστικά εκπτώσεων, ΦΠΑ ανά συντελεστή, στοκ, ιστορικό ledger και δικό τους CSV — χωρίς λογαριασμούς WP, χωρίς IP logs, όριο 5 προσπαθειών/15 λεπτά',
 		rs_li12: 'Analytics portal: period presets &amp; custom εύρη, φιλτράρισμα ανά προϊόν, μεταβολή KPI μήνα-προς-μήνα, trend chart 6/12 μηνών',
+		rs_li20: 'Λήξεις συμφωνητικών στο portal: το orOS CRM στέλνει τα συμφωνητικά των δημιουργών και ο δικαιούχος βλέπει τα δικά του με υπογραφή, λήξη, ημέρες που απομένουν, χρωματιστή κατάσταση (σε ισχύ / λήγει σύντομα / έληξε / λύθηκε) και αίτημα «να το συζητήσουμε / ανανέωση» που το παίρνει το orOS',
 		rs_li13: '«Εξόφληση όλων» περιόδου με ένα κλικ: πληρωμές με αιτιολογία για κάθε δικαιούχο, idempotent σε επανάληψη',
 		rs_li14: 'Ημερομηνία έναρξης αναφορών: τα reports και τα υπόλοιπα ξεκινούν από καθαρή βάση',
 		rs_li15: 'Πλήρες backup &amp; restore state (JSON): atomic import με αυστηρό validation, HPOS-aware',
@@ -1917,7 +1920,7 @@ footer .heart { color: var(--accent-bright); }
 		rs_li18: 'Admin polish: χρώμα ανά δικαιούχο, dark admin theme, δίγλωσσο UI (Ελληνικά / English) ανά χρήστη',
 		rs_li19: 'Συμβατό με HPOS — καμία επαφή με legacy order tables· καθαρό uninstall δεν αφήνει τίποτα πίσω',
 		rs_li20: 'Σύνδεση με το orOS: η καρτέλα συνεργάτη του CRM διαβάζει το υπόλοιπο κάθε δικαιούχου, τις φετινές πωλήσεις ανά τίτλο και το στοκ από δύο REST διαδρομές μόνο για ανάγνωση, με τα κλειδιά WooCommerce του ίδιου του καταστήματος',
-		rs_download: 'Λήψη v1.13.0 (.zip)',
+		rs_download: 'Λήψη v1.14.0 (.zip)',
 		rs_source: 'Πηγαίος κώδικας',
 		rs_releases: 'Εκδόσεις',
 		sp_desc: 'Dashboard υγείας καταστήματος και widget στην αρχική του WordPress για όσους διαχειρίζονται WooCommerce: εκκρεμείς και ολοκληρωμένες παραγγελίες, επιστροφές, ακυρώσεις και στοκ με μια ματιά. Με ενεργό το Revenue Splitter δείχνει επίσης το κέρδος του εκδότη και τις οφειλές προς κάθε άλλον δικαιούχο για την περίοδο.',

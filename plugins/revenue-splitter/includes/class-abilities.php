@@ -22,6 +22,8 @@
  *                                    all-or-nothing, with a dry run (1.13.0)
  *  revenue-splitter/ledger-delete    ledger entries by id, to undo an add
  *                                    (destructive, 1.13.0)
+ *  revenue-splitter/contracts        the creators' contracts orOS sent, with
+ *                                    today's state (read, 1.14.0)
  *
  * Nothing here returns an email address or a portal key. Ledger notes are
  * returned only by ledger-add, for the entries the caller just gave.
@@ -110,6 +112,18 @@ final class RS_Abilities {
 				),
 				'ann'         => array( true, false, true ),
 				'run'         => array( __CLASS__, 'balances' ),
+			),
+			'contracts'       => array(
+				'label'       => 'Revenue Splitter: contracts',
+				'description' => 'The creators\' contracts the orOS CRM last sent (title, format print/ebook, signing and end date, renewals), with the state shown today (on, soon = 90 days or fewer, ended, ended_by_agreement) and the days left, plus when the list came. Optional ben for one beneficiary. Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array( 'ben' => $name ),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'contracts' ),
 			),
 			'monthly-status'  => array(
 				'label'       => 'Revenue Splitter: monthly report status',
@@ -277,6 +291,18 @@ final class RS_Abilities {
 		}
 		$r['sales_since'] = RS_Reports::sales_since();
 		return $r;
+	}
+
+	public static function contracts( $in = null ) {
+		$in  = is_array( $in ) ? $in : array();
+		$ben = isset( $in['ben'] ) ? trim( (string) $in['ben'] ) : '';
+		$out = RS_Contracts::export( $ben );
+		$now = RS_Contracts::today();
+		foreach ( $out['contracts'] as $i => $c ) {
+			$out['contracts'][ $i ]['status']    = RS_Contracts::status( $c, $now );
+			$out['contracts'][ $i ]['days_left'] = RS_Contracts::days_left( $c, $now );
+		}
+		return $out;
 	}
 
 	public static function balances( $in = null ) {
