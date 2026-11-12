@@ -703,3 +703,25 @@ select.rs-prod-multi option:checked {
 .rs-wrap .rs-ct-ended { color: #ff9a9a !important; background: rgba(255, 154, 154, 0.12) !important; border-color: rgba(255, 154, 154, 0.45); }
 .rs-wrap .rs-ct-ended_by_agreement { color: #b7b2d6 !important; background: rgba(183, 178, 214, 0.10) !important; border-color: rgba(183, 178, 214, 0.35); }
 .rs-wrap .rs-ct-routes code { font-size: 12px; }
+
+/* ---- 1.15.0: «RS Καταστάσεις» ----------------------------------------- */
+.rs-wrap .rs-stmt-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 12px; }
+.rs-wrap .rs-stmt-bar input[type="month"] { margin-left: 6px; }
+.rs-wrap .rs-stmt-actions form { display: inline-block; margin: 2px 4px 2px 0; }
+.rs-wrap .rs-stmt-actions input[type="date"] { max-width: 150px; }
+.rs-wrap .rs-stmt-flag {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #f5c97e !important;
+	background: rgba(245, 201, 126, 0.12) !important;
+	border: 1px solid rgba(245, 201, 126, 0.45);
+}
+.rs-wrap .rs-stmt-settle { color: #d4c9ff !important; background: rgba(130, 99, 255, 0.16) !important; border-color: rgba(130, 99, 255, 0.5); }
+.rs-wrap .rs-stmt-st { font-weight: 600; }
+.rs-wrap .rs-stmt-st-sent { color: #8fe6ab !important; }
+.rs-wrap .rs-stmt-st-failed { color: #ff9a9a !important; }
+.rs-wrap .rs-stmt-st-skipped { color: #b7b2d6 !important; }
+.rs-wrap .rs-stmt-exclude label { display: inline-block; min-width: 240px; margin: 0 12px 6px 0; }

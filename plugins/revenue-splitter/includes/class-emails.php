@@ -277,7 +277,7 @@ final class RS_Emails {
 	 * αξιόπιστα), system fonts, υψηλή αντίθεση κειμένου (#eae8fa στο
 	 * #101218). Worst case υποβάθμιση: απλό μαύρο-σε-λευκό κείμενο.
 	 */
-	private static function wrap( string $inner ): string {
+	public static function wrap( string $inner ): string {
 
 		$html  = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>';
 		$html .= '<body style="margin:0;padding:24px;background:#f4f2fb;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">';
@@ -398,11 +398,25 @@ final class RS_Emails {
 			}
 		}
 
-		$today  = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' );
-		$sales_l = RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0;
-		$inc_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'income' );
-		$pay_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' );
-		$remain  = round( $sales_l + $inc_l - $pay_l, 2 );
+		// 1.15.0: the balance at the END of the month, not on the day the
+		// report is sent (before, a report sent on the 12th already counted
+		// the first 11 days of the next month).
+		$until = RS_Reports::run(
+			array(
+				'date_start' => '2000-01-01',
+				'date_end'   => $end,
+			)
+		);
+		$sales_l = 0.0;
+		foreach ( $until['beneficiaries'] as $b ) {
+			if ( (string) $b['name'] === $who ) {
+				$sales_l = (float) $b['amount'];
+				break;
+			}
+		}
+		$inc_l  = RS_Ledger::sum( $who, '2000-01-01', $end, 'income' );
+		$pay_l  = RS_Ledger::sum( $who, '2000-01-01', $end, 'payment' );
+		$remain = round( $sales_l + $inc_l - $pay_l, 2 );
 
 		return array(
 			'share'     => round( $share, 2 ),

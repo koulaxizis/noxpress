@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.14.3
+Stable tag: 1.15.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -61,6 +61,15 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.15.0 =
+* New: monthly creator statements (Noxpress → RS Statements). For every beneficiary with a balance or any movement in the month: the opening balance, the share per title (copies, %, amount), the Ledger's other income and payments, and the closing balance. It goes out as a short email with the statement as a PDF attached. No opt-in is needed; beneficiaries can be left out in the settings.
+* New: two sending modes. «Review» (default): every statement waits until you press Send (one by one, or the selected ones). «Automatic»: the daily check makes and sends the previous month's statements on the 1st, except statements with a warning, beneficiaries without an email and December statements, which always wait. A statement made by hand is never sent by itself, and turning the feature on never sends an older month.
+* New: checks that hold a statement: the VAT RS removes does not fit the product (no tax in WooCommerce, ISBN → 6%, other GTIN → 24%), more copies of one title in a month than a set limit (default 50), a negative balance, no email.
+* New: yearly settlement. December's statement is «Year-end settlement» and can be marked «Paid», which adds a Ledger payment of its closing balance (same checks as the Ledger form).
+* New: a small built-in PDF writer (no external service or library) with DejaVu Sans (Latin and Greek; licence in assets/fonts). Each PDF embeds only the glyphs it uses.
+* New: abilities revenue-splitter/statements-list and revenue-splitter/statement-preview (read-only).
+* Fix: the monthly report's «Balance payable» (and the monthly-preview ability's remaining) is now the balance at the end of the month, not on the day the report is sent.
 
 = 1.14.3 =
 * Changed: the «Sales» column in the dashboard widget and in the dashboard's beneficiary accounts is now «Share (excl. VAT)», because it shows each beneficiary's share of net sales, not the sales. No amount changes.

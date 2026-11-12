@@ -236,6 +236,41 @@ final class RS_Abilities {
 				'ann'         => array( false, true, true ),
 				'run'         => array( __CLASS__, 'ledger_delete' ),
 			),
+			'statements-list'   => array(
+				'label'       => 'Revenue Splitter: statements of a month',
+				'description' => 'The creator statements of one month (YYYY-MM, default last month): per beneficiary the number, opening balance, sales share, other income, payments, closing balance, warnings (vat, qty, negative, no_email), whether it is the December settlement, the status (draft, sent, skipped, failed), when it was sent and the ledger id of a settlement payment. Emails are not shown. Also the settings (enabled, mode review/auto, excluded) and the months that have statements. Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'month' => array(
+							'type'    => 'string',
+							'pattern' => '^\d{4}-\d{2}$',
+						),
+					),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'statements_list' ),
+			),
+			'statement-preview' => array(
+				'label'       => 'Revenue Splitter: one statement',
+				'description' => 'One beneficiary\'s statement of a month as stored (the figures that would be sent), with every title row and Ledger line, and the subject of its email. Nothing is sent. Make statements first from Noxpress → RS Statements.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'name'  => $name,
+						'month' => array(
+							'type'    => 'string',
+							'pattern' => '^\d{4}-\d{2}$',
+						),
+					),
+					'required'             => array( 'name', 'month' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'statement_preview' ),
+			),
 		);
 		foreach ( $defs as $id => $d ) {
 			wp_register_ability(
@@ -387,6 +422,58 @@ final class RS_Abilities {
 			'remaining' => $data['remaining'],
 			'products'  => $data['rows'],
 		);
+	}
+
+	public static function statements_list( $in = null ) {
+		$month = is_array( $in ) && isset( $in['month'] ) ? (string) $in['month'] : ( new DateTimeImmutable( 'first day of previous month', wp_timezone() ) )->format( 'Y-m' );
+		if ( ! RS_Statements::is_month( $month ) ) {
+			return new WP_Error( 'rs_month', 'month is YYYY-MM.' );
+		}
+		$set = RS_Statements::settings();
+		$out = array();
+		foreach ( RS_Statements::month_all( $month ) as $st ) {
+			$out[] = array(
+				'name'       => (string) $st['ben'],
+				'number'     => (string) $st['number'],
+				'opening'    => (float) $st['opening'],
+				'share'      => (float) $st['share'],
+				'income'     => (float) $st['income'],
+				'payments'   => (float) $st['payments'],
+				'closing'    => (float) $st['closing'],
+				'flags'      => array_values( (array) $st['flags'] ),
+				'settlement' => ! empty( $st['settlement'] ),
+				'status'     => (string) $st['status'],
+				'sent_at'    => (string) $st['sent_at'],
+				'paid_entry' => (int) $st['paid_entry'],
+			);
+		}
+		return array(
+			'month'      => $month,
+			'settings'   => array(
+				'enabled'   => $set['enabled'],
+				'mode'      => $set['mode'],
+				'exclude'   => $set['exclude'],
+				'qty_limit' => $set['qty_limit'],
+			),
+			'months'     => RS_Statements::months(),
+			'statements' => $out,
+		);
+	}
+
+	public static function statement_preview( $in = null ) {
+		$in    = is_array( $in ) ? $in : array();
+		$who   = isset( $in['name'] ) && is_string( $in['name'] ) ? trim( $in['name'] ) : '';
+		$month = isset( $in['month'] ) ? (string) $in['month'] : '';
+		if ( ! RS_Statements::is_month( $month ) ) {
+			return new WP_Error( 'rs_month', 'month is YYYY-MM.' );
+		}
+		$st = RS_Statements::get( $month, $who );
+		if ( null === $st ) {
+			return new WP_Error( 'rs_statement', 'No statement for this beneficiary and month.' );
+		}
+		unset( $st['sent_to'] );
+		$st['title'] = RS_Statements::title( $st );
+		return $st;
 	}
 
 	/* ---------------------------------------------------------------------

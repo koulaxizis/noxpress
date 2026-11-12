@@ -68,7 +68,18 @@ $rs_uninstall_options = array(
 	'rs_contracts_meta',     // 1.14.0: πότε ήρθε η τελευταία λίστα.
 	'rs_contract_requests',  // 1.14.0: αιτήματα ανανέωσης από το portal.
 	'rs_contracts_key',      // 1.14.1: hash του κλειδιού συμφωνητικών (orOS).
+	'rs_stmt_settings',      // 1.15.0: ρυθμίσεις καταστάσεων.
+	'rs_stmt_last',          // 1.15.0: τελευταίος μήνας της ημερήσιας δημιουργίας.
 );
+
+// 1.15.0: one option per month of statements (rs_stmt_m_YYYY-MM), listed in rs_stmt_months.
+$rs_stmt_months = json_decode( (string) get_option( 'rs_stmt_months', '' ), true );
+foreach ( is_array( $rs_stmt_months ) ? $rs_stmt_months : array() as $rs_stmt_month ) {
+	if ( is_string( $rs_stmt_month ) && preg_match( '/^\d{4}-\d{2}$/', $rs_stmt_month ) ) {
+		delete_option( 'rs_stmt_m_' . $rs_stmt_month );
+	}
+}
+$rs_uninstall_options[] = 'rs_stmt_months';
 
 foreach ( $rs_uninstall_options as $rs_opt ) {
 	delete_option( $rs_opt );
@@ -142,6 +153,7 @@ $rs_transient_prefixes = array(
 	'rs_split_warn_',            // v1.7.0: email warnings (metabox).
 	'rs_newkey_',                // One-shot plaintext portal keys.
 	'rs_ct_newkey_',             // 1.14.1: one-shot plaintext contracts key.
+	'rs_stmt_msg_',              // 1.15.0: PRG notices (statements).
 	'rs_block_checkout_warned_', // Blocks-checkout warning suppression flags.
 );
 
