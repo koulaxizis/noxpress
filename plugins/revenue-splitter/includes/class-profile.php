@@ -81,8 +81,13 @@ final class RS_Profile {
 	 * Storage
 	 * =================================================================== */
 
+	/** JSON text (what this plugin writes) or an array (what a remote tool such as Site Bridge may store). */
 	private static function read_json( string $opt ): array {
-		$raw = json_decode( (string) get_option( $opt, '' ), true );
+		$raw = get_option( $opt, '' );
+		if ( is_array( $raw ) ) {
+			return $raw;
+		}
+		$raw = json_decode( is_string( $raw ) ? $raw : '', true );
 		return is_array( $raw ) ? $raw : array();
 	}
 
