@@ -60,6 +60,14 @@ final class BPV_Metabox {
 			<p>
 				<label><input type="checkbox" name="bpv_hidden" value="1" <?php checked( $hidden ); ?> /> <?php esc_html_e( 'Απόκρυψη του κουμπιού (το δείγμα μένει)', 'book-preview' ); ?></label>
 			</p>
+			<?php if ( BPV_Samples::sample( $pid ) && class_exists( 'BPV_Opens' ) ) : ?>
+				<p class="description bpv-box__opens">
+					<?php
+					/* translators: 1: opens in the last 30 days, 2: opens in total */
+					echo esc_html( sprintf( __( 'Ανοίγματα δείγματος: %1$s τις τελευταίες 30 ημέρες, %2$s συνολικά.', 'book-preview' ), number_format_i18n( BPV_Opens::total( $pid, wp_date( 'Y-m-d', time() - 29 * DAY_IN_SECONDS ), '' ) ), number_format_i18n( BPV_Opens::total( $pid ) ) ) );
+					?>
+				</p>
+			<?php endif; ?>
 			<div class="bpv-box__status" aria-live="polite"><?php echo self::status_html( $pid ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in status_html(). ?></div>
 			<p class="bpv-box__actions">
 				<button type="button" class="button button-primary bpv-generate"><?php esc_html_e( 'Δημιουργία δείγματος', 'book-preview' ); ?></button>

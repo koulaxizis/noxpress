@@ -58,6 +58,26 @@
 		full: 'M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z'
 	};
 
+	// 1.2.0: one beacon per product and page view (BPV_Opens); no cookie, no storage.
+	var seen = {};
+	function counted( id ) {
+		id = parseInt( id, 10 );
+		if ( ! id || seen[ id ] || ! C.ajax ) {
+			return;
+		}
+		seen[ id ] = true;
+		try {
+			var body = new window.FormData();
+			body.append( 'action', 'bpv_open' );
+			body.append( 'id', String( id ) );
+			if ( navigator.sendBeacon ) {
+				navigator.sendBeacon( C.ajax, body );
+			} else if ( window.fetch ) {
+				window.fetch( C.ajax, { method: 'POST', body: body, credentials: 'same-origin', keepalive: true } );
+			}
+		} catch ( e ) {}
+	}
+
 	function open( btn ) {
 		var data;
 		try {
@@ -68,6 +88,7 @@
 		if ( ! data.src ) {
 			return;
 		}
+		counted( data.id );
 		if ( typeof window.HTMLDialogElement !== 'function' ) {
 			window.open( data.src, '_blank', 'noopener' );
 			return;
