@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Revenue Splitter
  * Plugin URI:           https://noxpress.tech
- * Description:          Πωλήσεις/έσοδα WooCommerce με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν, καταμερισμός σε δικαιούχους, ledger εκτός πωλήσεων & πληρωμών, υποχρεωτική αιτιολογία δωρεάν αντιτύπων, μηνιαία email αναφοράς, μηνιαίες καταστάσεις αμοιβών με PDF και Author Portal με προσωπικά κλειδιά και λήξεις συμφωνητικών από το orOS.
- * Version:              1.15.0
+ * Description:          Πωλήσεις/έσοδα WooCommerce με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν, καταμερισμός σε δικαιούχους, ledger εκτός πωλήσεων & πληρωμών, υποχρεωτική αιτιολογία δωρεάν αντιτύπων, μηνιαία email αναφοράς, μηνιαίες καταστάσεις αμοιβών με PDF και Author Portal με προσωπικά κλειδιά, λήξεις συμφωνητικών από το orOS, λήψεις και στατιστικά τίτλων, και αιτήματα δημιουργών.
+ * Version:              1.16.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -21,7 +21,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RS_VERSION', '1.15.0' );
+define( 'RS_VERSION', '1.16.0' );
 define( 'RS_FILE', __FILE__ );
 define( 'RS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RS_URL', plugin_dir_url( __FILE__ ) );
@@ -74,6 +74,7 @@ function rs_bootstrap(): void {
 	require_once RS_PATH . 'includes/class-contracts.php';
 	require_once RS_PATH . 'includes/class-pdf.php';
 	require_once RS_PATH . 'includes/class-statements.php';
+	require_once RS_PATH . 'includes/class-profile.php';
 	require_once RS_PATH . 'includes/class-abilities.php';
 	require_once RS_PATH . 'includes/class-rest.php';
 
@@ -87,6 +88,7 @@ function rs_bootstrap(): void {
 	RS_Portal::init();
 	RS_Contracts::init();
 	RS_Statements::init();
+	RS_Profile::init();
 	RS_Abilities::init();
 	RS_REST::init();
 
