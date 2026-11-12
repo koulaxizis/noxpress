@@ -414,15 +414,15 @@
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* New module: Consignments (off until switched on). Record books given to a bookstore with delivery and settle-by dates; copies leave the stock at delivery and come back with returns; a settlement makes an on-hold order for the sold copies, which counts in sales and Revenue Splitter only when marked «Collected». Overview of open, overdue and closed consignments, check dates, «On consignment» on the product screen, a printable delivery note.\n* New: REST `GET /wc/v3/tra/consignments` (and `/<id>`) for orOS; abilities `consignments-list`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-extend`; `status` shows a consignments summary.\n* New: `tra_consignments()` and `tra_consignment_lines()` for other plugins (Revenue Splitter's author portal).",
+        "published": "2026-11-12",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "404685196ccef4319e30d4862b2d0ae0f86b240dd484c6d43b478331000979d8",
-        "signature": "reFPjY9p82yfvb1PgxUUCNpSjxIoW5LL+x9Akf441NDzNCIhNG8zadESdal04plFaQlpSXrjZ2HBBe6UY3GlDg==",
+        "sha256": "f754fe305767fe11f43b430c4cbaf659b536fd49d65ac5d4cb58703216998e90",
+        "signature": "MK+vU4jyFlXWnbkUI3V/OtOSOWzNK1eG8uoNZQ9DYeg/VLGoI+RTv0YLTlQrIlNHVqDlk4StVSsb+Igjog1fAw==",
         "tested_wp": "7.1",
-        "version": "1.4.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.4.2/trade-accounts.zip"
+        "version": "1.5.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.5.0/trade-accounts.zip"
       }
     },
     "trade-feed-import": {
