@@ -284,19 +284,6 @@
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.14.3/revenue-splitter.zip"
       }
     },
-    "search-signals": {
-      "beta": {
-        "changelog": "* Initial release.\n* Title and description templates with per-object overrides, robots through wp_robots, canonical and pagination.\n* One JSON-LD graph (Organization, WebSite with product SearchAction, WebPage, BreadcrumbList, Article, Product from WooCommerce) with the noxpress_seo_graph filter; Open Graph and Twitter cards.\n* Sitemaps at Rank Math's addresses (/sitemap_index.xml, /{type}-sitemap{N}.xml) with images and the robots.txt line; /llms.txt without personal data, /llms-full.txt 410; static llms files moved to a backup on a click, with restore.\n* Import from Rank Math with dry run and undo; Compare with the live page and the sitemaps; Switch over and Switch back in one click.\n* Test mode, passive while another SEO plugin is active, SSG_DISABLE; no external calls and no cookies.\n* Abilities search-signals/status, get-meta, set-meta, json-ld, sitemap-status and compare; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.9).",
-        "published": "2026-11-03",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "0f2fba94ea82f4c55d7137ade91312febe60c379a19d0f964bb33865ce5f949c",
-        "signature": "ilQQi8gaN6uII3sO9/56slLP4vGgtvYbZ6Yr4NqfEd7eXQhWM7uErmhJeHxBIYm3DeCfxIKIkwRM2LliPoNLBg==",
-        "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.0/search-signals.zip"
-      }
-    },
     "shipping-notes": {
       "beta": {
         "changelog": "* New: product suggestions under the free-shipping bar while an amount is left. Up to 6 products from a list you choose; the ones that cover the amount left come first, cheapest first; products already in the cart or out of stock are skipped. Simple products add to the cart in place, variable ones open their page. Shown in the cart, hidden in the mini-cart and checkout. Off by default, with editable title and button texts.\n* New: the threshold is also read from a carrier method that turns free over an amount of its own: BOX NOW Delivery's \"free delivery threshold\", when the zone has no Free shipping method with an amount. Filter `shn_carrier_threshold` for other carriers.",
