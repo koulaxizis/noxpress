@@ -64,7 +64,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.16.1 =
-* Fix: the portal tables (per product, VAT by rate, transaction history) scroll sideways inside their box on narrow themes instead of overflowing the page.
+* Fix: the portal tables (per product, VAT by rate, transaction history) scroll sideways inside their box on narrow themes instead of overflowing the page; the monthly chart does the same.
 * Fix: the beneficiary ↔ creator page mapping is read also when a remote tool (such as Site Bridge) stored it as an array instead of JSON text.
 
 = 1.16.0 =

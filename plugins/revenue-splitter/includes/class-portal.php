@@ -1427,7 +1427,7 @@ final class RS_Portal {
 
 .rs-pt-chart-head { display: flex; justify-content: space-between; align-items: baseline; }
 .rs-pt-chart-range select { padding: 3px 6px; border: 1px solid #3a3f52; border-radius: 3px; background: #1a1d26; color: #f0eefc; }
-.rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin: 0.5em 0 1.5em; }
+.rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin: 0.5em 0 1.5em; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
 .rs-pt-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; text-align: center; }
 .rs-pt-bar { width: 70%; background: #6d4aff; border-radius: 3px 3px 0 0; min-height: 3px; }
 .rs-pt-col small { margin-top: 4px; font-size: 0.72em; color: #b7b2d6; }
