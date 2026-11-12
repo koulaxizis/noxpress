@@ -347,6 +347,17 @@
         "tested_wp": "7.1",
         "version": "1.12.0",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.0/site-bridge.zip"
+      },
+      "stable": {
+        "changelog": "* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.\n* New: \"Close now\" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.\n* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.\n* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.\n* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.",
+        "published": "2026-11-07",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "f8928251a06795db462c36d36392802d52c5d9309869d8c557943126f4372101",
+        "signature": "gAXag38Ledy+UUdL5Kw3gGU8ia87dk50wA2+bTlnOo+gBxWfRwmhOKmSu9GwFMtKhJyOwwplS48jyzbTuu2EAw==",
+        "tested_wp": "7.1",
+        "version": "1.12.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.0/site-bridge.zip"
       }
     },
     "smart-formatter": {
