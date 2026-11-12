@@ -12,6 +12,7 @@
  *              feed password (shown once), revoke, back to customer
  *  - api       how a bookstore connects, rate limit, contributor
  *              attributes, a test call, the call log
+ *  - consign   consignments (module "consign", TRA_Consign_UI)
  *  - tools     settings backup, developers
  *
  * Every state change: POST on admin_init (slug + nonce + capability, PRG,
@@ -35,20 +36,27 @@ final class TRA_Admin_UI {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 260 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
+		if ( class_exists( 'TRA_Consign_UI' ) ) {
+			add_action( 'admin_init', array( 'TRA_Consign_UI', 'print_note' ) );
+		}
 		add_action( 'admin_init', array( __CLASS__, 'privacy' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( TRA_FILE ), array( __CLASS__, 'action_links' ) );
 	}
 
-	/** Tab slug => label. */
+	/** Tab slug => label («Παρακαταθήκες» only while its module is on). */
 	private static function tabs(): array {
-		return array(
+		$tabs = array(
 			'modules'  => __( 'Modules', 'trade-accounts' ),
 			'settings' => __( 'Ρυθμίσεις', 'trade-accounts' ),
 			'accounts' => __( 'Λογαριασμοί', 'trade-accounts' ),
 			'api'      => __( 'Trade Feed', 'trade-accounts' ),
-			'tools'    => __( 'Εργαλεία', 'trade-accounts' ),
 		);
+		if ( class_exists( 'TRA_Consign_UI' ) ) {
+			$tabs['consign'] = __( 'Παρακαταθήκες', 'trade-accounts' );
+		}
+		$tabs['tools'] = __( 'Εργαλεία', 'trade-accounts' );
+		return $tabs;
 	}
 
 	/* =====================================================================
@@ -156,6 +164,9 @@ final class TRA_Admin_UI {
 				case 'tools':
 					self::render_tools();
 					break;
+				case 'consign':
+					TRA_Consign_UI::render();
+					break;
 				default:
 					self::render_modules();
 			}
@@ -218,6 +229,11 @@ final class TRA_Admin_UI {
 					<h3><?php esc_html_e( 'Trade Feed', 'trade-accounts' ); ?> <?php echo self::on_off( $s['mods']['feed'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?></h3>
 					<p><?php esc_html_e( 'API για τα e-shops των λογαριασμών: τα επιλέξιμα προϊόντα με τιμές λιανικής και χονδρικής, διαθεσιμότητα και προπαραγγελίες, σε JSON ή XML, με όνομα χρήστη και κωδικό ανά λογαριασμό.', 'trade-accounts' ); ?></p>
 					<?php self::checkbox( 'tra_mod_feed', $s['mods']['feed'], __( 'Ενεργοποίηση', 'trade-accounts' ) ); ?>
+				</div>
+				<div class="tra-mod">
+					<h3><?php esc_html_e( 'Παρακαταθήκες', 'trade-accounts' ); ?> <?php echo self::on_off( $s['mods']['consign'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?></h3>
+					<p><?php esc_html_e( 'Βιβλία που δίνεις σε βιβλιοπωλεία με παρακαταθήκη: ημερομηνία, τίτλοι, προθεσμία. Τα τεμάχια φεύγουν από το απόθεμα στην παράδοση, η εκκαθάριση γίνεται παραγγελία σε αναμονή και μετράει στις πωλήσεις μόνο όταν σημειώσεις την είσπραξη.', 'trade-accounts' ); ?></p>
+					<?php self::checkbox( 'tra_mod_consign', $s['mods']['consign'], __( 'Ενεργοποίηση', 'trade-accounts' ) ); ?>
 				</div>
 			</div>
 
@@ -753,6 +769,7 @@ final class TRA_Admin_UI {
 				$s                    = TRA_Settings::get();
 				$s['mods']['pricing'] = '1' === self::post( 'tra_mod_pricing' );
 				$s['mods']['feed']    = '1' === self::post( 'tra_mod_feed' );
+				$s['mods']['consign'] = '1' === self::post( 'tra_mod_consign' );
 				$s['mode']            = sanitize_key( self::post( 'tra_mode' ) );
 				$s['lang']            = sanitize_key( self::post( 'tra_lang' ) );
 				TRA_Settings::save( $s );
@@ -773,6 +790,13 @@ final class TRA_Admin_UI {
 				break;
 			case 'create':
 				self::redirect( 'accounts', self::do_create() );
+				break;
+			case 'consign':
+				if ( ! class_exists( 'TRA_Consign_UI' ) ) {
+					self::redirect( 'modules', array( self::msg( 'error', __( 'Το module Παρακαταθήκες είναι κλειστό.', 'trade-accounts' ) ) ) );
+				}
+				$res = TRA_Consign_UI::handle();
+				self::redirect( 'consign', $res[0], $res[1] );
 				break;
 			case 'clear_log':
 				delete_option( 'tra_log' );
@@ -880,9 +904,9 @@ final class TRA_Admin_UI {
 		);
 	}
 
-	private static function redirect( string $tab, array $msgs ): void {
+	private static function redirect( string $tab, array $msgs, array $args = array() ): void {
 		set_transient( 'tra_aui_msg_' . get_current_user_id(), $msgs, 60 );
-		wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG . '&tab=' . $tab ) );
+		wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', array_map( 'strval', $args ) ), admin_url( 'admin.php?page=' . self::SLUG . '&tab=' . $tab ) ) );
 		exit;
 	}
 

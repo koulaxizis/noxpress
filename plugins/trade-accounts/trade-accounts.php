@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Trade Accounts
  * Plugin URI:           https://noxpress.tech
- * Description:          Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές. Modules που ενεργοποιείς ένα-ένα: Τιμές χονδρικής (ρόλος «Χονδρική» με προκαθορισμένη έκπτωση μόνο στα προϊόντα που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, με υποχρεωτικό τιμολόγιο αν θέλεις) και Trade Feed (API με όνομα χρήστη και Application Password ανά λογαριασμό, JSON ή XML, με φίλτρα, όριο κλήσεων και ημερολόγιο).
- * Version:              1.4.2
+ * Description:          Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές. Modules που ενεργοποιείς ένα-ένα: Τιμές χονδρικής (ρόλος «Χονδρική» με προκαθορισμένη έκπτωση μόνο στα προϊόντα που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, με υποχρεωτικό τιμολόγιο αν θέλεις) Trade Feed (API με όνομα χρήστη και Application Password ανά λογαριασμό, JSON ή XML, με φίλτρα, όριο κλήσεων και ημερολόγιο) και Παρακαταθήκες (βιβλία σε βιβλιοπωλεία: απόθεμα, εκκαθάριση, είσπραξη).
+ * Version:              1.5.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -43,6 +43,11 @@
  *                    Store API and order; order / line marks; invoice
  *  - TRA_Feed      → module "feed": REST tra/v1 (products, one product,
  *                    categories) in JSON or XML, rate limit, call log
+ *  - TRA_Consign   → module "consign": books on consignment at a trade
+ *                    account (stock out at delivery, settlement order
+ *                    on-hold, counted only once collected), REST
+ *                    /wc/v3/tra/consignments for orOS
+ *  - TRA_Consign_UI → the «Παρακαταθήκες» tab and the printable note
  *  - TRA_Guide     → the trade guide page in a trade account's My Account
  *  - TRA_Abilities → status and accounts in the WordPress Abilities API
  *  - TRA_Admin_UI  → menu, modules, settings, accounts, API, tools
@@ -57,6 +62,14 @@
  *    bkf_get_source() again before it is listed). The invoice rule reads the receipt-type field of
  *    the invoicing plugin from the checkout POST (field name and value in
  *    the settings, default «Timologia for WooCommerce» by OBS).
+ *  - §1.1 (only public APIs): a settlement order of the consignments is
+ *    marked as stock-reduced through the order data store
+ *    (set_stock_reduced), because its copies left the stock at delivery
+ *    and WooCommerce must not reduce them again; its e-mails are muted
+ *    with WooCommerce's own woocommerce_email_enabled_* filters while it
+ *    is made and paid.
+ *  - §12 (nothing left after uninstall): consignments are the shop's
+ *    records (books at bookstores, money owed) and stay, like orders.
  *  - §14.4 (no REST): the tra/v1 routes are the purpose of the Trade Feed
  *    module; they answer only to authenticated trade accounts (and to
  *    managers, for testing).
@@ -79,13 +92,15 @@
  * in wp-config.php stops the prices and closes the feed (403).
  *
  * Cooperation (Bible §6): tra_is_trade( $user_id ), tra_trade_price(
- * $product, $user_id ), tra_is_eligible( $product ); filters tra_eligible,
- * tra_discount, tra_feed_item and tra_text.
+ * $product, $user_id ), tra_is_eligible( $product ), tra_consignments(
+ * $args ), tra_consignment_lines( $product_ids ); filters tra_eligible,
+ * tra_discount, tra_feed_item and tra_text; actions
+ * tra_consignment_created, tra_consignment_settled, tra_consignment_paid.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TRA_VERSION', '1.4.2' );
+define( 'TRA_VERSION', '1.5.0' );
 define( 'TRA_FILE', __FILE__ );
 define( 'TRA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TRA_URL', plugin_dir_url( __FILE__ ) );
@@ -143,6 +158,14 @@ final class Trade_Accounts {
 		if ( TRA_Settings::module( 'feed' ) ) {
 			require_once TRA_PATH . 'includes/class-feed.php';
 			TRA_Feed::init();
+		}
+
+		if ( TRA_Settings::module( 'consign' ) ) {
+			require_once TRA_PATH . 'includes/class-consign.php';
+			TRA_Consign::init();
+			if ( is_admin() ) {
+				require_once TRA_PATH . 'includes/class-consign-ui.php';
+			}
 		}
 
 		require_once TRA_PATH . 'includes/class-abilities.php';
@@ -212,6 +235,26 @@ function tra_trade_price( $product, int $user_id = 0 ): ?float {
 		return null;
 	}
 	return TRA_Scope::trade_price( $product, TRA_Accounts::discount( $user_id ) );
+}
+
+/**
+ * Consignments (module "consign"), as TRA_Consign::get() answers each one.
+ * $args: state (all | open | overdue | closed), account, product, limit.
+ * Empty while the module is off.
+ */
+function tra_consignments( array $args = array() ): array {
+	return class_exists( 'TRA_Consign' ) ? TRA_Consign::query( $args ) : array();
+}
+
+/**
+ * Copies still at bookstores, per product: product id => list of
+ * {consignment, account, name, city, given, due, open, overdue}. Used by
+ * Revenue Splitter's author portal. Empty while the module is off.
+ *
+ * @param int[] $product_ids Products; empty = every product.
+ */
+function tra_consignment_lines( array $product_ids = array() ): array {
+	return class_exists( 'TRA_Consign' ) ? TRA_Consign::open_lines( $product_ids ) : array();
 }
 
 // Priority 20 like the other suite plugins.

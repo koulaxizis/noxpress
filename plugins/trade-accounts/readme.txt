@@ -5,11 +5,11 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.2
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Trade accounts for bookstores and resellers. Modules you switch on one by one: trade prices with a preset discount on the products you choose, and the Trade Feed, an API that lets each account list those products in its own e-shop.
+Trade accounts for bookstores and resellers. Modules you switch on one by one: trade prices with a preset discount on the products you choose, the Trade Feed, an API that lets each account list those products in its own e-shop, and Consignments, books given to bookstores that count as sales only once paid.
 
 == Description ==
 
@@ -40,6 +40,16 @@ Every module is off after activation. A module that is off loads no code.
 * A rate limit per account and hour (default 120) with X-RateLimit headers and 429 / Retry-After; the account's last call and a log of the last 200 calls, without IP addresses or credentials. Answers are never cached.
 * Managers can call it too, to test, with the discount of the settings.
 
+**Consignments module**
+
+* Books given to a bookstore (a trade account) on consignment: delivery date, settle-by date (default 90 days), delivery note number, notes, titles with copies and unit price (default: the account's trade price, VAT included) and a full history.
+* Copies leave the stock at delivery (products that manage stock) and come back with returns. A product without stock management is recorded the same way, with no stock change.
+* A delivery is not a sale: no order, nothing in Revenue Splitter or the reports. A settlement (sold and returned copies) makes one ordinary order for the sold copies, on hold, which does not count yet; «Collected» completes it, and only then do Revenue Splitter, the Production Ledger and Store Pulse count it. Completing it from the orders screen does the same; cancelling it puts its copies back as still at the bookstore.
+* Settlement orders never reduce stock again and send no e-mails (an optional «completed» e-mail to the bookstore when collected).
+* Open, overdue and closed consignments with copies and value at bookstores and money to collect; a check date every 30 days (setting) while copies are out; «On consignment» in the product's Inventory tab; a printable delivery note (print or save as PDF) with signatures.
+* REST (read, WooCommerce REST keys): `GET /wc/v3/tra/consignments` (filters state, account, product) and `/wc/v3/tra/consignments/<id>`, for orOS.
+* Abilities: `consignments-list`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-extend`.
+
 **Safe by design**
 
 * Test mode by default: only managers see trade prices, as a preview, until you switch to live.
@@ -52,6 +62,7 @@ Every module is off after activation. A module that is off loads no code.
 **For developers**
 
 * `tra_is_trade( int $user_id = 0 )`, `tra_is_eligible( $product )`, `tra_trade_price( $product, int $user_id = 0 )`.
+* `tra_consignments( array $args = array() )` and `tra_consignment_lines( array $product_ids = array() )` (copies still at bookstores per product, for an author portal); actions `tra_consignment_created`, `tra_consignment_settled`, `tra_consignment_paid`.
 * Filters `tra_eligible` ( bool $ok, WC_Product $product ), `tra_discount` ( float $percent, int $user_id ), `tra_feed_item` ( array $item, WC_Product $product ), `tra_text` ( string $text, string $key, string $lang ).
 
 == Installation ==
@@ -78,13 +89,18 @@ They are WordPress's own credentials for APIs: stored hashed, revocable one by o
 
 = What happens on uninstall? =
 
-The settings, the call log, the plugin's user and product meta, its Application Passwords and the «Χονδρική» role are removed; trade accounts stay as customers. The discount marks stay in the orders, as the shop's record. The shared Noxpress options stay while another Noxpress plugin is installed.
+The settings, the call log, the plugin's user and product meta, its Application Passwords and the «Χονδρική» role are removed; trade accounts stay as customers. The discount marks stay in the orders, and consignments stay, as the shop's records. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Disclaimer ==
 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.5.0 =
+* New module: Consignments (off until switched on). Record books given to a bookstore with delivery and settle-by dates; copies leave the stock at delivery and come back with returns; a settlement makes an on-hold order for the sold copies, which counts in sales and Revenue Splitter only when marked «Collected». Overview of open, overdue and closed consignments, check dates, «On consignment» on the product screen, a printable delivery note.
+* New: REST `GET /wc/v3/tra/consignments` (and `/<id>`) for orOS; abilities `consignments-list`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-extend`; `status` shows a consignments summary.
+* New: `tra_consignments()` and `tra_consignment_lines()` for other plugins (Revenue Splitter's author portal).
 
 = 1.4.2 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

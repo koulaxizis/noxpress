@@ -444,3 +444,19 @@ a.tra-kofi:hover {
 	word-break: break-all;
 	padding: 6px 10px;
 }
+
+/* ===== Consignments (1.5.0) ===== */
+.tra-wrap .tra-inline {
+	display: inline-flex;
+	gap: 6px;
+	align-items: center;
+	flex-wrap: wrap;
+	margin: 0;
+}
+.tra-wrap .tra-table select {
+	max-width: 100%;
+}
+.tra-wrap .tra-grid select {
+	width: 100%;
+	max-width: 100%;
+}

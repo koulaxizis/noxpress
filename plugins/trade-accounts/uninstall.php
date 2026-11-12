@@ -17,6 +17,9 @@
  * are WordPress users, now customers), and the order marks _tra_trade and
  * the line marks _tra_discount with their readable line. They go with the
  * orders. The rs_lang user meta belongs to Revenue Splitter.
+ *
+ * Consignments (post type tra_consignment, 1.5.0) are the shop's records
+ * of books at bookstores and money owed: they stay, like orders.
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
