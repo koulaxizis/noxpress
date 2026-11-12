@@ -15,15 +15,15 @@
     },
     "book-preview": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* New: sample open counter. When a visitor opens a sample, the viewer sends the product's id once per page view to your own site; the number of opens per product and day is kept for two years (option bpv_opens, no IP or visitor data). Opens by shop staff and in test mode do not count, and at most 120 opens per product per hour are counted.\n* New: the product's \"Book Preview\" box shows the opens of the last 30 days and in total.\n* New: bpv_get_opens( $product_id, $from, $to ) and bpv_get_opens_by_month( $product_id, $from, $to ) for other plugins (Revenue Splitter's Author Portal reads them).",
+        "published": "2026-11-12",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0c04ffc1c3dbfb3fda4a381db4ca2b7ff66aa309cbec55ccfef2cbeb1bcaf40d",
-        "signature": "a2Hxa9jSKRDR7j8bRpJUuEgIkEHp8UFECBnH9GRF5prHqSn3av9/3MGha5xjj/zpOHcR0OC8eAMlOUhHPDIFDw==",
+        "sha256": "a644f1aeae07dd491cbb406a92d787644d2e18cd9f953b77b0b6efc79ed46cf0",
+        "signature": "Mf0Uz17gUEAAr42TfUbYtCVI5uPTaLetGcU8GyOXa/SSEottuMeDqrmkFSYCfGpHJTMdw1tgFgzn65EbJOoMAw==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.1.2/book-preview.zip"
+        "version": "1.2.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.2.0/book-preview.zip"
       }
     },
     "broadcast": {
@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: monthly creator statements (Noxpress → RS Statements). For every beneficiary with a balance or any movement in the month: the opening balance, the share per title (copies, %, amount), the Ledger's other income and payments, and the closing balance. It goes out as a short email with the statement as a PDF attached. No opt-in is needed; beneficiaries can be left out in the settings.\n* New: two sending modes. «Review» (default): every statement waits until you press Send (one by one, or the selected ones). «Automatic»: the daily check makes and sends the previous month's statements on the 1st, except statements with a warning, beneficiaries without an email and December statements, which always wait. A statement made by hand is never sent by itself, and turning the feature on never sends an older month.\n* New: checks that hold a statement: the VAT RS removes does not fit the product (no tax in WooCommerce, ISBN → 6%, other GTIN → 24%), more copies of one title in a month than a set limit (default 50), a negative balance, no email.\n* New: yearly settlement. December's statement is «Year-end settlement» and can be marked «Paid», which adds a Ledger payment of its closing balance (same checks as the Ledger form).\n* New: a small built-in PDF writer (no external service or library) with DejaVu Sans (Latin and Greek; licence in assets/fonts). Each PDF embeds only the glyphs it uses.\n* New: abilities revenue-splitter/statements-list and revenue-splitter/statement-preview (read-only).\n* Fix: the monthly report's «Balance payable» (and the monthly-preview ability's remaining) is now the balance at the end of the month, not on the day the report is sent.",
+        "changelog": "* New: «Your titles» in the Author Portal. For each of the creator's titles: downloads of the digital files in the period and in total, how many orders got the file (free or paid), the last download and the last 12 months as a chart. Downloads by shop staff do not count; variations count under their product.\n* New: interest and reviews per title, from the suite and from Koko Analytics when they are active: page views, sample opens (Book Preview 1.2.0+), wish lists (Wish Shelf), pre-orders and release day (Pre-Orders), the rating and the latest reviews (first name and initial only).\n* New: «Your page» in the portal: a link to the creator's page and a request for a change or addition (bio text, up to 6 links, a note, one JPG/PNG/WebP photo up to 5 MB, re-encoded, stored outside public reach). The creator never edits the page; the request goes to the shop.\n* New: promotion kit per title (link, cover and a short text to copy), a request for author copies (title, quantity, note) and «Your statements» (the monthly statements already sent, as PDF, each creator only their own).\n* New: Noxpress → RS Creators: open requests with the bio changes side by side, the links and the photo, Done or Decline with an optional reply the creator sees in the portal; the beneficiary ↔ creator page mapping (with suggestions by name); which roles count as author. A new request emails the site's admin address.\n* New: ability revenue-splitter/downloads (read-only, numbers only).\n* Safety: requests are rate-limited (3 per beneficiary per day, 10 per IP per hour, at most 3 open author-copies requests); photos are served to shop managers only and deleted 30 days after the request closes; closed requests are kept for 12 months.",
         "published": "2026-11-12",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "260a33854cd091d2511a74424a4202c5cd9a4a46d84a2edbfb8c16bab0bb719f",
-        "signature": "YyS0NUzGfzNGlyXHOfut7Z0FcOkz18UVETjsoAxQYo/9jG0xEbvmn0gT3bJo/yoIql6O0i4rMJEpJYyZKRn4DA==",
+        "sha256": "95f6df22e30293d11dee81c2118644e534c3378262d669cf0a8225f4154948ec",
+        "signature": "/eEeHKfuaV3RuWIkzIlqKnCnW2ZFfh0w3dMmhjx1Gj3XgP1BpJKMHTD+OXYYd3evJ5rqMvZ26tujk5YMJ/TTBg==",
         "tested_wp": "7.1",
-        "version": "1.15.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.15.0/revenue-splitter.zip"
+        "version": "1.16.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.16.0/revenue-splitter.zip"
       }
     },
     "search-signals": {
