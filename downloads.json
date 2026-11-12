@@ -1,6 +1,6 @@
 {
   "display": 1000,
-  "total": 1007,
+  "total": 1010,
   "offset": 5,
   "updated": "2026-11-12",
   "assets": {
@@ -1102,6 +1102,14 @@
     },
     "739832204": {
       "file": "nox-ta-1.5.0/trade-accounts.zip",
+      "count": 3
+    },
+    "740332120": {
+      "file": "nox-rs-1.16.0/revenue-splitter.zip",
+      "count": 0
+    },
+    "740332467": {
+      "file": "nox-bp-1.2.0/book-preview.zip",
       "count": 0
     }
   }
