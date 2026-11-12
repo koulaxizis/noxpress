@@ -24,6 +24,8 @@
  *                                    (destructive, 1.13.0)
  *  revenue-splitter/contracts        the creators' contracts orOS sent, with
  *                                    today's state (read, 1.14.0)
+ *  revenue-splitter/downloads        downloads of each creator's digital
+ *                                    files (read, 1.16.0)
  *
  * Nothing here returns an email address or a portal key. Ledger notes are
  * returned only by ledger-add, for the entries the caller just gave.
@@ -252,6 +254,22 @@ final class RS_Abilities {
 				),
 				'ann'         => array( true, false, true ),
 				'run'         => array( __CLASS__, 'statements_list' ),
+			),
+			'downloads'         => array(
+				'label'       => 'Revenue Splitter: downloads of creators\' digital files',
+				'description' => 'Per beneficiary (or one, with name) and title: downloads of the digital files in the period (local dates, inclusive; default the last 30 days) and in total, how many orders gave the file (in the period and in total) and the last download (GMT). The titles are those whose own split names the beneficiary, plus, with Featured Creators, those of the linked creator page in an author role. Downloads by shop staff do not count. Numbers only: no buyer data. Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'name'       => $name,
+						'date_start' => $date,
+						'date_end'   => $date,
+					),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( 'RS_Profile', 'ability_downloads' ),
 			),
 			'statement-preview' => array(
 				'label'       => 'Revenue Splitter: one statement',

@@ -7,8 +7,9 @@
  *    file names, the index.php guard and then the folder itself).
  *  - Product meta: _bpv_source, _bpv_pages, _bpv_hidden, _bpv_sample,
  *    _bpv_error.
- *  - Options: bpv_settings, bpv_bulk (a bulk run in progress).
- *  - Transients: bpv_aui_msg_{uid} (PRG notices).
+ *  - Options: bpv_settings, bpv_bulk (a bulk run in progress), bpv_opens
+ *    (sample open counts, 1.2.0).
+ *  - Transients: bpv_aui_msg_{uid} (PRG notices), bpv_oc_{id} (hourly open cap).
  *  - Background jobs: bpv_generate (Action Scheduler and WP-Cron).
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
@@ -26,14 +27,17 @@ function bpv_uninstall_site(): void {
 
 	delete_option( 'bpv_settings' );
 	delete_option( 'bpv_bulk' );
+	delete_option( 'bpv_opens' );
 
 	// Transients: LIKE with escaped '_' (otherwise a wildcard).
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 			$wpdb->esc_like( '_transient_bpv_aui_msg_' ) . '%',
-			$wpdb->esc_like( '_transient_timeout_bpv_aui_msg_' ) . '%'
+			$wpdb->esc_like( '_transient_timeout_bpv_aui_msg_' ) . '%',
+			$wpdb->esc_like( '_transient_bpv_oc_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_bpv_oc_' ) . '%'
 		)
 	);
 

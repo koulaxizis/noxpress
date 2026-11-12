@@ -16,6 +16,9 @@
  *    notices), rs_split_error_* / rs_split_warn_* (metabox notices),
  *    rs_newkey_* (one-shot κλειδιά portal), rs_block_checkout_warned_*.
  *  - WP-Cron: rs_email_monthly_check.
+ *  - 1.16.0: the folder uploads/noxpress-rs-photos (photos sent with bio
+ *    requests; only files this plugin wrote: index.php, .htaccess and
+ *    32-hex-character image names).
  *  - Order meta: _rs_free_reason, _rs_channel (classic + HPOS).
  *  - Order item meta: _rs_reg_unit.
  *  - Post meta προϊόντων: _rs_split, _rs_beneficiaries, _rs_vat_rate.
@@ -70,6 +73,9 @@ $rs_uninstall_options = array(
 	'rs_contracts_key',      // 1.14.1: hash του κλειδιού συμφωνητικών (orOS).
 	'rs_stmt_settings',      // 1.15.0: ρυθμίσεις καταστάσεων.
 	'rs_stmt_last',          // 1.15.0: τελευταίος μήνας της ημερήσιας δημιουργίας.
+	'rs_profiles',           // 1.16.0: beneficiary ↔ creator page.
+	'rs_profile_settings',   // 1.16.0: author roles.
+	'rs_profile_requests',   // 1.16.0: bio and author-copies requests.
 );
 
 // 1.15.0: one option per month of statements (rs_stmt_m_YYYY-MM), listed in rs_stmt_months.
@@ -83,6 +89,25 @@ $rs_uninstall_options[] = 'rs_stmt_months';
 
 foreach ( $rs_uninstall_options as $rs_opt ) {
 	delete_option( $rs_opt );
+}
+
+// ------------------------------------------------------------------------
+// 1.16.0: photos of bio requests. Only the files this plugin writes are
+// removed, then the folder if it is empty; nothing else is touched.
+// ------------------------------------------------------------------------
+
+$rs_up = wp_get_upload_dir();
+if ( empty( $rs_up['error'] ) && ! empty( $rs_up['basedir'] ) ) {
+	$rs_dir = rtrim( (string) $rs_up['basedir'], '/\\' ) . '/noxpress-rs-photos';
+	if ( is_dir( $rs_dir ) && ! is_link( $rs_dir ) ) {
+		foreach ( (array) scandir( $rs_dir ) as $rs_f ) {
+			$rs_f = (string) $rs_f;
+			if ( ( 'index.php' === $rs_f || '.htaccess' === $rs_f || preg_match( '/^[0-9a-f]{32}\.(jpg|png|webp)$/', $rs_f ) ) && is_file( $rs_dir . '/' . $rs_f ) ) {
+				wp_delete_file( $rs_dir . '/' . $rs_f );
+			}
+		}
+		@rmdir( $rs_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- left in place if not empty.
+	}
 }
 
 // ------------------------------------------------------------------------
@@ -154,6 +179,7 @@ $rs_transient_prefixes = array(
 	'rs_newkey_',                // One-shot plaintext portal keys.
 	'rs_ct_newkey_',             // 1.14.1: one-shot plaintext contracts key.
 	'rs_stmt_msg_',              // 1.15.0: PRG notices (statements).
+	'rs_dl_',                    // 1.16.0: cached portal download counts.
 	'rs_block_checkout_warned_', // Blocks-checkout warning suppression flags.
 );
 

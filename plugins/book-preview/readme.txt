@@ -5,7 +5,7 @@ Tags: woocommerce, book preview, pdf, sample, ebook
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -43,7 +43,12 @@ Book shops sell PDFs, but a buyer wants to leaf through a few pages first. Book 
 * Runs in small batches with a progress bar; it can stop and continue.
 * A samples screen lists every product with a PDF, its sample state and errors, with category and state filters.
 
-**Safe by design:** off until enabled; test mode shows the button to shop managers only; `define( 'BPV_DISABLE', true );` in wp-config.php stops every front-end hook. No database writes on visitor requests. Caches (WooCommerce, WP Rocket, LiteSpeed, W3 Total Cache) are purged for a product when its sample changes.
+**How many opened the sample**
+
+* The product's "Book Preview" box shows how many times visitors opened the sample (last 30 days and in total). One count per product and page view; opens by shop staff and in test mode do not count; at most 120 counted opens per product per hour.
+* Other plugins read the numbers with `bpv_get_opens( $product_id, $from, $to )` and `bpv_get_opens_by_month( $product_id, $from, $to )` (local days, `Y-m-d`). Revenue Splitter shows them to each creator in the Author Portal.
+
+**Safe by design:** off until enabled; test mode shows the button to shop managers only; `define( 'BPV_DISABLE', true );` in wp-config.php stops every front-end hook and the counter. The only database write on a visitor request is the open counter (one option). Caches (WooCommerce, WP Rocket, LiteSpeed, W3 Total Cache) are purged for a product when its sample changes.
 
 * Hooks: `bpv_text` filters each visitor text ( $text, $key, $lang ); `bpv_tool_path` sets the path of `qpdf` or `gs` when they are not in the server's PATH.
 * Backup: export / import the settings as JSON.
@@ -52,7 +57,7 @@ Book shops sell PDFs, but a buyer wants to leaf through a few pages first. Book 
 
 == Privacy ==
 
-No cookies, no tracking, no external calls: the viewer, its fonts and decoders are served from your own site. The visitor's browser downloads only the sample PDF.
+No cookies, no tracking, no external calls: the viewer, its fonts and decoders are served from your own site. The visitor's browser downloads only the sample PDF. When a sample opens, the browser sends the product's id to your own site (admin-ajax) so the open is counted; only the number per product and day is stored, never an IP address, user agent or visitor id.
 
 == Installation ==
 
@@ -91,6 +96,11 @@ Everything the plugin created is removed: its options, product meta, background 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: sample open counter. When a visitor opens a sample, the viewer sends the product's id once per page view to your own site; the number of opens per product and day is kept for two years (option bpv_opens, no IP or visitor data). Opens by shop staff and in test mode do not count, and at most 120 opens per product per hour are counted.
+* New: the product's "Book Preview" box shows the opens of the last 30 days and in total.
+* New: bpv_get_opens( $product_id, $from, $to ) and bpv_get_opens_by_month( $product_id, $from, $to ) for other plugins (Revenue Splitter's Author Portal reads them).
 
 = 1.1.2 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

@@ -21,6 +21,8 @@
  * BPV_DISABLE stops every hook (the bootstrap does not call init()), page
  * requests only, every callback in try/catch, nothing written, assets only
  * on pages with a button. No cookies, no storage, no external requests.
+ * 1.2.0: the viewer sends one beacon to admin-ajax when a sample opens
+ * (BPV_Opens), with the product id only.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -134,6 +136,7 @@ final class BPV_Front {
 				'fonts'  => $vendor . 'standard_fonts/',
 				'wasm'   => $vendor . 'wasm/',
 				'iccs'   => $vendor . 'iccs/',
+				'ajax'   => admin_url( 'admin-ajax.php' ),
 				'i18n'   => $en ? self::ui_en() : self::ui_el(),
 			)
 		);
@@ -305,6 +308,7 @@ final class BPV_Front {
 			}
 			$sample = BPV_Samples::sample( $product_id );
 			$data   = array(
+				'id'    => $product_id,
 				'src'   => BPV_Samples::url( $product_id ),
 				'title' => wp_strip_all_tags( $p->get_name() ),
 				'pages' => (int) ( $sample['count'] ?? 0 ),

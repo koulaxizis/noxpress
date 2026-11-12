@@ -31,6 +31,9 @@
  * ΦΠΑ/συντελεστή + KPI δ% + chart 6/12 + ιστορικό + CSV με φίλτρα.
  * v1.3.5 (#3): Login μόνο με κλειδί, φόρμα κεντραρισμένη.
  *
+ * 1.16.0: «Η σελίδα σου» under the head, «Οι τίτλοι σου» after «ΦΠΑ ανά
+ * συντελεστή» and «Οι καταστάσεις σου» after the history (RS_Profile).
+ *
  * 1.14.0: «Τα συμφωνητικά σου» after the KPIs (RS_Contracts::render_portal,
  * filtered by the session's beneficiary only); portal_url(), client_ip()
  * and has_key() are public for RS_Contracts.
@@ -1003,6 +1006,11 @@ final class RS_Portal {
 				</span>
 			</div>
 
+			<?php
+			// 1.16.0: «Η σελίδα σου» and the change request (RS_Profile).
+			RS_Profile::render_card( $who );
+			?>
+
 			<form method="get" class="rs-pt-filters">
 				<select name="<?php echo esc_attr( self::GP_PERIOD ); ?>">
 					<option value="month"<?php selected( $per['preset'], 'month' ); ?>><?php esc_html_e( 'Τρέχων μήνας', 'revenue-splitter' ); ?></option>
@@ -1169,6 +1177,11 @@ final class RS_Portal {
 				</table>
 			<?php endif; ?>
 
+			<?php
+			// 1.16.0: «Οι τίτλοι σου»: downloads, opens, views, wish lists, pre-orders, reviews, promotion, copies.
+			RS_Profile::render_titles( $who, $per );
+			?>
+
 			<h3><?php esc_html_e( 'Ιστορικό συναλλαγών', 'revenue-splitter' ); ?></h3>
 			<table class="rs-pt-table">
 				<thead>
@@ -1198,6 +1211,11 @@ final class RS_Portal {
 			<p class="rs-pt-note">
 				<?php esc_html_e( 'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.', 'revenue-splitter' ); ?>
 			</p>
+
+			<?php
+			// 1.16.0: the statements already sent, as PDF.
+			RS_Profile::render_statements( $who );
+			?>
 
 			<hr class="rs-pt-sep" />
 
