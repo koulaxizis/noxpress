@@ -456,3 +456,7 @@ a.tra-kofi:hover {
 .tra-wrap .tra-table select {
 	max-width: 100%;
 }
+.tra-wrap .tra-grid select {
+	width: 100%;
+	max-width: 100%;
+}

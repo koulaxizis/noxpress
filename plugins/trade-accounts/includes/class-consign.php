@@ -27,9 +27,10 @@
  *    its copies back as still at the bookstore.
  *
  * Settlement orders never touch stock again (their copies left at
- * delivery: the order is marked as stock-reduced) and send no e-mail to
- * the bookstore or the shop, unless the setting c_mail is on (the
- * «completed» e-mail when the money is collected).
+ * delivery: the order is marked as stock-reduced), send the shop no «new
+ * order» e-mail and the bookstore no order e-mail, also when completed
+ * from the orders screen, unless the setting c_mail is on (the «completed»
+ * e-mail when the money is collected).
  *
  * Stock follows each product's current setting: a delivery reduces the
  * stock of products that manage stock, a return increases it. A product
@@ -61,6 +62,9 @@ final class TRA_Consign {
 		add_action( 'woocommerce_order_status_completed', array( __CLASS__, 'on_completed' ), 20, 1 );
 		add_action( 'woocommerce_order_status_cancelled', array( __CLASS__, 'on_cancelled' ), 20, 1 );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest' ) );
+		foreach ( array( 'customer_on_hold_order', 'customer_processing_order', 'customer_completed_order' ) as $mail ) {
+			add_filter( 'woocommerce_email_enabled_' . $mail, array( __CLASS__, 'mail_enabled' ), 99, 3 );
+		}
 		if ( is_admin() ) {
 			add_action( 'woocommerce_product_options_stock_status', array( __CLASS__, 'product_box' ) );
 		}
@@ -515,10 +519,13 @@ final class TRA_Consign {
 			if ( $date !== self::today() && false !== $created ) {
 				$order->set_date_created( $created );
 			}
+			// The copies left the stock at delivery: never again. Set on the
+			// object too, or the next save() writes the flag back as false.
+			if ( is_callable( array( $order, 'set_order_stock_reduced' ) ) ) {
+				$order->set_order_stock_reduced( true );
+			}
 			$order->calculate_totals( true );
 			$order->save();
-
-			// The copies left the stock at delivery: never again.
 			$store = $order->get_data_store();
 			if ( is_object( $store ) && method_exists( $store, 'set_stock_reduced' ) ) {
 				$store->set_stock_reduced( $order->get_id(), true );
@@ -582,12 +589,6 @@ final class TRA_Consign {
 		self::log( $r, 'paid', sprintf( __( 'Είσπραξη παραγγελίας #%1$d, %2$s, στις %3$s.', 'trade-accounts' ), $order_id, wc_format_decimal( $order->get_total(), wc_get_price_decimals() ), $date ) );
 		self::store( $id, $r );
 
-		$mute = static function () {
-			return false;
-		};
-		if ( ! TRA_Settings::get()['c_mail'] ) {
-			add_filter( 'woocommerce_email_enabled_customer_completed_order', $mute, 99 );
-		}
 		self::$busy = true;
 		try {
 			$paid_at = strtotime( $date . ' 12:00:00' );
@@ -595,7 +596,6 @@ final class TRA_Consign {
 			$order->update_status( 'completed', __( 'Η είσπραξη της παρακαταθήκης σημειώθηκε.', 'trade-accounts' ) );
 		} finally {
 			self::$busy = false;
-			remove_filter( 'woocommerce_email_enabled_customer_completed_order', $mute, 99 );
 		}
 		do_action( 'tra_consignment_paid', $id, self::get( $id ), $order_id );
 		return true;
@@ -656,6 +656,23 @@ final class TRA_Consign {
 			}
 		}
 		return -1;
+	}
+
+	/**
+	 * Order e-mails to the bookstore: never for a settlement order, also
+	 * when it is completed from the orders screen, except «completed» with
+	 * the setting c_mail.
+	 *
+	 * @param bool          $enabled Enabled.
+	 * @param WC_Order|null $order   Order.
+	 * @param WC_Email|null $email   E-mail.
+	 */
+	public static function mail_enabled( $enabled, $order = null, $email = null ) {
+		if ( ! $enabled || ! $order instanceof WC_Order || ! self::of_order( $order ) ) {
+			return $enabled;
+		}
+		$id = $email instanceof WC_Email ? (string) $email->id : '';
+		return 'customer_completed_order' === $id && TRA_Settings::get()['c_mail'];
 	}
 
 	/** The consignment of a settlement order, or 0. */
@@ -972,9 +989,13 @@ final class TRA_Consign {
 		if ( ! $rows ) {
 			echo '<span class="description">' . esc_html__( 'κανένα τεμάχιο σε βιβλιοπωλεία', 'trade-accounts' ) . '</span>';
 		} else {
-			$names = array();
+			$per = array();
 			foreach ( $rows as $row ) {
-				$names[] = $row['name'] . ' (' . $row['open'] . ')';
+				$per[ $row['name'] ] = ( isset( $per[ $row['name'] ] ) ? $per[ $row['name'] ] : 0 ) + (int) $row['open'];
+			}
+			$names = array();
+			foreach ( $per as $name => $open ) {
+				$names[] = $name . ' (' . $open . ')';
 			}
 			/* translators: 1: copies, 2: list of bookstores */
 			echo '<span class="description">' . esc_html( sprintf( __( '%1$d τεμάχια: %2$s', 'trade-accounts' ), $n, implode( ', ', $names ) ) ) . '</span>';

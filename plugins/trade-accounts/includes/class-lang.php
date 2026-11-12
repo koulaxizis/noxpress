@@ -255,7 +255,7 @@ final class TRA_Lang {
 		'Προθεσμία εκκαθάρισης (ημέρες μετά την παράδοση)' => 'Settle by (days after delivery)',
 		'Έλεγχος με το βιβλιοπωλείο κάθε (ημέρες, 0 = ποτέ)' => 'Check with the bookstore every (days, 0 = never)',
 		'Email «Η παραγγελία ολοκληρώθηκε» στο βιβλιοπωλείο όταν σημειώνεται η είσπραξη' => '«Order completed» e-mail to the bookstore when the payment is marked as collected',
-		'Οι παραγγελίες εκκαθάρισης δεν στέλνουν ποτέ άλλο email (ούτε στο κατάστημα ούτε στο βιβλιοπωλείο).' => 'Settlement orders never send any other e-mail (neither to the shop nor to the bookstore).',
+		'Οι παραγγελίες εκκαθάρισης δεν στέλνουν άλλο email στο βιβλιοπωλείο, ούτε «Νέα παραγγελία» στο κατάστημα.' => 'Settlement orders send the bookstore no other e-mail, and the shop no «New order» e-mail.',
 		'Όλες οι παρακαταθήκες' => 'All consignments',
 		'Δεν υπάρχει λογαριασμός χονδρικής: φτιάξε πρώτα το βιβλιοπωλείο στην καρτέλα Λογαριασμοί.' => 'There is no trade account: create the bookstore in the Accounts tab first.',
 		'Κανένα προϊόν δεν είναι επιλέξιμο: διάλεξε κατηγορίες στις Ρυθμίσεις.' => 'No product is eligible: choose categories in Settings.',

@@ -205,7 +205,7 @@ final class TRA_Consign_UI {
 						<input type="number" name="tra_c_check" min="0" max="180" value="<?php echo (int) $s['c_check']; ?>" /></label>
 				</div>
 				<label class="tra-check"><input type="checkbox" name="tra_c_mail" value="1"<?php checked( $s['c_mail'] ); ?> /> <?php esc_html_e( 'Email «Η παραγγελία ολοκληρώθηκε» στο βιβλιοπωλείο όταν σημειώνεται η είσπραξη', 'trade-accounts' ); ?></label>
-				<p class="description"><?php esc_html_e( 'Οι παραγγελίες εκκαθάρισης δεν στέλνουν ποτέ άλλο email (ούτε στο κατάστημα ούτε στο βιβλιοπωλείο).', 'trade-accounts' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Οι παραγγελίες εκκαθάρισης δεν στέλνουν άλλο email στο βιβλιοπωλείο, ούτε «Νέα παραγγελία» στο κατάστημα.', 'trade-accounts' ); ?></p>
 				<p class="tra-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'trade-accounts' ); ?></button></p>
 			</form>
 		</div>
