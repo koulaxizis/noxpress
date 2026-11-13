@@ -71,6 +71,10 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 * Developer: the balance formula lives in one place, RS_Ledger::net() (other income − deductions − payments). RS_Ledger::sum( ..., 'income' ) still returns income minus deductions, so older add-ons (e.g. Store Pulse before 1.8.5) keep showing the right balance; pass true as the fifth argument for the other income alone.
 * Note: going back to an older version drops deduction entries from the Ledger on its next change. Export the state first if you ever downgrade.
 
+= 1.16.1 =
+* Fix: the portal tables (per product, VAT by rate, transaction history) scroll sideways inside their box on narrow themes instead of overflowing the page; the monthly chart does the same.
+* Fix: the beneficiary ↔ creator page mapping is read also when a remote tool (such as Site Bridge) stored it as an array instead of JSON text.
+
 = 1.16.0 =
 * New: «Your titles» in the Author Portal. For each of the creator's titles: downloads of the digital files in the period and in total, how many orders got the file (free or paid), the last download and the last 12 months as a chart. Downloads by shop staff do not count; variations count under their product.
 * New: interest and reviews per title, from the suite and from Koko Analytics when they are active: page views, sample opens (Book Preview 1.2.0+), wish lists (Wish Shelf), pre-orders and release day (Pre-Orders), the rating and the latest reviews (first name and initial only).
