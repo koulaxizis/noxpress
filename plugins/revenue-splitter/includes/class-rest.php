@@ -42,6 +42,14 @@
  *      the Author Portal's renewal requests, newest first
  *  POST /wp-json/rs/v1/contract-requests/<id>  { state: oros|closed }
  *      orOS marks a request after importing it (Bible §20 pull pattern)
+ * 1.18.0, same key (Chris's cards, notes/rs-portal-profile/04 + 05):
+ *  GET  /wp-json/rs/v1/profile-requests?state=new|oros|closed|all
+ *      the Author Portal's page and author-copy requests, newest first
+ *  POST /wp-json/rs/v1/profile-requests/<id>  { state: oros }
+ *      or { state: done|declined, reply } (the creator sees the reply)
+ *  GET  /wp-json/rs/v1/profile-requests/<id>/photo   the request's photo
+ *  POST /wp-json/rs/v1/production  { v:1, sent, works:[…] } (RS_Production)
+ *  GET  /wp-json/rs/v1/production?ben=<beneficiary>
  * Authentication: the contracts key (contracts_allowed()). Deviation from
  * Bible §20 («κανένα δικό μας token»): a key that can only touch the
  * contracts, so no WooCommerce key with write rights lives in orOS
@@ -189,6 +197,67 @@ final class RS_REST {
 						'enum'     => array( 'oros', 'closed' ),
 						'required' => true,
 					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS_CT,
+			'/profile-requests',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'pf_requests_get' ),
+				'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
+				'args'                => array(
+					'state' => array(
+						'type'    => 'string',
+						'enum'    => array( 'new', 'oros', 'closed', 'all' ),
+						'default' => 'new',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS_CT,
+			'/profile-requests/(?P<id>[A-Za-z0-9_-]{1,64})',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'pf_requests_post' ),
+				'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
+				'args'                => array(
+					'state' => array(
+						'type'     => 'string',
+						'enum'     => array( 'oros', 'done', 'declined' ),
+						'required' => true,
+					),
+					'reply' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS_CT,
+			'/profile-requests/(?P<id>[A-Za-z0-9_-]{1,64})/photo',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'pf_photo' ),
+				'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
+			)
+		);
+		register_rest_route(
+			self::NS_CT,
+			'/production',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'production_get' ),
+					'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'production_post' ),
+					'permission_callback' => array( __CLASS__, 'contracts_allowed' ),
 				),
 			)
 		);
@@ -348,6 +417,57 @@ final class RS_REST {
 			return new WP_Error( 'rs_request', 'Unknown request.', array( 'status' => 404 ) );
 		}
 		return self::nocache( array( 'request' => RS_Contracts::request( $id ) ) );
+	}
+
+	public static function pf_requests_get( WP_REST_Request $req ) {
+		$state = (string) $req->get_param( 'state' );
+		return self::nocache( array( 'requests' => RS_Profile::api_requests( '' === $state ? 'new' : $state ) ) );
+	}
+
+	public static function pf_requests_post( WP_REST_Request $req ) {
+		$id    = (string) $req->get_param( 'id' );
+		$state = (string) $req->get_param( 'state' );
+		$r     = RS_Profile::request( $id );
+		if ( null === $r ) {
+			return new WP_Error( 'rs_request', 'Unknown request.', array( 'status' => 404 ) );
+		}
+		$ok = 'oros' === $state
+			? RS_Profile::mark_oros( $id )
+			: RS_Profile::close( $id, $state, sanitize_textarea_field( (string) $req->get_param( 'reply' ) ) );
+		if ( ! $ok ) {
+			return new WP_Error( 'rs_request_closed', 'The request is already closed.', array( 'status' => 409 ) );
+		}
+		return self::nocache( array( 'request' => RS_Profile::api_row( (array) RS_Profile::request( $id ) ) ) );
+	}
+
+	public static function pf_photo( WP_REST_Request $req ) {
+		$id = (string) $req->get_param( 'id' );
+		$ph = RS_Profile::photo_file( $id );
+		if ( null === $ph ) {
+			return new WP_Error( 'rs_photo', 'No photo for this request.', array( 'status' => 404 ) );
+		}
+		RS_Profile::send_photo( $id, $ph ); // Exits.
+		return new WP_Error( 'rs_photo', 'Could not send the photo.', array( 'status' => 500 ) );
+	}
+
+	public static function production_post( WP_REST_Request $req ) {
+		if ( strlen( (string) $req->get_body() ) > RS_Production::MAX_BODY ) {
+			return new WP_Error( 'rs_production_size', 'The body is larger than 1 MB; nothing was saved.', array( 'status' => 413 ) );
+		}
+		$body = $req->get_json_params();
+		if ( null === $body ) {
+			return new WP_Error( 'rs_production_json', 'The body must be JSON (Content-Type: application/json).', array( 'status' => 400 ) );
+		}
+		$r = RS_Production::ingest( $body );
+		if ( is_wp_error( $r ) ) {
+			return $r;
+		}
+		return self::nocache( $r );
+	}
+
+	public static function production_get( WP_REST_Request $req ) {
+		$v = $req->get_param( 'ben' );
+		return self::nocache( RS_Production::export( null === $v ? '' : trim( (string) $v ) ) );
 	}
 
 	/* ---------------------------------------------------------------------

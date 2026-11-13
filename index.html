@@ -524,7 +524,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="revenue-splitter">
 		<h2><a href="#revenue-splitter">Revenue Splitter</a></h2>
 		<a class="card-video" href="media/videos/revenue-splitter.mp4" data-video="revenue-splitter" data-video-title="Revenue Splitter" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.17.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.18.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="rs_desc">Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -552,10 +552,11 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="rs_li20">orOS link: the CRM partner card reads each beneficiary's balance, this year's sales per title and stock through two read-only REST routes, with the shop's own WooCommerce keys</li>
 			<li data-i18n="rs_li22">Monthly creator statements: opening balance, share per title, ledger income and payments, closing balance, sent as an email with a PDF; you review each one first or let them go automatically, warnings (VAT, copies, no email) and the December year-end settlement always wait for you</li>
 			<li data-i18n="rs_li23">Creators' titles in the portal: downloads of each e-book, how many got it, page views, sample opens, wish lists, pre-orders, ratings and reviews, a promotion kit and their sent statements as PDF; numbers only, never buyer data. They ask for page changes or author copies, and you apply them</li>
+			<li data-i18n="rs_li24">The work in production, in the portal: orOS sends the phase of each creator's current work from its Kanban board, and they see seven simple phases, the date of each, the expected release, a note written for them and what happens in that phase. Their page and copy requests go to orOS too</li>
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.17.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.17.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.0/revenue-splitter.zip" rel="nofollow noopener" data-i18n="rs_download">Download v1.18.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/revenue-splitter" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -1539,7 +1540,8 @@ footer .heart { color: var(--accent-bright); }
 		rs_li20: 'orOS link: the CRM partner card reads each beneficiary\'s balance, this year\'s sales per title and stock through two read-only REST routes, with the shop\'s own WooCommerce keys',
 		rs_li22: 'Monthly creator statements: opening balance, share per title, ledger income and payments, closing balance, sent as an email with a PDF; you review each one first or let them go automatically, warnings (VAT, copies, no email) and the December year-end settlement always wait for you',
 		rs_li23: "Creators' titles in the portal: downloads of each e-book, how many got it, page views, sample opens, wish lists, pre-orders, ratings and reviews, a promotion kit and their sent statements as PDF; numbers only, never buyer data. They ask for page changes or author copies, and you apply them",
-		rs_download: 'Download v1.17.0 (.zip)',
+		rs_li24: "The work in production, in the portal: orOS sends the phase of each creator's current work from its Kanban board, and they see seven simple phases, the date of each, the expected release, a note written for them and what happens in that phase. Their page and copy requests go to orOS too",
+		rs_download: 'Download v1.18.0 (.zip)',
 		rs_source: 'Source',
 		rs_releases: 'Releases',
 		sp_desc: 'A store-health dashboard and a WordPress home-screen widget for WooCommerce managers: pending and completed orders, refunds, cancellations and stock at a glance. With Revenue Splitter active, it also shows the publisher\'s profit and what is owed to every other beneficiary for the period.',
@@ -1930,7 +1932,8 @@ footer .heart { color: var(--accent-bright); }
 		rs_li20: 'Σύνδεση με το orOS: η καρτέλα συνεργάτη του CRM διαβάζει το υπόλοιπο κάθε δικαιούχου, τις φετινές πωλήσεις ανά τίτλο και το στοκ από δύο REST διαδρομές μόνο για ανάγνωση, με τα κλειδιά WooCommerce του ίδιου του καταστήματος',
 		rs_li22: 'Μηνιαίες καταστάσεις αμοιβών: υπόλοιπο έναρξης, μερίδιο ανά τίτλο, έσοδα και πληρωμές του Καθολικού, υπόλοιπο λήξης, σε email με PDF· τις ελέγχεις μία μία ή φεύγουν αυτόματα, ενώ όσες έχουν προειδοποίηση (ΦΠΑ, τεμάχια, χωρίς email) και η εκκαθάριση Δεκεμβρίου περιμένουν πάντα εσένα',
 		rs_li23: 'Οι τίτλοι του δημιουργού στο portal: λήψεις κάθε e-book, πόσοι το απέκτησαν, προβολές, ανοίγματα δείγματος, λίστες επιθυμιών, προπαραγγελίες, βαθμολογίες και κριτικές, πακέτο προβολής και οι καταστάσεις που στάλθηκαν σε PDF· μόνο αριθμοί, ποτέ στοιχεία αγοραστών. Ζητούν αλλαγές στη σελίδα τους ή αντίτυπα συγγραφέα, κι εσύ τα εφαρμόζεις',
-		rs_download: 'Λήψη v1.17.0 (.zip)',
+		rs_li24: 'Το έργο σε παραγωγή, στο portal: το orOS στέλνει τη φάση του τρέχοντος έργου κάθε δημιουργού από τον πίνακα Kanban, κι εκείνος βλέπει επτά απλές φάσεις, πότε πέρασε την καθεμία, την αναμενόμενη κυκλοφορία, μια σημείωση γραμμένη γι\' αυτόν και τι γίνεται σε κάθε φάση. Και τα αιτήματα σελίδας και αντιτύπων φτάνουν στο orOS',
+		rs_download: 'Λήψη v1.18.0 (.zip)',
 		rs_source: 'Πηγαίος κώδικας',
 		rs_releases: 'Εκδόσεις',
 		sp_desc: 'Dashboard υγείας καταστήματος και widget στην αρχική του WordPress για όσους διαχειρίζονται WooCommerce: εκκρεμείς και ολοκληρωμένες παραγγελίες, επιστροφές, ακυρώσεις και στοκ με μια ματιά. Με ενεργό το Revenue Splitter δείχνει επίσης το κέρδος του εκδότη και τις οφειλές προς κάθε άλλον δικαιούχο για την περίοδο.',

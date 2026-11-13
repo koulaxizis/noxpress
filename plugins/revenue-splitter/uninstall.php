@@ -76,6 +76,11 @@ $rs_uninstall_options = array(
 	'rs_profiles',           // 1.16.0: beneficiary ↔ creator page.
 	'rs_profile_settings',   // 1.16.0: author roles.
 	'rs_profile_requests',   // 1.16.0: bio and author-copies requests.
+	'rs_profile_no_email',   // 1.18.0: no admin email for new requests.
+	'rs_production',         // 1.18.0: production stage per work (from orOS).
+	'rs_production_meta',
+	'rs_production_hist',
+	'rs_production_texts',
 );
 
 // 1.15.0: one option per month of statements (rs_stmt_m_YYYY-MM), listed in rs_stmt_months.
