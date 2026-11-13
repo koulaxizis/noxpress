@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fix: the portal tables (per product, VAT by rate, transaction history) scroll sideways inside their box on narrow themes instead of overflowing the page; the monthly chart does the same.\n* Fix: the beneficiary ↔ creator page mapping is read also when a remote tool (such as Site Bridge) stored it as an array instead of JSON text.",
+        "changelog": "* New: a third Ledger entry type, «Deduction» («Κράτηση»): money kept from what a beneficiary is owed, for example their share in a production they co-fund. Always a positive amount, subtracted from the balance, with a required reason and, optionally, the product it is for. A deduction has no sales channel.\n* New: a deduction larger than the payable balance is allowed. The form asks first, and after saving a notice shows the balance below zero, which the next sales cover. A statement whose closing balance is below zero waits for review, as before.\n* New: deductions everywhere the balance shows: a «Deductions» column on the dashboard's beneficiary accounting, «Deduction» rows (with the product's title) in the Author Portal history, a «Deductions» line in the portal CSV, a «Deductions» list in the monthly report email, and a «Deductions» line and section in the monthly statements (email and PDF). «Pay all (period)» subtracts them too.\n* New: wp rs ledger-add --type=expense [--product=<id>], wp rs ledger-list --type=expense, a «Deductions» line in wp rs balance; ability revenue-splitter/ledger-add accepts type expense and product_id; balances, statements-list and the orOS route wc/v3/rs/balances return deductions.\n* Developer: the balance formula lives in one place, RS_Ledger::net() (other income − deductions − payments). RS_Ledger::sum( ..., 'income' ) still returns income minus deductions, so older add-ons (e.g. Store Pulse before 1.8.5) keep showing the right balance; pass true as the fifth argument for the other income alone.\n* Note: going back to an older version drops deduction entries from the Ledger on its next change. Export the state first if you ever downgrade.",
         "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "7c6868627be2903e77b95bc7f7ca287316d3988892364bf106319c51477dc58f",
-        "signature": "cUOvLCtkFpBX2+FBiABpuQ/9orHxLKPmQbm7O5MZhrso0kXC1wqmIUkFvrSfb/ZSHsqaK9GAdB3p4jKEgRcEDQ==",
+        "sha256": "f46a561e8e00fb1e7cb16c200b9bd206359646a4b6356241a22d987191b0754b",
+        "signature": "Yr47BY9JH5316TOr2dlmoHYaBIewPXhJEjecjxawhezWEk91+PSeYGS99/HGJvcGBzrl6o10y7ov08F5CzG/Bg==",
         "tested_wp": "7.1",
-        "version": "1.16.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.16.1/revenue-splitter.zip"
+        "version": "1.17.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.17.0/revenue-splitter.zip"
       }
     },
     "search-signals": {
@@ -388,15 +388,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* New: two more periods, «This month» (from the 1st) and «This year» (from 1 January), for every period setting. «This year» matches the Revenue Splitter widget.\n* Changed: «Last month» is now called «Last 30 days», which is what it always counted.\n* Changed: the Quick View widget shows the period next to «Publisher profit» and «Owed to others», and a note that the amounts are without VAT, after ledger entries and without shipping.\n* Changed: «Owed to others» now counts like the publisher's profit: share plus ledger income minus payments in the period (it was the share only). The per-beneficiary table on the dashboard shows that total under «Net (after deductions)».\n* The abilities' period input accepts this_month and year.",
-        "published": "2026-11-11",
+        "changelog": "* Changed: «Publisher profit» and «Owed to others» also subtract the Revenue Splitter's new «Deduction» ledger entries (money kept from a creator's balance, e.g. their share in a production; Revenue Splitter 1.17.0). With an older Revenue Splitter nothing changes.",
+        "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "46c5fefd49bc6a77c460dfec0c021bcaf42089c2d6d714c3ebea8656655340a3",
-        "signature": "+BkFzq0pkHtfHYGZLX9b+sF1CykHF3aiGhzZkmvb19bQQm9sYC5E5ZeOY2DvETo+pzxjN+GtkflqPxACgsFADA==",
+        "sha256": "1ade0cfd6b39ecdaeb8adfe1a2db32e5cbc8c950278e3f9c1ac6b5bbd4965903",
+        "signature": "qdlu0LiYTsQBNiSOhdEn/fld0mp2SoPpyTsKgE8fFpPhUNxJHeHjNJuFfkg6IJkC8wmMza0EIy5+SDx8fqz5DA==",
         "tested_wp": "7.1",
-        "version": "1.8.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.4/store-pulse.zip"
+        "version": "1.8.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.5/store-pulse.zip"
       }
     },
     "theme-patcher": {
