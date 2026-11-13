@@ -91,12 +91,20 @@ final class RS_Contracts {
 	 * Storage
 	 * =================================================================== */
 
+	/** JSON text, or an array when a remote tool (e.g. Site Bridge) stored it as one (1.18.0). */
 	private static function read_json( string $opt ): array {
 		$raw = get_option( $opt, '' );
+		if ( is_array( $raw ) ) {
+			return $raw;
+		}
 		if ( ! is_string( $raw ) || '' === $raw ) {
 			return array();
 		}
 		$d = json_decode( $raw, true );
+		// Encoded twice by a remote tool.
+		if ( is_string( $d ) ) {
+			$d = json_decode( $d, true );
+		}
 		return is_array( $d ) ? $d : array();
 	}
 

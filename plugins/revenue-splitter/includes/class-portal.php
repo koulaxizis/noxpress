@@ -1060,6 +1060,8 @@ final class RS_Portal {
 			<?php
 			// 1.14.0: «Τα συμφωνητικά σου» — only the signed-in beneficiary's own (RS_Contracts).
 			RS_Contracts::render_portal( $who );
+			// 1.18.0: «Το έργο σου σε παραγωγή» (RS_Production, pushed by orOS).
+			RS_Production::render_portal( $who );
 			?>
 
 			<div class="rs-pt-chart-head">

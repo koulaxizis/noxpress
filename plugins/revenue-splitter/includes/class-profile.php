@@ -46,6 +46,8 @@ final class RS_Profile {
 	const OPT_MAP = 'rs_profiles';
 	const OPT_SET = 'rs_profile_settings';
 	const OPT_REQ = 'rs_profile_requests';
+	/** 1.18.0: '1' = no admin email for new requests (orOS imports them). */
+	const OPT_NOMAIL = 'rs_profile_no_email';
 	const SLUG    = 'revenue-splitter-creators';
 	const DIR     = 'noxpress-rs-photos';
 	const CPT     = 'nox_creator';
@@ -88,6 +90,10 @@ final class RS_Profile {
 			return $raw;
 		}
 		$raw = json_decode( is_string( $raw ) ? $raw : '', true );
+		// JSON text stored as a JSON string (a remote tool encoded it twice).
+		if ( is_string( $raw ) ) {
+			$raw = json_decode( $raw, true );
+		}
 		return is_array( $raw ) ? $raw : array();
 	}
 
@@ -509,6 +515,75 @@ final class RS_Profile {
 		return count( self::requests( 'new' ) );
 	}
 
+	/* =====================================================================
+	 * orOS route (1.18.0): rs/v1/profile-requests, pulled with the narrow key
+	 * =================================================================== */
+
+	/**
+	 * Requests for orOS. new = open and not yet taken by orOS, oros = open and
+	 * taken, closed = done or declined. The photo file name never leaves the site.
+	 *
+	 * @return array[]
+	 */
+	public static function api_requests( string $state ): array {
+		$out = array();
+		foreach ( array_reverse( self::requests() ) as $r ) {
+			$open  = 'new' === $r['state'];
+			$taken = ! empty( $r['oros_at'] );
+			if ( ( 'new' === $state && ( ! $open || $taken ) )
+				|| ( 'oros' === $state && ( ! $open || ! $taken ) )
+				|| ( 'closed' === $state && $open ) ) {
+				continue;
+			}
+			$out[] = self::api_row( $r );
+		}
+		return $out;
+	}
+
+	public static function api_row( array $r ): array {
+		$row = array(
+			'id'    => (string) $r['id'],
+			'type'  => (string) $r['type'],
+			'ben'   => (string) $r['ben'],
+			'at'    => (string) $r['at'],
+			'state' => 'new' === $r['state'] ? ( empty( $r['oros_at'] ) ? 'new' : 'oros' ) : (string) $r['state'],
+			'note'  => (string) ( $r['note'] ?? '' ),
+		);
+		if ( 'bio' === $r['type'] ) {
+			$row['bio']       = (string) ( $r['bio'] ?? '' );
+			$row['was']       = (string) ( $r['was'] ?? '' );
+			$row['links']     = array_values( (array) ( $r['links'] ?? array() ) );
+			$row['has_photo'] = ! empty( $r['photo'] );
+		} else {
+			$row['product_id'] = (int) ( $r['product_id'] ?? 0 );
+			$row['title']      = (string) ( $r['title'] ?? '' );
+			$row['qty']        = (int) ( $r['qty'] ?? 0 );
+		}
+		if ( ! empty( $r['oros_at'] ) ) {
+			$row['oros_at'] = (string) $r['oros_at'];
+		}
+		if ( 'new' !== $r['state'] ) {
+			$row['closed_at'] = (string) ( $r['closed_at'] ?? '' );
+			$row['reply']     = (string) ( $r['reply'] ?? '' );
+		}
+		return $row;
+	}
+
+	/** orOS took an open request. False when unknown or already closed. */
+	public static function mark_oros( string $id ): bool {
+		$all = self::requests();
+		foreach ( $all as $i => $r ) {
+			if ( $r['id'] === $id && 'new' === $r['state'] ) {
+				if ( empty( $r['oros_at'] ) ) {
+					$all[ $i ]['oros_at'] = gmdate( 'c' );
+					self::write_json( self::OPT_REQ, $all );
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** «Μαρία Παπαδοπούλου» → «Μαρία Π.»: reviews are public, but the portal shows no more than needed. */
 	private static function short_name( string $name ): string {
 		$parts = preg_split( '/\s+/u', trim( wp_strip_all_tags( $name ) ), -1, PREG_SPLIT_NO_EMPTY );
@@ -696,6 +771,9 @@ final class RS_Profile {
 
 	/** A short email to the site's admin address; nothing goes to the creator. */
 	private static function notify( array $req ): void {
+		if ( '1' === (string) get_option( self::OPT_NOMAIL, '' ) ) {
+			return;
+		}
 		$to = (string) get_option( 'admin_email', '' );
 		if ( ! is_email( $to ) ) {
 			return;
@@ -797,25 +875,47 @@ final class RS_Profile {
 		if ( ! current_user_can( RS_Admin_UI::CAP ) || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'rs_pf_photo_' . $id ) ) {
 			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'revenue-splitter' ) );
 		}
+		$ph = self::photo_file( $id );
+		if ( null === $ph ) {
+			wp_die( esc_html__( 'Η φωτογραφία δεν βρέθηκε.', 'revenue-splitter' ) );
+		}
+		self::send_photo( $id, $ph );
+	}
+
+	/**
+	 * The stored photo of a request: path, MIME type and extension, or null.
+	 *
+	 * @return array{file:string,type:string,ext:string}|null
+	 */
+	public static function photo_file( string $id ): ?array {
 		$r    = self::request( $id );
 		$name = null !== $r ? (string) ( $r['photo'] ?? '' ) : '';
 		$up   = wp_get_upload_dir();
 		$file = rtrim( (string) $up['basedir'], '/\\' ) . '/' . self::DIR . '/' . $name;
 		if ( '' === $name || ! preg_match( '/^[0-9a-f]{32}\.(jpg|png|webp)$/', $name, $m ) || ! is_file( $file ) ) {
-			wp_die( esc_html__( 'Η φωτογραφία δεν βρέθηκε.', 'revenue-splitter' ) );
+			return null;
 		}
 		$types = array(
 			'jpg'  => 'image/jpeg',
 			'png'  => 'image/png',
 			'webp' => 'image/webp',
 		);
+		return array(
+			'file' => $file,
+			'type' => $types[ $m[1] ],
+			'ext'  => $m[1],
+		);
+	}
+
+	/** @param array{file:string,type:string,ext:string} $ph */
+	public static function send_photo( string $id, array $ph ): void {
 		nocache_headers();
-		header( 'Content-Type: ' . $types[ $m[1] ] );
+		header( 'Content-Type: ' . $ph['type'] );
 		// ASCII only: a Greek name in this header breaks some servers.
-		header( 'Content-Disposition: inline; filename="photo-' . preg_replace( '/[^A-Za-z0-9_-]/', '', $id ) . '.' . $m[1] . '"' );
+		header( 'Content-Disposition: inline; filename="photo-' . preg_replace( '/[^A-Za-z0-9_-]/', '', $id ) . '.' . $ph['ext'] . '"' );
 		header( 'X-Content-Type-Options: nosniff' );
-		header( 'Content-Length: ' . (string) filesize( $file ) );
-		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		header( 'Content-Length: ' . (string) filesize( $ph['file'] ) );
+		readfile( $ph['file'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
 	}
 
@@ -1488,6 +1588,9 @@ final class RS_Profile {
 			}
 			self::write_json( self::OPT_MAP, $map );
 			$done = 'map';
+		} elseif ( 'mail' === $act ) {
+			update_option( self::OPT_NOMAIL, isset( $_POST['rs_pf_no_email'] ) ? '1' : '', false );
+			$done = 'mail';
 		} elseif ( 'roles' === $act ) {
 			$taxes = array_keys( self::role_taxes() );
 			$sel   = isset( $_POST['rs_pf_roles'] ) && is_array( $_POST['rs_pf_roles'] ) ? array_map( 'sanitize_key', wp_unslash( $_POST['rs_pf_roles'] ) ) : array();
@@ -1537,6 +1640,8 @@ final class RS_Profile {
 			<h1><?php esc_html_e( 'Revenue Splitter — Δημιουργοί', 'revenue-splitter' ); ?></h1>
 			<?php if ( 'map' === $done ) : ?>
 				<div class="notice notice-success"><p><?php esc_html_e( 'Οι συνδέσεις αποθηκεύτηκαν.', 'revenue-splitter' ); ?></p></div>
+			<?php elseif ( 'mail' === $done ) : ?>
+				<div class="notice notice-success"><p><?php esc_html_e( 'Η ρύθμιση email αποθηκεύτηκε.', 'revenue-splitter' ); ?></p></div>
 			<?php elseif ( 'roles' === $done ) : ?>
 				<div class="notice notice-success"><p><?php esc_html_e( 'Οι ρόλοι αποθηκεύτηκαν.', 'revenue-splitter' ); ?></p></div>
 			<?php elseif ( 'closed' === $done ) : ?>
@@ -1689,6 +1794,20 @@ final class RS_Profile {
 					<p><button type="submit" class="button"><?php esc_html_e( 'Αποθήκευση ρόλων', 'revenue-splitter' ); ?></button></p>
 				</form>
 			<?php endif; ?>
+
+			<h2 class="rs-h2"><?php esc_html_e( 'Αιτήματα προς orOS', 'revenue-splitter' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Το orOS παίρνει τα αιτήματα με το κλειδί του «RS Συμφωνητικά»:', 'revenue-splitter' ); ?></p>
+			<ul class="rs-list">
+				<li><code><?php echo esc_html( 'GET ' . rest_url( 'rs/v1/profile-requests?state=new' ) ); ?></code></li>
+				<li><code><?php echo esc_html( 'POST ' . rest_url( 'rs/v1/profile-requests/<id>' ) ); ?></code> <code>{"state":"oros"}</code> · <code>{"state":"done|declined","reply":"…"}</code></li>
+				<li><code><?php echo esc_html( 'GET ' . rest_url( 'rs/v1/profile-requests/<id>/photo' ) ); ?></code></li>
+			</ul>
+			<form method="post">
+				<?php wp_nonce_field( 'rs_pf_admin', 'rs_pf_admin_nonce' ); ?>
+				<input type="hidden" name="rs_pf_admin" value="mail" />
+				<label><input type="checkbox" name="rs_pf_no_email" value="1"<?php checked( '1' === (string) get_option( self::OPT_NOMAIL, '' ) ); ?> /> <?php esc_html_e( 'Μην στέλνεις email για νέα αιτήματα (τα παίρνει το orOS)', 'revenue-splitter' ); ?></label>
+				<p><button type="submit" class="button"><?php esc_html_e( 'Αποθήκευση', 'revenue-splitter' ); ?></button></p>
+			</form>
 
 			<?php if ( ! empty( $closed ) ) : ?>
 				<h2 class="rs-h2"><?php esc_html_e( 'Κλεισμένα αιτήματα', 'revenue-splitter' ); ?></h2>
