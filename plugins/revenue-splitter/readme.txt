@@ -68,7 +68,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 * New: Noxpress → RS Production: the list orOS sent and the seven phase texts, with defaults you can change.
 * New: orOS route for creator requests (page changes and author copies): GET rs/v1/profile-requests?state=new|oros|closed|all, POST rs/v1/profile-requests/<id> with {state: oros} or {state: done|declined, reply} (the creator sees the reply), GET …/<id>/photo. Same narrow contracts key; the photo's file name never leaves the site.
 * New: setting in RS Creators to stop the admin email for new requests when orOS picks them up.
-* Fix: the stored contracts list is read also when a remote tool stored it as an array.
+* Fix: the stored contracts list is read also when a remote tool stored it as an array; the mapping, requests, contracts and production lists are read also when a remote tool encoded the JSON twice (found on glarolykoi).
 
 = 1.17.0 =
 * New: a third Ledger entry type, «Deduction» («Κράτηση»): money kept from what a beneficiary is owed, for example their share in a production they co-fund. Always a positive amount, subtracted from the balance, with a required reason and, optionally, the product it is for. A deduction has no sales channel.

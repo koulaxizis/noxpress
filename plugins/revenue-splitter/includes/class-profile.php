@@ -90,6 +90,10 @@ final class RS_Profile {
 			return $raw;
 		}
 		$raw = json_decode( is_string( $raw ) ? $raw : '', true );
+		// JSON text stored as a JSON string (a remote tool encoded it twice).
+		if ( is_string( $raw ) ) {
+			$raw = json_decode( $raw, true );
+		}
 		return is_array( $raw ) ? $raw : array();
 	}
 

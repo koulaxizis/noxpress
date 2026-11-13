@@ -101,6 +101,10 @@ final class RS_Contracts {
 			return array();
 		}
 		$d = json_decode( $raw, true );
+		// Encoded twice by a remote tool.
+		if ( is_string( $d ) ) {
+			$d = json_decode( $d, true );
+		}
 		return is_array( $d ) ? $d : array();
 	}
 
