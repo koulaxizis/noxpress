@@ -380,9 +380,12 @@ final class PL_Report {
 				continue;
 			}
 			$qty = (int) $item->get_quantity();
-			if ( $qty <= 0 ) {
+			// Trade Accounts «Είσπραξη ποσού»: a _tra_part line may pay a
+			// part of a copy (0 copies): money, no units.
+			if ( $qty <= 0 && '1' !== (string) $item->get_meta( '_tra_part' ) ) {
 				continue;
 			}
+			$qty = max( 0, $qty );
 			$pid = self::product_of( $item );
 			if ( $pid <= 0 ) {
 				continue;

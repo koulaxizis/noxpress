@@ -25,6 +25,18 @@
  *    the Production Ledger and Store Pulse count it. Completing the order
  *    from the WooCommerce orders screen does the same; cancelling it puts
  *    its copies back as still at the bookstore.
+ *  - «Είσπραξη ποσού» (1.6.0, for bookstores that pay round sums now and
+ *    then, Christos 13/11/2026): an amount the bookstore paid is shared
+ *    among all its sold, not yet paid copies, in proportion to their value
+ *    (largest remainder to the cent). It makes one completed order with a
+ *    line per title for its share (item meta _tra_part = 1), so Revenue
+ *    Splitter splits it to the creators by their percentages; the line's
+ *    quantity is the copies the payment completes (0 when it only pays a
+ *    part of a copy: Revenue Splitter, Store Pulse and the Production
+ *    Ledger count a _tra_part line with 0 copies as money only). A
+ *    settlement order paid in full this way is cancelled (its stock flag
+ *    cleared first, no e-mail), as its money now lives in the payment
+ *    orders.
  *
  * Settlement orders never touch stock again (their copies left at
  * delivery: the order is marked as stock-reduced), send the shop no «new
@@ -51,6 +63,8 @@ final class TRA_Consign {
 	const CPT       = 'tra_consignment';
 	const META      = '_trc';
 	const ORDER_META = '_tra_consignment';
+	const PAY_META  = '_tra_consignment_pay';
+	const PART_META = '_tra_part';
 	const MAX_LINES = 60;
 	const MAX_QTY   = 9999;
 
@@ -579,6 +593,9 @@ final class TRA_Consign {
 		if ( ! empty( $r['orders'][ $i ]['gone'] ) ) {
 			return new WP_Error( 'trc_gone', __( 'Η παραγγελία ακυρώθηκε.', 'trade-accounts' ) );
 		}
+		if ( self::part_sum( $r['orders'][ $i ] ) > 0 ) {
+			return new WP_Error( 'trc_part', __( 'Αυτή η εκκαθάριση έχει ήδη τμηματικές εισπράξεις: γράψε το υπόλοιπο με «Είσπραξη ποσού».', 'trade-accounts' ) );
+		}
 		$order = wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			return new WP_Error( 'trc_order', __( 'Η παραγγελία δεν βρέθηκε.', 'trade-accounts' ) );
@@ -599,6 +616,419 @@ final class TRA_Consign {
 		}
 		do_action( 'tra_consignment_paid', $id, self::get( $id ), $order_id );
 		return true;
+	}
+
+	/* =====================================================================
+	 * «Είσπραξη ποσού»: a round sum shared among the sold, unpaid copies
+	 * =================================================================== */
+
+	/** Cents already paid in parts on a settlement order entry. */
+	private static function part_sum( array $o ): int {
+		return (int) array_sum( array_map( 'intval', (array) ( $o['part'] ?? array() ) ) );
+	}
+
+	/** The unit price (cents) of a product in a consignment record. */
+	private static function line_price( array $r, int $pid ): int {
+		foreach ( $r['lines'] as $l ) {
+			if ( (int) $l['p'] === $pid ) {
+				return (int) $l['pc'];
+			}
+		}
+		return 0;
+	}
+
+	/** The value (cents) of a settlement order entry: its copies at the delivery's prices. */
+	private static function order_value( array $r, array $o ): int {
+		$v = 0;
+		foreach ( (array) $o['lines'] as $pid => $q ) {
+			$v += self::line_price( $r, (int) $pid ) * (int) $q;
+		}
+		return $v;
+	}
+
+	/**
+	 * What an account still owes: one row per product of every settlement
+	 * order not yet paid, oldest first.
+	 *
+	 * @return array<int, array{c: int, o: int, order: int, p: int, pc: int, done: int, owed: int, name: string}>
+	 */
+	private static function owed_rows( int $account ): array {
+		$rows = array();
+		$list = self::query(
+			array(
+				'account' => $account,
+				'limit'   => 500,
+			)
+		);
+		usort(
+			$list,
+			static function ( $a, $b ) {
+				return strcmp( $a['given'], $b['given'] ) ?: $a['id'] <=> $b['id'];
+			}
+		);
+		foreach ( $list as $c ) {
+			$r = self::raw( (int) $c['id'] );
+			if ( null === $r ) {
+				continue;
+			}
+			foreach ( $r['orders'] as $oi => $o ) {
+				if ( ! empty( $o['gone'] ) || '' !== $o['paid'] ) {
+					continue;
+				}
+				$part = (array) ( $o['part'] ?? array() );
+				foreach ( (array) $o['lines'] as $pid => $q ) {
+					$pid  = (int) $pid;
+					$pc   = self::line_price( $r, $pid );
+					$done = isset( $part[ $pid ] ) ? (int) $part[ $pid ] : 0;
+					$owed = $pc * (int) $q - $done;
+					if ( $owed <= 0 ) {
+						continue;
+					}
+					$name = '';
+					foreach ( $r['lines'] as $l ) {
+						if ( (int) $l['p'] === $pid ) {
+							$name = (string) $l['name'];
+							break;
+						}
+					}
+					$rows[] = array(
+						'c'     => (int) $c['id'],
+						'o'     => (int) $oi,
+						'order' => (int) $o['id'],
+						'p'     => $pid,
+						'pc'    => $pc,
+						'done'  => $done,
+						'owed'  => $owed,
+						'name'  => $name,
+					);
+				}
+			}
+		}
+		return $rows;
+	}
+
+	/** Cents an account still owes for sold copies (settled, not yet paid). */
+	public static function owed( int $account ): int {
+		return (int) array_sum( wp_list_pluck( self::owed_rows( $account ), 'owed' ) );
+	}
+
+	/**
+	 * Accounts that owe money for sold copies: user id => cents, largest first.
+	 *
+	 * @return array<int, int>
+	 */
+	public static function debtors(): array {
+		$out = array();
+		foreach ( self::query( array( 'limit' => 500 ) ) as $c ) {
+			$uid = (int) $c['account']['id'];
+			if ( ! isset( $out[ $uid ] ) && (int) self::cents( $c['totals']['to_collect'] ) > 0 ) {
+				$out[ $uid ] = self::owed( $uid );
+			}
+		}
+		arsort( $out );
+		return array_filter( $out );
+	}
+
+	/**
+	 * Shares $amount cents over $rows in proportion to what each row owes:
+	 * floor shares, the cents left over to the largest remainders (oldest
+	 * row first on ties). The shares add up to $amount exactly.
+	 *
+	 * @return int[] Share per row, same keys as $rows.
+	 */
+	private static function share( int $amount, array $rows ): array {
+		$total = (int) array_sum( wp_list_pluck( $rows, 'owed' ) );
+		$share = array();
+		$rest  = array();
+		foreach ( $rows as $k => $row ) {
+			$share[ $k ] = intdiv( $amount * $row['owed'], $total );
+			$rest[ $k ]  = ( $amount * $row['owed'] ) % $total;
+		}
+		$left = $amount - (int) array_sum( $share );
+		$keys = array_keys( $rest );
+		usort(
+			$keys,
+			static function ( $a, $b ) use ( $rest ) {
+				return $rest[ $b ] <=> $rest[ $a ] ?: $a <=> $b;
+			}
+		);
+		foreach ( $keys as $k ) {
+			if ( $left <= 0 ) {
+				break;
+			}
+			++$share[ $k ];
+			--$left;
+		}
+		return $share;
+	}
+
+	/**
+	 * «Είσπραξη ποσού»: $amount (VAT included) paid by an account on $date,
+	 * shared among its sold, unpaid copies in proportion to their value.
+	 * $dry = true only computes the sharing.
+	 *
+	 * @param int    $account User id of the trade account.
+	 * @param mixed  $amount  Decimal string or number.
+	 * @param string $date    Y-m-d, '' = today.
+	 * @param string $note    Note for the order and the history.
+	 * @param bool   $dry     Compute only.
+	 * @return array|WP_Error {order, amount, owed_before, owed_after, lines: [{product, name, share, copies}]}
+	 */
+	public static function pay( int $account, $amount, string $date = '', string $note = '', bool $dry = false ) {
+		if ( $account <= 0 || ! get_userdata( $account ) instanceof WP_User ) {
+			return new WP_Error( 'trc_account', __( 'Διάλεξε λογαριασμό χονδρικής.', 'trade-accounts' ) );
+		}
+		$cents = self::cents( $amount );
+		if ( null === $cents || $cents <= 0 ) {
+			return new WP_Error( 'trc_amount', __( 'Γράψε το ποσό που εισπράχθηκε.', 'trade-accounts' ) );
+		}
+		$date = '' !== $date ? self::date( $date ) : self::today();
+		if ( '' === $date ) {
+			return new WP_Error( 'trc_date', __( 'Η ημερομηνία είσπραξης δεν είναι έγκυρη.', 'trade-accounts' ) );
+		}
+		$note = mb_substr( trim( sanitize_textarea_field( $note ) ), 0, 500 );
+		$rows = self::owed_rows( $account );
+		$owed = (int) array_sum( wp_list_pluck( $rows, 'owed' ) );
+		if ( $owed <= 0 ) {
+			return new WP_Error( 'trc_owed', __( 'Αυτός ο λογαριασμός δεν χρωστάει τίποτα: κάνε πρώτα την εκκαθάριση με τα πουλημένα.', 'trade-accounts' ) );
+		}
+		if ( $cents > $owed ) {
+			/* translators: %s: amount still owed */
+			return new WP_Error( 'trc_over', sprintf( __( 'Το ποσό είναι μεγαλύτερο από όσα χρωστάει ο λογαριασμός για πουλημένα τεμάχια (%s). Αν πούλησε κι άλλα, κάνε πρώτα την εκκαθάριση.', 'trade-accounts' ), self::money( $owed ) ) );
+		}
+
+		$share = self::share( $cents, $rows );
+		$per   = array();
+		foreach ( $rows as $k => $row ) {
+			$pid = $row['p'];
+			if ( ! isset( $per[ $pid ] ) ) {
+				$per[ $pid ] = array(
+					'product' => $pid,
+					'name'    => $row['name'],
+					'share'   => 0,
+					'copies'  => 0,
+				);
+			}
+			$per[ $pid ]['share'] += $share[ $k ];
+			if ( $row['pc'] > 0 ) {
+				$per[ $pid ]['copies'] += intdiv( $row['done'] + $share[ $k ], $row['pc'] ) - intdiv( $row['done'], $row['pc'] );
+			}
+		}
+		$per = array_values(
+			array_filter(
+				$per,
+				static function ( $l ) {
+					return $l['share'] > 0;
+				}
+			)
+		);
+		$out = array(
+			'order'       => 0,
+			'date'        => $date,
+			'amount'      => self::money( $cents ),
+			'owed_before' => self::money( $owed ),
+			'owed_after'  => self::money( $owed - $cents ),
+			'lines'       => array_map(
+				static function ( $l ) {
+					$l['share'] = self::money( $l['share'] );
+					return $l;
+				},
+				$per
+			),
+		);
+		if ( $dry ) {
+			return $out;
+		}
+
+		$order_id = self::make_pay_order( $account, $per, $date, $note );
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+		$out['order'] = $order_id;
+
+		// The shares into the records; settlement orders paid in full close.
+		$touched = array();
+		foreach ( $rows as $k => $row ) {
+			if ( $share[ $k ] <= 0 ) {
+				continue;
+			}
+			if ( ! isset( $touched[ $row['c'] ] ) ) {
+				$touched[ $row['c'] ] = array(
+					'r'    => self::raw( $row['c'] ),
+					'sum'  => 0,
+					'full' => array(),
+				);
+			}
+			$t = &$touched[ $row['c'] ];
+			$o = &$t['r']['orders'][ $row['o'] ];
+			if ( ! isset( $o['part'] ) || ! is_array( $o['part'] ) ) {
+				$o['part'] = array();
+			}
+			$o['part'][ $row['p'] ] = ( isset( $o['part'][ $row['p'] ] ) ? (int) $o['part'][ $row['p'] ] : 0 ) + $share[ $k ];
+			$t['sum']              += $share[ $k ];
+			unset( $o, $t );
+		}
+		foreach ( $touched as $cid => $t ) {
+			$r = $t['r'];
+			foreach ( $r['orders'] as $oi => $o ) {
+				if ( empty( $o['part'] ) || ! empty( $o['gone'] ) || '' !== $o['paid'] ) {
+					continue;
+				}
+				if ( self::part_sum( $o ) >= self::order_value( $r, $o ) ) {
+					$r['orders'][ $oi ]['paid'] = $date;
+					$r['orders'][ $oi ]['by']   = 'parts';
+					self::close_receivable( (int) $o['id'], $order_id );
+				}
+			}
+			$r['pays']   = isset( $r['pays'] ) && is_array( $r['pays'] ) ? $r['pays'] : array();
+			$r['pays'][] = array(
+				'order'  => $order_id,
+				'date'   => $date,
+				'amount' => self::money( $t['sum'] ),
+			);
+			self::log(
+				$r,
+				'pay',
+				/* translators: 1: amount of this consignment, 2: whole amount, 3: date, 4: order number */
+				sprintf( __( 'Είσπραξη ποσού: %1$s από τα %2$s που πλήρωσε ο λογαριασμός στις %3$s (παραγγελία #%4$d).', 'trade-accounts' ), self::money( $t['sum'] ), self::money( $cents ), $date, $order_id ) . ( '' !== $note ? ' ' . $note : '' )
+			);
+			self::store( (int) $cid, $r );
+		}
+
+		do_action( 'tra_consignment_payment', $account, $out );
+		return $out;
+	}
+
+	/**
+	 * The order of a payment: one line per title for its share, completed
+	 * on $date, stock untouched, no e-mails.
+	 *
+	 * @param array<int, array{product: int, name: string, share: int, copies: int}> $per Lines.
+	 * @return int|WP_Error
+	 */
+	private static function make_pay_order( int $uid, array $per, string $date, string $note ) {
+		$discount = TRA_Accounts::discount( $uid );
+		$mute     = static function () {
+			return false;
+		};
+		$mails    = array( 'new_order', 'customer_completed_order', 'customer_processing_order', 'customer_on_hold_order' );
+		foreach ( $mails as $m ) {
+			add_filter( 'woocommerce_email_enabled_' . $m, $mute, 100 );
+		}
+		self::$busy = true;
+		try {
+			$order = wc_create_order(
+				array(
+					'customer_id' => $uid,
+					'created_via' => 'tra-consignment-pay',
+				)
+			);
+			if ( is_wp_error( $order ) ) {
+				return $order;
+			}
+			if ( ! $order instanceof WC_Order ) {
+				return new WP_Error( 'trc_order', __( 'Η παραγγελία δεν δημιουργήθηκε.', 'trade-accounts' ) );
+			}
+			if ( class_exists( 'WC_Customer' ) ) {
+				$customer = new WC_Customer( $uid );
+				foreach ( array( 'billing', 'shipping' ) as $type ) {
+					$getter = 'get_' . $type;
+					foreach ( (array) $customer->$getter() as $k => $v ) {
+						$setter = 'set_' . $type . '_' . $k;
+						if ( is_callable( array( $order, $setter ) ) ) {
+							$order->$setter( $v );
+						}
+					}
+				}
+			}
+			foreach ( $per as $l ) {
+				$product = wc_get_product( (int) $l['product'] );
+				$gross   = (int) $l['share'] / 100;
+				$net     = $gross;
+				if ( $product instanceof WC_Product && wc_tax_enabled() && $product->is_taxable() ) {
+					$rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'edit' ) );
+					$net   = $gross - array_sum( WC_Tax::calc_tax( $gross, $rates, true ) );
+				}
+				$item = new WC_Order_Item_Product();
+				if ( $product instanceof WC_Product ) {
+					$item->set_product( $product );
+				}
+				$item->set_name( $product instanceof WC_Product ? $product->get_name() : (string) $l['name'] );
+				$item->set_quantity( (int) $l['copies'] );
+				$item->set_subtotal( $net );
+				$item->set_total( $net );
+				$item->add_meta_data( self::PART_META, '1', true );
+				$item->add_meta_data( '_tra_discount', (string) $discount, true );
+				$order->add_item( $item );
+			}
+			$order->update_meta_data( '_tra_trade', (string) $discount );
+			$order->update_meta_data( self::PAY_META, (string) $uid );
+			$order->set_payment_method_title( __( 'Είσπραξη παρακαταθήκης', 'trade-accounts' ) );
+			if ( '' !== $note ) {
+				$order->set_customer_note( $note );
+			}
+			$at = strtotime( $date . ' 12:00:00' );
+			if ( $date !== self::today() && false !== $at ) {
+				$order->set_date_created( $at );
+			}
+			$order->set_date_paid( false !== $at && $date !== self::today() ? $at : time() );
+			if ( is_callable( array( $order, 'set_order_stock_reduced' ) ) ) {
+				$order->set_order_stock_reduced( true );
+			}
+			$order->calculate_totals( true );
+			$order->save();
+			$store = $order->get_data_store();
+			if ( is_object( $store ) && method_exists( $store, 'set_stock_reduced' ) ) {
+				$store->set_stock_reduced( $order->get_id(), true );
+			}
+			$order->update_status(
+				'completed',
+				__( 'Είσπραξη ποσού από παρακαταθήκες: κάθε γραμμή είναι το μερίδιο του τίτλου, ανάλογα με την αξία των πουλημένων και απλήρωτων τεμαχίων. Τα τεμάχια είχαν φύγει από το απόθεμα στην παράδοση.', 'trade-accounts' )
+			);
+			return (int) $order->get_id();
+		} catch ( \Throwable $e ) {
+			return new WP_Error( 'trc_order', __( 'Η παραγγελία δεν δημιουργήθηκε.', 'trade-accounts' ) . ' ' . $e->getMessage() );
+		} finally {
+			self::$busy = false;
+			foreach ( $mails as $m ) {
+				remove_filter( 'woocommerce_email_enabled_' . $m, $mute, 100 );
+			}
+		}
+	}
+
+	/**
+	 * A settlement order paid in full by payments: cancelled without giving
+	 * stock back (the flag is cleared first) and without e-mails, so that
+	 * nothing counts it twice.
+	 */
+	private static function close_receivable( int $order_id, int $pay_id ): void {
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order || 'cancelled' === $order->get_status() ) {
+			return;
+		}
+		$mute = static function () {
+			return false;
+		};
+		add_filter( 'woocommerce_email_enabled_cancelled_order', $mute, 100 );
+		self::$busy = true;
+		try {
+			if ( is_callable( array( $order, 'set_order_stock_reduced' ) ) ) {
+				$order->set_order_stock_reduced( false );
+			}
+			$order->save();
+			$store = $order->get_data_store();
+			if ( is_object( $store ) && method_exists( $store, 'set_stock_reduced' ) ) {
+				$store->set_stock_reduced( $order_id, false );
+			}
+			$order->update_status(
+				'cancelled',
+				/* translators: %d: last payment order */
+				sprintf( __( 'Πληρώθηκε ολόκληρη με εισπράξεις ποσού (τελευταία: παραγγελία #%d). Ακυρώνεται για να μη μετρηθεί δύο φορές· το απόθεμα δεν αλλάζει.', 'trade-accounts' ), $pay_id )
+			);
+		} finally {
+			self::$busy = false;
+			remove_filter( 'woocommerce_email_enabled_cancelled_order', $mute, 100 );
+		}
 	}
 
 	/**
@@ -668,7 +1098,7 @@ final class TRA_Consign {
 	 * @param WC_Email|null $email   E-mail.
 	 */
 	public static function mail_enabled( $enabled, $order = null, $email = null ) {
-		if ( ! $enabled || ! $order instanceof WC_Order || ! self::of_order( $order ) ) {
+		if ( ! $enabled || ! $order instanceof WC_Order || ( ! self::of_order( $order ) && ! (int) $order->get_meta( self::PAY_META ) ) ) {
 			return $enabled;
 		}
 		$id = $email instanceof WC_Email ? (string) $email->id : '';
@@ -698,11 +1128,17 @@ final class TRA_Consign {
 		$r['orders'][ $i ]['paid'] = self::today();
 		/* translators: %d: order number */
 		self::log( $r, 'paid', sprintf( __( 'Η παραγγελία #%d ολοκληρώθηκε από τις παραγγελίες: σημειώθηκε ως είσπραξη.', 'trade-accounts' ), (int) $order_id ) );
+		if ( self::part_sum( $r['orders'][ $i ] ) > 0 ) {
+			self::log( $r, 'warn', __( 'Προσοχή: είχε ήδη τμηματικές εισπράξεις, που μετράνε και αυτές. Έλεγξε τα ποσά για να μη μετρηθούν δύο φορές.', 'trade-accounts' ) );
+		}
 		self::store( $id, $r );
 	}
 
 	/** Cancelled: its copies are counted as still at the bookstore. */
 	public static function on_cancelled( $order_id ): void {
+		if ( self::$busy ) {
+			return;
+		}
 		$id = self::of_order( $order_id );
 		$r  = $id ? self::raw( $id ) : null;
 		if ( null === $r ) {
@@ -790,14 +1226,18 @@ final class TRA_Consign {
 				'status'    => $order instanceof WC_Order ? (string) $order->get_status() : 'deleted',
 				'copies'    => array_sum( array_map( 'intval', (array) $o['lines'] ) ),
 				'edit_url'  => $order instanceof WC_Order ? (string) $order->get_edit_order_url() : '',
+				'part'      => self::money( 0 ),
 			);
 			if ( $gone ) {
 				continue;
 			}
+			$part                               = self::part_sum( $o );
+			$orders[ count( $orders ) - 1 ]['part'] = self::money( '' !== $o['paid'] ? 0 : $part );
 			if ( '' !== $o['paid'] ) {
-				$collected += $total_c;
+				$collected += '' !== (string) ( $o['by'] ?? '' ) ? self::order_value( $r, $o ) : $total_c;
 			} else {
-				$pending += $total_c;
+				$collected += $part;
+				$pending   += max( 0, self::order_value( $r, $o ) - $part );
 			}
 		}
 		$today = self::today();
@@ -852,6 +1292,7 @@ final class TRA_Consign {
 				'collected'  => self::money( $collected ),
 			),
 			'orders'     => $orders,
+			'payments'   => array_values( (array) ( $r['pays'] ?? array() ) ),
 			'history'    => $history,
 		);
 	}
@@ -1204,6 +1645,34 @@ final class TRA_Consign {
 				'ann'         => array( false, false, false ),
 				'run'         => array( __CLASS__, 'ab_paid' ),
 			),
+			'consignment-payment' => array(
+				'label'       => 'Trade Accounts: amount paid by a bookstore',
+				'description' => 'A bookstore paid a round sum (VAT included) for consignments: it is shared among all its sold, not yet paid copies in proportion to their value, and one completed order is made with a line per title for its share (quantity = copies this payment completes, 0 for a part of a copy), so Revenue Splitter splits it to the creators. Settlement orders paid in full this way are cancelled without stock change. dry_run = true only shows the sharing. Refused when the amount is more than what the account owes for settled copies.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'account' => array(
+							'type'        => 'integer',
+							'minimum'     => 1,
+							'description' => 'User id of the trade account (accounts-list).',
+						),
+						'amount'  => array(
+							'type'        => 'string',
+							'description' => 'Amount paid, VAT included, decimal string (e.g. "150" or "150,00").',
+						),
+						'date'    => $date,
+						'note'    => array(
+							'type'      => 'string',
+							'maxLength' => 500,
+						),
+						'dry_run' => array( 'type' => 'boolean' ),
+					),
+					'required'             => array( 'account', 'amount' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'ab_pay' ),
+			),
 			'consignment-extend' => array(
 				'label'       => 'Trade Accounts: new settle-by date',
 				'description' => 'Moves the settle-by date of a consignment and/or adds a note to its history (doc = delivery note number).',
@@ -1260,6 +1729,17 @@ final class TRA_Consign {
 		$in  = is_array( $in ) ? $in : array();
 		$res = self::paid( isset( $in['id'] ) ? (int) $in['id'] : 0, isset( $in['order'] ) ? (int) $in['order'] : 0, isset( $in['date'] ) ? (string) $in['date'] : '' );
 		return is_wp_error( $res ) ? $res : self::get( (int) $in['id'] );
+	}
+
+	public static function ab_pay( $in = null ) {
+		$in = is_array( $in ) ? $in : array();
+		return self::pay(
+			isset( $in['account'] ) ? (int) $in['account'] : 0,
+			isset( $in['amount'] ) ? (string) $in['amount'] : '',
+			isset( $in['date'] ) ? (string) $in['date'] : '',
+			isset( $in['note'] ) ? (string) $in['note'] : '',
+			! empty( $in['dry_run'] )
+		);
 	}
 
 	public static function ab_extend( $in = null ) {

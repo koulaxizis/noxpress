@@ -185,7 +185,43 @@ final class TRA_Consign_UI {
 			</tbody>
 		</table>
 
+		<?php self::render_pay(); ?>
+
 		<?php self::render_settings(); ?>
+		<?php
+	}
+
+	/** «Είσπραξη ποσού»: a round sum from a bookstore, shared among its sold, unpaid copies. */
+	private static function render_pay(): void {
+		$debtors = TRA_Consign::debtors();
+		if ( ! $debtors ) {
+			return;
+		}
+		?>
+		<h3 class="tra-h3"><?php esc_html_e( 'Είσπραξη ποσού', 'trade-accounts' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'Για βιβλιοπωλεία που πληρώνουν ποσά κατά διαστήματα: το ποσό μοιράζεται σε όλα τα πουλημένα και απλήρωτα τεμάχια, ανάλογα με την αξία τους, και ο Revenue Splitter το μοιράζει στους δημιουργούς με τα ποσοστά τους. Τα απούλητα δεν παίρνουν τίποτα.', 'trade-accounts' ); ?></p>
+		<div class="tra-zone">
+			<form method="post">
+				<?php wp_nonce_field( TRA_Admin_UI::NONCE, TRA_Admin_UI::NONCE_FIELD ); ?>
+				<input type="hidden" name="tra_action" value="consign" />
+				<input type="hidden" name="tra_c_do" value="pay" />
+				<p>
+					<label><?php esc_html_e( 'Βιβλιοπωλείο', 'trade-accounts' ); ?><br />
+						<select name="tra_c_account">
+							<?php foreach ( $debtors as $uid => $owed ) : ?>
+								<option value="<?php echo (int) $uid; ?>"><?php echo esc_html( sprintf( /* translators: 1: bookstore, 2: amount owed */ __( '%1$s (χρωστάει %2$s)', 'trade-accounts' ), TRA_Consign::account_name( (int) $uid ), self::eur( TRA_Consign::money( (int) $owed ) ) ) ); ?></option>
+							<?php endforeach; ?>
+						</select></label>
+					<label><?php esc_html_e( 'Ποσό (με ΦΠΑ)', 'trade-accounts' ); ?><br />
+						<input type="text" name="tra_c_amount" inputmode="decimal" size="10" required /></label>
+					<label><?php esc_html_e( 'Ημερομηνία', 'trade-accounts' ); ?><br />
+						<input type="date" name="tra_c_date" value="<?php echo esc_attr( TRA_Consign::today() ); ?>" /></label>
+				</p>
+				<p><label><?php esc_html_e( 'Σημείωση (π.χ. αριθμός κατάθεσης)', 'trade-accounts' ); ?><br />
+					<input type="text" name="tra_c_note" class="regular-text" maxlength="500" /></label></p>
+				<p><button type="submit" class="button button-primary" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Το ποσό μοιράζεται στα πουλημένα τεμάχια και μετράει από τώρα στις πωλήσεις και στο Revenue Splitter. Συνέχεια;', 'trade-accounts' ) ) ); ?>);"><?php esc_html_e( 'Καταχώριση είσπραξης', 'trade-accounts' ); ?></button></p>
+			</form>
+		</div>
 		<?php
 	}
 
@@ -380,12 +416,15 @@ final class TRA_Consign_UI {
 							<br /><span class="tra-muted"><?php echo esc_html( wc_get_order_status_name( $o['status'] ) ); ?></span></td>
 						<td><?php echo esc_html( self::day( $o['date'] ) ); ?></td>
 						<td><?php echo (int) $o['copies']; ?></td>
-						<td><?php echo esc_html( self::eur( $o['total'] ) ); ?></td>
+						<td><?php echo esc_html( self::eur( $o['total'] ) ); ?>
+							<?php if ( (int) TRA_Consign::cents( $o['part'] ) > 0 ) : ?><br /><span class="tra-muted"><?php echo esc_html( sprintf( /* translators: %s: amount */ __( 'εισπράχθηκαν %s με «Είσπραξη ποσού»', 'trade-accounts' ), self::eur( $o['part'] ) ) ); ?></span><?php endif; ?></td>
 						<td>
 							<?php if ( $o['cancelled'] ) : ?>
 								<span class="tra-badge tra-badge--muted"><?php esc_html_e( 'Ακυρώθηκε', 'trade-accounts' ); ?></span>
 							<?php elseif ( '' !== $o['paid'] ) : ?>
 								<span class="tra-badge tra-badge--ok"><?php echo esc_html( sprintf( /* translators: %s: date */ __( 'Εισπράχθηκε %s', 'trade-accounts' ), self::day( $o['paid'] ) ) ); ?></span>
+							<?php elseif ( (int) TRA_Consign::cents( $o['part'] ) > 0 ) : ?>
+								<span class="tra-muted"><?php esc_html_e( 'Το υπόλοιπο μπαίνει με «Είσπραξη ποσού» στη λίστα.', 'trade-accounts' ); ?></span>
 							<?php else : ?>
 								<form method="post" class="tra-inline">
 									<?php wp_nonce_field( TRA_Admin_UI::NONCE, TRA_Admin_UI::NONCE_FIELD ); ?>
@@ -403,6 +442,27 @@ final class TRA_Consign_UI {
 			<?php endif; ?>
 			</tbody>
 		</table>
+
+		<?php if ( $c['payments'] ) : ?>
+			<h3 class="tra-h3"><?php esc_html_e( 'Εισπράξεις ποσού', 'trade-accounts' ); ?></h3>
+			<table class="widefat tra-table">
+				<thead><tr>
+					<th><?php esc_html_e( 'Παραγγελία', 'trade-accounts' ); ?></th>
+					<th><?php esc_html_e( 'Ημερομηνία', 'trade-accounts' ); ?></th>
+					<th><?php esc_html_e( 'Μερίδιο αυτής της παρακαταθήκης', 'trade-accounts' ); ?></th>
+				</tr></thead>
+				<tbody>
+				<?php foreach ( $c['payments'] as $p ) : ?>
+					<?php $po = wc_get_order( (int) $p['order'] ); ?>
+					<tr>
+						<td><?php if ( $po instanceof WC_Order ) : ?><a href="<?php echo esc_url( $po->get_edit_order_url() ); ?>">#<?php echo (int) $p['order']; ?></a><?php else : ?>#<?php echo (int) $p['order']; ?><?php endif; ?></td>
+						<td><?php echo esc_html( self::day( (string) $p['date'] ) ); ?></td>
+						<td><?php echo esc_html( self::eur( (string) $p['amount'] ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
 
 		<h3 class="tra-h3"><?php esc_html_e( 'Προθεσμία και σημειώσεις', 'trade-accounts' ); ?></h3>
 		<div class="tra-zone">
@@ -501,6 +561,26 @@ final class TRA_Consign_UI {
 					return array( array( self::msg( 'error', $res->get_error_message() ) ), array( 'id' => $id ) );
 				}
 				return array( array( self::msg( 'success', __( 'Η είσπραξη σημειώθηκε: η παραγγελία ολοκληρώθηκε και μετράει στις πωλήσεις.', 'trade-accounts' ) ) ), array( 'id' => $id ) );
+
+			case 'pay':
+				$res = TRA_Consign::pay( (int) self::post( 'tra_c_account' ), self::post( 'tra_c_amount' ), self::post( 'tra_c_date' ), self::post( 'tra_c_note' ) );
+				if ( is_wp_error( $res ) ) {
+					return array( array( self::msg( 'error', $res->get_error_message() ) ), array() );
+				}
+				$parts = array();
+				foreach ( $res['lines'] as $l ) {
+					$parts[] = $l['name'] . ' ' . self::eur( $l['share'] );
+				}
+				return array(
+					array(
+						self::msg(
+							'success',
+							/* translators: 1: amount, 2: order number, 3: shares per title, 4: amount still owed */
+							sprintf( __( 'Η είσπραξη %1$s καταχωρήθηκε (παραγγελία #%2$d): %3$s. Υπόλοιπο που χρωστάει: %4$s.', 'trade-accounts' ), self::eur( $res['amount'] ), $res['order'], implode( ', ', $parts ), self::eur( $res['owed_after'] ) )
+						),
+					),
+					array(),
+				);
 
 			case 'extend':
 				$c = TRA_Consign::get( $id );
