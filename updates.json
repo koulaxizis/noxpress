@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: «Your titles» in the Author Portal. For each of the creator's titles: downloads of the digital files in the period and in total, how many orders got the file (free or paid), the last download and the last 12 months as a chart. Downloads by shop staff do not count; variations count under their product.\n* New: interest and reviews per title, from the suite and from Koko Analytics when they are active: page views, sample opens (Book Preview 1.2.0+), wish lists (Wish Shelf), pre-orders and release day (Pre-Orders), the rating and the latest reviews (first name and initial only).\n* New: «Your page» in the portal: a link to the creator's page and a request for a change or addition (bio text, up to 6 links, a note, one JPG/PNG/WebP photo up to 5 MB, re-encoded, stored outside public reach). The creator never edits the page; the request goes to the shop.\n* New: promotion kit per title (link, cover and a short text to copy), a request for author copies (title, quantity, note) and «Your statements» (the monthly statements already sent, as PDF, each creator only their own).\n* New: Noxpress → RS Creators: open requests with the bio changes side by side, the links and the photo, Done or Decline with an optional reply the creator sees in the portal; the beneficiary ↔ creator page mapping (with suggestions by name); which roles count as author. A new request emails the site's admin address.\n* New: ability revenue-splitter/downloads (read-only, numbers only).\n* Safety: requests are rate-limited (3 per beneficiary per day, 10 per IP per hour, at most 3 open author-copies requests); photos are served to shop managers only and deleted 30 days after the request closes; closed requests are kept for 12 months.",
-        "published": "2026-11-12",
+        "changelog": "* Fix: the portal tables (per product, VAT by rate, transaction history) scroll sideways inside their box on narrow themes instead of overflowing the page; the monthly chart does the same.\n* Fix: the beneficiary ↔ creator page mapping is read also when a remote tool (such as Site Bridge) stored it as an array instead of JSON text.",
+        "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "95f6df22e30293d11dee81c2118644e534c3378262d669cf0a8225f4154948ec",
-        "signature": "/eEeHKfuaV3RuWIkzIlqKnCnW2ZFfh0w3dMmhjx1Gj3XgP1BpJKMHTD+OXYYd3evJ5rqMvZ26tujk5YMJ/TTBg==",
+        "sha256": "7c6868627be2903e77b95bc7f7ca287316d3988892364bf106319c51477dc58f",
+        "signature": "cUOvLCtkFpBX2+FBiABpuQ/9orHxLKPmQbm7O5MZhrso0kXC1wqmIUkFvrSfb/ZSHsqaK9GAdB3p4jKEgRcEDQ==",
         "tested_wp": "7.1",
-        "version": "1.16.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.16.0/revenue-splitter.zip"
+        "version": "1.16.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.16.1/revenue-splitter.zip"
       }
     },
     "search-signals": {
