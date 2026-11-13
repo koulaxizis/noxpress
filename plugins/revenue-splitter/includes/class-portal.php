@@ -1091,6 +1091,7 @@ final class RS_Portal {
 			</div>
 
 			<h3><?php esc_html_e( 'Ανά προϊόν', 'revenue-splitter' ); ?> — <?php echo esc_html( $per['label'] ); ?></h3>
+			<div class="rs-pt-scroll">
 			<table class="rs-pt-table">
 				<thead>
 					<tr>
@@ -1150,9 +1151,11 @@ final class RS_Portal {
 				<?php endif; ?>
 				</tbody>
 			</table>
+			</div>
 
 			<?php if ( ! empty( $by_rate ) ) : ?>
 				<h3><?php esc_html_e( 'ΦΠΑ ανά συντελεστή', 'revenue-splitter' ); ?></h3>
+				<div class="rs-pt-scroll">
 				<table class="rs-pt-table">
 					<thead>
 						<tr>
@@ -1175,6 +1178,7 @@ final class RS_Portal {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
+				</div>
 			<?php endif; ?>
 
 			<?php
@@ -1183,6 +1187,7 @@ final class RS_Portal {
 			?>
 
 			<h3><?php esc_html_e( 'Ιστορικό συναλλαγών', 'revenue-splitter' ); ?></h3>
+			<div class="rs-pt-scroll">
 			<table class="rs-pt-table">
 				<thead>
 					<tr>
@@ -1207,6 +1212,7 @@ final class RS_Portal {
 				<?php endif; ?>
 				</tbody>
 			</table>
+			</div>
 
 			<p class="rs-pt-note">
 				<?php esc_html_e( 'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.', 'revenue-splitter' ); ?>
@@ -1407,6 +1413,7 @@ final class RS_Portal {
 
 .rs-pt-error { color: #ff9a9a; font-weight: 600; margin: 0; }
 
+.rs-pt-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .rs-pt-table { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
 .rs-pt-table th, .rs-pt-table td { border: 1px solid #2e3240; padding: 6px 10px; text-align: left; font-size: 0.92em; }
 /* Colours with !important (Bible §4): light theme table rules (e.g. Storefront's
@@ -1420,7 +1427,7 @@ final class RS_Portal {
 
 .rs-pt-chart-head { display: flex; justify-content: space-between; align-items: baseline; }
 .rs-pt-chart-range select { padding: 3px 6px; border: 1px solid #3a3f52; border-radius: 3px; background: #1a1d26; color: #f0eefc; }
-.rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin: 0.5em 0 1.5em; }
+.rs-pt-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; margin: 0.5em 0 1.5em; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
 .rs-pt-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; text-align: center; }
 .rs-pt-bar { width: 70%; background: #6d4aff; border-radius: 3px 3px 0 0; min-height: 3px; }
 .rs-pt-col small { margin-top: 4px; font-size: 0.72em; color: #b7b2d6; }
