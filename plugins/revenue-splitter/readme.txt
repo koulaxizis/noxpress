@@ -70,6 +70,9 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 * New: setting in RS Creators to stop the admin email for new requests when orOS picks them up.
 * Fix: the stored contracts list is read also when a remote tool stored it as an array; the mapping, requests, contracts and production lists are read also when a remote tool encoded the JSON twice (found on glarolykoi).
 
+= 1.17.1 =
+* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) counts its money also when it pays only part of a copy (quantity 0), so every euro a bookstore pays reaches the creators. Such a line adds no copies.
+
 = 1.17.0 =
 * New: a third Ledger entry type, «Deduction» («Κράτηση»): money kept from what a beneficiary is owed, for example their share in a production they co-fund. Always a positive amount, subtracted from the balance, with a required reason and, optionally, the product it is for. A deduction has no sales channel.
 * New: a deduction larger than the payable balance is allowed. The form asks first, and after saving a notice shows the balance below zero, which the next sales cover. A statement whose closing balance is below zero waits for review, as before.

@@ -1,6 +1,6 @@
 {
   "display": 1000,
-  "total": 1016,
+  "total": 1023,
   "offset": 5,
   "updated": "2026-11-13",
   "assets": {
@@ -1114,14 +1114,30 @@
     },
     "742365592": {
       "file": "nox-rs-1.16.1/revenue-splitter.zip",
-      "count": 0
+      "count": 2
     },
     "742378601": {
       "file": "nox-rs-1.17.0/revenue-splitter.zip",
-      "count": 0
+      "count": 3
     },
     "742378700": {
       "file": "nox-sp-1.8.5/store-pulse.zip",
+      "count": 2
+    },
+    "743047078": {
+      "file": "nox-rs-1.17.1/revenue-splitter.zip",
+      "count": 0
+    },
+    "743047238": {
+      "file": "nox-sp-1.8.6/store-pulse.zip",
+      "count": 0
+    },
+    "743047712": {
+      "file": "nox-ta-1.6.0/trade-accounts.zip",
+      "count": 0
+    },
+    "743047895": {
+      "file": "nox-pl-1.1.1/production-ledger.zip",
       "count": 0
     }
   }
