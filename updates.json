@@ -247,15 +247,15 @@
     },
     "production-ledger": {
       "beta": {
-        "changelog": "* orOS: the report per product is also readable at wc/v3/pl/report (read only, amounts in cents), so orOS Publishing shows each title's cost and result with the same figures as the report screen: direct costs, its shares of shipping, consumables and payment fees, shipping charged, creator payouts, VAT and break-even.",
-        "published": "2026-11-07",
+        "changelog": "* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) that pays only part of a copy (quantity 0) counts in the title's income, with no copies.",
+        "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "48b5e6486f822645c7a6875ea1cdc9213c736c18ebd87d44ab63afd9623f0573",
-        "signature": "omCm3reSnwP1u3QpOLq7g6m0nVMhzok76HMYtC9O3ZblEf82mHmnqJGT5cBr5i4sILd33Ri7BHQTcmeADutWAQ==",
+        "sha256": "bfba05260b9f049497870d4a5736fbe58583b39cce49ad1db0e57a082bfab1cc",
+        "signature": "UQgD4jdo46G2+aar6118/yTDsxirdtjCRGceqhHdCafqaMd4+8z+XzcBw8LPew0X1kA5D7EFocL1NwQmyzfSCg==",
         "tested_wp": "7.1",
-        "version": "1.1.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.0/production-ledger.zip"
+        "version": "1.1.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.1/production-ledger.zip"
       }
     },
     "publishing-quote": {
@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: a third Ledger entry type, «Deduction» («Κράτηση»): money kept from what a beneficiary is owed, for example their share in a production they co-fund. Always a positive amount, subtracted from the balance, with a required reason and, optionally, the product it is for. A deduction has no sales channel.\n* New: a deduction larger than the payable balance is allowed. The form asks first, and after saving a notice shows the balance below zero, which the next sales cover. A statement whose closing balance is below zero waits for review, as before.\n* New: deductions everywhere the balance shows: a «Deductions» column on the dashboard's beneficiary accounting, «Deduction» rows (with the product's title) in the Author Portal history, a «Deductions» line in the portal CSV, a «Deductions» list in the monthly report email, and a «Deductions» line and section in the monthly statements (email and PDF). «Pay all (period)» subtracts them too.\n* New: wp rs ledger-add --type=expense [--product=<id>], wp rs ledger-list --type=expense, a «Deductions» line in wp rs balance; ability revenue-splitter/ledger-add accepts type expense and product_id; balances, statements-list and the orOS route wc/v3/rs/balances return deductions.\n* Developer: the balance formula lives in one place, RS_Ledger::net() (other income − deductions − payments). RS_Ledger::sum( ..., 'income' ) still returns income minus deductions, so older add-ons (e.g. Store Pulse before 1.8.5) keep showing the right balance; pass true as the fifth argument for the other income alone.\n* Note: going back to an older version drops deduction entries from the Ledger on its next change. Export the state first if you ever downgrade.",
+        "changelog": "* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) counts its money also when it pays only part of a copy (quantity 0), so every euro a bookstore pays reaches the creators. Such a line adds no copies.",
         "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f46a561e8e00fb1e7cb16c200b9bd206359646a4b6356241a22d987191b0754b",
-        "signature": "Yr47BY9JH5316TOr2dlmoHYaBIewPXhJEjecjxawhezWEk91+PSeYGS99/HGJvcGBzrl6o10y7ov08F5CzG/Bg==",
+        "sha256": "d27679d7c496d863238cc7ec038c68df3a3a3b46ce9513b89be881b825280b26",
+        "signature": "qM3JnxgXGz02LFiZN3rM0qLoPapiwp23rG/GPPb40aJQPffHIc5NzzwlzSXutKxyA5A1dwLDmuc9QIuUSAnbDw==",
         "tested_wp": "7.1",
-        "version": "1.17.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.17.0/revenue-splitter.zip"
+        "version": "1.17.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.17.1/revenue-splitter.zip"
       }
     },
     "search-signals": {
@@ -388,15 +388,15 @@
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Changed: «Publisher profit» and «Owed to others» also subtract the Revenue Splitter's new «Deduction» ledger entries (money kept from a creator's balance, e.g. their share in a production; Revenue Splitter 1.17.0). With an older Revenue Splitter nothing changes.",
+        "changelog": "* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) that pays only part of a copy (quantity 0) counts in the top sellers' money, with no copies.",
         "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1ade0cfd6b39ecdaeb8adfe1a2db32e5cbc8c950278e3f9c1ac6b5bbd4965903",
-        "signature": "qdlu0LiYTsQBNiSOhdEn/fld0mp2SoPpyTsKgE8fFpPhUNxJHeHjNJuFfkg6IJkC8wmMza0EIy5+SDx8fqz5DA==",
+        "sha256": "b2c6f244b7a04d7dfa888458a6f5b864c5c1d3e61a8bfbc12a208cabe716d0ea",
+        "signature": "2joGDXWPDHCFNJ+P4IMSTDp2Hk5TAg9qyczIivuHbt58/DJAbwEIGMXVPvHQBJWvW0A2vKpkVJ08ZroSIW2tBA==",
         "tested_wp": "7.1",
-        "version": "1.8.5",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.5/store-pulse.zip"
+        "version": "1.8.6",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.6/store-pulse.zip"
       }
     },
     "theme-patcher": {
@@ -414,15 +414,15 @@
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* New module: Consignments (off until switched on). Record books given to a bookstore with delivery and settle-by dates; copies leave the stock at delivery and come back with returns; a settlement makes an on-hold order for the sold copies, which counts in sales and Revenue Splitter only when marked «Collected». Overview of open, overdue and closed consignments, check dates, «On consignment» on the product screen, a printable delivery note.\n* New: REST `GET /wc/v3/tra/consignments` (and `/<id>`) for orOS; abilities `consignments-list`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-extend`; `status` shows a consignments summary.\n* New: `tra_consignments()` and `tra_consignment_lines()` for other plugins (Revenue Splitter's author portal).",
-        "published": "2026-11-12",
+        "changelog": "* New: «Amount received» on the Consignments tab (and ability `consignment-payment`, with `dry_run`), for bookstores that pay round sums now and then. The amount is shared among all the bookstore's sold, unpaid copies in proportion to their value, to the cent, and makes one completed order with a line per title for its share, so Revenue Splitter splits it to the creators by their percentages. A line's quantity is the copies the payment completes (0 when it pays part of a copy). A settlement order paid in full this way is cancelled without stock change or e-mail, so nothing counts twice.\n* Each consignment shows its payments, and each settlement order what was already received; «Collected» is not offered for an order with part payments.\n* Needs Revenue Splitter 1.17.1, Store Pulse 1.8.6 and Production Ledger 1.1.1 to count lines that pay part of a copy.",
+        "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f754fe305767fe11f43b430c4cbaf659b536fd49d65ac5d4cb58703216998e90",
-        "signature": "MK+vU4jyFlXWnbkUI3V/OtOSOWzNK1eG8uoNZQ9DYeg/VLGoI+RTv0YLTlQrIlNHVqDlk4StVSsb+Igjog1fAw==",
+        "sha256": "41b53d5d3a3e7673673857fa856b985526c11fe070b568b6c1e8712be32c6300",
+        "signature": "2SaBHt0rXYCh4yU3QKXPmIcD1SVG5XpR+k8+UamTPB8i3VT4eJeg/vkzHiVVJRGDLD1Q/2okgYIP+Z9YCT0UAg==",
         "tested_wp": "7.1",
-        "version": "1.5.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.5.0/trade-accounts.zip"
+        "version": "1.6.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.6.0/trade-accounts.zip"
       }
     },
     "trade-feed-import": {
