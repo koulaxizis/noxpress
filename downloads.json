@@ -1,8 +1,8 @@
 {
   "display": 1000,
-  "total": 1010,
+  "total": 1016,
   "offset": 5,
-  "updated": "2026-11-12",
+  "updated": "2026-11-13",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -1106,10 +1106,14 @@
     },
     "740332120": {
       "file": "nox-rs-1.16.0/revenue-splitter.zip",
-      "count": 0
+      "count": 3
     },
     "740332467": {
       "file": "nox-bp-1.2.0/book-preview.zip",
+      "count": 3
+    },
+    "742365592": {
+      "file": "nox-rs-1.16.1/revenue-splitter.zip",
       "count": 0
     }
   }
