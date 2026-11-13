@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) counts its money also when it pays only part of a copy (quantity 0), so every euro a bookstore pays reaches the creators. Such a line adds no copies.",
+        "changelog": "* New: «Your work in production» in the Author Portal. orOS sends the phase of each creator's current work (POST rs/v1/production with the contracts key, the whole list each time) and the creator sees seven phases (review and agreement, editing, illustration and cover, typesetting, proofs, production, release), the date each phase was reached, the expected release, a note written for them and a short text on what happens in that phase. A «new» badge shows for 14 days after a change; a released work stays 30 days. Only the phase and that note reach the site, never the board's internal columns or comments.\n* New: Noxpress → RS Production: the list orOS sent and the seven phase texts, with defaults you can change.\n* New: orOS route for creator requests (page changes and author copies): GET rs/v1/profile-requests?state=new|oros|closed|all, POST rs/v1/profile-requests/<id> with {state: oros} or {state: done|declined, reply} (the creator sees the reply), GET …/<id>/photo. Same narrow contracts key; the photo's file name never leaves the site.\n* New: setting in RS Creators to stop the admin email for new requests when orOS picks them up.\n* Fix: the stored contracts list is read also when a remote tool stored it as an array; the mapping, requests, contracts and production lists are read also when a remote tool encoded the JSON twice (found on glarolykoi).",
         "published": "2026-11-13",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d27679d7c496d863238cc7ec038c68df3a3a3b46ce9513b89be881b825280b26",
-        "signature": "qM3JnxgXGz02LFiZN3rM0qLoPapiwp23rG/GPPb40aJQPffHIc5NzzwlzSXutKxyA5A1dwLDmuc9QIuUSAnbDw==",
+        "sha256": "a8d6216770b55525fee785eeaf0c5856811d338305db4b8df6f4b1f16086bee1",
+        "signature": "6MnhZEJlOWpYVoyVHpzDDS6lGAMlUsLS/UmRptNutZuyTu5hqDUVEg5jRt9K0gmDM1EIqUk0MhJMHlpiul2YAg==",
         "tested_wp": "7.1",
-        "version": "1.17.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.17.1/revenue-splitter.zip"
+        "version": "1.18.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.0/revenue-splitter.zip"
       }
     },
     "search-signals": {
