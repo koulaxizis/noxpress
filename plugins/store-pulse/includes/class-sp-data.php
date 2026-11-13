@@ -507,9 +507,12 @@ final class SP_Data {
 						$pid = (int) $item->get_product_id();
 						$qty = (int) $item->get_quantity();
 
-						if ( $pid <= 0 || $qty <= 0 ) {
+						// Trade Accounts «Είσπραξη ποσού»: a _tra_part line may pay
+						// a part of a copy (0 copies): money, no units.
+						if ( $pid <= 0 || ( $qty <= 0 && '1' !== (string) $item->get_meta( '_tra_part' ) ) ) {
 							continue;
 						}
+						$qty = max( 0, $qty );
 
 						$ref  = $line_refunds[ $item_id ] ?? array( 'qty' => 0, 'amount' => 0.0 );
 						$qty -= (int) $ref['qty'];

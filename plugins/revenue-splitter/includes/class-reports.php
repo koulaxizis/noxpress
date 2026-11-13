@@ -387,9 +387,14 @@ class RS_Reports {
 				// --------------------------------------------------------
 
 				$qty = (int) $item->get_quantity();
-				if ( $qty <= 0 ) {
+				// Trade Accounts 1.6.0 «Είσπραξη ποσού»: a line with meta
+				// _tra_part is a title's share of a bookstore's payment; 0
+				// copies when it pays only a part of a copy. Money, no units.
+				$part = '1' === (string) $item->get_meta( '_tra_part' );
+				if ( $qty <= 0 && ! $part ) {
 					continue; // Γραμμές refund δεν είναι πωλήσεις.
 				}
+				$qty = max( 0, $qty );
 
 				// Gross γραμμής (ΦΠΑ-συμπεριλημτικό), μετά refunds.
 				$gross = (float) $item->get_total() + (float) $item->get_total_tax();
@@ -470,7 +475,7 @@ class RS_Reports {
 				 * «Πλήρης». Ανίχνευση: paid-unit vs regular-price unit
 				 * (ΦΠΑ-συμπεριληπτικά).
 				 */
-				if ( $disc_line <= 0.01 ) {
+				if ( $disc_line <= 0.01 && $qty > 0 && ! $part ) {
 					$native = self::native_sale_discount( $item, $reg_gross, $qty );
 					if ( null !== $native ) {
 						$disc_line = $native['amount'];
@@ -549,7 +554,7 @@ class RS_Reports {
 		$products = array();
 		foreach ( $per_product as $pid => $acc ) {
 
-			if ( $acc['qty'] <= 0 && $acc['qty_free'] <= 0 ) {
+			if ( $acc['qty'] <= 0 && $acc['qty_free'] <= 0 && $acc['gross'] <= 0.005 ) {
 				continue; // Μόνο refunded γραμμές — δεν εμφανίζεται.
 			}
 
