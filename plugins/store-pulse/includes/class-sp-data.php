@@ -804,6 +804,19 @@ final class SP_Data {
 	}
 
 	/**
+	 * 1.8.5: what the RS ledger adds to a balance in [start, end]: other
+	 * income − deductions («Κράτηση», RS 1.17.0) − payments. RS 1.17.0+
+	 * has RS_Ledger::net(); an older RS has no deductions, so income −
+	 * payments is the same thing there.
+	 */
+	private static function ledger_net( string $who, string $start, string $end ): float {
+		if ( is_callable( array( 'RS_Ledger', 'net' ) ) ) {
+			return (float) RS_Ledger::net( $who, $start, $end );
+		}
+		return (float) RS_Ledger::sum( $who, $start, $end, 'income' ) - (float) RS_Ledger::sum( $who, $start, $end, 'payment' );
+	}
+
+	/**
 	 * Money cards — ΜΟΝΟ μέσω του Revenue Splitter.
 	 *
 	 * Επιστρέφει null όταν το RS δεν είναι ενεργό (caller δείχνει
@@ -811,9 +824,9 @@ final class SP_Data {
 	 *  - publisher_known: false όταν ο configured εκδότης δεν είναι
 	 *    γνωστός δικαιούχος (κενό όνομα = δεν έχει επιλεγεί).
 	 *  - share: το μερίδιο του εκδότη από πωλήσεις περιόδου.
-	 *  - net: share + ledger income − payments του εκδότη (περίοδος).
+	 *  - net: share + ledger income − κρατήσεις − payments του εκδότη (περίοδος).
 	 *  - others: κάθε μη-εκδότης δικαιούχος → share + owed (= share
-	 *    + ledger income − payments περιόδου).
+	 *    + ledger income − κρατήσεις − payments περιόδου, ledger_net()).
 	 *  - others_sum: Σ share των υπολοίπων (μόνο πωλήσεις).
 	 *  - others_owed_sum (1.8.4): Σ owed των υπολοίπων — ίδια σημασιολογία
 	 *    με το «net» του εκδότη (share + ledger), αυτό δείχνουν οι κάρτες
@@ -853,14 +866,7 @@ final class SP_Data {
 
 				// ---- Εκδότης ----
 				$pub_share = $shares[ $publisher ] ?? 0.0;
-				$pub_net   = $known
-					? round(
-						$pub_share
-						+ RS_Ledger::sum( $publisher, $start, $end, 'income' )
-						- RS_Ledger::sum( $publisher, $start, $end, 'payment' ),
-						2
-					)
-					: 0.0;
+				$pub_net   = $known ? round( $pub_share + self::ledger_net( $publisher, $start, $end ), 2 ) : 0.0;
 
 				// ---- Οι υπόλοιποι ----
 				$others     = array();
@@ -872,12 +878,7 @@ final class SP_Data {
 						continue;
 					}
 
-					$owed = round(
-						$share
-						+ RS_Ledger::sum( $name, $start, $end, 'income' )
-						- RS_Ledger::sum( $name, $start, $end, 'payment' ),
-						2
-					);
+					$owed = round( $share + self::ledger_net( $name, $start, $end ), 2 );
 
 					$others_sum += $share;
 					$owed_sum   += $owed;

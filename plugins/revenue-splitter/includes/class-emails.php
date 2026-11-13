@@ -414,14 +414,26 @@ final class RS_Emails {
 				break;
 			}
 		}
-		$inc_l  = RS_Ledger::sum( $who, '2000-01-01', $end, 'income' );
-		$pay_l  = RS_Ledger::sum( $who, '2000-01-01', $end, 'payment' );
-		$remain = round( $sales_l + $inc_l - $pay_l, 2 );
+		// 1.17.0: other income − deductions − payments (RS_Ledger::net).
+		$remain = round( $sales_l + RS_Ledger::net( $who, '2000-01-01', $end ), 2 );
+
+		// 1.17.0: the month's deductions, listed in the email.
+		$deductions = array();
+		foreach ( array_reverse( RS_Ledger::for_beneficiary( $who, 'expense' ) ) as $e ) {
+			if ( $e['date'] >= $start && $e['date'] <= $end ) {
+				$deductions[] = array(
+					'date'   => (string) $e['date'],
+					'text'   => RS_Ledger::describe( $e ),
+					'amount' => round( (float) $e['amount'], 2 ),
+				);
+			}
+		}
 
 		return array(
-			'share'     => round( $share, 2 ),
-			'remaining' => $remain,
-			'rows'      => $rows,
+			'share'      => round( $share, 2 ),
+			'remaining'  => $remain,
+			'rows'       => $rows,
+			'deductions' => $deductions,
 		);
 	}
 
@@ -485,6 +497,19 @@ final class RS_Emails {
 		}
 
 		$inner .= '</table>';
+
+		// 1.17.0: «Κρατήσεις» of the month (money kept from the balance).
+		if ( ! empty( $data['deductions'] ) ) {
+			$inner .= '<h3 style="margin:16px 0 6px;font-size:1em;color:#f6f4ff;">' . esc_html__( 'Κρατήσεις', 'revenue-splitter' ) . '</h3>';
+			$inner .= '<table style="width:100%;border-collapse:collapse;">';
+			foreach ( $data['deductions'] as $d ) {
+				$inner .= '<tr>';
+				$inner .= '<td style="border:1px solid #2e3240;padding:6px 10px;">' . esc_html( RS_Lang::fmt_date( $d['date'] ) . ' · ' . $d['text'] ) . '</td>';
+				$inner .= '<td style="border:1px solid #2e3240;padding:6px 10px;text-align:right;font-weight:600;">−' . esc_html( $cur( $d['amount'] ) ) . '</td>';
+				$inner .= '</tr>';
+			}
+			$inner .= '</table>';
+		}
 
 		$inner .= '<p style="margin:16px 0 0;color:#b7b2d6;font-size:0.85em;">';
 		$inner .= esc_html__( 'Η αναφορά στέλνεται επειδή έχεις ενεργοποιήσει τη μηνιαία αναφορά στο portal σου. Μπορείς να την απενεργοποιήσεις εκεί ανά πάσα στιγμή.', 'revenue-splitter' );

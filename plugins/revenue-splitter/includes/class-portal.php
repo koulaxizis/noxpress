@@ -915,9 +915,8 @@ final class RS_Portal {
 		$rep_prev = RS_Reports::run( array( 'date_start' => $prev->format( 'Y-m-01' ), 'date_end' => $prev->format( 'Y-m-t' ) ) );
 
 		$sales_l = RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0;
-		$inc_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'income' );
-		$pay_l   = RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' );
-		$remain  = round( $sales_l + $inc_l - $pay_l, 2 );
+		// 1.17.0: other income − deductions − payments (RS_Ledger::net).
+		$remain  = round( $sales_l + RS_Ledger::net( $who, '2000-01-01', $today ), 2 );
 
 		$this_share = self::share_of( $rep_this, $who );
 		$prev_share = self::share_of( $rep_prev, $who );
@@ -1199,9 +1198,9 @@ final class RS_Portal {
 					<?php foreach ( $history as $e ) : ?>
 					<tr>
 							<td><?php echo esc_html( RS_Lang::fmt_date( $e['date'] ) ); ?></td>
-						<td><?php echo esc_html( 'income' === $e['type'] ? __( 'Έσοδο', 'revenue-splitter' ) : __( 'Πληρωμή', 'revenue-splitter' ) ); ?></td>
-						<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? ( $e['amount'] < 0 ? '−' : '+' ) : '−' ) . $cur( abs( (float) $e['amount'] ) ) ); ?></strong></td>
-						<td><?php echo esc_html( $e['note'] ); ?></td>
+						<td><?php echo esc_html( RS_Ledger::type_label( $e['type'] ) ); ?></td>
+						<td class="num"><strong><?php echo esc_html( ( RS_Ledger::signed( $e ) < 0 ? '−' : '+' ) . $cur( abs( (float) $e['amount'] ) ) ); ?></strong></td>
+						<td><?php echo esc_html( RS_Ledger::describe( $e ) ); ?></td>
 					</tr>
 					<?php endforeach; ?>
 				<?php endif; ?>
@@ -1209,7 +1208,7 @@ final class RS_Portal {
 			</table>
 
 			<p class="rs-pt-note">
-				<?php esc_html_e( 'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.', 'revenue-splitter' ); ?>
+				<?php esc_html_e( 'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − κρατήσεις (π.χ. συμμετοχή σε παραγωγή) − πληρωμές που έχεις λάβει.', 'revenue-splitter' ); ?>
 			</p>
 
 			<?php
@@ -1369,7 +1368,12 @@ final class RS_Portal {
 		}
 
 		fputcsv( $out, array(), ',', '"', '\\' );
-		fputcsv( $out, array( __( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ), $cur( ( RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0 ) + RS_Ledger::sum( $who, '2000-01-01', $today, 'income' ) - RS_Ledger::sum( $who, '2000-01-01', $today, 'payment' ) ) ), ',', '"', '\\' );
+		// 1.17.0: deductions (all time) on their own line, then the balance.
+		$exp_l = RS_Ledger::sum( $who, '2000-01-01', $today, 'expense' );
+		if ( $exp_l > 0 ) {
+			fputcsv( $out, array( __( 'Κρατήσεις', 'revenue-splitter' ), $cur( -1 * $exp_l ) ), ',', '"', '\\' );
+		}
+		fputcsv( $out, array( __( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ), $cur( ( RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0 ) + RS_Ledger::net( $who, '2000-01-01', $today ) ) ), ',', '"', '\\' );
 
 		fclose( $out );
 		exit;

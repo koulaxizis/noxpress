@@ -6,9 +6,9 @@
  *
  *   wp rs report [--start=Y-m-d] [--end=Y-m-d] [--product=<id>]
  *               [--ben=<name>] [--format=table|json]
- *   wp rs ledger-add --type=income|payment --ben=<name> --amount=<n>
+ *   wp rs ledger-add --type=income|payment|expense --ben=<name> --amount=<n>
  *                   --note="<reason>" [--date=Y-m-d]
- *   wp rs ledger-list [--ben=<name>] [--type=income|payment] [--format=table|json]
+ *   wp rs ledger-list [--ben=<name>] [--type=income|payment|expense] [--format=table|json]
  *   wp rs ledger-delete --id=<id>
  *   wp rs balance --ben=<name>
  *   wp rs backup
@@ -208,18 +208,19 @@ final class RS_CLI {
 	 * =================================================================== */
 
 	/**
-	 * Add a ledger entry (non-sales income or payment).
+	 * Add a ledger entry (non-sales income, deduction or payment).
 	 *
 	 * ## OPTIONS
 	 *
 	 * --type=<type>
-	 * : Entry type: income or payment.
+	 * : Entry type: income, payment or expense (a deduction: money kept
+	 * from the balance, e.g. a share in a production).
 	 *
 	 * --ben=<name>
 	 * : Beneficiary name (must exist in Settings).
 	 *
 	 * --amount=<amount>
-	 * : Amount (payments: positive only; income: + or -, non-zero).
+	 * : Amount (payments and deductions: positive only; income: + or -, non-zero).
 	 *
 	 * --note=<note>
 	 * : Mandatory reason.
@@ -228,12 +229,16 @@ final class RS_CLI {
 	 * : Entry date (Y-m-d). Default: today.
 	 *
 	 * [--channel=<channel>]
-	 * : Optional sales channel (must exist in the Settings channel list).
+	 * : Optional sales channel (must exist in the Settings channel list; never for a deduction).
+	 *
+	 * [--product=<id>]
+	 * : Deductions only: the product the deduction is for.
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp rs ledger-add --type=income --ben="Maria Papadopoulou" --amount=-40 --note="correction: double entry June"
 	 *     wp rs ledger-add --type=payment --ben="Maria Papadopoulou" --amount=250 --note="Q3 payout" --date=2026-09-30
+	 *     wp rs ledger-add --type=expense --ben="Maria Papadopoulou" --amount=300 --note="share in the audiobook production" --product=123
 	 */
 	public static function ledger_add( array $args, array $assoc ): void {
 
@@ -257,6 +262,7 @@ final class RS_CLI {
 			'amount'      => (string) $assoc['amount'],
 			'note'        => (string) $assoc['note'],
 			'channel'     => isset( $assoc['channel'] ) ? (string) $assoc['channel'] : '',
+			'product_id'  => isset( $assoc['product'] ) ? absint( $assoc['product'] ) : 0,
 		);
 
 		$res = RS_Ledger::add( $entry );
@@ -282,7 +288,7 @@ final class RS_CLI {
 	 * : Filter by beneficiary.
 	 *
 	 * [--type=<type>]
-	 * : Filter by type: income or payment.
+	 * : Filter by type: income, payment or expense.
 	 *
 	 * [--format=<format>]
 	 * : Output format: table or json. Default: table.
@@ -299,8 +305,8 @@ final class RS_CLI {
 		$ben  = isset( $assoc['ben'] ) ? (string) $assoc['ben'] : null;
 		$type = isset( $assoc['type'] ) ? (string) $assoc['type'] : null;
 
-		if ( null !== $type && ! in_array( $type, array( 'income', 'payment' ), true ) ) {
-			WP_CLI::error( 'Invalid --type (income|payment).' );
+		if ( null !== $type && ! in_array( $type, RS_Ledger::TYPES, true ) ) {
+			WP_CLI::error( 'Invalid --type (income|payment|expense).' );
 		}
 
 		$entries = RS_Ledger::all();
@@ -341,7 +347,7 @@ final class RS_CLI {
 					'type'   => $e['type'],
 					'ben'    => $e['beneficiary'],
 					'amount' => self::fmt( $e['amount'] ),
-					'note'   => $e['note'],
+					'note'   => RS_Ledger::describe( $e ),
 				);
 			},
 			$entries
@@ -395,7 +401,7 @@ final class RS_CLI {
 
 	/**
 	 * Show the LIFETIME balance of a beneficiary (all-time sales +
-	 * non-sales income − payments).
+	 * non-sales income − deductions − payments).
 	 *
 	 * ## OPTIONS
 	 *
@@ -418,8 +424,10 @@ final class RS_CLI {
 		$now = new DateTimeImmutable( 'now', wp_timezone() );
 
 		$sales  = RS_Reports::lifetime_beneficiaries()[ $ben ] ?? 0.0;
-		$income = RS_Ledger::sum( $ben, '2000-01-01', $now->format( 'Y-m-d' ), 'income' );
-		$paid   = RS_Ledger::sum( $ben, '2000-01-01', $now->format( 'Y-m-d' ), 'payment' );
+		$today  = $now->format( 'Y-m-d' );
+		$income = RS_Ledger::sum( $ben, '2000-01-01', $today, 'income', true );
+		$deduct = RS_Ledger::sum( $ben, '2000-01-01', $today, 'expense' );
+		$paid   = RS_Ledger::sum( $ben, '2000-01-01', $today, 'payment' );
 
 		// Audit fix: lifetime_beneficiaries() κάνει caching 5' —
 		// ο χρήστης πρέπει να ξέρει ότι το balance μπορεί να είναι
@@ -427,8 +435,9 @@ final class RS_CLI {
 		WP_CLI::line( 'Lifetime balance for "' . $ben . '"' );
 		WP_CLI::line( '  All-time sales:      ' . self::fmt( $sales ) );
 		WP_CLI::line( '  Non-sales income:    ' . self::fmt( $income ) );
+		WP_CLI::line( '  Deductions:          ' . self::fmt( $deduct ) );
 		WP_CLI::line( '  Payments:            ' . self::fmt( $paid ) );
-		WP_CLI::line( '  Remaining payable:   ' . self::fmt( $sales + $income - $paid ) );
+		WP_CLI::line( '  Remaining payable:   ' . self::fmt( $sales + RS_Ledger::net( $ben, '2000-01-01', $today ) ) );
 	}
 
 	/* =====================================================================
