@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.4
+Stable tag: 1.8.5
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -61,6 +61,9 @@ VAT is the same (Store Pulse uses Revenue Splitter's rate for each product). The
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.8.5 =
+* Changed: «Publisher profit» and «Owed to others» also subtract the Revenue Splitter's new «Deduction» ledger entries (money kept from a creator's balance, e.g. their share in a production; Revenue Splitter 1.17.0). With an older Revenue Splitter nothing changes.
 
 = 1.8.4 =
 * New: two more periods, «This month» (from the 1st) and «This year» (from 1 January), for every period setting. «This year» matches the Revenue Splitter widget.

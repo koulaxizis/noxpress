@@ -272,7 +272,7 @@ class RS_Lang {
 		'Χωρίς ΦΠΑ'                                               => 'Without VAT',
 		'Στοκ'                                                    => 'Stock',
 		'Το μερίδιό μου'                                          => 'My share',
-		'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − πληρωμές που έχεις λάβει.' => '"Outstanding balance" = all-time shares from sales + income outside sales − payments received.',
+		'Το «αποπληρωτέο υπόλοιπο» = all-time μερίδια από πωλήσεις + έσοδα εκτός πωλήσεων − κρατήσεις (π.χ. συμμετοχή σε παραγωγή) − πληρωμές που έχεις λάβει.' => 'The «payable balance» = all-time sales shares + non-sales income − deductions (e.g. a share in a production) − payments you have received.',
 		'Ποσοστό'                                                => 'Percent',
 		'Μερίδιο'                                                 => 'Share',
 		'Καμία πώληση σε αυτή την περίοδο.'                      => 'No sales in this period.',
@@ -297,6 +297,18 @@ class RS_Lang {
 
 		// --- Ledger / checkout / stock ---
 		'Έσοδα εκτός πωλήσεων & Πληρωμές'                        => 'Non-sales income & Payments',
+		'Έσοδα εκτός πωλήσεων, Κρατήσεις & Πληρωμές'            => 'Non-sales income, Deductions & Payments',
+		// 1.17.0: «Κράτηση» (deduction).
+		'Κράτηση'                                               => 'Deduction',
+		'Κρατήσεις'                                             => 'Deductions',
+		'Κράτηση (−)'                                           => 'Deduction (−)',
+		'— χωρίς προϊόν —'                                       => '— no product —',
+		'Προϊόν (προαιρετικό)'                                  => 'Product (optional)',
+		'Η κράτηση πρέπει να είναι θετικό ποσό (αφαιρείται από το υπόλοιπο).' => 'A deduction must be a positive amount (it is subtracted from the balance).',
+		'Το προϊόν της κράτησης δεν βρέθηκε.'                    => 'The product of the deduction was not found.',
+		/* translators: 1: beneficiary, 2: balance */
+		'Το υπόλοιπο του/της %1$s είναι τώρα %2$s: θα καλυφθεί από τις επόμενες πωλήσεις.' => 'The balance of %1$s is now %2$s: the next sales will cover it.',
+		'Η κράτηση είναι μεγαλύτερη από το υπόλοιπο (%s). Το υπόλοιπο θα γίνει αρνητικό και θα καλυφθεί από τις επόμενες πωλήσεις. Συνέχεια;' => 'The deduction is larger than the balance (%s). The balance will go below zero and the next sales will cover it. Continue?',
 		'Πληρωμή'                                                => 'Payment',
 		'Έσοδο'                                                  => 'Income',
 		'Έσοδο (+/−)'                                            => 'Income (+/−)',
@@ -323,8 +335,8 @@ class RS_Lang {
 		'Αιτιολογία δωρεάν αντιτύπου'                             => 'Free copy reason',
 		'π.χ. δώρο, διαγωνισμός, κριτική βιβλίου…'               => 'e.g. gift, giveaway, book review…',
 		'Παρακαλώ συμπλήρωσε την αιτιολογία δωρεάν αντιτύπου.'    => 'Please provide the reason for your free copy.',
-		'Προσαρμογές εκτός WooCommerce: bonus, υποτροφίες, διορθώσεις («Έσοδο», + ή −) και αποπληρωμές («Πληρωμή», πάντα θετικές). Κάθε εγγραφή χρειάζεται αιτιολογία.' => 'Adjustments outside WooCommerce: bonuses, grants, corrections ("Income", + or −) and payouts ("Payment", always positive). Every entry requires a reason.',
-		'Η πληρωμή πρέπει να είναι θετικό ποσό (ποσά που αφαιρούνται καταχωρούνται ως «Έσοδο» με αρνητική τιμή).' => 'A payment must be a positive amount (deductions are entered as "Income" with a negative value).',
+		'Προσαρμογές εκτός WooCommerce: bonus, υποτροφίες, διορθώσεις («Έσοδο», + ή −), ποσά που κρατάμε από όσα δικαιούται ο δικαιούχος, π.χ. για συμμετοχή σε παραγωγή («Κράτηση», πάντα θετική, αφαιρείται από το υπόλοιπο) και αποπληρωμές («Πληρωμή», πάντα θετικές). Κάθε εγγραφή χρειάζεται αιτιολογία.' => 'Adjustments outside WooCommerce: bonuses, grants, corrections («Income», + or −), money kept from what the beneficiary is owed, e.g. for a share in a production («Deduction», always positive, subtracted from the balance) and payouts («Payment», always positive). Every entry needs a reason.',
+		'Η πληρωμή πρέπει να είναι θετικό ποσό (για ποσά που κρατάμε από τον δικαιούχο διάλεξε «Κράτηση»).' => 'A payment must be a positive amount (for money kept from the beneficiary choose «Deduction»).',
 		'Άγνωστος δικαιούχος — αποθηκεύεις πρώτα τους δικαιούχους στις Ρυθμίσεις;' => 'Unknown beneficiary — did you save the beneficiaries in Settings first?',
 
 		// --- Portal CSV headers ---

@@ -8,8 +8,8 @@
  * and the same code paths:
  *
  *  revenue-splitter/report           the sales report of a period (read)
- *  revenue-splitter/balances         lifetime sales, other income, payments
- *                                    and what is owed, per beneficiary (read)
+ *  revenue-splitter/balances         lifetime sales, other income,
+ *                                    deductions, payments and what is owed, per beneficiary (read)
  *  revenue-splitter/monthly-status   who gets the monthly report, and
  *                                    whether last month's went out (read)
  *  revenue-splitter/monthly-preview  one beneficiary's monthly report, as
@@ -17,7 +17,7 @@
  *  revenue-splitter/send-test        a test email to the site's admin address
  *  revenue-splitter/monthly-send     last month's reports, now (destructive:
  *                                    emails leave the site)
- *  revenue-splitter/ledger-add       other income or payments, several at
+ *  revenue-splitter/ledger-add       other income, deductions or payments, several at
  *                                    once, validated as the Ledger form,
  *                                    all-or-nothing, with a dry run (1.13.0)
  *  revenue-splitter/ledger-delete    ledger entries by id, to undo an add
@@ -105,7 +105,7 @@ final class RS_Abilities {
 			),
 			'balances'        => array(
 				'label'       => 'Revenue Splitter: balances',
-				'description' => 'Per beneficiary, all time: sales share, other income and payments from the ledger, and what remains payable (as "wp rs balance"). Optional name for one beneficiary. Reports are cached for 5 minutes. Changes nothing.',
+				'description' => 'Per beneficiary, all time: sales share, other income, deductions and payments from the ledger, and what remains payable (as "wp rs balance"). Optional name for one beneficiary. Reports are cached for 5 minutes. Changes nothing.',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array( 'name' => $name ),
@@ -179,7 +179,7 @@ final class RS_Abilities {
 			),
 			'ledger-add'      => array(
 				'label'       => 'Revenue Splitter: add ledger entries',
-				'description' => 'Adds other income (type income; negative amounts are corrections) or payments (type payment; always positive) to the Ledger, as the Ledger form does: date YYYY-MM-DD, a known beneficiary, a non-zero amount and a required note; channel optional, from the Settings list. At most 100 entries; all-or-nothing (one invalid entry and nothing is written). An entry equal to an existing one (type, date, beneficiary, amount, note) is refused unless allow_duplicates. dry_run validates and shows what would be added without writing. Returns the new entries with their ids (for ledger-delete).',
+				'description' => 'Adds other income (type income; negative amounts are corrections), deductions (type expense: money kept from what the beneficiary is owed, e.g. their share in a production; always positive, subtracted from the balance; optional product_id of the product it is for; never a channel) or payments (type payment; always positive) to the Ledger, as the Ledger form does: date YYYY-MM-DD, a known beneficiary, a non-zero amount and a required note; channel optional, from the Settings list. At most 100 entries; all-or-nothing (one invalid entry and nothing is written). An entry equal to an existing one (type, date, beneficiary, amount, note) is refused unless allow_duplicates. dry_run validates and shows what would be added without writing. Returns the new entries with their ids (for ledger-delete).',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -192,13 +192,17 @@ final class RS_Abilities {
 								'properties'           => array(
 									'type'        => array(
 										'type' => 'string',
-										'enum' => array( 'income', 'payment' ),
+										'enum' => array( 'income', 'payment', 'expense' ),
 									),
 									'date'        => $date,
 									'beneficiary' => array( 'type' => 'string' ),
 									'amount'      => array( 'type' => 'number' ),
 									'note'        => array( 'type' => 'string' ),
 									'channel'     => array( 'type' => 'string' ),
+									'product_id'  => array(
+										'type'    => 'integer',
+										'minimum' => 0,
+									),
 								),
 								'required'             => array( 'type', 'date', 'beneficiary', 'amount', 'note' ),
 								'additionalProperties' => false,
@@ -240,7 +244,7 @@ final class RS_Abilities {
 			),
 			'statements-list'   => array(
 				'label'       => 'Revenue Splitter: statements of a month',
-				'description' => 'The creator statements of one month (YYYY-MM, default last month): per beneficiary the number, opening balance, sales share, other income, payments, closing balance, warnings (vat, qty, negative, no_email), whether it is the December settlement, the status (draft, sent, skipped, failed), when it was sent and the ledger id of a settlement payment. Emails are not shown. Also the settings (enabled, mode review/auto, excluded) and the months that have statements. Changes nothing.',
+				'description' => 'The creator statements of one month (YYYY-MM, default last month): per beneficiary the number, opening balance, sales share, other income, deductions, payments, closing balance, warnings (vat, qty, negative, no_email), whether it is the December settlement, the status (draft, sent, skipped, failed), when it was sent and the ledger id of a settlement payment. Emails are not shown. Also the settings (enabled, mode review/auto, excluded) and the months that have statements. Changes nothing.',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -374,14 +378,14 @@ final class RS_Abilities {
 		foreach ( $names as $n ) {
 			$n      = (string) $n;
 			$s      = (float) ( $sales[ $n ] ?? 0.0 );
-			$income = RS_Ledger::sum( $n, '2000-01-01', $today, 'income' );
-			$paid   = RS_Ledger::sum( $n, '2000-01-01', $today, 'payment' );
+			$income = RS_Ledger::sum( $n, '2000-01-01', $today, 'income', true );
 			$out[]  = array(
-				'name'      => $n,
-				'sales'     => round( $s, 2 ),
-				'income'    => round( $income, 2 ),
-				'payments'  => round( $paid, 2 ),
-				'remaining' => round( $s + $income - $paid, 2 ),
+				'name'       => $n,
+				'sales'      => round( $s, 2 ),
+				'income'     => round( $income, 2 ),
+				'deductions' => RS_Ledger::sum( $n, '2000-01-01', $today, 'expense' ),
+				'payments'   => RS_Ledger::sum( $n, '2000-01-01', $today, 'payment' ),
+				'remaining'  => round( $s + RS_Ledger::net( $n, '2000-01-01', $today ), 2 ),
 			);
 		}
 		usort(
@@ -456,6 +460,7 @@ final class RS_Abilities {
 				'opening'    => (float) $st['opening'],
 				'share'      => (float) $st['share'],
 				'income'     => (float) $st['income'],
+				'deductions' => (float) ( $st['deductions'] ?? 0 ),
 				'payments'   => (float) $st['payments'],
 				'closing'    => (float) $st['closing'],
 				'flags'      => array_values( (array) $st['flags'] ),

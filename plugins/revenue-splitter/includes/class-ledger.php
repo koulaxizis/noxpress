@@ -2,10 +2,12 @@
 /**
  * RS_Ledger — Έσοδα εκτός πωλήσεων + Πληρωμές (v1.3.0 → v1.3.6).
  *
- * Ενιαίο ledger ανά δικαιούχο, δύο τύποι εγγραφών:
+ * Ενιαίο ledger ανά δικαιούχο, τρεις τύποι εγγραφών:
  *  - 'income'  : custom έσοδα/προσαρμογές εκτός πωλήσεων. Επιτρέπονται
  *                ΑΡΝΗΤΙΚΕΣ εγγραφές (διορθώσεις/κρατήσεις) — όχι μηδέν.
  *  - 'payment' : αποπληρωμή προς τον δικαιούχο — ΠΑΝΤΑ θετικό ποσό.
+ *  - 'expense' : (1.17.0) «Κράτηση», ποσό που κρατάμε από όσα δικαιούται
+ *                ο δικαιούχος — ΠΑΝΤΑ θετικό, αφαιρείται από το υπόλοιπο.
  *
  * Κανόνες:
  *  - Κάθε εγγραφή έχει ΥΠΟΧΡΕΩΤΙΚΗ αιτιολογία (note).
@@ -26,6 +28,16 @@
  * σιωπηλή — επιστρέφει ρητό error notice (η εγγραφή δεν βρέθηκε /
  * άκυρο ID).
  *
+ * 1.17.0: third type 'expense' («Κράτηση», EN "Deduction"): money kept
+ * from what the beneficiary is owed, e.g. their share in a production
+ * they co-fund. Always a positive amount, subtracted from the balance,
+ * never a channel, optionally linked to one product (product_id). The
+ * balance is computed in ONE place, net() = income − expense − payment.
+ * For callers written before 1.17.0 (e.g. an older Store Pulse) the
+ * plain sum( 'income' ) still returns income − expense, so their
+ * "share + income − payment" stays right; sum( ..., 'income', true )
+ * returns the other income alone.
+ *
  * v1.3.6 (#2): «Εξόφληση όλων (περιόδου)» — mark-all-as-paid με
  * επιλογή διαστήματος [Από, Έως] + υποχρεωτική αιτιολογία. Για κάθε
  * δικαιούχο υπολογίζει: μερίδια πωλήσεων περιόδου (RS_Reports::run,
@@ -44,6 +56,9 @@ final class RS_Ledger {
 
 	const OPT_LEDGER = 'rs_ledger';
 	const NONCE_ACT  = 'rs_ledger_admin';
+
+	/** 1.17.0: the entry types. */
+	const TYPES = array( 'income', 'payment', 'expense' );
 
 	/** @var array[]|null v1.3.1 (#12): per-request cache του decoded ledger. */
 	private static $all_cache = null;
@@ -65,8 +80,9 @@ final class RS_Ledger {
 	 * static cache. Οι mutations (add/delete/wipe) το συγχρονίζουν.
 	 *
 	 * Σχέδιο εγγραφής:
-	 *   {id:int, date:'Y-m-d', type:'income'|'payment',
-	 *    beneficiary:string, amount:float, note:string}
+	 *   {id:int, date:'Y-m-d', type:'income'|'payment'|'expense',
+	 *    beneficiary:string, amount:float, note:string, channel:string,
+	 *    product_id:int (1.17.0, expense only, 0 = none)}
 	 *
 	 * @return array[]
 	 */
@@ -86,7 +102,7 @@ final class RS_Ledger {
 					|| ! isset( $e['id'], $e['date'], $e['type'], $e['beneficiary'], $e['amount'], $e['note'] ) ) {
 					continue;
 				}
-				if ( ! in_array( $e['type'], array( 'income', 'payment' ), true ) ) {
+				if ( ! in_array( $e['type'], self::TYPES, true ) ) {
 					continue;
 				}
 				$out[] = array(
@@ -101,6 +117,8 @@ final class RS_Ledger {
 					// εγγραφές χωρίς κανάλι ≠ error, απλώς κενό. Η λίστα
 					// καναλιών μπορεί να έχει αλλάξει μετά την εγγραφή.
 					'channel'     => isset( $e['channel'] ) && is_string( $e['channel'] ) ? sanitize_text_field( $e['channel'] ) : '',
+					// 1.17.0: product a deduction is for (0 = none).
+					'product_id'  => isset( $e['product_id'] ) ? absint( $e['product_id'] ) : 0,
 				);
 			}
 		}
@@ -137,18 +155,101 @@ final class RS_Ledger {
 	/**
 	 * Άθροισμα εγγραφών δικαιούχου σε περίοδο [start, end] (inclusive),
 	 * προαιρετικά ανά τύπο. Θετικές/αρνητικές τιμές αθροίζονται ως έχουν.
+	 *
+	 * 1.17.0: type 'income' without $strict returns income − expense, so
+	 * callers that only know income and payment (an older Store Pulse)
+	 * still get the right balance. Pass $strict = true for the other
+	 * income alone. For a balance use net().
 	 */
-	public static function sum( string $who, string $start, string $end, ?string $type = null ): float {
+	public static function sum( string $who, string $start, string $end, ?string $type = null, bool $strict = false ): float {
 
 		$total = 0.0;
+		$fold  = ( 'income' === $type && ! $strict );
 
-		foreach ( self::for_beneficiary( $who, $type ) as $e ) {
-			if ( $e['date'] >= $start && $e['date'] <= $end ) {
-				$total += (float) $e['amount'];
+		foreach ( self::for_beneficiary( $who, $fold ? null : $type ) as $e ) {
+			if ( $e['date'] < $start || $e['date'] > $end ) {
+				continue;
 			}
+			if ( $fold ) {
+				if ( 'income' === $e['type'] ) {
+					$total += (float) $e['amount'];
+				} elseif ( 'expense' === $e['type'] ) {
+					$total -= (float) $e['amount'];
+				}
+				continue;
+			}
+			$total += (float) $e['amount'];
 		}
 
 		return round( $total, 2 );
+	}
+
+	/**
+	 * 1.17.0: what the ledger adds to a beneficiary's balance in
+	 * [start, end]: other income − deductions − payments. The one place
+	 * the balance formula lives (balance = sales share + net()).
+	 */
+	public static function net( string $who, string $start, string $end ): float {
+
+		$total = 0.0;
+
+		foreach ( self::for_beneficiary( $who ) as $e ) {
+			if ( $e['date'] < $start || $e['date'] > $end ) {
+				continue;
+			}
+			$total += ( 'income' === $e['type'] ) ? (float) $e['amount'] : -1 * (float) $e['amount'];
+		}
+
+		return round( $total, 2 );
+	}
+
+	/**
+	 * 1.17.0: the label of an entry type, in the admin's language.
+	 * Public so the Portal, emails and statements use the same words.
+	 */
+	public static function type_label( string $type ): string {
+		switch ( $type ) {
+			case 'payment':
+				return __( 'Πληρωμή', 'revenue-splitter' );
+			case 'expense':
+				return __( 'Κράτηση', 'revenue-splitter' );
+			default:
+				return __( 'Έσοδο', 'revenue-splitter' );
+		}
+	}
+
+	/**
+	 * 1.17.0: the entry's note, with the linked product's title after it
+	 * for a deduction ("note · Title"). Plain text, escape on output.
+	 */
+	public static function describe( array $e ): string {
+		$note = (string) ( $e['note'] ?? '' );
+		$pid  = (int) ( $e['product_id'] ?? 0 );
+		if ( $pid > 0 ) {
+			$title = get_the_title( $pid );
+			if ( '' !== $title ) {
+				$note .= ' · ' . wp_strip_all_tags( $title );
+			}
+		}
+		return $note;
+	}
+
+	/**
+	 * 1.17.0: the signed amount of an entry as it moves the balance
+	 * (income as is, payments and deductions negative).
+	 */
+	public static function signed( array $e ): float {
+		return ( 'income' === ( $e['type'] ?? '' ) ) ? (float) $e['amount'] : -1 * (float) $e['amount'];
+	}
+
+	/**
+	 * 1.17.0: a beneficiary's payable balance today, all time
+	 * (lifetime sales share + net()), as the Portal shows it.
+	 */
+	public static function payable( string $who ): float {
+		$today = ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' );
+		$life  = class_exists( 'RS_Reports' ) ? (float) ( RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0 ) : 0.0;
+		return round( $life + self::net( $who, '2000-01-01', $today ), 2 );
 	}
 	
 	
@@ -198,13 +299,13 @@ final class RS_Ledger {
 	 * Κοινό validation + κανονικοποίηση εγγραφής (audit: κοινό για
 	 * add() και import_bulk() — μία πηγή αλήθειας για τους κανόνες).
 	 *
-	 * @param array $entry {type, date, beneficiary, amount, note, channel?}
+	 * @param array $entry {type, date, beneficiary, amount, note, channel?, product_id?}
 	 * @return array ['ok'=>true,'entry'=>normalized] ή ['ok'=>false,'error'=>string]
 	 */
 	private static function validate_entry( array $entry ): array {
 
 		$type = isset( $entry['type'] ) ? sanitize_key( (string) $entry['type'] ) : '';
-		if ( ! in_array( $type, array( 'income', 'payment' ), true ) ) {
+		if ( ! in_array( $type, self::TYPES, true ) ) {
 			return array( 'ok' => false, 'error' => __( 'Άκυρος τύπος εγγραφής.', 'revenue-splitter' ) );
 		}
 
@@ -230,7 +331,10 @@ final class RS_Ledger {
 		$amount_f = round( (float) $amount_raw, 2 );
 
 		if ( 'payment' === $type && $amount_f <= 0 ) {
-			return array( 'ok' => false, 'error' => __( 'Η πληρωμή πρέπει να είναι θετικό ποσό (ποσά που αφαιρούνται καταχωρούνται ως «Έσοδο» με αρνητική τιμή).', 'revenue-splitter' ) );
+			return array( 'ok' => false, 'error' => __( 'Η πληρωμή πρέπει να είναι θετικό ποσό (για ποσά που κρατάμε από τον δικαιούχο διάλεξε «Κράτηση»).', 'revenue-splitter' ) );
+		}
+		if ( 'expense' === $type && $amount_f <= 0 ) {
+			return array( 'ok' => false, 'error' => __( 'Η κράτηση πρέπει να είναι θετικό ποσό (αφαιρείται από το υπόλοιπο).', 'revenue-splitter' ) );
 		}
 		if ( 'income' === $type && 0.0 === $amount_f ) {
 			return array( 'ok' => false, 'error' => __( 'Το ποσό δεν μπορεί να είναι μηδέν.', 'revenue-splitter' ) );
@@ -243,10 +347,18 @@ final class RS_Ledger {
 
 		// v1.3.8 (#7): Κανάλι (προαιρετικό, whitelist από Ρυθμίσεις —
 		// server-side, ώστε και το state import να περνά από το ίδιο φίλτρο).
-		$channel = trim( sanitize_text_field( (string) ( $entry['channel'] ?? '' ) ) );
+		// 1.17.0: a deduction is not a sale, so it never has a channel.
+		$channel = ( 'expense' === $type ) ? '' : trim( sanitize_text_field( (string) ( $entry['channel'] ?? '' ) ) );
 
 		if ( '' !== $channel && ! in_array( $channel, RS_Admin_UI::get_channels(), true ) ) {
 			return array( 'ok' => false, 'error' => __( 'Μη έγκυρο κανάλι πώλησης (δεν είναι στη λίστα των Ρυθμίσεων).', 'revenue-splitter' ) );
+		}
+
+		// 1.17.0: optional product of a deduction (other types: always 0).
+		$raw_pid    = $entry['product_id'] ?? 0;
+		$product_id = ( 'expense' === $type && is_scalar( $raw_pid ) ) ? absint( $raw_pid ) : 0;
+		if ( $product_id > 0 && 'product' !== get_post_type( $product_id ) ) {
+			return array( 'ok' => false, 'error' => __( 'Το προϊόν της κράτησης δεν βρέθηκε.', 'revenue-splitter' ) );
 		}
 
 		return array(
@@ -258,6 +370,7 @@ final class RS_Ledger {
 				'amount'      => $amount_f,
 				'note'        => $note,
 				'channel'     => $channel,
+				'product_id'  => $product_id,
 			),
 		);
 	}
@@ -576,6 +689,9 @@ final class RS_Ledger {
 				// ελέγχεται μέσα στο add()).
 				// phpcs:ignore WordPress.Security.NonceVerification.Missing
 				'channel'     => isset( $_POST['rs_ledger_channel'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_ledger_channel'] ) ) : '',
+				// 1.17.0: product of a deduction (ignored for other types).
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'product_id'  => isset( $_POST['rs_ledger_product'] ) ? absint( wp_unslash( $_POST['rs_ledger_product'] ) ) : 0,
 			);
 
 			$res = self::add( $entry );
@@ -585,6 +701,22 @@ final class RS_Ledger {
 					'type' => 'success',
 					'text' => __( 'Η εγγραφή καταχωρήθηκε.', 'revenue-splitter' ),
 				);
+				// 1.17.0 (Christos: a deduction larger than the balance is
+				// allowed): say so, the next sales cover the minus.
+				if ( 'expense' === $entry['type'] ) {
+					$left = self::payable( $entry['beneficiary'] );
+					if ( $left < -0.005 ) {
+						$notices[] = array(
+							'type' => 'warning',
+							'text' => sprintf(
+								/* translators: 1: beneficiary, 2: balance */
+								__( 'Το υπόλοιπο του/της %1$s είναι τώρα %2$s: θα καλυφθεί από τις επόμενες πωλήσεις.', 'revenue-splitter' ),
+								$entry['beneficiary'],
+								number_format_i18n( $left, 2 )
+							),
+						);
+					}
+				}
 			} else {
 				$notices[] = array(
 					'type' => 'error',
@@ -607,7 +739,7 @@ final class RS_Ledger {
 	 * v1.3.6 (#2): «Εξόφληση όλων» — επεξεργασία του pay-all POST.
 	 *
 	 * Για κάθε δικαιούχο υπολογίζει, ΜΕΣΑ στο διάστημα [start, end]:
-	 *   μερίδια πωλήσεων (report περιόδου) + έσοδα εκτός πωλήσεων − πληρωμές
+	 *   μερίδια πωλήσεων (report περιόδου) + έσοδα εκτός πωλήσεων − κρατήσεις − πληρωμές
 	 * και αν το υπόλοιπο είναι θετικό (εύρος > 0.005), καταχωρεί Πληρωμή
 	 * ακριβώς αυτού, με ημερομηνία = $end και την αιτιολογία του χρήστη.
 	 *
@@ -666,8 +798,14 @@ final class RS_Ledger {
 		$candidates = array();
 		foreach ( RS_Beneficiaries::collect_names() as $name ) {
 			$has_sales  = isset( $sales_of[ $name ] );
-			$has_motion = 0.0 !== RS_Ledger::sum( $name, $start, $end, 'income' )
-						|| 0.0 !== RS_Ledger::sum( $name, $start, $end, 'payment' );
+			$has_motion = ! empty(
+				array_filter(
+					self::for_beneficiary( $name ),
+					static function ( $e ) use ( $start, $end ) {
+						return $e['date'] >= $start && $e['date'] <= $end;
+					}
+				)
+			);
 			if ( $has_sales || $has_motion ) {
 				$candidates[] = $name;
 			}
@@ -679,12 +817,8 @@ final class RS_Ledger {
 
 		foreach ( $candidates as $name ) {
 
-			$due = round(
-				( $sales_of[ $name ] ?? 0.0 )
-				+ RS_Ledger::sum( $name, $start, $end, 'income' )
-				- RS_Ledger::sum( $name, $start, $end, 'payment' ),
-				2
-			);
+			// 1.17.0: deductions of the period are subtracted too (net()).
+			$due = round( ( $sales_of[ $name ] ?? 0.0 ) + self::net( $name, $start, $end ), 2 );
 
 			if ( $due <= 0.005 ) {
 				continue; // Τίποτα προς εξόφληση στο διάστημα.
@@ -797,6 +931,32 @@ final class RS_Ledger {
 		return array();
 	}
 
+	/**
+	 * 1.17.0: products a deduction can be linked to, id => "Title (#id)",
+	 * by title. Drafts and private ones too: a production may not be on
+	 * sale yet.
+	 *
+	 * @return array<int,string>
+	 */
+	private static function product_choices(): array {
+		$ids = get_posts(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+				'posts_per_page' => 1000,
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			)
+		);
+		$out = array();
+		foreach ( $ids as $id ) {
+			$out[ (int) $id ] = wp_strip_all_tags( get_the_title( $id ) ) . ' (#' . (int) $id . ')';
+		}
+		return $out;
+	}
+
 	/** Πίνακας ledger + φόρμα καταχώρισης (καλείται από render_settings). */
 	public static function render_admin(): void {
 
@@ -809,9 +969,9 @@ final class RS_Ledger {
 		}
 		?>
 		<hr />
-		<h2><?php esc_html_e( 'Έσοδα εκτός πωλήσεων & Πληρωμές', 'revenue-splitter' ); ?></h2>
+		<h2><?php esc_html_e( 'Έσοδα εκτός πωλήσεων, Κρατήσεις & Πληρωμές', 'revenue-splitter' ); ?></h2>
 		<p class="description">
-			<?php esc_html_e( 'Προσαρμογές εκτός WooCommerce: bonus, υποτροφίες, διορθώσεις («Έσοδο», + ή −) και αποπληρωμές («Πληρωμή», πάντα θετικές). Κάθε εγγραφή χρειάζεται αιτιολογία.', 'revenue-splitter' ); ?>
+			<?php esc_html_e( 'Προσαρμογές εκτός WooCommerce: bonus, υποτροφίες, διορθώσεις («Έσοδο», + ή −), ποσά που κρατάμε από όσα δικαιούται ο δικαιούχος, π.χ. για συμμετοχή σε παραγωγή («Κράτηση», πάντα θετική, αφαιρείται από το υπόλοιπο) και αποπληρωμές («Πληρωμή», πάντα θετικές). Κάθε εγγραφή χρειάζεται αιτιολογία.', 'revenue-splitter' ); ?>
 		</p>
 
 		<table class="widefat striped rs-table">
@@ -833,10 +993,10 @@ final class RS_Ledger {
 				<?php foreach ( $entries as $e ) : ?>
 				<tr>
 					<td><?php echo esc_html( RS_Lang::fmt_date( $e['date'] ) ); ?></td>
-					<td><?php echo esc_html( 'income' === $e['type'] ? __( 'Έσοδο', 'revenue-splitter' ) : __( 'Πληρωμή', 'revenue-splitter' ) ); ?></td>
+					<td><?php echo esc_html( self::type_label( $e['type'] ) ); ?></td>
 					<td><strong><?php echo esc_html( $e['beneficiary'] ); ?></strong></td>
-					<td class="num"><strong><?php echo esc_html( ( 'income' === $e['type'] ? ( $e['amount'] < 0 ? '−' : '+' ) : '−' ) . number_format_i18n( abs( (float) $e['amount'] ), 2 ) ); ?></strong></td>
-					<td><?php echo esc_html( $e['note'] ); ?></td>
+					<td class="num"><strong><?php echo esc_html( ( self::signed( $e ) < 0 ? '−' : '+' ) . number_format_i18n( abs( (float) $e['amount'] ), 2 ) ); ?></strong></td>
+					<td><?php echo esc_html( self::describe( $e ) ); ?></td>
 					<td><?php echo esc_html( '' !== ( $e['channel'] ?? '' ) ? $e['channel'] : '—' ); ?></td>
 					<td>
 						<form method="post" style="display:inline; margin:0;">
@@ -853,17 +1013,29 @@ final class RS_Ledger {
 			</tbody>
 		</table>
 
-		<form method="post" class="rs-period-form" style="margin-top:14px;">
+		<form method="post" class="rs-period-form rs-ledger-add" style="margin-top:14px;"
+			data-warn="<?php esc_attr_e( 'Η κράτηση είναι μεγαλύτερη από το υπόλοιπο (%s). Το υπόλοιπο θα γίνει αρνητικό και θα καλυφθεί από τις επόμενες πωλήσεις. Συνέχεια;', 'revenue-splitter' ); ?>">
 			<?php wp_nonce_field( self::NONCE_ACT, 'rs_ledger_nonce' ); ?>
 
-			<select name="rs_ledger_type">
+			<select name="rs_ledger_type" id="rs-ledger-type">
 				<option value="income"><?php esc_html_e( 'Έσοδο (+/−)', 'revenue-splitter' ); ?></option>
+				<option value="expense"><?php esc_html_e( 'Κράτηση (−)', 'revenue-splitter' ); ?></option>
 				<option value="payment"><?php esc_html_e( 'Πληρωμή', 'revenue-splitter' ); ?></option>
 			</select>
 
-			<select name="rs_ledger_ben">
+			<?php // 1.17.0: data-balance = payable balance today, for the deduction warning (admin.js). ?>
+			<select name="rs_ledger_ben" id="rs-ledger-ben">
 				<?php foreach ( $names as $name ) : ?>
-					<option value="<?php echo esc_attr( $name ); ?>"><?php echo esc_html( $name ); ?></option>
+					<option value="<?php echo esc_attr( $name ); ?>" data-balance="<?php echo esc_attr( number_format( self::payable( $name ), 2, '.', '' ) ); ?>"><?php echo esc_html( $name ); ?></option>
+				<?php endforeach; ?>
+			</select>
+
+			<?php // 1.17.0: product a deduction is for (shown only for «Κράτηση», admin.js). ?>
+			<select name="rs_ledger_product" id="rs-ledger-product" class="rs-ledger-product" hidden
+				aria-label="<?php esc_attr_e( 'Προϊόν (προαιρετικό)', 'revenue-splitter' ); ?>">
+				<option value="0"><?php esc_html_e( '— χωρίς προϊόν —', 'revenue-splitter' ); ?></option>
+				<?php foreach ( self::product_choices() as $cpid => $ctitle ) : ?>
+					<option value="<?php echo esc_attr( (string) $cpid ); ?>"><?php echo esc_html( $ctitle ); ?></option>
 				<?php endforeach; ?>
 			</select>
 
@@ -881,7 +1053,7 @@ final class RS_Ledger {
 			<input type="date" name="rs_ledger_date"
 				value="<?php echo esc_attr( ( new DateTimeImmutable( 'now', wp_timezone() ) )->format( 'Y-m-d' ) ); ?>" />
 
-			<input type="text" name="rs_ledger_amount" class="rs-search" style="min-width:110px;"
+			<input type="text" name="rs_ledger_amount" id="rs-ledger-amount" class="rs-search" style="min-width:110px;"
 				placeholder="<?php esc_attr_e( 'Ποσό (π.χ. 150 ή -40)', 'revenue-splitter' ); ?>" required />
 
 			<input type="text" name="rs_ledger_note" class="rs-search" style="min-width:280px;"

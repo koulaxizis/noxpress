@@ -598,19 +598,20 @@ final class RS_Admin_UI {
 					break;
 				}
 			}
-			$inc_p = RS_Ledger::sum( $name, $per['start'], $per['end'], 'income' );
+			// 1.17.0: deductions in their own column; balances via net().
+			$inc_p = RS_Ledger::sum( $name, $per['start'], $per['end'], 'income', true );
+			$exp_p = RS_Ledger::sum( $name, $per['start'], $per['end'], 'expense' );
 			$pay_p = RS_Ledger::sum( $name, $per['start'], $per['end'], 'payment' );
-			$inc_l = RS_Ledger::sum( $name, '2000-01-01', $today, 'income' );
-			$pay_l = RS_Ledger::sum( $name, '2000-01-01', $today, 'payment' );
 			$life  = ( $lifetime[ $name ] ?? 0.0 );
 
 			$accounts[] = array(
 				'name'   => $name,
 				'sales'  => $sales,
 				'inc'    => $inc_p,
+				'exp'    => $exp_p,
 				'pay'    => $pay_p,
-				'remain' => round( $sales + $inc_p - $pay_p, 2 ),
-				'life'   => round( $life + $inc_l - $pay_l, 2 ),
+				'remain' => round( $sales + RS_Ledger::net( $name, $per['start'], $per['end'] ), 2 ),
+				'life'   => round( $life + RS_Ledger::net( $name, '2000-01-01', $today ), 2 ),
 			);
 		}
 		usort(
@@ -840,6 +841,7 @@ final class RS_Admin_UI {
 						<th><?php esc_html_e( 'Δικαιούχος', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Μερίδιο (χωρίς ΦΠΑ)', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Έσοδα εκτός πωλήσεων', 'revenue-splitter' ); ?></th>
+						<th class="num"><?php esc_html_e( 'Κρατήσεις', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Πληρωμές', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Υπόλοιπο (περιόδου)', 'revenue-splitter' ); ?></th>
 						<th class="num"><?php esc_html_e( 'Συνολικό υπόλοιπο', 'revenue-splitter' ); ?></th>
@@ -847,7 +849,7 @@ final class RS_Admin_UI {
 				</thead>
 				<tbody>
 				<?php if ( empty( $accounts ) ) : ?>
-					<tr><td colspan="6" class="rs-empty"><?php esc_html_e( 'Δεν υπάρχουν δεδομένα δικαιούχων στην περίοδο.', 'revenue-splitter' ); ?></td></tr>
+					<tr><td colspan="7" class="rs-empty"><?php esc_html_e( 'Δεν υπάρχουν δεδομένα δικαιούχων στην περίοδο.', 'revenue-splitter' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $accounts as $a ) : ?>
 					<tr>
@@ -859,6 +861,7 @@ final class RS_Admin_UI {
 						</td>
 						<td class="num"><?php echo esc_html( $cur( $a['sales'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( $cur( $a['inc'] ) ); ?></td>
+						<td class="num">−<?php echo esc_html( $cur( $a['exp'] ) ); ?></td>
 						<td class="num">−<?php echo esc_html( $cur( $a['pay'] ) ); ?></td>
 						<td class="num"><strong class="<?php echo esc_attr( $a['remain'] < 0 ? 'rs-neg' : '' ); ?>"><?php echo esc_html( $cur( $a['remain'] ) ); ?></strong></td>
 						<td class="num"><strong class="<?php echo esc_attr( $a['life'] < 0 ? 'rs-neg' : '' ); ?>"><?php echo esc_html( $cur( $a['life'] ) ); ?></strong></td>
@@ -2915,13 +2918,8 @@ final class RS_Admin_UI {
 						<td><strong class="rs-chip-name rs-name-pill" style="background:<?php echo esc_attr( self::ben_color( $b['name'] ) ); ?>;color:<?php echo esc_attr( self::chip_fg( self::ben_color( $b['name'] ) ) ); ?>;"><?php echo esc_html( $b['name'] ); ?></strong></td>
 						<td class="num"><?php echo esc_html( $cur( (float) $b['amount'] ) ); ?></td>
 						<?php
-						// v1.4.1 FIX: ενιαία σημασιολογία με το dashboard (sales + income − payments).
-						$widget_remain = round(
-							(float) $b['amount']
-							+ RS_Ledger::sum( $b['name'], $per['start'], $per['end'], 'income' )
-							- RS_Ledger::sum( $b['name'], $per['start'], $per['end'], 'payment' ),
-							2
-						);
+						// v1.4.1 FIX: ενιαία σημασιολογία με το dashboard (1.17.0: sales + net()).
+						$widget_remain = round( (float) $b['amount'] + RS_Ledger::net( $b['name'], $per['start'], $per['end'] ), 2 );
 						?>
 						<td class="num"><?php echo esc_html( $cur( $widget_remain ) ); ?></td>
 					</tr>

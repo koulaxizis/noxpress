@@ -4,7 +4,8 @@
  *
  * Builds on the monthly report of RS_Emails: one statement per beneficiary
  * and month, with the opening balance, the month's sales shares per title,
- * the Ledger's other income and payments, and the closing balance. It goes
+ * the Ledger's other income, deductions (1.17.0) and payments, and the
+ * closing balance. It goes
  * out as a short email with the full statement as a PDF (RS_PDF).
  *
  * Flow:
@@ -236,7 +237,7 @@ final class RS_Statements {
 	/** One beneficiary's statement, or null when there is nothing in it. */
 	private static function compute( string $ben, string $month, string $start, string $end, string $prior, array $month_r, array $open_s, array $set ): ?array {
 
-		$opening = round( (float) ( $open_s[ $ben ] ?? 0.0 ) + RS_Ledger::sum( $ben, '2000-01-01', $prior, 'income' ) - RS_Ledger::sum( $ben, '2000-01-01', $prior, 'payment' ), 2 );
+		$opening = round( (float) ( $open_s[ $ben ] ?? 0.0 ) + RS_Ledger::net( $ben, '2000-01-01', $prior ), 2 );
 
 		$rows  = array();
 		$share = 0.0;
@@ -275,6 +276,7 @@ final class RS_Statements {
 		$ledger   = array();
 		$income   = 0.0;
 		$payments = 0.0;
+		$deduct   = 0.0;
 		foreach ( array_reverse( RS_Ledger::for_beneficiary( $ben ) ) as $e ) {
 			if ( $e['date'] < $start || $e['date'] > $end ) {
 				continue;
@@ -284,10 +286,13 @@ final class RS_Statements {
 				'date'   => (string) $e['date'],
 				'type'   => (string) $e['type'],
 				'amount' => round( (float) $e['amount'], 2 ),
-				'note'   => (string) $e['note'],
+				// 1.17.0: a deduction's note carries its product's title.
+				'note'   => RS_Ledger::describe( $e ),
 			);
 			if ( 'payment' === $e['type'] ) {
 				$payments += (float) $e['amount'];
+			} elseif ( 'expense' === $e['type'] ) {
+				$deduct += (float) $e['amount'];
 			} else {
 				$income += (float) $e['amount'];
 			}
@@ -296,7 +301,8 @@ final class RS_Statements {
 		$share   = round( $share, 2 );
 		$income  = round( $income, 2 );
 		$pay     = round( $payments, 2 );
-		$closing = round( $opening + $share + $income - $pay, 2 );
+		$deduct  = round( $deduct, 2 );
+		$closing = round( $opening + $share + $income - $deduct - $pay, 2 );
 
 		if ( abs( $opening ) < 0.005 && abs( $closing ) < 0.005 && empty( $rows ) && empty( $ledger ) ) {
 			return null;
@@ -328,6 +334,7 @@ final class RS_Statements {
 			'share'      => $share,
 			'ledger'     => $ledger,
 			'income'     => $income,
+			'deductions' => $deduct, // 1.17.0; statements made before lack it (read with ?? 0).
 			'payments'   => $pay,
 			'closing'    => $closing,
 			'settlement' => '12' === substr( $month, 5, 2 ),
@@ -521,6 +528,9 @@ final class RS_Statements {
 		if ( abs( (float) $st['income'] ) > 0.004 ) {
 			$lines[] = array( 'Άλλα έσοδα', $cur( $st['income'] ), false );
 		}
+		if ( (float) ( $st['deductions'] ?? 0 ) > 0.004 ) {
+			$lines[] = array( 'Κρατήσεις', $cur( -1 * (float) $st['deductions'] ), false );
+		}
 		if ( (float) $st['payments'] > 0.004 ) {
 			$lines[] = array( 'Πληρωμές', $cur( -1 * (float) $st['payments'] ), false );
 		}
@@ -631,6 +641,19 @@ final class RS_Statements {
 			$section( 'Άλλα έσοδα' );
 			foreach ( $inc as $e ) {
 				$row( self::dmy( $e['date'] ) . ' · ' . $e['note'], '', '', self::money( (float) $e['amount'] ) );
+			}
+		}
+		// 1.17.0: «Κρατήσεις», money kept from the balance (e.g. a share in a production).
+		$ded = array_filter(
+			$st['ledger'],
+			static function ( $e ) {
+				return 'expense' === $e['type'];
+			}
+		);
+		if ( ! empty( $ded ) ) {
+			$section( 'Κρατήσεις' );
+			foreach ( $ded as $e ) {
+				$row( self::dmy( $e['date'] ) . ' · ' . $e['note'], '', '', self::money( -1 * (float) $e['amount'] ) );
 			}
 		}
 		if ( ! empty( $pay ) ) {
@@ -967,7 +990,7 @@ final class RS_Statements {
 							<td><strong><?php echo esc_html( $ben ); ?></strong><br /><small class="rs-muted"><?php echo esc_html( (string) $st['number'] ); ?></small></td>
 							<td class="num"><?php echo esc_html( self::money( (float) $st['opening'] ) ); ?></td>
 							<td class="num"><?php echo esc_html( self::money( (float) $st['share'] ) ); ?></td>
-							<td class="num"><?php echo esc_html( self::money( (float) $st['income'] - (float) $st['payments'] ) ); ?></td>
+							<td class="num"><?php echo esc_html( self::money( (float) $st['income'] - (float) ( $st['deductions'] ?? 0 ) - (float) $st['payments'] ) ); ?></td>
 							<td class="num"><strong><?php echo esc_html( self::money( (float) $st['closing'] ) ); ?></strong></td>
 							<td>
 								<?php if ( empty( $st['flags'] ) ) : ?>

@@ -9,8 +9,9 @@
  * revenue-splitter/balances and revenue-splitter/report abilities:
  *
  *  GET /wp-json/wc/v3/rs/balances?name=<beneficiary>
- *      per beneficiary, all time: sales share, other income, payments and
- *      what remains payable
+ *      per beneficiary, all time: sales share, other income, deductions
+ *      (1.17.0: remaining = sales + income − deductions − payments),
+ *      payments and what remains payable
  *  GET /wp-json/wc/v3/rs/report?date_start=Y-m-d&date_end=Y-m-d&name=<beneficiary>
  *      the products sold in a period (default: this calendar year) with
  *      their splits and current stock; with name, only the products that
@@ -222,9 +223,10 @@ final class RS_REST {
 			$out[] = array(
 				'name'      => (string) $b['name'],
 				'sales'     => self::cents( $b['sales'] ),
-				'income'    => self::cents( $b['income'] ),
-				'payments'  => self::cents( $b['payments'] ),
-				'remaining' => self::cents( $b['remaining'] ),
+				'income'     => self::cents( $b['income'] ),
+				'deductions' => self::cents( $b['deductions'] ),
+				'payments'   => self::cents( $b['payments'] ),
+				'remaining'  => self::cents( $b['remaining'] ),
 			);
 		}
 		return self::nocache(

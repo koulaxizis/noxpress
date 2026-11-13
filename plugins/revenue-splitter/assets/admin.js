@@ -3,6 +3,7 @@
  *  1. Live add/remove γραμμών δικαιούχων
  *  2. Ζωντανό Σ=100% validation (χρώμα, comma-tolerant)
  *  3. Toggle «global defaults» στο metabox
+ *  4. Ledger: product picker + balance warning for «Κράτηση» (1.17.0)
  *
  * v1.3.1 FIX (#4): ΑΦΑΙΡΕΘΗΚΕ η ενότητα 4 (Period presets / bindPresets)
  * μαζί με τον helper isoLocal() — στοχεύε selectors (#rs-period-preset,
@@ -143,11 +144,49 @@
 
 
 	/* ------------------------------------------------------------------
+	 * 1.17.0: Ledger form, «Κράτηση» (deduction)
+	 *  - the product picker shows only for a deduction
+	 *  - a deduction larger than the payable balance asks first (allowed:
+	 *    the next sales cover the minus)
+	 * ------------------------------------------------------------------ */
+
+	function ledgerToggle() {
+		var type = document.getElementById('rs-ledger-type');
+		var prod = document.getElementById('rs-ledger-product');
+		if (!type || !prod) return;
+		prod.hidden = (type.value !== 'expense');
+	}
+
+	document.addEventListener('change', function (e) {
+		if (e.target.matches('#rs-ledger-type')) ledgerToggle();
+	});
+
+	document.addEventListener('submit', function (e) {
+		var form = e.target;
+		if (!form.matches || !form.matches('form.rs-ledger-add')) return;
+
+		var type = document.getElementById('rs-ledger-type');
+		var ben = document.getElementById('rs-ledger-ben');
+		var amt = document.getElementById('rs-ledger-amount');
+		if (!type || !ben || !amt || type.value !== 'expense') return;
+
+		var opt = ben.options[ben.selectedIndex];
+		var bal = opt ? parseFloat(opt.getAttribute('data-balance')) : NaN;
+		var val = parseFloat(String(amt.value).replace(/\s/g, '').replace(',', '.'));
+		if (isNaN(bal) || isNaN(val) || !(val > bal)) return;
+
+		var msg = String(form.getAttribute('data-warn') || '').replace('%s', bal.toFixed(2));
+		if (msg !== '' && !window.confirm(msg)) e.preventDefault();
+	});
+
+
+	/* ------------------------------------------------------------------
 	 * Init
 	 * ------------------------------------------------------------------ */
 
 	document.addEventListener('DOMContentLoaded', function () {
 		bindRows(document);
+		ledgerToggle();
 		// v1.3.1 (#4): κανένα bindPresets() εδώ — δες κεφαλίδα.
 	});
 })();
