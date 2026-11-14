@@ -65,7 +65,7 @@ Notifications: WorkManager, about once an hour, `book-feed/notices` with the rea
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-Pull requests get the debug APK as an artifact of the "Android app" workflow. Release: raise `versionName` / `versionCode` in `app/build.gradle.kts`, add a `## <version>` section here in `CHANGELOG.md` and merge; the workflow publishes `nox-sba-<version>` with the signed APK. The signing key comes from the repository secrets (see `.github/workflows/android.yml`).
+Pull requests get the debug APK as an artifact of the "Android app" workflow. It is signed with the runner's own debug key (new on every run, no key in the repository) and installs as a separate app, `tech.noxpress.sitebridge.debug`, next to the signed one; it never replaces or updates it. Release: raise `versionName` / `versionCode` in `app/build.gradle.kts`, add a `## <version>` section here in `CHANGELOG.md` and merge; the workflow publishes `nox-sba-<version>` with the signed APK. The signing key comes from the repository secrets (see `.github/workflows/android.yml`).
 
 The debug build accepts plain http to `10.0.2.2`, `127.0.0.1` and `localhost` (a local test WordPress from the emulator). The release build is HTTPS only.
 
