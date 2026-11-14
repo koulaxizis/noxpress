@@ -80,15 +80,15 @@
     },
     "fast-pages": {
       "beta": {
-        "changelog": "* Fix: an empty wp-content/advanced-cache.php (WP Rocket leaves one behind when it is deactivated) no longer counts as another plugin's drop-in. «Turn on page cache» now replaces it, so no server access is needed after moving from WP Rocket.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-01). Update recommended. The page cache is emptied once on update.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2f6addf6e76bb0aecfb9673bbaa91874f8a7ba12c7270852987a36793dc7c313",
-        "signature": "IFgqU4K6RMnHP74rnJByDUK48Y7YVUh/4MkJMDwTHa9jc7Wq3Psw0zCEV0xMHZY8F9GrHRp8jFlZc6YTUI38Bg==",
+        "sha256": "0de5cfef72088d7bc211d11d90084705844da4187dd9ed2e827120388ae6b412",
+        "signature": "X8rkH0s8Bt5OSSidUt/063VYnZRLJZFrbYCqwCyXeMgdtj90Ll/a+LNaHzuaJQT/dcXeCWoXy+H5rHwZ8YDoDw==",
         "tested_wp": "7.1",
-        "version": "1.0.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.4/fast-pages.zip"
+        "version": "1.0.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.5/fast-pages.zip"
       }
     },
     "featured-creators": {
@@ -338,15 +338,15 @@
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.\n* New: \"Close now\" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.\n* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.\n* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.\n* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.",
-        "published": "2026-11-07",
+        "changelog": "* Security hardening (NXS-02, NXS-03, NXS-05, NXS-06, NXS-20). Update the Hub and every site. Some query shapes and option names that used to pass are now refused with a message that says what to do instead.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f8928251a06795db462c36d36392802d52c5d9309869d8c557943126f4372101",
-        "signature": "gAXag38Ledy+UUdL5Kw3gGU8ia87dk50wA2+bTlnOo+gBxWfRwmhOKmSu9GwFMtKhJyOwwplS48jyzbTuu2EAw==",
+        "sha256": "bb91178208cdcea71da47c5f04f630cea0e3b3b7b325016bb20cd9e3fa7c0a4c",
+        "signature": "7aF6q7I0nwBrFn6eGuNl1P137hEyhZJeGha5NRwqQKoJgyM0yu4DIZTUKRwbht6TfQ/MoVKM25ibrka2hL9TDw==",
         "tested_wp": "7.1",
-        "version": "1.12.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.0/site-bridge.zip"
+        "version": "1.12.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.1/site-bridge.zip"
       },
       "stable": {
         "changelog": "* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.\n* New: \"Close now\" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.\n* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.\n* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.\n* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.",
