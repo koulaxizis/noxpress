@@ -1,6 +1,6 @@
 {
-  "display": 1043,
-  "total": 1043,
+  "display": 1060,
+  "total": 1060,
   "offset": 5,
   "updated": "2026-11-14",
   "assets": {
@@ -1146,71 +1146,71 @@
     },
     "748276758": {
       "file": "nox-sb-1.12.1/site-bridge.zip",
-      "count": 1
+      "count": 2
     },
     "748277056": {
       "file": "nox-fp-1.0.5/fast-pages.zip",
-      "count": 1
+      "count": 2
     },
     "748298638": {
       "file": "nox-rs-1.18.1/revenue-splitter.zip",
-      "count": 0
+      "count": 1
     },
     "748298892": {
       "file": "nox-tp-1.6.2/theme-patcher.zip",
-      "count": 0
+      "count": 1
     },
     "748299083": {
       "file": "nox-bp-1.2.1/book-preview.zip",
-      "count": 0
+      "count": 1
     },
     "748299490": {
       "file": "nox-bf-1.13.2/book-feed.zip",
-      "count": 0
+      "count": 1
     },
     "748299641": {
       "file": "nox-ta-1.6.1/trade-accounts.zip",
-      "count": 0
+      "count": 1
     },
     "748299842": {
       "file": "nox-ml-1.0.4/magic-login.zip",
-      "count": 0
+      "count": 1
     },
     "748299984": {
       "file": "nox-ti-1.0.3/trade-feed-import.zip",
-      "count": 0
+      "count": 1
     },
     "748307071": {
       "file": "nox-pf-1.2.3/product-formats.zip",
-      "count": 0
+      "count": 1
     },
     "748307157": {
       "file": "nox-ew-1.2.3/easy-withdrawal.zip",
-      "count": 0
+      "count": 1
     },
     "748307303": {
       "file": "nox-cr-1.3.2/featured-creators.zip",
-      "count": 0
+      "count": 1
     },
     "748307571": {
       "file": "nox-nm-1.2.3/data-migrator.zip",
-      "count": 0
+      "count": 1
     },
     "748307688": {
       "file": "nox-hs-1.4.3/home-sections.zip",
-      "count": 0
+      "count": 1
     },
     "748307879": {
       "file": "nox-fp-1.0.6/fast-pages.zip",
-      "count": 0
+      "count": 1
     },
     "748307971": {
       "file": "nox-br-1.4.1/broadcast.zip",
-      "count": 0
+      "count": 1
     },
     "748308115": {
       "file": "nox-rd-1.0.3/redirects.zip",
-      "count": 0
+      "count": 1
     }
   }
 }
