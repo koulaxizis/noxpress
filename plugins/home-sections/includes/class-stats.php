@@ -351,7 +351,7 @@ final class HMS_Stats {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'rest' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => '__return_true', // Public (§22): only the counters a published shortcode shows.
 				'args'                => array(),
 			)
 		);
