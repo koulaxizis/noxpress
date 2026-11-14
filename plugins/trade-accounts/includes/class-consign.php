@@ -97,8 +97,12 @@ final class TRA_Consign {
 				'rewrite'             => false,
 				'query_var'           => false,
 				'supports'            => array( 'title' ),
-				'capability_type'     => 'post',
-				'map_meta_cap'        => true,
+				// Shop staff only (1.6.1): every post capability maps to manage_woocommerce.
+				'capabilities'        => array_fill_keys(
+					array( 'edit_post', 'read_post', 'delete_post', 'edit_posts', 'edit_others_posts', 'edit_private_posts', 'edit_published_posts', 'publish_posts', 'read_private_posts', 'delete_posts', 'delete_private_posts', 'delete_published_posts', 'delete_others_posts', 'create_posts', 'read' ),
+					'manage_woocommerce'
+				),
+				'map_meta_cap'        => false,
 			)
 		);
 	}

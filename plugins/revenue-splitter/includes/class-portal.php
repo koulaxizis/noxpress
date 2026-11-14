@@ -22,7 +22,9 @@
  *    — ανεξάρτητα από το κλειδί που μαντεύεται. Το reset έχει δικό του
  *    όριο ανά IP (rs_rl_r_*) ΚΑΙ ανά δικαιούχο (3/ώρα, rs_rl_b_*) που
  *    ΔΕΝ μηδενίζεται από επιτυχή reset/login.
- *  - Session: τυχαίο token → transient rs_tok_* (TTL 7 μέρες, sliding).
+ *  - Session: τυχαίο token → transient rs_tok_<hmac του token> (TTL 7 μέρες, sliding,
+ *    απόλυτο όριο 30 μέρες). Από 1.18.1 το session δένεται με το κλειδί: αλλαγή ή
+ *    διαγραφή του κλειδιού τερματίζει τα ανοιχτά sessions.
  *  - Login με κλειδί ΜΟΝΟ: το κλειδί ταυτοποιεί ΜΟΝΑΔΙΚΑ τον δικαιούχο
  *    (48-char alphanumeric) — scan όλων των hashed keys με
  *    hash_equals (timing-safe).
@@ -49,6 +51,7 @@ final class RS_Portal {
 	const SLUG_ADMIN  = 'revenue-splitter-portal';
 	const COOKIE_NAME = 'rs_ptok';
 	const TOK_TTL     = WEEK_IN_SECONDS;
+	const TOK_MAX     = 30 * DAY_IN_SECONDS; // Absolute session lifetime (1.18.1).
 
 	const RL_MAX = 5;        // αποτυχημένες προσπάθειες…
 	const RL_WIN = 900;      // …ανά 15 λεπτά.
@@ -74,6 +77,8 @@ final class RS_Portal {
 		// Legacy alias: παλιές σελίδες με [rs_portal].
 		add_shortcode( 'rs_portal', array( __CLASS__, 'shortcode' ) );
 		add_action( 'init', array( __CLASS__, 'route' ) );
+		// 1.18.1: the forgot-key lookup and e-mail run in the background.
+		add_action( 'rs_portal_reset_send', array( __CLASS__, 'reset_send' ) );
 		// v1.12.1: the portal is personal, never in a page cache.
 		add_action( 'template_redirect', array( __CLASS__, 'no_page_cache' ), 1 );
 		add_filter( 'noxpress_private_cookies', array( __CLASS__, 'private_cookie' ) );
@@ -337,17 +342,24 @@ final class RS_Portal {
 			return null;
 		}
 
-		$name = get_transient( 'rs_tok_' . $tok );
+		$slot = self::tok_slot( $tok );
+		$sess = get_transient( $slot );
+		$name = is_array( $sess ) && isset( $sess['who'] ) ? (string) $sess['who'] : '';
+		$live = '' !== $name
+			&& isset( $sess['k'], $sess['born'] )
+			&& hash_equals( self::key_mark( $name ), (string) $sess['k'] )
+			&& time() - (int) $sess['born'] < self::TOK_MAX;
 
-		if ( ! is_string( $name ) || '' === $name ) {
+		if ( ! $live ) {
+			delete_transient( $slot );
 			if ( ! headers_sent() ) {
 				self::clear_cookie();
 			}
 			return null;
 		}
 
-		// Sliding TTL.
-		set_transient( 'rs_tok_' . $tok, $name, self::TOK_TTL );
+		// Sliding TTL, never past the absolute lifetime.
+		set_transient( $slot, $sess, (int) min( self::TOK_TTL, self::TOK_MAX - ( time() - (int) $sess['born'] ) ) );
 
 		self::$session_who = $name;
 
@@ -370,9 +382,50 @@ final class RS_Portal {
 		);
 	}
 
+	/**
+	 * Background half of «Ξέχασες το κλειδί;» (1.18.1). Reverse lookup:
+	 * only here is the name found. Throttle per beneficiary (3/hour),
+	 * independent of login/IP and never reset by success: no mail-bombing
+	 * or endless rotation of someone else's key.
+	 */
+	public static function reset_send( $email ): void {
+		$email = is_string( $email ) ? trim( $email ) : '';
+		$who   = '' !== $email ? RS_Emails::name_for_email( $email ) : '';
+		if ( '' === $who || ! self::reset_allowed( $who ) ) {
+			return;
+		}
+		$plain = self::rotate_key( $who );
+		if ( '' !== $plain ) {
+			RS_Emails::send_key( $who, $plain, $email );
+			RS_Emails::notify_admin_rotation( $who );
+		}
+	}
+
+	/**
+	 * Transient name of a session (1.18.1): an HMAC of the token, so the
+	 * cookie value never appears in the options table.
+	 */
+	private static function tok_slot( string $tok ): string {
+		return 'rs_tok_' . substr( hash_hmac( 'sha256', $tok, wp_salt( 'auth' ) ), 0, 40 );
+	}
+
+	/** Fingerprint of the person's current key; '' when they have none. */
+	private static function key_mark( string $who ): string {
+		$keys = self::all_keys();
+		return isset( $keys[ $who ] ) && '' !== (string) $keys[ $who ] ? substr( hash_hmac( 'sha256', (string) $keys[ $who ], wp_salt( 'auth' ) ), 0, 32 ) : '';
+	}
+
 	private static function start_session( string $who ): void {
 		$tok = wp_generate_password( 40, false, false );
-		set_transient( 'rs_tok_' . $tok, $who, self::TOK_TTL );
+		set_transient(
+			self::tok_slot( $tok ),
+			array(
+				'who'  => $who,
+				'k'    => self::key_mark( $who ),
+				'born' => time(),
+			),
+			self::TOK_TTL
+		);
 		// php 7.3+ syntax: [name, value, expire, path, domain, secure, httponly, samesite]
 		setcookie(
 			self::COOKIE_NAME,
@@ -396,7 +449,7 @@ final class RS_Portal {
 		$tok = isset( $_COOKIE[ self::COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) : '';
 
 		if ( '' !== $tok ) {
-			delete_transient( 'rs_tok_' . $tok );
+			delete_transient( self::tok_slot( $tok ) );
 		}
 
 		self::clear_cookie();
@@ -465,21 +518,15 @@ final class RS_Portal {
 			}
 			self::record_attempt( 'reset' );
 
-			// Reverse lookup: ΜΟΝΟ εδώ αποκαλύπτεται το όνομα. Το
-			// outcome προς τον χρήστη είναι ΠΑΝΤΑ generic (no email
-			// enumeration) — μήνυμα 'rq'.
-			$who = RS_Emails::name_for_email( $email );
-
-			// Throttle ανά δικαιούχο (3/ώρα), ανεξάρτητο από login/IP και
-			// ΠΟΤΕ δεν μηδενίζεται από επιτυχία — κανένα mail-bombing ή
-			// συνεχές rotation του κλειδιού κάποιου τρίτου. Πάνω από το
-			// όριο: σιωπηλό skip, ίδιο generic μήνυμα.
-			if ( '' !== $who && self::reset_allowed( $who ) ) {
-				$plain = self::rotate_key( $who );
-
-				if ( '' !== $plain ) {
-					RS_Emails::send_key( $who, $plain, $email );
-					RS_Emails::notify_admin_rotation( $who );
+			// 1.18.1: the lookup and the e-mail run in the background
+			// (Action Scheduler, or WP-Cron without it), so the answer takes
+			// the same time whether or not the e-mail belongs to someone.
+			// The message is ALWAYS the generic 'rq' (no email enumeration).
+			if ( is_email( $email ) ) {
+				if ( function_exists( 'as_enqueue_async_action' ) ) {
+					as_enqueue_async_action( 'rs_portal_reset_send', array( $email ), 'revenue-splitter' );
+				} else {
+					wp_schedule_single_event( time(), 'rs_portal_reset_send', array( $email ) );
 				}
 			}
 

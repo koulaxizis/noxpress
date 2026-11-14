@@ -20,6 +20,8 @@ final class TFI_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		'%d βιβλίο του εκδότη το έχεις ήδη στο κατάστημα με το ίδιο ISBN. Δεν το αγγίξαμε. Αν είναι το ίδιο βιβλίο, σύνδεσέ το από τους «Τίτλους» (Σύνδεση όσων υπάρχουν ήδη), και από εκεί και πέρα θα ενημερώνονται μόνο τιμή και διαθεσιμότητα.' => '%d of the publisher\'s books is already in your shop with the same ISBN. We did not touch it. If it is the same book, link it from «Titles» (Link the ones that already exist), and from then on only its price and availability are updated.',
+		'%d βιβλία του εκδότη τα έχεις ήδη στο κατάστημα με το ίδιο ISBN. Δεν τα αγγίξαμε. Αν είναι τα ίδια βιβλία, σύνδεσέ τα από τους «Τίτλους» (Σύνδεση όσων υπάρχουν ήδη), και από εκεί και πέρα θα ενημερώνονται μόνο τιμή και διαθεσιμότητα.' => '%d of the publisher\'s books are already in your shop with the same ISBN. We did not touch them. If they are the same books, link them from «Titles» (Link the ones that already exist), and from then on only their price and availability are updated.',
 		'Το Trade Feed Import χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Trade Feed Import needs WooCommerce to be active — the plugin stays inactive until it is.',
 		'Το εξώφυλλο δεν είναι εικόνα JPEG, PNG, GIF ή WebP έως 10 MB.' => 'The cover is not a JPEG, PNG, GIF or WebP image of up to 10 MB.',
 		'Τίτλος' => 'Title',
@@ -78,7 +80,7 @@ final class TFI_Lang {
 		'Όχι ακόμα: να μπουν ως πρόχειρα, να τα δω πρώτα (προτείνεται)' => 'Not yet: add them as drafts so I can check them first (recommended)',
 		'Ναι, να φαίνονται αμέσως' => 'Yes, show them right away',
 		'Φέρε όλους τους τίτλους' => 'Bring all the titles',
-		'Κάθε βιβλίο έρχεται με εξώφυλλο, ISBN, συγγραφείς, περιγραφή και την τιμή λιανικής του εκδότη. Αν έχεις ήδη στο κατάστημα ένα βιβλίο με το ίδιο ISBN, δεν φτιάχνεται δεύτερο: το δικό σου απλώς παίρνει τιμή και διαθεσιμότητα από τον εκδότη. Από αύριο, τιμές και διαθεσιμότητα ενημερώνονται μόνες τους κάθε πρωί.' => 'Every book comes with its cover, ISBN, authors, description and the publisher\'s retail price. If your shop already has a book with the same ISBN, no second one is made: yours simply takes its price and availability from the publisher. From tomorrow, prices and availability update by themselves every morning.',
+		'Κάθε βιβλίο έρχεται με εξώφυλλο, ISBN, συγγραφείς, περιγραφή και την τιμή λιανικής του εκδότη. Αν έχεις ήδη στο κατάστημα ένα βιβλίο με το ίδιο ISBN, δεν φτιάχνεται δεύτερο και το δικό σου μένει όπως είναι· στο τέλος σου λέμε ποια είναι, για να τα συνδέσεις αν θέλεις. Από αύριο, τιμές και διαθεσιμότητα ενημερώνονται μόνες τους κάθε πρωί.' => 'Every book comes with its cover, ISBN, authors, description and the publisher\'s retail price. If your shop already has a book with the same ISBN, no second one is made and yours stays as it is; at the end we tell you which ones they are, so you can link them if you like. From tomorrow, prices and availability update by themselves every morning.',
 		'Λάθος στοιχεία; Σύνδεση από την αρχή' => 'Wrong details? Connect again from the start',
 		'Φέρνουμε τους τίτλους…' => 'Bringing the titles…',
 		'Διαβάστηκαν %1$d τίτλοι · νέα προϊόντα: %2$d · ενημερώθηκαν: %3$d' => '%1$d titles read · new products: %2$d · updated: %3$d',

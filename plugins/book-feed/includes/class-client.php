@@ -67,6 +67,61 @@ final class BKF_Client {
 		return self::parse( $res, $pass );
 	}
 
+	/**
+	 * 1.13.2: true when every address the host resolves to is public (no
+	 * loopback, private, link-local or reserved range, so no cloud metadata
+	 * service either). A site that allows a host through WordPress's
+	 * http_request_host_is_external filter keeps that choice.
+	 */
+	public static function public_url( string $url ): bool {
+		$host = strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) );
+		if ( '' === $host ) {
+			return false;
+		}
+		if ( apply_filters( 'http_request_host_is_external', false, $host, $url ) ) {
+			return true;
+		}
+		$ips = filter_var( $host, FILTER_VALIDATE_IP ) ? array( $host ) : gethostbynamel( $host );
+		if ( ! is_array( $ips ) || ! $ips ) {
+			return true; // Not resolvable here: the request itself fails.
+		}
+		foreach ( $ips as $ip ) {
+			if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Requests hook: a redirect to a non-public address stops the request (1.13.2). */
+	public static function check_redirect( $location ): void {
+		if ( ! self::public_url( (string) $location ) ) {
+			// WordPress 6.2+ (Requests 2). Older versions keep wp_safe_remote_get's own redirect check.
+			if ( ! class_exists( '\WpOrg\Requests\Exception' ) ) {
+				return;
+			}
+			throw new \WpOrg\Requests\Exception( __( 'Η διεύθυνση δεν είναι δημόσια (τοπικό ή εσωτερικό δίκτυο): το αίτημα δεν στάλθηκε.', 'book-feed' ), 'bkf_private' );
+		}
+	}
+
+	/**
+	 * wp_safe_remote_get() for a public address only, redirects included.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function public_get( string $url, array $args ) {
+		if ( ! self::public_url( $url ) ) {
+			return new WP_Error( 'bkf_private', __( 'Η διεύθυνση δεν είναι δημόσια (τοπικό ή εσωτερικό δίκτυο): το αίτημα δεν στάλθηκε.', 'book-feed' ) );
+		}
+		add_action( 'requests-requests.before_redirect', array( __CLASS__, 'check_redirect' ), 10, 1 );
+		try {
+			$r = wp_safe_remote_get( $url, $args );
+		} finally {
+			remove_action( 'requests-requests.before_redirect', array( __CLASS__, 'check_redirect' ), 10 );
+		}
+		return $r;
+	}
+
 	/** GET with https first when allowed; returns the body or WP_Error. */
 	private static function fetch( array $s, array $args ) {
 		$base  = $s['url'];
@@ -85,7 +140,7 @@ final class BKF_Client {
 		foreach ( $tries as $i => $url ) {
 			$full       = $url . '?' . http_build_query( $args, '', '&', PHP_QUERY_RFC3986 );
 			self::$last = self::redact( $url, (string) $args['pass'] );
-			$r          = wp_safe_remote_get(
+			$r          = self::public_get(
 				$full,
 				array(
 					'timeout'     => self::TIMEOUT,

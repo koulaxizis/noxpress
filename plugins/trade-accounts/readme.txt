@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,9 @@ The settings, the call log, the plugin's user and product meta, its Application 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.6.1 =
+* Security hardening (NXS-10, NXS-16). Update recommended. Feed passwords now sign in only to the Trade Feed routes, and an existing user becomes a trade account only when your account may edit that user.
 
 = 1.6.0 =
 * New: «Amount received» on the Consignments tab (and ability `consignment-payment`, with `dry_run`), for bookstores that pay round sums now and then. The amount is shared among all the bookstore's sold, unpaid copies in proportion to their value, to the cent, and makes one completed order with a line per title for its share, so Revenue Splitter splits it to the creators by their percentages. A line's quantity is the copies the payment completes (0 when it pays part of a copy). A settlement order paid in full this way is cancelled without stock change or e-mail, so nothing counts twice.

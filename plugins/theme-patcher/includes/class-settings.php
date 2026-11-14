@@ -282,9 +282,50 @@ final class TP_Settings {
 	 * =================================================================== */
 
 	public static function save( array $data ): bool {
-		$clean = self::sanitize_all( $data );
+		$clean = self::trust_texts( self::sanitize_all( $data ) );
 		self::$cache = $clean;
 		return false !== update_option( self::OPT, wp_json_encode( $clean, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ), true );
+	}
+
+	/** Text rows turned text-only by the last save() (shown to the user). */
+	public static $demoted = 0;
+
+	/**
+	 * Text rows that write raw HTML ("raw") need unfiltered_html, which
+	 * WooCommerce takes from shop managers. Without it, a new or changed
+	 * row is saved text-only; rows already stored exactly as they are stay
+	 * raw, so saving another tab never drops them (1.6.2).
+	 */
+	private static function trust_texts( array $all ): array {
+		self::$demoted = 0;
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $all;
+		}
+		$raw    = get_option( self::OPT, '' );
+		$stored = is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null;
+		$stored = is_array( $stored ) ? self::sanitize_all( $stored ) : self::defaults();
+		$kept   = array();
+		foreach ( $stored['themes'] as $theme ) {
+			foreach ( $theme['texts'] as $fix ) {
+				$kept[ self::text_sig( $fix ) ] = $fix['raw'];
+			}
+		}
+		foreach ( $all['themes'] as $key => $theme ) {
+			foreach ( $theme['texts'] as $i => $fix ) {
+				$sig = self::text_sig( $fix );
+				if ( $fix['raw'] && empty( $kept[ $sig ] ) ) {
+					$all['themes'][ $key ]['texts'][ $i ]['raw'] = false;
+					if ( ! isset( $kept[ $sig ] ) ) {
+						++self::$demoted;
+					}
+				}
+			}
+		}
+		return $all;
+	}
+
+	private static function text_sig( array $fix ): string {
+		return md5( $fix['find'] . "\0" . $fix['replace'] . "\0" . $fix['custom'] );
 	}
 
 	/** Replace the settings block of one theme (others untouched). */
@@ -695,6 +736,9 @@ final class TP_Settings {
 	 * Text table row. "find" is kept raw (it is only searched for); the
 	 * custom replacement may hold simple HTML (links, emphasis) and goes
 	 * through wp_kses_post(). An empty custom text removes the found text.
+	 * "raw" rows are searched in the whole HTML; text-only rows (saved
+	 * without unfiltered_html) change visible text only. Rows stored
+	 * before 1.6.2 carry no flag and stay raw.
 	 */
 	public static function sanitize_text( array $raw ): ?array {
 		$find = isset( $raw['find'] ) ? trim( (string) $raw['find'] ) : '';
@@ -712,6 +756,7 @@ final class TP_Settings {
 			'replace' => $replace,
 			'custom'  => $custom,
 			'scope'   => $scope,
+			'raw'     => array_key_exists( 'raw', $raw ) ? ! empty( $raw['raw'] ) : true,
 		);
 	}
 }

@@ -1179,6 +1179,9 @@ final class BKF_Admin_UI {
 			$msgs[] = self::msg( 'warning', __( 'Η διεύθυνση δεν είναι έγκυρη (http ή https, χωρίς παραμέτρους): κρατήθηκε η προεπιλογή.', 'book-feed' ) );
 		}
 		BKF_Settings::save( $new );
+		if ( BKF_Settings::$url_kept ) {
+			$msgs[] = self::msg( 'warning', __( 'Η διεύθυνση της υπηρεσίας δεν άλλαξε: σε άλλον server την αλλάζει μόνο διαχειριστής, και τότε ο κωδικός δίνεται ξανά.', 'book-feed' ) );
+		}
 		if ( $new['url'] !== $cur['url'] || ! empty( $in['https'] ) !== $cur['https'] ) {
 			delete_transient( BKF_Client::SCHEME_TR );
 		}
@@ -1191,6 +1194,8 @@ final class BKF_Admin_UI {
 			$pw = (string) wp_unslash( $_POST['bkf_pass'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			if ( strlen( $pw ) > 200 || preg_match( '/[\x00-\x1f]/', $pw ) ) {
 				$msgs[] = self::msg( 'error', __( 'Ο κωδικός δεν αποθηκεύτηκε: έως 200 χαρακτήρες, χωρίς χαρακτήρες ελέγχου.', 'book-feed' ) );
+			} elseif ( ! BKF_Crypt::has_salts() ) {
+				$msgs[] = self::msg( 'error', __( 'Ο κωδικός δεν αποθηκεύτηκε: το wp-config.php δεν έχει δικά του κλειδιά (AUTH_KEY, SECURE_AUTH_KEY, AUTH_SALT, SECURE_AUTH_SALT). Πρόσθεσέ τα ή χρησιμοποίησε τη σταθερά BKF_PASSWORD.', 'book-feed' ) );
 			} elseif ( ! BKF_Settings::set_password( $pw ) ) {
 				$msgs[] = self::msg( 'error', __( 'Ο κωδικός δεν αποθηκεύτηκε: η PHP του server δεν έχει OpenSSL με AES-256-GCM. Χρησιμοποίησε τη σταθερά BKF_PASSWORD.', 'book-feed' ) );
 			}
@@ -1389,7 +1394,7 @@ final class BKF_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="book-feed-log-' . wp_date( 'Y-m-d' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		fputcsv( $out, array( __( 'Πότε', 'book-feed' ), __( 'Ενέργεια', 'book-feed' ), __( 'Προϊόν', 'book-feed' ), __( 'Τίτλος', 'book-feed' ), 'ISBN', __( 'Πεδία', 'book-feed' ), __( 'Μήνυμα', 'book-feed' ) ), $sep, '"', '\\' );
+		fputcsv( $out, array( __( 'Πότε', 'book-feed' ), __( 'Ενέργεια', 'book-feed' ), __( 'Προϊόν', 'book-feed' ), __( 'Τίτλος', 'book-feed' ), 'ISBN', __( 'Πεδία', 'book-feed' ), __( 'Μήνυμα', 'book-feed' ) ), $sep, '"', '' );
 		foreach ( $rows as $e ) {
 			fputcsv(
 				$out,
@@ -1404,7 +1409,7 @@ final class BKF_Admin_UI {
 				),
 				$sep,
 				'"',
-				'\\'
+				''
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions

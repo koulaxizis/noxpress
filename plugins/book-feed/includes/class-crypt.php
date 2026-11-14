@@ -13,8 +13,24 @@ defined( 'ABSPATH' ) || exit;
 
 final class BKF_Crypt {
 
+	/**
+	 * 1.13.2: the four wp-config keys exist, are not empty and are not the
+	 * sample's placeholder. Without them nothing is sealed: a key built from
+	 * known text would not protect the password.
+	 */
+	public static function has_salts(): bool {
+		foreach ( array( 'AUTH_KEY', 'SECURE_AUTH_KEY', 'AUTH_SALT', 'SECURE_AUTH_SALT' ) as $c ) {
+			$v = defined( $c ) ? (string) constant( $c ) : '';
+			if ( strlen( $v ) < 16 || false !== stripos( $v, 'put your unique phrase here' ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public static function available(): bool {
-		return function_exists( 'openssl_encrypt' )
+		return self::has_salts()
+			&& function_exists( 'openssl_encrypt' )
 			&& in_array( 'aes-256-gcm', array_map( 'strtolower', (array) openssl_get_cipher_methods() ), true );
 	}
 

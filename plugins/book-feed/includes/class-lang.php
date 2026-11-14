@@ -25,6 +25,9 @@ final class BKF_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		'Ο κωδικός δεν αποθηκεύτηκε: το wp-config.php δεν έχει δικά του κλειδιά (AUTH_KEY, SECURE_AUTH_KEY, AUTH_SALT, SECURE_AUTH_SALT). Πρόσθεσέ τα ή χρησιμοποίησε τη σταθερά BKF_PASSWORD.' => 'The password was not saved: wp-config.php has no keys of its own (AUTH_KEY, SECURE_AUTH_KEY, AUTH_SALT, SECURE_AUTH_SALT). Add them or use the BKF_PASSWORD constant.',
+		'Η διεύθυνση της υπηρεσίας δεν άλλαξε: σε άλλον server την αλλάζει μόνο διαχειριστής, και τότε ο κωδικός δίνεται ξανά.' => 'The service address was not changed: only an administrator can move it to another server, and then the password is entered again.',
+		'Η διεύθυνση δεν είναι δημόσια (τοπικό ή εσωτερικό δίκτυο): το αίτημα δεν στάλθηκε.' => 'The address is not public (local or internal network): the request was not sent.',
 		'Το προϊόν δεν αποθηκεύτηκε.'                               => 'The product was not saved.',
 		'Το εξώφυλλο δεν είναι εικόνα JPEG, PNG, GIF ή WebP έως 10 MB.' => 'The cover is not a JPEG, PNG, GIF or WebP image of up to 10 MB.',
 		'Ο συγχρονισμός σταμάτησε με το χέρι.'                      => 'The sync was stopped by hand.',

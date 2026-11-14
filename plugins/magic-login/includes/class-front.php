@@ -32,6 +32,12 @@ final class MGL_Front {
 	/** @var array|null The link of this request: array( 'key' => 'id-token', 'entry' => array|null ). */
 	private static $link = null;
 
+	/** Cookie that ties «Σύνδεση» to the browser that opened the link (1.0.4). */
+	const BIND_COOKIE = 'mgl_bind';
+
+	/** @var string This request's bind value (set when a link is opened). */
+	private static $bind = '';
+
 	/** @var bool Set after an error: the plugin stays out of the rest of the request (Bible §14.6). */
 	private static $broken = false;
 
@@ -137,6 +143,7 @@ final class MGL_Front {
 				<p><?php echo esc_html( MGL_Settings::text( 'confirm', array( 'email' => MGL_Tokens::mask_email( (string) $user->user_email ) ) ) ); ?></p>
 				<?php wp_nonce_field( 'mgl_confirm', 'mgl_cnonce', false ); ?>
 				<input type="hidden" name="mgl_key" value="<?php echo esc_attr( self::$link['key'] ); ?>" />
+				<input type="hidden" name="mgl_bind" value="<?php echo esc_attr( self::bind_mark( self::$link['key'], self::$bind ) ); ?>" />
 				<button type="submit" class="<?php echo esc_attr( trim( $cls ) ); ?>" name="mgl_confirm" value="1"><?php echo esc_html( MGL_Settings::text( 'go' ) ); ?></button>
 			</form>
 			<?php
@@ -254,6 +261,11 @@ final class MGL_Front {
 		wc_add_notice( $sent_msg, 'success' );
 	}
 
+	/** Ties the confirmation form to the link and to this browser's cookie (1.0.4). */
+	private static function bind_mark( string $key, string $bind ): string {
+		return hash_hmac( 'sha256', $key . '|' . $bind, wp_salt( 'nonce' ) );
+	}
+
 	/** «Σύνδεση» on the confirmation box: use the token up, log in, go back. */
 	private static function confirm(): void {
 		if ( is_user_logged_in() ) {
@@ -261,6 +273,12 @@ final class MGL_Front {
 			exit;
 		}
 		if ( ! wp_verify_nonce( sanitize_key( self::post( 'mgl_cnonce' ) ), 'mgl_confirm' ) ) {
+			wc_add_notice( MGL_Settings::text( 'stale' ), 'error' );
+			return;
+		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- compared only.
+		$bind = isset( $_COOKIE[ self::BIND_COOKIE ] ) && is_string( $_COOKIE[ self::BIND_COOKIE ] ) ? (string) wp_unslash( $_COOKIE[ self::BIND_COOKIE ] ) : '';
+		if ( '' === $bind || ! hash_equals( self::bind_mark( self::post( 'mgl_key' ), $bind ), self::post( 'mgl_bind' ) ) ) {
 			wc_add_notice( MGL_Settings::text( 'stale' ), 'error' );
 			return;
 		}
@@ -311,6 +329,23 @@ final class MGL_Front {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the token is the credential.
 			$key    = sanitize_text_field( wp_unslash( (string) $_GET['mgl'] ) );
 			$parsed = MGL_Tokens::parse( $key );
+			// 1.0.4: «Σύνδεση» works only in the browser that opened the link
+			// (a SameSite cookie), so another site cannot post a link of its own.
+			self::$bind = wp_generate_password( 32, false, false );
+			if ( ! headers_sent() ) {
+				setcookie(
+					self::BIND_COOKIE,
+					self::$bind,
+					array(
+						'expires'  => time() + HOUR_IN_SECONDS,
+						'path'     => COOKIEPATH ? COOKIEPATH : '/',
+						'domain'   => COOKIE_DOMAIN,
+						'secure'   => is_ssl(),
+						'httponly' => true,
+						'samesite' => 'Lax',
+					)
+				);
+			}
 			// Read only: a mail scanner opening the link uses nothing up.
 			self::$link = array(
 				'key'   => $key,
