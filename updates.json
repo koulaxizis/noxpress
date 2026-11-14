@@ -1,172 +1,186 @@
 {
+  "expires": 1795890515,
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Security hardening (NXS-09, NXS-18). Update recommended. Titles, subtitles and other text from the feed are saved as plain text. Moving the service to another server needs an administrator and asks for the password again; requests go only to public addresses; the password is sealed only when wp-config.php has its own keys.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1b20b9d25472fc6b83dcfff5c3645613913dda9228554a7f990b677909977abb",
-        "signature": "TT/0V4eTqQCWAnC0LPBVKnj1SwWNlZHVPFgdklr6twfwnCAJ8lLeAQ11Yd80ea42f0EBEqh1Ydz02KvRYSRrDA==",
+        "sha256": "32c5207c396dce585fc11ab7ab86b73488c4b1174f35a27a018d996259e9d1a3",
+        "sig2": "tc1povSo8mbi3D365ZhEowIs69N++IDdpAzTTbaA6UoXxCyY3/zMda5ix5V3v1pNyjYh0rIcgxHB6UEmFCZUAw==",
+        "signature": "GGO1mY/MhebtI/ECK5C88Axa1mMeoYyPNUOo10y+usV2K7tJxAocFAY7HY68+5+9tzTj8cgKnCuQBp/qzEU8Bg==",
         "tested_wp": "7.1",
-        "version": "1.13.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.2/book-feed.zip"
+        "version": "1.13.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.3/book-feed.zip"
       }
     },
     "book-preview": {
       "beta": {
-        "changelog": "* Security hardening (NXS-07). Update recommended. The viewer opens, shows and links only http and https addresses.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a7113beff3fffa79e7fc706f626766fbd9458040fff820704692f59cb825034b",
-        "signature": "nKyYV0A135Pt/1AbYK+8biXwTTiY/S5gHh7isl2VGVaZ/vx5ccCHk9Pm2LKLANQo5CWga7UEjlcdj4Yo47RwAA==",
+        "sha256": "864f96c74f46725f0a281aa3d3d0ab5d37b11b4cf41ee198318945d2a244ae8a",
+        "sig2": "mMj1hMd4COZeICeL4hgUarApQMY1iZogRj2flMIq4aH+O+Zl7vtIabBpScJ28WJiH0A7+ILhwzSJrN9TF5I/CQ==",
+        "signature": "7KvbiaQQH6bXL6LslI4P54JaIWtkJiJIZIGT9i0Rbyoi45+59OVKnef595CdsmoqoZziHDKbv34P0xVvW01fCA==",
         "tested_wp": "7.1",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.2.1/book-preview.zip"
+        "version": "1.2.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.2.2/book-preview.zip"
       }
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Security hardening (NXS-19). The history CSV quotes every cell the standard way, and secrets are sealed only when wp-config.php has its own keys.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d58566744956be1b468f5c9bd37c711c97d55949596dd96c24c961373d4c9dc0",
-        "signature": "5fzGybgfu0aAyVL6+AcOBVYF/CPCggIMwAnX/7gBoInBtiWTlc6zgVVMjEWp+1JPuaVvilX8m3cUO+BPYfXbBQ==",
+        "sha256": "29f6782720e2f77b48fb231dfa8ee1ea3b32036ea06448cb1a94046beb5f3a12",
+        "sig2": "j9nT89AhOtfTRh2uZJZ8HE+LXm9ENlvzYckN6pA1Xv1V/Q/fYbnrp4WA7nNq3/L5M25QsTUB5ZIpEPxyBMb1AA==",
+        "signature": "Qboo6MMWILolyrXV7cIW1VvvsG88VMJiOvDXTlSkQjackiZzbo7dl0o+rvTOr6dhOs/PWw71h7FUUIX+EPFEAA==",
         "tested_wp": "7.1",
-        "version": "1.4.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.4.1/broadcast.zip"
+        "version": "1.4.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.4.2/broadcast.zip"
       }
     },
     "checkout-extras": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "724a8831693e0843dc0444ae2f3b6c4d98343b60865dbc2eb3cce8c7c0fb4781",
-        "signature": "cRxeIUE7A+N4DlnwtiuF1MEX9loznMFiKBUUu2e1SwzfUcQEXx/cgy3jdjPV+HBFi9sutvSEmuEFDrf9QFF5Cg==",
+        "sha256": "76a7e078de6d9a190399537fea61b94668a739be2b6126a3f69fadd0be8405e5",
+        "sig2": "wq/uIr/Hf9+oL/nhzA9x47+jdAmNCs1jCiv4ls63YZzW5BPwkOVz2n0umy7SjQHQdkOLkh248RLSI/NoLQyOBw==",
+        "signature": "WPm6aJHkfZBRyrnnMuLQbAbqyz7Yi7pn+Mo8+pZpalS0O0lWuwoY7MyNGqCW517HGz7gM4KxFyvAyB8ULeMGAQ==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.1.1/checkout-extras.zip"
+        "version": "1.1.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.1.2/checkout-extras.zip"
       }
     },
     "data-migrator": {
       "beta": {
-        "changelog": "* Security hardening (NXS-12, NXS-13, NXS-27). Update recommended. An encrypted backup refuses entries that are not encrypted; the installer's form always posts to itself on the same host and locks out only the address that typed wrong keys; deeply nested serialized values are replaced safely.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "05d2d92c0860f6a7ad371c899b1b2f2ce313a9f13839e39cf9afcd783db5a1f4",
-        "signature": "TNQ9H6R8hTwM1V7NBHYQNoBtUzMN1XmS+Mt9qDk8x1WA5rSaWoF+dacz+dnsnuccJ+wBbrqfndw8i7lftjjVDw==",
+        "sha256": "552eb20f41a52774b889e5334f4563b982331fbe87b74a1a74d9b214bfaceacf",
+        "sig2": "x7pvLmoQqxBRelkqWAqGGRGlOPEhOOgO6Lyc91iyYOLOx6uGpTgZI3vM748qfbRnOyldrfg6allx/8EKWsu3AA==",
+        "signature": "NC/xRhavvE4asOaYM6Ob3OTRXfP03gLJjhnSFgw+JnesovNW7biWWxDIKP1jJ/PhEXfifBHKekgbfAqRbYb/BA==",
         "tested_wp": "7.1",
-        "version": "1.2.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.2.3/data-migrator.zip"
+        "version": "1.2.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.2.4/data-migrator.zip"
       }
     },
     "easy-withdrawal": {
       "beta": {
-        "changelog": "* Security hardening (NXS-24). Every guest order lookup counts toward the limit, per address and per typed e-mail and order number.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "bf5ceaa84cfff24cf38dc95bde13812c28923211d9f781f53cbe87c7a18c6d37",
-        "signature": "bPxt+k5IipOCZrSddqBakZxI79PyMJEvkqjb5UVyvoEzv8Wl5zeU1tniggIG3ZEn5HVXDHtuwUIiVE+SaXkbDA==",
+        "sha256": "a07b5447fce587223316001245bbc4f627c26dc5e184cb3f536a8314c050e66f",
+        "sig2": "lnYmkKe3mdcrvEti60sDO+nQMi3Xy68zpxqLi02HTRWInWS8mKjdCE2LBrz8d6ZtuoZbh6Pp0z23oZygTw0vCg==",
+        "signature": "aR0k3BmRSdabybvaU76z27wY/ZnI0qhoajXuq5EvmPSFRxjInKYNNeGrMYYsbd8NvnSzjTcYjWAH8HB1t1WdAQ==",
         "tested_wp": "7.1",
-        "version": "1.2.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.3/easy-withdrawal.zip"
+        "version": "1.2.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.4/easy-withdrawal.zip"
       }
     },
     "fast-pages": {
       "beta": {
-        "changelog": "* Security hardening (NXS-08). Image, frame, background and file tags are read and changed with WordPress's HTML parser (WordPress 6.2 and later).",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "9259ba5ce32f1955fd9a8de1bbaec4b87632ae7b556dd43525ea1fba71401864",
-        "signature": "JqLHeELBOhTNDaXUdgR6/RCgDOiKjoZN5mWau8adxdl/37ZLuPf60QTU7/EvDWwtgqIK9P4Wyu9fMOQpuFBQDg==",
+        "sha256": "1acbee8eae010fa6059696bcafffe8feeb40466babde99e7fe9805ab6b9f9bc2",
+        "sig2": "Y4wvOhJgUiQKLJ/EZ2pIOBASlrWNjiOP2G9Fc0urvhzGvKqsPeLJd7+iY/tiFU42Drl9hzq8uAIem0SURA4nAQ==",
+        "signature": "QGtQOjjsth2HIMgi8+HEY0GF+Wt8sROeK8tPnc5TMHI0c9nSKFo/bBX2KTJZDtU2RF7+QbfpBo6HE9kx7lW4AQ==",
         "tested_wp": "7.1",
-        "version": "1.0.6",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.6/fast-pages.zip"
+        "version": "1.0.7",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.7/fast-pages.zip"
       }
     },
     "featured-creators": {
       "beta": {
-        "changelog": "* Security hardening (NXS-26). In test mode or when switched off, creators stay out of the REST API and of searches for visitors, as they already did on the pages.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2dce2f35a0ce1b28ba809fb590a3ee8fe50b81e3478b93f29b196c60ce1b5fa7",
-        "signature": "1M8X+s3XERkH56VMp8CoOCci6lnRfePLlmZPYRh7yo6yO7vPgl4eOD2yH0zzJQdkLMpcMQX3s2ypp1ESrb91CQ==",
+        "sha256": "f72c57ce51e420191006c92bbcfaa0d5466eb222e9b74f225993566ac283827f",
+        "sig2": "DMEumJPd8Yc908QL+kHPqPKI55fqx1OP2Vpkpp42bumhOrGhMKgJUZ8Q1ZQrlaphk+ut2bYVtXYscZGor3k7Cg==",
+        "signature": "rO8axUNMie6ll+MqBeUNWmoI6KDQ+CSu1VqnrconV0pMBtZpXmRuiPDGIkTLSREcS5v01PSE6q0KijiEHwGYDg==",
         "tested_wp": "7.1",
-        "version": "1.3.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.2/featured-creators.zip"
+        "version": "1.3.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.3/featured-creators.zip"
       }
     },
     "greeklish-permalinks": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0939764712e2718903e8767e5ea1f5f754e6e52f2678d058af862b977022c9d2",
-        "signature": "cBm8lr707S1ufE/NjCUvZD3Q6GNdf9OTylLwZi7i2YiOIJmYSFUfhs7Ljlq2vWc5Vi/Ys3n5CF6NfKGHUnZIAQ==",
+        "sha256": "53938e3679be5998f88d4be773884389d29903e39503eb8270afc5bf0199c4df",
+        "sig2": "Fs56rxKNhRHmEBVy9X5DCUGvAU0jQl3FJMiYXPlCF3+AnAOLiqce2FBJJuYxEu0opCJ54Lwe8R5PTijhcUU+Bg==",
+        "signature": "K+f/5MMSpJur56b46p25Wzb3fdrFmGzZHpGO9D65rZd3C/CnZWfS0GVBIsZYm7U2FUFaFPFaJOlMJu+pf8cbBw==",
         "tested_wp": "7.1",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.2.1/greeklish-permalinks.zip"
+        "version": "1.2.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.2.2/greeklish-permalinks.zip"
       }
     },
     "hide-catalog": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f7eacc59b884481928a5f0cf213701f47ec8cbe9b2b218537469de63e0602979",
-        "signature": "o+38GU8uvWmkq9Nzu59X13qqgywoxpiTLEOOgeawzcOrnO/zxnJ19PvjlzVQ3QoWtNzXABtaTjnUAuKJ8k0cCg==",
+        "sha256": "9917204ff4ce8e13caa258cfdee12a283172651a84d9ed58848c3568d8dc601e",
+        "sig2": "Z9BmyyEiMdI/rsmbHiVOyLSGJAkN1KztlktM9MnfBdpBOUx6dtkj/n+6uhIwJzLyFtLQJT/RdXYubOaRbY2dCA==",
+        "signature": "Hb8hiitihXd2iLvC03V719U+yIGhWmPie2jQmAEq1V7KCy37BHxfgJ6xixTEQbCtUUXyehHZ73DZujzBK2c3BQ==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.2/hide-catalog.zip"
+        "version": "1.1.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.3/hide-catalog.zip"
       }
     },
     "home-sections": {
       "beta": {
-        "changelog": "* Security hardening (NXS-22). The stats REST route gives only the counters a [hs_stats] on the site shows.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "54fe8e8c72ef32a43a19e9e6e6b5d1dc5264e1e817fac6a254d55ea5eff77393",
-        "signature": "RaUpXLmV34bTgZq8KhQUyCyB7guNW2ZYSyKlpRt7ioTKMu9g4JQjeZT3eujRcukcprkcMx1hiSzxBMw702pmAg==",
+        "sha256": "4a086d2681c086c13d2d86664fcc91287ad1b7098f071c3c171b10f8fb40d0e6",
+        "sig2": "k9VWKAIgMJXmdFlmSNKyc1ow2/E5RtKRUeF01KLUFvv8V2c9QHPwAsGQ/2EnOSh97DpMv6dEsS5pJtcc0Z0kDQ==",
+        "signature": "8itsQ8/uMFQHzEfjU9rLvY1C75tyjDCqXbZ5iGuhsJsHv0Z2GfgIR7HQvyUn9uztwlty1En2Xswg0DFQYnQiBg==",
         "tested_wp": "7.1",
-        "version": "1.4.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.3/home-sections.zip"
+        "version": "1.4.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.4/home-sections.zip"
       }
     },
     "lean-images": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f4cc9de7e5cf9fb8bee17e4bd420f47ec7908d54b021e9614104c5e7902ce685",
-        "signature": "kGWCdSrbZVS+G8iVrnTKeYLHOLpT33zqpAfnY9iE7roty512qe/JekWUB2P0FhHg0rXNZpPTda4B6oyp5fqQAg==",
+        "sha256": "87dab94a2ec025f3812abcd0592f021d97acb407ce54db9972a3a7de9433849b",
+        "sig2": "MLN+rB1vyQSzPX5yNaMUcqx9lD/Q/lXl2qwRmO47JJsoz/SSSHTPH9yDI0AbAuD2gOn+2rLSCcU2rjtxIu0WCQ==",
+        "signature": "HLgsdKyVErqpXjKMiq9heBnKmMONwl3v7/dZz26mAg4+AF/CcJdcm7yA18bCYprjgoos3Kvlt3FslyQcI+epDw==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.1/lean-images.zip"
+        "version": "1.0.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.2/lean-images.zip"
       }
     },
     "live-operator": {
       "beta": {
-        "changelog": "* The opening hours in the structured data work with Search Signals too (the `noxpress_seo_graph` filter), so they stay after the switch from Rank Math.",
-        "published": "2026-11-03",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4183a0e7ec9647bda4fb117e1917565f522c213c141cefa78350785eb4487b32",
-        "signature": "nKsKOcvGgZ+DkUlHGf74Ke095yA7EdV7JRxswktFGlLuLRoEneVc8XGUwdcHw91Dl/P0dlUMLN02rMjnUejZAQ==",
+        "sha256": "319a11157e77b276276271a318b0f6756c2cdee8a1acbbf3344c72c7c7ba0ef1",
+        "sig2": "kiqmb0Iv9iKRzui7kERxyU6+m/oxFoSsE7cRVYZQ1PaFPuLFMA7/BnyqQ1UTX/FR7QV3qINJEpF7xRCtAEM3Ag==",
+        "signature": "ddVq25k6xEq5sJYy2L3sSx3aG6JAd0jCmylVGKEgLQsZhYF3OCv+i+gRKDHxlPNBYmCYH/IunAQ2gHLcMejAAg==",
         "tested_wp": "7.1",
-        "version": "1.5.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.1/live-operator.zip"
+        "version": "1.5.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.2/live-operator.zip"
       },
       "stable": {
         "changelog": "* The opening hours in the structured data work with Search Signals too (the `noxpress_seo_graph` filter), so they stay after the switch from Rank Math.",
@@ -174,6 +188,7 @@
         "requires_php": "7.4",
         "requires_wp": "6.0",
         "sha256": "4183a0e7ec9647bda4fb117e1917565f522c213c141cefa78350785eb4487b32",
+        "sig2": "fWeJ3XTMSdqbDw04Dhfk1yoxxVasYVlwnH8Q5hWpNPRA8sHO1F37Mzc5RyQsxzGWyommpLHFrmFpfkn5dSNJAw==",
         "signature": "nKsKOcvGgZ+DkUlHGf74Ke095yA7EdV7JRxswktFGlLuLRoEneVc8XGUwdcHw91Dl/P0dlUMLN02rMjnUejZAQ==",
         "tested_wp": "7.1",
         "version": "1.5.1",
@@ -182,171 +197,184 @@
     },
     "magic-login": {
       "beta": {
-        "changelog": "* Security hardening (NXS-14). Update recommended. «Σύνδεση» works only in the browser that opened the link; a new password or e-mail address from the profile ends pending links; on multisite, staff anywhere on the network never get links.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b49314dba946cf5e59fb572c37caaf17f8e4d1f40a13dab1c041814ab7953d2b",
-        "signature": "9LLVI2faznhBjJZhf4mKEIduQ9xktIlLhNZbIp7u1YmonfGmJr5kRMCA2NnCveaCSJWO6XNpl8sFb25M0FRWBA==",
+        "sha256": "91ed1a3b08dff7cd0f63f0c083d117bec6f9d68c4b4e1ce9659806e6ff66dfbf",
+        "sig2": "pIJcrlVxYjk1Qnw9VIKZMyxEuVgdseX5sJyTFfZMfxPWJ8rcYuanzI4R5eEg2G+FXwIQW8jtzOGT989VSwciDg==",
+        "signature": "bAbc/OuGdgMyRPcd76cAxtFVUJQzzfUVgwENtaVRb34a2Z3MrlKtH9CVpN6YDimzegLCDZbyk3s7CxluP1fCAQ==",
         "tested_wp": "7.1",
-        "version": "1.0.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.4/magic-login.zip"
+        "version": "1.0.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.5/magic-login.zip"
       }
     },
     "oros-connect": {
       "beta": {
-        "changelog": "* Newsletter: the form in a popup too (off by default). Opens after 20 seconds or half the page, at most once every 30 days per browser and never after a sign-up; not on the cart, the checkout, the account pages or a page that has the form. localStorage only, no cookie; the same HTML for every visitor. Its own title, text and close label in Greek and English; filter `orc_popup_show`; `?orc_popup=1` to test.\n* Newsletter: the shop key is now checked by orOS (Subscribe link → Shop key), so signed checkout sign-ups join without a confirmation email; texts updated.\n* Privacy policy text mentions the popup's localStorage entry.",
-        "published": "2026-11-04",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a63978826d1f3bfdbd957d7766cb3eacaa652fac2e47863d7e1dbc3d9234e4f3",
-        "signature": "8++CrCXk2nC5KajejnIXHGggPI+ZTHsG7EpR032k9354eemFFtctXLy3EYSP08PHfQs2hEhWr+ANPkBIXjrLBg==",
+        "sha256": "af3c3980b43c3bd6271b1bdbb93f2567c675b2472df50f6ceb8030d3eec793a1",
+        "sig2": "t+UySHMrMToJoO9qY3aHeSHc0I+XwbpLCDh4tALkEdKfdAWJb5qd+UkygEyYQ7QbpyQ/1GDGdPo2bA5TVKT5Dg==",
+        "signature": "TDQvxpYmj5XPz/k5oKsvh8oHLPboPUyJge/Rc99vFp2tGXxWokySXTjX4iN8nZzDx0M4csLZBXlq8jzbiadyCA==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.3.0/oros-connect.zip"
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.3.1/oros-connect.zip"
       }
     },
     "pre-orders": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1b6aa23d22ab88f539dc3315391124167aae2c3e9ca0ab4cd7aec7858b2a7f51",
-        "signature": "sdlGS8ZEX5V29U5ywfEL56kOQZx7AZSaQdhOPrpegr3dG1xNqvTYDA29+dqDSLmvDaVH7fIvRdc0VgDat0O2AA==",
+        "sha256": "be6aa1d7b8ee6246fa4e42aaa385da18e0b86c9214b21e6430df73214f6dcce3",
+        "sig2": "wsw7eRFfoY+vCi39LencnievSMgfGC9x+JC1Outj17nO0+VsSkz1puuv9OAzyu8mOF7OATJnjPSIT5m74botAQ==",
+        "signature": "tYsSlqPqG7Q90RCT9rD/6wgGB6ZuuhGKhte1OtHMzEQQUmOKIfIQ/WvGJioeF+f6hYMUqovR8JWtRqNCgu1TCA==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.2/pre-orders.zip"
+        "version": "1.1.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.3/pre-orders.zip"
       }
     },
     "product-bundles": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "5899ac69b8590b9d252d74386c6c5b64440de45be186d7558dd3908ff3739bf1",
-        "signature": "1DJ2oAg0wWYvk2mem3A/5Tepy0IL4BEaFDUuWw3S3ae2mhpsB4gMDvhV6TKrdaGqeT2mq26/LQ0HXcY/YojRDA==",
+        "sha256": "af5d30d63a3f351619efe97c9ebd0b88134e92eb2185be24be0be9bcf41e3a26",
+        "sig2": "7ol5h/5ECk67Z0fa78TLufyn/PbYvSkJBnkUbFp1USkKDHxwMo6PZ4TdSMZHRHYr3JY40Cw65YLl/3EYU9xLBw==",
+        "signature": "V+2EbFoHNE6bNFnohtUJJ4cysgkmsiLjFdFpTp0+dFYg3/xFACGR0NJonoeHSmHYQzk40owCBYWkxj2w4wVVCA==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.1.1/product-bundles.zip"
+        "version": "1.1.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.1.2/product-bundles.zip"
       }
     },
     "product-formats": {
       "beta": {
-        "changelog": "* Security hardening (NXS-25). [nox_formats id=…] shows nothing for a draft, private or password-protected product the visitor may not see.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "4035417d69e576e711c16ac2cace1f2dca9e7a4b550ad87c22000d285d304e2c",
-        "signature": "qc9yL+qTUZl5zSoULejt/dzQ1h7mJGnD9igSyGpSk4g/khE0dD2PxkQfb+6mbSNOE1wwKNV0Hcb3c7yQPNl4Bw==",
+        "sha256": "651e5a99637833955b0af1ab281a29344b6559b1c254a1907ec63d12dfbca49d",
+        "sig2": "nVr2jWJ38h6OqElEoxHp7XL4uXMKfPxaRvIWPk8Y905/5Daiile3nSVyWQ8lE+S789Xu6iNMdDANwa+EDe0tCg==",
+        "signature": "5nzCNP2rv4SYeppRvlJijHAAZWE5Y0zC6FMca0WlnJ6dsUbKOG0WgL2et9ZftqPShWmrCy70A9ha/36WuuD6CA==",
         "tested_wp": "7.1",
-        "version": "1.2.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.3/product-formats.zip"
+        "version": "1.2.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.2.4/product-formats.zip"
       }
     },
     "production-ledger": {
       "beta": {
-        "changelog": "* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) that pays only part of a copy (quantity 0) counts in the title's income, with no copies.",
-        "published": "2026-11-13",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "bfba05260b9f049497870d4a5736fbe58583b39cce49ad1db0e57a082bfab1cc",
-        "signature": "UQgD4jdo46G2+aar6118/yTDsxirdtjCRGceqhHdCafqaMd4+8z+XzcBw8LPew0X1kA5D7EFocL1NwQmyzfSCg==",
+        "sha256": "86e7fecb6131e7793df40825b52f810a89f6dbf4be59e6d490f9646e19114d2b",
+        "sig2": "JrV1vr1AZW9OYbpMjWuzI63HX9WVd41eABRWVqxBvuuskxMdBc+5KM0jGbPnLJr56uVpyah/qJWcldW5z5BtAg==",
+        "signature": "hitVleD9vO2/ToTegRno09XxibPRIBxxiAsCjwSWiPRXsrRgwY6SM/rtx8acWqekzTDwAhlWAjtXJqAjPB4nCw==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.1/production-ledger.zip"
+        "version": "1.1.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.2/production-ledger.zip"
       }
     },
     "publishing-quote": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d5ec7af91b7469eeccad8a1c8d7f2f3c62d39b1e3dcbe49c6025f5f57c27728a",
-        "signature": "JMsuq9M13BTOZdRmhp8tpT11YpKJELeqlmocnbwhDgJnwNSGO7/4ncbK0IsdjHwkXX2kE0jwXwpvVkr0jUslCw==",
+        "sha256": "a972916c08518f63b1cd7a5e23258c4ce5e0234da39b4ef9fe6ea0e4bab431b0",
+        "sig2": "4D6d5iggDCjYBnvnW4V7GLlL+2lS60fbUUR9eidp+P7iainvhNbHpfSOEr22ozIm69LuzzHBiNyQtb/vRn4hDw==",
+        "signature": "xXSowxCWoAJI+qPKNeiDPS1mUqm/Y/DkrA5tyeMoRzZvYdrgQHjRvFFWNPsujlgL53fxUVcZ5RQrB+3icyfbAw==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.2/publishing-quote.zip"
+        "version": "1.1.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.3/publishing-quote.zip"
       }
     },
     "redirects": {
       "beta": {
-        "changelog": "* Security hardening (NXS-23). Text taken from the visitor's address into a regex target never changes the target's host.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f37b620c10eff0d2004188e48d60fc17a8832dc3a6f3c527a2c3f636eded85d0",
-        "signature": "0nrLwcWdbZcT4i0Fwk2mCl6H5Ij1bz+rZ3XiEKiV3w523+j3TquRpxdnaKk603nPggRMzVun+SQGsfcHR4KEAA==",
+        "sha256": "12a4265628ade9ddd155c42dc2f5321ce9f584f07409212af943df93c9bc22e1",
+        "sig2": "3Hjiie5eFBoudaGsreZF6n7JUG0nxVmL97IHB+4H9Jq1PfYRFzOuUGeMVIhkXLGUwjn2EJ/OQrd0XKdnNX5RAQ==",
+        "signature": "+xYQWiR5FrU76FVV0QePk1rCfcZ9UPnZkm4sZyLcVfmZtRDuIvG3YovX1CL3dhoTDsv/bHkGrqYzNmnrgmmwDg==",
         "tested_wp": "7.1",
-        "version": "1.0.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.3/redirects.zip"
+        "version": "1.0.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.4/redirects.zip"
       }
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* Security hardening (NXS-06, NXS-11, NXS-15). Update recommended. Portal sessions end when the person's key changes and last at most 30 days; everyone signs in to the portal once more after this update. The «Ξέχασες το κλειδί;» e-mail is sent in the background.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ed0c023546bf947b9ef6a18c5a7dc7a034b676ece95c32b65f2877d1ae878511",
-        "signature": "chP6ep2v/l2BlLXnsS7N2cMX2fIJXtwacxBVpnXNkh2gzR3iC2fmcgGNj+mxG9Ke0M1h9D+08yOYgzDrSPkqBw==",
+        "sha256": "2fa321a487cb688a4ed4547b3902a0fa4c97747402b85b7c1f3630a82a16578d",
+        "sig2": "QasM8VnZI990QpmE5cYs8YyrXMTetzS10ZHoh8hDi+OAk+WphuHUkPPzphuIDCDEwM681F4WbAuwM1uKLEhJDg==",
+        "signature": "tQoNFn6yElZgLtJA3osMmS08DR4PVjVGK7+kxxHrZiAsGi92fSEnrRM5S0GdTra/++f6FWO1QnERfrvyGydTBA==",
         "tested_wp": "7.1",
-        "version": "1.18.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.1/revenue-splitter.zip"
+        "version": "1.18.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.2/revenue-splitter.zip"
       }
     },
     "search-signals": {
       "beta": {
-        "changelog": "* Initial release.\n* Title and description templates with per-object overrides, robots through wp_robots, canonical and pagination.\n* One JSON-LD graph (Organization, WebSite with product SearchAction, WebPage, BreadcrumbList, Article, Product from WooCommerce) with the noxpress_seo_graph filter; Open Graph and Twitter cards.\n* Sitemaps at Rank Math's addresses (/sitemap_index.xml, /{type}-sitemap{N}.xml) with images and the robots.txt line; /llms.txt without personal data, /llms-full.txt 410; static llms files moved to a backup on a click, with restore.\n* Import from Rank Math with dry run and undo; Compare with the live page and the sitemaps; Switch over and Switch back in one click.\n* Test mode, passive while another SEO plugin is active, SSG_DISABLE; no external calls and no cookies.\n* Abilities search-signals/status, get-meta, set-meta, json-ld, sitemap-status and compare; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.2.9).",
-        "published": "2026-11-03",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0f2fba94ea82f4c55d7137ade91312febe60c379a19d0f964bb33865ce5f949c",
-        "signature": "ilQQi8gaN6uII3sO9/56slLP4vGgtvYbZ6Yr4NqfEd7eXQhWM7uErmhJeHxBIYm3DeCfxIKIkwRM2LliPoNLBg==",
+        "sha256": "1507a70490e0d094887b21de274b6d67befcf3773626b253983d5af83b6f74df",
+        "sig2": "lLWL4fZyNDV1SmrGuUUE9DBU02rJspL8UD04bfu8aB2ziQAOZVi+yIG5sK3G/BUbDnUEWW+f0XAkPQNSLh3nCQ==",
+        "signature": "fMGLYgFZGPJ9AbjrroY3/WwQFLx61K9eTVnWXjrX64kt802rBSTQSS8DWX0QOjO8RHKnbQonsEhhweyB5e96AA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.0/search-signals.zip"
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.1/search-signals.zip"
       }
     },
     "shipping-notes": {
       "beta": {
-        "changelog": "* New: product suggestions under the free-shipping bar while an amount is left. Up to 6 products from a list you choose; the ones that cover the amount left come first, cheapest first; products already in the cart or out of stock are skipped. Simple products add to the cart in place, variable ones open their page. Shown in the cart, hidden in the mini-cart and checkout. Off by default, with editable title and button texts.\n* New: the threshold is also read from a carrier method that turns free over an amount of its own: BOX NOW Delivery's \"free delivery threshold\", when the zone has no Free shipping method with an amount. Filter `shn_carrier_threshold` for other carriers.",
-        "published": "2026-11-07",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "89793ce72f888b6df4ca37fe9eb59ce957676f4e318dddfcf5a66d520956c544",
-        "signature": "Im5i+7wUKNbBlHL8V69CGGtSOuBdXZ2rRLL/Df8nwYZbnQv1b+hoC5Orup5iuNOW4M08VREyLCS/Y4WRE+W6DQ==",
+        "sha256": "2dedc2c72be716451e4d69653f1f08e93862ecd3dd4068fb072c7214bddee987",
+        "sig2": "fdvtbg8cVqrwlHOXa4cZYd+g0qfHPSydo9Q1gIfHLne3kwlQNPd2DbhZdlGvwOYEeSXOlba2xv/m/rRTa5OmAg==",
+        "signature": "s0f4EljqNWIGNNEGahphBcxDcI49WqFRJgP5JVLXHsfqAl9AeeVenIRzR/MhHnYOTZdsPsMK5cDq6fiXl7f3DA==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.3.0/shipping-notes.zip"
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.3.1/shipping-notes.zip"
       }
     },
     "shop-filters": {
       "beta": {
-        "changelog": "* Search Signals: filtered listing pages get noindex, follow through its robots, and the plugin's own canonical tag is left out while Search Signals prints the SEO tags, so a page never has two.",
-        "published": "2026-11-03",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2d75e3e8617adb8106cf168db2447f8a428640ea2892917113a935be60e095ae",
-        "signature": "UU3aHYMyGXIFVYgo2fDCBOXKTrr7tGoOukBRr+/ldFSBLNbVpPOKs6wtB2DPSD5F/urb8dOVEHm7bOjZ5nEiDA==",
+        "sha256": "e2cd02f8e08defa7e39e8b0f91bc464aa8916b594c11c4fdcaeeb6d5b7421621",
+        "sig2": "+3DB/Ta+HBumDQy4/hzjs+fq7cdfFekDr2KZTCuEitBOtb1apDMN4MlA8RzvHtUnIbXRHD1wTbrIZXlEk56jDQ==",
+        "signature": "FSNUVDm7s58SkOr7SIRMGcD2pMx/WRiDwWt6Ytl/DyWCfdcWUldlAQ9RFYIWHkyp2BUV16lxXSPMQVtO9saSBw==",
         "tested_wp": "7.1",
-        "version": "1.3.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.2/shop-filters.zip"
+        "version": "1.3.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.3/shop-filters.zip"
       }
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* Security hardening (NXS-02, NXS-03, NXS-05, NXS-06, NXS-20). Update the Hub and every site. Some query shapes and option names that used to pass are now refused with a message that says what to do instead.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "bb91178208cdcea71da47c5f04f630cea0e3b3b7b325016bb20cd9e3fa7c0a4c",
-        "signature": "7aF6q7I0nwBrFn6eGuNl1P137hEyhZJeGha5NRwqQKoJgyM0yu4DIZTUKRwbht6TfQ/MoVKM25ibrka2hL9TDw==",
+        "sha256": "cdbed2a7f88d70435c1a08380bebf27d7baf476f88b5e2e35cdacdf5800dd17d",
+        "sig2": "gJ5wRKD87L2Q2PyjEvgTscHf0Pmb2U50iisftSEhAPAsA0i3mRGv+gjbKHlIqn1ILwPAPNdfqBWal7Xksz+eBg==",
+        "signature": "L+oJgZ8KPfWahNrd4t5NomgSGSkOyV4U04w6u19efQ7xnknRz2FdCQbxWapGMOs95yGUXay+tqgaMKhL/EF/Bw==",
         "tested_wp": "7.1",
-        "version": "1.12.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.1/site-bridge.zip"
+        "version": "1.12.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.2/site-bridge.zip"
       },
       "stable": {
         "changelog": "* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.\n* New: \"Close now\" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.\n* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.\n* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.\n* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.",
@@ -354,6 +382,7 @@
         "requires_php": "7.4",
         "requires_wp": "6.0",
         "sha256": "f8928251a06795db462c36d36392802d52c5d9309869d8c557943126f4372101",
+        "sig2": "stDve74xY7JPYZAiQ5cBL5u1gUkHb03zUC24SynmacX21wT9QjWcEuFZmvZA5Pt/kVp7fBjk+WiBAAsdJMtVBQ==",
         "signature": "gAXag38Ledy+UUdL5Kw3gGU8ia87dk50wA2+bTlnOo+gBxWfRwmhOKmSu9GwFMtKhJyOwwplS48jyzbTuu2EAw==",
         "tested_wp": "7.1",
         "version": "1.12.0",
@@ -362,107 +391,116 @@
     },
     "smart-formatter": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "5b876860c37af325c96b7b7308ff22e2944efa6d249e1e81c36310ec35793603",
-        "signature": "wPcLCBPBOXIDuwdV4aYk5CAtLtizxTE7dib+9ZvsHK/bIT4wsTp2KptcHKg//dZSJi7BgM1jU3zJIOS3duidDw==",
+        "sha256": "1cdf56a9e7761006e84d8b62c157b1d8260efa006b3b78294a40603586a273e3",
+        "sig2": "Eaz/UgELHWURm7eAYJB98xrb1QW34fvXPYF42zjDtw+x28M4KuWjmpR3yzSmQHFrpkMKIe933QUTZkuqAtRABA==",
+        "signature": "K/5ujt9yzjwjvGCwfnOzCQXg5TQJsifzkQfKWfbPHc87Ts+iyAV3ku89RaR/5allQ1jXaQWZiZiolIDmpSa+Bg==",
         "tested_wp": "7.1",
-        "version": "1.5.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.5.1/smart-formatter.zip"
+        "version": "1.5.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.5.2/smart-formatter.zip"
       }
     },
     "store-pickup": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "228b55a0487f480172af8462738a729fce5aa0c81b6aeeb33f0f2ba5029e8774",
-        "signature": "Tjir/kQuGVBCh9MuXUHqaH5b+qJZCkxJNK06AoH2V1yHsg8jLpLAq6jVh9n8n8NekB2V25V3rOAvtzNrJ9QrDg==",
+        "sha256": "bd477f578bda60bced289d9a599b41862d7dcf4e51d617a6ece6cd13575837f3",
+        "sig2": "7m87ndXoPrTEBFFdeR0FQ7baO3LG9jbc+lNwZfPXw0EXnqFfBJpBpeGkjgmM88T0VV13dd5G1+KknfvY0i1ZAw==",
+        "signature": "94PBVc0lPfy3lYABI1++STh0BL6YhXl4qQHN7MjZL6KntnvYDmU9cYJbMOyTwZ8qBNtDeBh/X20QHzw7BlqQCw==",
         "tested_wp": "7.1",
-        "version": "1.2.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.2.1/store-pickup.zip"
+        "version": "1.2.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.2.2/store-pickup.zip"
       }
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Fix: an order line from Trade Accounts «Amount received» (item meta `_tra_part`) that pays only part of a copy (quantity 0) counts in the top sellers' money, with no copies.",
-        "published": "2026-11-13",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b2c6f244b7a04d7dfa888458a6f5b864c5c1d3e61a8bfbc12a208cabe716d0ea",
-        "signature": "2joGDXWPDHCFNJ+P4IMSTDp2Hk5TAg9qyczIivuHbt58/DJAbwEIGMXVPvHQBJWvW0A2vKpkVJ08ZroSIW2tBA==",
+        "sha256": "b8f2a22144df45b5e34b03c9b661c5ccac5ffde308fd2776361a1cb03a86155b",
+        "sig2": "At+/50jbS6k/b4Akia4Lqp0xDpnHcyTfff6b+TFQ066xhnApxlbrYsnxJWBqBpYjs2jmn1vq/4Wq5lrWqbtVBQ==",
+        "signature": "ByD5DKace/TI1tzX/axPqfpNO6ZcLWuc1ncp6ySb7kQQG3lYtWjNldgO41DX6nNUsBx52nXBc2JzIwqIsc6nDg==",
         "tested_wp": "7.1",
-        "version": "1.8.6",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.6/store-pulse.zip"
+        "version": "1.8.7",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.7/store-pulse.zip"
       }
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* Security hardening (NXS-04). Update recommended. Text rows saved by an account without the unfiltered_html capability now change visible text only, without HTML; rows that are already stored keep working as before.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2ec3f07dac052f1ad3e419112f3d6120e3f88da2e06a7974815454d6af21c1f2",
-        "signature": "G8x/1baeRy0VxwrgLX60C9DqYlqSU99djV1p4jFVB+z+QSPvaIzS9+4nBtVFjZKv6PElMIblAzBrSNdrfFViDw==",
+        "sha256": "da76ee4219bc988c2517aa09f5c8c5665418ea78473bb2f385ae05d84f1e6155",
+        "sig2": "/vd/7t1DyPzcizS3k732pFilfqZYNkMYaVFAvxncVFAEc4oAMQ993lZQDNIpUXvkaOgr6Yl0JYlA8iCkmWctAw==",
+        "signature": "VouYNHBESgj8k/trHdRTrq//5YxLkEMJAqDhH8s673Ds3o+NDw1rBGS1e8Muu4to419Ww/WK9vLc50kYtmXTCA==",
         "tested_wp": "7.1",
-        "version": "1.6.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.6.2/theme-patcher.zip"
+        "version": "1.6.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.6.3/theme-patcher.zip"
       }
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* Security hardening (NXS-10, NXS-16). Update recommended. Feed passwords now sign in only to the Trade Feed routes, and an existing user becomes a trade account only when your account may edit that user.",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ad6d6e2392eeb54ba2faafbd6aaf75a5b4c5c411dc151cf37ce9230ec0ed0b43",
-        "signature": "VoWANbIGQx276jJkZco1dnMeODjNDYfVNbzb+Ps+ikq4zADD+wrheEAVhefLSTf6J4zqJJdPDUUUzvwm4UBsDQ==",
+        "sha256": "8efea00d3d6a264e56dcd7c7cedb9a65b05d46a858e174aae2f0fe2f36f63c43",
+        "sig2": "DLpPpGbu4Dam2EB1y3BE1Q1CSWVOrLvRkJ/o0CLSc78pKzy7frvW+/1g/+Ordvz5jMNt+LdZiX20dB0pg7fjDQ==",
+        "signature": "9nYuscKBBs5UF2VhFUX843Z4o+1YnAxU8KgUyrTPTLWoo4zvNygsSXcg3Op//2180JLfhnO9FTdPXItCIJFQDQ==",
         "tested_wp": "7.1",
-        "version": "1.6.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.6.1/trade-accounts.zip"
+        "version": "1.6.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.6.2/trade-accounts.zip"
       }
     },
     "trade-feed-import": {
       "beta": {
-        "changelog": "* Security hardening (NXS-17). Update recommended. A new publisher address (typed or from a settings backup) clears the saved password. The first import no longer links books you already sell by ISBN on its own: it lists them, and you link them in «Titles».",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
         "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1d1e3201ce2b8ab54964a350ce5cbe3a8fccb73323fe5c2f9b9f8c54bdb8777e",
-        "signature": "n/RHqeSHCHiKC8jNaguql3UdjJggr0Vyn7zoDXNmHWLp8JX1lf784zSSFahgrosi1qXMzxTSsGRdJyjsO8J1Cg==",
+        "sha256": "243e157fa3767494e040ce71a519263699eff00dfd9815f1ef666725650dea75",
+        "sig2": "HwZ8GsEKJ9S/RgB46IS1felN+JtBlAbrwXx7jc4tytZAZ78O/90tT22NT+eNW0O/QW8RU88lpvEUFp4pDYWQCw==",
+        "signature": "80OXUhtjM9hwRJPVEcAXGyWBBiPR6ulSD7jmqCuIWsYGlZLyIIB3R6Smjx3bnm6taMAtTxIjyPhgofxOhYRmDA==",
         "tested_wp": "7.1",
-        "version": "1.0.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.3/trade-feed-import.zip"
+        "version": "1.0.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.4/trade-feed-import.zip"
       }
     },
     "variation-picker": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "2d87fe3b847019e905fe349eab9d7f8351966ea836328c0710b59feacb70efc3",
-        "signature": "Ka+p288NcVp6/MZqMmf+qz/U5WynC/fwYFKihElpn0/FQ6yWL4mP8M58pecNeJFc6JsRpHhcUFjLT8MdMIhwAQ==",
+        "sha256": "71802c79790e35df5186efffed8651fe3f68528a691d96a9c375d52338b2c950",
+        "sig2": "+oXSP1Fn/0aOlEC5Lz3HLs6pniMeZHbXOHCnWPienU/9pJ657m4Ee2OnaB1lGd76IZFGpT8rwqcCdcCm5XZMBA==",
+        "signature": "O3qTbNn7P2RnjZlg399R2gHMb97cTCQKEtCIKCx3j56vlbPrAewH3Tu7TbPTr1xhGQckSZC9ImMTCEMbcqffDw==",
         "tested_wp": "7.1",
-        "version": "1.1.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.1.1/variation-picker.zip"
+        "version": "1.1.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.1.2/variation-picker.zip"
       }
     },
     "wish-shelf": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d602bf712171e10b122b5bc7cae9b34a5a6b1c31c5e1efef01c5ee4abf1bb9fc",
-        "signature": "aTMHt6nh2w6PENoSNRxKfLY0UxYfoVl7mQA+gFCVuoUA+TcGDEdQzC74hblXMsvjMPIqW+/k6FRh2wIYNgWuCQ==",
+        "sha256": "ada132be52cef02a24bf704149681c618f3b5ccb234e641c8a7f45ce9c13f5dd",
+        "sig2": "/cCgUBdUeB+fSqFuJrWQosGXe+u3+MLDrgc304wckbFKLy9uQaVVfw7HULmqHduUCRasiKPahDySlCi2Dn/rBQ==",
+        "signature": "Wlw5/XaqO+WgOX/VjoDGs323ONOtDa2wduFhR/BK5iCXOx9aoUP+BZTy0xqR18T9mN2YV1sOo/rRft+O9MvMCA==",
         "tested_wp": "7.1",
-        "version": "1.2.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.2/wish-shelf.zip"
+        "version": "1.2.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.3/wish-shelf.zip"
       }
     }
-  }
+  },
+  "serial": 1794680915
 }
