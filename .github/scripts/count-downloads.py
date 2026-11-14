@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Counts the downloads of this repository's release assets for the site's
-"More than X downloads" line (Bible §17).
+"X downloads" line (Bible §17).
 
 GitHub keeps a public download_count for every release asset. Each run adds
 the current counts to a ledger kept in the output file, by asset id, never
 lowering a count, so the total does not drop when a release or an asset is
-deleted. The site shows "display": the largest step of 1, 5, 10, 25, 50,
-100, 250, 500, 1,000, 2,500… below the total.
+deleted. The site shows "display", the exact total (Chris 2026-11-14; until
+then it was rounded down to a step of 1, 5, 10, 25, 50, 100…).
 
 The file is rewritten only when "display" changes or an asset appears that
-the ledger does not have yet, so the bot commits rarely.
+the ledger does not have yet, so the bot commits at most once per run.
 
 Environment:
   GITHUB_REPOSITORY   owner/repo
@@ -46,25 +46,6 @@ def releases(repo):
     return items
 
 
-def steps():
-    yield 1
-    yield 5
-    base = 10
-    while True:
-        for m in (1, 2.5, 5):
-            yield int(base * m)
-        base *= 10
-
-
-def display(total):
-    """The largest step below total (0 when there is none)."""
-    shown = 0
-    for s in steps():
-        if s >= total:
-            return shown
-        shown = s
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('output')
@@ -93,7 +74,7 @@ def main():
             ledger[key] = {'file': f"{tag}/{a.get('name', '')}", 'count': max(prev, count)}
 
     total = max(0, sum(v['count'] for v in ledger.values()) - args.offset)
-    shown = display(total)
+    shown = total
 
     if old and shown == old.get('display') and set(ledger) <= known:
         print('unchanged')
