@@ -22,15 +22,6 @@ android {
     }
 
     signingConfigs {
-        // A fixed debug key in the repo (not a secret: debug builds only), so a
-        // debug APK from any CI run installs over the previous one. The runner's
-        // own debug key changes on every run.
-        getByName("debug") {
-            storeFile = file("debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-        }
         if (keystorePath != null) {
             create("release") {
                 storeFile = file(keystorePath)
@@ -42,6 +33,13 @@ android {
     }
 
     buildTypes {
+        // Debug builds are signed with the runner's own debug key (new on
+        // every run, never in the repo) and install as a separate app, so a
+        // debug APK can never replace or update the signed app (Bible §13).
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
             if (keystorePath != null) {
