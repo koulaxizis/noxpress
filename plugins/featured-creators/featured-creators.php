@@ -3,7 +3,7 @@
  * Plugin Name:          Featured Creators
  * Plugin URI:           https://noxpress.tech
  * Description:          Μία σελίδα για κάθε δημιουργό του καταλόγου (συγγραφέα, εικονογράφο, μουσικό, σκηνοθέτη…) που συγκεντρώνει αυτόματα τα προϊόντα του ανά ρόλο από τα χαρακτηριστικά του WooCommerce. Σύνδεσμοι από τα «Επιπλέον πληροφορίες», πλαίσιο δημιουργού στο προϊόν, ευρετήριο με φίλτρο ρόλου και schema Person / ProfilePage.
- * Version:              1.3.1
+ * Version:              1.3.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -68,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CRT_VERSION', '1.3.1' );
+define( 'CRT_VERSION', '1.3.2' );
 define( 'CRT_FILE', __FILE__ );
 define( 'CRT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CRT_URL', plugin_dir_url( __FILE__ ) );
@@ -122,6 +122,9 @@ final class Featured_Creators {
 		// stay registered (empty output) so the editor keeps them valid.
 		if ( self::killed() ) {
 			add_action( 'init', array( 'CRT_Front', 'register_blocks' ) );
+			// 1.3.2: and the creators stay out of REST and search for visitors.
+			add_filter( 'rest_request_before_callbacks', array( 'CRT_Front', 'rest_gate' ), 10, 3 );
+			add_action( 'pre_get_posts', array( 'CRT_Front', 'hide_in_queries' ) );
 		} else {
 			CRT_Front::init();
 			CRT_Schema::init();

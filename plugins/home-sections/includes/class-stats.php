@@ -364,10 +364,30 @@ final class HMS_Stats {
 		} catch ( \Throwable $e ) {
 			$v = null;
 		}
-		if ( null === $v ) {
+		// 1.4.3: only counters that a [hs_stats] on the site shows.
+		$v = null === $v ? array() : array_intersect_key( $v, array_flip( self::public_keys() ) );
+		if ( ! $v ) {
 			return new WP_Error( 'hms_stats_empty', 'No counts yet.', array( 'status' => 404 ) );
 		}
 		return rest_ensure_response( $v );
+	}
+
+	/** Option: the counter keys a shortcode on the site has shown (1.4.3). */
+	const PUBLIC_OPT = 'hms_stats_public';
+
+	/** @return string[] */
+	public static function public_keys(): array {
+		$k = get_option( self::PUBLIC_OPT, array() );
+		return is_array( $k ) ? array_values( array_filter( $k, 'is_string' ) ) : array();
+	}
+
+	/** Remembers the keys a shortcode shows, so the REST route gives only those. */
+	private static function mark_public( array $keys ): void {
+		$have = self::public_keys();
+		$all  = array_values( array_unique( array_merge( $have, array_map( 'strval', $keys ) ) ) );
+		if ( count( $all ) !== count( $have ) ) {
+			update_option( self::PUBLIC_OPT, $all, true );
+		}
 	}
 
 	/* =====================================================================
@@ -428,8 +448,10 @@ final class HMS_Stats {
 			if ( null === $v ) {
 				return '';
 			}
-			$html = self::html( self::parse_atts( $atts ), $v );
+			$a    = self::parse_atts( $atts );
+			$html = self::html( $a, $v );
 			if ( '' !== $html ) {
+				self::mark_public( $a['show'] );
 				self::enqueue();
 			}
 			return $html;

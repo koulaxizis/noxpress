@@ -1618,7 +1618,7 @@ final class BRC_Admin_UI {
 			),
 			$sep,
 			'"',
-			'\\'
+			''
 		);
 		$names    = self::module_names();
 		$statuses = self::status_names();
@@ -1639,7 +1639,7 @@ final class BRC_Admin_UI {
 				),
 				$sep,
 				'"',
-				'\\'
+				''
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output.

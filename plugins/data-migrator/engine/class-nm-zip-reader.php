@@ -85,6 +85,15 @@ final class NM_Zip_Reader {
 		return true;
 	}
 
+	/**
+	 * 1.2.3: in an encrypted archive (a password is set) every entry must be
+	 * AES encrypted with its MAC, except the nm/encrypted.json marker. An
+	 * entry added in clear by someone without the password is refused.
+	 */
+	private function plain_in_encrypted( array $e ): bool {
+		return '' !== $this->pw && $e['aes'] < 0 && 'nm/encrypted.json' !== $e['name'];
+	}
+
 	public function set_password( string $password ): void {
 		$this->pw = $password;
 	}
@@ -231,6 +240,10 @@ final class NM_Zip_Reader {
 			$this->error = 'nopass';
 			return false;
 		}
+		if ( $this->plain_in_encrypted( $e ) ) {
+			$this->error = 'plain';
+			return false;
+		}
 		$at = $this->data_offset( $e );
 		if ( $at < 0 ) {
 			$this->error = 'read';
@@ -279,6 +292,9 @@ final class NM_Zip_Reader {
 		}
 		if ( ( 0 !== $e['method'] && 8 !== $e['method'] ) || self::encrypted( $e ) ) {
 			return 'method';
+		}
+		if ( $this->plain_in_encrypted( $e ) ) {
+			return 'plain';
 		}
 		$at = $this->data_offset( $e );
 		if ( $at < 0 ) {

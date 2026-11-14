@@ -101,6 +101,13 @@ final class FPG_Optimize {
 
 	/** Value of an attribute in a tag, or null. */
 	public static function attr( string $tag, string $name ) {
+		// 1.0.6: WordPress's HTML parser when there is one (6.2+), so a name
+		// typed inside another attribute's value is never read as an attribute.
+		$p = self::parser( $tag );
+		if ( $p ) {
+			$v = $p->get_attribute( $name );
+			return null === $v ? null : ( true === $v ? '' : (string) $v );
+		}
 		if ( preg_match( '/\s' . preg_quote( $name, '/' ) . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>]+))/i', $tag, $m ) ) {
 			$v = isset( $m[3] ) && '' !== $m[3] ? $m[3] : ( isset( $m[2] ) && '' !== $m[2] ? $m[2] : $m[1] );
 			return html_entity_decode( $v, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
@@ -111,8 +118,24 @@ final class FPG_Optimize {
 		return null;
 	}
 
+	/** A tag processor on the opening tag, or null (WordPress before 6.2, or not a tag). */
+	private static function parser( string $tag ) {
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return null;
+		}
+		$p = new WP_HTML_Tag_Processor( $tag );
+		return $p->next_tag() ? $p : null;
+	}
+
 	/** Adds attributes before the end of an opening tag. */
 	private static function add_attrs( string $tag, array $attrs ): string {
+		$p = self::parser( $tag );
+		if ( $p ) {
+			foreach ( $attrs as $k => $v ) {
+				$p->set_attribute( (string) $k, (string) $v );
+			}
+			return $p->get_updated_html();
+		}
 		$add = '';
 		foreach ( $attrs as $k => $v ) {
 			$add .= ' ' . $k . '="' . esc_attr( (string) $v ) . '"';
@@ -122,6 +145,11 @@ final class FPG_Optimize {
 
 	/** Replaces (or adds) the value of one attribute. */
 	private static function set_attr( string $tag, string $name, string $value ): string {
+		$p = self::parser( $tag );
+		if ( $p ) {
+			$p->set_attribute( $name, $value );
+			return $p->get_updated_html();
+		}
 		$re = '/(\s' . preg_quote( $name, '/' ) . '\s*=\s*)(?:"[^"]*"|\'[^\']*\'|[^\s"\'>]+)/i';
 		if ( preg_match( $re, $tag ) ) {
 			return self::cb(
@@ -459,17 +487,33 @@ final class FPG_Optimize {
 		return self::cb(
 			'#<(?!img\b|iframe\b|html\b|body\b|head\b)[a-z][a-z0-9-]*\b[^>]*\sstyle\s*=\s*(["\'])[^"\']*url\s*\([^>]*>#i',
 			static function ( $m ) {
-				$tag   = $m[0];
-				$style = (string) self::attr( $tag, 'style' );
+				$tag = $m[0];
+				// 1.0.6: the tag is read and changed by WordPress's HTML parser,
+				// never by a regex, so text inside another attribute stays text.
+				if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+					return $tag;
+				}
+				$p = new WP_HTML_Tag_Processor( $tag );
+				if ( ! $p->next_tag() ) {
+					return $tag;
+				}
+				$style = $p->get_attribute( 'style' );
+				$style = is_string( $style ) ? $style : '';
 				if ( ! preg_match( '/background(-image)?\s*:[^;]*url\s*\(/i', $style ) || preg_match( '/url\s*\(\s*["\']?data:/i', $style ) ) {
 					return $tag;
 				}
-				$class = (string) self::attr( $tag, 'class' );
+				$class = $p->get_attribute( 'class' );
+				$class = is_string( $class ) ? $class : '';
 				if ( preg_match( '/(^|\s)(skip-lazy|no-lazy|fpg-no-lazy)(\s|$)/', $class ) || self::excluded( $tag, 'lazy_exclude' ) ) {
 					return $tag;
 				}
+				$p->add_class( 'fpg-lazy-bg' );
+				$out = $p->get_updated_html();
+				if ( $out === $tag ) {
+					return $tag;
+				}
 				self::$need['bg'] = true;
-				return self::set_attr( $tag, 'class', trim( $class . ' fpg-lazy-bg' ) );
+				return $out;
 			},
 			$html
 		);

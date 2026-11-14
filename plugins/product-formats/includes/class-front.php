@@ -243,9 +243,26 @@ final class PFM_Front {
 	 * The block HTML for a product, '' when it is in no work or the work
 	 * has fewer than two formats a visitor can open.
 	 */
+	/**
+	 * 1.2.3: the product is one this visitor may see: published without a
+	 * password (or with the password entered), or readable by them (a
+	 * draft or private product for its editors). [nox_formats id=…] never
+	 * shows the price or format of anything else.
+	 */
+	private static function viewable( int $product_id ): bool {
+		$post = get_post( $product_id );
+		if ( ! $post ) {
+			return false;
+		}
+		if ( 'publish' === $post->post_status ) {
+			return ! post_password_required( $post );
+		}
+		return current_user_can( 'read_post', $product_id );
+	}
+
 	public static function render( int $product_id ): string {
 		try {
-			if ( $product_id <= 0 || 'product' !== get_post_type( $product_id ) ) {
+			if ( $product_id <= 0 || 'product' !== get_post_type( $product_id ) || ! self::viewable( $product_id ) ) {
 				return '';
 			}
 			$work = PFM_Works::work_of( $product_id );

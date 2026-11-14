@@ -26,6 +26,7 @@ final class EWD_Form {
 	const TOKEN_TTL = 1800;
 	const DONE_TTL  = DAY_IN_SECONDS;
 	const RL_MAX    = 5;
+	const RL_IP     = 10;
 	const RL_WIN    = 900;
 
 	/** @var string Error of the confirm step, shown by the shortcode. */
@@ -148,13 +149,29 @@ final class EWD_Form {
 		return 'ewd_rl_' . substr( hash_hmac( 'sha256', $ip, wp_salt( 'nonce' ) ), 0, 32 );
 	}
 
-	private static function limited(): bool {
-		return (int) get_transient( self::ip_key() ) >= self::RL_MAX;
+	/** Limit key for one typed value (e-mail or order number), 1.2.3. */
+	private static function val_key( string $kind, string $v ): string {
+		return 'ewd_rl' . $kind . '_' . substr( hash_hmac( 'sha256', strtolower( trim( $v ) ), wp_salt( 'nonce' ) ), 0, 32 );
 	}
 
-	private static function fail(): void {
-		$k = self::ip_key();
-		set_transient( $k, (int) get_transient( $k ) + 1, self::RL_WIN );
+	/**
+	 * 1.2.3: every lookup counts, before the lookup runs (so parallel tries
+	 * count too), per address (RL_IP) and per typed e-mail and order number
+	 * (RL_MAX), so many addresses cannot share the guessing of one order.
+	 */
+	private static function limited( string $number, string $email ): bool {
+		$limits = array(
+			self::ip_key()                  => self::RL_IP,
+			self::val_key( 'e', $email )    => self::RL_MAX,
+			self::val_key( 'n', $number )   => self::RL_MAX,
+		);
+		$over = false;
+		foreach ( $limits as $k => $max ) {
+			$n = (int) get_transient( $k ) + 1;
+			set_transient( $k, $n, self::RL_WIN );
+			$over = $over || $n > $max;
+		}
+		return $over;
 	}
 
 	/** True on the page that holds the form. */
@@ -328,13 +345,12 @@ final class EWD_Form {
 			self::render_find( __( 'Η φόρμα έληξε. Ξεκίνα ξανά.', 'easy-withdrawal' ) );
 			return;
 		}
-		if ( self::limited() ) {
+		if ( self::limited( self::post( 'ewd_number' ), self::post( 'ewd_email' ) ) ) {
 			self::render_find( __( 'Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε 15 λεπτά.', 'easy-withdrawal' ) );
 			return;
 		}
 		$order = EWD_Rules::find_order( sanitize_text_field( self::post( 'ewd_number' ) ), sanitize_email( self::post( 'ewd_email' ) ) );
 		if ( ! $order ) {
-			self::fail();
 			self::render_find( __( 'Δεν βρέθηκε παραγγελία με αυτόν τον αριθμό και αυτό το email. Έλεγξε το email επιβεβαίωσης της παραγγελίας.', 'easy-withdrawal' ) );
 			return;
 		}

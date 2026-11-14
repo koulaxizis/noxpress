@@ -5,7 +5,7 @@ Tags: viber, channel, announcements, youtube, instagram
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -83,6 +83,9 @@ The webhook at Viber is removed, and the queue and history table, the settings, 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.1 =
+* Security hardening (NXS-19). The history CSV quotes every cell the standard way, and secrets are sealed only when wp-config.php has its own keys.
 
 = 1.4.0 =
 * New: newsletter posts carry a picture. Neither MailerLite nor orOS sends one and Viber shows no preview for a link inside a text message, so a newsletter post went out as bare text. With «Picture from the email» on (default) and the MailerLite API token set, the first real picture of the email's HTML (https, JPEG/PNG/GIF, not a tracker or an icon under 120 px) is used; otherwise the new «Fixed newsletter picture» (chosen from the media library); otherwise text as before. orOS Newsletter issues get the fixed picture.
