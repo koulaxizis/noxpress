@@ -98,13 +98,22 @@ final class NM_Replacer {
 
 	/** Replace in one value (plain, JSON or serialized). */
 	public function replace( string $v ): string {
+		return $this->replace_at( $v, 0 );
+	}
+
+	/**
+	 * 1.2.3: $depth carries on into serialized strings inside serialized
+	 * strings, so nesting deeper than walk()'s limit is replaced as plain
+	 * text instead of recursing without end.
+	 */
+	private function replace_at( string $v, int $depth ): string {
 		if ( ! $this->map || ! $this->may_match( $v ) ) {
 			return $v;
 		}
-		if ( self::looks_serialized( $v ) ) {
+		if ( $depth <= 256 && self::looks_serialized( $v ) ) {
 			$p   = 0;
 			$out = '';
-			if ( $this->walk( $v, $p, $out, 0 ) && strlen( $v ) === $p ) {
+			if ( $this->walk( $v, $p, $out, $depth ) && strlen( $v ) === $p ) {
 				return $out;
 			}
 		}
@@ -188,7 +197,7 @@ final class NM_Replacer {
 				}
 				$str = substr( $s, $start, $len );
 				if ( ! $is_key && $this->may_match( $str ) ) {
-					$str = $this->replace( $str );
+					$str = $this->replace_at( $str, $depth + 1 );
 				}
 				$out .= 's:' . strlen( $str ) . ':"' . $str . '";';
 				$p    = $start + $len + 2;

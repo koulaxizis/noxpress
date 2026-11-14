@@ -6,8 +6,8 @@
  * site will live, open the file in the browser and give the one-time key
  * that the plugin showed when it made this installer.
  *
- * - Key: only its sha256 is in this file. 5 wrong attempts lock the
- *   installer for 15 minutes; it stops working 7 days after it was made.
+ * - Key: only its sha256 is in this file. 5 wrong attempts from one address lock
+ *   that address out for 15 minutes; it stops working 7 days after it was made.
  * - It never reads or writes outside its own folder.
  * - It writes wp-config.php from the backup's wp-config-sample.php with
  *   the database details you give and fresh salts (the old site's
@@ -49,7 +49,23 @@ final class NM_Installer_App {
 			'sess'   => '',
 			'lang'   => '',
 		);
-		$this->self_url   = strtok( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), '?' ); // phpcs:ignore
+		$this->self_url   = self::own_path( (string) ( $_SERVER['REQUEST_URI'] ?? '' ) ); // phpcs:ignore
+	}
+
+	/**
+	 * 1.2.3: the installer's own path on this host, never another host:
+	 * an absolute or "//host" request line cannot send the key elsewhere.
+	 */
+	private static function own_path( string $uri ): string {
+		$path = (string) strtok( $uri, '?#' );
+		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $path ) ) {
+			$path = (string) parse_url( $path, PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+		}
+		$path = '/' . ltrim( (string) preg_replace( '#/+#', '/', str_replace( '\\', '/', $path ) ), '/' );
+		if ( basename( $path ) !== basename( __FILE__ ) ) {
+			$path = rtrim( dirname( $path ), '/' ) . '/' . basename( __FILE__ );
+		}
+		return $path;
 	}
 
 	private function save(): void {
@@ -127,17 +143,24 @@ final class NM_Installer_App {
 	}
 
 	private function login(): void {
-		if ( (int) $this->st['locked'] > time() ) {
+		// 1.2.3: the 5-tries lock is per visitor address, so a stranger
+		// cannot keep the right operator locked out.
+		$who  = substr( hash( 'sha256', (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) . '|' . NM_INST_KEYHASH ), 0, 16 ); // phpcs:ignore
+		$byip = isset( $this->st['by_ip'] ) && is_array( $this->st['by_ip'] ) ? $this->st['by_ip'] : array();
+		$mine = isset( $byip[ $who ] ) && is_array( $byip[ $who ] ) ? $byip[ $who ] : array( 0, 0 );
+		if ( (int) $mine[1] > time() ) {
 			$this->page_login( NM_Util::t( 'Πολλές λάθος προσπάθειες. Δοκίμασε ξανά σε 15 λεπτά.' ) );
 			return;
 		}
 		$key = strtolower( preg_replace( '/[^A-Za-z0-9]/', '', $this->post( 'key' ) ) );
 		if ( ! hash_equals( NM_INST_KEYHASH, hash( 'sha256', $key ) ) ) {
-			++$this->st['fails'];
-			if ( $this->st['fails'] >= 5 ) {
-				$this->st['locked'] = time() + 900;
-				$this->st['fails']  = 0;
+			$mine = array( (int) $mine[0] + 1, 0 );
+			if ( $mine[0] >= 5 ) {
+				$mine = array( 0, time() + 900 );
 			}
+			unset( $byip[ $who ] );
+			$byip[ $who ]      = $mine;
+			$this->st['by_ip'] = array_slice( $byip, -200, null, true );
 			$this->save();
 			sleep( 1 );
 			$this->page_login( NM_Util::t( 'Λάθος κλειδί.' ) );
@@ -146,6 +169,7 @@ final class NM_Installer_App {
 		$secret             = NM_Util::hex( 32 );
 		$this->st['sess']   = hash( 'sha256', $secret );
 		$this->st['fails']  = 0;
+		unset( $this->st['by_ip'][ $who ] );
 		$this->save();
 		setcookie(
 			$this->cookie_name(),
