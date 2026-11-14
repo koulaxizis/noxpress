@@ -57,7 +57,7 @@ jobs:
           set -uo pipefail
           "$RUNNER_TEMP/gitleaks" git . --redact --no-banner --exit-code 0 \
             --report-format json --report-path "$RUNNER_TEMP/gl.json"
-          python3 .github/scripts/security-report.py gitleaks "$RUNNER_TEMP/gl.json" >> "$GITHUB_STEP_SUMMARY"
+          python3 .github/scripts/security-report.py gitleaks "$RUNNER_TEMP/gl.json" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "high=$(python3 .github/scripts/security-report.py gitleaks-high "$RUNNER_TEMP/gl.json")" >> "$GITHUB_ENV"
       - name: Gate
         run: python3 .github/scripts/security-gate.py "$high" "secret(s)"
@@ -79,7 +79,7 @@ jobs:
           semgrep scan --metrics=off --config .github/semgrep/noxpress.yml \
             --exclude 'plugins/*/includes/noxpress-core' --json -q \
             plugins plugins/site-bridge/includes/noxpress-core > "$RUNNER_TEMP/sg.json" || true
-          python3 .github/scripts/security-report.py semgrep "$RUNNER_TEMP/sg.json" >> "$GITHUB_STEP_SUMMARY"
+          python3 .github/scripts/security-report.py semgrep "$RUNNER_TEMP/sg.json" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "high=$(python3 .github/scripts/security-report.py semgrep-high "$RUNNER_TEMP/sg.json")" >> "$GITHUB_ENV"
       - name: Gate
         run: python3 .github/scripts/security-gate.py "$high" "high semgrep finding(s)"
@@ -104,7 +104,7 @@ jobs:
           cfg=()
           [ -f .github/osv-scanner.toml ] && cfg=(--config .github/osv-scanner.toml)
           "$RUNNER_TEMP/osv-scanner" scan -r "${cfg[@]}" --format json . > "$RUNNER_TEMP/osv.json" || true
-          python3 .github/scripts/security-report.py osv "$RUNNER_TEMP/osv.json" >> "$GITHUB_STEP_SUMMARY"
+          python3 .github/scripts/security-report.py osv "$RUNNER_TEMP/osv.json" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "high=$(python3 .github/scripts/security-report.py osv-high "$RUNNER_TEMP/osv.json")" >> "$GITHUB_ENV"
       - name: Gate
         run: python3 .github/scripts/security-gate.py "$high" "dependency issue(s) with CVSS 7.0+"
@@ -122,4 +122,4 @@ jobs:
         run: |
           set -uo pipefail
           mobsfscan --json -o "$RUNNER_TEMP/mobsf.json" apps >/dev/null 2>&1 || true
-          python3 .github/scripts/security-report.py mobsf "$RUNNER_TEMP/mobsf.json" >> "$GITHUB_STEP_SUMMARY"
+          python3 .github/scripts/security-report.py mobsf "$RUNNER_TEMP/mobsf.json" | tee -a "$GITHUB_STEP_SUMMARY"
