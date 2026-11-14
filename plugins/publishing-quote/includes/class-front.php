@@ -63,7 +63,7 @@ final class PBQ_Front {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'rest_quote' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => '__return_true', // Public (§22): the visitor's quote, rates stay on the server.
 			)
 		);
 		register_rest_route(
@@ -72,7 +72,7 @@ final class PBQ_Front {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'rest_request' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => '__return_true', // Public (§22): a visitor's request, validated and rate limited in PBQ_Requests::submit().
 			)
 		);
 	}

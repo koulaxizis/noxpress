@@ -12,8 +12,21 @@
  *     Updates, the update button, the changelog popup and the auto-update
  *     toggle are then WordPress's own.
  *  3. Before WordPress unpacks a suite package, upgrader_pre_download
- *     downloads it here and checks the sha256 and the signature of
- *     "noxpress|<slug>|<version>|<sha256>". A failed check stops the install.
+ *     downloads it here and checks the sha256 and the signature. A failed
+ *     check stops the install. A package older than the installed version
+ *     is refused.
+ *
+ * Signed list (Core 1.3.0, security hardening NXS-21): updates.json has a
+ * "serial" (unix time of the build) and an "expires" (serial + 14 days; the
+ * release workflow re-signs it every week). Every release carries "sig2",
+ * an Ed25519 signature of
+ *   noxpress2|<slug>|<channel>|<version>|<sha256>|<serial>|<expires>
+ * so nobody can serve an old list (rollback / freeze), present a beta as
+ * stable, or keep a site on an expired list. A list older than the newest
+ * serial this site has seen, an expired one or one without valid "sig2"
+ * signatures is ignored, and the hub says why. The v1 "signature"
+ * (noxpress|<slug>|<version>|<sha256>) stays in the file for sites with
+ * older Core copies; this Core no longer reads it.
  *
  * Requests: wp_safe_remote_get only, 10 s timeout, cached for 12 hours
  * (1 hour after a failure), never on visitor requests: update checks run
@@ -40,6 +53,12 @@ final class Noxpress_Updater {
 
 	/** Site option: unix time of the last manifest fetch attempt. */
 	const OPT_CHECKED = 'noxpress_checked';
+
+	/** Site option: array( 'serial' => newest serial seen, 'problem' => '' | 'expired' | 'rollback' | 'signature' ). */
+	const OPT_TRUST = 'noxpress_trust';
+
+	/** Longest validity a list may claim (expires - serial), in seconds. */
+	const MAX_VALID = 31 * DAY_IN_SECONDS;
 
 	/** User meta: slug => version of the other channel's release this user hid in the hub. */
 	const META_HIDDEN = 'noxpress_hidden';
@@ -86,6 +105,7 @@ final class Noxpress_Updater {
 		}
 
 		$data     = array();
+		$problem  = 'unavailable';
 		$response = wp_safe_remote_get(
 			self::MANIFEST_URL,
 			array(
@@ -94,18 +114,40 @@ final class Noxpress_Updater {
 			)
 		);
 		if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
-			$data = self::parse( (string) wp_remote_retrieve_body( $response ) );
+			$data    = self::parse( (string) wp_remote_retrieve_body( $response ), $problem );
 		}
+		self::remember( $data, $problem );
 
 		update_site_option( self::OPT_CHECKED, time() );
 		set_site_transient( self::CACHE, $data, $data ? 12 * HOUR_IN_SECONDS : HOUR_IN_SECONDS );
 		return $data;
 	}
 
-	/** Strict parse of updates.json: unknown plugins and malformed releases are dropped. */
-	public static function parse( string $json ): array {
-		$raw = json_decode( $json, true );
+	/**
+	 * Strict parse of updates.json: unknown plugins and malformed or
+	 * unsigned releases are dropped. The whole list is refused when it has
+	 * expired, is older than the newest list this site has seen, or has no
+	 * valid release at all.
+	 *
+	 * @param string $problem Set to '' | 'expired' | 'rollback' | 'signature'.
+	 */
+	public static function parse( string $json, &$problem = '' ): array {
+		$problem = 'signature';
+		$raw     = json_decode( $json, true );
 		if ( ! is_array( $raw ) || ! isset( $raw['plugins'] ) || ! is_array( $raw['plugins'] ) ) {
+			return array();
+		}
+		$serial  = isset( $raw['serial'] ) && is_int( $raw['serial'] ) ? $raw['serial'] : 0;
+		$expires = isset( $raw['expires'] ) && is_int( $raw['expires'] ) ? $raw['expires'] : 0;
+		if ( $serial <= 0 || $expires <= $serial || $expires - $serial > self::MAX_VALID ) {
+			return array();
+		}
+		if ( $expires < time() ) {
+			$problem = 'expired';
+			return array();
+		}
+		if ( $serial < self::trusted_serial() ) {
+			$problem = 'rollback';
 			return array();
 		}
 		$out = array();
@@ -115,25 +157,70 @@ final class Noxpress_Updater {
 			}
 			$entry = array();
 			foreach ( array( 'stable', 'beta' ) as $channel ) {
-				$rel               = isset( $raw['plugins'][ $slug ][ $channel ] ) ? self::release( $slug, $raw['plugins'][ $slug ][ $channel ] ) : null;
+				$rel               = isset( $raw['plugins'][ $slug ][ $channel ] ) ? self::release( $slug, $channel, $raw['plugins'][ $slug ][ $channel ], $serial, $expires ) : null;
 				$entry[ $channel ] = $rel;
 			}
 			if ( $entry['stable'] || $entry['beta'] ) {
 				$out[ $slug ] = $entry;
 			}
 		}
+		$problem = $out ? '' : 'signature';
 		return $out;
 	}
 
-	/** One validated release, or null. */
-	private static function release( string $slug, $r ): ?array {
+	/** Newest list serial this site has accepted (0 = none yet). */
+	public static function trusted_serial(): int {
+		$t = get_site_option( self::OPT_TRUST, array() );
+		return is_array( $t ) && isset( $t['serial'] ) ? (int) $t['serial'] : 0;
+	}
+
+	/** Why the last list was refused: '' | 'expired' | 'rollback' | 'signature' | 'unavailable'. */
+	public static function problem(): string {
+		$t = get_site_option( self::OPT_TRUST, array() );
+		return is_array( $t ) && isset( $t['problem'] ) ? (string) $t['problem'] : '';
+	}
+
+	/** Stores the newest accepted serial and the reason of a refusal. */
+	private static function remember( array $data, string $problem ): void {
+		$serial = self::trusted_serial();
+		foreach ( $data as $entry ) {
+			foreach ( array( 'stable', 'beta' ) as $channel ) {
+				if ( ! empty( $entry[ $channel ]['serial'] ) ) {
+					$serial = max( $serial, (int) $entry[ $channel ]['serial'] );
+				}
+			}
+		}
+		update_site_option( self::OPT_TRUST, array( 'serial' => $serial, 'problem' => $data ? '' : $problem ) );
+	}
+
+	/** Ed25519 check of a message against PUBLIC_KEY. */
+	private static function signed( string $message, string $signature ): bool {
+		try {
+			return function_exists( 'sodium_crypto_sign_verify_detached' )
+				&& sodium_crypto_sign_verify_detached(
+					(string) base64_decode( $signature, true ),
+					$message,
+					(string) base64_decode( self::PUBLIC_KEY, true )
+				);
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+	}
+
+	/** The signed message of a release (sig2). */
+	public static function message( string $slug, array $rel ): string {
+		return 'noxpress2|' . $slug . '|' . $rel['channel'] . '|' . $rel['version'] . '|' . $rel['sha256'] . '|' . $rel['serial'] . '|' . $rel['expires'];
+	}
+
+	/** One validated release with a valid sig2, or null. */
+	private static function release( string $slug, string $channel, $r, int $serial, int $expires ): ?array {
 		if ( ! is_array( $r ) ) {
 			return null;
 		}
 		$version = isset( $r['version'] ) ? (string) $r['version'] : '';
 		$zip     = isset( $r['zip'] ) ? (string) $r['zip'] : '';
 		$sha     = isset( $r['sha256'] ) ? strtolower( (string) $r['sha256'] ) : '';
-		$sig     = isset( $r['signature'] ) ? (string) $r['signature'] : '';
+		$sig     = isset( $r['sig2'] ) ? (string) $r['sig2'] : '';
 
 		if ( ! preg_match( '/^\d+\.\d+\.\d+$/', $version )
 			|| 0 !== strpos( $zip, self::PACKAGE_PREFIX )
@@ -146,6 +233,17 @@ final class Noxpress_Updater {
 			return null;
 		}
 
+		$rel = array(
+			'version' => $version,
+			'sha256'  => $sha,
+			'channel' => $channel,
+			'serial'  => $serial,
+			'expires' => $expires,
+		);
+		if ( ! self::signed( self::message( $slug, $rel ), $sig ) ) {
+			return null;
+		}
+
 		$text = static function ( $key, $max ) use ( $r ): string {
 			return isset( $r[ $key ] ) && is_scalar( $r[ $key ] ) ? substr( sanitize_textarea_field( (string) $r[ $key ] ), 0, $max ) : '';
 		};
@@ -155,6 +253,9 @@ final class Noxpress_Updater {
 			'zip'          => $zip,
 			'sha256'       => $sha,
 			'signature'    => $sig,
+			'channel'      => $channel,
+			'serial'       => $serial,
+			'expires'      => $expires,
 			'published'    => $text( 'published', 40 ),
 			'requires'     => $text( 'requires_wp', 10 ),
 			'requires_php' => $text( 'requires_php', 10 ),
@@ -172,8 +273,8 @@ final class Noxpress_Updater {
 		if ( empty( $manifest[ $slug ] ) ) {
 			return null;
 		}
-		$stable = $manifest[ $slug ]['stable'];
-		$beta   = $manifest[ $slug ]['beta'];
+		$stable = self::fresh( $manifest[ $slug ]['stable'] );
+		$beta   = self::fresh( $manifest[ $slug ]['beta'] );
 		if ( 'beta' === self::channel() && $beta && ( ! $stable || version_compare( $beta['version'], $stable['version'], '>' ) ) ) {
 			return $beta + array( 'beta' => true );
 		}
@@ -181,6 +282,11 @@ final class Noxpress_Updater {
 			return $stable + array( 'beta' => false );
 		}
 		return null;
+	}
+
+	/** The release while its list is valid, else null (a cached list can expire). */
+	private static function fresh( ?array $rel ): ?array {
+		return $rel && ! empty( $rel['expires'] ) && (int) $rel['expires'] >= time() ? $rel : null;
 	}
 
 	/**
@@ -193,7 +299,7 @@ final class Noxpress_Updater {
 			return null;
 		}
 		$on_beta = 'beta' === self::channel();
-		$alt     = $manifest[ $slug ][ $on_beta ? 'stable' : 'beta' ];
+		$alt     = self::fresh( $manifest[ $slug ][ $on_beta ? 'stable' : 'beta' ] );
 		$cur     = self::latest( $slug, $manifest );
 		if ( ! $alt || ( $cur && ! version_compare( $alt['version'], $cur['version'], '>' ) ) ) {
 			return null;
@@ -266,7 +372,7 @@ final class Noxpress_Updater {
 			return null;
 		}
 		$manifest = self::manifest();
-		$beta     = isset( $manifest[ $slug ]['beta'] ) ? $manifest[ $slug ]['beta'] : null;
+		$beta     = isset( $manifest[ $slug ]['beta'] ) ? self::fresh( $manifest[ $slug ]['beta'] ) : null;
 		return $beta ? $beta + array( 'beta' => true ) : null;
 	}
 
@@ -449,6 +555,13 @@ final class Noxpress_Updater {
 		if ( ! $found ) {
 			return new WP_Error( 'noxpress_unknown_package', __( 'Το πακέτο δεν υπάρχει στη λίστα εκδόσεων του Noxpress.', 'noxpress' ) );
 		}
+		if ( ! self::fresh( $found ) ) {
+			return new WP_Error( 'noxpress_expired', __( 'Η λίστα εκδόσεων έχει λήξει. Η εγκατάσταση ακυρώθηκε.', 'noxpress' ) );
+		}
+		$installed = Noxpress_Core::installed();
+		if ( isset( $installed[ $slug ]['Version'] ) && version_compare( $found['version'], (string) $installed[ $slug ]['Version'], '<' ) ) {
+			return new WP_Error( 'noxpress_downgrade', __( 'Το πακέτο είναι παλιότερο από την εγκατεστημένη έκδοση. Η εγκατάσταση ακυρώθηκε.', 'noxpress' ) );
+		}
 
 		if ( is_object( $upgrader ) && isset( $upgrader->skin ) && isset( $upgrader->strings['downloading_package'] ) ) {
 			$upgrader->skin->feedback( 'downloading_package', $package );
@@ -476,18 +589,8 @@ final class Noxpress_Updater {
 			return new WP_Error( 'noxpress_sha256', __( 'Το πακέτο δεν ταιριάζει με το sha256 της λίστας εκδόσεων. Η εγκατάσταση ακυρώθηκε.', 'noxpress' ) );
 		}
 
-		$message = 'noxpress|' . $slug . '|' . $rel['version'] . '|' . $sha;
-		$valid   = false;
-		try {
-			$valid = function_exists( 'sodium_crypto_sign_verify_detached' )
-				&& sodium_crypto_sign_verify_detached(
-					(string) base64_decode( $rel['signature'], true ),
-					$message,
-					(string) base64_decode( self::PUBLIC_KEY, true )
-				);
-		} catch ( \Throwable $e ) {
-			$valid = false;
-		}
+		$valid = isset( $rel['channel'], $rel['serial'], $rel['expires'] )
+			&& self::signed( self::message( $slug, array( 'sha256' => $sha ) + $rel ), $rel['signature'] );
 		if ( ! $valid ) {
 			return new WP_Error( 'noxpress_signature', __( 'Η ψηφιακή υπογραφή του πακέτου δεν είναι έγκυρη. Η εγκατάσταση ακυρώθηκε.', 'noxpress' ) );
 		}

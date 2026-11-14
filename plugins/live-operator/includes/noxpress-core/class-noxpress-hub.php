@@ -235,7 +235,16 @@ final class Noxpress_Hub {
 				<p class="nx-muted"><?php esc_html_e( 'Οι εγκαταστάσεις και οι ενημερώσεις γίνονται από διαχειριστή του site.', 'noxpress' ); ?></p>
 			<?php endif; ?>
 
-			<?php if ( ! $have_list ) : ?>
+			<?php
+			$problem = $have_list ? '' : Noxpress_Updater::problem();
+			if ( 'expired' === $problem ) :
+				?>
+				<div class="notice notice-warning inline"><p><?php esc_html_e( 'Η λίστα εκδόσεων έχει λήξει και δεν μπορεί να επιβεβαιωθεί, άρα το site δεν προτείνει ενημερώσεις. Θα ξαναδοκιμάσει αυτόματα· αν μένει έτσι πάνω από μία μέρα, ρώτα στο noxpress.tech.', 'noxpress' ); ?></p></div>
+			<?php elseif ( 'rollback' === $problem ) : ?>
+				<div class="notice notice-warning inline"><p><?php esc_html_e( 'Η λίστα εκδόσεων που ήρθε είναι παλιότερη από αυτήν που έχει ήδη δει το site, άρα αγνοήθηκε. Οι ενημερώσεις συνεχίζουν με την επόμενη έγκυρη λίστα.', 'noxpress' ); ?></p></div>
+			<?php elseif ( 'signature' === $problem ) : ?>
+				<div class="notice notice-warning inline"><p><?php esc_html_e( 'Η λίστα εκδόσεων δεν έχει έγκυρη υπογραφή, άρα αγνοήθηκε. Οι ενημερώσεις συνεχίζουν με την επόμενη έγκυρη λίστα.', 'noxpress' ); ?></p></div>
+			<?php elseif ( ! $have_list ) : ?>
 				<div class="notice notice-warning inline"><p><?php esc_html_e( 'Η λίστα εκδόσεων δεν είναι διαθέσιμη αυτή τη στιγμή (noxpress.tech). Θα ξαναδοκιμάσει αυτόματα.', 'noxpress' ); ?></p></div>
 			<?php endif; ?>
 

@@ -9,8 +9,11 @@
  * Dispatch map:
  *  - Noxpress_Core     → catalog of suite plugins, top-level menu, language,
  *                        page-cache helpers (no_page_cache, purge_page_cache)
- *  - Noxpress_Updater  → updates.json, update transient, plugin details,
- *                        package verification (sha256 + Ed25519)
+ *  - Noxpress_Updater  → updates.json (signed, with serial and expiry since
+ *                        1.3.0), update transient, plugin details, package
+ *                        verification (sha256 + Ed25519)
+ *  - Noxpress_Safe     → shared security helpers (public URLs, CSV, salts,
+ *                        tag attributes, AI note), since 1.3.0
  *  - Noxpress_Hub      → the "Noxpress" landing page, channel setting
  *
  * Language (Bible §9): Greek msgids in the 'noxpress' domain, English from
@@ -100,6 +103,12 @@ final class Noxpress_Core {
 		'Τελευταίος έλεγχος: %s'                                => 'Last check: %s',
 		'Τελευταίος έλεγχος: ποτέ'                              => 'Last check: never',
 		'Η λίστα εκδόσεων δεν είναι διαθέσιμη αυτή τη στιγμή (noxpress.tech). Θα ξαναδοκιμάσει αυτόματα.' => 'The version list is not available right now (noxpress.tech). It will retry automatically.',
+		'Η λίστα εκδόσεων έχει λήξει και δεν μπορεί να επιβεβαιωθεί, άρα το site δεν προτείνει ενημερώσεις. Θα ξαναδοκιμάσει αυτόματα· αν μένει έτσι πάνω από μία μέρα, ρώτα στο noxpress.tech.' => 'The version list has expired and cannot be confirmed, so the site offers no updates. It will retry automatically; if this lasts more than a day, ask at noxpress.tech.',
+		'Η λίστα εκδόσεων που ήρθε είναι παλιότερη από αυτήν που έχει ήδη δει το site, άρα αγνοήθηκε. Οι ενημερώσεις συνεχίζουν με την επόμενη έγκυρη λίστα.' => 'The version list received is older than one this site has already seen, so it was ignored. Updates continue with the next valid list.',
+		'Η λίστα εκδόσεων δεν έχει έγκυρη υπογραφή, άρα αγνοήθηκε. Οι ενημερώσεις συνεχίζουν με την επόμενη έγκυρη λίστα.' => 'The version list has no valid signature, so it was ignored. Updates continue with the next valid list.',
+		'Η λίστα εκδόσεων έχει λήξει. Η εγκατάσταση ακυρώθηκε.' => 'The version list has expired. The installation was cancelled.',
+		'Το πακέτο είναι παλιότερο από την εγκατεστημένη έκδοση. Η εγκατάσταση ακυρώθηκε.' => 'The package is older than the installed version. The installation was cancelled.',
+		'Η διεύθυνση δεν είναι δημόσια (τοπικό ή εσωτερικό δίκτυο): το αίτημα δεν στάλθηκε.' => 'The address is not public (local or internal network): the request was not sent.',
 		'Οι αλλαγές αρχείων είναι απενεργοποιημένες σε αυτό το site (DISALLOW_FILE_MODS): οι ενημερώσεις και οι εγκαταστάσεις γίνονται εκτός WordPress.' => 'File changes are disabled on this site (DISALLOW_FILE_MODS): updates and installs happen outside WordPress.',
 		'Οι εγκαταστάσεις και οι ενημερώσεις γίνονται από διαχειριστή του site.' => 'Installs and updates are done by a site administrator.',
 		'Το κανάλι ενημερώσεων αποθηκεύτηκε.'                   => 'The update channel was saved.',
@@ -169,6 +178,7 @@ final class Noxpress_Core {
 		add_filter( 'gettext_noxpress', array( __CLASS__, 'translate' ), 10, 3 );
 		add_filter( 'ngettext_noxpress', array( __CLASS__, 'translate_plural' ), 10, 5 );
 
+		require_once NOXPRESS_CORE_PATH . '/class-noxpress-safe.php';
 		require_once NOXPRESS_CORE_PATH . '/class-noxpress-updater.php';
 		Noxpress_Updater::init();
 

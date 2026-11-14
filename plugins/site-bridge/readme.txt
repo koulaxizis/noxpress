@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.1
+Stable tag: 1.12.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -101,6 +101,9 @@ Every setting, key, pairing, connection and the audit log are deleted, so no tok
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.12.2 =
+* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.
 
 = 1.12.1 =
 * Security hardening (NXS-02, NXS-03, NXS-05, NXS-06, NXS-20). Update the Hub and every site. Some query shapes and option names that used to pass are now refused with a message that says what to do instead.
