@@ -39,6 +39,12 @@ $h = preg_replace( '/x/', 'y', $h );
 fputcsv( $fh, $row, ',', '"', '\\' );
 // ok: nox-fputcsv-escape
 fputcsv( $fh, $row, ',', '"', '' );
+// ruleid: nox-fputcsv-escape
+$row = fgetcsv( $fh, 0, ',', '"', '\\' );
+// ruleid: nox-fputcsv-escape
+$row = fgetcsv( $fh );
+// ok: nox-fputcsv-escape
+$row = fgetcsv( $fh, 0, ',', '"', '' );
 
 // ruleid: nox-remote-request-unchecked
 wp_remote_get( $url );

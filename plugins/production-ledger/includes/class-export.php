@@ -38,7 +38,7 @@ final class PL_Export {
 		}
 		fwrite( $fh, "\xEF\xBB\xBF" );
 		foreach ( $rows as $r ) {
-			fputcsv( $fh, $r, $sep, '"', '\\' );
+			fputcsv( $fh, $r, $sep, '"', '' );
 		}
 		rewind( $fh );
 		$csv = (string) stream_get_contents( $fh );

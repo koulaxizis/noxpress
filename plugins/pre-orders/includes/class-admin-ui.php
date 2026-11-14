@@ -817,7 +817,7 @@ final class POR_Admin_UI {
 			),
 			$sep,
 			'"',
-			'\\'
+			''
 		);
 		foreach ( $items as $it ) {
 			$p   = wc_get_product( $it['id'] );
@@ -846,7 +846,7 @@ final class POR_Admin_UI {
 					),
 					$sep,
 					'"',
-					'\\'
+					''
 				);
 			}
 		}
