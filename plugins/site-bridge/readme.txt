@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.0
+Stable tag: 1.12.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -101,6 +101,9 @@ Every setting, key, pairing, connection and the audit log are deleted, so no tok
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.12.1 =
+* Security hardening (NXS-02, NXS-03, NXS-05, NXS-06, NXS-20). Update the Hub and every site. Some query shapes and option names that used to pass are now refused with a message that says what to do instead.
 
 = 1.12.0 =
 * New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.

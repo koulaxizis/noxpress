@@ -37,16 +37,18 @@ final class FPG_Key {
 	const PATTERN = '/^[0-9a-f]{32}(-m)?\.html$/';
 
 	/**
-	 * The current request. Returns array( ok, reason, file, test ):
+	 * The current request. Returns array( ok, reason, file, test, private ):
 	 * ok = a cache file may answer it, file = that file, test = the
-	 * request asked for the test preview (?fpg-test=1).
+	 * request asked for the test preview (?fpg-test=1), private = a test
+	 * preview that carries a personal cookie (served, never stored).
 	 */
 	public static function request( array $server, array $cookies, array $cfg ): array {
 		$out    = array(
-			'ok'     => false,
-			'reason' => '',
-			'file'   => '',
-			'test'   => false,
+			'ok'      => false,
+			'reason'  => '',
+			'file'    => '',
+			'test'    => false,
+			'private' => false,
 		);
 		$method = isset( $server['REQUEST_METHOD'] ) ? strtoupper( (string) $server['REQUEST_METHOD'] ) : 'GET';
 		if ( 'GET' !== $method && 'HEAD' !== $method ) {
@@ -78,16 +80,21 @@ final class FPG_Key {
 			$out['reason'] = $why;
 			return $out;
 		}
-		// The test preview shows the visitors' page to a logged-in admin:
-		// the cookies of the admin do not matter for it.
-		if ( ! $out['test'] ) {
-			$prefixes = array_merge( self::COOKIES, isset( $cfg['cookies'] ) ? (array) $cfg['cookies'] : array() );
-			foreach ( array_keys( $cookies ) as $name ) {
-				foreach ( $prefixes as $p ) {
-					if ( '' !== $p && 0 === strpos( (string) $name, (string) $p ) ) {
-						$out['reason'] = 'cookie';
-						return $out;
+		// A visitor with a personal cookie never gets or makes a cache file.
+		// One exception, 1.0.5: in test mode the preview (?fpg-test=1) may
+		// show an existing file to an admin whatever their cookies, but the
+		// request is marked "private" and FPG_Cache never stores its page.
+		// Outside test mode the parameter changes nothing here.
+		$prefixes = array_merge( self::COOKIES, isset( $cfg['cookies'] ) ? (array) $cfg['cookies'] : array() );
+		foreach ( array_keys( $cookies ) as $name ) {
+			foreach ( $prefixes as $p ) {
+				if ( '' !== $p && 0 === strpos( (string) $name, (string) $p ) ) {
+					if ( $out['test'] && ! empty( $cfg['test'] ) ) {
+						$out['private'] = true;
+						break 2;
 					}
+					$out['reason'] = 'cookie';
+					return $out;
 				}
 			}
 		}

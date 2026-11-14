@@ -612,6 +612,15 @@ final class SBR_Tools {
 		}
 		$out = array();
 		foreach ( $names as $n ) {
+			// 1.12.1: only the exact stored name (no padding, case or accent
+			// variants), so the secret check sees the real name.
+			if ( '' === SBR_Guard::option_name( $n ) ) {
+				$out[ $n ] = array(
+					'exists' => false,
+					'error'  => 'Give the option name exactly as it is stored (plain ASCII, same case).',
+				);
+				continue;
+			}
 			$exists = null !== $wpdb->get_var( $wpdb->prepare( "SELECT option_id FROM {$wpdb->options} WHERE option_name = %s LIMIT 1", $n ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			if ( ! $exists ) {
 				$out[ $n ] = array( 'exists' => false );
@@ -794,8 +803,9 @@ final class SBR_Tools {
 		$home = wp_parse_url( home_url( '/' ) );
 		if ( preg_match( '#^https?://#i', $path ) ) {
 			$p = wp_parse_url( $path );
-			if ( ! is_array( $p ) || strtolower( $p['host'] ?? '' ) !== strtolower( $home['host'] ?? '' ) ) {
-				return new WP_Error( 'sbr_args', 'Only pages of this site.' );
+			// 1.12.1: the same scheme, host and port as the site.
+			if ( ! is_array( $p ) || strtolower( $p['host'] ?? '' ) !== strtolower( $home['host'] ?? '' ) || strtolower( $p['scheme'] ?? '' ) !== strtolower( $home['scheme'] ?? '' ) || ( $p['port'] ?? null ) !== ( $home['port'] ?? null ) || isset( $p['user'] ) || isset( $p['pass'] ) ) {
+				return new WP_Error( 'sbr_args', 'Only pages of this site (same scheme, host and port).' );
 			}
 			$url = $path;
 		} else {
@@ -806,7 +816,7 @@ final class SBR_Tools {
 			$url,
 			array(
 				'timeout'     => 20,
-				'redirection' => 3,
+				'redirection' => 0, // 1.12.1: a redirect is reported (status + location), never followed.
 				'user-agent'  => 'Mozilla/5.0 (compatible; SiteBridge/' . SBR_VERSION . '; +https://noxpress.tech)',
 				'sslverify'   => apply_filters( 'https_local_ssl_verify', false ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter for loopbacks.
 				'headers'     => array( 'Cache-Control' => 'no-cache' ),
