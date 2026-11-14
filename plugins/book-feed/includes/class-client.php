@@ -96,8 +96,11 @@ final class BKF_Client {
 	/** Requests hook: a redirect to a non-public address stops the request (1.13.2). */
 	public static function check_redirect( $location ): void {
 		if ( ! self::public_url( (string) $location ) ) {
-			$e = class_exists( '\WpOrg\Requests\Exception' ) ? '\WpOrg\Requests\Exception' : 'Requests_Exception';
-			throw new $e( __( 'Η διεύθυνση δεν είναι δημόσια (τοπικό ή εσωτερικό δίκτυο): το αίτημα δεν στάλθηκε.', 'book-feed' ), 'bkf_private' );
+			// WordPress 6.2+ (Requests 2). Older versions keep wp_safe_remote_get's own redirect check.
+			if ( ! class_exists( '\WpOrg\Requests\Exception' ) ) {
+				return;
+			}
+			throw new \WpOrg\Requests\Exception( __( 'Η διεύθυνση δεν είναι δημόσια (τοπικό ή εσωτερικό δίκτυο): το αίτημα δεν στάλθηκε.', 'book-feed' ), 'bkf_private' );
 		}
 	}
 
