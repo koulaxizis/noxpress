@@ -3,12 +3,14 @@
 #
 #  - secrets:  gitleaks over the whole git history (redacted output).
 #  - code:     semgrep with our own rules (.github/semgrep/noxpress.yml, with
-#              tests) on the plugins (one copy of Noxpress Core).
+#              tests) on the plugins (one copy of Noxpress Core), and every
+#              public REST route on the Bible §22 map (check-public-routes.py).
 #  - deps:     osv-scanner on lockfiles and vendored libraries.
 #  - android:  mobsfscan on the apps. Report only.
 #
 # Report only until ENFORCE_FROM. From that day a job fails on a high
-# finding: any secret, a semgrep rule with severity ERROR, or a dependency
+# finding: any secret, a semgrep rule with severity ERROR, a public REST
+# route without a §22 line and comment, or a dependency
 # issue with CVSS 7.0 or more. Everything else stays in the run's summary.
 # An accepted exception: `// nosemgrep: <rule-id>` with its reason, or
 # `.github/osv-scanner.toml` ([[IgnoredVulns]] with reason and ignoreUntil).
@@ -81,8 +83,13 @@ jobs:
             plugins plugins/site-bridge/includes/noxpress-core > "$RUNNER_TEMP/sg.json" || true
           python3 .github/scripts/security-report.py semgrep "$RUNNER_TEMP/sg.json" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "high=$(python3 .github/scripts/security-report.py semgrep-high "$RUNNER_TEMP/sg.json")" >> "$GITHUB_ENV"
+      - name: Public REST routes on the map (Bible §22)
+        run: |
+          set -uo pipefail
+          python3 .github/scripts/check-public-routes.py | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "high=$(( high + $(python3 .github/scripts/check-public-routes.py --count) ))" >> "$GITHUB_ENV"
       - name: Gate
-        run: python3 .github/scripts/security-gate.py "$high" "high semgrep finding(s)"
+        run: python3 .github/scripts/security-gate.py "$high" "high finding(s), semgrep or public routes off the map"
 
   deps:
     runs-on: ubuntu-latest
