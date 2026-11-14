@@ -1,0 +1,125 @@
+# Security scans on every PR and every push to main (Bible §13, security
+# policy §11; security hardening 2026-11, H5, approved by Chris 2026-11-14).
+#
+#  - secrets:  gitleaks over the whole git history (redacted output).
+#  - code:     semgrep with our own rules (.github/semgrep/noxpress.yml, with
+#              tests) on the plugins (one copy of Noxpress Core).
+#  - deps:     osv-scanner on lockfiles and vendored libraries.
+#  - android:  mobsfscan on the apps. Report only.
+#
+# Report only until ENFORCE_FROM. From that day a job fails on a high
+# finding: any secret, a semgrep rule with severity ERROR, or a dependency
+# issue with CVSS 7.0 or more. Everything else stays in the run's summary.
+# An accepted exception: `// nosemgrep: <rule-id>` with its reason, or
+# `.github/osv-scanner.toml` ([[IgnoredVulns]] with reason and ignoreUntil).
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  ENFORCE_FROM: '2026-11-30'
+  GITLEAKS_VERSION: '8.21.2'
+  GITLEAKS_SHA256: '5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba'
+  OSV_VERSION: '1.9.2'
+  OSV_SHA256: 'd6af4b67fa5de658598bd2d445efb99e90d1734b3146962418719c4350ecb74b'
+  SEMGREP_VERSION: '1.172.0'
+  MOBSFSCAN_VERSION: '1.1.0'
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -fsSLo gl.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gl.tgz" | sha256sum -c -
+          tar -xzf gl.tgz gitleaks
+      - name: gitleaks
+        run: |
+          set -uo pipefail
+          "$RUNNER_TEMP/gitleaks" git . --redact --no-banner --exit-code 0 \
+            --report-format json --report-path "$RUNNER_TEMP/gl.json"
+          python3 .github/scripts/security-report.py gitleaks "$RUNNER_TEMP/gl.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "high=$(python3 .github/scripts/security-report.py gitleaks-high "$RUNNER_TEMP/gl.json")" >> "$GITHUB_ENV"
+      - name: Gate
+        run: python3 .github/scripts/security-gate.py "$high" "secret(s)"
+
+  code:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Install semgrep
+        run: python3 -m pip install --user --disable-pip-version-check -q "semgrep==${SEMGREP_VERSION}"
+      - name: Rule tests
+        run: semgrep --test --metrics=off .github/semgrep
+      - name: semgrep
+        run: |
+          set -uo pipefail
+          semgrep scan --metrics=off --config .github/semgrep/noxpress.yml \
+            --exclude 'plugins/*/includes/noxpress-core' --json -q \
+            plugins plugins/site-bridge/includes/noxpress-core > "$RUNNER_TEMP/sg.json" || true
+          python3 .github/scripts/security-report.py semgrep "$RUNNER_TEMP/sg.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "high=$(python3 .github/scripts/security-report.py semgrep-high "$RUNNER_TEMP/sg.json")" >> "$GITHUB_ENV"
+      - name: Gate
+        run: python3 .github/scripts/security-gate.py "$high" "high semgrep finding(s)"
+
+  deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Install osv-scanner
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -fsSLo osv-scanner "https://github.com/google/osv-scanner/releases/download/v${OSV_VERSION}/osv-scanner_linux_amd64"
+          echo "${OSV_SHA256}  osv-scanner" | sha256sum -c -
+          chmod +x osv-scanner
+      - name: osv-scanner
+        run: |
+          set -uo pipefail
+          cfg=()
+          [ -f .github/osv-scanner.toml ] && cfg=(--config .github/osv-scanner.toml)
+          "$RUNNER_TEMP/osv-scanner" scan -r "${cfg[@]}" --format json . > "$RUNNER_TEMP/osv.json" || true
+          python3 .github/scripts/security-report.py osv "$RUNNER_TEMP/osv.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "high=$(python3 .github/scripts/security-report.py osv-high "$RUNNER_TEMP/osv.json")" >> "$GITHUB_ENV"
+      - name: Gate
+        run: python3 .github/scripts/security-gate.py "$high" "dependency issue(s) with CVSS 7.0+"
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Install mobsfscan
+        run: python3 -m pip install --user --disable-pip-version-check -q "mobsfscan==${MOBSFSCAN_VERSION}"
+      - name: mobsfscan (report only)
+        run: |
+          set -uo pipefail
+          mobsfscan --json -o "$RUNNER_TEMP/mobsf.json" apps >/dev/null 2>&1 || true
+          python3 .github/scripts/security-report.py mobsf "$RUNNER_TEMP/mobsf.json" >> "$GITHUB_STEP_SUMMARY"
