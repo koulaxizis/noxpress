@@ -2449,7 +2449,7 @@ footer .heart { color: var(--accent-bright); }
 (function () {
 	'use strict';
 	/* ------------------------------------------------------------------
-	 * Μετρητής λήψεων (Bible §17): «More than X downloads» από το
+	 * Μετρητής λήψεων (Bible §17): ο ακριβής αριθμός «X downloads» από το
 	 * downloads.json του ίδιου site, που γράφει το workflow «Count
 	 * downloads». Χωρίς αρχείο ή με 0, η γραμμή μένει κρυφή.
 	 * ------------------------------------------------------------------ */
@@ -2460,9 +2460,10 @@ footer .heart { color: var(--accent-bright); }
 		if (!shown) { return; }
 		var isEl = 'el' === document.documentElement.lang;
 		var n = shown.toLocaleString(isEl ? 'el-GR' : 'en-US');
+		var one = 1 === shown;
 		el.innerHTML = isEl
-			? 'Πάνω από <strong>' + n + '</strong> λήψεις'
-			: 'More than <strong>' + n + '</strong> downloads';
+			? '<strong>' + n + '</strong> ' + (one ? 'λήψη' : 'λήψεις')
+			: '<strong>' + n + '</strong> ' + (one ? 'download' : 'downloads');
 		el.hidden = false;
 	}
 	fetch('downloads.json', { cache: 'no-cache' }).then(function (r) {

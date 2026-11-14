@@ -1,4 +1,4 @@
-# Μετράει τις λήψεις των plugins για τη γραμμή «More than X downloads» του
+# Μετράει τις λήψεις των plugins για τη γραμμή «X downloads» του
 # noxpress.tech (Bible §17). Χωρίς analytics: αθροίζει το δημόσιο
 # download_count που κρατά το GitHub για κάθε zip των releases nox-*.
 #
@@ -6,7 +6,7 @@
 # χειροκίνητα από Actions → «Count downloads» → Run workflow.
 #
 # Γράφει το downloads.json στη ρίζα του main μόνο όταν αλλάζει ο αριθμός
-# που δείχνει το site ή όταν εμφανίζεται νέο zip.
+# που δείχνει το site (ο ακριβής, από 14/11/2026) ή όταν εμφανίζεται νέο zip.
 #
 # OFFSET: λήψεις που έκανε το δικό μας job «manifest» πριν σταματήσει να
 # κατεβάζει τα zip που δεν άλλαξαν (μία εκτέλεση, 9/10/2026: 5 λήψεις).
