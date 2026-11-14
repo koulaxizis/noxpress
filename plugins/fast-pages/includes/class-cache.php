@@ -130,6 +130,10 @@ final class FPG_Cache {
 		if ( ! self::req()['ok'] ) {
 			return self::req()['reason'];
 		}
+		// A test preview with a personal cookie is never stored (1.0.5).
+		if ( ! empty( self::req()['private'] ) ) {
+			return 'cookie';
+		}
 		$code = http_response_code();
 		if ( false !== $code && 200 !== (int) $code ) {
 			return 'status';

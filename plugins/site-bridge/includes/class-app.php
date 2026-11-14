@@ -570,9 +570,20 @@ final class SBR_App {
 		if ( ! SBR_Store::hit( 'app|' . $id, 30, 2000 ) ) {
 			return self::fail( 429, 'rate', 'Too many calls from this device; wait a minute.' );
 		}
-		$devs[ $id ]['last_used'] = time();
-		$devs[ $id ]['ip']        = Site_Bridge::ip();
-		self::save_devices( $devs );
+		// 1.12.1: write the last use from a fresh read and only while the
+		// device is still paired, at most once a minute, so this write can
+		// never bring back a device that was revoked during the request.
+		if ( time() - (int) ( $devs[ $id ]['last_used'] ?? 0 ) >= 60 ) {
+			wp_cache_delete( self::DEVICES, 'options' );
+			$fresh = self::devices();
+			if ( ! isset( $fresh[ $id ] ) ) {
+				return self::fail( 401, 'unknown_device', 'This device is not paired with the Hub.' );
+			}
+			$fresh[ $id ]['last_used'] = time();
+			$fresh[ $id ]['ip']        = Site_Bridge::ip();
+			self::save_devices( $fresh );
+			return $fresh[ $id ];
+		}
 		return $devs[ $id ];
 	}
 

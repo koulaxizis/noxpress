@@ -28,9 +28,9 @@ final class SBR_Tools_Write {
 	}
 
 	public static function tool_option_set( array $a ) {
-		$name = SBR_Tools::a_str( $a, 'name' );
-		if ( '' === $name || strlen( $name ) > 191 ) {
-			return new WP_Error( 'sbr_args', 'Invalid option name.' );
+		$name = SBR_Guard::option_name( SBR_Tools::a_str( $a, 'name' ) );
+		if ( '' === $name ) {
+			return new WP_Error( 'sbr_args', 'Invalid option name: plain ASCII without spaces, written exactly as it is stored (same case).' );
 		}
 		$why = SBR_Guard::blocked_option( $name );
 		if ( '' !== $why ) {

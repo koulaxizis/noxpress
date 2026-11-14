@@ -24,7 +24,7 @@ final class SBR_Guard {
 	const MASK = '***';
 
 	/** Names whose values are never shown. */
-	const SECRET_RE = '/(passw|secret|token|api_?key|private_?key|consumer_?key|access_?key|auth_?key|license_?key|activation_?key|signing_?key|_salt$|^salt$|^sbr_keys$|application_passwords|session_tokens)/i';
+	const SECRET_RE = '/(passw|secret|token|api_?key|private_?key|consumer_?key|access_?key|auth_?key|license_?key|activation_?key|signing_?key|_salt$|^salt$|^sbr_keys$|application_passwords|session_tokens|(^|_)pass(_|$)|pwd|^(secure_auth|logged_in|nonce)_key$|(^|_)nl_key$|hmac|credential|^_(site_)?transient_(timeout_)?sbr_)/i';
 
 	/** Names whose values are personal data (masked when the setting is on). */
 	const PII_RE = '/(e-?mail|phone|mobile|address_?[12]|_address$|^address$|ip_?address|remote_?addr|^ip$|_ip$|postcode|post_code|zip_?code)/i';
@@ -94,6 +94,16 @@ final class SBR_Guard {
 				return array( 'error' => 'The query names a secret (' . $lit . '): its value is never readable.' );
 			}
 		}
+		// 1.12.1: values are masked by the column names that come back, so
+		// nothing may rename columns behind our back: no set operations
+		// (UNION / INTERSECT / EXCEPT) and no column lists on a CTE or a
+		// derived table ("WITH t(a, b) AS", "(SELECT …) AS t(a, b)").
+		if ( preg_match( '/\b(UNION|INTERSECT|EXCEPT)\b/i', $bare, $w ) ) {
+			return array( 'error' => 'Not allowed in a read-only query: ' . strtoupper( $w[1] ) . '. Run the SELECTs one by one.' );
+		}
+		if ( preg_match( '/\)\s*AS\s*\(/i', $bare ) || preg_match( '/\bWITH\s+(?:RECURSIVE\s+)?[A-Za-z0-9_$]+\s*\(/i', $bare ) || preg_match( '/\)\s*(?:AS\s+)?(?!(?:AND|OR|NOT|XOR|IN|IS|LIKE|REGEXP|RLIKE|BETWEEN|ON|USING|WHEN|THEN|ELSE|END|DIV|MOD|OVER|ESCAPE|COLLATE|SOUNDS|MEMBER|JOIN|LEFT|RIGHT|INNER|OUTER|CROSS|STRAIGHT_JOIN|NATURAL|WHERE|GROUP|ORDER|HAVING|LIMIT|OFFSET|WINDOW|SELECT|FROM|ASC|DESC|ANY|ALL|SOME|EXISTS|CASE|INTERVAL|BINARY|NULL|WITH|ROLLUP|PARTITION|ROWS|RANGE|LATERAL)\b)[A-Za-z_$][A-Za-z0-9_$]*\s*\(/i', $bare ) ) {
+			return array( 'error' => 'Column lists on a CTE or a derived table are not allowed: give the columns their names inside the SELECT.' );
+		}
 		if ( preg_match( '/\b(mysql|performance_schema|sys)\s*\./i', $bare ) ) {
 			return array( 'error' => 'The server\'s own schemas (mysql, performance_schema, sys) are never readable.' );
 		}
@@ -143,7 +153,13 @@ final class SBR_Guard {
 			} elseif ( preg_match( '/(?:^|\.)\s*([A-Za-z0-9_$]+)$/', $item, $a ) ) {
 				$out = strtolower( $a[1] );
 			}
+			$reads = (bool) preg_match( '/\b(option_value|meta_value)\b/i', $item );
 			if ( ! in_array( $out, array( 'option_name', 'option_value', 'meta_key', 'meta_value' ), true ) ) {
+				// 1.12.1: a value under another name (alias, function) is refused,
+				// so no output name can hide it from the masking.
+				if ( $reads ) {
+					return $why;
+				}
 				continue;
 			}
 			if ( ! $plain || ( isset( $m[3] ) && '' !== $m[3] && strtolower( $m[3] ) !== strtolower( $m[2] ) ) ) {
@@ -566,6 +582,25 @@ final class SBR_Guard {
 	}
 
 	/** Options no tool writes. */
+	/**
+	 * 1.12.1: the option name a tool may use, or '' when it is refused.
+	 * WordPress trims the name and MySQL compares it without case or
+	 * accents, so a name is accepted only in plain ASCII without spaces or
+	 * control characters, and only exactly as it is stored when it exists:
+	 * the name that is checked is always the name that is read or written.
+	 */
+	public static function option_name( string $name ): string {
+		global $wpdb;
+		if ( '' === $name || strlen( $name ) > 191 || ! preg_match( '/^[\x21-\x7E]+$/', $name ) ) {
+			return '';
+		}
+		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name = %s LIMIT 1", $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( null !== $stored && (string) $stored !== $name ) {
+			return '';
+		}
+		return $name;
+	}
+
 	public static function blocked_option( string $name ): string {
 		global $wpdb;
 		$name = strtolower( $name );
