@@ -49,6 +49,9 @@
 # το νεότερο stable και το νεότερο beta, με sha256 και υπογραφή Ed25519.
 # Χρειάζεται το secret NOXPRESS_SIGNING_KEY (ιδιωτικό κλειδί PEM)· χωρίς
 # αυτό το workflow σταματά πριν βγάλει οτιδήποτε.
+# Από το Core 1.3.0 η λίστα έχει serial και λήξη 14 ημερών (Bible §16):
+# κάθε Δευτέρα 04:17 UTC το schedule τρέχει μόνο το job «manifest» και την
+# ξαναϋπογράφει, ώστε να ισχύει πάντα για 7 ημέρες τουλάχιστον.
 name: Release plugin
 
 on:
@@ -58,6 +61,8 @@ on:
     tags: ['nox-*-*']
   release:
     types: [published, edited, prereleased, released, unpublished, deleted]
+  schedule:
+    - cron: '17 4 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -76,7 +81,7 @@ env:
 
 jobs:
   release:
-    if: github.event_name != 'release'
+    if: github.event_name != 'release' && github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

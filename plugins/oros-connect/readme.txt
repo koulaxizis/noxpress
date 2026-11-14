@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -85,6 +85,9 @@ The settings, the send log, queued sends, the last offers import and the transie
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.1 =
+* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.
 
 = 1.3.0 =
 * Newsletter: the form in a popup too (off by default). Opens after 20 seconds or half the page, at most once every 30 days per browser and never after a sign-up; not on the cart, the checkout, the account pages or a page that has the form. localStorage only, no cookie; the same HTML for every visitor. Its own title, text and close label in Greek and English; filter `orc_popup_show`; `?orc_popup=1` to test.

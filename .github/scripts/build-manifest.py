@@ -5,9 +5,15 @@ For every plugin code given on the command line it picks, from the GitHub
 releases of this repository:
   - "stable": the newest release that is not a pre-release,
   - "beta":   the newest release of any kind,
-downloads the plugin zip, and records its sha256, an Ed25519 signature of
-"noxpress|<slug>|<version>|<sha256>", the requirements from the plugin
-header and readme, and the changelog of that version.
+downloads the plugin zip, and records its sha256, the requirements from
+the plugin header and readme, and the changelog of that version.
+
+Signatures (Ed25519):
+  - "sig2" (Core 1.3.0+): noxpress2|<slug>|<channel>|<version>|<sha256>|<serial>|<expires>
+    where serial is the build time and expires = serial + 14 days, both at
+    the top of the file. The release workflow runs every week, so a list
+    is always valid for at least 7 more days.
+  - "signature" (older Core): noxpress|<slug>|<version>|<sha256>.
 
 Environment:
   GITHUB_REPOSITORY      owner/repo
@@ -31,6 +37,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import zipfile
 
 SLUGS = {
@@ -71,6 +78,7 @@ SLUGS = {
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
 SEMVER = re.compile(r'^\d+\.\d+\.\d+$')
+VALID_DAYS = 14
 
 
 def run(*args, data=None):
@@ -183,7 +191,15 @@ def main():
         raise SystemExit('NOXPRESS_SIGNING_KEY does not match Noxpress_Updater::PUBLIC_KEY')
 
     all_releases = [r for r in releases(repo) if not r.get('draft')]
-    manifest = {'plugins': {}}
+    serial = int(time.time())
+    expires = serial + VALID_DAYS * 86400
+    manifest = {'plugins': {}, 'serial': serial, 'expires': expires}
+
+    def sigs(slug, channel, version, sha):
+        return {
+            'signature': sign(key_file, f'noxpress|{slug}|{version}|{sha}'),
+            'sig2': sign(key_file, f'noxpress2|{slug}|{channel}|{version}|{sha}|{serial}|{expires}'),
+        }
     previous = {}
     if os.path.exists(out_file):
         with open(out_file, encoding='utf-8') as fh:
@@ -219,7 +235,7 @@ def main():
                 if reused:
                     entry[channel] = dict(
                         reused,
-                        signature=sign(key_file, f'noxpress|{slug}|{version}|{reused["sha256"]}'),
+                        **sigs(slug, channel, version, reused['sha256']),
                         published=(rel.get('published_at') or '')[:10],
                     )
                     continue
@@ -236,7 +252,7 @@ def main():
                     'version': version,
                     'zip': f'https://github.com/{repo}/releases/download/{tag}/{slug}.zip',
                     'sha256': sha,
-                    'signature': sign(key_file, f'noxpress|{slug}|{version}|{sha}'),
+                    **sigs(slug, channel, version, sha),
                     'published': (rel.get('published_at') or '')[:10],
                     **info,
                 }
