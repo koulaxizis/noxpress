@@ -60,6 +60,9 @@ final class CRT_Front {
 		add_action( 'init', array( __CLASS__, 'register_block_template' ), 20 );
 
 		add_action( 'template_redirect', array( __CLASS__, 'gate_page' ), 5 );
+		// 1.3.2: REST and search follow the same mode as the pages.
+		add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'rest_gate' ), 10, 3 );
+		add_action( 'pre_get_posts', array( __CLASS__, 'hide_in_queries' ) );
 		add_filter( 'template_include', array( __CLASS__, 'template_include' ), 50 );
 		add_filter( 'the_content', array( __CLASS__, 'content_fallback' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
@@ -91,6 +94,50 @@ final class CRT_Front {
 			return did_action( 'set_current_user' ) && current_user_can( 'manage_woocommerce' );
 		}
 		return false;
+	}
+
+	/**
+	 * 1.3.2: whether creators may be listed to this viewer outside the
+	 * pages (REST, search): always in live mode and for editors (the block
+	 * editor), in test mode for shop managers, never when off.
+	 */
+	public static function open_to_viewer(): bool {
+		if ( current_user_can( 'edit_posts' ) ) {
+			return true;
+		}
+		if ( Featured_Creators::killed() ) {
+			return false;
+		}
+		$mode = CRT_Settings::get()['mode'];
+		return 'live' === $mode || ( 'test' === $mode && current_user_can( 'manage_woocommerce' ) );
+	}
+
+	/** The creators' REST routes answer 404 to a viewer who may not see them. */
+	public static function rest_gate( $response, $handler, $request ) {
+		if ( ! $request instanceof WP_REST_Request || 0 !== strpos( (string) $request->get_route(), '/wp/v2/nox-creators' ) || self::open_to_viewer() ) {
+			return $response;
+		}
+		return new WP_Error( 'rest_no_route', 'No route was found matching the URL and request method.', array( 'status' => 404 ) );
+	}
+
+	/** Searches and mixed queries (front end, REST search) leave creators out for such a viewer. */
+	public static function hide_in_queries( $q ): void {
+		if ( ! $q instanceof WP_Query || ( is_admin() && ! wp_doing_ajax() ) || self::open_to_viewer() ) {
+			return;
+		}
+		$pt = $q->get( 'post_type' );
+		if ( 'any' === $pt || ( '' === $pt && $q->is_search() ) ) {
+			$types = get_post_types( array( 'exclude_from_search' => false ) );
+			unset( $types[ CRT_CPT::PT ] );
+			$q->set( 'post_type', array_values( $types ) );
+		} elseif ( is_array( $pt ) && in_array( CRT_CPT::PT, $pt, true ) ) {
+			$rest = array_values( array_diff( $pt, array( CRT_CPT::PT ) ) );
+			if ( $rest ) {
+				$q->set( 'post_type', $rest );
+			} else {
+				$q->set( 'post__in', array( 0 ) );
+			}
+		}
 	}
 
 	/** A front-end page view. */

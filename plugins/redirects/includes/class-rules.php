@@ -343,6 +343,8 @@ final class RDR_Rules {
 				break;
 			default:
 				$url = $rule['target'];
+				$tpl = (string) $rule['target'];
+				$rel = '' !== $tpl && '/' === $tpl[0] && 0 !== strpos( $tpl, '//' );
 				if ( 'regex' === $rule['match'] && $caps ) {
 					$url = preg_replace_callback(
 						'/\$([1-9])/',
@@ -356,8 +358,16 @@ final class RDR_Rules {
 				if ( '' === $url ) {
 					return '';
 				}
-				if ( '/' === $url[0] && 0 !== strpos( $url, '//' ) ) {
+				// 1.0.3: text from the visitor's address never changes the
+				// host: a site path stays on the site, a full address keeps
+				// the host the rule was saved with.
+				if ( $rel ) {
+					if ( '/' !== $url[0] || 0 === strpos( $url, '//' ) || false !== strpos( $url, '\\' ) ) {
+						return '';
+					}
 					$url = home_url( $url );
+				} elseif ( strtolower( (string) wp_parse_url( preg_replace( '/\$[1-9]/', '', $tpl ), PHP_URL_HOST ) ) !== strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ) ) {
+					return '';
 				}
 		}
 		return $url;

@@ -28,6 +28,7 @@ function hms_uninstall_site(): void {
 
 	delete_option( 'hms_settings' );
 	delete_option( 'hms_stats_data' );
+	delete_option( 'hms_stats_public' );
 	delete_transient( 'hms_video_cache' );
 
 	foreach ( array( 'hms_stats_rebuild', 'hms_stats_refresh' ) as $hms_hook ) {

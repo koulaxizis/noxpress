@@ -5,7 +5,7 @@ Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -112,6 +112,9 @@ Settings, notices and the term ownership meta are deleted. Creators are kept by 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.2 =
+* Security hardening (NXS-26). In test mode or when switched off, creators stay out of the REST API and of searches for visitors, as they already did on the pages.
 
 = 1.3.1 =
 * Fix: photos stay round when an image optimiser (Imagify, WebP plugins) wraps them in `<picture>`; they showed square in the strip, the index and the tab.
