@@ -2,28 +2,28 @@
   "plugins": {
     "book-feed": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-09, NXS-18). Update recommended. Titles, subtitles and other text from the feed are saved as plain text. Moving the service to another server needs an administrator and asks for the password again; requests go only to public addresses; the password is sealed only when wp-config.php has its own keys.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "40d78879b82d4fe67a41b6668812b216d27c727ee90f49622c8bb932fd145304",
-        "signature": "10+vMPFyyfBvO1etLtA633xEQZuiG+i8OMlhw2En0oKNCe422lPRtkcjXBSSdFnBaSGQdxFlvAvlW5opFKSIBg==",
+        "sha256": "1b20b9d25472fc6b83dcfff5c3645613913dda9228554a7f990b677909977abb",
+        "signature": "TT/0V4eTqQCWAnC0LPBVKnj1SwWNlZHVPFgdklr6twfwnCAJ8lLeAQ11Yd80ea42f0EBEqh1Ydz02KvRYSRrDA==",
         "tested_wp": "7.1",
-        "version": "1.13.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.1/book-feed.zip"
+        "version": "1.13.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.2/book-feed.zip"
       }
     },
     "book-preview": {
       "beta": {
-        "changelog": "* New: sample open counter. When a visitor opens a sample, the viewer sends the product's id once per page view to your own site; the number of opens per product and day is kept for two years (option bpv_opens, no IP or visitor data). Opens by shop staff and in test mode do not count, and at most 120 opens per product per hour are counted.\n* New: the product's \"Book Preview\" box shows the opens of the last 30 days and in total.\n* New: bpv_get_opens( $product_id, $from, $to ) and bpv_get_opens_by_month( $product_id, $from, $to ) for other plugins (Revenue Splitter's Author Portal reads them).",
-        "published": "2026-11-12",
+        "changelog": "* Security hardening (NXS-07). Update recommended. The viewer opens, shows and links only http and https addresses.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a644f1aeae07dd491cbb406a92d787644d2e18cd9f953b77b0b6efc79ed46cf0",
-        "signature": "Mf0Uz17gUEAAr42TfUbYtCVI5uPTaLetGcU8GyOXa/SSEottuMeDqrmkFSYCfGpHJTMdw1tgFgzn65EbJOoMAw==",
+        "sha256": "a7113beff3fffa79e7fc706f626766fbd9458040fff820704692f59cb825034b",
+        "signature": "nKyYV0A135Pt/1AbYK+8biXwTTiY/S5gHh7isl2VGVaZ/vx5ccCHk9Pm2LKLANQo5CWga7UEjlcdj4Yo47RwAA==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.2.0/book-preview.zip"
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.2.1/book-preview.zip"
       }
     },
     "broadcast": {
@@ -182,15 +182,15 @@
     },
     "magic-login": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-14). Update recommended. «Σύνδεση» works only in the browser that opened the link; a new password or e-mail address from the profile ends pending links; on multisite, staff anywhere on the network never get links.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "bf6a70f18bbf95717ff4e60656da6820e0af776fd12d041823dd585e1398e9e8",
-        "signature": "gi5C1V8F/GbEDncXuwZ6cN/Wz1i27hE/LxfwFcV1o+cu8ozHbstWSMvS+H+c8H7QYuVkaZVcrKnWTUMOn4HIAA==",
+        "sha256": "b49314dba946cf5e59fb572c37caaf17f8e4d1f40a13dab1c041814ab7953d2b",
+        "signature": "9LLVI2faznhBjJZhf4mKEIduQ9xktIlLhNZbIp7u1YmonfGmJr5kRMCA2NnCveaCSJWO6XNpl8sFb25M0FRWBA==",
         "tested_wp": "7.1",
-        "version": "1.0.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.3/magic-login.zip"
+        "version": "1.0.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.4/magic-login.zip"
       }
     },
     "oros-connect": {
@@ -286,15 +286,15 @@
     },
     "revenue-splitter": {
       "beta": {
-        "changelog": "* New: «Your work in production» in the Author Portal. orOS sends the phase of each creator's current work (POST rs/v1/production with the contracts key, the whole list each time) and the creator sees seven phases (review and agreement, editing, illustration and cover, typesetting, proofs, production, release), the date each phase was reached, the expected release, a note written for them and a short text on what happens in that phase. A «new» badge shows for 14 days after a change; a released work stays 30 days. Only the phase and that note reach the site, never the board's internal columns or comments.\n* New: Noxpress → RS Production: the list orOS sent and the seven phase texts, with defaults you can change.\n* New: orOS route for creator requests (page changes and author copies): GET rs/v1/profile-requests?state=new|oros|closed|all, POST rs/v1/profile-requests/<id> with {state: oros} or {state: done|declined, reply} (the creator sees the reply), GET …/<id>/photo. Same narrow contracts key; the photo's file name never leaves the site.\n* New: setting in RS Creators to stop the admin email for new requests when orOS picks them up.\n* Fix: the stored contracts list is read also when a remote tool stored it as an array; the mapping, requests, contracts and production lists are read also when a remote tool encoded the JSON twice (found on glarolykoi).",
-        "published": "2026-11-13",
+        "changelog": "* Security hardening (NXS-06, NXS-11, NXS-15). Update recommended. Portal sessions end when the person's key changes and last at most 30 days; everyone signs in to the portal once more after this update. The «Ξέχασες το κλειδί;» e-mail is sent in the background.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a8d6216770b55525fee785eeaf0c5856811d338305db4b8df6f4b1f16086bee1",
-        "signature": "6MnhZEJlOWpYVoyVHpzDDS6lGAMlUsLS/UmRptNutZuyTu5hqDUVEg5jRt9K0gmDM1EIqUk0MhJMHlpiul2YAg==",
+        "sha256": "ed0c023546bf947b9ef6a18c5a7dc7a034b676ece95c32b65f2877d1ae878511",
+        "signature": "chP6ep2v/l2BlLXnsS7N2cMX2fIJXtwacxBVpnXNkh2gzR3iC2fmcgGNj+mxG9Ke0M1h9D+08yOYgzDrSPkqBw==",
         "tested_wp": "7.1",
-        "version": "1.18.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.0/revenue-splitter.zip"
+        "version": "1.18.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.1/revenue-splitter.zip"
       }
     },
     "search-signals": {
@@ -401,41 +401,41 @@
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-04). Update recommended. Text rows saved by an account without the unfiltered_html capability now change visible text only, without HTML; rows that are already stored keep working as before.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "d596af03d23ec0267d20b254cfcb466776598faa8e38c19fbfd225706090ed1d",
-        "signature": "fZ7zbPPrNk8cDTBGYMaTgBy5hhIrPMI6bG4ThRk/BWGTut14VUuaDM+EuTDrrJQFOkOKx4GJQFC4fmG1V38FBw==",
+        "sha256": "2ec3f07dac052f1ad3e419112f3d6120e3f88da2e06a7974815454d6af21c1f2",
+        "signature": "G8x/1baeRy0VxwrgLX60C9DqYlqSU99djV1p4jFVB+z+QSPvaIzS9+4nBtVFjZKv6PElMIblAzBrSNdrfFViDw==",
         "tested_wp": "7.1",
-        "version": "1.6.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.6.1/theme-patcher.zip"
+        "version": "1.6.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.6.2/theme-patcher.zip"
       }
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* New: «Amount received» on the Consignments tab (and ability `consignment-payment`, with `dry_run`), for bookstores that pay round sums now and then. The amount is shared among all the bookstore's sold, unpaid copies in proportion to their value, to the cent, and makes one completed order with a line per title for its share, so Revenue Splitter splits it to the creators by their percentages. A line's quantity is the copies the payment completes (0 when it pays part of a copy). A settlement order paid in full this way is cancelled without stock change or e-mail, so nothing counts twice.\n* Each consignment shows its payments, and each settlement order what was already received; «Collected» is not offered for an order with part payments.\n* Needs Revenue Splitter 1.17.1, Store Pulse 1.8.6 and Production Ledger 1.1.1 to count lines that pay part of a copy.",
-        "published": "2026-11-13",
+        "changelog": "* Security hardening (NXS-10, NXS-16). Update recommended. Feed passwords now sign in only to the Trade Feed routes, and an existing user becomes a trade account only when your account may edit that user.",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "41b53d5d3a3e7673673857fa856b985526c11fe070b568b6c1e8712be32c6300",
-        "signature": "2SaBHt0rXYCh4yU3QKXPmIcD1SVG5XpR+k8+UamTPB8i3VT4eJeg/vkzHiVVJRGDLD1Q/2okgYIP+Z9YCT0UAg==",
+        "sha256": "ad6d6e2392eeb54ba2faafbd6aaf75a5b4c5c411dc151cf37ce9230ec0ed0b43",
+        "signature": "VoWANbIGQx276jJkZco1dnMeODjNDYfVNbzb+Ps+ikq4zADD+wrheEAVhefLSTf6J4zqJJdPDUUUzvwm4UBsDQ==",
         "tested_wp": "7.1",
-        "version": "1.6.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.6.0/trade-accounts.zip"
+        "version": "1.6.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.6.1/trade-accounts.zip"
       }
     },
     "trade-feed-import": {
       "beta": {
-        "changelog": "* Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.",
-        "published": "2026-11-02",
+        "changelog": "* Security hardening (NXS-17). Update recommended. A new publisher address (typed or from a settings backup) clears the saved password. The first import no longer links books you already sell by ISBN on its own: it lists them, and you link them in «Titles».",
+        "published": "2026-11-14",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ad0f0190a2f31600e6dfec31e1e2a1f09e0d1de93da7ae7b622f7625690a6a27",
-        "signature": "G9Y1l56yznkIa3fx2By857q9ka4lU/0llCILA/V5OiR3N0VsTzDLtXLt7zdoxaUfeu0uiBZbSPyfrRJVgMY6BA==",
+        "sha256": "1d1e3201ce2b8ab54964a350ce5cbe3a8fccb73323fe5c2f9b9f8c54bdb8777e",
+        "signature": "n/RHqeSHCHiKC8jNaguql3UdjJggr0Vyn7zoDXNmHWLp8JX1lf784zSSFahgrosi1qXMzxTSsGRdJyjsO8J1Cg==",
         "tested_wp": "7.1",
-        "version": "1.0.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.2/trade-feed-import.zip"
+        "version": "1.0.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.3/trade-feed-import.zip"
       }
     },
     "variation-picker": {
