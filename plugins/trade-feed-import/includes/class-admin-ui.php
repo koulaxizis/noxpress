@@ -349,7 +349,7 @@ final class TFI_Admin_UI {
 				?>
 				<p class="tfi-submit"><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Φέρε όλους τους τίτλους', 'trade-feed-import' ); ?></button></p>
 			</form>
-			<p class="description"><?php esc_html_e( 'Κάθε βιβλίο έρχεται με εξώφυλλο, ISBN, συγγραφείς, περιγραφή και την τιμή λιανικής του εκδότη. Αν έχεις ήδη στο κατάστημα ένα βιβλίο με το ίδιο ISBN, δεν φτιάχνεται δεύτερο: το δικό σου απλώς παίρνει τιμή και διαθεσιμότητα από τον εκδότη. Από αύριο, τιμές και διαθεσιμότητα ενημερώνονται μόνες τους κάθε πρωί.', 'trade-feed-import' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Κάθε βιβλίο έρχεται με εξώφυλλο, ISBN, συγγραφείς, περιγραφή και την τιμή λιανικής του εκδότη. Αν έχεις ήδη στο κατάστημα ένα βιβλίο με το ίδιο ISBN, δεν φτιάχνεται δεύτερο και το δικό σου μένει όπως είναι· στο τέλος σου λέμε ποια είναι, για να τα συνδέσεις αν θέλεις. Από αύριο, τιμές και διαθεσιμότητα ενημερώνονται μόνες τους κάθε πρωί.', 'trade-feed-import' ); ?></p>
 		</div>
 		<?php self::form_open( 'disconnect' ); ?>
 			<p><button type="submit" class="button-link"><?php esc_html_e( 'Λάθος στοιχεία; Σύνδεση από την αρχή', 'trade-feed-import' ); ?></button></p>
@@ -410,6 +410,7 @@ final class TFI_Admin_UI {
 					<?php
 					$made   = (int) $last['n']['created'];
 					$linked = (int) ( $last['n']['linked'] ?? 0 );
+					$exists = (int) ( $last['n']['exists'] ?? 0 );
 					/* translators: %d: new products */
 					echo esc_html( sprintf( _n( 'Μπήκε %d νέο βιβλίο στο κατάστημά σου.', 'Μπήκαν %d νέα βιβλία στο κατάστημά σου.', $made, 'trade-feed-import' ), $made ) );
 					if ( $linked > 0 ) {
@@ -418,6 +419,15 @@ final class TFI_Admin_UI {
 					}
 					?>
 				</p>
+				<?php if ( $exists > 0 ) : ?>
+					<p>
+						<?php
+						/* translators: %d: products of the shop with the same ISBN */
+						echo esc_html( sprintf( _n( '%d βιβλίο του εκδότη το έχεις ήδη στο κατάστημα με το ίδιο ISBN. Δεν το αγγίξαμε. Αν είναι το ίδιο βιβλίο, σύνδεσέ το από τους «Τίτλους» (Σύνδεση όσων υπάρχουν ήδη), και από εκεί και πέρα θα ενημερώνονται μόνο τιμή και διαθεσιμότητα.', '%d βιβλία του εκδότη τα έχεις ήδη στο κατάστημα με το ίδιο ISBN. Δεν τα αγγίξαμε. Αν είναι τα ίδια βιβλία, σύνδεσέ τα από τους «Τίτλους» (Σύνδεση όσων υπάρχουν ήδη), και από εκεί και πέρα θα ενημερώνονται μόνο τιμή και διαθεσιμότητα.', $exists, 'trade-feed-import' ), $exists ) );
+						?>
+						<a class="button" href="<?php echo esc_url( self::url( 'titles' ) ); ?>"><?php esc_html_e( 'Τίτλοι', 'trade-feed-import' ); ?></a>
+					</p>
+				<?php endif; ?>
 				<?php if ( 'draft' === $s['status'] ) : ?>
 					<p><?php esc_html_e( 'Είναι πρόχειρα: οι πελάτες σου δεν τα βλέπουν ακόμα. Άνοιξέ τα, δες ότι είναι όπως τα θέλεις και πάτα «Δημοσίευση» (ή διάλεξέ τα όλα στη λίστα προϊόντων → Μαζική επεξεργασία → Κατάσταση: Δημοσιευμένο).', 'trade-feed-import' ); ?></p>
 					<p><a class="button button-primary button-hero" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&post_status=draft' ) ); ?>"><?php esc_html_e( 'Δες τα πρόχειρα προϊόντα', 'trade-feed-import' ); ?></a></p>

@@ -2319,7 +2319,11 @@ final class RS_Admin_UI {
 				$applied = 0;
 
 				foreach ( $state['ordermeta'] as $row ) {
-					if ( ! is_array( $row ) || empty( $row['order_id'] ) || ! array_key_exists( 'value', $row ) ) {
+					if ( ! is_array( $row ) || empty( $row['order_id'] ) || ! array_key_exists( 'value', $row ) || ! is_scalar( $row['value'] ) ) {
+						continue;
+					}
+					// 1.18.1: the reason is plain text; a serialized value is never written raw.
+					if ( is_serialized( (string) $row['value'] ) ) {
 						continue;
 					}
 

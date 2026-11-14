@@ -810,6 +810,10 @@ final class TRA_Feed {
 		if ( $uid <= 0 ) {
 			return; // Failed logins are WordPress's business (no user, nothing to tie the line to).
 		}
+		// Only calls the feed lets in are logged (1.6.1): any other signed-in user stays out of the log.
+		if ( Trade_Accounts::killed() || ! ( current_user_can( Trade_Accounts::cap() ) || ( TRA_Accounts::is_trade( $uid ) && TRA_Accounts::api_on( $uid ) ) ) ) {
+			return;
+		}
 		$data  = $response->get_data();
 		$n     = is_array( $data ) && isset( $data['items'] ) && is_array( $data['items'] ) ? count( $data['items'] ) : ( 200 === $response->get_status() ? 1 : 0 );
 		$query = $request->get_query_params();

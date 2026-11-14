@@ -74,6 +74,12 @@ final class TFI_Settings {
 
 	public static function save( array $raw ): void {
 		$clean = self::sanitize( $raw );
+		$was   = get_option( self::OPT, array() );
+		// 1.0.3: the password belongs to the publisher it was given for. A new
+		// address (form or backup import) drops it, so it is never sent elsewhere.
+		if ( is_array( $was ) && isset( $was['url'] ) && '' !== (string) $was['url'] && (string) $was['url'] !== $clean['url'] ) {
+			delete_option( self::PASS );
+		}
 		update_option( self::OPT, $clean, false );
 		self::$cache = $clean;
 	}

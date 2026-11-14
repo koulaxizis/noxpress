@@ -39,6 +39,68 @@ final class TRA_Accounts {
 		add_action( 'set_user_role', array( __CLASS__, 'flush' ) );
 		add_action( 'add_user_role', array( __CLASS__, 'flush' ) );
 		add_action( 'remove_user_role', array( __CLASS__, 'flush' ) );
+		// Feed passwords work only on the feed (1.6.1).
+		add_action( 'wp_authenticate_application_password_errors', array( __CLASS__, 'scope_password' ), 10, 3 );
+	}
+
+	/**
+	 * A feed password (app_id APP_ID) signs in only to the tra/v1 REST
+	 * routes: never to the rest of the REST API or to XML-RPC.
+	 *
+	 * @param WP_Error $error Errors; one added here stops the sign-in.
+	 * @param WP_User  $user  The user.
+	 * @param array    $item  The Application Password that matched.
+	 */
+	public static function scope_password( $error, $user, $item ): void {
+		if ( ! $error instanceof WP_Error || ! is_array( $item ) || ! isset( $item['app_id'] ) || self::APP_ID !== $item['app_id'] ) {
+			return;
+		}
+		if ( ! self::is_feed_request() ) {
+			$error->add( 'tra_feed_only', __( 'Αυτός ο κωδικός δουλεύει μόνο για το Trade Feed.', 'trade-accounts' ) );
+		}
+	}
+
+	/** True only for a REST request to tra/v1 (never XML-RPC). */
+	private static function is_feed_request(): bool {
+		if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+			return false;
+		}
+		$route = '';
+		if ( isset( $GLOBALS['wp'] ) && is_object( $GLOBALS['wp'] ) && ! empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+			$route = (string) $GLOBALS['wp']->query_vars['rest_route'];
+		} elseif ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing check.
+			$route = wp_unslash( $_GET['rest_route'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Recommended -- compared only.
+		} else {
+			$uri    = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- compared only.
+			$path   = (string) wp_parse_url( $uri, PHP_URL_PATH );
+			$prefix = '/' . trim( rest_get_url_prefix(), '/' ) . '/';
+			$pos    = strpos( $path, $prefix );
+			if ( false === $pos ) {
+				return false;
+			}
+			$route = substr( $path, $pos + strlen( $prefix ) - 1 );
+		}
+		$route = '/' . ltrim( rawurldecode( $route ), '/' );
+		return false === strpos( $route, '..' ) && 0 === strpos( $route, '/tra/v1/' );
+	}
+
+	/**
+	 * Multisite: a super admin, or a user with any role on another site of
+	 * the network, is never made a trade account here (1.6.1).
+	 */
+	private static function elsewhere( WP_User $user ): bool {
+		if ( ! is_multisite() ) {
+			return false;
+		}
+		if ( is_super_admin( $user->ID ) ) {
+			return true;
+		}
+		foreach ( array_keys( (array) get_blogs_of_user( $user->ID ) ) as $blog ) {
+			if ( (int) $blog !== get_current_blog_id() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static function add_role(): void {
@@ -123,8 +185,11 @@ final class TRA_Accounts {
 
 		$existing = get_user_by( 'email', $email );
 		if ( $existing instanceof WP_User ) {
-			if ( user_can( $existing, 'edit_posts' ) || user_can( $existing, 'manage_woocommerce' ) ) {
+			if ( user_can( $existing, 'edit_posts' ) || user_can( $existing, 'manage_woocommerce' ) || self::elsewhere( $existing ) ) {
 				return new WP_Error( 'tra_staff', __( 'Αυτό το email ανήκει σε λογαριασμό προσωπικού του site. Δεν αλλάζει σε χονδρική.', 'trade-accounts' ) );
+			}
+			if ( ! current_user_can( 'edit_user', $existing->ID ) ) {
+				return new WP_Error( 'tra_cannot', __( 'Ο λογαριασμός σου δεν μπορεί να αλλάξει τον ρόλο αυτού του χρήστη.', 'trade-accounts' ) );
 			}
 			$existing->set_role( self::ROLE );
 			$uid = (int) $existing->ID;

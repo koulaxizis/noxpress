@@ -22,6 +22,8 @@ final class TRA_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		'Αυτός ο κωδικός δουλεύει μόνο για το Trade Feed.' => 'This password works only for the Trade Feed.',
+		'Ο λογαριασμός σου δεν μπορεί να αλλάξει τον ρόλο αυτού του χρήστη.' => 'Your account cannot change this user\'s role.',
 		// Accounts, scope, bootstrap.
 		'Το email δεν είναι έγκυρο.' => 'The email is not valid.',
 		'Αυτό το email ανήκει σε λογαριασμό προσωπικού του site. Δεν αλλάζει σε χονδρική.' => 'This email belongs to a staff account of the site. It is not changed to trade.',

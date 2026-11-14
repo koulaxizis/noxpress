@@ -23,6 +23,8 @@ final class TP_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		'Ο λογαριασμός σου δεν έχει το δικαίωμα unfiltered_html: οι νέες ή αλλαγμένες γραμμές αλλάζουν μόνο το ορατό κείμενο, και το δικό σου κείμενο μπαίνει χωρίς HTML.' => 'Your account does not have the unfiltered_html capability: new or changed rows change visible text only, and your text goes in without HTML.',
+		'Οι νέες ή αλλαγμένες γραμμές αλλάζουν μόνο το ορατό κείμενο της σελίδας, χωρίς HTML, γιατί ο λογαριασμός σου δεν έχει το δικαίωμα unfiltered_html. Για HTML ή κείμενο μέσα σε κώδικα, ζήτησε την αλλαγή από διαχειριστή.' => 'New or changed rows change only the visible text of the page, without HTML, because your account does not have the unfiltered_html capability. For HTML or text inside code, ask an administrator to make the change.',
 		// Bootstrap / menu / pages.
 		'Το Theme Patcher χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Theme Patcher requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 		'Theme Patcher'                                              => 'Theme Patcher',

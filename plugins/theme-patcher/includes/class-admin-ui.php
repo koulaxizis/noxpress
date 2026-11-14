@@ -609,6 +609,9 @@ final class TP_Admin_UI {
 		?>
 		<h2 class="tp-h2"><?php esc_html_e( 'Κείμενα του θέματος', 'theme-patcher' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Πίνακας «κείμενο του θέματος → δικό μου κείμενο». Η αναζήτηση γίνεται ακριβώς όπως είναι στο HTML της σελίδας (και σε κρυφά κείμενα). Όταν η αναζήτηση είναι ολόκληρο στοιχείο, π.χ. <h1>Shop</h1>, αλλάζει μόνο το κείμενό του. Το δικό σου κείμενο δέχεται απλό HTML (συνδέσμους, έντονα). Άδειο δικό σου κείμενο σβήνει το κείμενο του θέματος.', 'theme-patcher' ); ?></p>
+		<?php if ( ! current_user_can( 'unfiltered_html' ) ) : ?>
+			<p class="description"><strong><?php esc_html_e( 'Ο λογαριασμός σου δεν έχει το δικαίωμα unfiltered_html: οι νέες ή αλλαγμένες γραμμές αλλάζουν μόνο το ορατό κείμενο, και το δικό σου κείμενο μπαίνει χωρίς HTML.', 'theme-patcher' ); ?></strong></p>
+		<?php endif; ?>
 
 		<form method="post">
 			<?php self::nonce_field(); ?>
@@ -1704,7 +1707,11 @@ final class TP_Admin_UI {
 		$theme          = TP_Settings::theme();
 		$theme['texts'] = array_values( self::posted_array( 'tp_texts' ) );
 		TP_Settings::save_theme( TP_Settings::sanitize_theme( $theme ) );
-		return array( self::msg( 'success', __( 'Τα κείμενα αποθηκεύτηκαν.', 'theme-patcher' ) ) );
+		$msgs = array( self::msg( 'success', __( 'Τα κείμενα αποθηκεύτηκαν.', 'theme-patcher' ) ) );
+		if ( TP_Settings::$demoted > 0 ) {
+			$msgs[] = self::msg( 'warning', __( 'Οι νέες ή αλλαγμένες γραμμές αλλάζουν μόνο το ορατό κείμενο της σελίδας, χωρίς HTML, γιατί ο λογαριασμός σου δεν έχει το δικαίωμα unfiltered_html. Για HTML ή κείμενο μέσα σε κώδικα, ζήτησε την αλλαγή από διαχειριστή.', 'theme-patcher' ) );
+		}
+		return $msgs;
 	}
 
 	private static function do_save_page(): array {

@@ -169,10 +169,37 @@ final class BKF_Settings {
 		return self::$cache;
 	}
 
+	/** True when the last save() kept the old service address (1.13.2). */
+	public static $url_kept = false;
+
+	/**
+	 * 1.13.2: the service password belongs to the service host. Moving to
+	 * another host needs an administrator (manage_options) and drops the
+	 * saved password, so it is never sent to an address someone else picked.
+	 */
 	public static function save( array $v ): void {
+		self::$cache    = null;
+		self::$url_kept = false;
+		$clean          = self::clean( $v );
+		$was            = get_option( self::OPTION, array() );
+		$old            = is_array( $was ) && isset( $was['url'] ) && is_string( $was['url'] ) ? $was['url'] : self::DEFAULT_URL;
+		if ( self::host_of( $old ) !== self::host_of( $clean['url'] ) ) {
+			if ( current_user_can( 'manage_options' ) ) {
+				delete_option( self::PASS );
+			} else {
+				$clean['url']   = $old;
+				self::$url_kept = true;
+			}
+		}
+		update_option( self::OPTION, $clean, false );
 		self::$cache = null;
-		update_option( self::OPTION, self::clean( $v ), false );
-		self::$cache = null;
+	}
+
+	/** host:port of an address, lower case ('' when there is none). */
+	public static function host_of( string $url ): string {
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		$port = (int) wp_parse_url( $url, PHP_URL_PORT );
+		return '' === $host ? '' : $host . ':' . $port;
 	}
 
 	/** A short single-line text. */

@@ -129,8 +129,9 @@ final class TFI_Sync {
 	 * connected.
 	 *
 	 * @param bool $first The first import (set-up guide): every new title is
-	 *                    imported and products of the shop with the same
-	 *                    ISBN are linked, whatever the settings say.
+	 *                    imported, whatever the settings say. Products of the
+	 *                    shop with the same ISBN stay as they are (1.0.3):
+	 *                    the owner links them from «Τίτλοι».
 	 */
 	public static function start( bool $first = false ): bool {
 		if ( self::job() || ! TFI_Settings::connected() || Trade_Feed_Import::killed() ) {
@@ -241,9 +242,10 @@ final class TFI_Sync {
 					$out = TFI_Importer::update( $w['pid'], $r );
 				} elseif ( 'new' === $w['state'] && $auto ) {
 					$out = TFI_Importer::import( $r );
-				} elseif ( 'exists' === $w['state'] && $first ) {
-					$out = array( 'result' => TFI_Importer::link( $w['pid'], $r ) ? 'linked' : 'exists' );
 				} elseif ( 'exists' === $w['state'] ) {
+					// 1.0.3: a shop product with the same ISBN is never linked
+					// on its own (the publisher's list decides nothing about
+					// products of other publishers): the owner links it in «Τίτλοι».
 					$out = array( 'result' => 'exists' );
 				} else {
 					continue;

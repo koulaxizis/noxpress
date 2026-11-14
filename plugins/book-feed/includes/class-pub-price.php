@@ -199,7 +199,7 @@ final class BKF_Pub_Price {
 		$img  = '';
 		$read = false;
 		$link = '';
-		$res  = wp_safe_remote_get(
+		$res  = BKF_Client::public_get(
 			$url,
 			array(
 				'timeout'             => self::TIMEOUT,

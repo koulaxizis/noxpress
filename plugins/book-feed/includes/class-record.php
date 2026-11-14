@@ -14,6 +14,15 @@ defined( 'ABSPATH' ) || exit;
 final class BKF_Record {
 
 	/** First scalar of a value (or the value itself) as a string. */
+	/**
+	 * Plain text from the feed: tags removed, then BKF_Settings::text()
+	 * (control characters, length). Feed text never carries markup into
+	 * product names or attributes (1.13.2).
+	 */
+	private static function plain( $v, int $max = 200 ): string {
+		return BKF_Settings::text( is_scalar( $v ) ? wp_strip_all_tags( (string) $v ) : '', $max );
+	}
+
 	public static function one( $v ): string {
 		if ( is_array( $v ) ) {
 			foreach ( $v as $x ) {
@@ -31,7 +40,7 @@ final class BKF_Record {
 		$out = array();
 		foreach ( is_array( $v ) ? $v : array( $v ) as $x ) {
 			if ( is_scalar( $x ) ) {
-				$x = BKF_Settings::text( $x, $len );
+				$x = self::plain( $x, $len );
 				if ( '' !== $x ) {
 					$out[] = $x;
 				}
@@ -86,12 +95,12 @@ final class BKF_Record {
 		if ( '' === $id || strlen( $id ) > 64 || preg_match( '/[\x00-\x1f]/', $id ) ) {
 			return null;
 		}
-		$title = BKF_Settings::text( self::one( $d['distinctive_title'] ?? '' ), 300 );
+		$title = self::plain( self::one( $d['distinctive_title'] ?? '' ), 300 );
 		if ( '' === $title ) {
 			return null;
 		}
 
-		$isbn_raw = BKF_Settings::text( self::one( $d['isbn13'] ?? '' ), 30 );
+		$isbn_raw = self::plain( self::one( $d['isbn13'] ?? '' ), 30 );
 		$isbn     = '' !== self::isbn_digits( $isbn_raw ) ? $isbn_raw : '';
 
 		// Contributors: contr_name[i] with contr_role[i].
@@ -122,26 +131,26 @@ final class BKF_Record {
 			'isbn'        => $isbn,
 			'isbn_digits' => self::isbn_digits( $isbn ),
 			'title'       => $title,
-			'subtitle'    => BKF_Settings::text( self::one( $d['distinctive_subtitle'] ?? '' ), 300 ),
-			'orig_title'  => BKF_Settings::text( self::one( $d['original_title'] ?? '' ), 300 ),
-			'kind'        => BKF_Settings::text( self::one( $d['product_kind'] ?? '' ), 60 ),
-			'form'        => BKF_Settings::text( self::one( $d['product_form'] ?? '' ), 80 ),
-			'status'      => BKF_Settings::text( self::one( $d['publishing_status'] ?? '' ), 80 ),
-			'pub_id'      => BKF_Settings::text( self::one( $d['pub_id'] ?? '' ), 40 ),
-			'pub_name'    => BKF_Settings::text( self::one( $d['pub_name'] ?? '' ), 150 ),
-			'imprint'     => BKF_Settings::text( self::one( $d['imprint'] ?? '' ), 150 ),
+			'subtitle'    => self::plain( self::one( $d['distinctive_subtitle'] ?? '' ), 300 ),
+			'orig_title'  => self::plain( self::one( $d['original_title'] ?? '' ), 300 ),
+			'kind'        => self::plain( self::one( $d['product_kind'] ?? '' ), 60 ),
+			'form'        => self::plain( self::one( $d['product_form'] ?? '' ), 80 ),
+			'status'      => self::plain( self::one( $d['publishing_status'] ?? '' ), 80 ),
+			'pub_id'      => self::plain( self::one( $d['pub_id'] ?? '' ), 40 ),
+			'pub_name'    => self::plain( self::one( $d['pub_name'] ?? '' ), 150 ),
+			'imprint'     => self::plain( self::one( $d['imprint'] ?? '' ), 150 ),
 			'price'       => self::num( $d['price'] ?? '', 0, 100000 ),
 			'vat'         => self::num( $d['vat'] ?? '', 0, 100 ),
-			'ptype'       => BKF_Settings::text( self::one( $d['price_type'] ?? '' ), 80 ),
+			'ptype'       => self::plain( self::one( $d['price_type'] ?? '' ), 80 ),
 			'valid_until' => $valid ? gmdate( 'Y-m-d', $valid ) : '',
 			'cover'       => self::url( $d['cover'] ?? '' ),
 			'back'        => self::url( $d['back_cover'] ?? '' ),
 			'desc'        => $desc,
-			'short'       => BKF_Settings::text( self::one( $d['short_descr'] ?? '' ), 2000 ),
+			'short'       => self::plain( self::one( $d['short_descr'] ?? '' ), 2000 ),
 			'cats'        => self::many( $d['category'] ?? array(), 20, 120 ),
-			'cat_main'    => BKF_Settings::text( self::one( $d['category_main'] ?? '' ), 120 ),
+			'cat_main'    => self::plain( self::one( $d['category_main'] ?? '' ), 120 ),
 			'class'       => self::many( $d['classification'] ?? array(), 50, 120 ),
-			'class_main'  => BKF_Settings::text( self::one( $d['classification_main'] ?? '' ), 120 ),
+			'class_main'  => self::plain( self::one( $d['classification_main'] ?? '' ), 120 ),
 			'contribs'    => $contribs,
 			'language'    => self::many( $d['language'] ?? array(), 10, 60 ),
 			'pages'       => (int) self::num( $d['pages'] ?? '', 0, 100000 ),
@@ -149,8 +158,8 @@ final class BKF_Record {
 			'height'      => (float) self::num( $d['height'] ?? '', 0, 1000 ),
 			'width'       => (float) self::num( $d['width'] ?? '', 0, 1000 ),
 			'year'        => (int) self::num( $d['pub_year'] ?? '', 0, 2200 ),
-			'series'      => BKF_Settings::text( self::one( $d['coll_title'] ?? '' ), 200 ),
-			'series_no'   => BKF_Settings::text( self::one( $d['coll_seq_no'] ?? '' ), 20 ),
+			'series'      => self::plain( self::one( $d['coll_title'] ?? '' ), 200 ),
+			'series_no'   => self::plain( self::one( $d['coll_seq_no'] ?? '' ), 20 ),
 			'rel_isbn'    => array_values( array_filter( array_map( array( __CLASS__, 'isbn_digits' ), self::many( $d['rel_isbn'] ?? array(), 20, 30 ) ) ) ),
 			'updated'     => self::time( $d['last_update'] ?? '' ),
 			'avq'         => null === self::num( $d['avq'] ?? '', 0, 1000000 ) ? null : (int) self::num( $d['avq'] ?? '', 0, 1000000 ),

@@ -5,7 +5,7 @@ Tags: bookstores, wholesale, import, sync, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -24,7 +24,7 @@ A publisher that runs Trade Accounts gives each bookshop a trade account and a T
 **What comes in**
 
 * Simple products with title, description, short description, cover (downloaded once, reused when the same image is already in the library), ISBN as GTIN and SKU (when no other product has it), contributors and the other attributes (as global attributes when your shop has the same attribute, otherwise as product attributes), dimensions and weight (converted to your units), the publisher as a brand, your category and tax class.
-* A book you already sell with the same ISBN is never duplicated: in the first import it is linked, so only its price, availability and pre-order follow the publisher, and its content stays yours.
+* A book you already sell with the same ISBN is never duplicated. The first import leaves it as it is and tells you; once you link it in «Titles», only its price, availability and pre-order follow the publisher, and its content stays yours.
 
 **Every day**
 
@@ -78,6 +78,9 @@ No. A field you change by hand is locked and stays as you wrote it.
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.0.3 =
+* Security hardening (NXS-17). Update recommended. A new publisher address (typed or from a settings backup) clears the saved password. The first import no longer links books you already sell by ISBN on its own: it lists them, and you link them in «Titles».
 
 = 1.0.2 =
 * Noxpress Core 1.2.8: a use-at-your-own-risk notice on the Noxpress hub page, and a Disclaimer section in this readme.

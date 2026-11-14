@@ -78,12 +78,34 @@
 		} catch ( e ) {}
 	}
 
+	// Only http(s) addresses leave the viewer (1.2.1): a data-bpv attribute
+	// typed into post content must not run code through a link or image.
+	function safeUrl( u ) {
+		if ( 'string' !== typeof u || '' === u ) {
+			return '';
+		}
+		try {
+			var p = new window.URL( u, window.location.href ).protocol;
+			return 'http:' === p || 'https:' === p ? u : '';
+		} catch ( e ) {
+			return '';
+		}
+	}
+
 	function open( btn ) {
 		var data;
 		try {
 			data = JSON.parse( btn.getAttribute( 'data-bpv' ) || '{}' );
 		} catch ( e ) {
 			return;
+		}
+		if ( ! data || 'object' !== typeof data ) {
+			return;
+		}
+		data.src = safeUrl( data.src );
+		if ( data.end && 'object' === typeof data.end ) {
+			data.end.href  = safeUrl( data.end.href );
+			data.end.image = safeUrl( data.end.image );
 		}
 		if ( ! data.src ) {
 			return;
@@ -296,11 +318,13 @@
 						}
 					}
 				} );
-			} else {
+			} else if ( end.href ) {
 				cta = el( 'a', btn.className.replace( 'bpv-open', 'bpv-buy' ), end.button );
 				cta.href = end.href;
 			}
-			body.appendChild( cta );
+			if ( cta ) {
+				body.appendChild( cta );
+			}
 			card.appendChild( body );
 			return card;
 		}

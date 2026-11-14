@@ -48,6 +48,19 @@ final class MGL_Tokens {
 		// A new password ends any pending link.
 		add_action( 'after_password_reset', array( __CLASS__, 'forget_user' ) );
 		add_action( 'wp_set_password', array( __CLASS__, 'forget_on_set_password' ), 10, 2 );
+		// 1.0.4: so does a new password or e-mail address from the profile.
+		add_action( 'profile_update', array( __CLASS__, 'forget_on_profile' ), 10, 2 );
+	}
+
+	/** profile_update action: ( $user_id, $old_user_data ). */
+	public static function forget_on_profile( $user_id, $old = null ): void {
+		$user = get_userdata( (int) $user_id );
+		if ( ! $user instanceof WP_User || ! $old instanceof WP_User ) {
+			return;
+		}
+		if ( $user->user_pass !== $old->user_pass || strtolower( (string) $user->user_email ) !== strtolower( (string) $old->user_email ) ) {
+			self::forget_user( (int) $user_id );
+		}
 	}
 
 	/** @param WP_User|int $user */
@@ -82,7 +95,34 @@ final class MGL_Tokens {
 		 * @param WP_User $user User.
 		 */
 		$ok = (bool) apply_filters( 'mgl_user_allowed', $ok, $user );
-		return $ok && ! user_can( $user, 'edit_posts' ) && ! user_can( $user, 'manage_woocommerce' ) && ! user_can( $user, 'manage_options' );
+		return $ok && ! self::staff_here( $user ) && ! self::staff_elsewhere( $user );
+	}
+
+	private static function staff_here( WP_User $user ): bool {
+		return user_can( $user, 'edit_posts' ) || user_can( $user, 'manage_woocommerce' ) || user_can( $user, 'manage_options' );
+	}
+
+	/** Multisite (1.0.4): a super admin, or staff on any other site of the network, is staff here too. */
+	private static function staff_elsewhere( WP_User $user ): bool {
+		if ( ! is_multisite() ) {
+			return false;
+		}
+		if ( is_super_admin( $user->ID ) ) {
+			return true;
+		}
+		$here = get_current_blog_id();
+		foreach ( array_keys( (array) get_blogs_of_user( $user->ID ) ) as $blog ) {
+			if ( (int) $blog === $here ) {
+				continue;
+			}
+			switch_to_blog( (int) $blog );
+			$staff = self::staff_here( new WP_User( $user->ID ) );
+			restore_current_blog();
+			if ( $staff ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** In test mode only the listed test accounts get links. */
@@ -198,8 +238,10 @@ final class MGL_Tokens {
 	 * Rate limits
 	 * =================================================================== */
 
+	/** Per-account limit key: by user id when the account exists, so e-mail and username share one limit (1.0.4). */
 	private static function key_acct( string $ident ): string {
-		return 'mgl_ra_' . md5( strtolower( trim( $ident ) ) );
+		$user = self::find_user( $ident );
+		return 'mgl_ra_' . ( $user instanceof WP_User ? 'u' . (int) $user->ID : md5( strtolower( trim( $ident ) ) ) );
 	}
 
 	/** Cloudflare's published ranges (cloudflare.com/ips), for CF-Connecting-IP. */

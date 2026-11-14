@@ -5,7 +5,7 @@ Tags: woocommerce, book preview, pdf, sample, ebook
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,9 @@ Everything the plugin created is removed: its options, product meta, background 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.1 =
+* Security hardening (NXS-07). Update recommended. The viewer opens, shows and links only http and https addresses.
 
 = 1.2.0 =
 * New: sample open counter. When a visitor opens a sample, the viewer sends the product's id once per page view to your own site; the number of opens per product and day is kept for two years (option bpv_opens, no IP or visitor data). Opens by shop staff and in test mode do not count, and at most 120 opens per product per hour are counted.

@@ -197,6 +197,9 @@ final class TP_Page {
 	/* ---------- Text table ---------- */
 
 	private static function apply_text( string $html, array $fix ): string {
+		if ( empty( $fix['raw'] ) ) {
+			return self::apply_plain_text( $html, $fix );
+		}
 		if ( false === strpos( $html, $fix['find'] ) ) {
 			return $html;
 		}
@@ -208,6 +211,44 @@ final class TP_Page {
 		$html  = str_replace( $fix['find'], $replace, $html, $count );
 		self::$stats['texts'] += $count;
 		return $html;
+	}
+
+	/**
+	 * Text-only row (saved without unfiltered_html, 1.6.2): changes visible
+	 * text only, never tags, attributes, comments, scripts or styles, and
+	 * the new text is escaped. On a regex failure the page stays as it is.
+	 */
+	private static function apply_plain_text( string $html, array $fix ): string {
+		$needles = array_values( array_unique( array( $fix['find'], esc_html( $fix['find'] ) ) ) );
+		$found   = false;
+		foreach ( $needles as $needle ) {
+			$found = $found || false !== strpos( $html, $needle );
+		}
+		if ( ! $found ) {
+			return $html;
+		}
+		$replace = 'wc_title' === $fix['replace'] ? self::wc_title() : esc_html( wp_strip_all_tags( $fix['custom'] ) );
+		$parts   = preg_split( '#(<script\b.*?</script\s*>|<style\b.*?</style\s*>|<textarea\b.*?</textarea\s*>|<!--.*?-->|<[^>]*>)#is', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if ( ! is_array( $parts ) ) {
+			return $html;
+		}
+		$count = 0;
+		foreach ( $parts as $i => $part ) {
+			if ( 1 === $i % 2 || '' === $part ) {
+				continue;
+			}
+			foreach ( $needles as $needle ) {
+				$c    = 0;
+				$part = str_replace( $needle, $replace, $part, $c );
+				$count += $c;
+			}
+			$parts[ $i ] = $part;
+		}
+		if ( 0 === $count ) {
+			return $html;
+		}
+		self::$stats['texts'] += $count;
+		return implode( '', $parts );
 	}
 
 	private static function wc_title(): string {
@@ -495,7 +536,14 @@ final class TP_Page {
 			$quoted = '"' . esc_attr( $value ) . '"';
 			$re     = '/(\s' . preg_quote( $name, '/' ) . ')\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i';
 			if ( preg_match( $re, $s ) ) {
-				$s = (string) preg_replace( $re, '$1=' . str_replace( '$', '\$', $quoted ), $s, 1 );
+				$s = (string) preg_replace_callback(
+					$re,
+					static function ( $m ) use ( $quoted ) {
+						return $m[1] . '=' . $quoted;
+					},
+					$s,
+					1
+				);
 			} else {
 				$tail = '';
 				if ( preg_match( '/\s*\/\s*$/', $s, $t ) ) {
