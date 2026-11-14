@@ -1,0 +1,147 @@
+# Noxpress semgrep rules (Bible §11, security policy 1.107). Run by
+# .github/workflows/security.yml. Severity ERROR = high rule: blocks a PR from
+# the enforce date. WARNING = report only. An accepted exception gets a
+# `// nosemgrep: <rule-id>` comment with its reason on the same line.
+rules:
+  - id: nox-rest-route-without-permission-callback
+    severity: ERROR
+    languages: [php]
+    message: >-
+      register_rest_route() without a permission_callback: WordPress treats the
+      route as public. Add a permission_callback (Bible §11, §22).
+    patterns:
+      - pattern: register_rest_route($NS, $ROUTE, $ARGS, ...)
+      - pattern-not: "register_rest_route($NS, $ROUTE, array(..., 'permission_callback' => $CB, ...), ...)"
+      - pattern-not: "register_rest_route($NS, $ROUTE, [..., 'permission_callback' => $CB, ...], ...)"
+      - pattern-not: "register_rest_route($NS, $ROUTE, array(..., array(..., 'permission_callback' => $CB, ...), ...), ...)"
+      - pattern-not: "register_rest_route($NS, $ROUTE, [..., [..., 'permission_callback' => $CB, ...], ...], ...)"
+      - pattern-not: register_rest_route($NS, $ROUTE, $BASE + $MORE, ...)
+      - metavariable-pattern:
+          metavariable: $ARGS
+          patterns:
+            - pattern-either:
+                - pattern: array(...)
+                - pattern: '[...]'
+
+  - id: nox-wpdb-query-without-prepare
+    severity: ERROR
+    languages: [php]
+    message: >-
+      $wpdb query built from a variable without $wpdb->prepare(). Use
+      prepare() with placeholders (Bible §11). Table names from $wpdb->prefix
+      or a class constant are fine.
+    patterns:
+      - pattern-either:
+          - pattern: $DB->query($Q, ...)
+          - pattern: $DB->get_var($Q, ...)
+          - pattern: $DB->get_row($Q, ...)
+          - pattern: $DB->get_col($Q, ...)
+          - pattern: $DB->get_results($Q, ...)
+      - metavariable-regex:
+          metavariable: $DB
+          regex: ^\$wpdb$
+      - metavariable-pattern:
+          metavariable: $Q
+          patterns:
+            - pattern-either:
+                - pattern: $A . $B
+                - pattern: '"...$X..."'
+                - pattern: sprintf(...)
+            - pattern-not: $DB->prepare(...)
+            - pattern-not-inside: $DB->prepare(...)
+      - metavariable-pattern:
+          metavariable: $Q
+          patterns:
+            - pattern-either:
+                - pattern: <... $_GET ...>
+                - pattern: <... $_POST ...>
+                - pattern: <... $_REQUEST ...>
+                - pattern: <... $_COOKIE ...>
+                - pattern: <... $_SERVER ...>
+                - pattern: <... $request ...>
+                - pattern: <... $args ...>
+                - pattern: <... $params ...>
+                - pattern: <... $value ...>
+                - pattern: <... $search ...>
+                - pattern: <... $term ...>
+
+  - id: nox-unserialize-user-data
+    severity: ERROR
+    languages: [php]
+    message: >-
+      unserialize() without allowed_classes => false can build objects
+      (PHP object injection). Use json_decode, or
+      unserialize($x, array( 'allowed_classes' => false )) (Bible §11).
+    patterns:
+      - pattern: unserialize($X)
+      - pattern-not: unserialize($X, $OPTS, ...)
+
+  - id: nox-rest-route-public
+    severity: WARNING
+    languages: [php]
+    message: >-
+      Public REST route (__return_true). It must be on the capability map
+      (Bible §22) and return only what the page already shows.
+    pattern-either:
+      - pattern: "array(..., 'permission_callback' => '__return_true', ...)"
+      - pattern: "[..., 'permission_callback' => '__return_true', ...]"
+
+  - id: nox-preg-replace-dynamic-replacement
+    severity: WARNING
+    languages: [php]
+    message: >-
+      preg_replace() with a replacement built from data: $1 / \1 in the data
+      are expanded. Use preg_replace_callback() (Bible §11).
+    patterns:
+      - pattern: preg_replace($P, $R, ...)
+      - pattern-not: preg_replace($P, "...", ...)
+      - pattern-not: preg_replace($P, array(...), ...)
+      - pattern-not: preg_replace($P, '[...]', ...)
+
+  - id: nox-fputcsv-escape
+    severity: WARNING
+    languages: [php]
+    message: >-
+      fputcsv() without an empty escape (''): a cell that ends in a backslash
+      moves data to the next column (Bible §10, §11).
+    patterns:
+      - pattern: fputcsv(...)
+      - pattern-not: fputcsv($F, $ROW, $D, $E, '')
+      - pattern-not: fputcsv($F, $ROW, $D, $E, "")
+
+  - id: nox-remote-request-unchecked
+    severity: WARNING
+    languages: [php]
+    message: >-
+      HTTP request to a URL that is not a literal. If the URL comes from a
+      setting, another site or a user, it must go through a public-IP check
+      and a redirect check (Bible §11).
+    patterns:
+      - pattern-either:
+          - pattern: wp_remote_get($U, ...)
+          - pattern: wp_remote_post($U, ...)
+          - pattern: wp_remote_request($U, ...)
+          - pattern: wp_remote_head($U, ...)
+          - pattern: wp_safe_remote_get($U, ...)
+          - pattern: wp_safe_remote_post($U, ...)
+          - pattern: download_url($U, ...)
+      - pattern-not: $F("...", ...)
+
+  - id: nox-token-in-transient-name
+    severity: WARNING
+    languages: [php]
+    message: >-
+      Transient name built from a token, code or key. Store only a hash
+      (hash_hmac / sha256) in the name (Bible §11).
+    patterns:
+      - pattern-either:
+          - pattern: set_transient($N, ...)
+          - pattern: get_transient($N)
+          - pattern: set_site_transient($N, ...)
+      - metavariable-pattern:
+          metavariable: $N
+          patterns:
+            - pattern: $A . $T
+            - metavariable-regex:
+                metavariable: $T
+                regex: (?i)^\$(token|tok|code|key|secret|nonce|pass\w*)$
