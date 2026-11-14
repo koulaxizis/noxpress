@@ -99,15 +99,21 @@ rules:
       - pattern-not: preg_replace($P, '[...]', ...)
 
   - id: nox-fputcsv-escape
-    severity: WARNING
+    severity: ERROR
     languages: [php]
     message: >-
-      fputcsv() without an empty escape (''): a cell that ends in a backslash
-      moves data to the next column (Bible §10, §11).
-    patterns:
-      - pattern: fputcsv(...)
-      - pattern-not: fputcsv($F, $ROW, $D, $E, '')
-      - pattern-not: fputcsv($F, $ROW, $D, $E, "")
+      fputcsv() / fgetcsv() without an empty escape (''): a cell that ends in
+      a backslash moves data to the next column (Bible §10, §11). Prefer
+      Noxpress_Safe::csv_row().
+    pattern-either:
+      - patterns:
+          - pattern: fputcsv(...)
+          - pattern-not: fputcsv($F, $ROW, $D, $E, '')
+          - pattern-not: fputcsv($F, $ROW, $D, $E, "")
+      - patterns:
+          - pattern: fgetcsv(...)
+          - pattern-not: fgetcsv($F, $L, $D, $E, '')
+          - pattern-not: fgetcsv($F, $L, $D, $E, "")
 
   - id: nox-remote-request-unchecked
     severity: WARNING

@@ -1374,8 +1374,8 @@ final class RS_Portal {
 
 		$cur = self::currency_fmt();
 
-		fputcsv( $out, array( RS_Admin_UI::csv_cell( $who ), $per['start'], $per['end'] ), ',', '"', '\\' );
-		fputcsv( $out, array(), ',', '"', '\\' );
+		fputcsv( $out, array( RS_Admin_UI::csv_cell( $who ), $per['start'], $per['end'] ), ',', '"', '' );
+		fputcsv( $out, array(), ',', '"', '' );
 
 		fputcsv(
 			$out,
@@ -1393,7 +1393,7 @@ final class RS_Portal {
 			),
 			',',
 			'"',
-			'\\'
+			''
 		);
 
 		foreach ( $rep['products'] as $p ) {
@@ -1417,18 +1417,18 @@ final class RS_Portal {
 					),
 					',',
 					'"',
-					'\\'
+					''
 				);
 			}
 		}
 
-		fputcsv( $out, array(), ',', '"', '\\' );
+		fputcsv( $out, array(), ',', '"', '' );
 		// 1.17.0: deductions (all time) on their own line, then the balance.
 		$exp_l = RS_Ledger::sum( $who, '2000-01-01', $today, 'expense' );
 		if ( $exp_l > 0 ) {
-			fputcsv( $out, array( __( 'Κρατήσεις', 'revenue-splitter' ), $cur( -1 * $exp_l ) ), ',', '"', '\\' );
+			fputcsv( $out, array( __( 'Κρατήσεις', 'revenue-splitter' ), $cur( -1 * $exp_l ) ), ',', '"', '' );
 		}
-		fputcsv( $out, array( __( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ), $cur( ( RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0 ) + RS_Ledger::net( $who, '2000-01-01', $today ) ) ), ',', '"', '\\' );
+		fputcsv( $out, array( __( 'Αποπληρωτέο υπόλοιπο', 'revenue-splitter' ), $cur( ( RS_Reports::lifetime_beneficiaries()[ $who ] ?? 0.0 ) + RS_Ledger::net( $who, '2000-01-01', $today ) ) ), ',', '"', '' );
 
 		fclose( $out );
 		exit;

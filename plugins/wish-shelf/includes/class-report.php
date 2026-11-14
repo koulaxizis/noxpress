@@ -195,7 +195,7 @@ final class WSH_Report {
 			),
 			$sep,
 			'"',
-			'\\'
+			''
 		);
 		foreach ( $rows as $r ) {
 			fputcsv(
@@ -211,7 +211,7 @@ final class WSH_Report {
 				),
 				$sep,
 				'"',
-				'\\'
+				''
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose

@@ -205,7 +205,7 @@ final class RDR_Import {
 		}
 		$out   = array();
 		$first = true;
-		while ( false !== ( $row = fgetcsv( $fh, 0, ',', '"', '\\' ) ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		while ( false !== ( $row = fgetcsv( $fh, 0, ',', '"', '' ) ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 			if ( ! is_array( $row ) || count( $row ) < 2 ) {
 				continue;
 			}
