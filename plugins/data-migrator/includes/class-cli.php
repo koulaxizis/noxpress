@@ -35,10 +35,20 @@ final class NM_CLI {
 	 * [--note=<text>]
 	 * : A note shown in the list.
 	 *
+	 * [--dest=<dest>]
+	 * : Where it goes (1.3.0). Default: the Dropbox setting, else local.
+	 * ---
+	 * options:
+	 *   - local
+	 *   - both
+	 *   - remote
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp data-migrator backup
 	 *     wp data-migrator backup --scope=db --note="before update"
+	 *     wp data-migrator backup --dest=both
 	 *
 	 * @param array $args  Positional.
 	 * @param array $assoc Options.
@@ -49,6 +59,7 @@ final class NM_CLI {
 				'scope'   => (string) ( $assoc['scope'] ?? 'full' ),
 				'part_mb' => isset( $assoc['part-mb'] ) ? (int) $assoc['part-mb'] : (int) NM_Settings::get()['part_mb'],
 				'note'    => sanitize_text_field( (string) ( $assoc['note'] ?? '' ) ),
+				'dest'    => (string) ( $assoc['dest'] ?? ( NM_Dropbox::connected() ? NM_Dropbox::get()['dest'] : 'local' ) ),
 			)
 		);
 		if ( is_wp_error( $job ) ) {
@@ -59,6 +70,11 @@ final class NM_CLI {
 			WP_CLI::error( (string) $p['text'] );
 		}
 		$m = NM_Storage::meta( (string) $p['id'] );
+		if ( 'failed' === ( $m['remote']['state'] ?? '' ) ) {
+			WP_CLI::warning( 'Dropbox upload failed (the backup stays on this server): ' . (string) $m['remote']['error'] );
+		} elseif ( NM_Remote::in_dropbox( (array) $m ) ) {
+			WP_CLI::log( 'In Dropbox: /' . NM_Remote::host( (array) $m ) . '/' );
+		}
 		WP_CLI::success( sprintf( 'Backup %s: %d part(s), %s.', (string) $p['id'], count( (array) ( $m['parts'] ?? array() ) ), NM_Util::size( (float) ( $m['size'] ?? 0 ) ) ) );
 		foreach ( (array) ( $m['parts'] ?? array() ) as $part ) {
 			WP_CLI::log( NM_Storage::part_path( (string) $part['file'] ) );

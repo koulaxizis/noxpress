@@ -128,6 +128,26 @@
 			} );
 		} );
 	}
+	// Dropbox: upload again (push) or download to this server (fetch).
+	document.addEventListener( 'click', function ( e ) {
+		var b = e.target.closest ? e.target.closest( '[data-nm-remote]' ) : null;
+		if ( ! b || ! brun ) {
+			return;
+		}
+		e.preventDefault();
+		Array.prototype.forEach.call( document.querySelectorAll( '[data-nm-remote]' ), function ( x ) {
+			x.disabled = true;
+		} );
+		show( brun, 0, '…' );
+		brun.scrollIntoView( { block: 'center' } );
+		post( 'remote_job', { op: b.getAttribute( 'data-nm-remote' ), id: b.getAttribute( 'data-id' ) } ).then( function ( d ) {
+			run( d.job, brun, function () {
+				window.location.href = A.backups;
+			} );
+		} ).catch( function ( err ) {
+			show( brun, null, err.message, true );
+		} );
+	} );
 	if ( brun && brun.getAttribute( 'data-job' ) ) {
 		run( brun.getAttribute( 'data-job' ), brun, function () {
 			window.location.href = A.backups;

@@ -17,7 +17,8 @@
  *
  * Backup files: <host>-<YYYYMMDD-HHMMSS>-<id>[-partN].zip, <id> = 32 hex;
  * metadata in backups/<id>.php (guarded JSON). Every read, download or
- * delete passes the patterns below first.
+ * delete passes the patterns below first. A backup that lives only in
+ * Dropbox (1.3.0) keeps its metadata here with local = false.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -262,6 +263,25 @@ final class NM_Storage {
 		NM_Util::rrmdir( self::sub( 'work' ) . '/' . $id, self::sub( 'work' ) );
 		@unlink( self::meta_path( $id ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
 		return true;
+	}
+
+	/**
+	 * Delete only the local parts of a backup that is also in Dropbox
+	 * (1.3.0); the metadata stays, marked local = false.
+	 */
+	public static function drop_local( string $id ): bool {
+		$m = self::meta( $id );
+		if ( ! $m ) {
+			return false;
+		}
+		foreach ( (array) ( $m['parts'] ?? array() ) as $p ) {
+			$path = self::part_path( (string) ( $p['file'] ?? '' ) );
+			if ( '' !== $path && false !== strpos( $path, $id ) && is_file( $path ) ) {
+				@unlink( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			}
+		}
+		$m['local'] = false;
+		return self::save_meta( $m );
 	}
 
 	/* ---------------------------------------------------------------

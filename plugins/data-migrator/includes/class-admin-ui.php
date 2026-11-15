@@ -9,7 +9,8 @@
  *  - nm-restore   «Επαναφορά»: upload, analysis (dry run), plan, start;
  *                 finalize / undo of the last restore
  *  - nm-settings  «DM Ρυθμίσεις»: storage folder, parts, exclusions,
- *                 keep backups on uninstall, language (without RS)
+ *                 keep backups on uninstall, language (without RS),
+ *                 Dropbox connection and defaults (1.3.0)
  *
  * State changes: POST on admin_init (page + nonce + capability, PRG,
  * message in the transient nm_aui_msg_{uid}). Long work: admin-ajax with
@@ -34,7 +35,7 @@ final class NM_Admin_UI {
 		add_action( 'admin_init', array( __CLASS__, 'download' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( NM_FILE ), array( __CLASS__, 'action_links' ) );
-		foreach ( array( 'backup_start', 'step', 'cancel', 'upload', 'upload_done', 'analyze' ) as $a ) {
+		foreach ( array( 'backup_start', 'step', 'cancel', 'upload', 'upload_done', 'analyze', 'remote_job' ) as $a ) {
 			add_action( 'wp_ajax_nm_' . $a, array( __CLASS__, 'ajax_' . $a ) );
 		}
 	}
@@ -235,13 +236,15 @@ final class NM_Admin_UI {
 			echo '<option value="' . esc_attr( (string) $p ) . '"' . selected( (int) $set['part_mb'], $p, false ) . '>' . esc_html( 0 === $p ? __( 'Ένα αρχείο', 'data-migrator' ) : NM_Util::size( $p * 1048576.0 ) ) . '</option>';
 		}
 		echo '</select> <label for="nm-note">' . esc_html__( 'Σημείωση', 'data-migrator' ) . '</label> <input type="text" id="nm-note" name="note" maxlength="120"></p>';
+		self::dest_field( NM_Dropbox::get()['dest'], 'nm-dest' );
 		if ( $set['encrypt'] ) {
 			$ok = NM_Crypt::available() && in_array( NM_Settings::password_source(), array( 'const', 'option' ), true );
 			echo '<p class="' . ( $ok ? 'nm-ok' : 'nm-err' ) . '">' . esc_html( $ok ? __( 'Τα νέα αντίγραφα κρυπτογραφούνται (AES-256).', 'data-migrator' ) : __( 'Η κρυπτογράφηση είναι ενεργή αλλά ο κωδικός λείπει ή δεν διαβάζεται πια. Όρισέ τον ξανά στις Ρυθμίσεις.', 'data-migrator' ) ) . '</p>';
 		}
 		echo '<p><button type="submit" class="button button-primary"' . disabled( (bool) $running, true, false ) . '>' . esc_html__( 'Δημιουργία αντιγράφου', 'data-migrator' ) . '</button></p></form>';
-		echo '<div class="nm-run' . ( $running && 'backup' === $running['type'] ? ' is-on' : '' ) . '" id="nm-backup-run" data-job="' . esc_attr( $running && 'backup' === $running['type'] ? (string) $running['id'] : '' ) . '"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p><button type="button" class="button nm-cancel">' . esc_html__( 'Ακύρωση', 'data-migrator' ) . '</button></div>';
-		if ( $running && 'backup' !== $running['type'] ) {
+		$mine = $running && in_array( $running['type'], array( 'backup', 'push', 'fetch' ), true );
+		echo '<div class="nm-run' . ( $mine ? ' is-on' : '' ) . '" id="nm-backup-run" data-job="' . esc_attr( $mine ? (string) $running['id'] : '' ) . '"><div class="nm-progress"><span></span></div><p class="nm-text description">…</p><button type="button" class="button nm-cancel">' . esc_html__( 'Ακύρωση', 'data-migrator' ) . '</button></div>';
+		if ( $running && ! $mine ) {
 			echo '<p class="nm-warn">' . esc_html__( 'Τρέχει ήδη μια εργασία του Data Migrator. Περίμενε να τελειώσει ή ακύρωσέ την.', 'data-migrator' ) . '</p>';
 		}
 		echo '</div>';
@@ -261,6 +264,10 @@ final class NM_Admin_UI {
 			echo '</tbody></table>';
 		}
 		echo '<p class="description">' . esc_html( sprintf( /* translators: 1: folder, 2: size */ __( 'Φάκελος: %1$s · Χώρος: %2$s', 'data-migrator' ), NM_Storage::dir(), NM_Util::size( NM_Storage::used() ) ) ) . '</p>';
+		if ( NM_Dropbox::connected() ) {
+			self::form_open( 'dropbox_sync', 'nm-backups' );
+			echo '<p><button class="button">' . esc_html__( 'Ανάγνωση των αντιγράφων στο Dropbox', 'data-migrator' ) . '</button> <span class="description">' . esc_html__( 'Προσθέτει στη λίστα όσα αντίγραφα είναι στο Dropbox αλλά όχι εδώ, π.χ. σε νέο server ή από άλλο site.', 'data-migrator' ) . '</span></p></form>';
+		}
 
 		// Core check.
 		echo '<h2 class="nm-h2">' . esc_html__( 'Έλεγχος αρχείων του WordPress', 'data-migrator' ) . '</h2><div class="nm-zone">';
@@ -290,7 +297,7 @@ final class NM_Admin_UI {
 		$all = NM_Schedule::all();
 		$set = NM_Settings::get();
 		echo '<h2 class="nm-h2">' . esc_html__( 'Πρόγραμμα αντιγράφων', 'data-migrator' ) . '</h2><div class="nm-zone">';
-		echo '<p class="description">' . esc_html__( 'Αντίγραφα που γίνονται μόνα τους, στο παρασκήνιο, σε μικρά βήματα που δεν βαραίνουν το site. Μένουν στον ίδιο φάκελο με τα υπόλοιπα: κατέβασέ τα από τη λίστα, ώστε να έχεις αντίγραφο και έξω από τον server.', 'data-migrator' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Αντίγραφα που γίνονται μόνα τους, στο παρασκήνιο, σε μικρά βήματα που δεν βαραίνουν το site. Για αντίγραφο και έξω από τον server, στείλε τα και στο Dropbox ή κατέβασέ τα από τη λίστα.', 'data-migrator' ) . '</p>';
 
 		$late = false;
 		foreach ( $all as $sc ) {
@@ -305,7 +312,11 @@ final class NM_Admin_UI {
 		if ( $all ) {
 			echo '<table class="widefat nm-table"><thead><tr><th>' . esc_html__( 'Περιεχόμενο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Πότε', 'data-migrator' ) . '</th><th>' . esc_html__( 'Επόμενο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Τελευταίο', 'data-migrator' ) . '</th><th>' . esc_html__( 'Ενέργειες', 'data-migrator' ) . '</th></tr></thead><tbody>';
 			foreach ( $all as $sc ) {
-				echo '<tr><td>' . esc_html( $scopes[ $sc['scope'] ] ?? '' ) . '<br><span class="description">' . esc_html( sprintf( /* translators: %d: number of backups */ _n( 'Κρατά το τελευταίο %d', 'Κρατά τα τελευταία %d', (int) $sc['keep'], 'data-migrator' ), (int) $sc['keep'] ) ) . '</span></td>';
+				echo '<tr><td>' . esc_html( $scopes[ $sc['scope'] ] ?? '' ) . '<br><span class="description">' . esc_html( sprintf( /* translators: %d: number of backups */ _n( 'Κρατά το τελευταίο %d', 'Κρατά τα τελευταία %d', (int) $sc['keep'], 'data-migrator' ), (int) $sc['keep'] ) ) . '</span>';
+				if ( 'local' !== $sc['dest'] ) {
+					echo '<br><span class="nm-badge">' . esc_html( self::dest_labels()[ $sc['dest'] ] ) . '</span>';
+				}
+				echo '</td>';
 				echo '<td>' . esc_html( NM_Schedule::label( $sc ) ) . '</td>';
 				echo '<td>' . ( $sc['on'] ? esc_html( self::when( (int) $sc['next'] ) ) : '<span class="nm-warn">' . esc_html__( 'Σε παύση', 'data-migrator' ) . '</span>' ) . '</td><td>';
 				$last = (array) $sc['last'];
@@ -377,6 +388,10 @@ final class NM_Admin_UI {
 		echo '</select></label> <label data-freq="monthly">' . esc_html__( 'Ημέρα του μήνα', 'data-migrator' ) . ' <input type="number" name="dom" min="1" max="28" value="' . esc_attr( (string) $sc['dom'] ) . '" style="width:64px"></label>';
 		echo ' <label>' . esc_html__( 'Ώρα', 'data-migrator' ) . ' <input type="time" name="time" value="' . esc_attr( $sc['time'] ) . '"></label>';
 		echo ' <label>' . esc_html__( 'Πόσα να κρατά', 'data-migrator' ) . ' <input type="number" name="keep" min="1" max="60" value="' . esc_attr( (string) $sc['keep'] ) . '" style="width:64px"></label></p>';
+		self::dest_field( (string) $sc['dest'], 'nm-dest-' . ( $new ? 'new' : $sc['id'] ) );
+		if ( NM_Dropbox::connected() || 'local' !== $sc['dest'] ) {
+			echo '<p><label>' . esc_html__( 'Πόσα να κρατά στο Dropbox', 'data-migrator' ) . ' <input type="number" name="rkeep" min="0" max="60" value="' . esc_attr( (string) $sc['rkeep'] ) . '" style="width:64px"></label> <span class="description">' . esc_html__( '0: όσα και εδώ.', 'data-migrator' ) . '</span></p>';
+		}
 		echo '<p class="description">' . esc_html( sprintf( /* translators: %s: time zone */ __( 'Ζώνη ώρας του site: %s. Προτείνεται ώρα με λίγη κίνηση. Για τα πλήρη αντίγραφα αρκούν συνήθως 4, για τη βάση 7.', 'data-migrator' ), wp_timezone_string() ) ) . '</p>';
 		echo '<p><label><input type="checkbox" name="on" value="1"' . checked( (bool) $sc['on'], true, false ) . '> ' . esc_html__( 'Ενεργό', 'data-migrator' ) . '</label></p>';
 		echo '<p><button class="button button-primary">' . esc_html( $new ? __( 'Προσθήκη προγράμματος', 'data-migrator' ) : __( 'Αποθήκευση', 'data-migrator' ) ) . '</button></p></div></form>';
@@ -396,6 +411,11 @@ final class NM_Admin_UI {
 		if ( ! empty( $m['enc'] ) ) {
 			echo '<br><span class="nm-badge">' . esc_html__( 'Κρυπτογραφημένο', 'data-migrator' ) . '</span>';
 		}
+		$local  = NM_Remote::has_local( $m );
+		$remote = NM_Remote::in_dropbox( $m );
+		if ( $remote ) {
+			echo '<br><span class="nm-badge">' . esc_html( $local ? __( 'Εδώ + Dropbox', 'data-migrator' ) : __( 'Μόνο στο Dropbox', 'data-migrator' ) ) . '</span>';
+		}
 		if ( ! empty( $m['note'] ) ) {
 			echo '<br><span class="description">' . esc_html( (string) $m['note'] ) . '</span>';
 		}
@@ -404,6 +424,14 @@ final class NM_Admin_UI {
 			echo '<br><span class="nm-warn">' . esc_html__( 'Σε εξέλιξη', 'data-migrator' ) . '</span>';
 		} elseif ( 'failed' === $status ) {
 			echo '<br><span class="nm-err">' . esc_html( sprintf( /* translators: %s: error */ __( 'Απέτυχε: %s', 'data-migrator' ), (string) ( $m['error'] ?? '' ) ) ) . '</span>';
+		}
+		$rstate = (string) ( $m['remote']['state'] ?? '' );
+		if ( 'failed' === $rstate ) {
+			echo '<br><span class="nm-err">' . esc_html( sprintf( /* translators: %s: error */ __( 'Dropbox: η αποστολή απέτυχε: %s', 'data-migrator' ), (string) ( $m['remote']['error'] ?? '' ) ) ) . '</span>';
+		} elseif ( 'uploading' === $rstate ) {
+			echo '<br><span class="nm-warn">' . esc_html__( 'Dropbox: η αποστολή δεν ολοκληρώθηκε', 'data-migrator' ) . '</span>';
+		} elseif ( $remote && ! empty( $m['imported'] ) ) {
+			echo '<br><span class="description">' . esc_html__( 'Βρέθηκε στο Dropbox', 'data-migrator' ) . '</span>';
 		}
 		$flags = (array) ( $m['flags'] ?? array() );
 		$php   = array();
@@ -423,15 +451,29 @@ final class NM_Admin_UI {
 			echo '<br><span class="description">' . esc_html( sprintf( /* translators: %d: parts */ __( '%d κομμάτια', 'data-migrator' ), count( (array) $m['parts'] ) ) ) . '</span>';
 		}
 		echo '</td><td>' . esc_html( (string) ( $m['home'] ?? '' ) ) . '</td><td class="nm-actions">';
-		if ( 'done' === $status ) {
-			foreach ( (array) $m['parts'] as $i => $p ) {
+		$parts = (array) ( $m['parts'] ?? array() );
+		$many  = count( $parts ) > 1;
+		if ( 'done' === $status && $local ) {
+			foreach ( $parts as $i => $p ) {
 				$url = wp_nonce_url( admin_url( 'admin.php?page=nm-backups&nm_dl=part&id=' . $id . '&n=' . $i ), 'nm_dl_' . $id );
-				echo '<a class="button" href="' . esc_url( $url ) . '">' . esc_html( count( (array) $m['parts'] ) > 1 ? sprintf( /* translators: %d: part number */ __( 'Λήψη %d', 'data-migrator' ), $i + 1 ) : __( 'Λήψη', 'data-migrator' ) ) . '</a>';
+				echo '<a class="button" href="' . esc_url( $url ) . '">' . esc_html( $many ? sprintf( /* translators: %d: part number */ __( 'Λήψη %d', 'data-migrator' ), $i + 1 ) : __( 'Λήψη', 'data-migrator' ) ) . '</a>';
 			}
 			echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=nm-restore&backup=' . $id ) ) . '">' . esc_html__( 'Επαναφορά', 'data-migrator' ) . '</a>';
 			if ( ! empty( $m['db'] ) && in_array( 'core', (array) ( $m['groups'] ?? array() ), true ) ) {
 				self::form_open( 'installer', 'nm-backups' );
 				echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><button class="button" title="' . esc_attr__( 'Για επαναφορά σε άδειο server, χωρίς WordPress', 'data-migrator' ) . '">' . esc_html__( 'Installer', 'data-migrator' ) . '</button></form>';
+			}
+			if ( ! $remote && NM_Dropbox::connected() ) {
+				echo '<button type="button" class="button" data-nm-remote="push" data-id="' . esc_attr( $id ) . '">' . esc_html( 'failed' === $rstate || 'uploading' === $rstate ? __( 'Ξανά στο Dropbox', 'data-migrator' ) : __( 'Αποστολή στο Dropbox', 'data-migrator' ) ) . '</button>';
+			}
+		}
+		if ( 'done' === $status && $remote && NM_Dropbox::connected() ) {
+			if ( ! $local ) {
+				echo '<button type="button" class="button button-primary" data-nm-remote="fetch" data-id="' . esc_attr( $id ) . '" title="' . esc_attr__( 'Κατεβαίνει σε αυτόν τον server για επαναφορά', 'data-migrator' ) . '">' . esc_html__( 'Λήψη στον server', 'data-migrator' ) . '</button>';
+			}
+			foreach ( $parts as $i => $p ) {
+				$url = wp_nonce_url( admin_url( 'admin.php?page=nm-backups&nm_dl=dropbox&id=' . $id . '&n=' . $i ), 'nm_dl_' . $id );
+				echo '<a class="button" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $many ? sprintf( /* translators: %d: part number */ __( 'Από Dropbox %d', 'data-migrator' ), $i + 1 ) : __( 'Λήψη από Dropbox', 'data-migrator' ) ) . '</a>';
 			}
 		}
 		if ( ! empty( $m['job'] ) && '' !== NM_Storage::log_file( (string) $m['job'] ) && is_file( NM_Storage::log_file( (string) $m['job'] ) ) ) {
@@ -439,10 +481,48 @@ final class NM_Admin_UI {
 			echo '<a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Log', 'data-migrator' ) . '</a>';
 		}
 		if ( 'running' !== $status ) {
-			self::form_open( 'delete', 'nm-backups', __( 'Να διαγραφεί οριστικά αυτό το αντίγραφο;', 'data-migrator' ) );
-			echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><button class="button">' . esc_html__( 'Διαγραφή', 'data-migrator' ) . '</button></form>';
+			if ( $remote && $local ) {
+				self::form_open( 'delete', 'nm-backups', __( 'Να διαγραφεί το αντίγραφο από αυτόν τον server; Στο Dropbox μένει.', 'data-migrator' ) );
+				echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><input type="hidden" name="where" value="local"><button class="button">' . esc_html__( 'Διαγραφή από εδώ', 'data-migrator' ) . '</button></form>';
+			} elseif ( ! $remote ) {
+				self::form_open( 'delete', 'nm-backups', __( 'Να διαγραφεί οριστικά αυτό το αντίγραφο;', 'data-migrator' ) );
+				echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><button class="button">' . esc_html__( 'Διαγραφή', 'data-migrator' ) . '</button></form>';
+			}
+			if ( $remote && NM_Dropbox::connected() ) {
+				self::form_open( 'delete', 'nm-backups', __( 'Να διαγραφεί οριστικά αυτό το αντίγραφο από το Dropbox;', 'data-migrator' ) );
+				echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><input type="hidden" name="where" value="dropbox"><button class="button">' . esc_html__( 'Διαγραφή από Dropbox', 'data-migrator' ) . '</button></form>';
+			}
 		}
 		echo '</td></tr>';
+	}
+
+	/** The "where does it go" choice; only "here" without a Dropbox connection. */
+	private static function dest_field( string $cur, string $dom_id ): void {
+		$on = NM_Dropbox::connected();
+		echo '<p><label for="' . esc_attr( $dom_id ) . '">' . esc_html__( 'Πού', 'data-migrator' ) . '</label> <select id="' . esc_attr( $dom_id ) . '" name="dest">';
+		foreach ( self::dest_labels() as $k => $l ) {
+			if ( 'local' !== $k && ! $on && $cur !== $k ) {
+				continue;
+			}
+			echo '<option value="' . esc_attr( $k ) . '"' . selected( $cur, $k, false ) . '>' . esc_html( $l ) . '</option>';
+		}
+		echo '</select>';
+		if ( ! $on ) {
+			echo ' <span class="description">' . esc_html__( 'Για αντίγραφα στο Dropbox, σύνδεσέ το στις DM Ρυθμίσεις.', 'data-migrator' ) . '</span>';
+		} elseif ( NM_Dropbox::get()['encrypt'] ) {
+			echo ' <span class="description">' . esc_html__( 'Όσα πάνε στο Dropbox κρυπτογραφούνται (AES-256).', 'data-migrator' ) . '</span>';
+		} else {
+			echo ' <span class="nm-warn">' . esc_html__( 'Όσα πάνε στο Dropbox ανεβαίνουν χωρίς κρυπτογράφηση.', 'data-migrator' ) . '</span>';
+		}
+		echo '</p>';
+	}
+
+	private static function dest_labels(): array {
+		return array(
+			'local'  => __( 'Μόνο σε αυτόν τον server', 'data-migrator' ),
+			'both'   => __( 'Σε αυτόν τον server και στο Dropbox', 'data-migrator' ),
+			'remote' => __( 'Μόνο στο Dropbox', 'data-migrator' ),
+		);
 	}
 
 	private static function integrity_html( array $c ): void {
@@ -511,7 +591,7 @@ final class NM_Admin_UI {
 		$all = array_filter(
 			NM_Storage::all(),
 			static function ( $m ) {
-				return 'done' === ( $m['status'] ?? '' );
+				return 'done' === ( $m['status'] ?? '' ) && NM_Remote::has_local( $m );
 			}
 		);
 		if ( ! $all ) {
@@ -700,6 +780,73 @@ final class NM_Admin_UI {
 
 		self::form_open( 'web_test', 'nm-settings' );
 		echo '<p><button class="button">' . esc_html__( 'Έλεγχος του φακέλου μέσω HTTP', 'data-migrator' ) . '</button></p></form>';
+
+		self::render_dropbox();
+	}
+
+	/** Settings: the Dropbox connection and its defaults (1.3.0). */
+	private static function render_dropbox(): void {
+		$d    = NM_Dropbox::get();
+		$ksrc = NM_Dropbox::app_key_source();
+		$tsrc = NM_Dropbox::token_source();
+		$on   = NM_Dropbox::connected();
+		echo '<h2 class="nm-h2" id="nm-dropbox">' . esc_html__( 'Dropbox', 'data-migrator' ) . '</h2><div class="nm-zone">';
+		echo '<p class="description">' . esc_html__( 'Αντίγραφα και στο Dropbox σου, ώστε να υπάρχουν κι αν χαθεί ή παραβιαστεί ο server. Το site μιλά απευθείας με το Dropbox, χωρίς ενδιάμεσο, και βλέπει μόνο τον δικό του φάκελο (Apps/…), όχι το υπόλοιπο Dropbox. Κάθε site συνδέει τον λογαριασμό Dropbox που διαλέγεις.', 'data-migrator' ) . '</p>';
+		if ( ! NM_Crypt::available() ) {
+			echo '<p class="nm-warn">' . esc_html__( 'Δεν γίνεται σε αυτόν τον server: η PHP δεν έχει την επέκταση OpenSSL.', 'data-migrator' ) . '</p></div>';
+			return;
+		}
+		if ( '' !== $d['broken'] ) {
+			echo '<p class="nm-err">' . esc_html( $d['broken'] ) . '</p>';
+		}
+		if ( $on ) {
+			echo '<p class="nm-ok">' . esc_html( sprintf( /* translators: 1: account, 2: date */ __( 'Συνδεδεμένο με τον λογαριασμό %1$s από %2$s.', 'data-migrator' ), '' !== $d['account'] ? $d['account'] : '—', self::when( (int) $d['since'] ) ) ) . ( $d['last_ok'] ? ' <span class="description">' . esc_html( sprintf( /* translators: %s: date */ __( 'Τελευταία επιτυχημένη αποστολή: %s.', 'data-migrator' ), self::when( (int) $d['last_ok'] ) ) ) . '</span>' : '' ) . '</p>';
+			if ( 'const' === $tsrc ) {
+				echo '<p class="description">' . esc_html__( 'Το token ορίζεται στο wp-config.php (NM_DROPBOX_TOKEN).', 'data-migrator' ) . '</p>';
+			} else {
+				echo '<p class="description">' . esc_html__( 'Το token φυλάγεται κρυπτογραφημένο με τα κλειδιά του wp-config.php και δεν μπαίνει ποτέ στα αντίγραφα.', 'data-migrator' ) . '</p>';
+			}
+			self::form_open( 'dropbox_disconnect', 'nm-settings', __( 'Να αποσυνδεθεί το Dropbox; Τα αντίγραφα που είναι ήδη εκεί μένουν.', 'data-migrator' ) );
+			echo '<p><button class="button">' . esc_html__( 'Αποσύνδεση', 'data-migrator' ) . '</button></p></form>';
+		} elseif ( 'none' === $ksrc ) {
+			echo '<p class="nm-warn">' . esc_html__( 'Χρειάζεται ένα app key του Dropbox (είναι δημόσιο, όχι μυστικό). Φτιάξε δική σου εφαρμογή στο Dropbox App Console: Scoped access, App folder, δικαιώματα account_info.read, files.metadata.read, files.content.read και files.content.write, και γράψε εδώ το App key.', 'data-migrator' ) . '</p>';
+			echo '<p><a class="button" href="https://www.dropbox.com/developers/apps" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Dropbox App Console', 'data-migrator' ) . '</a></p>';
+		} else {
+			if ( 'unreadable' === $tsrc ) {
+				echo '<p class="nm-err">' . esc_html__( 'Το αποθηκευμένο token δεν διαβάζεται πια (άλλαξαν τα κλειδιά του wp-config.php). Σύνδεσε ξανά.', 'data-migrator' ) . '</p>';
+			}
+			if ( ! NM_Dropbox::salts_ok() ) {
+				echo '<p class="nm-err">' . esc_html__( 'Το wp-config.php δεν έχει πραγματικά κλειδιά (salts), οπότε το token δεν μπορεί να φυλαχτεί κρυπτογραφημένο. Πρόσθεσε τα salts ή όρισε το token με τη σταθερά NM_DROPBOX_TOKEN.', 'data-migrator' ) . '</p>';
+			}
+			echo '<ol class="nm-steps"><li>';
+			echo '<form method="post" target="_blank" action="' . esc_url( admin_url( 'admin.php?page=nm-settings' ) ) . '">';
+			wp_nonce_field( self::NONCE, self::NONCE_FIELD );
+			echo '<input type="hidden" name="nm_action" value="dropbox_auth"><button class="button button-primary">' . esc_html__( 'Σύνδεση με Dropbox', 'data-migrator' ) . '</button> <span class="description">' . esc_html__( 'Ανοίγει το Dropbox σε νέα καρτέλα. Διάλεξε λογαριασμό και πάτησε Allow.', 'data-migrator' ) . '</span></form></li><li>';
+			self::form_open( 'dropbox_code', 'nm-settings' );
+			echo '<label for="nm-dbx-code">' . esc_html__( 'Κωδικός που δείχνει το Dropbox', 'data-migrator' ) . '</label> <input type="text" id="nm-dbx-code" name="code" class="regular-text" autocomplete="off" spellcheck="false"> <button class="button">' . esc_html__( 'Ολοκλήρωση σύνδεσης', 'data-migrator' ) . '</button> <span class="description">' . esc_html__( 'Ισχύει 10 λεπτά.', 'data-migrator' ) . '</span></form></li></ol>';
+		}
+
+		self::form_open( 'dropbox_save', 'nm-settings' );
+		echo '<p><label for="nm-dbx-dest">' . esc_html__( 'Προεπιλογή για τα χειροκίνητα αντίγραφα', 'data-migrator' ) . '</label> <select id="nm-dbx-dest" name="dest">';
+		foreach ( self::dest_labels() as $k => $l ) {
+			echo '<option value="' . esc_attr( $k ) . '"' . selected( $d['dest'], $k, false ) . '>' . esc_html( $l ) . '</option>';
+		}
+		echo '</select> <span class="description">' . esc_html__( 'Κάθε πρόγραμμα έχει τη δική του επιλογή.', 'data-migrator' ) . '</span></p>';
+		echo '<label style="display:block"><input type="checkbox" name="encrypt" value="1"' . checked( $d['encrypt'], true, false ) . '> ' . esc_html__( 'Κρυπτογράφηση των αντιγράφων που πάνε στο Dropbox (AES-256)', 'data-migrator' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Με τον κωδικό της ενότητας «Κρυπτογράφηση» πιο πάνω, και για το αντίγραφο που μένει εδώ. Χωρίς κρυπτογράφηση, όποιος μπει στο Dropbox σου διαβάζει όλη τη βάση: πελάτες, διευθύνσεις, παραγγελίες, hashes κωδικών.', 'data-migrator' ) . '</p>';
+		echo '<p><label for="nm-dbx-chunk">' . esc_html__( 'Μέγεθος κάθε αποστολής', 'data-migrator' ) . '</label> <select id="nm-dbx-chunk" name="chunk_mb">';
+		foreach ( array( 4, 8, 16 ) as $c ) {
+			echo '<option value="' . esc_attr( (string) $c ) . '"' . selected( (int) $d['chunk_mb'], $c, false ) . '>' . esc_html( $c . ' MB' ) . '</option>';
+		}
+		echo '</select> <span class="description">' . esc_html__( 'Μικρότερο σε αργούς ή αυστηρούς servers.', 'data-migrator' ) . '</span></p>';
+		echo '<p><label for="nm-dbx-quota">' . esc_html__( 'Όριο χώρου στο Dropbox για τα προγραμματισμένα (GB, 0 = χωρίς όριο)', 'data-migrator' ) . '</label> <input type="number" id="nm-dbx-quota" name="quota" min="0" max="10000" value="' . esc_attr( (string) $d['quota'] ) . '" style="width:90px"></p>';
+		echo '<p class="description">' . esc_html__( 'Το Data Migrator σβήνει στο Dropbox μόνο δικά του προγραμματισμένα αντίγραφα. Τα σβησμένα αρχεία μένουν για λίγες μέρες στα «Deleted files» του Dropbox.', 'data-migrator' ) . '</p>';
+		if ( 'const' !== $ksrc ) {
+			echo '<details' . ( 'none' === $ksrc ? ' open' : '' ) . '><summary>' . esc_html__( 'Δική σου εφαρμογή Dropbox (προαιρετικό)', 'data-migrator' ) . '</summary><p><label for="nm-dbx-key">App key</label> <input type="text" id="nm-dbx-key" name="app_key" value="' . esc_attr( $d['app_key'] ) . '" class="regular-text" autocomplete="off" spellcheck="false"></p><p class="description">' . esc_html__( 'Κενό: η κοινή εφαρμογή της σουίτας. Μια αλλαγή εφαρμογής θέλει νέα σύνδεση. Εναλλακτικά, η σταθερά NM_DROPBOX_APP_KEY στο wp-config.php.', 'data-migrator' ) . '</p></details>';
+		} else {
+			echo '<p class="description">' . esc_html__( 'Το app key ορίζεται στο wp-config.php (NM_DROPBOX_APP_KEY).', 'data-migrator' ) . '</p>';
+		}
+		echo '<p><button class="button button-primary">' . esc_html__( 'Αποθήκευση', 'data-migrator' ) . '</button></p></form></div>';
 	}
 
 	/** Settings: encryption (off by default). */
@@ -805,9 +952,73 @@ final class NM_Admin_UI {
 				break;
 
 			case 'delete':
-				$id     = self::post( 'id' );
-				$ok     = preg_match( NM_Storage::ID_RE, $id ) && NM_Storage::delete( $id );
-				$msgs[] = self::msg( $ok ? 'success' : 'error', $ok ? __( 'Το αντίγραφο διαγράφηκε.', 'data-migrator' ) : __( 'Το αντίγραφο δεν βρέθηκε.', 'data-migrator' ) );
+				$id    = self::post( 'id' );
+				$where = self::post( 'where' );
+				$m     = preg_match( NM_Storage::ID_RE, $id ) ? NM_Storage::meta( $id ) : null;
+				if ( ! $m ) {
+					$ok = false;
+				} elseif ( 'dropbox' === $where ) {
+					$ok = NM_Remote::in_dropbox( $m ) && NM_Remote::delete( $id );
+				} elseif ( NM_Remote::in_dropbox( $m ) ) {
+					$ok = NM_Storage::drop_local( $id ); // The Dropbox copy stays.
+				} else {
+					$ok = NM_Storage::delete( $id );
+				}
+				$msgs[] = self::msg( $ok ? 'success' : 'error', $ok ? __( 'Το αντίγραφο διαγράφηκε.', 'data-migrator' ) : ( 'dropbox' === $where ? __( 'Η διαγραφή από το Dropbox δεν έγινε. Δες το log ή δοκίμασε ξανά.', 'data-migrator' ) : __( 'Το αντίγραφο δεν βρέθηκε.', 'data-migrator' ) ) );
+				break;
+
+			case 'dropbox_save':
+				$prev = NM_Dropbox::app_key();
+				NM_Dropbox::save(
+					array(
+						'dest'     => self::post( 'dest' ),
+						'encrypt'  => '1' === self::post( 'encrypt' ),
+						'chunk_mb' => (int) self::post( 'chunk_mb' ),
+						'quota'    => (int) self::post( 'quota' ),
+						'app_key'  => 'const' === NM_Dropbox::app_key_source() ? NM_Dropbox::get()['app_key'] : self::post( 'app_key' ),
+					)
+				);
+				if ( '' !== self::post( 'app_key' ) && ! preg_match( NM_Dropbox::KEY_RE, strtolower( self::post( 'app_key' ) ) ) ) {
+					$msgs[] = self::msg( 'error', __( 'Το app key δεν είναι έγκυρο (γράμματα και αριθμοί).', 'data-migrator' ) );
+				}
+				if ( NM_Dropbox::app_key() !== $prev && 'option' === NM_Dropbox::token_source() ) {
+					NM_Dropbox::forget(); // A token belongs to the app that issued it.
+					$msgs[] = self::msg( 'warning', __( 'Άλλαξε η εφαρμογή Dropbox: σύνδεσε ξανά.', 'data-migrator' ) );
+				}
+				$d = NM_Dropbox::get();
+				if ( 'local' !== $d['dest'] && $d['encrypt'] && ! in_array( NM_Settings::password_source(), array( 'const', 'option' ), true ) ) {
+					$msgs[] = self::msg( 'warning', __( 'Για την κρυπτογράφηση των αντιγράφων στο Dropbox όρισε κωδικό στην ενότητα «Κρυπτογράφηση».', 'data-migrator' ) );
+				}
+				$msgs[] = self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'data-migrator' ) );
+				$extra  = '#nm-dropbox';
+				break;
+
+			case 'dropbox_auth':
+				$url = NM_Dropbox::auth_url();
+				if ( '' === $url ) {
+					$msgs[] = self::msg( 'error', __( 'Χρειάζεται ένα app key του Dropbox (είναι δημόσιο, όχι μυστικό). Φτιάξε δική σου εφαρμογή στο Dropbox App Console: Scoped access, App folder, δικαιώματα account_info.read, files.metadata.read, files.content.read και files.content.write, και γράψε εδώ το App key.', 'data-migrator' ) );
+					break;
+				}
+				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- a fixed Dropbox address built above.
+				wp_redirect( $url );
+				exit;
+
+			case 'dropbox_code':
+				$r      = NM_Dropbox::connect( self::post( 'code' ) );
+				$msgs[] = self::msg( is_wp_error( $r ) ? 'error' : 'success', is_wp_error( $r ) ? $r->get_error_message() : __( 'Το Dropbox συνδέθηκε.', 'data-migrator' ) );
+				$extra  = '#nm-dropbox';
+				break;
+
+			case 'dropbox_disconnect':
+				NM_Dropbox::disconnect();
+				$msgs[] = self::msg( 'success', __( 'Το Dropbox αποσυνδέθηκε. Τα αντίγραφα που είναι εκεί έμειναν.', 'data-migrator' ) );
+				$extra  = '#nm-dropbox';
+				break;
+
+			case 'dropbox_sync':
+				NM_Util::$log_file = NM_Storage::sub( 'logs' ) . '/dropbox.log';
+				$r      = NM_Remote::sync();
+				$msgs[] = self::msg( is_wp_error( $r ) ? 'error' : 'success', is_wp_error( $r ) ? $r->get_error_message() : sprintf( /* translators: %d: count */ _n( 'Βρέθηκε %d νέο αντίγραφο στο Dropbox.', 'Βρέθηκαν %d νέα αντίγραφα στο Dropbox.', (int) $r, 'data-migrator' ), (int) $r ) );
 				break;
 
 			case 'installer':
@@ -882,6 +1093,8 @@ final class NM_Admin_UI {
 						'dow'   => (int) self::post( 'dow' ),
 						'dom'   => (int) self::post( 'dom' ),
 						'keep'  => (int) self::post( 'keep' ),
+						'dest'  => self::post( 'dest' ),
+						'rkeep' => (int) self::post( 'rkeep' ),
 					)
 				);
 				$msgs[] = self::msg( 'success', $sc['on'] ? sprintf( /* translators: %s: date and time */ __( 'Το πρόγραμμα αποθηκεύτηκε. Επόμενο αντίγραφο: %s.', 'data-migrator' ), self::when( (int) $sc['next'] ) ) : __( 'Το πρόγραμμα αποθηκεύτηκε σε παύση.', 'data-migrator' ) );
@@ -1040,6 +1253,15 @@ final class NM_Admin_UI {
 			echo $src; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a file download.
 			exit;
 		}
+		if ( 'dropbox' === $what ) {
+			$url = NM_Remote::link( $id, (int) self::q( 'n' ) );
+			if ( '' === $url ) {
+				wp_die( esc_html__( 'Το Dropbox δεν έδωσε σύνδεσμο λήψης. Δοκίμασε ξανά.', 'data-migrator' ) );
+			}
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- a Dropbox link, host checked in NM_Remote::link().
+			wp_redirect( $url );
+			exit;
+		}
 		if ( 'log' === $what ) {
 			$f = NM_Storage::log_file( (string) ( $meta['job'] ?? '' ) );
 			if ( '' === $f || ! is_file( $f ) ) {
@@ -1100,6 +1322,7 @@ final class NM_Admin_UI {
 			'root_dirs'    => self::post_list( 'root_dirs' ),
 			'part_mb'      => (int) self::post( 'part_mb' ),
 			'note'         => self::post( 'note' ),
+			'dest'         => self::post( 'dest' ),
 		);
 		$job = NM_Backup::start( $o );
 		if ( is_wp_error( $job ) ) {
@@ -1114,7 +1337,11 @@ final class NM_Admin_UI {
 		if ( ! preg_match( NM_Storage::JOB_RE, $job ) ) {
 			wp_send_json_error( array( 'text' => __( 'Μη έγκυρο αίτημα.', 'data-migrator' ) ) );
 		}
-		$r = 'a' === $job[0] ? NM_Restore_Prep::step( $job ) : NM_Backup::step( $job );
+		if ( 'u' === $job[0] || 'd' === $job[0] ) {
+			$r = NM_Remote::step( $job );
+		} else {
+			$r = 'a' === $job[0] ? NM_Restore_Prep::step( $job ) : NM_Backup::step( $job );
+		}
 		if ( 'a' === $job[0] && 'done' === $r['status'] ) {
 			$r['url'] = admin_url( 'admin.php?page=nm-restore&analysis=' . $job );
 		}
@@ -1124,8 +1351,23 @@ final class NM_Admin_UI {
 	public static function ajax_cancel(): void {
 		self::ajax_guard();
 		$job = self::post( 'job' );
-		$ok  = preg_match( NM_Storage::JOB_RE, $job ) && NM_Backup::cancel( $job );
+		$ok  = preg_match( NM_Storage::JOB_RE, $job ) && ( 'u' === $job[0] || 'd' === $job[0] ? NM_Remote::cancel( $job ) : NM_Backup::cancel( $job ) );
 		wp_send_json_success( array( 'ok' => $ok ) );
+	}
+
+	/** Upload a backup to Dropbox again (push) or bring it back here (fetch). */
+	public static function ajax_remote_job(): void {
+		self::ajax_guard();
+		$id = self::post( 'id' );
+		$op = self::post( 'op' );
+		if ( ! preg_match( NM_Storage::ID_RE, $id ) || ! in_array( $op, array( 'push', 'fetch' ), true ) ) {
+			wp_send_json_error( array( 'text' => __( 'Μη έγκυρο αίτημα.', 'data-migrator' ) ) );
+		}
+		$job = 'push' === $op ? NM_Remote::push_start( $id ) : NM_Remote::fetch_start( $id );
+		if ( is_wp_error( $job ) ) {
+			wp_send_json_error( array( 'text' => $job->get_error_message() ) );
+		}
+		wp_send_json_success( array( 'job' => $job['id'] ) );
 	}
 
 	public static function ajax_upload(): void {
