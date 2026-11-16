@@ -83,13 +83,13 @@ final class EBD_Delivery {
 				return $file_path;
 			}
 
-			// A download WooCommerce is about to refuse needs no copy.
-			$left = $download->get_downloads_remaining();
-			if ( '' !== (string) $left && (int) $left <= 0 ) {
-				return $file_path;
-			}
+			// An expired download needs no copy: WooCommerce refuses it right
+			// after this filter, with this exact rule, range requests too.
+			// No such shortcut for «no downloads left»: WooCommerce lets range
+			// requests through then, and they must get the stamped copy, never
+			// the original (fail closed; the copy is made once and cached).
 			$exp = $download->get_access_expires();
-			if ( $exp && $exp->getTimestamp() < time() ) {
+			if ( $exp && $exp->getTimestamp() < strtotime( 'midnight', time() ) ) {
 				return $file_path;
 			}
 
