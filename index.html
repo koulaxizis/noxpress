@@ -1362,6 +1362,27 @@ footer .heart { color: var(--accent-bright); }
 	</article>
 
 
+	<article class="card" id="product-feed">
+		<h2><a href="#product-feed">Product Feed</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="fd_desc">Product feeds for Google Merchant Center, Skroutz, BestPrice and the Meta catalog, plus a general CSV: one static file per feed with a fixed URL, rebuilt in the background, with ISBN / GTIN, publisher, pre-orders and a check before anything is published.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="fd_li1">Google Merchant Center (RSS with g: fields, variations with item_group_id, availability with pre-orders), Skroutz XML with the four availability texts, BestPrice XML, Meta catalog and CSV</li>
+			<li data-i18n="fd_li2">GTIN / ISBN from WooCommerce’s own field with check-digit test, brand from the publisher, real prices with VAT and sale dates, pre-orders from Pre-Orders, Hide Catalog and Book Feed per feed</li>
+			<li data-i18n="fd_li3">Background builds with the Action Scheduler, 100 products a batch, atomic replace so a service never reads half a file, every 1 to 24 hours, «Refresh now» and one debounced rebuild after changes</li>
+			<li data-i18n="fd_li4">A report for every build (how many went in, what stayed out and why, warnings per product with a link) and a preview of the first 20 items or one product, nothing written</li>
+			<li data-i18n="fd_li5">One-click import from CTX Feed without touching it, a copy at the old file path once the old plugin is off, digital products out by default, PFD_DISABLE, settings backup, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-fd-1.0.0/product-feed.zip" rel="nofollow noopener" data-i18n="fd_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/product-feed" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="apps">
@@ -1859,6 +1880,13 @@ footer .heart { color: var(--accent-bright); }
 		pt_li4: 'Position, new title or hide for the Description, Additional information and Reviews tabs and the suite’s own (Care &amp; Safety, Creators, Book Preview)',
 		pt_li5: 'Read-only import from Custom Product Tabs for WooCommerce with a preview and undo, no duplicates while both run, old shortcodes keep working; test mode, PTB_DISABLE, abilities for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		pt_download: 'Download v1.0.0 (.zip)',
+		fd_desc: 'Product feeds for Google Merchant Center, Skroutz, BestPrice and the Meta catalog, plus a general CSV: one static file per feed with a fixed URL, rebuilt in the background, with ISBN / GTIN, publisher, pre-orders and a check before anything is published.',
+		fd_li1: 'Google Merchant Center (RSS with g: fields, variations with item_group_id, availability with pre-orders), Skroutz XML with the four availability texts, BestPrice XML, Meta catalog and CSV',
+		fd_li2: 'GTIN / ISBN from WooCommerce’s own field with check-digit test, brand from the publisher, real prices with VAT and sale dates, pre-orders from Pre-Orders, Hide Catalog and Book Feed per feed',
+		fd_li3: 'Background builds with the Action Scheduler, 100 products a batch, atomic replace so a service never reads half a file, every 1 to 24 hours, «Refresh now» and one debounced rebuild after changes',
+		fd_li4: 'A report for every build (how many went in, what stayed out and why, warnings per product with a link) and a preview of the first 20 items or one product, nothing written',
+		fd_li5: 'One-click import from CTX Feed without touching it, a copy at the old file path once the old plugin is off, digital products out by default, PFD_DISABLE, settings backup, bilingual UI and shared «Noxpress» menu',
+		fd_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2258,6 +2286,13 @@ footer .heart { color: var(--accent-bright); }
 		pt_li4: 'Θέση, νέος τίτλος ή απόκρυψη για τις καρτέλες Περιγραφή, Πρόσθετες πληροφορίες και Κριτικές και για τις καρτέλες της σουίτας (Φροντίδα &amp; Ασφάλεια, Δημιουργοί, Book Preview)',
 		pt_li5: 'Εισαγωγή μόνο για ανάγνωση από το Custom Product Tabs for WooCommerce με προεπισκόπηση και αναίρεση, χωρίς διπλές καρτέλες όσο τρέχουν και τα δύο, και τα παλιά shortcodes δουλεύουν· λειτουργία δοκιμής, PTB_DISABLE, abilities για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		pt_download: 'Λήψη v1.0.0 (.zip)',
+		fd_desc: 'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice και τον κατάλογο Meta, και ένα γενικό CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, που ξαναχτίζεται στο παρασκήνιο, με ISBN / GTIN, εκδότη, προπαραγγελίες και έλεγχο πριν δημοσιευτεί οτιδήποτε.',
+		fd_li1: 'Google Merchant Center (RSS με πεδία g:, παραλλαγές με item_group_id, διαθεσιμότητα με προπαραγγελίες), Skroutz XML με τα τέσσερα κείμενα διαθεσιμότητας, BestPrice XML, κατάλογος Meta και CSV',
+		fd_li2: 'GTIN / ISBN από το πεδίο του WooCommerce με έλεγχο ψηφίου, brand από τον εκδότη, πραγματικές τιμές με ΦΠΑ και ημερομηνίες έκπτωσης, προπαραγγελίες από το Pre-Orders, Hide Catalog και Book Feed ανά feed',
+		fd_li3: 'Χτίσιμο στο παρασκήνιο με το Action Scheduler, 100 προϊόντα ανά παρτίδα, αντικατάσταση σε ένα βήμα ώστε μια υπηρεσία να μη διαβάζει ποτέ μισό αρχείο, κάθε 1 έως 24 ώρες, «Ανανέωση τώρα» και μία ανανέωση μετά από αλλαγές',
+		fd_li4: 'Αναφορά για κάθε χτίσιμο (πόσα μπήκαν, τι έμεινε έξω και γιατί, προειδοποιήσεις ανά προϊόν με σύνδεσμο) και προεπισκόπηση των πρώτων 20 ή ενός προϊόντος, χωρίς να γραφτεί τίποτα',
+		fd_li5: 'Εισαγωγή με ένα κλικ από το CTX Feed χωρίς να το αγγίξει, αντίγραφο στο παλιό path όταν κλείσει το παλιό plugin, ψηφιακά προϊόντα έξω από προεπιλογή, PFD_DISABLE, αντίγραφο ρυθμίσεων, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		fd_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
