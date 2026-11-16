@@ -1,6 +1,6 @@
 {
-  "display": 1300,
-  "total": 1300,
+  "display": 1301,
+  "total": 1301,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1586,10 +1586,14 @@
     },
     "754592478": {
       "file": "nox-al-1.0.0/activity-log.zip",
-      "count": 0
+      "count": 1
     },
     "754609797": {
       "file": "nox-mr-1.0.0/mail-relay.zip",
+      "count": 0
+    },
+    "754625740": {
+      "file": "nox-lg-1.0.0/login-guard.zip",
       "count": 0
     }
   }
