@@ -69,8 +69,8 @@ final class Noxpress_Core {
 		'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.' => '301 / 410 redirects for old addresses, only where the site answers 404, and a 404 log in a private file without IPs or bots, with suggested targets and import from Rank Math, Redirection, Yoast and CSV.',
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
+		'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.' => 'Product feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and CSV: one static file per feed with a fixed URL, background refresh, GTIN / ISBN, publisher, pre-orders, a check before publishing and an import from CTX Feed.',
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
-		'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.' => 'Contact forms with a block and a shortcode, e-mail notifications and spam protection without third-party services. No message is lost when the e-mail fails, and an import from Contact Form 7 that keeps its shortcode.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -148,6 +148,7 @@ final class Noxpress_Core {
 		'Τα plugins εγκαθίστανται ένα-ένα, από το κανάλι ενημερώσεων του site. Δεν ενεργοποιούνται, εκτός αν το τσεκάρεις.' => 'The plugins are installed one by one, from the site\'s update channel. They are not activated unless you tick it.',
 		'Τα plugins ενημερώνονται ένα-ένα. Όσα είναι ενεργά μένουν ενεργά.' => 'The plugins are updated one by one. Active ones stay active.',
 		'Τα plugins απενεργοποιούνται και διαγράφονται. Η διαγραφή τρέχει το uninstall κάθε plugin: σβήνει ρυθμίσεις και δεδομένα του, εκτός από όσα κρατά το ίδιο το plugin (π.χ. παραγγελίες ή ό,τι έχεις τσεκάρει να μείνει στα Εργαλεία του). Δεν αναιρείται.' => 'The plugins are deactivated and deleted. Deleting runs each plugin\'s uninstall: it removes its settings and data, except what the plugin itself keeps (e.g. orders, or whatever you ticked to keep in its Tools). This cannot be undone.',
+		'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.' => 'Contact forms with a block and a shortcode, e-mail notifications and spam protection without third-party services. No message is lost when the e-mail fails, and an import from Contact Form 7 that keeps its shortcode.',
 		'Σε live site τα χαρακτηριστικά τους φεύγουν αμέσως από το κατάστημα. Καλύτερα με πρόσφατο backup.' => 'On a live site their features leave the store at once. Best with a recent backup.',
 		'Plugins μόνο με beta έκδοση, που δεν μπαίνουν στο κανάλι Stable: %d. Για αυτά, «Μετάβαση στο Beta για όλα» ή «Εγκατάσταση beta» στη γραμμή τους.' => 'Plugins with only a beta version, left out on the Stable channel: %d. For those, use "Switch everything to Beta" or "Install beta" on their row.',
 		'Ενεργοποίηση μετά την εγκατάσταση'                     => 'Activate after installing',
@@ -369,6 +370,11 @@ final class Noxpress_Core {
 				'name' => 'Product Tabs',
 				'desc' => __( 'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.', 'noxpress' ),
 				'page' => 'ptb-settings',
+			),
+			'product-feed'      => array(
+				'name' => 'Product Feed',
+				'desc' => __( 'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.', 'noxpress' ),
+				'page' => 'pfd-feeds',
 			),
 			'forms'             => array(
 				'name' => 'Forms',

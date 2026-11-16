@@ -76,6 +76,7 @@ SLUGS = {
     'pl': 'production-ledger',
     'pt': 'product-tabs',
     'fm': 'forms',
+    'fd': 'product-feed',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
