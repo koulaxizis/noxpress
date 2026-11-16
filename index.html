@@ -1431,6 +1431,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="mail-relay">
+		<h2><a href="#mail-relay">Mail Relay</a></h2>
+		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="mr_desc">Every email of your site through the account you choose: SMTP with a ready setup for Proton Mail, or Brevo, Mailgun, SendGrid, Postmark and Amazon SES. A backup connection takes over when the primary fails, and a sent log shows what went out, what failed and which plugin sent it. Replaces FluentSMTP and WP Mail SMTP.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="mr_li1">SMTP with presets for Proton Mail (SMTP token), Gmail / Google Workspace, Microsoft 365 and your hosting's mail server; Brevo, Mailgun (US or EU), SendGrid, Postmark and Amazon SES over their APIs, with fixed endpoints</li>
+			<li data-i18n="mr_li2">Backup connection tried at once when the primary fails; WordPress's own wp_mail() stays in charge, so attachments, HTML and headers are what WordPress builds</li>
+			<li data-i18n="mr_li3">Passwords and keys sealed with AES-256-GCM or kept in wp-config.php, never shown again, deleted when the server or the user changes, sent only over verified SSL / STARTTLS</li>
+			<li data-i18n="mr_li4">Sent log with status, recipients, subject and the plugin or WooCommerce email that sent it; content only if you turn it on, sealed for 7 days and never for password resets or login links; CSV and privacy export / erase</li>
+			<li data-i18n="mr_li5">Failure banner and at most one summary email an hour, staging guard that holds mails on a copy of the site, SPF / DKIM / DMARC check, import from FluentSMTP, MRL_DISABLE, read-only abilities for Site Bridge, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-mr-1.0.0/mail-relay.zip" rel="nofollow noopener" data-i18n="mr_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/mail-relay" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="apps">
@@ -1956,6 +1977,13 @@ footer .heart { color: var(--accent-bright); }
 		al_li5: 'E-mail for critical changes (new administrator, plugin installed or activated, theme switched, site address changed), at most one every 15 minutes',
 		al_li6: 'Kept 90 days (you choose), WordPress privacy export and erase, a read-only ability for Site Bridge; bilingual UI and shared «Noxpress» menu',
 		al_download: 'Download v1.0.0 (.zip)',
+		mr_desc: 'Every email of your site through the account you choose: SMTP with a ready setup for Proton Mail, or Brevo, Mailgun, SendGrid, Postmark and Amazon SES. A backup connection takes over when the primary fails, and a sent log shows what went out, what failed and which plugin sent it. Replaces FluentSMTP and WP Mail SMTP.',
+		mr_li1: 'SMTP with presets for Proton Mail (SMTP token), Gmail / Google Workspace, Microsoft 365 and your hosting\'s mail server; Brevo, Mailgun (US or EU), SendGrid, Postmark and Amazon SES over their APIs, with fixed endpoints',
+		mr_li2: 'Backup connection tried at once when the primary fails; WordPress\'s own wp_mail() stays in charge, so attachments, HTML and headers are what WordPress builds',
+		mr_li3: 'Passwords and keys sealed with AES-256-GCM or kept in wp-config.php, never shown again, deleted when the server or the user changes, sent only over verified SSL / STARTTLS',
+		mr_li4: 'Sent log with status, recipients, subject and the plugin or WooCommerce email that sent it; content only if you turn it on, sealed for 7 days and never for password resets or login links; CSV and privacy export / erase',
+		mr_li5: 'Failure banner and at most one summary email an hour, staging guard that holds mails on a copy of the site, SPF / DKIM / DMARC check, import from FluentSMTP, MRL_DISABLE, read-only abilities for Site Bridge, bilingual UI and shared «Noxpress» menu',
+		mr_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2383,6 +2411,13 @@ footer .heart { color: var(--accent-bright); }
 		al_li5: 'Email για κρίσιμες αλλαγές (νέος διαχειριστής, εγκατάσταση ή ενεργοποίηση plugin, αλλαγή θέματος, αλλαγή διεύθυνσης του site), το πολύ ένα κάθε 15 λεπτά',
 		al_li6: 'Κρατά 90 ημέρες (το διαλέγεις), εξαγωγή και διαγραφή προσωπικών δεδομένων του WordPress, ability μόνο για ανάγνωση για το Site Bridge· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		al_download: 'Λήψη v1.0.0 (.zip)',
+		mr_desc: 'Όλα τα email του site μέσω του λογαριασμού που διαλέγετε: SMTP με έτοιμη ρύθμιση για Proton Mail, ή Brevo, Mailgun, SendGrid, Postmark και Amazon SES. Μια εφεδρική σύνδεση αναλαμβάνει όταν η κύρια αποτύχει, και το αρχείο αποστολών δείχνει τι έφυγε, τι απέτυχε και ποιο plugin το έστειλε. Αντικαθιστά το FluentSMTP και το WP Mail SMTP.',
+		mr_li1: 'SMTP με έτοιμες ρυθμίσεις για Proton Mail (SMTP token), Gmail / Google Workspace, Microsoft 365 και τον mail server της φιλοξενίας· Brevo, Mailgun (ΗΠΑ ή ΕΕ), SendGrid, Postmark και Amazon SES μέσω των API τους, με σταθερές διευθύνσεις',
+		mr_li2: 'Εφεδρική σύνδεση που δοκιμάζεται αμέσως όταν αποτύχει η κύρια· το wp_mail() του WordPress μένει υπεύθυνο, οπότε συνημμένα, HTML και headers είναι όπως τα φτιάχνει το WordPress',
+		mr_li3: 'Κωδικοί και κλειδιά σφραγισμένα με AES-256-GCM ή στο wp-config.php, δεν ξαναφαίνονται ποτέ, σβήνονται όταν αλλάξει ο server ή ο χρήστης, και φεύγουν μόνο με ελεγμένο SSL / STARTTLS',
+		mr_li4: 'Αρχείο αποστολών με κατάσταση, παραλήπτες, θέμα και το plugin ή το email του WooCommerce που το έστειλε· περιεχόμενο μόνο αν το ανοίξετε, σφραγισμένο για 7 ημέρες και ποτέ για επαναφορά κωδικού ή links σύνδεσης· CSV, εξαγωγή και διαγραφή προσωπικών δεδομένων',
+		mr_li5: 'Ειδοποίηση στο admin και το πολύ ένα email σύνοψης την ώρα, πάγωμα της αποστολής σε αντίγραφο του site, έλεγχος SPF / DKIM / DMARC, εισαγωγή από το FluentSMTP, MRL_DISABLE, abilities μόνο για ανάγνωση για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		mr_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
