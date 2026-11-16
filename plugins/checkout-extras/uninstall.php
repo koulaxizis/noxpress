@@ -1,12 +1,12 @@
 <?php
 /**
- * Checkout Extras — uninstall.php (v1.0.0)
+ * Checkout Extras — uninstall.php (v1.2.0)
  *
  * Deleted:
  *  - Option cke_settings (settings, texts).
  *  - Transients cke_aui_msg_{uid} (PRG notices).
  *  - The background jobs (Action Scheduler group checkout-extras: the daily
- *    cleanup and the coupon reminders).
+ *    cleanup, the coupon reminders and the store vacation's cache purges).
  *  - Only when "Delete the thank-you coupons … when the plugin is deleted"
  *    is ticked in Tools: the coupons this plugin created (meta
  *    _cke_generated), active ones too. No other coupon is touched.
@@ -16,7 +16,9 @@
  * line on the orders (_cke_gift, _cke_gift_message, _cke_gift_fee), the
  * coupon code each order received or used (_cke_coupon_id,
  * _cke_coupon_code, _cke_redeemed, _cke_used_in) and, by default, the
- * coupons themselves: customers hold the codes. The rs_lang user meta
+ * coupons themselves: customers hold the codes. The store vacation note on
+ * orders accepted for shipping after the vacation (_cke_vacation_until)
+ * stays too. The rs_lang user meta
  * belongs to Revenue Splitter and is not touched.
  */
 
@@ -36,6 +38,7 @@ function cke_uninstall_site(): void {
 		// match only the jobs without args.
 		as_unschedule_all_actions( 'cke_cleanup' );
 		as_unschedule_all_actions( 'cke_coupon_reminder' );
+		as_unschedule_all_actions( 'cke_vacation_flip' );
 		as_unschedule_all_actions( '', array(), 'checkout-extras' );
 	}
 

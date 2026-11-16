@@ -24,6 +24,10 @@
  *                      is left (1.3.0, off); fs_sg_ids product ids in the
  *                      store's order of preference (max 20); fs_sg_max how
  *                      many show (1–6); fs_t_sg_title / fs_t_sg_add texts
+ *  - fs_product        a line under the product page's add-to-cart button
+ *                      (1.4.0, off): what this product does for free
+ *                      shipping with the current cart; fs_t_p_left /
+ *                      fs_t_p_won texts
  *
  * Delivery time (dl_*):
  *  - dl_mode           'off' (default) | 'test' | 'live'
@@ -87,6 +91,8 @@ final class SHN_Settings {
 		'fs_t_won'        => 200,
 		'fs_t_sg_title'   => 120,
 		'fs_t_sg_add'     => 40,
+		'fs_t_p_left'     => 200,
+		'fs_t_p_won'      => 200,
 		'dl_t_est'        => 200,
 		'dl_t_item'       => 200,
 		'dl_t_title'      => 100,
@@ -151,6 +157,15 @@ final class SHN_Settings {
 			'fs_t_sg_add'       => array(
 				'el' => 'Προσθήκη',
 				'en' => 'Add',
+			),
+			'fs_product'        => false,
+			'fs_t_p_left'       => array(
+				'el' => 'Δωρεάν αποστολή από {threshold}. Με αυτό στο καλάθι απομένουν {remaining}.',
+				'en' => 'Free shipping from {threshold}. With this in your cart, {remaining} to go.',
+			),
+			'fs_t_p_won'        => array(
+				'el' => 'Με αυτό στο καλάθι η αποστολή είναι δωρεάν.',
+				'en' => 'With this in your cart, shipping is free.',
 			),
 
 			'dl_mode'           => 'off',
@@ -300,7 +315,7 @@ final class SHN_Settings {
 				}
 			}
 		}
-		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won', 'fs_sg' ) as $k ) {
+		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won', 'fs_sg', 'fs_product' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 		$s['fs_sg_ids'] = array();
