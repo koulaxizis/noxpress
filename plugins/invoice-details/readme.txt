@@ -5,7 +5,7 @@ Tags: woocommerce, invoice, vat number, vies, greece
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -52,6 +52,7 @@ Customers choose a **receipt or an invoice** at checkout. For an invoice they gi
 
 * `ivd_get( $order )`: the invoice details of an order (array) or null.
 * `ivd_is_invoice( $order )`: true for an invoice.
+* `ivd_offered()`: true when the current visitor sees the choice at checkout (1.0.1).
 * Filter `ivd_require_invoice( bool $required, WC_Cart|null $cart )`.
 * Filter `ivd_text( string $text, string $key, string $lang )` for the customer texts.
 * Filter `ivd_vies_response( $pre, string $country, string $number )` to answer VIES in tests.
@@ -82,6 +83,9 @@ The details on the orders (they are store records) and, unless you tick the opti
 The plugin helps collect invoice details; checking that an invoice is issued correctly and on time stays with the store and its accountant.
 
 == Changelog ==
+
+= 1.0.1 =
+* New `ivd_offered()`: true when the current visitor sees the receipt / invoice choice. Trade Accounts 1.7.0 uses it to hand its «trade orders need an invoice» rule to Invoice Details, in the classic checkout and the Checkout block.
 
 = 1.0.0 =
 * First release: receipt / invoice choice in the classic checkout and the Checkout block, company name, VAT number, tax office, activity and head office, Greek check digit, VIES for other EU countries (an outage never stops an order), details on the order, in the emails and in My account, admin box with «Check in VIES», orders list column and filter, «Invoices» page with CSV, reading of Timologia / OBS orders and optional compatible meta, test mode, IVD_DISABLE, read-only ability, privacy export and erasure.
