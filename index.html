@@ -1451,6 +1451,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="live-search">
+		<h2><a href="#live-search">Live Search</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="lv_desc">Search suggestions as the visitor types: title, ISBN, authors and more, without accents, with greeklish and tolerant of small typos. The theme’s own search forms stay as they are and simply find more; an exact ISBN opens the book directly. Moves over from FiboSearch.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="lv_li1">Searches title, ISBN / GTIN / SKU (10 ↔ 13 digits), authors and other attributes, categories, tags and publishers; «h eirini» finds «Η Ειρήνη», one wrong letter is forgiven, synonyms per line</li>
+			<li data-i18n="lv_li2">Suggestions from one static file in the browser: no request per keystroke, a new file name with every change and the old one kept 13 hours, so cached pages keep working; from the server above 5,000 products</li>
+			<li data-i18n="lv_li3">The WooCommerce results page finds the same, best first and out of stock last, in the theme’s own template</li>
+			<li data-i18n="lv_li4">Image, authors, price (no price for trade accounts), out of stock and pre-order badges, one suggestion per work with its formats, creator pages; keyboard and screen reader friendly</li>
+			<li data-i18n="lv_li5">Statistics in a private file with no IP or user, synonyms from searches that found nothing, import from FiboSearch; test mode, LVS_DISABLE, abilities for Site Bridge, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lv-1.0.0/live-search.zip" rel="nofollow noopener" data-i18n="lv_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/live-search" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 
 	<article class="card" id="product-feed">
 		<h2><a href="#product-feed">Product Feed</a></h2>
@@ -2025,6 +2046,13 @@ footer .heart { color: var(--accent-bright); }
 		lg_li4: 'E-mail when an administrator logs in from a new device, and one e-mail an hour at most during an attack',
 		lg_li5: 'Log with truncated IPs and keyed hashes for 30 days, the real IP only from REMOTE_ADDR or Cloudflare, recovery doors (LGD_DISABLE, WP-CLI), ability for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		lg_download: 'Download v1.0.0 (.zip)',
+		lv_desc: 'Search suggestions as the visitor types: title, ISBN, authors and more, without accents, with greeklish and tolerant of small typos. The theme’s own search forms stay as they are and simply find more; an exact ISBN opens the book directly. Moves over from FiboSearch.',
+		lv_li1: 'Searches title, ISBN / GTIN / SKU (10 ↔ 13 digits), authors and other attributes, categories, tags and publishers; «h eirini» finds «Η Ειρήνη», one wrong letter is forgiven, synonyms per line',
+		lv_li2: 'Suggestions from one static file in the browser: no request per keystroke, a new file name with every change and the old one kept 13 hours, so cached pages keep working; from the server above 5,000 products',
+		lv_li3: 'The WooCommerce results page finds the same, best first and out of stock last, in the theme’s own template',
+		lv_li4: 'Image, authors, price (no price for trade accounts), out of stock and pre-order badges, one suggestion per work with its formats, creator pages; keyboard and screen reader friendly',
+		lv_li5: 'Statistics in a private file with no IP or user, synonyms from searches that found nothing, import from FiboSearch; test mode, LVS_DISABLE, abilities for Site Bridge, bilingual UI and shared «Noxpress» menu',
+		lv_download: 'Download v1.0.0 (.zip)',
 		al_desc: 'Who changed what and when: products, prices, stock, orders, coupons, pages, users and logins, plugins, themes and settings, with the source of every change: admin, REST API, WP-CLI, cron or Claude through Site Bridge. No secrets and no customer details.',
 		al_li1: 'Old → new value for every changed field: price, sale price and dates, stock, SKU, status, categories, settings of WordPress, WooCommerce and the suite',
 		al_li2: 'Order status changes with who moved them (staff, the customer, a payment gateway or cron), refunds and admin edits; orders and customers only as numbers',
@@ -2473,6 +2501,13 @@ footer .heart { color: var(--accent-bright); }
 		lg_li4: 'Email όταν ένας διαχειριστής συνδέεται από νέα συσκευή, και το πολύ ένα email την ώρα σε κύμα επιθέσεων',
 		lg_li5: 'Ημερολόγιο με κομμένη IP και hash για 30 ημέρες, η πραγματική IP μόνο από το REMOTE_ADDR ή την Cloudflare, πόρτες ανάκτησης (LGD_DISABLE, WP-CLI), ability για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		lg_download: 'Λήψη v1.0.0 (.zip)',
+		lv_desc: 'Προτάσεις αναζήτησης καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς και άλλα, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες αναζήτησης του θέματος μένουν ίδιες και απλώς βρίσκουν περισσότερα· ένα ακριβές ISBN ανοίγει κατευθείαν το βιβλίο. Αντικαθιστά το FiboSearch.',
+		lv_li1: 'Ψάχνει τίτλο, ISBN / GTIN / SKU (10 ↔ 13 ψηφία), συγγραφείς και άλλα χαρακτηριστικά, κατηγορίες, ετικέτες και εκδότες· το «h eirini» βρίσκει «Η Ειρήνη», ένα λάθος γράμμα συγχωρείται, συνώνυμα ανά γραμμή',
+		lv_li2: 'Προτάσεις από ένα στατικό αρχείο στον browser: κανένα αίτημα ανά πλήκτρο, νέο όνομα αρχείου σε κάθε αλλαγή και το παλιό κρατιέται 13 ώρες, ώστε οι σελίδες στην cache να δουλεύουν· από τον server πάνω από 5.000 προϊόντα',
+		lv_li3: 'Η σελίδα αποτελεσμάτων του WooCommerce βρίσκει τα ίδια, τα καλύτερα πρώτα και τα εξαντλημένα στο τέλος, με το template του θέματος',
+		lv_li4: 'Εικόνα, συγγραφείς, τιμή (καμία τιμή για λογαριασμούς χονδρικής), σήματα εξαντλημένου και προπαραγγελίας, μία πρόταση ανά έργο με τις μορφές του, σελίδες δημιουργών· φιλικό σε πληκτρολόγιο και αναγνώστες οθόνης',
+		lv_li5: 'Στατιστικά σε ιδιωτικό αρχείο χωρίς IP ή χρήστη, συνώνυμα από αναζητήσεις χωρίς αποτέλεσμα, εισαγωγή από το FiboSearch· λειτουργία δοκιμής, LVS_DISABLE, abilities για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		lv_download: 'Λήψη v1.0.0 (.zip)',
 		al_desc: 'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, απόθεμα, παραγγελίες, κουπόνια, σελίδες, χρήστες και συνδέσεις, plugins, θέματα και ρυθμίσεις, με την πηγή κάθε αλλαγής: admin, REST API, WP-CLI, cron ή το Claude μέσω Site Bridge. Χωρίς μυστικά και χωρίς στοιχεία πελατών.',
 		al_li1: 'Παλιά → νέα τιμή για κάθε πεδίο που άλλαξε: τιμή, τιμή και ημερομηνίες προσφοράς, απόθεμα, SKU, κατάσταση, κατηγορίες, ρυθμίσεις του WordPress, του WooCommerce και της σουίτας',
 		al_li2: 'Αλλαγές κατάστασης παραγγελιών με το ποιος τις έκανε (προσωπικό, ο πελάτης, η πύλη πληρωμής ή το cron), επιστροφές χρημάτων και αλλαγές από το admin· παραγγελίες και πελάτες μόνο ως αριθμοί',

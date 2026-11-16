@@ -82,6 +82,7 @@ SLUGS = {
     'fd': 'product-feed',
     'iv': 'invoice-details',
     'lg': 'login-guard',
+    'lv': 'live-search',
     'al': 'activity-log',
     'mr': 'mail-relay',
     'sb': 'site-bridge',
