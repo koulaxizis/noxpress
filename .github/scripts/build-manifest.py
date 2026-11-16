@@ -74,6 +74,7 @@ SLUGS = {
     'rd': 'redirects',
     'ss': 'search-signals',
     'pl': 'production-ledger',
+    'iv': 'invoice-details',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
