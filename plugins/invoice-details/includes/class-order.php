@@ -32,6 +32,7 @@ final class IVD_Order {
 			add_action( 'add_meta_boxes', array( __CLASS__, 'meta_box' ), 30 );
 			add_action( 'woocommerce_process_shop_order_meta', array( __CLASS__, 'save_meta_box' ), 50, 2 );
 			add_action( 'admin_post_ivd_check', array( __CLASS__, 'route_check' ) );
+			add_action( 'admin_post_ivd_aade', array( __CLASS__, 'route_aade' ) );
 			add_action( 'admin_notices', array( __CLASS__, 'check_notice' ) );
 			add_filter( 'woocommerce_admin_billing_fields', array( __CLASS__, 'admin_billing_fields' ), 20, 3 );
 			if ( IVD_Settings::get()['column'] ) {
@@ -187,6 +188,10 @@ final class IVD_Order {
 				$url = wp_nonce_url( admin_url( 'admin-post.php?action=ivd_check&order=' . (int) $order->get_id() ), 'ivd_check_' . (int) $order->get_id() );
 				echo '<p style="margin:8px 0 0"><a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'Έλεγχος VIES', 'invoice-details' ) . '</a></p>';
 				if ( 'GR' === $d['country'] ) {
+					if ( IVD_Aade::configured() ) {
+						$aade = wp_nonce_url( admin_url( 'admin-post.php?action=ivd_aade&order=' . (int) $order->get_id() ), 'ivd_aade_' . (int) $order->get_id() );
+						echo '<p style="margin:8px 0 0"><a class="button" href="' . esc_url( $aade ) . '">' . esc_html__( 'Συμπλήρωση από ΑΑΔΕ', 'invoice-details' ) . '</a></p>';
+					}
 					echo '<p class="description">' . esc_html__( 'Για ελληνικό ΑΦΜ το VIES είναι μόνο πληροφορία: πολλές ελληνικές επιχειρήσεις δεν είναι γραμμένες για ενδοκοινοτικές συναλλαγές.', 'invoice-details' ) . '</p>';
 				}
 			}
@@ -272,11 +277,72 @@ final class IVD_Order {
 		exit;
 	}
 
+	/**
+	 * admin-post.php?action=ivd_aade: fills the empty details of one order
+	 * from AADE (nonce + capability). Never overwrites what is there; a note
+	 * says what came in.
+	 */
+	public static function route_aade(): void {
+		$id = isset( $_GET['order'] ) ? absint( wp_unslash( $_GET['order'] ) ) : 0;
+		if ( ! $id || ! current_user_can( self::CAP ) || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'ivd_aade_' . $id ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'invoice-details' ) );
+		}
+		$order  = wc_get_order( $id );
+		$status = 'none';
+		if ( $order instanceof WC_Order ) {
+			$d = IVD_Data::get( $order );
+			if ( null !== $d && '' !== $d['vat'] && 'GR' === $d['country'] ) {
+				$r      = IVD_Aade::lookup( $d['vat'], true );
+				$status = 'aade_' . $r['status'];
+				if ( in_array( $r['status'], array( 'found', 'inactive' ), true ) ) {
+					$map    = array(
+						'company'    => 'name',
+						'tax_office' => 'tax_office',
+						'activity'   => 'activity',
+						'hq'         => 'hq',
+					);
+					$filled = array();
+					foreach ( $map as $f => $src ) {
+						if ( '' === $d[ $f ] && '' !== $r[ $src ] ) {
+							$d[ $f ]  = $r[ $src ];
+							$filled[] = $f;
+						}
+					}
+					IVD_Data::store( $order, $d );
+					$order->add_order_note(
+						sprintf(
+							/* translators: 1: company name at AADE, 2: tax office, 3: active or inactive */
+							__( 'Invoice Details: ΑΑΔΕ — %1$s, ΔΟΥ %2$s (%3$s).', 'invoice-details' ),
+							$r['name'],
+							$r['tax_office'],
+							'found' === $r['status'] ? __( 'ενεργός', 'invoice-details' ) : __( 'ανενεργός', 'invoice-details' )
+						)
+					);
+					$order->save();
+				}
+			}
+		}
+		$back = $order instanceof WC_Order ? $order->get_edit_order_url() : admin_url();
+		wp_safe_redirect( add_query_arg( 'ivd_checked', rawurlencode( $status ), $back ) );
+		exit;
+	}
+
 	/** The result notice after «Έλεγχος VIES». */
 	public static function check_notice(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only notice after our own redirect.
 		$status = isset( $_GET['ivd_checked'] ) ? sanitize_key( wp_unslash( (string) $_GET['ivd_checked'] ) ) : '';
 		if ( '' === $status || ! current_user_can( self::CAP ) ) {
+			return;
+		}
+		if ( 0 === strpos( $status, 'aade_' ) ) {
+			$labels = array(
+				'aade_found'       => array( 'success', __( 'Τα κενά στοιχεία συμπληρώθηκαν από την ΑΑΔΕ.', 'invoice-details' ) ),
+				'aade_inactive'    => array( 'warning', __( 'Ο ΑΦΜ είναι ανενεργός στην ΑΑΔΕ. Τα κενά στοιχεία συμπληρώθηκαν.', 'invoice-details' ) ),
+				'aade_not_found'   => array( 'error', __( 'Ο ΑΦΜ δεν βρέθηκε στην ΑΑΔΕ.', 'invoice-details' ) ),
+				'aade_unavailable' => array( 'warning', __( 'Η ΑΑΔΕ δεν απάντησε. Δοκίμασε ξανά αργότερα.', 'invoice-details' ) ),
+			);
+			$l = isset( $labels[ $status ] ) ? $labels[ $status ] : array( 'warning', __( 'Η συμπλήρωση από την ΑΑΔΕ δεν έγινε.', 'invoice-details' ) );
+			echo '<div class="notice notice-' . esc_attr( $l[0] ) . ' is-dismissible"><p>' . esc_html( $l[1] ) . '</p></div>';
 			return;
 		}
 		$type = 'valid' === $status ? 'success' : ( 'invalid' === $status ? 'error' : 'warning' );
