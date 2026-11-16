@@ -271,7 +271,7 @@ final class PTB_Front {
 			return '';
 		}
 		self::enqueue();
-		$label = sprintf( PTB_Settings::text( 'play' ), $title );
+		$label = str_replace( '%s', $title, PTB_Settings::text( 'play' ) ); // Not sprintf: another % in the setting would throw.
 		return '<div class="ptb-video"><button type="button" class="ptb-play" data-src="' . esc_attr( $src ) . '" data-title="' . esc_attr( $title ) . '" aria-label="' . esc_attr( $label ) . '">'
 			. ( '' !== $img ? '<img src="' . esc_url( $img ) . '" alt="" loading="lazy" width="480" height="360">' : '' )
 			. '<span class="ptb-play-icon" aria-hidden="true"></span></button></div>';
