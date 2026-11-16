@@ -70,6 +70,7 @@ final class Noxpress_Core {
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
+		'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.' => 'Contact forms with a block and a shortcode, e-mail notifications and spam protection without third-party services. No message is lost when the e-mail fails, and an import from Contact Form 7 that keeps its shortcode.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -368,6 +369,11 @@ final class Noxpress_Core {
 				'name' => 'Product Tabs',
 				'desc' => __( 'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.', 'noxpress' ),
 				'page' => 'ptb-settings',
+			),
+			'forms'             => array(
+				'name' => 'Forms',
+				'desc' => __( 'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.', 'noxpress' ),
+				'page' => 'frm-forms',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
