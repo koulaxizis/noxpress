@@ -182,6 +182,34 @@ final class GLP_Redirects {
 		return '';
 	}
 
+	/**
+	 * Server check: does a missing file under uploads reach WordPress (so
+	 * the 301 of old file URLs works)? 'yes', 'no' or 'unknown' (the site
+	 * did not answer a request to itself). Admin only; the answer is kept
+	 * for 12 hours unless $fresh.
+	 */
+	public static function probe( bool $fresh = false ): string {
+		$state = $fresh ? false : get_transient( 'glp_probe' );
+		if ( is_string( $state ) && in_array( $state, array( 'yes', 'no' ), true ) ) {
+			return $state;
+		}
+		$url = trailingslashit( wp_get_upload_dir()['baseurl'] ) . 'glp-probe-' . wp_generate_password( 8, false ) . '.jpg';
+		$r   = wp_remote_get(
+			$url,
+			array(
+				'timeout'     => 8,
+				'redirection' => 0,
+				'sslverify'   => apply_filters( 'https_local_ssl_verify', false ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- core filter.
+			)
+		);
+		if ( is_wp_error( $r ) ) {
+			return 'unknown';
+		}
+		$state = '' !== (string) wp_remote_retrieve_header( $r, 'x-glp-probe' ) ? 'yes' : 'no';
+		set_transient( 'glp_probe', $state, 12 * HOUR_IN_SECONDS );
+		return $state;
+	}
+
 	/** URL of an upload path, each segment encoded. */
 	public static function upload_url( string $rel ): string {
 		$up = wp_get_upload_dir();

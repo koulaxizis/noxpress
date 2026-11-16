@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -18,6 +18,7 @@ Two messages for your customers: how much is left for free shipping (with a prog
 * "€15.00 left for free shipping" with a progress bar, and "You've got free shipping!" once the cart qualifies. An optional message for an empty cart.
 * The threshold comes from WooCommerce itself: the "Free shipping" method of the customer's shipping zone (minimum order amount, or "minimum amount or coupon"). You can also set a fixed amount.
 * Carrier methods with their own "free over X" setting count too (BOX NOW Delivery), when the zone has no Free shipping method with an amount.
+* Product page line (optional): under the "Add to cart" button, "Free shipping from €35.00. With this in your cart, €12.00 to go." or "With this in your cart, shipping is free.", counted from the visitor's cart plus the product (the lowest price of a variable product). Never on digital products.
 * Optional product suggestions under the bar in the cart, from a list you choose.
 * The amount is counted exactly like WooCommerce counts it: coupons, tax display and the method's "apply minimum before coupon discount" option. The "won" state is confirmed by WooCommerce's own method, so the message never promises what checkout will not give.
 * Hidden for carts that need no shipping (virtual or downloadable products only).
@@ -107,6 +108,9 @@ The free shipping bar does. The parcel names, the "two parcels" message and the 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: an optional line on the product page, under the "Add to cart" button, that tells what this product does for free shipping with the visitor's cart: how much is still left, or that shipping becomes free. Classic themes, Astra and block themes; its own texts (with {threshold}, {remaining} and {price}); follows the free-shipping test mode. Off until you tick it.
 
 = 1.3.1 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.

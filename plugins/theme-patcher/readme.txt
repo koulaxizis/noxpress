@@ -1,11 +1,11 @@
 === Theme Patcher ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, theme compatibility, product cards, price labels, sale badge
+Tags: woocommerce, theme compatibility, product cards, price labels, product badges
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.3
+Stable tag: 1.7.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -69,6 +69,16 @@ Many classic themes draw product cards, category tiles and texts with their own 
 * **Rounding:** down by default, so the badge never shows more than the real discount (20.5% → 20%), or to the nearest whole number.
 * **Where:** shop and category lists, related products, the product page, the "Product Sale Badge" block (WooCommerce 10.0+, left alone when the block is set to show a percentage or an amount) and the cards Theme Patcher fixes. The theme's own badge element is kept; only its text changes. Themes that build their own badge without WooCommerce keep theirs.
 * **Import from Customizer for WooCommerce** with one click; its `{percent}` means the same. Texts in Greek and English with the language of the price labels; developers can change a text with the `tp_sale_badge_text` filter.
+
+**Product badges** (Badges tab, together with the sale badge)
+
+* **New** for products published in the last 30 days (you set the days).
+* **Last pieces** for products that manage stock, are in stock and have 1 up to a limit left (default: WooCommerce's low stock amount). Variable products count their variations. `{stock}` writes the quantity ("Only {stock} left").
+* **Sold out** on cards and the product page.
+* **Per tag or category:** up to 10 rules "tag / category → text" ("Award", "Signed copies"); a category covers its subcategories.
+* **Per product:** a "My badge" field in the product's General tab.
+* **At most 2 per product** by default (1–4), the sale badge included, in a fixed order: sale, my badge, tag / category, last pieces, new, sold out. Products with an active pre-order (Pre-Orders) never show "Last pieces" or "Sold out".
+* **Where:** shop and category lists, related products, the product page, the Product Image and Product Image Gallery blocks of block themes, and Theme Patcher's card slot. Top left, top right or in a row; colours per badge, and CSS variables for themes. Display only: prices, carts, orders, emails, feeds and the schema never change. Developers can change the list with the `tp_badges` filter.
 
 **Care & safety tab**
 
@@ -142,6 +152,13 @@ Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.7.0 =
+* New: product badges for the whole store, in a new Badges tab: "New" (published in the last 30 days), "Last pieces" (stock from 1 up to a limit, WooCommerce's low stock amount by default, `{stock}` placeholder), "Sold out", up to 10 tag or category rules with your own text, and a "My badge" field per product. At most 2 per product by default (1–4), the sale badge included; top left, top right or in a row; colours per badge. Greek and English. Off until enabled.
+* New: the badges show in classic shop lists and product pages, in the Product Image and Product Image Gallery blocks of block themes, and in Theme Patcher's card slot. In WooCommerce's blockified templates the classic hooks are taken off, so a badge never shows twice. On the product page a "top left" badge moves to the top right when the product is on sale, out of the way of the sale flash.
+* New: products with an active pre-order (Pre-Orders) never show "Last pieces" or "Sold out".
+* New: filter `tp_badges`. The badges are included in the settings backup; the per-product text (`_tp_badge`) stays after uninstall unless "delete on uninstall" is ticked.
+* Changed: the sale badge settings moved from the Prices tab to the Badges tab (values unchanged).
 
 = 1.6.3 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.

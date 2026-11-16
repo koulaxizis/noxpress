@@ -7,6 +7,10 @@
  *    WooCommerce's hooks (and Astra's own); block themes only render_block,
  *    because WooCommerce's compatibility layer also fires the classic hooks
  *    there, around other blocks. A guard prints the button once per page.
+ *  - Tab (1.3.0, setting "tab"): «Ξεφυλλίστε το βιβλίο», key bpv_preview,
+ *    priority 35, on every product page with a visible sample, holding
+ *    the same button. With position "manual" it is the only button on the
+ *    page. Product Tabs orders it with the other tabs by its key.
  *  - Shortcode [book_preview id="123" label="…"] and the block
  *    "book-preview/sample" (same markup) for any other place.
  *  - The viewer: a <dialog> built by assets/viewer.js on the first click;
@@ -31,6 +35,8 @@ final class BPV_Front {
 
 	const SHORTCODE = 'book_preview';
 	const BLOCK     = 'book-preview/sample';
+	const TAB_KEY   = 'bpv_preview';
+	const TAB_PRIO  = 35;
 
 	/** Per-request state. */
 	private static $active = null;
@@ -41,6 +47,42 @@ final class BPV_Front {
 		add_shortcode( self::SHORTCODE, array( __CLASS__, 'shortcode' ) );
 		add_action( 'init', array( __CLASS__, 'register_block' ) );
 		add_action( 'wp', array( __CLASS__, 'setup' ) );
+		add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'tabs' ), 60 );
+	}
+
+	/** woocommerce_product_tabs: the sample's own tab (1.3.0). */
+	public static function tabs( $tabs ) {
+		try {
+			if ( ! is_array( $tabs ) || empty( BPV_Settings::get()['tab'] ) || ! self::active() || ! function_exists( 'is_product' ) || ! is_product() ) {
+				return $tabs;
+			}
+			global $product;
+			if ( ! $product instanceof WC_Product || (int) $product->get_id() !== (int) get_queried_object_id() || ! BPV_Samples::visible( (int) $product->get_id() ) ) {
+				return $tabs;
+			}
+			$tabs[ self::TAB_KEY ] = array(
+				'title'    => BPV_Settings::text( 'tab_title' ),
+				'priority' => self::TAB_PRIO,
+				'callback' => array( __CLASS__, 'tab_content' ),
+			);
+			return $tabs;
+		} catch ( \Throwable $e ) {
+			self::$broken = true;
+			return $tabs;
+		}
+	}
+
+	/** Tab callback: the button of the viewed product. */
+	public static function tab_content(): void {
+		try {
+			$html = self::render( (int) get_queried_object_id() );
+			if ( '' !== $html ) {
+				self::enqueue();
+				echo $html; // phpcs:ignore WordPress.Security.EscapeOutput -- built and escaped in render().
+			}
+		} catch ( \Throwable $e ) {
+			self::$broken = true;
+		}
 	}
 
 	/** Hooks for this page view (runs once the main query is known). */
