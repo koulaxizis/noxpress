@@ -8,6 +8,9 @@
  *  zip     SQL chunks, then the files, into one or more ZIP parts;
  *          each finished part gets its sha256
  *  finish  nm/manifest.json in the last part, metadata, cleanup
+ *  upload  (1.3.0, dest both|remote) NM_Remote::upload_run(): the parts
+ *          and the metadata go to Dropbox; a failure there keeps the
+ *          local backup and ends as a warning, never as a failed backup
  *
  * The browser calls step() through admin-ajax (NM_Admin_UI), WP-CLI
  * calls it in a loop. A lock file keeps two requests from working on
@@ -138,7 +141,8 @@ final class NM_Backup {
 	 * Create a backup job.
 	 *
 	 * @param array $o scope (full|db|files|custom), groups[], db (bool),
-	 *                 extra_tables[], root_dirs[], part_mb, note.
+	 *                 extra_tables[], root_dirs[], part_mb, note,
+	 *                 dest (local|both|remote, 1.3.0).
 	 * @return array|WP_Error The job.
 	 */
 	public static function start( array $o ) {
@@ -199,8 +203,14 @@ final class NM_Backup {
 			}
 		}
 
+		$dest = in_array( $o['dest'] ?? '', NM_Remote::DESTS, true ) ? (string) $o['dest'] : 'local';
+		if ( 'local' !== $dest && ! NM_Dropbox::connected() ) {
+			return new WP_Error( 'dropbox', NM_Util::t( 'Το αντίγραφο πάει στο Dropbox αλλά δεν υπάρχει σύνδεση με το Dropbox. Σύνδεσέ το στις Ρυθμίσεις. Το αντίγραφο δεν ξεκίνησε.' ) );
+		}
+
 		$id    = NM_Util::hex( 16 );
-		$enc   = ! empty( NM_Settings::get()['encrypt'] );
+		// Copies for Dropbox follow their own switch (on by default).
+		$enc   = ! empty( NM_Settings::get()['encrypt'] ) || ( 'local' !== $dest && ! empty( NM_Dropbox::get()['encrypt'] ) );
 		$pwchk = '';
 		if ( $enc ) {
 			// Never a silent fallback to an unencrypted backup.
@@ -238,6 +248,7 @@ final class NM_Backup {
 			'root'    => $root_dirs,
 			'part_mb' => $part,
 			'note'    => substr( sanitize_text_field( (string) ( $o['note'] ?? '' ) ), 0, 120 ),
+			'dest'    => $dest,
 			'sched'   => isset( $o['sched'] ) && preg_match( '/^[a-f0-9]{8}$/', (string) $o['sched'] ) ? (string) $o['sched'] : '',
 			'dbsize'  => $dbsize,
 			'enc'     => $enc,
@@ -265,13 +276,14 @@ final class NM_Backup {
 				'note'    => $job['note'],
 				'sched'   => $job['sched'],
 				'enc'     => $enc,
+				'dest'    => $dest,
 				'parts'   => array(),
 				'job'     => $job['id'],
 				'home'    => home_url(),
 			)
 		);
 		NM_Util::$log_file = NM_Storage::log_file( $job['id'] );
-		NM_Util::log( 'backup ' . $id . ' started: scope ' . $scope . ', ' . count( $tables ) . ' tables, groups ' . implode( ',', $grps ) . ( $enc ? ', encrypted' : '' ) );
+		NM_Util::log( 'backup ' . $id . ' started: scope ' . $scope . ', ' . count( $tables ) . ' tables, groups ' . implode( ',', $grps ) . ( $enc ? ', encrypted' : '' ) . ( 'local' !== $dest ? ', to Dropbox (' . $dest . ')' : '' ) );
 		return $job;
 	}
 
@@ -338,13 +350,16 @@ final class NM_Backup {
 					case 'finish':
 						$r = self::phase_finish( $job );
 						break;
+					case 'upload':
+						$r = NM_Remote::upload_run( $job, $deadline );
+						break;
 					default:
 						$r = 'error';
 				}
 				if ( 'error' === $r ) {
 					self::fail( $job );
 				} elseif ( 'next' === $r ) {
-					$order        = array( 'scan', 'db', 'zip', 'finish', 'done' );
+					$order        = array( 'scan', 'db', 'zip', 'finish', 'upload', 'done' );
 					$job['phase'] = $order[ array_search( $job['phase'], $order, true ) + 1 ];
 					$job['ss']    = array();
 					if ( 'done' === $job['phase'] ) {
@@ -420,6 +435,7 @@ final class NM_Backup {
 			'db'     => NM_Util::t( 'Εξαγωγή βάσης' ),
 			'zip'    => NM_Util::t( 'Συμπίεση' ),
 			'finish' => NM_Util::t( 'Ολοκλήρωση' ),
+			'upload' => NM_Util::t( 'Αποστολή στο Dropbox' ),
 			'done'   => NM_Util::t( 'Έτοιμο' ),
 		);
 		$pct  = 0;
@@ -438,6 +454,8 @@ final class NM_Backup {
 			$text .= ' · ' . NM_Util::size( (float) ( $ss['bytes'] ?? 0 ) ) . ' / ' . NM_Util::size( (float) $tot );
 		} elseif ( 'finish' === $job['phase'] ) {
 			$pct = 99;
+		} elseif ( 'upload' === $job['phase'] ) {
+			list( $pct, $text ) = NM_Remote::upload_progress( $job );
 		} elseif ( 'done' === $job['phase'] ) {
 			$pct = 100;
 		}
@@ -667,8 +685,13 @@ final class NM_Backup {
 			$job['error'] = NM_Util::t( 'Δεν έγινε σύνδεση με τη βάση δεδομένων.' );
 			return 'error';
 		}
+		global $wpdb;
 		$path = NM_Storage::job_path( $job['id'] );
-		$ss   = $job['ss'] ? $job['ss'] : array( 'tables' => $job['tables'] );
+		$ss   = $job['ss'] ? $job['ss'] : array(
+			'tables' => $job['tables'],
+			// The Dropbox token and its transients never go into a backup.
+			'skip'   => array( $wpdb->prefix . 'options' => array( 'option_name', NM_Dropbox::DUMP_SKIP_RE ) ),
+		);
 		$dump = new NM_Dumper(
 			$db,
 			$ss,
@@ -968,6 +991,7 @@ final class NM_Backup {
 			'note'      => $job['note'],
 			'sched'     => (string) ( $job['sched'] ?? '' ),
 			'enc'       => ! empty( $job['enc'] ),
+			'dest'      => (string) ( $job['dest'] ?? 'local' ),
 			'job'       => $job['id'],
 			'home'      => home_url(),
 			'parts'     => $job['parts'],

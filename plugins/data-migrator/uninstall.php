@@ -1,11 +1,14 @@
 <?php
 /**
- * Data Migrator — uninstall.php (v1.2.0)
+ * Data Migrator — uninstall.php (v1.3.0)
  *
  * Deleted:
- *  - Every nm_* option (nm_settings, nm_crypt, nm_schedules, nm_state, nm_post_restore) and every
- *    nm_* transient (PRG notices, installer keys, restore tokens shown
- *    once, the core checksum result).
+ *  - Every nm_* option (nm_settings, nm_crypt, nm_schedules, nm_state, nm_post_restore,
+ *    nm_remote, nm_dropbox_token) and every nm_* transient (PRG notices,
+ *    installer keys, restore tokens shown once, the core checksum result,
+ *    the Dropbox access token and PKCE verifiers). The Dropbox token is
+ *    not revoked here (no network calls on uninstall), and the backups in
+ *    Dropbox stay where they are.
  *  - Temporary, snapshot and undo tables of unfinished restores
  *    (nmt<6 hex>_…, nms<6 hex>_…, nmx<6 hex>_…). Deleting the plugin
  *    finalizes any open restore.

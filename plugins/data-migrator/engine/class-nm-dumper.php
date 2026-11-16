@@ -54,6 +54,7 @@ final class NM_Dumper {
 				'maxstmt' => 0,
 				'chunks'  => array(),
 				'error'   => '',
+				'skip'    => array(),
 			),
 			$state
 		);
@@ -401,8 +402,26 @@ final class NM_Dumper {
 		$head  = 'INSERT INTO ' . NM_DB::ident( $table ) . ' (' . $sel . ') VALUES ';
 		$stmt  = '';
 		$count = 0;
+		$kept  = 0;
 		$last  = null;
+		// Rows that never go into a backup (1.3.0: secrets of a remote
+		// destination): [table => [column, regex]].
+		$skip_col = null;
+		$skip_re  = '';
+		if ( isset( $this->st['skip'][ $table ] ) && is_array( $this->st['skip'][ $table ] ) ) {
+			$i = array_search( (string) $this->st['skip'][ $table ][0], $cols, true );
+			if ( false !== $i ) {
+				$skip_col = $i;
+				$skip_re  = (string) $this->st['skip'][ $table ][1];
+			}
+		}
 		while ( $row = $res->fetch_row() ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			++$count;
+			$last = $row;
+			if ( null !== $skip_col && preg_match( $skip_re, (string) $row[ $skip_col ] ) ) {
+				continue;
+			}
+			++$kept;
 			$vals = array();
 			foreach ( $row as $i => $v ) {
 				$vals[] = self::value( $v, $info['kinds'][ $i ] );
@@ -417,15 +436,13 @@ final class NM_Dumper {
 				$stmt = '';
 			}
 			$stmt .= '' === $stmt ? $head . $tuple : ',' . $tuple;
-			++$count;
-			$last = $row;
 		}
 		$res->free();
 		if ( '' !== $stmt && ! $this->write_line( $stmt . ';' ) ) {
 			$this->st['error'] = 'write';
 			return 'error';
 		}
-		$this->st['rows'][ $table ] = (int) $this->st['rows'][ $table ] + $count;
+		$this->st['rows'][ $table ] = (int) $this->st['rows'][ $table ] + $kept;
 		if ( $info['key'] && $last ) {
 			$k = array();
 			foreach ( $info['key'] as $kc ) {

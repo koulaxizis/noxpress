@@ -32,6 +32,12 @@
  *  - Retention deletes only scheduled backups, never manual ones, and
  *    only after a successful run: a failure never removes the last good
  *    backup.
+ *  - Dropbox (1.3.0): each schedule says where its backups go (dest) and
+ *    how many stay in Dropbox (rkeep, 0 = as many as here). Retention in
+ *    Dropbox runs only after the newest backup reached Dropbox; a local
+ *    copy past "keep" that is also in Dropbox loses only its local parts.
+ *    A failed upload makes the run "failed" (e-mail) while the backup
+ *    stays on this server.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -78,6 +84,8 @@ final class NM_Schedule {
 			'dow'    => 1,
 			'dom'    => 1,
 			'keep'   => 7,
+			'dest'   => 'local',
+			'rkeep'  => 0,
 			'next'   => 0,
 			'tries'  => 0,
 			'last'   => array(),
@@ -98,6 +106,8 @@ final class NM_Schedule {
 		$out['dow']   = max( 1, min( 7, (int) ( $s['dow'] ?? $d['dow'] ) ) );
 		$out['dom']   = max( 1, min( 28, (int) ( $s['dom'] ?? $d['dom'] ) ) );
 		$out['keep']  = max( 1, min( 60, (int) ( $s['keep'] ?? $d['keep'] ) ) );
+		$out['dest']  = in_array( $s['dest'] ?? '', NM_Remote::DESTS, true ) ? $s['dest'] : $d['dest'];
+		$out['rkeep'] = max( 0, min( 60, (int) ( $s['rkeep'] ?? 0 ) ) );
 		$out['next']  = max( 0, (int) ( $s['next'] ?? 0 ) );
 		$out['tries'] = max( 0, min( 100, (int) ( $s['tries'] ?? 0 ) ) );
 		$last         = isset( $s['last'] ) && is_array( $s['last'] ) ? $s['last'] : array();
@@ -397,6 +407,7 @@ final class NM_Schedule {
 				'scope'   => $s['scope'],
 				'part_mb' => (int) NM_Settings::get()['part_mb'],
 				'sched'   => $s['id'],
+				'dest'    => $s['dest'],
 			)
 		);
 		if ( is_wp_error( $job ) ) {
@@ -547,8 +558,19 @@ final class NM_Schedule {
 		}
 		if ( 'done' === $job['status'] ) {
 			self::retention( $all[ $sid ] );
-			$m = NM_Storage::meta( (string) $job['backup'] );
-			self::finish_run( $all[ $sid ], 'done', NM_Util::tf( 'Αντίγραφο %1$s, %2$s.', self::when( (int) $job['created'] ), NM_Util::size( (float) ( $m['size'] ?? 0 ) ) ), (string) $job['backup'] );
+			$m   = NM_Storage::meta( (string) $job['backup'] );
+			$msg = NM_Util::tf( 'Αντίγραφο %1$s, %2$s.', self::when( (int) $job['created'] ), NM_Util::size( (float) ( $m['size'] ?? 0 ) ) );
+			if ( 'local' !== ( $job['dest'] ?? 'local' ) ) {
+				if ( $m && NM_Remote::in_dropbox( $m ) ) {
+					NM_Remote::retention( $all[ $sid ] );
+					$msg .= ' ' . NM_Util::t( 'Ανέβηκε στο Dropbox.' );
+				} else {
+					$err = (string) ( $job['remote_error'] ?? ( $m['remote']['error'] ?? '' ) );
+					self::finish_run( $all[ $sid ], 'failed', $msg . ' ' . NM_Util::tf( 'Η αποστολή στο Dropbox απέτυχε (το αντίγραφο έμεινε σε αυτόν τον server): %s', $err ), (string) $job['backup'] );
+					return;
+				}
+			}
+			self::finish_run( $all[ $sid ], 'done', $msg, (string) $job['backup'] );
 		} else {
 			self::finish_run( $all[ $sid ], 'failed', (string) ( $job['error'] ?? NM_Util::t( 'Ακυρώθηκε.' ) ), '' );
 		}
@@ -581,7 +603,8 @@ final class NM_Schedule {
 	/**
 	 * Keep the newest N backups of the schedule, then the size limit of
 	 * all scheduled backups. Manual backups are never touched, and the
-	 * newest backup of each schedule always stays.
+	 * newest backup of each schedule always stays. Only copies on this
+	 * server count; one that is also in Dropbox keeps its Dropbox copy.
 	 */
 	public static function retention( array $s ): void {
 		$mine   = array();
@@ -595,7 +618,7 @@ final class NM_Schedule {
 				$failed[] = $m;
 				continue;
 			}
-			if ( 'done' !== ( $m['status'] ?? '' ) ) {
+			if ( 'done' !== ( $m['status'] ?? '' ) || ! NM_Remote::has_local( $m ) ) {
 				continue;
 			}
 			$sched[] = $m;
@@ -605,7 +628,7 @@ final class NM_Schedule {
 		}
 		$gone = array();
 		foreach ( array_slice( $mine, (int) $s['keep'] ) as $m ) {
-			NM_Storage::delete( (string) $m['id'] );
+			self::drop( $m );
 			$gone[ $m['id'] ] = true;
 		}
 		// Failed runs leave only a row in the list: keep the latest one.
@@ -635,8 +658,17 @@ final class NM_Schedule {
 			if ( isset( $gone[ $m['id'] ] ) || in_array( $m['id'], $newest, true ) ) {
 				continue;
 			}
-			NM_Storage::delete( (string) $m['id'] );
+			self::drop( $m );
 			$total -= (float) ( $m['size'] ?? 0 );
+		}
+	}
+
+	/** The local copy goes; a copy in Dropbox stays (its own retention). */
+	private static function drop( array $m ): void {
+		if ( NM_Remote::in_dropbox( $m ) ) {
+			NM_Storage::drop_local( (string) $m['id'] );
+		} else {
+			NM_Storage::delete( (string) $m['id'] );
 		}
 	}
 

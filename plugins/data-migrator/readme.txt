@@ -5,11 +5,11 @@ Tags: backup, restore, migration, clone, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Full backup of a WordPress / WooCommerce site and restore on the same or another server, at the same or another address, with no manual fixes afterwards. No external services.
+Full backup of a WordPress / WooCommerce site and restore on the same or another server, at the same or another address, with no manual fixes afterwards. No external services, unless you connect your own Dropbox.
 
 == Description ==
 
@@ -42,6 +42,18 @@ Full backup of a WordPress / WooCommerce site and restore on the same or another
 * It never falls back to an unencrypted backup: with encryption on and the password missing or unreadable (e.g. the keys in wp-config.php changed), or without PHP's OpenSSL extension, the backup does not start and a scheduled run emails the administrator.
 * Cost: about 3 ms of extra CPU per file inside the archive (10,000 files take about half a minute more), plus the encryption of the data itself.
 
+**Dropbox (optional, off until you connect it)**
+
+* Each site connects the Dropbox account its owner picks, in DM Settings. The site talks to Dropbox directly; nothing goes through a server of ours.
+* The app has "App folder" access only: the site sees `Apps/<app name>/` and nothing else of the account. Each site keeps its backups in its own subfolder, named after its address.
+* Connecting: press Connect, allow the app on the Dropbox page that opens, and paste the code Dropbox shows back on the site (OAuth 2 with PKCE, no redirect and no app secret). The app key is the suite's shared one, or your own app's key typed in DM Settings, or `define( 'NM_DROPBOX_APP_KEY', '…' );` in wp-config.php.
+* The refresh token is stored sealed with the keys of wp-config.php, or set as `define( 'NM_DROPBOX_TOKEN', '…' );` in wp-config.php. Without real keys in wp-config.php the site refuses to store it. It never goes into a backup, a log, a job file or an email. Disconnect revokes it at Dropbox.
+* Where each backup goes: only on the server (the default), on the server and in Dropbox, or only in Dropbox. For manual backups, schedules and `wp data-migrator backup --dest=local|both|remote`. "Only in Dropbox" deletes the copy on the server only after the upload is checked against Dropbox's own hash and size.
+* Backups sent to Dropbox are encrypted by default with the backup password (see Encryption); you can turn that off in DM Settings. Without a password the backup does not start. While it is on, an unencrypted backup already on the server is not sent to Dropbox: make a new one with Dropbox as its destination.
+* Uploads in pieces of 4, 8 or 16 MB (8 by default), in the same short steps as the backup, with retries after a lost answer or a "too many requests". If the upload fails, the backup stays on the server and the list says so; "Send to Dropbox" tries again.
+* Each schedule keeps its own number of backups in Dropbox, and an optional size limit for all scheduled backups in Dropbox together (no limit by default).
+* "Read backups in Dropbox" lists what the folder holds, including backups of a site you are moving from. "Get from Dropbox" brings a backup back to the server (checked with sha256) for a restore; you can also download it straight from Dropbox.
+
 **Restore and migration**
 
 * Upload a backup from any site (in small chunks, so the server's upload limit does not matter) or pick one already on the server.
@@ -67,7 +79,7 @@ Full backup of a WordPress / WooCommerce site and restore on the same or another
 
 **WP-CLI**
 
-* `wp data-migrator backup [--scope=full|db|files] [--part-mb=<mb>] [--note=<text>]`
+* `wp data-migrator backup [--scope=full|db|files] [--part-mb=<mb>] [--note=<text>] [--dest=local|both|remote]`
 * `wp data-migrator import <file>...`, `list`, `verify <id>`, `delete <id>`, `check`
 * `wp data-migrator restore <id> [--new-url=<url>] [--local] [--bare] [--db-only|--files-only] [--blog-public=<0|1>] [--salts] [--password=<password>] [--dry-run] [--yes]`
 * `verify` and `restore` take `--password=<password>` for an encrypted backup; without it they use the stored password.
@@ -108,13 +120,19 @@ Press **Undo** on the Restore page (or `wp data-migrator undo`). The site goes b
 
 = What happens on uninstall? =
 
-Settings, jobs, work files, logs and any undo data are deleted. The backups are deleted too, unless "Keep backups" is ticked in DM Settings. The stored encryption password is always deleted: kept encrypted backups need their password typed in. The shared Noxpress options stay while another Noxpress plugin is installed.
+Settings, jobs, work files, logs and any undo data are deleted, and so is the stored Dropbox token (it is not revoked: press Disconnect first if you want that). Backups in Dropbox stay where they are. The backups are deleted too, unless "Keep backups" is ticked in DM Settings. The stored encryption password is always deleted: kept encrypted backups need their password typed in. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Disclaimer ==
 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: optional backups to your own Dropbox (App folder only). Connect in DM Settings with a pasted code (OAuth 2 with PKCE); the token is sealed with the keys of wp-config.php or set as a constant, and never goes into a backup.
+* New: choose where each backup goes (server, server and Dropbox, only Dropbox) for manual backups, schedules and WP-CLI (`--dest`). Dropbox copies are encrypted by default; the server copy is deleted only after a checked upload.
+* New: uploads in pieces of 4/8/16 MB with retries, per-schedule retention in Dropbox and an optional size limit, "Read backups in Dropbox", "Send to Dropbox" and "Get from Dropbox".
+* The database dump now skips the plugin's own Dropbox token rows.
 
 = 1.2.4 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.

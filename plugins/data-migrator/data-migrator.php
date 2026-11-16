@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Data Migrator
  * Plugin URI:           https://noxpress.tech
- * Description:          Πλήρες αντίγραφο ασφαλείας του WordPress / WooCommerce site (βάση, uploads, θέματα, plugins, core) και επαναφορά στον ίδιο ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις. Ανάλυση πριν την επαναφορά, αναίρεση με ένα κλικ, installer για άδειο server, WP-CLI. Χωρίς εξωτερικές υπηρεσίες.
- * Version:              1.2.4
+ * Description:          Πλήρες αντίγραφο ασφαλείας του WordPress / WooCommerce site (βάση, uploads, θέματα, plugins, core) και επαναφορά στον ίδιο ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις. Ανάλυση πριν την επαναφορά, αναίρεση με ένα κλικ, installer για άδειο server, WP-CLI, προαιρετικά αντίγραφα στο Dropbox σου. Χωρίς εξωτερικές υπηρεσίες, εκτός αν συνδέσεις προαιρετικά Dropbox.
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -37,6 +37,8 @@
  *    - NM_Lang         → EN dictionary + gettext filter (rs_lang, §9)
  *    - NM_Settings     → nm_settings option
  *    - NM_Storage      → private storage folder, backups, jobs, logs
+ *    - NM_Dropbox      → the site's Dropbox connection (PKCE, sealed token, HTTP)
+ *    - NM_Remote       → backups in Dropbox: upload, download, list, retention
  *    - NM_Integrity    → core checksums (api.wordpress.org)
  *    - NM_Backup       → backup job (scan, db, zip, manifest)
  *    - NM_Schedule     → scheduled backups (events, background steps, retention)
@@ -74,7 +76,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NM_VERSION', '1.2.4' );
+define( 'NM_VERSION', '1.3.0' );
 define( 'NM_FILE', __FILE__ );
 define( 'NM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NM_URL', plugin_dir_url( __FILE__ ) );
@@ -94,6 +96,8 @@ require_once NM_PATH . 'engine/class-nm-restorer.php';
 require_once NM_PATH . 'includes/class-lang.php';
 require_once NM_PATH . 'includes/class-settings.php';
 require_once NM_PATH . 'includes/class-storage.php';
+require_once NM_PATH . 'includes/class-dropbox.php';
+require_once NM_PATH . 'includes/class-remote.php';
 require_once NM_PATH . 'includes/class-integrity.php';
 require_once NM_PATH . 'includes/class-backup.php';
 require_once NM_PATH . 'includes/class-schedule.php';
