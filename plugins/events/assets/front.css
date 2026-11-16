@@ -27,3 +27,9 @@
 .evt-more{margin:.6em 0 0}
 @media (max-width:480px){.evt-facts{grid-template-columns:1fr;gap:.15em}.evt-facts dd{margin-bottom:.5em}}
 .evt-switch{margin:.25em 0 1em}
+.evt-buy{margin:0 0 1em;padding:1em 1.1em;border:1px solid rgba(0,0,0,.14);border-radius:6px}
+.evt-buy__row{display:flex;flex-wrap:wrap;align-items:center;gap:.5em 1em;margin:0 0 .6em}
+.evt-buy__row:last-child{margin-bottom:0}
+.evt-buy__type{flex:1 1 12em}
+.evt-buy__qty{width:4.5em}
+.evt-buy__note{margin:0}
