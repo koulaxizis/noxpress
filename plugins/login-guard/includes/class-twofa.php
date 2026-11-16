@@ -63,12 +63,17 @@ final class LGD_TwoFA {
 	/** User id whose new session the strict guard ended in this request. */
 	private static $blocked = 0;
 
-	/** An Application Password authenticated this request. */
-	private static $app_ok = false;
+	/** User id the request's own auth cookie resolved to, before any login code ran (strict guard). */
+	private static $cookie_uid = -1;
+
+	/** Wrong codes per user in WRONG_WINDOW, in every mode where 2FA works. */
+	const WRONG_MAX    = 10;
+	const WRONG_WINDOW = 15;
+	const WRONG        = '_lgd_2fa_w';
 
 	public static function init(): void {
 		add_filter( 'authenticate', array( __CLASS__, 'intercept' ), 100000, 3 );
-		add_action( 'application_password_did_authenticate', array( __CLASS__, 'app_ok' ) );
+		add_filter( 'determine_current_user', array( __CLASS__, 'note_cookie_user' ), PHP_INT_MAX );
 		add_action( 'login_form_lgd_2fa', array( __CLASS__, 'page' ) );
 		add_action( 'set_auth_cookie', array( __CLASS__, 'guard' ), 10, 6 );
 		add_action( 'wp_login', array( __CLASS__, 'after_login' ), 1, 2 );
@@ -138,7 +143,8 @@ final class LGD_TwoFA {
 	/** Raises the remembered-browser version of a user (forgets them all). */
 	public static function bump( int $uid ): void {
 		if ( $uid > 0 ) {
-			update_user_meta( $uid, self::TV, (int) get_user_meta( $uid, self::TV, true ) + 1 );
+			// Random, never a counter: a reinstall cannot bring an old value back.
+			update_user_meta( $uid, self::TV, bin2hex( random_bytes( 8 ) ) );
 		}
 	}
 
@@ -148,9 +154,13 @@ final class LGD_TwoFA {
 		}
 	}
 
-	/** «Log out everywhere else» in the profile. */
+	/** «Log out everywhere» in a profile (wp_ajax_destroy-sessions): the user of that profile, after core's own checks. */
 	public static function bump_current(): void {
-		self::bump( get_current_user_id() );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified below with core's nonce.
+		$uid = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+		if ( $uid > 0 && current_user_can( 'edit_user', $uid ) && false !== check_ajax_referer( 'update-user_' . $uid, 'nonce', false ) ) {
+			self::bump( $uid );
+		}
 	}
 
 	/** profile_update: a new password or e-mail forgets the remembered browsers. */
@@ -298,8 +308,55 @@ final class LGD_TwoFA {
 	 * Login
 	 * =================================================================== */
 
-	public static function app_ok(): void {
-		self::$app_ok = true;
+	/** determine_current_user (last): the first answer is the request's own cookie login. */
+	public static function note_cookie_user( $user_id ) {
+		if ( -1 === self::$cookie_uid ) {
+			self::$cookie_uid = (int) $user_id;
+		}
+		return $user_id;
+	}
+
+	/** True when $password is one of $user's Application Passwords (checked here, not by a request-wide flag). */
+	private static function is_app_password( WP_User $user, $password ): bool {
+		if ( ! is_string( $password ) || '' === $password || ! class_exists( 'WP_Application_Passwords' ) ) {
+			return false;
+		}
+		$pw = preg_replace( '/[^a-z\d]/i', '', $password );
+		if ( 24 !== strlen( (string) $pw ) ) {
+			return false; // Every Application Password has 24 characters.
+		}
+		foreach ( (array) WP_Application_Passwords::get_user_application_passwords( (int) $user->ID ) as $item ) {
+			if ( empty( $item['password'] ) ) {
+				continue;
+			}
+			$ok = method_exists( 'WP_Application_Passwords', 'check_password' )
+				? WP_Application_Passwords::check_password( $pw, $item['password'] )
+				: wp_check_password( $pw, $item['password'], (int) $user->ID );
+			if ( $ok ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Atomic +1 of the user's wrong-code counter; returns the new count in this window. */
+	private static function wrong_bump( int $uid ): int {
+		global $wpdb;
+		$start = (int) get_user_meta( $uid, self::WRONG . 's', true );
+		if ( $start < time() - self::WRONG_WINDOW * MINUTE_IN_SECONDS ) {
+			update_user_meta( $uid, self::WRONG . 's', time() );
+			update_user_meta( $uid, self::WRONG, 0 );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- atomic increment, cache cleared below.
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->usermeta} SET meta_value = meta_value + 1 WHERE user_id = %d AND meta_key = %s", $uid, self::WRONG ) );
+		wp_cache_delete( $uid, 'user_meta' );
+		return (int) get_user_meta( $uid, self::WRONG, true );
+	}
+
+	/** True while the user has too many wrong codes in the window. */
+	private static function wrong_over( int $uid ): bool {
+		$start = (int) get_user_meta( $uid, self::WRONG . 's', true );
+		return $start >= time() - self::WRONG_WINDOW * MINUTE_IN_SECONDS && (int) get_user_meta( $uid, self::WRONG, true ) >= self::WRONG_MAX;
 	}
 
 	/** authenticate (100000): the second step for a user with 2FA. */
@@ -308,8 +365,8 @@ final class LGD_TwoFA {
 			if ( ! $user instanceof WP_User || ! self::active() || ! self::is_on( (int) $user->ID ) ) {
 				return $user;
 			}
-			if ( self::$app_ok ) {
-				return $user; // Application Password (XML-RPC «open»): no 2FA by WordPress's design.
+			if ( self::is_app_password( $user, $password ) ) {
+				return $user; // This user's own Application Password: no 2FA by WordPress's design.
 			}
 			if ( self::trusted_browser( $user ) ) {
 				self::$passed = (int) $user->ID;
@@ -475,6 +532,11 @@ final class LGD_TwoFA {
 					self::render( wp_strip_all_tags( $err->get_error_message() ), true, false );
 				}
 			}
+			// In every mode: a new password login does not reset this limit.
+			if ( self::wrong_over( $uid ) ) {
+				self::end_pending( $uid );
+				self::render( LGD_Settings::text( 'tfa_expired' ), true, false );
+			}
 			$code = isset( $_POST['lgd_code'] ) && is_string( $_POST['lgd_code'] ) ? sanitize_text_field( wp_unslash( $_POST['lgd_code'] ) ) : '';
 			$kind = '' !== $code ? self::check( $uid, $code ) : '';
 			if ( '' === $kind ) {
@@ -496,8 +558,9 @@ final class LGD_TwoFA {
 		 * @param int $user_id
 		 */
 		do_action( 'lgd_2fa_failed', $uid );
+		$total    = self::wrong_bump( $uid );
 		$rec['n'] = ( isset( $rec['n'] ) ? (int) $rec['n'] : 0 ) + 1;
-		if ( $rec['n'] >= self::TRIES ) {
+		if ( $rec['n'] >= self::TRIES || $total >= self::WRONG_MAX ) {
 			self::end_pending( $uid );
 			self::render( LGD_Settings::text( 'tfa_expired' ), true, false );
 		}
@@ -596,7 +659,7 @@ final class LGD_TwoFA {
 	private static function trust_hmac( WP_User $user, int $exp ): string {
 		$uid  = (int) $user->ID;
 		$frag = substr( (string) $user->user_pass, -12 );
-		return hash_hmac( 'sha256', 'td|' . $uid . '|' . $exp . '|' . (int) get_user_meta( $uid, self::TV, true ) . '|' . $frag, wp_salt( 'auth' ) );
+		return hash_hmac( 'sha256', 'td|' . $uid . '|' . $exp . '|' . (string) get_user_meta( $uid, self::TV, true ) . '|' . $frag . '|' . ( isset( self::rec( $uid )['on'] ) ? (int) self::rec( $uid )['on'] : 0 ), wp_salt( 'auth' ) );
 	}
 
 	private static function trusted_browser( WP_User $user ): bool {
@@ -626,8 +689,8 @@ final class LGD_TwoFA {
 			if ( ( defined( 'WP_CLI' ) && WP_CLI ) || wp_doing_cron() ) {
 				return;
 			}
-			if ( did_action( 'set_current_user' ) && get_current_user_id() === $uid ) {
-				return; // A fresh cookie for the user already logged in (e.g. a password change).
+			if ( self::$cookie_uid === $uid && $uid > 0 ) {
+				return; // A fresh cookie for the user this request's own cookie logged in (e.g. a password change).
 			}
 			if ( ! LGD_Settings::live() ) {
 				LGD_Store::log( 'test_session', LGD_Store::ip(), $uid );
@@ -746,6 +809,10 @@ final class LGD_TwoFA {
 				case 'reset':
 					/* translators: 1: user login, 2: site name */
 					$first = sprintf( __( 'Ένας διαχειριστής μηδένισε την επαλήθευση σε δύο βήματα του λογαριασμού %1$s στο %2$s. Ρύθμισέ την ξανά από το προφίλ σου.', 'login-guard' ), $user->user_login, $site );
+					break;
+				case 'codes':
+					/* translators: 1: user login, 2: site name */
+					$first = sprintf( __( 'Έγιναν νέοι κωδικοί ανάκτησης για τον λογαριασμό %1$s στο %2$s. Οι παλιοί δεν δουλεύουν πια.', 'login-guard' ), $user->user_login, $site );
 					break;
 				default:
 					/* translators: 1: user login, 2: site name, 3: codes left */

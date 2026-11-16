@@ -122,7 +122,7 @@ final class LGD_Profile {
 			echo '<tr><th>' . esc_html__( 'Κατάσταση', 'login-guard' ) . '</th><td><strong>' . esc_html__( 'Ενεργή', 'login-guard' ) . '</strong> · ';
 			/* translators: 1: date, 2: recovery codes left */
 			echo esc_html( sprintf( __( 'από %1$s, %2$d κωδικοί ανάκτησης απομένουν', 'login-guard' ), wp_date( (string) get_option( 'date_format' ), (int) $rec['on'] ), $left ) ) . '</td></tr>';
-			echo '<tr><th>' . esc_html__( 'Κωδικοί ανάκτησης', 'login-guard' ) . '</th><td><label><input type="checkbox" name="lgd_tfa_codes" value="1" /> ' . esc_html__( 'Νέοι κωδικοί ανάκτησης (οι παλιοί σταματούν να δουλεύουν)', 'login-guard' ) . '</label></td></tr>';
+			echo '<tr><th>' . esc_html__( 'Κωδικοί ανάκτησης', 'login-guard' ) . '</th><td><label><input type="checkbox" name="lgd_tfa_codes" value="1" /> ' . esc_html__( 'Νέοι κωδικοί ανάκτησης (οι παλιοί σταματούν να δουλεύουν)', 'login-guard' ) . '</label><br /><input type="text" name="lgd_tfa_codes_code" class="regular-text" inputmode="numeric" autocomplete="one-time-code" value="" aria-label="' . esc_attr__( 'Κωδικός από την εφαρμογή ή κωδικός ανάκτησης', 'login-guard' ) . '" /><p class="description">' . esc_html__( 'Γράψε έναν κωδικό από την εφαρμογή ή έναν κωδικό ανάκτησης.', 'login-guard' ) . '</p></td></tr>';
 			echo '<tr><th>' . esc_html__( 'Θυμημένοι browsers', 'login-guard' ) . '</th><td><label><input type="checkbox" name="lgd_tfa_forget" value="1" /> ' . esc_html__( 'Να ζητηθεί ξανά ο κωδικός σε όλους τους browsers', 'login-guard' ) . '</label></td></tr>';
 			if ( LGD_TwoFA::required( $user ) ) {
 				echo '<tr><th>' . esc_html__( 'Απενεργοποίηση', 'login-guard' ) . '</th><td><p class="description">' . esc_html__( 'Ο ρόλος σου τη χρειάζεται, γι\' αυτό δεν κλείνει από εδώ.', 'login-guard' ) . '</p></td></tr>';
@@ -234,7 +234,12 @@ final class LGD_Profile {
 			return;
 		}
 		if ( '1' === self::post( 'lgd_tfa_codes' ) ) {
+			if ( '' === LGD_TwoFA::check( $uid, self::post( 'lgd_tfa_codes_code' ) ) ) {
+				self::$error = __( 'Για νέους κωδικούς ανάκτησης, γράψε έναν κωδικό από την εφαρμογή ή έναν κωδικό ανάκτησης.', 'login-guard' );
+				return;
+			}
 			self::keep_codes( $uid, LGD_TwoFA::regenerate( $user ) );
+			LGD_TwoFA::mail( $user, 'codes' );
 			self::flash( $uid, __( 'Νέοι κωδικοί ανάκτησης. Οι παλιοί δεν δουλεύουν πια.', 'login-guard' ) );
 		}
 		if ( '1' === self::post( 'lgd_tfa_forget' ) ) {

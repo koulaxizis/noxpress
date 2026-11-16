@@ -19,8 +19,8 @@ Nothing a visitor sees changes after activation: the plugin starts switched off.
 
 **Two-step verification (TOTP)**
 
-* Each user sets it up in their profile: scan a QR code (drawn in the browser, no outside service) with any authenticator app (Aegis, 2FAS, Google or Microsoft Authenticator, 1Password and others), confirm with one code, and keep the 10 one-time recovery codes that are shown once.
-* After the password, the login asks for the 6-digit code, on wp-login.php and on the WooCommerce login forms. A right password alone never makes a session. Every code works once; five wrong codes end the attempt, and wrong codes count towards the login limits.
+* Each user sets it up in their profile: scan a QR code (drawn in the browser, no outside service) with any authenticator app (Aegis, 2FAS, Google or Microsoft Authenticator, 1Password and others), confirm with one code, and keep the 10 one-time recovery codes that are shown once. New codes need a current code.
+* After the password, the login asks for the 6-digit code, on wp-login.php and on the WooCommerce login forms. A right password alone never makes a session. Every code works once; five wrong codes end the attempt, ten in 15 minutes pause the second step for that account in every mode, and wrong codes count towards the login limits.
 * «Do not ask again in this browser» for 30 days (a setting, 0 turns it off). A new password, a new e-mail, a change of 2FA or «Log out everywhere else» forgets every remembered browser.
 * Required for roles (administrators by default, in «Live» only), with a grace period of 7 days or 3 logins; after it, the admin opens only the profile until the user sets it up. A role you have yourself becomes required only after you set up your own.
 * Strict guard: if another plugin logs in a user with 2FA without the second step (a «log in as» feature, a login link), that session is ended and logged. WP-CLI and cron are not touched.

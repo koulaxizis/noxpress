@@ -670,6 +670,22 @@ final class LGD_Admin_UI {
 		}
 	}
 
+	/**
+	 * Multisite: a super admin's 2FA must not depend on one subsite's
+	 * administrator, so only a super admin changes the mode and the 2FA
+	 * switches there.
+	 */
+	private static function network_policy( array $s ): array {
+		if ( ! is_multisite() || is_super_admin() ) {
+			return $s;
+		}
+		$cur = LGD_Settings::get();
+		foreach ( array( 'mode', 'twofa', 'tfa_strict' ) as $k ) {
+			$s[ $k ] = $cur[ $k ];
+		}
+		return $s;
+	}
+
 	private static function do_save_settings(): void {
 		$s    = LGD_Settings::get();
 		$prev = $s['mode'];
@@ -699,7 +715,7 @@ final class LGD_Admin_UI {
 				$s[ 't_' . $k . '_' . $l ] = self::post( 'lgd_t_' . $k . '_' . $l );
 			}
 		}
-		$saved = LGD_Settings::save( $s );
+		$saved = LGD_Settings::save( self::network_policy( $s ) );
 
 		// Anti self-lockout: the address that saves stays trusted for 24 hours.
 		LGD_Store::remember_saver( LGD_Store::ip() );
@@ -773,7 +789,7 @@ final class LGD_Admin_UI {
 		}
 		$in         = $state['options'][ LGD_Settings::OPT ];
 		$in['mode'] = LGD_Settings::mode(); // A backup never switches the mode.
-		LGD_Settings::save( $in );
+		LGD_Settings::save( self::network_policy( $in ) );
 		return array( self::msg( 'success', __( 'Οι ρυθμίσεις επανήλθαν. Η λειτουργία έμεινε όπως ήταν.', 'login-guard' ) ) );
 	}
 
