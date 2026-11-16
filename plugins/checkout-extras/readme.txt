@@ -1,19 +1,19 @@
 === Checkout Extras ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: woocommerce, gift, thank you page, coupon, checkout
+Tags: woocommerce, gift, thank you page, coupon, vacation mode
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-A gift option with a message at checkout, a message and products on the thank-you page, and a unique thank-you coupon for the next order. Each part is turned on separately.
+A gift option with a message at checkout, a message and products on the thank-you page, a unique thank-you coupon for the next order, and a store vacation mode. Each part is turned on separately.
 
 == Description ==
 
-Three small things around the checkout, in one plugin. Each part has its own switch (off, test mode, on for everyone).
+Four small things around the checkout, in one plugin. Each part has its own switch (off, test mode, on for everyone).
 
 **"This is a gift" at checkout**
 
@@ -39,6 +39,16 @@ Three small things around the checkout, in one plugin. Each part has its own swi
 * Statistics by period: coupons issued and used, revenue of the orders that used one, total discount, and the latest coupons with their state.
 * A daily cleanup deletes expired unused thank-you coupons after the days you choose. Only coupons this plugin made are touched; the statistics stay, because they are read from the orders.
 
+**Store vacation**
+
+* The site stays open and indexable while buying stops: no buy button on the product pages, new items are refused by the cart, and the cart and checkout show an error and take no order. This holds in the classic checkout, the Cart and Checkout blocks and the Store API, also for a request sent by hand.
+* Or "orders accepted, shipped after the vacation": buying stays open, a bar says when orders ship, the checkout asks for a required checkbox, and the order gets a "Shipping: after the vacation" row (thank-you page, account, emails, admin). With Shipping Notes the delivery estimate starts at the end date.
+* Optional start and end (site time zone), decided on every request, so the shop opens exactly at the end; an optional warning bar some days before the start; "Close now" and "Open now" buttons; a reminder in the admin bar.
+* A bar on every page, and a note in place of the buy button. Greek / English texts with `{return_date}` and `{start_date}`.
+* Exemptions while closed: digital products (virtual and downloadable), Noxpress Pre-Orders products, chosen user roles (e.g. trade customers), and the `cke_vacation_allow` filter.
+* Never closed: paying an existing order, payment gateway callbacks, orders from WP admin or the authenticated REST API, the account pages and downloads. Prices, structured data and feeds do not change. Items already in a cart stay there.
+* Every change purges the page cache (Fast Pages, WP Rocket, LiteSpeed, W3 Total Cache, WP Super Cache), and background jobs purge it again at the warning, the start and the end.
+
 **Classic and block checkout**
 
 * The classic checkout (`[woocommerce_checkout]`) gets every option.
@@ -58,7 +68,9 @@ Three small things around the checkout, in one plugin. Each part has its own swi
 * `cke_coupon_args` ( array $args, WC_Order $order ): the coupon's properties before it is created; return `false` for no coupon.
 * `cke_coupon_created` ( WC_Coupon $coupon, WC_Order $order ): fires after a thank-you coupon is created.
 * `cke_text` ( string $text, string $key, string $lang ): change any customer text.
-* Order meta: `_cke_gift`, `_cke_gift_message`, `_cke_gift_fee`, `_cke_coupon_code`, `_cke_redeemed`.
+* `cke_vacation_allow` ( bool $allow, WC_Product $product ): return `true` to keep a product on sale while the shop is closed for the vacation.
+* Abilities (WordPress 6.9+, capability `manage_woocommerce`): `checkout-extras/vacation-status` and `checkout-extras/vacation-set`.
+* Order meta: `_cke_gift`, `_cke_gift_message`, `_cke_gift_fee`, `_cke_coupon_code`, `_cke_redeemed`, `_cke_vacation_until`.
 
 == Installation ==
 
@@ -82,6 +94,14 @@ A coupon on a pending order is a coupon for an order that may never be paid. By 
 
 You have set a gift wrapping fee. The block cannot add a fee from a field without writing to the session, so the option is shown there only without a cost. Use the classic checkout shortcode for a paid gift option.
 
+= What does the store vacation close, exactly? =
+
+New purchases by visitors. A customer can still pay an order that already exists (for example a payment link you sent), payment gateways can still confirm payments, and you can still create orders in WP admin. The pages stay online with their prices, so search engines see no change.
+
+= Will my cache show the old buttons? =
+
+The rule itself runs on every request and the cart and checkout are never cached, so no order gets through. Cached pages are purged on every change and at the start and end times; if a background job runs late, a cached page may show the old look for a short while.
+
 = What happens on uninstall? =
 
 The settings, the transients and the background jobs are removed. The gift and the coupon code on past orders stay: they are part of the order record. The coupons themselves stay too, because customers hold the codes, unless you tick "Delete the thank-you coupons … when the plugin is deleted" in Tools. The shared Noxpress options stay while another Noxpress plugin is installed.
@@ -91,6 +111,9 @@ The settings, the transients and the background jobs are removed. The gift and t
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: store vacation. The site stays open while buying stops (no buy button, cart and checkout refuse orders, also in the Cart / Checkout blocks and the Store API), or orders are accepted and shipped after the vacation (required checkbox at checkout, note on the order, Shipping Notes estimate from the end date). Optional start and end that open and close the shop by themselves, a warning bar before the start, Close now / Open now, exemptions for digital products, Pre-Orders products and chosen roles, page cache purge on every change and at the change times, an admin bar reminder, and the abilities checkout-extras/vacation-status and vacation-set. Off after the update.
 
 = 1.1.2 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.

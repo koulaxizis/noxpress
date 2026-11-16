@@ -1,12 +1,14 @@
 <?php
 /**
- * Greeklish Permalinks — uninstall.php (v1.0.0)
+ * Greeklish Permalinks — uninstall.php (v1.3.0)
  *
  * Deleted:
- *  - Options glp_settings, glp_log (undo log of the bulk page).
+ *  - Options glp_settings, glp_log (undo log of the bulk page),
+ *    glp_rename_log (undo log of the own-name renames, 1.3.0).
  *  - Option glp_map (redirect table of the bulk page), unless the setting
  *    "keep the redirect table" (keep_map) is on.
- *  - Transients glp_aui_msg_{uid} (PRG notices).
+ *  - Transients glp_aui_msg_{uid} and glp_ren_msg_{uid} (PRG notices),
+ *    glp_probe (server check).
  *  - Multisite: every site ONCE (the main site included in the loop).
  *
  * Kept (production data, Bible §12): slugs and file names the plugin
@@ -29,6 +31,8 @@ function glp_uninstall_site(): void {
 
 	delete_option( 'glp_settings' );
 	delete_option( 'glp_log' );
+	delete_option( 'glp_rename_log' );
+	delete_transient( 'glp_probe' );
 	if ( ! $glp_keep_map ) {
 		delete_option( 'glp_map' );
 	}
@@ -36,9 +40,11 @@ function glp_uninstall_site(): void {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 			$wpdb->esc_like( '_transient_glp_aui_msg_' ) . '%',
-			$wpdb->esc_like( '_transient_timeout_glp_aui_msg_' ) . '%'
+			$wpdb->esc_like( '_transient_timeout_glp_aui_msg_' ) . '%',
+			$wpdb->esc_like( '_transient_glp_ren_msg_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_glp_ren_msg_' ) . '%'
 		)
 	);
 }

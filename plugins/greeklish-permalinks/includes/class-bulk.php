@@ -43,6 +43,14 @@ final class GLP_Bulk {
 	const SCAN_LIMIT = 3000;
 	const STATUSES   = array( 'publish', 'future', 'draft', 'pending', 'private', 'inherit' );
 
+	/**
+	 * Where a file's undo entry goes during rename_file(): add( entry ):
+	 * bool and drop( key ). Null: the bulk run's log.
+	 *
+	 * @var array|null
+	 */
+	private static $sink = null;
+
 	/* =====================================================================
 	 * What can be scanned
 	 * =================================================================== */
@@ -249,11 +257,49 @@ final class GLP_Bulk {
 	}
 
 	/**
+	 * Rename one attachment's files to an own name (GLP_Rename, 1.3.0):
+	 * the same engine as the bulk run, for any file, Greek or not.
+	 *
+	 * @param string        $stem  New name without extension, already clean (GLP_Rename::clean_stem()).
+	 * @param callable|null $add   Apply: writes the undo entry, true when written. Null: dry run.
+	 * @param callable|null $drop  Apply: removes the entry of a rename that failed.
+	 * @return array Same shape as process().
+	 */
+	public static function rename_file( int $id, string $stem, ?callable $add = null, ?callable $drop = null ): array {
+		$res = array(
+			'k'      => 'f:' . $id,
+			'status' => 'error',
+			'new'    => '',
+			'note'   => '',
+		);
+		if ( '' === $stem ) {
+			$res['note'] = __( 'Το νέο όνομα είναι κενό.', 'greeklish-permalinks' );
+			return $res;
+		}
+		$apply = null !== $add;
+		if ( $apply ) {
+			self::$sink = array(
+				'add'  => $add,
+				'drop' => null !== $drop ? $drop : static function () {},
+			);
+		}
+		try {
+			return self::file( $id, $apply ? 'own' : '', $res, $stem );
+		} catch ( \Throwable $e ) {
+			$res['status'] = 'error';
+			$res['note']   = $e->getMessage();
+			return $res;
+		} finally {
+			self::$sink = null;
+		}
+	}
+
+	/**
 	 * Write the undo entry before the change. False: the item must not be
 	 * touched and the run stops (the result says why).
 	 */
 	private static function save_entry( string $run, array $entry, array &$res ): bool {
-		if ( self::append( $run, $entry ) ) {
+		if ( null !== self::$sink ? (bool) call_user_func( self::$sink['add'], $entry ) : self::append( $run, $entry ) ) {
 			return true;
 		}
 		$res['status'] = 'error';
@@ -448,7 +494,7 @@ final class GLP_Bulk {
 	 * .webp / .avif copies that exist on disk), with a "-2", "-3"… suffix on
 	 * the stem when a new name is taken by another file.
 	 */
-	private static function rename_plan( string $dir_abs, string $main, $meta ): array {
+	private static function rename_plan( string $dir_abs, string $main, $meta, ?string $to = null, bool &$taken_name = false ): array {
 		$fopt  = GLP_Settings::file_opt();
 		$names = self::file_names( $main, $meta );
 		foreach ( $names as $nm ) {
@@ -459,7 +505,10 @@ final class GLP_Bulk {
 			}
 		}
 		$stem     = self::stem( $main, $meta );
-		$stem_new = GLP_Converter::file_name( $stem, $fopt );
+		$stem_new = null !== $to ? $to : GLP_Converter::file_name( $stem, $fopt );
+		if ( null !== $to ) {
+			$fopt['lower'] = true; // An own name is always lower case (GLP_Rename::clean_stem()).
+		}
 
 		for ( $n = 1; $n < 100; $n++ ) {
 			$suffix = 1 === $n ? '' : '-' . $n;
@@ -469,6 +518,10 @@ final class GLP_Bulk {
 					$rest = substr( $nm, strlen( $stem ) );
 					$rest = GLP_Converter::has_greek( $rest ) ? GLP_Converter::file_name( $rest, $fopt ) : $rest;
 					$new  = $stem_new . $suffix . ( ! empty( $fopt['lower'] ) ? strtolower( $rest ) : $rest );
+				} elseif ( null !== $to && $nm === $main ) {
+					// The main file outside the stem (an edited image): it still takes the own name.
+					$ext = (string) pathinfo( $nm, PATHINFO_EXTENSION );
+					$new = $to . $suffix . ( '' !== $ext ? '.' . strtolower( $ext ) : '' );
 				} else {
 					$conv = GLP_Converter::file_name( $nm, $fopt );
 					$dot  = strrpos( $conv, '.' );
@@ -485,6 +538,7 @@ final class GLP_Bulk {
 			}
 			// Two different old names must not land on one new name either.
 			if ( ! $taken && count( array_unique( $plan ) ) === count( $plan ) ) {
+				$taken_name = $n > 1;
 				return array_filter(
 					$plan,
 					static function ( $new, $old ) {
@@ -586,7 +640,7 @@ final class GLP_Bulk {
 		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $args ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery -- placeholders built above.
 	}
 
-	private static function file( int $id, string $run, array $res ): array {
+	private static function file( int $id, string $run, array $res, ?string $to = null ): array {
 		$apply = '' !== $run;
 		global $wpdb;
 		$post = get_post( $id );
@@ -594,7 +648,7 @@ final class GLP_Bulk {
 		if ( ! $post || 'attachment' !== $post->post_type || '' === $rel ) {
 			return self::skip( $res, __( 'Δεν βρέθηκε.', 'greeklish-permalinks' ) );
 		}
-		if ( ! GLP_Converter::has_greek( $rel ) ) {
+		if ( null === $to && ! GLP_Converter::has_greek( $rel ) ) {
 			return self::skip( $res, __( 'Δεν έχει πια ελληνικά.', 'greeklish-permalinks' ) );
 		}
 		if ( preg_match( '#^(https?:)?//#i', $rel ) || 0 === strpos( $rel, '/' ) || false !== strpos( $rel, '..' ) ) {
@@ -608,7 +662,8 @@ final class GLP_Bulk {
 			return self::skip( $res, __( 'Το αρχείο λείπει από τον δίσκο.', 'greeklish-permalinks' ) );
 		}
 		$meta = wp_get_attachment_metadata( $id, true );
-		$plan = self::rename_plan( $dir_abs, $main, $meta );
+		$taken = false;
+		$plan  = self::rename_plan( $dir_abs, $main, $meta, $to, $taken );
 		if ( ! isset( $plan[ $main ] ) ) {
 			return self::skip( $res, __( 'Το νέο όνομα είναι ίδιο.', 'greeklish-permalinks' ) );
 		}
@@ -631,8 +686,9 @@ final class GLP_Bulk {
 				'dl'      => count( $dl ),
 				'other'   => count( $other ) + self::options_with( $needles ),
 				'others'  => array_slice( array_values( array_unique( wp_list_pluck( $other, 'meta_key' ) ) ), 0, 5 ),
+				'webp'    => count( preg_grep( '/\.(webp|avif)$/i', array_keys( $plan ) ) ),
 			);
-			if ( $res['new'] !== $dir_rel . GLP_Converter::file_name( $main, GLP_Settings::file_opt() ) ) {
+			if ( $taken ) {
 				$res['note'] = __( 'Υπάρχει ήδη: πήρε αριθμό.', 'greeklish-permalinks' );
 			}
 			return $res;
@@ -699,14 +755,45 @@ final class GLP_Bulk {
 		self::write_posts( $content );
 		self::write_downloads( $dl );
 
-		// 4. Redirects from every old path.
-		$m = GLP_Redirects::map();
+		// 4. Redirects from every old path. Older redirects to an old path
+		// now go straight to the new one, and a path that holds a file
+		// again stops redirecting.
+		$m     = GLP_Redirects::map();
+		$moves = array();
 		foreach ( $plan as $old => $new ) {
-			$m['files'][ $dir_rel . $old ] = $dir_rel . $new;
+			$moves[ $dir_rel . $old ] = $dir_rel . $new;
+		}
+		foreach ( $m['files'] as $from => $target ) {
+			if ( isset( $moves[ $target ] ) ) {
+				$m['files'][ $from ] = $moves[ $target ];
+			}
+		}
+		foreach ( $moves as $from => $target ) {
+			unset( $m['files'][ $target ] );
+			$m['files'][ $from ] = $target;
 		}
 		GLP_Redirects::save_map( $m );
 		clean_post_cache( $id );
+		self::purge( array_merge( array_keys( $content ), array_keys( $dl ), array( (int) $post->post_parent ) ), $id );
 		return $res;
+	}
+
+	/**
+	 * Page cache of the pages that show the file (Fast Pages and other
+	 * suite caches, through Noxpress Core): the posts whose text changed,
+	 * the products with changed downloads, the parent and the posts that
+	 * use it as their image.
+	 */
+	private static function purge( array $ids, int $attachment = 0 ): void {
+		global $wpdb;
+		if ( $attachment > 0 ) {
+			$thumbs = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_thumbnail_id' AND meta_value = %s LIMIT 200", (string) $attachment ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery -- one indexed lookup after a rename.
+			$ids    = array_merge( $ids, array_map( 'intval', (array) $thumbs ) );
+		}
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+		if ( $ids && class_exists( 'Noxpress_Core' ) && method_exists( 'Noxpress_Core', 'purge_page_cache' ) ) {
+			Noxpress_Core::purge_page_cache( $ids );
+		}
 	}
 
 	/** Metadata with every file name of the plan replaced. */
@@ -863,6 +950,10 @@ final class GLP_Bulk {
 
 	/** Remove the entry of an item that did not change after all. */
 	private static function drop_entry( string $run, string $k ): void {
+		if ( null !== self::$sink ) {
+			call_user_func( self::$sink['drop'], $k );
+			return;
+		}
 		$l = self::log();
 		if ( ! $l || $l['run'] !== $run || ! $l['items'] ) {
 			return;
@@ -1017,6 +1108,14 @@ final class GLP_Bulk {
 		return array( $done, $errors, count( $l['items'] ) );
 	}
 
+	/**
+	 * Revert one log entry; '' or an error text. Public for the own-name
+	 * renames (GLP_Rename), which keep their own log.
+	 */
+	public static function undo_entry( array $e ): string {
+		return self::undo_one( $e );
+	}
+
 	/** Revert one log entry; '' or an error text. */
 	private static function undo_one( array $e ): string {
 		global $wpdb;
@@ -1124,12 +1223,22 @@ final class GLP_Bulk {
 			}
 		}
 
-		$m = GLP_Redirects::map();
-		foreach ( array_keys( $plan ) as $old ) {
+		$m    = GLP_Redirects::map();
+		$back = array();
+		foreach ( $plan as $old => $new ) {
 			unset( $m['files'][ $dir_rel . $old ] );
+			$back[ $dir_rel . $new ] = $dir_rel . $old;
+		}
+		// Older redirects that the rename sent on to the new path go to the old one again.
+		foreach ( $m['files'] as $from => $target ) {
+			if ( isset( $back[ $target ] ) ) {
+				$m['files'][ $from ] = $back[ $target ];
+			}
 		}
 		GLP_Redirects::save_map( $m );
 		clean_post_cache( $id );
+		$parent = get_post( $id );
+		self::purge( array_merge( array_keys( (array) $e['posts'] ), array_keys( (array) $e['dl'] ), array( $parent ? (int) $parent->post_parent : 0 ) ), $id );
 
 		foreach ( $moved as $old => $new ) {
 			if ( ! file_exists( $dir_abs . $old ) ) {

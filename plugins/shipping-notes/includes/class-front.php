@@ -18,6 +18,13 @@
  *    blocks on pages where the block cart store (wc/store/cart) exists.
  *  No endpoint of our own: only WooCommerce's refresh mechanisms.
  *
+ * Product page line (fs_product, 1.4.0): under the add-to-cart button
+ * (woocommerce_single_product_summary 32, Astra's hook, or render_block
+ * of the add-to-cart blocks on block themes), always: "Free shipping from
+ * X. With this in your cart, Y to go." or "With this in your cart,
+ * shipping is free." Computed on the server for the visitor's cart; a
+ * classic add to cart reloads the page.
+ *
  * Delivery time (dl): product page (after the price or the add-to-cart
  * form; classic hooks, Astra hooks, or render_block on block themes),
  * [nox_delivery] and the noxpress/delivery block. Dates and the cut-off
@@ -45,6 +52,7 @@ final class SHN_Front {
 	private static $store_api = false;
 	private static $dl_done   = false;
 	private static $cart_done = false;
+	private static $fsp_done  = false;
 	private static $css       = false;
 	private static $dl_js     = false;
 	private static $live_js   = false;
@@ -70,6 +78,9 @@ final class SHN_Front {
 			}
 			add_filter( 'woocommerce_add_to_cart_fragments', array( __CLASS__, 'fragments' ) );
 			add_action( 'woocommerce_init', array( __CLASS__, 'store_api_register' ) );
+			if ( $s['fs_product'] ) {
+				add_action( 'wp', array( __CLASS__, 'setup_fs_product' ) );
+			}
 		}
 
 		if ( 'off' !== $s['dl_mode'] && 'none' !== $s['dl_position'] ) {
@@ -366,6 +377,93 @@ final class SHN_Front {
 		} catch ( \Throwable $e ) {
 			self::fail();
 			return '';
+		}
+	}
+
+	/* =====================================================================
+	 * Free shipping: product page line (1.4.0)
+	 * =================================================================== */
+
+	/** Hooks under the add-to-cart button of the viewed product. */
+	public static function setup_fs_product(): void {
+		try {
+			if ( ! function_exists( 'is_product' ) || ! is_product() || ! self::visible( 'fs' ) ) {
+				return;
+			}
+			if ( ! ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) ) {
+				add_action( 'astra_woo_single_add_to_cart_after', array( __CLASS__, 'print_fs_product' ), 11 );
+				add_action( 'woocommerce_single_product_summary', array( __CLASS__, 'print_fs_product' ), 32 );
+			}
+			add_filter( 'render_block_woocommerce/add-to-cart-form', array( __CLASS__, 'block_fs_product' ), 11, 3 );
+			add_filter( 'render_block_woocommerce/add-to-cart-with-options', array( __CLASS__, 'block_fs_product' ), 11, 3 );
+		} catch ( \Throwable $e ) {
+			self::fail();
+		}
+	}
+
+	/** The line of a product ('' when nothing shows). */
+	public static function fs_product_html( int $id ): string {
+		$product = $id > 0 ? wc_get_product( $id ) : null;
+		if ( ! $product instanceof WC_Product ) {
+			return '';
+		}
+		$st = SHN_Threshold::for_product( $product );
+		if ( null === $st ) {
+			return '';
+		}
+		$won  = 'won' === $st['state'];
+		$text = strtr(
+			esc_html( SHN_Settings::text( $won ? 'fs_t_p_won' : 'fs_t_p_left' ) ),
+			array(
+				'{threshold}' => wc_price( $st['threshold'] ),
+				'{remaining}' => wc_price( $st['remaining'] ),
+				'{price}'     => wc_price( (float) wc_get_price_to_display( $product ) ),
+			)
+		);
+		if ( '' === trim( wp_strip_all_tags( $text ) ) ) {
+			return '';
+		}
+		self::css();
+		$s     = SHN_Settings::get();
+		$style = '' !== $s['fs_color'] ? ' style="--shn-color:' . esc_attr( $s['fs_color'] ) . '"' : '';
+		return '<p class="shn-fsp shn-fsp--' . ( $won ? 'won' : 'left' ) . '"' . $style . '>' . $text . '</p>';
+	}
+
+	/** Action callback: the line of the viewed product, once. */
+	public static function print_fs_product(): void {
+		try {
+			if ( self::$fsp_done || ! self::visible( 'fs' ) ) {
+				return;
+			}
+			$html = self::fs_product_html( self::current_product_id() );
+			if ( '' !== $html ) {
+				self::$fsp_done = true;
+				echo $html; // phpcs:ignore WordPress.Security.EscapeOutput -- built and escaped in fs_product_html().
+			}
+		} catch ( \Throwable $e ) {
+			self::fail();
+		}
+	}
+
+	/** render_block filter: after the viewed product's add-to-cart block. */
+	public static function block_fs_product( $content, $parsed = null, $block = null ) {
+		try {
+			$content = (string) $content;
+			if ( self::$fsp_done || ! self::visible( 'fs' ) ) {
+				return $content;
+			}
+			if ( is_object( $block ) && isset( $block->context['postId'] ) && (int) $block->context['postId'] !== (int) get_queried_object_id() ) {
+				return $content; // A product list on the same page.
+			}
+			$html = self::fs_product_html( (int) get_queried_object_id() );
+			if ( '' === $html ) {
+				return $content;
+			}
+			self::$fsp_done = true;
+			return $content . $html;
+		} catch ( \Throwable $e ) {
+			self::fail();
+			return (string) $content;
 		}
 	}
 

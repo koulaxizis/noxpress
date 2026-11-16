@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Checkout Extras
  * Plugin URI:           https://noxpress.tech
- * Description:          Τρία μικρά πράγματα γύρω από το ταμείο, σε ένα plugin: «Είναι δώρο» με αφιέρωση και προαιρετική χρέωση συσκευασίας, μήνυμα και προτεινόμενα προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία, μόνο σε πληρωμένες παραγγελίες, με μέτρηση χρήσης και καθαρισμό των ληγμένων.
- * Version:              1.1.2
+ * Description:          Τέσσερα μικρά πράγματα γύρω από το ταμείο, σε ένα plugin: «Είναι δώρο» με αφιέρωση και προαιρετική χρέωση συσκευασίας, μήνυμα και προτεινόμενα προϊόντα στη σελίδα ευχαριστίας, κουπόνι ευχαριστίας για την επόμενη παραγγελία, μόνο σε πληρωμένες παραγγελίες, με μέτρηση χρήσης και καθαρισμό των ληγμένων, και διακοπές καταστήματος: το site μένει ανοιχτό, οι αγορές κλείνουν (ή γίνονται δεκτές για αποστολή μετά), με ημερομηνίες που ανοίγουν και κλείνουν μόνες τους.
+ * Version:              1.2.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -34,10 +34,15 @@
  *  - CKE_Coupon    → the thank-you coupon: issue on status change, rules,
  *                    email block, redemption tracking, stats, daily cleanup,
  *                    reminders (Action Scheduler)
+ *  - CKE_Vacation  → store vacation: buying closed in three layers
+ *                    (products, cart, checkout) or "shipped after the
+ *                    vacation", bar, dates, cache purge at the change times
+ *  - CKE_Abilities → checkout-extras/vacation-status and vacation-set in
+ *                    the WordPress Abilities API (WordPress 6.9+)
  *  - CKE_Emails    → the WooCommerce emails "Thank-you coupon" and
  *                    "Coupon reminder" (class-email-classes.php, templates/)
  *  - CKE_Admin_UI  → menu, settings page (gift, thank-you page, coupon,
- *                    stats, tools), backup, footer
+ *                    vacation, stats, tools), backup, footer
  *
  * Front-end rules (Bible §14): every part is off after activation; test
  * mode shows a part only to shop managers (and issues coupons only for
@@ -46,7 +51,10 @@
  * session, no external request.
  *
  * Cooperation (Bible §6): fires cke_coupon_created; filters cke_text,
- * cke_coupon_args. Public API: cke_get_gift().
+ * cke_coupon_args, cke_vacation_allow. Public API: cke_get_gift(). Reads
+ * Pre-Orders' por_get_release() (exempt pre-orders), fills Shipping Notes'
+ * shn_available_from with the vacation end, purges the page cache through
+ * Noxpress_Core::purge_page_cache().
  *
  * Deviations from the Bible (with reason):
  *  - §14.4 (never in AJAX or REST): the gift option and its fee live in
@@ -55,6 +63,9 @@
  *    read-only cart extension value (the §14.4 Store API exception). In the
  *    Checkout block a fee cannot follow a field without session writes, so
  *    with a gift fee the option is offered in the classic checkout only.
+ *    The store vacation answers in the Store API too (purchasable rule,
+ *    cart errors, a required block checkout field while "shipped later"),
+ *    so the Cart and Checkout blocks refuse what the classic pages refuse.
  *  - §14.5 (no database write on a visitor request): the gift is written on
  *    the order WooCommerce creates, and the coupon is created on an order
  *    status change (also when a payment callback or the checkout request
@@ -67,7 +78,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CKE_VERSION', '1.1.2' );
+define( 'CKE_VERSION', '1.2.0' );
 define( 'CKE_FILE', __FILE__ );
 define( 'CKE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CKE_URL', plugin_dir_url( __FILE__ ) );
@@ -114,17 +125,22 @@ final class Checkout_Extras {
 		require_once CKE_PATH . 'includes/class-coupon.php';
 		require_once CKE_PATH . 'includes/class-thankyou.php';
 		require_once CKE_PATH . 'includes/class-emails.php';
+		require_once CKE_PATH . 'includes/class-vacation.php';
+		require_once CKE_PATH . 'includes/class-abilities.php';
 
 		// Orders that already carry a gift or a coupon keep showing them
 		// (admin screens, emails, the background jobs), whatever the mode.
 		CKE_Gift::init_display();
 		CKE_Coupon::init();
 		CKE_Emails::init();
+		CKE_Vacation::init_display();
+		CKE_Abilities::init();
 
 		// Emergency switch (Bible §14): no checkout or thank-you hooks at all.
 		if ( ! self::killed() ) {
 			CKE_Gift::init_front();
 			CKE_Thankyou::init();
+			CKE_Vacation::init_front();
 		}
 
 		if ( is_admin() ) {
@@ -177,6 +193,7 @@ register_deactivation_hook(
 	static function () {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( 'cke_cleanup' );
+			as_unschedule_all_actions( 'cke_vacation_flip' );
 		}
 	}
 );
