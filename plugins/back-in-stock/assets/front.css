@@ -1,0 +1,20 @@
+/**
+ * Back in Stock — front.css (v1.0.0). Theme-proof: own classes only,
+ * colours from the theme (currentColor), no fixed fonts.
+ */
+.bis-box{margin:1.25em 0;padding:1em 1.1em;border:1px solid rgba(0,0,0,.14);border-radius:6px;max-width:32rem}
+.bis-box[hidden]{display:none!important}
+.bis-title{margin:0 0 .35em;font-weight:600}
+.bis-hint,.bis-pick{margin:0 0 .75em;font-size:.92em}
+.bis-form{margin:0}
+.bis-label{display:block;margin:0 0 .25em;font-size:.92em}
+.bis-email{display:block;width:100%;max-width:100%;box-sizing:border-box;margin:0 0 .75em}
+.bis-variation{display:block;max-width:100%;margin:0 0 .75em}
+.bis-consent{display:block;margin:0 0 .9em;font-size:.92em;line-height:1.45}
+.bis-consent input{margin-right:.35em}
+.bis-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+.bis-msg{margin:0 0 .75em;padding:.55em .75em;border-radius:4px;font-size:.92em}
+.bis-msg--ok{background:rgba(0,128,0,.08)}
+.bis-msg--err{background:rgba(204,0,0,.08)}
+.bis-js .bis-box[data-bis-variable] .bis-pick,
+.bis-js .bis-box[data-bis-variable] .bis-variation{display:none}

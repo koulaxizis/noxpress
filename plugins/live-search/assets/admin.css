@@ -1,0 +1,473 @@
+/**
+ * Live Search — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors lvs-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.lvs-wrap {
+	--lvs-bg: #101218;
+	--lvs-panel: #14161d;
+	--lvs-panel-2: #1d2029;
+	--lvs-input: #1a1d26;
+	--lvs-border: #2e3240;
+	--lvs-border-input: #3a3f52;
+	--lvs-row-border: #23262f;
+	--lvs-stripe: #181b23;
+	--lvs-hover: #1e212c;
+	--lvs-text: #eae8fa;
+	--lvs-heading: #f6f4ff;
+	--lvs-muted: #b7b2d6;
+	--lvs-link: #beb1ff;
+	--lvs-link-hover: #d4c9ff;
+	--lvs-accent: #6d4aff;
+	--lvs-accent-hover: #8263ff;
+	--lvs-warn: #f5c97e;
+	--lvs-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.lvs-wrap {
+	color-scheme: dark;
+	background: var(--lvs-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--lvs-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.lvs-wrap h1,
+.lvs-wrap h2 {
+	color: var(--lvs-heading);
+}
+
+.lvs-wrap a { color: var(--lvs-link); }
+.lvs-wrap a:hover { color: var(--lvs-link-hover); }
+
+.lvs-wrap .lvs-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--lvs-muted);
+	border-bottom: 1px solid var(--lvs-border);
+	padding-bottom: 6px;
+}
+
+.lvs-wrap .description,
+.lvs-wrap p.description,
+.lvs-wrap .lvs-hint {
+	color: var(--lvs-muted) !important;
+}
+
+.lvs-zone {
+	background: var(--lvs-panel);
+	border: 1px solid var(--lvs-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.lvs-wrap input[type="text"],
+.lvs-wrap input[type="url"],
+.lvs-wrap input[type="number"],
+.lvs-wrap input[type="time"],
+.lvs-wrap input[type="date"],
+.lvs-wrap textarea,
+.lvs-wrap select {
+	background-color: var(--lvs-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--lvs-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.lvs-wrap input::placeholder,
+.lvs-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.lvs-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.lvs-wrap input[type="file"] {
+	color: var(--lvs-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.lvs-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.lvs-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.lvs-wrap input[type="checkbox"],
+.lvs-wrap input[type="radio"] {
+	accent-color: var(--lvs-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.lvs-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.lvs-wrap .button:hover:not(:disabled) {
+	border-color: var(--lvs-accent) !important;
+	color: #ffffff !important;
+}
+
+.lvs-wrap .button-primary {
+	background: var(--lvs-accent) !important;
+	border-color: var(--lvs-accent) !important;
+	color: #ffffff !important;
+}
+
+.lvs-wrap .button-primary:hover:not(:disabled) {
+	background: var(--lvs-accent-hover) !important;
+}
+
+.lvs-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.lvs-submit { margin-top: 20px; }
+.lvs-inline-form { display: inline; margin-right: 10px; }
+.lvs-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.lvs-table,
+table.widefat.lvs-table {
+	background: var(--lvs-panel) !important;
+	border: 1px solid var(--lvs-border) !important;
+	border-radius: 6px;
+	color: var(--lvs-text) !important;
+	margin-top: 14px !important;
+}
+
+.lvs-table thead th,
+.lvs-table thead td {
+	background: var(--lvs-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.lvs-table tbody td,
+.lvs-table tbody th {
+	background: var(--lvs-panel) !important;
+	color: var(--lvs-text) !important;
+	border-bottom: 1px solid var(--lvs-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.lvs-table tbody tr:nth-child(2n) td,
+.lvs-table tbody tr:nth-child(2n) th {
+	background: var(--lvs-stripe) !important;
+}
+
+.lvs-table tbody tr:hover td,
+.lvs-table tbody tr:hover th {
+	background: var(--lvs-hover) !important;
+}
+
+.lvs-table td,
+.lvs-table th {
+	padding: 12px 14px;
+}
+
+.lvs-table td code {
+	background: transparent !important;
+	color: var(--lvs-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.lvs-table .lvs-empty {
+	color: var(--lvs-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.lvs-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.lvs-footer a { color: #beb1ff; text-decoration: none; }
+.lvs-footer a:hover { text-decoration: underline; }
+
+.lvs-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.lvs-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.lvs-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.lvs-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.lvs-muted { color: var(--lvs-muted) !important; }
+.lvs-warn { color: var(--lvs-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.lvs-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.lvs-wrap .lvs-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--lvs-heading);
+}
+
+.lvs-status p { margin: 0 0 8px; }
+.lvs-status p:last-child { margin-bottom: 0; }
+.lvs-status code,
+.lvs-wrap .description code,
+.lvs-wrap .lvs-hint code {
+	background: var(--lvs-panel-2);
+	color: var(--lvs-muted);
+	border: 1px solid var(--lvs-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.lvs-suspended { margin: 8px 0 0; }
+.lvs-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.lvs-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--lvs-border);
+	background: var(--lvs-panel-2);
+	color: var(--lvs-text);
+	white-space: nowrap;
+}
+.lvs-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.lvs-badge--muted { color: var(--lvs-muted); }
+.lvs-badge--warn { border-color: #6b5a33; color: var(--lvs-warn); }
+.lvs-badge--danger { border-color: #6b3a3a; color: var(--lvs-danger); }
+
+/* Area fieldsets. */
+.lvs-area {
+	background: var(--lvs-panel);
+	border: 1px solid var(--lvs-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.lvs-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--lvs-heading);
+}
+.lvs-row { margin: 4px 0 8px; }
+
+.lvs-details > summary {
+	cursor: pointer;
+	color: var(--lvs-link);
+	margin: 4px 0;
+}
+.lvs-details[open] > summary { margin-bottom: 12px; }
+
+.lvs-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.lvs-wrap .lvs-label {
+	display: block;
+	font-weight: 600;
+	color: var(--lvs-heading);
+	margin: 8px 0 6px;
+}
+.lvs-grid .lvs-label:first-child { margin-top: 0; }
+
+.lvs-field {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.lvs-field > span:first-child {
+	min-width: 150px;
+	color: var(--lvs-text);
+}
+.lvs-wrap .lvs-hint { display: block; font-size: 12px; margin-top: 4px; }
+.lvs-wrap td .lvs-hint { display: inline; }
+.lvs-table td.lvs-warn { color: var(--lvs-warn) !important; }
+
+/* Tabs of the main page. */
+.lvs-wrap .lvs-tabs {
+	border-bottom: 1px solid var(--lvs-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.lvs-wrap .lvs-tabs .nav-tab {
+	background: var(--lvs-panel);
+	border-color: var(--lvs-border);
+	color: var(--lvs-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.lvs-wrap .lvs-tabs .nav-tab:hover { color: var(--lvs-link-hover); background: var(--lvs-hover); }
+.lvs-wrap .lvs-tabs .nav-tab-active,
+.lvs-wrap .lvs-tabs .nav-tab-active:hover {
+	background: var(--lvs-bg);
+	border-bottom-color: var(--lvs-bg);
+	color: var(--lvs-heading);
+}
+
+/* One input per line (removal rules). */
+.lvs-wrap .lvs-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.lvs-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--lvs-border);
+	border-radius: 6px;
+	background: var(--lvs-panel-2);
+}
+.lvs-scroll .lvs-field { margin-bottom: 4px; }
+
+/* ===== Shipping Notes ===== */
+
+.lvs-wrap .lvs-wide { width: 100%; max-width: 640px; }
+.lvs-wrap .lvs-num { width: 90px; }
+.lvs-wrap .lvs-texts input[type="text"] { width: 100%; }
+
+/* ===== Rule cards ===== */
+.lvs-wrap .lvs-rule-card {
+	min-width: 0; /* fieldsets default to min-content and overflow narrow screens */
+	margin: 12px 0 0;
+	padding: 12px 18px 10px;
+}
+.lvs-wrap .lvs-rule-card legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--lvs-heading);
+}
+.lvs-wrap .lvs-rule-card--new { border-style: dashed; }
+.lvs-wrap .lvs-rule-card--new legend { color: var(--lvs-muted); }
+.lvs-wrap .lvs-rule-card .lvs-label { margin: 0; }
+.lvs-wrap .lvs-rule-card .lvs-label .lvs-wide {
+	display: block;
+	width: 100%;
+	max-width: none;
+	margin-top: 6px;
+	font-weight: 400;
+}
+.lvs-wrap .lvs-rule-card textarea { min-height: 64px; }
+.lvs-wrap .lvs-rule-card .lvs-badge { white-space: normal; max-width: 100%; }
+.lvs-wrap .lvs-rule-card select,
+.lvs-wrap input[type="file"] { max-width: 100%; }
+.lvs-wrap .lvs-texts td:first-child { width: 280px; }
+
+/* ===== Live Search additions ===== */
+.lvs-radio {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.lvs-kv th {
+	width: 260px;
+	font-weight: 600;
+}
+
+.lvs-bar {
+	position: relative;
+	height: 8px;
+	margin: 12px 0 0;
+	max-width: 520px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--lvs-panel-2);
+	border: 1px solid var(--lvs-border);
+}
+
+.lvs-bar[hidden] {
+	display: none;
+}
+
+.lvs-bar > span {
+	display: block;
+	width: 0;
+	height: 100%;
+	background: var(--lvs-accent);
+	transition: width 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lvs-bar > span {
+		transition: none;
+	}
+}

@@ -5,7 +5,7 @@ Tags: woocommerce, wishlist, wish list, save for later, favorites
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -113,8 +113,11 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 
+= 1.2.7 =
+* Noxpress Core 1.4.11: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+
 = 1.2.6 =
-* Core 1.4.8: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* With Back in Stock: when the customer also asked Back in Stock to be notified about the same product (or variation), the daily email leaves out its «back in stock» line, so the customer gets one email, not two. Noxpress Core 1.4.10.
 
 = 1.2.5 =
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).

@@ -1,0 +1,465 @@
+/**
+ * Events — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors evt-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.evt-wrap {
+	--evt-bg: #101218;
+	--evt-panel: #14161d;
+	--evt-panel-2: #1d2029;
+	--evt-input: #1a1d26;
+	--evt-border: #2e3240;
+	--evt-border-input: #3a3f52;
+	--evt-row-border: #23262f;
+	--evt-stripe: #181b23;
+	--evt-hover: #1e212c;
+	--evt-text: #eae8fa;
+	--evt-heading: #f6f4ff;
+	--evt-muted: #b7b2d6;
+	--evt-link: #beb1ff;
+	--evt-link-hover: #d4c9ff;
+	--evt-accent: #6d4aff;
+	--evt-accent-hover: #8263ff;
+	--evt-warn: #f5c97e;
+	--evt-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.evt-wrap {
+	color-scheme: dark;
+	background: var(--evt-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--evt-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.evt-wrap h1,
+.evt-wrap h2 {
+	color: var(--evt-heading);
+}
+
+.evt-wrap a { color: var(--evt-link); }
+.evt-wrap a:hover { color: var(--evt-link-hover); }
+
+.evt-wrap .evt-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--evt-muted);
+	border-bottom: 1px solid var(--evt-border);
+	padding-bottom: 6px;
+}
+
+.evt-wrap .description,
+.evt-wrap p.description,
+.evt-wrap .evt-hint {
+	color: var(--evt-muted) !important;
+}
+
+.evt-zone {
+	background: var(--evt-panel);
+	border: 1px solid var(--evt-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.evt-wrap input[type="text"],
+.evt-wrap input[type="email"],
+.evt-wrap input[type="url"],
+.evt-wrap input[type="number"],
+.evt-wrap input[type="time"],
+.evt-wrap input[type="date"],
+.evt-wrap textarea,
+.evt-wrap select {
+	background-color: var(--evt-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--evt-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.evt-wrap input::placeholder,
+.evt-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.evt-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.evt-wrap input[type="file"] {
+	color: var(--evt-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.evt-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.evt-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.evt-wrap input[type="checkbox"],
+.evt-wrap input[type="radio"] {
+	accent-color: var(--evt-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.evt-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.evt-wrap .button:hover:not(:disabled) {
+	border-color: var(--evt-accent) !important;
+	color: #ffffff !important;
+}
+
+.evt-wrap .button-primary {
+	background: var(--evt-accent) !important;
+	border-color: var(--evt-accent) !important;
+	color: #ffffff !important;
+}
+
+.evt-wrap .button-primary:hover:not(:disabled) {
+	background: var(--evt-accent-hover) !important;
+}
+
+.evt-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.evt-submit { margin-top: 20px; }
+.evt-inline-form { display: inline; margin-right: 10px; }
+.evt-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.evt-table,
+table.widefat.evt-table {
+	background: var(--evt-panel) !important;
+	border: 1px solid var(--evt-border) !important;
+	border-radius: 6px;
+	color: var(--evt-text) !important;
+	margin-top: 14px !important;
+}
+
+.evt-table thead th,
+.evt-table thead td {
+	background: var(--evt-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.evt-table tbody td,
+.evt-table tbody th {
+	background: var(--evt-panel) !important;
+	color: var(--evt-text) !important;
+	border-bottom: 1px solid var(--evt-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.evt-table tbody tr:nth-child(2n) td,
+.evt-table tbody tr:nth-child(2n) th {
+	background: var(--evt-stripe) !important;
+}
+
+.evt-table tbody tr:hover td,
+.evt-table tbody tr:hover th {
+	background: var(--evt-hover) !important;
+}
+
+.evt-table td,
+.evt-table th {
+	padding: 12px 14px;
+}
+
+.evt-table td code {
+	background: transparent !important;
+	color: var(--evt-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.evt-table .evt-empty {
+	color: var(--evt-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.evt-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.evt-footer a { color: #beb1ff; text-decoration: none; }
+.evt-footer a:hover { text-decoration: underline; }
+
+.evt-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.evt-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.evt-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.evt-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.evt-muted { color: var(--evt-muted) !important; }
+.evt-warn { color: var(--evt-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.evt-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.evt-wrap .evt-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--evt-heading);
+}
+
+.evt-status p { margin: 0 0 8px; }
+.evt-status p:last-child { margin-bottom: 0; }
+.evt-status code,
+.evt-wrap .description code,
+.evt-wrap .evt-hint code {
+	background: var(--evt-panel-2);
+	color: var(--evt-muted);
+	border: 1px solid var(--evt-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.evt-suspended { margin: 8px 0 0; }
+.evt-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.evt-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--evt-border);
+	background: var(--evt-panel-2);
+	color: var(--evt-text);
+	white-space: nowrap;
+}
+.evt-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.evt-badge--muted { color: var(--evt-muted); }
+.evt-badge--warn { border-color: #6b5a33; color: var(--evt-warn); }
+.evt-badge--danger { border-color: #6b3a3a; color: var(--evt-danger); }
+
+/* Area fieldsets. */
+.evt-area {
+	background: var(--evt-panel);
+	border: 1px solid var(--evt-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.evt-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--evt-heading);
+}
+.evt-row { margin: 4px 0 8px; }
+
+.evt-details > summary {
+	cursor: pointer;
+	color: var(--evt-link);
+	margin: 4px 0;
+}
+.evt-details[open] > summary { margin-bottom: 12px; }
+
+.evt-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.evt-wrap .evt-label {
+	display: block;
+	font-weight: 600;
+	color: var(--evt-heading);
+	margin: 8px 0 6px;
+}
+.evt-grid .evt-label:first-child { margin-top: 0; }
+
+.evt-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.evt-field > span:first-child {
+	min-width: 150px;
+	color: var(--evt-text);
+}
+.evt-wrap .evt-color { width: 96px; font-family: monospace; }
+.evt-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--evt-border-input);
+}
+
+.evt-wrap .evt-hint { display: block; font-size: 12px; margin-top: 4px; }
+.evt-wrap td .evt-hint { display: inline; }
+.evt-table td.evt-warn { color: var(--evt-warn) !important; }
+
+/* Tabs of the main page. */
+.evt-wrap .evt-tabs {
+	border-bottom: 1px solid var(--evt-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.evt-wrap .evt-tabs .nav-tab {
+	background: var(--evt-panel);
+	border-color: var(--evt-border);
+	color: var(--evt-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.evt-wrap .evt-tabs .nav-tab:hover { color: var(--evt-link-hover); background: var(--evt-hover); }
+.evt-wrap .evt-tabs .nav-tab-active,
+.evt-wrap .evt-tabs .nav-tab-active:hover {
+	background: var(--evt-bg);
+	border-bottom-color: var(--evt-bg);
+	color: var(--evt-heading);
+}
+
+/* One input per line (removal rules). */
+.evt-wrap .evt-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.evt-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--evt-border);
+	border-radius: 6px;
+	background: var(--evt-panel-2);
+}
+.evt-scroll .evt-field { margin-bottom: 4px; }
+
+/* ===== orOS Connect ===== */
+
+.evt-wrap .evt-wide { width: 100%; max-width: 640px; }
+.evt-wrap .evt-key { width: 100%; max-width: 360px; font-family: monospace; }
+.evt-wrap textarea.evt-wide { min-height: 96px; font-family: monospace; font-size: 12px; }
+
+/* Module cards. */
+.evt-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.evt-mod { background: var(--evt-panel); border: 1px solid var(--evt-border); border-radius: 6px; padding: 14px 16px; }
+.evt-mod h3 { margin: 0 0 6px; font-size: 14px; color: var(--evt-heading); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.evt-mod p { margin: 0 0 10px; color: var(--evt-muted); }
+.evt-mod.is-soon { opacity: .7; }
+
+/* Two languages side by side. */
+.evt-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
+.evt-pair input[type="text"] { width: 100%; }
+.evt-pair .evt-lang { font-size: 12px; color: var(--evt-muted); display: block; margin-bottom: 2px; }
+
+/* Send log. */
+.evt-table td.is-ok { color: #9fe0b5 !important; }
+.evt-table td.is-retry { color: var(--evt-warn) !important; }
+.evt-table td.is-fail { color: var(--evt-danger) !important; }
+
+@media (max-width: 600px) {
+	.evt-wrap { padding: 20px 14px 18px; }
+	.evt-field { flex-wrap: wrap; }
+}
+
+/* ===== Back in Stock additions ===== */
+.evt-wrap input[type="number"].evt-num { width: 90px; }
+.evt-wrap textarea.evt-testers { width: 100%; max-width: 520px; min-height: 70px; }
+.evt-counts { margin: 0 0 6px; }
+
+/* Back in Stock 1.0.0 */
+.evt-table th.num,
+.evt-table td.num { text-align: right; white-space: nowrap; }
+.evt-counts .evt-badge { margin-right: 8px; }
+
+/* ===== Event edit screen and list (light WP screens, outside .evt-wrap) ===== */
+.evt-box h4{margin:1.2em 0 .4em}
+.evt-box .evt-row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-end;margin:0 0 8px}
+.evt-box .evt-row label{display:flex;flex-direction:column;gap:3px;min-width:180px}
+.evt-box .evt-row label.evt-inline{flex-direction:row;align-items:center;min-width:0}
+.evt-box .evt-row input[type="text"],.evt-box .evt-row input[type="url"]{min-width:220px}
+.evt-box .evt-row label > span,.evt-box .evt-block > span{font-weight:600}
+.evt-box .evt-block{display:block;margin:8px 0}
+.evt-box .evt-block select,.evt-box .evt-block input{width:100%;max-width:100%}
+.evt-box .description{margin:2px 0 10px}
+.evt-listbar p{margin:.4em 0}
+.column-evt_when{width:18%}
+.column-evt_status{width:14%}
+.evt-muted{color:#646970}
+.wp-list-table .evt-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;line-height:18px;background:#f0f0f1;color:#1d2327}
+.wp-list-table .evt-badge--scheduled{background:#e7f5ea;color:#00450c}
+.wp-list-table .evt-badge--postponed,.wp-list-table .evt-badge--rescheduled{background:#fcf3dc;color:#5c4400}
+.wp-list-table .evt-badge--cancelled{background:#fce8e8;color:#8a1f1f}
+.wp-list-table .evt-badge--ended{background:#f0f0f1;color:#50575e}
+.evt-wrap .evt-texts input{width:100%!important}
+@media (max-width:782px){.evt-box .evt-row label{min-width:100%}.evt-box .evt-row input[type="text"],.evt-box .evt-row input[type="url"]{min-width:0;width:100%}}
