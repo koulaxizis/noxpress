@@ -28,7 +28,7 @@ function pl_uninstall_site(): void {
 	global $wpdb;
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'pl_printful_fetch', array(), 'production-ledger', 'product-tabs' );
+		as_unschedule_all_actions( 'pl_printful_fetch', array(), 'production-ledger' );
 	}
 	wp_unschedule_hook( 'pl_printful_fetch' );
 
