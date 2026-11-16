@@ -1,12 +1,14 @@
 <?php
 /**
- * Login Guard — uninstall.php (v1.0.0)
+ * Login Guard — uninstall.php (v1.1.0)
  *
  * Always deleted (they only live for minutes or hours, or belong to one
  * person): every transient that starts with lgd_ (failure counters,
  * lockouts, escalation and request counters, admin notices, retry and
  * log-throttle flags), the user meta _lgd_unlock (unlock tokens) and
- * _lgd_devices (known devices), and the daily cron lgd_daily.
+ * _lgd_devices (known devices), the two-step verification meta
+ * (_lgd_2fa, _lgd_2fa_p, _lgd_2fa_setup, _lgd_2fa_g, _lgd_2fa_w(s), _lgd_tv: uninstalling
+ * turns 2FA off for everyone), and the daily cron lgd_daily.
  * Deleted unless «Keep settings and log» (lgd_settings.keep) is on:
  *  - Table {prefix}lgd_log (the log).
  *  - Options lgd_settings, lgd_locks, lgd_stats, lgd_state, lgd_db.
@@ -59,6 +61,10 @@ if ( is_multisite() ) {
 
 delete_metadata( 'user', 0, '_lgd_unlock', '', true );
 delete_metadata( 'user', 0, '_lgd_devices', '', true );
+// 1.1.0: two-step verification (secrets, pending steps, setup, grace, browser version).
+foreach ( array( '_lgd_2fa', '_lgd_2fa_p', '_lgd_2fa_setup', '_lgd_2fa_g', '_lgd_2fa_w', '_lgd_2fa_ws', '_lgd_tv' ) as $lgd_meta ) {
+	delete_metadata( 'user', 0, $lgd_meta, '', true );
+}
 
 // ---------------------------------------------------------------------
 // Noxpress Core (Bible §16): the update channel, the cached version list

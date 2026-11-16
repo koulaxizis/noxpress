@@ -1432,11 +1432,12 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="login-guard">
 		<h2><a href="#login-guard">Login Guard</a></h2>
-		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
-		<p data-i18n="lg_desc">Limits on failed logins per IP and per account on every way in (login form, WooCommerce, XML-RPC, Application Passwords), with lockouts that end by themselves and an unlock link by e-mail for the real owner, with a test mode first.</p>
+		<div class="meta">v1.1.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="lg_desc">Two-step verification with an authenticator app, and limits on failed logins per IP and per account on every way in (login form, WooCommerce, XML-RPC, Application Passwords), with lockouts that end by themselves and an unlock link by e-mail for the real owner, with a test mode first.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
 		<ul>
+			<li data-i18n="lg_li6">Two-step verification with any authenticator app on wp-login and the WooCommerce login, 10 one-time recovery codes, «do not ask again in this browser», required for the roles you choose with a grace period, and sessions that skip the second step ended</li>
 			<li data-i18n="lg_li1">5 failures in 15 minutes lock an IP for 15 minutes, repeat offenders for 24 hours; 20 failures an hour lock an account from any address; every number is a setting, with an allow list</li>
 			<li data-i18n="lg_li2">Unlock by e-mail, once, for 15 minutes and only in the browser that asked; limits and the same answer on «Lost password», on WordPress and WooCommerce</li>
 			<li data-i18n="lg_li3">XML-RPC without logins, multicall and pingbacks by default, or fully closed; neutral login errors and no user names from /wp/v2/users, ?author=N, the sitemap or oEmbed</li>
@@ -1445,7 +1446,7 @@ footer .heart { color: var(--accent-bright); }
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lg-1.0.0/login-guard.zip" rel="nofollow noopener" data-i18n="lg_download">Download v1.0.0 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lg-1.1.0/login-guard.zip" rel="nofollow noopener" data-i18n="lg_download">Download v1.1.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/login-guard" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -2102,13 +2103,14 @@ footer .heart { color: var(--accent-bright); }
 		iv_li4: '«Invoices» page: the invoice orders of a period with net, VAT and total after refunds, and a CSV for the accountant (Excel Greek or standard)',
 		iv_li5: 'Reads orders made with Timologia and OBS, can also write their meta names for your invoicing provider; test mode, IVD_DISABLE, read-only ability for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		iv_download: 'Download v1.1.0 (.zip)',
-		lg_desc: 'Limits on failed logins per IP and per account on every way in (login form, WooCommerce, XML-RPC, Application Passwords), with lockouts that end by themselves and an unlock link by e-mail for the real owner, with a test mode first.',
+		lg_desc: 'Two-step verification with an authenticator app, and limits on failed logins per IP and per account on every way in (login form, WooCommerce, XML-RPC, Application Passwords), with lockouts that end by themselves and an unlock link by e-mail for the real owner, with a test mode first.',
+		lg_li6: 'Two-step verification with any authenticator app on wp-login and the WooCommerce login, 10 one-time recovery codes, «do not ask again in this browser», required for the roles you choose with a grace period, and sessions that skip the second step ended',
 		lg_li1: '5 failures in 15 minutes lock an IP for 15 minutes, repeat offenders for 24 hours; 20 failures an hour lock an account from any address; every number is a setting, with an allow list',
 		lg_li2: 'Unlock by e-mail, once, for 15 minutes and only in the browser that asked; limits and the same answer on «Lost password», on WordPress and WooCommerce',
 		lg_li3: 'XML-RPC without logins, multicall and pingbacks by default, or fully closed; neutral login errors and no user names from /wp/v2/users, ?author=N, the sitemap or oEmbed',
 		lg_li4: 'E-mail when an administrator logs in from a new device, and one e-mail an hour at most during an attack',
 		lg_li5: 'Log with truncated IPs and keyed hashes for 30 days, the real IP only from REMOTE_ADDR or Cloudflare, recovery doors (LGD_DISABLE, WP-CLI), ability for Site Bridge, bilingual UI and shared «Noxpress» menu',
-		lg_download: 'Download v1.0.0 (.zip)',
+		lg_download: 'Download v1.1.0 (.zip)',
 		lv_desc: 'Search suggestions as the visitor types: title, ISBN, authors and more, without accents, with greeklish and tolerant of small typos. The theme’s own search forms stay as they are and simply find more; an exact ISBN opens the book directly. Moves over from FiboSearch.',
 		lv_li1: 'Searches title, ISBN / GTIN / SKU (10 ↔ 13 digits), authors and other attributes, categories, tags and publishers; «h eirini» finds «Η Ειρήνη», one wrong letter is forgiven, synonyms per line',
 		lv_li2: 'Suggestions from one static file in the browser: no request per keystroke, a new file name with every change and the old one kept 13 hours, so cached pages keep working; from the server above 5,000 products',
@@ -2578,13 +2580,14 @@ footer .heart { color: var(--accent-bright); }
 		iv_li4: 'Σελίδα «Τιμολόγια»: οι παραγγελίες με τιμολόγιο ενός διαστήματος με καθαρό, ΦΠΑ και σύνολο μετά τις επιστροφές, και CSV για τον λογιστή (Excel ελληνικά ή απλό)',
 		iv_li5: 'Διαβάζει τις παραγγελίες του Timologia και του OBS και μπορεί να γράφει και τα δικά τους ονόματα για τον πάροχο τιμολόγησης· λειτουργία δοκιμής, IVD_DISABLE, ability μόνο για ανάγνωση για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		iv_download: 'Λήψη v1.1.0 (.zip)',
-		lg_desc: 'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό σε κάθε είσοδο (φόρμα σύνδεσης, WooCommerce, XML-RPC, Application Passwords), με κλειδώματα που λήγουν μόνα τους και σύνδεσμο ξεκλειδώματος με email για τον πραγματικό κάτοχο, με λειτουργία δοκιμής πρώτα.',
+		lg_desc: 'Επαλήθευση σε δύο βήματα με εφαρμογή authenticator, και όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό σε κάθε είσοδο (φόρμα σύνδεσης, WooCommerce, XML-RPC, Application Passwords), με κλειδώματα που λήγουν μόνα τους και σύνδεσμο ξεκλειδώματος με email για τον πραγματικό κάτοχο, με λειτουργία δοκιμής πρώτα.',
+		lg_li6: 'Επαλήθευση σε δύο βήματα με οποιαδήποτε εφαρμογή authenticator στο wp-login και στη σύνδεση του WooCommerce, 10 κωδικοί ανάκτησης μίας χρήσης, «να μη ζητηθεί ξανά σε αυτόν τον browser», υποχρεωτική για τους ρόλους που διαλέγεις με περίοδο χάριτος, και τέλος σε συνδέσεις που παρακάμπτουν το δεύτερο βήμα',
 		lg_li1: '5 αποτυχίες σε 15 λεπτά κλειδώνουν μια IP για 15 λεπτά, όσους επιμένουν για 24 ώρες· 20 αποτυχίες την ώρα κλειδώνουν έναν λογαριασμό από όποια διεύθυνση κι αν έρχονται· κάθε αριθμός είναι ρύθμιση, με λίστα έμπιστων διευθύνσεων',
 		lg_li2: 'Ξεκλείδωμα με email, μία φορά, για 15 λεπτά και μόνο στον browser που το ζήτησε· όρια και ίδια απάντηση στο «Ξέχασα τον κωδικό», στο WordPress και στο WooCommerce',
 		lg_li3: 'XML-RPC χωρίς συνδέσεις, multicall και pingbacks από προεπιλογή, ή κλειστό εντελώς· ουδέτερα μηνύματα σύνδεσης και κανένα όνομα χρήστη από το /wp/v2/users, το ?author=N, το sitemap ή το oEmbed',
 		lg_li4: 'Email όταν ένας διαχειριστής συνδέεται από νέα συσκευή, και το πολύ ένα email την ώρα σε κύμα επιθέσεων',
 		lg_li5: 'Ημερολόγιο με κομμένη IP και hash για 30 ημέρες, η πραγματική IP μόνο από το REMOTE_ADDR ή την Cloudflare, πόρτες ανάκτησης (LGD_DISABLE, WP-CLI), ability για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
-		lg_download: 'Λήψη v1.0.0 (.zip)',
+		lg_download: 'Λήψη v1.1.0 (.zip)',
 		lv_desc: 'Προτάσεις αναζήτησης καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς και άλλα, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες αναζήτησης του θέματος μένουν ίδιες και απλώς βρίσκουν περισσότερα· ένα ακριβές ISBN ανοίγει κατευθείαν το βιβλίο. Αντικαθιστά το FiboSearch.',
 		lv_li1: 'Ψάχνει τίτλο, ISBN / GTIN / SKU (10 ↔ 13 ψηφία), συγγραφείς και άλλα χαρακτηριστικά, κατηγορίες, ετικέτες και εκδότες· το «h eirini» βρίσκει «Η Ειρήνη», ένα λάθος γράμμα συγχωρείται, συνώνυμα ανά γραμμή',
 		lv_li2: 'Προτάσεις από ένα στατικό αρχείο στον browser: κανένα αίτημα ανά πλήκτρο, νέο όνομα αρχείου σε κάθε αλλαγή και το παλιό κρατιέται 13 ώρες, ώστε οι σελίδες στην cache να δουλεύουν· από τον server πάνω από 5.000 προϊόντα',

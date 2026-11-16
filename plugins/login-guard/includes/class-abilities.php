@@ -119,12 +119,28 @@ final class LGD_Abilities {
 				'neutral_errors'  => $s['enum_errors'],
 				'lost_password'   => $s['lostpw'],
 			),
+			'two_factor'      => self::twofa(),
 			'failed_24h'      => LGD_Store::failures( 24 ),
 			'failed_30d'      => LGD_Store::failures( 24 * 30 ),
 			'events_24h'      => LGD_Store::counts( time() - DAY_IN_SECONDS ),
 			'events_30d'      => LGD_Store::counts( time() - 30 * DAY_IN_SECONDS ),
 			'active_lockouts' => $locks,
 			'latest'          => $latest,
+		);
+	}
+
+	/** 2FA counts only: never names, secrets or codes. */
+	private static function twofa(): array {
+		$s   = LGD_Settings::get();
+		$sum = LGD_TwoFA::summary( 0 );
+		return array(
+			'active'         => LGD_TwoFA::active(),
+			'possible'       => LGD_TwoFA::possible(),
+			'required_roles' => array_values( (array) $s['tfa_roles'] ),
+			'strict_guard'   => (bool) $s['tfa_strict'],
+			'users_on'       => (int) $sum['on'],
+			'users_missing'  => (int) $sum['missing'],
+			'app_passwords'  => count( LGD_TwoFA::app_passwords() ),
 		);
 	}
 }

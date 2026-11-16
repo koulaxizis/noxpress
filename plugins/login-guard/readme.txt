@@ -1,21 +1,33 @@
 === Login Guard ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: login, security, brute force, xml-rpc, user enumeration
+Tags: login, security, two-factor, brute force, xml-rpc
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.
+Two-step verification with an authenticator app, limits on failed logins per IP and per account with an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.
 
 == Description ==
 
-Every WordPress site gets password guesses all day: on wp-login.php, on the WooCommerce My Account form, through XML-RPC and through Application Passwords on the REST API. WordPress itself never says «stop». Login Guard counts the failures, locks the guessers out for a while and stops the site from telling them which user names exist.
+Every WordPress site gets password guesses all day: on wp-login.php, on the WooCommerce My Account form, through XML-RPC and through Application Passwords on the REST API. WordPress itself never says «stop». Login Guard counts the failures, locks the guessers out for a while and stops the site from telling them which user names exist. With two-step verification, a stolen password alone no longer opens the admin.
 
-Nothing a visitor sees changes after activation: the plugin starts switched off. In «Test» it counts failures and writes to its log what it would have locked, without locking anybody; only «Live» locks.
+Nothing a visitor sees changes after activation: the plugin starts switched off. In «Test» it counts failures and writes to its log what it would have locked, without locking anybody, and two-step verification works for the users who set it up; only «Live» locks and makes it required for the roles you choose.
+
+**Two-step verification (TOTP)**
+
+* Each user sets it up in their profile: scan a QR code (drawn in the browser, no outside service) with any authenticator app (Aegis, 2FAS, Google or Microsoft Authenticator, 1Password and others), confirm with one code, and keep the 10 one-time recovery codes that are shown once. New codes need a current code.
+* After the password, the login asks for the 6-digit code, on wp-login.php and on the WooCommerce login forms. A right password alone never makes a session. Every code works once; five wrong codes end the attempt, ten in 15 minutes pause the second step for that account in every mode, and wrong codes count towards the login limits.
+* «Do not ask again in this browser» for 30 days (a setting, 0 turns it off). A new password, a new e-mail, a change of 2FA or «Log out everywhere else» forgets every remembered browser.
+* Required for roles (administrators by default, in «Live» only), with a grace period of 7 days or 3 logins; after it, the admin opens only the profile until the user sets it up. A role you have yourself becomes required only after you set up your own.
+* Strict guard: if another plugin logs in a user with 2FA without the second step (a «log in as» feature, a login link), that session is ended and logged. WP-CLI and cron are not touched.
+* The secret is kept encrypted with the keys of wp-config.php (AES-256-GCM, bound to the user), the recovery codes only as a keyed hash. Without real keys in wp-config.php the plugin says so and does not offer 2FA.
+* E-mail to the user when 2FA is turned on, off or reset, and when a recovery code is used.
+* Application Passwords keep working without a second step, as WordPress designs them (orOS, Trade Feed Import and other tools use them). The overview lists who has them and when they were last used.
+* Another administrator with 2FA can reset a user's 2FA from that profile; `wp login-guard 2fa reset <user>` does it from WP-CLI; `define( 'LGD_DISABLE_2FA', true );` switches off only 2FA.
 
 **Login limits**
 
@@ -57,7 +69,7 @@ Nothing a visitor sees changes after activation: the plugin starts switched off.
 
 * The overview: lockouts and failures of the last 24 hours, active lockouts with «Unlock» and «Unlock all», and a warning when the server sees a private IP for every visitor (a proxy in front of the site that the plugin does not trust).
 * The IP comes only from the server's REMOTE_ADDR, or from CF-Connecting-IP when the request really comes from Cloudflare (Noxpress Core). Other headers are ignored, because any visitor can send them.
-* WP-CLI: `wp login-guard status`, `wp login-guard unlock --ip=… | --user=… | --all`, `wp login-guard mode off|test|live`.
+* WP-CLI: `wp login-guard status`, `wp login-guard unlock --ip=… | --user=… | --all`, `wp login-guard mode off|test|live`, `wp login-guard 2fa status|reset <user>`.
 * Ability login-guard/status (read-only, administrators) for AI tools and Site Bridge.
 * JSON export and import of the settings; visitor texts in Greek and English in the settings.
 * Greek and English admin.
@@ -86,19 +98,33 @@ Behind Cloudflare, yes: the visitor's IP is read from CF-Connecting-IP only when
 
 Only after 5 failures in 15 minutes. Add the office's address to the allow list and it is never locked per IP.
 
-= Is there two-factor authentication? =
+= I lost my phone with the authenticator app. =
 
-Not in 1.0. It is planned for 1.1 (authenticator app and recovery codes for administrators).
+Log in with one of your recovery codes, in the same field as the app's code, then set 2FA up again in your profile. Without a recovery code: another administrator with 2FA resets yours from your profile, or run `wp login-guard 2fa reset <user>`, or add `define( 'LGD_DISABLE_2FA', true );` to wp-config.php for a moment.
+
+= Does two-step verification work for customers? =
+
+Not in 1.1: it is meant for the people who run the site. Customers are covered by the login limits, and by Magic Login when you use it.
+
+= Does it work with Site Bridge, orOS and other tools? =
+
+Yes. Application Passwords log in without a second step, by WordPress's design, so tools that use them keep working. Site Bridge's sign-in is a normal admin login, so it asks for the code once.
 
 = What happens on uninstall? =
 
-The log table and the options are removed, unless you ticked «Keep settings and log». Counters, lockouts, unlock tokens and the known devices are always removed. The shared Noxpress options stay while another Noxpress plugin is installed.
+The log table and the options are removed, unless you ticked «Keep settings and log». Counters, lockouts, unlock tokens, the known devices and every user's two-step verification are always removed. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Disclaimer ==
 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: two-step verification with an authenticator app (TOTP, RFC 6238) on wp-login.php and the WooCommerce login forms, with 10 one-time recovery codes, «do not ask again in this browser», required roles with a grace period, a strict guard against sessions that skip the second step, e-mails on every change, and resets by another administrator or WP-CLI (`wp login-guard 2fa`).
+* New: the overview lists users with 2FA, users who need it, and Application Passwords with their last use.
+* New: actions lgd_2fa_passed, lgd_2fa_failed, lgd_session_blocked; filter lgd_requires_2fa; LGD_DISABLE_2FA.
+* The English admin also translates the plural messages (lockouts ended, ignored trusted addresses).
 
 = 1.0.0 =
 * Initial release.
