@@ -1,0 +1,436 @@
+/**
+ * Discount Rules — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors dsr-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.dsr-wrap {
+	--dsr-bg: #101218;
+	--dsr-panel: #14161d;
+	--dsr-panel-2: #1d2029;
+	--dsr-input: #1a1d26;
+	--dsr-border: #2e3240;
+	--dsr-border-input: #3a3f52;
+	--dsr-row-border: #23262f;
+	--dsr-stripe: #181b23;
+	--dsr-hover: #1e212c;
+	--dsr-text: #eae8fa;
+	--dsr-heading: #f6f4ff;
+	--dsr-muted: #b7b2d6;
+	--dsr-link: #beb1ff;
+	--dsr-link-hover: #d4c9ff;
+	--dsr-accent: #6d4aff;
+	--dsr-accent-hover: #8263ff;
+	--dsr-warn: #f5c97e;
+	--dsr-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.dsr-wrap {
+	color-scheme: dark;
+	background: var(--dsr-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--dsr-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.dsr-wrap h1,
+.dsr-wrap h2 {
+	color: var(--dsr-heading);
+}
+
+.dsr-wrap a { color: var(--dsr-link); }
+.dsr-wrap a:hover { color: var(--dsr-link-hover); }
+
+.dsr-wrap .dsr-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--dsr-muted);
+	border-bottom: 1px solid var(--dsr-border);
+	padding-bottom: 6px;
+}
+
+.dsr-wrap .description,
+.dsr-wrap p.description,
+.dsr-wrap .dsr-hint {
+	color: var(--dsr-muted) !important;
+}
+
+.dsr-zone {
+	background: var(--dsr-panel);
+	border: 1px solid var(--dsr-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.dsr-wrap input[type="text"],
+.dsr-wrap input[type="url"],
+.dsr-wrap input[type="number"],
+.dsr-wrap input[type="time"],
+.dsr-wrap input[type="date"],
+.dsr-wrap textarea,
+.dsr-wrap select {
+	background-color: var(--dsr-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--dsr-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.dsr-wrap input::placeholder,
+.dsr-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.dsr-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.dsr-wrap input[type="file"] {
+	color: var(--dsr-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.dsr-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.dsr-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.dsr-wrap input[type="checkbox"],
+.dsr-wrap input[type="radio"] {
+	accent-color: var(--dsr-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.dsr-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.dsr-wrap .button:hover:not(:disabled) {
+	border-color: var(--dsr-accent) !important;
+	color: #ffffff !important;
+}
+
+.dsr-wrap .button-primary {
+	background: var(--dsr-accent) !important;
+	border-color: var(--dsr-accent) !important;
+	color: #ffffff !important;
+}
+
+.dsr-wrap .button-primary:hover:not(:disabled) {
+	background: var(--dsr-accent-hover) !important;
+}
+
+.dsr-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.dsr-submit { margin-top: 20px; }
+.dsr-inline-form { display: inline; margin-right: 10px; }
+.dsr-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.dsr-table,
+table.widefat.dsr-table {
+	background: var(--dsr-panel) !important;
+	border: 1px solid var(--dsr-border) !important;
+	border-radius: 6px;
+	color: var(--dsr-text) !important;
+	margin-top: 14px !important;
+}
+
+.dsr-table thead th,
+.dsr-table thead td {
+	background: var(--dsr-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.dsr-table tbody td,
+.dsr-table tbody th {
+	background: var(--dsr-panel) !important;
+	color: var(--dsr-text) !important;
+	border-bottom: 1px solid var(--dsr-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.dsr-table tbody tr:nth-child(2n) td,
+.dsr-table tbody tr:nth-child(2n) th {
+	background: var(--dsr-stripe) !important;
+}
+
+.dsr-table tbody tr:hover td,
+.dsr-table tbody tr:hover th {
+	background: var(--dsr-hover) !important;
+}
+
+.dsr-table td,
+.dsr-table th {
+	padding: 12px 14px;
+}
+
+.dsr-table td code {
+	background: transparent !important;
+	color: var(--dsr-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.dsr-table .dsr-empty {
+	color: var(--dsr-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.dsr-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.dsr-footer a { color: #beb1ff; text-decoration: none; }
+.dsr-footer a:hover { text-decoration: underline; }
+
+.dsr-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.dsr-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.dsr-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.dsr-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.dsr-muted { color: var(--dsr-muted) !important; }
+.dsr-warn { color: var(--dsr-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.dsr-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.dsr-wrap .dsr-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--dsr-heading);
+}
+
+.dsr-status p { margin: 0 0 8px; }
+.dsr-status p:last-child { margin-bottom: 0; }
+.dsr-status code,
+.dsr-wrap .description code,
+.dsr-wrap .dsr-hint code {
+	background: var(--dsr-panel-2);
+	color: var(--dsr-muted);
+	border: 1px solid var(--dsr-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.dsr-suspended { margin: 8px 0 0; }
+.dsr-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.dsr-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--dsr-border);
+	background: var(--dsr-panel-2);
+	color: var(--dsr-text);
+	white-space: nowrap;
+}
+.dsr-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.dsr-badge--muted { color: var(--dsr-muted); }
+.dsr-badge--warn { border-color: #6b5a33; color: var(--dsr-warn); }
+.dsr-badge--danger { border-color: #6b3a3a; color: var(--dsr-danger); }
+
+/* Area fieldsets. */
+.dsr-area {
+	background: var(--dsr-panel);
+	border: 1px solid var(--dsr-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.dsr-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--dsr-heading);
+}
+.dsr-row { margin: 4px 0 8px; }
+
+.dsr-details > summary {
+	cursor: pointer;
+	color: var(--dsr-link);
+	margin: 4px 0;
+}
+.dsr-details[open] > summary { margin-bottom: 12px; }
+
+.dsr-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.dsr-wrap .dsr-label {
+	display: block;
+	font-weight: 600;
+	color: var(--dsr-heading);
+	margin: 8px 0 6px;
+}
+.dsr-grid .dsr-label:first-child { margin-top: 0; }
+
+.dsr-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.dsr-field > span:first-child {
+	min-width: 150px;
+	color: var(--dsr-text);
+}
+.dsr-wrap .dsr-hint { display: block; font-size: 12px; margin-top: 4px; }
+.dsr-wrap td .dsr-hint { display: inline; }
+.dsr-table td.dsr-warn { color: var(--dsr-warn) !important; }
+
+/* Tabs of the main page. */
+.dsr-wrap .dsr-tabs {
+	border-bottom: 1px solid var(--dsr-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.dsr-wrap .dsr-tabs .nav-tab {
+	background: var(--dsr-panel);
+	border-color: var(--dsr-border);
+	color: var(--dsr-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.dsr-wrap .dsr-tabs .nav-tab:hover { color: var(--dsr-link-hover); background: var(--dsr-hover); }
+.dsr-wrap .dsr-tabs .nav-tab-active,
+.dsr-wrap .dsr-tabs .nav-tab-active:hover {
+	background: var(--dsr-bg);
+	border-bottom-color: var(--dsr-bg);
+	color: var(--dsr-heading);
+}
+
+/* One input per line (removal rules). */
+.dsr-wrap .dsr-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.dsr-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--dsr-border);
+	border-radius: 6px;
+	background: var(--dsr-panel-2);
+}
+.dsr-scroll .dsr-field { margin-bottom: 4px; }
+
+/* ===== Discount Rules: fields ===== */
+
+.dsr-wrap .dsr-wide { width: 100%; max-width: 640px; }
+.dsr-wrap .dsr-num { width: 90px; }
+.dsr-wrap .dsr-texts input[type="text"] { width: 100%; }
+
+.dsr-wrap .dsr-texts td:first-child { width: 280px; }
+.dsr-wrap .dsr-texts textarea { width: 100%; min-height: 64px; }
+.dsr-wrap .dsr-short { width: 140px; }
+.dsr-wrap .dsr-table .dsr-num-col { text-align: right; white-space: nowrap; }
+.dsr-wrap .dsr-field .description { margin-left: 8px; }
+.dsr-wrap .dsr-zone .dsr-check + .description { margin-top: 8px; }
+
+/* ===== Discount Rules: rule list and form ===== */
+.dsr-wrap .dsr-actions { white-space: nowrap; }
+.dsr-wrap .dsr-actions .dsr-inline-form { display: inline-block; margin: 0 4px 4px 0; }
+.dsr-wrap .dsr-example { color: #beb1ff !important; font-weight: 600; min-height: 1.4em; }
+.dsr-wrap .dsr-tiers-edit { max-width: 520px; }
+.dsr-wrap .dsr-tiers-edit .dsr-kind { margin-left: 4px; }
+.dsr-wrap .dsr-type-box { margin: 6px 0; }
+.dsr-wrap .dsr-diff { margin: 0; padding-left: 18px; list-style: disc; }
+.dsr-wrap .dsr-diff li { margin: 0 0 2px; word-break: break-word; }
+
+/* WooCommerce selects (selectWoo) on the dark panel. */
+.dsr-wrap .select2-container { max-width: 640px; }
+.dsr-wrap .select2-container--default .select2-selection--single,
+.dsr-wrap .select2-container--default .select2-selection--multiple {
+	background: #181b24 !important;
+	border: 1px solid #3a3550 !important;
+	color: #eae8fa !important;
+	min-height: 32px;
+}
+.dsr-wrap .select2-container--default .select2-selection--single .select2-selection__rendered { color: #eae8fa !important; line-height: 30px; }
+.dsr-wrap .select2-container--default .select2-selection--multiple .select2-selection__choice {
+	background: #2a2440 !important;
+	border-color: #6d4aff !important;
+	color: #eae8fa !important;
+}
+.dsr-wrap .select2-container--default .select2-search--inline .select2-search__field { color: #eae8fa !important; }
+.dsr-wrap .select2-container--default .select2-selection--multiple .select2-selection__choice__remove { color: #b7b2d6 !important; }
