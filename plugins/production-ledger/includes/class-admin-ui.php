@@ -263,6 +263,17 @@ final class PL_Admin_UI {
 			<div class="pl-kpi pl-kpi--main"><span><?php esc_html_e( 'Τελικό αποτέλεσμα', 'production-ledger' ); ?></span><strong class="<?php echo $rep['grand_total'] < 0 ? 'pl-neg' : 'pl-pos'; ?>"><?php echo esc_html( self::money( $rep['grand_total'] ) ); ?></strong><em><?php echo esc_html( $rep['currency'] ); ?></em></div>
 		</div>
 
+		<?php
+		$owed = PL_Report::stored_value_owed();
+		if ( $owed ) {
+			$parts = array();
+			foreach ( $owed as $cur => $amount ) {
+				$parts[] = wp_strip_all_tags( wc_price( $amount, array( 'currency' => $cur ) ) );
+			}
+			echo '<p class="pl-hint"><strong>' . esc_html__( 'Ανεξόφλητες δωροκάρτες:', 'production-ledger' ) . '</strong> ' . esc_html( implode( ' · ', $parts ) ) . ' ' . esc_html__( '(υπόλοιπο σήμερα· χρήματα που χρωστά το κατάστημα, όχι έσοδο. Οι πωλήσεις δωροκαρτών δεν μετρούν στα έσοδα· μετρούν τα προϊόντα που αγοράζονται με αυτές.)', 'production-ledger' ) . '</p>';
+		}
+		?>
+
 		<h2 class="pl-h2"><?php esc_html_e( 'Ανά προϊόν', 'production-ledger' ); ?></h2>
 		<p><input type="search" class="pl-search regular-text" placeholder="<?php esc_attr_e( 'Αναζήτηση προϊόντος…', 'production-ledger' ); ?>" data-table="pl-products" /></p>
 		<?php if ( ! $rep['products'] ) : ?>

@@ -5,7 +5,7 @@ Tags: woocommerce, gift card, store credit, voucher, pdf
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -84,8 +84,11 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 
-= 1.0.1 =
+= 1.0.2 =
 * Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+
+= 1.0.1 =
+* Answers the suite filter noxpress_stored_value_owed with today's gift card balances per currency, for Production Ledger.
 
 = 1.0.0 =
 * Initial release (beta).

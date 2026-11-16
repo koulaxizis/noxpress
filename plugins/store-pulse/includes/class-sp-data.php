@@ -212,7 +212,8 @@ final class SP_Data {
 	public static function cached( string $key, callable $producer ): array {
 
 		$gen = 'rs' . (string) get_option( 'rs_cache_version', '0' )
-			. '|sp' . (string) get_option( 'sp_cache_version', '0' );
+			. '|sp' . (string) get_option( 'sp_cache_version', '0' )
+			. '|' . SP_VERSION; // A new version never reads figures counted by the old one.
 
 		$tk = 'sp_' . md5( $key . '|' . $gen );
 		$hit = get_transient( $tk );
@@ -357,6 +358,14 @@ final class SP_Data {
 		return $out;
 	}
 
+	/**
+	 * A line that is stored value (a gift card), not a product sale. The
+	 * plugin that sells it answers the suite filter (Bible §6).
+	 */
+	public static function is_stored_value( $item ): bool {
+		return $item instanceof WC_Order_Item && (bool) apply_filters( 'noxpress_is_stored_value_item', false, $item );
+	}
+
 	/* =====================================================================
 	 * Sections
 	 * =================================================================== */
@@ -473,19 +482,36 @@ final class SP_Data {
 					 * με το Revenue Splitter και με το per-product gross
 					 * παρακάτω. Από το αποτέλεσμα αφαιρείται το refunded.
 					 */
+					/*
+					 * Stored value (a gift card, noxpress_is_stored_value_item)
+					 * is money the shop owes, not a sale: its lines and their
+					 * refunds stay out, and an order of only such lines is not
+					 * counted. The products bought with a card count as usual.
+					 */
+					$line_refunds      = self::line_refunds( $order );
 					$order_items_gross = 0.0;
-					foreach ( $order->get_items() as $item ) {
+					$stored_refunded   = 0.0;
+					$sales_lines       = 0;
+					foreach ( $order->get_items() as $item_id => $item ) {
 						/** @var WC_Order_Item_Product $item */
-						if ( $item instanceof WC_Order_Item_Product ) {
-							$order_items_gross += (float) $item->get_total() + (float) $item->get_total_tax();
+						if ( ! $item instanceof WC_Order_Item_Product ) {
+							continue;
 						}
+						if ( self::is_stored_value( $item ) ) {
+							$stored_refunded += (float) ( $line_refunds[ $item_id ]['amount'] ?? 0.0 );
+							continue;
+						}
+						++$sales_lines;
+						$order_items_gross += (float) $item->get_total() + (float) $item->get_total_tax();
+					}
+					if ( 0 === $sales_lines ) {
+						--$count;
+						return;
 					}
 
-					$refunded = (float) $order->get_total_refunded();
+					$refunded = max( 0.0, (float) $order->get_total_refunded() - $stored_refunded );
 					$paid     = $order_items_gross - $refunded;
 					$gross   += $paid;
-
-					$line_refunds = self::line_refunds( $order );
 
 					$cid = (int) $order->get_customer_id();
 					if ( $cid > 0 ) {
@@ -500,7 +526,7 @@ final class SP_Data {
 					foreach ( $order->get_items() as $item_id => $item ) {
 						/** @var WC_Order_Item_Product $item */
 
-						if ( ! $item instanceof WC_Order_Item_Product ) {
+						if ( ! $item instanceof WC_Order_Item_Product || self::is_stored_value( $item ) ) {
 							continue;
 						}
 

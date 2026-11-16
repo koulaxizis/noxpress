@@ -3,7 +3,7 @@
  * Plugin Name:          Live Search
  * Plugin URI:           https://noxpress.tech
  * Description:          Αναζήτηση προϊόντων με προτάσεις καθώς γράφεις: τίτλος, ISBN / GTIN / SKU, συγγραφείς και άλλα χαρακτηριστικά, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι προτάσεις έρχονται από ένα στατικό αρχείο, χωρίς αίτημα στον server σε κάθε πλήκτρο· η σελίδα αποτελεσμάτων βρίσκει τα ίδια.
- * Version:              1.0.1
+ * Version:              1.0.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -86,7 +86,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LVS_VERSION', '1.0.1' );
+define( 'LVS_VERSION', '1.0.2' );
 define( 'LVS_FILE', __FILE__ );
 define( 'LVS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LVS_URL', plugin_dir_url( __FILE__ ) );
@@ -171,6 +171,8 @@ final class Live_Search {
 		LVS_Index::install();
 		LVS_Index::schedule();
 		LVS_Stats::ensure_dir();
+		// The first index right away, in the background (not only tonight).
+		LVS_Index::start_full();
 	}
 
 	public static function deactivate(): void {

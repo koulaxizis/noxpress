@@ -5,7 +5,7 @@ Tags: woocommerce, dashboard, orders, stock, sales report
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.10
+Stable tag: 1.9.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -62,8 +62,12 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 
-= 1.8.10 =
+= 1.9.1 =
 * Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+
+= 1.9.0 =
+* Gift cards are not sales: lines that answer the suite filter noxpress_is_stored_value_item (Gift Cards) stay out of completed revenue, best sellers, the order count and the sales report, with their refunds. Products bought with a gift card count as usual.
+* Cached figures of older versions are not reused.
 
 = 1.8.9 =
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).

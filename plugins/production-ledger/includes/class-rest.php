@@ -340,7 +340,7 @@ final class PL_Rest {
 			);
 			$line_ids = array();
 			foreach ( $order->get_items() as $item ) {
-				if ( $item instanceof WC_Order_Item_Product ) {
+				if ( $item instanceof WC_Order_Item_Product && ! PL_Report::is_stored_value( $item ) ) {
 					$pid = PL_Report::product_of( $item );
 					if ( $pid > 0 ) {
 						$line_ids[ $pid ] = true;
