@@ -1394,9 +1394,9 @@ final class BKF_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="book-feed-log-' . wp_date( 'Y-m-d' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		fputcsv( $out, array( __( 'Πότε', 'book-feed' ), __( 'Ενέργεια', 'book-feed' ), __( 'Προϊόν', 'book-feed' ), __( 'Τίτλος', 'book-feed' ), 'ISBN', __( 'Πεδία', 'book-feed' ), __( 'Μήνυμα', 'book-feed' ) ), $sep, '"', '' );
+		Noxpress_Safe::csv_row( $out, array( __( 'Πότε', 'book-feed' ), __( 'Ενέργεια', 'book-feed' ), __( 'Προϊόν', 'book-feed' ), __( 'Τίτλος', 'book-feed' ), 'ISBN', __( 'Πεδία', 'book-feed' ), __( 'Μήνυμα', 'book-feed' ) ), $sep );
 		foreach ( $rows as $e ) {
-			fputcsv(
+			Noxpress_Safe::csv_row(
 				$out,
 				array(
 					wp_date( 'Y-m-d H:i', $e['t'] ),
@@ -1407,9 +1407,7 @@ final class BKF_Admin_UI {
 					self::cell( BKF_Log::fields_text( $e['fields'] ) ),
 					self::cell( $e['msg'] ),
 				),
-				$sep,
-				'"',
-				''
+				$sep
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions

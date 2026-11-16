@@ -1261,7 +1261,7 @@ final class RDR_Admin_UI {
 			$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 			fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- UTF-8 BOM for spreadsheets.
 			foreach ( RDR_Import::csv_rows() as $row ) {
-				fputcsv( $out, $row, ',', '"', '' );
+				Noxpress_Safe::csv_row( $out, $row, ',' );
 			}
 			fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			exit;

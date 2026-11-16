@@ -5,7 +5,7 @@ Tags: ebook, watermark, pdf, epub, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -103,6 +103,9 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 Noto Sans (subset), SIL Open Font License 1.1. See LICENSES.md.
 
 == Changelog ==
+
+= 1.0.1 =
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.0.0 =
 * Initial release.

@@ -396,11 +396,7 @@ final class EVT_Checkin {
 		self::back( $t ? $t['event_id'] : 0, 'undo' );
 	}
 
-	/** A CSV cell that cannot start a formula in a spreadsheet. */
-	private static function cell( string $v ): string {
-		return ( '' !== $v && false !== strpos( "=+-@\t\r", $v[0] ) ) ? "'" . $v : $v;
-	}
-
+	/** Attendee list as CSV, written through Noxpress_Safe::csv_row() (Bible §10). */
 	public static function csv(): void {
 		$event = isset( $_GET['event'] ) ? absint( $_GET['event'] ) : 0;
 		if ( ! self::manager() || ! check_admin_referer( 'evt_csv_' . $event ) ) {
@@ -412,26 +408,20 @@ final class EVT_Checkin {
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- CSV stream.
 		$head = array( __( 'Κωδικός', 'events' ), __( 'Παραγγελία', 'events' ), __( 'Αγοραστής', 'events' ), __( 'Email', 'events' ), __( 'Όνομα συμμετέχοντα', 'events' ), __( 'Κατάσταση', 'events' ), __( 'Είσοδος', 'events' ) );
-		fputcsv( $out, $head, ',', '"', '' );
+		Noxpress_Safe::csv_row( $out, $head );
 		foreach ( EVT_Ticket_Store::for_event( $event ) as $r ) {
 			$o = wc_get_order( $r['order_id'] );
-			fputcsv(
+			Noxpress_Safe::csv_row(
 				$out,
-				array_map(
-					array( __CLASS__, 'cell' ),
-					array(
-						EVT_Ticket_Store::pretty( EVT_Ticket_Store::code_for( $r ) ),
-						$o ? (string) $o->get_order_number() : (string) $r['order_id'],
-						$o ? trim( $o->get_formatted_billing_full_name() ) : '',
-						$o ? (string) $o->get_billing_email() : '',
-						(string) $r['name'],
-						(string) $r['status'],
-						$r['used'] ? wp_date( 'Y-m-d H:i', strtotime( $r['used'] . ' UTC' ) ) : '',
-					)
-				),
-				',',
-				'"',
-				''
+				array(
+					EVT_Ticket_Store::pretty( EVT_Ticket_Store::code_for( $r ) ),
+					$o ? (string) $o->get_order_number() : (string) $r['order_id'],
+					$o ? trim( $o->get_formatted_billing_full_name() ) : '',
+					$o ? (string) $o->get_billing_email() : '',
+					(string) $r['name'],
+					(string) $r['status'],
+					$r['used'] ? wp_date( 'Y-m-d H:i', strtotime( $r['used'] . ' UTC' ) ) : '',
+				)
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- CSV stream.

@@ -3,7 +3,7 @@
  * Plugin Name:          Search Signals
  * Plugin URI:           https://noxpress.tech
  * Description:          Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD (Organization, WebSite, WebPage, Product, BreadcrumbList), Open Graph και Twitter, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισάγει ρυθμίσεις και meta από το Rank Math, συγκρίνει την έξοδο πριν τη μετάβαση και μένει παθητικό όσο τρέχει άλλο SEO plugin.
- * Version:              1.1.0
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -78,7 +78,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SSG_VERSION', '1.1.0' );
+define( 'SSG_VERSION', '1.1.1' );
 define( 'SSG_FILE', __FILE__ );
 define( 'SSG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SSG_URL', plugin_dir_url( __FILE__ ) );

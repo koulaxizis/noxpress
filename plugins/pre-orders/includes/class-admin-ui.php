@@ -799,7 +799,7 @@ final class POR_Admin_UI {
 
 		$fh = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- output stream.
 		fwrite( $fh, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- UTF-8 BOM for Excel.
-		fputcsv(
+		Noxpress_Safe::csv_row(
 			$fh,
 			array(
 				__( 'Παραγγελία', 'pre-orders' ),
@@ -815,9 +815,7 @@ final class POR_Admin_UI {
 				__( 'Ποσό', 'pre-orders' ),
 				__( 'Κυκλοφορία', 'pre-orders' ),
 			),
-			$sep,
-			'"',
-			''
+			$sep
 		);
 		foreach ( $items as $it ) {
 			$p   = wc_get_product( $it['id'] );
@@ -828,7 +826,7 @@ final class POR_Admin_UI {
 				$addr = $o->get_formatted_shipping_address();
 				$addr = '' !== (string) $addr ? $addr : $o->get_formatted_billing_address();
 				$made = $o->get_date_created();
-				fputcsv(
+				Noxpress_Safe::csv_row(
 					$fh,
 					array(
 						self::csv_text( (string) $o->get_order_number() ),
@@ -844,9 +842,7 @@ final class POR_Admin_UI {
 						number_format( (float) $item->get_total() + (float) $item->get_total_tax(), 2, $dec, '' ),
 						'' !== $it['date'] ? $it['date'] : self::csv_text( __( 'χωρίς ημερομηνία', 'pre-orders' ) ),
 					),
-					$sep,
-					'"',
-					''
+					$sep
 				);
 			}
 		}

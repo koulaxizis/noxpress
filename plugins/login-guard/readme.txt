@@ -5,7 +5,7 @@ Tags: login, security, two-factor, brute force, xml-rpc
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -119,6 +119,9 @@ The log table and the options are removed, unless you ticked «Keep settings and
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.1 =
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.1.0 =
 * New: two-step verification with an authenticator app (TOTP, RFC 6238) on wp-login.php and the WooCommerce login forms, with 10 one-time recovery codes, «do not ask again in this browser», required roles with a grace period, a strict guard against sessions that skip the second step, e-mails on every change, and resets by another administrator or WP-CLI (`wp login-guard 2fa`).

@@ -5,7 +5,7 @@ Tags: woocommerce, invoice, vat number, vies, greece
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -89,6 +89,9 @@ The details on the orders (they are store records) and, unless you tick the opti
 The plugin helps collect invoice details; checking that an invoice is issued correctly and on time stays with the store and its accountant.
 
 == Changelog ==
+
+= 1.1.1 =
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.1.0 =
 * New: details from AADE. With the special Taxisnet credentials in wp-config.php, a Greek VAT number fills in the company name, tax office, activity and head office in the classic checkout and the Checkout block, and «Fill in from AADE» on the order fills the empty ones. Only empty fields are filled, one lookup per number for 7 days, limits per visitor and per site, never stops an order. Off until you switch it on.

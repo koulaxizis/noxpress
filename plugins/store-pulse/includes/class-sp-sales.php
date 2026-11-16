@@ -714,14 +714,14 @@ final class SP_Sales {
 		foreach ( $args['cols'] as $c ) {
 			$head[] = __( self::COLUMNS[ $c ], 'store-pulse' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- msgids in SP_Lang.
 		}
-		fputcsv( $fh, $head, $sep, '"', '' );
+		Noxpress_Safe::csv_row( $fh, $head, $sep );
 
 		foreach ( $rows as $r ) {
-			fputcsv( $fh, self::csv_cells( $r, $args ), $sep, '"', '' );
+			Noxpress_Safe::csv_row( $fh, self::csv_cells( $r, $args ), $sep );
 		}
 
 		if ( $args['totals'] ) {
-			fputcsv( $fh, self::csv_cells( self::totals( $report ), $args, true ), $sep, '"', '' );
+			Noxpress_Safe::csv_row( $fh, self::csv_cells( self::totals( $report ), $args, true ), $sep );
 		}
 
 		fclose( $fh );

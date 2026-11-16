@@ -182,7 +182,7 @@ final class WSH_Report {
 		header( 'Content-Disposition: attachment; filename="wish-shelf-report-' . gmdate( 'Y-m-d' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-		fputcsv(
+		Noxpress_Safe::csv_row(
 			$out,
 			array(
 				__( 'ID', 'wish-shelf' ),
@@ -193,12 +193,10 @@ final class WSH_Report {
 				__( 'Απόθεμα', 'wish-shelf' ),
 				__( 'Τιμή', 'wish-shelf' ),
 			),
-			$sep,
-			'"',
-			''
+			$sep
 		);
 		foreach ( $rows as $r ) {
-			fputcsv(
+			Noxpress_Safe::csv_row(
 				$out,
 				array(
 					$r['id'],
@@ -209,9 +207,7 @@ final class WSH_Report {
 					'in' === $r['stock'] ? __( 'Σε απόθεμα', 'wish-shelf' ) : __( 'Εξαντλημένο', 'wish-shelf' ),
 					null === $r['price'] ? '' : str_replace( '.', $dec, number_format( $r['price'], wc_get_price_decimals(), '.', '' ) ),
 				),
-				$sep,
-				'"',
-				''
+				$sep
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose

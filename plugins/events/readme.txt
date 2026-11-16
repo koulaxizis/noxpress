@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, check-in, event schema
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -57,6 +57,9 @@ The settings, the role «Event cashier» and the scheduled jobs are removed. The
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+= 1.1.1 =
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+
 = 1.1.0 =
 * Tickets through WooCommerce: a product linked to the event, seats as stock, ticket types as variations, «Create a ticket» in the event box.
 * Sales window (sales start, close before the start, closed when cancelled or postponed), checked on the page, in the cart, at the checkout and in the Store API.
