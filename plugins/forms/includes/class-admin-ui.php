@@ -29,7 +29,7 @@ final class FRM_Admin_UI {
 	const PER_PAGE    = 30;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 400 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 450 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_init', array( __CLASS__, 'privacy' ) );
