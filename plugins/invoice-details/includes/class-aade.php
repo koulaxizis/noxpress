@@ -33,6 +33,7 @@ final class IVD_Aade {
 	const RATE_ALL = 300;
 	const CACHE    = 'ivd_aade_';
 	const LAST     = 'ivd_aade_last';
+	const RL       = 'ivd_aade_rl_';
 
 	/** Cloudflare's ranges (Bible §11, IP for rate limits), as in Magic Login. */
 	const CF_RANGES = array(
@@ -69,24 +70,64 @@ final class IVD_Aade {
 	}
 
 	/**
-	 * Rate limit for the public lookup. Counts only when $count is true.
+	 * Rate limit for the public lookup: at most RATE_IP per visitor in 10
+	 * minutes and RATE_ALL for the site in an hour. Each counter is bumped
+	 * atomically and the bumped value is checked, so requests that arrive
+	 * together cannot all read the same count. IPv6 visitors count per /64.
 	 *
 	 * @return bool True when the lookup may go ahead.
 	 */
-	public static function allowed( bool $count = true ): bool {
-		$ip   = self::client_ip();
-		$who  = 'ivd_aade_ip_' . substr( wp_hash( '' !== $ip ? $ip : 'none' ), 0, 20 );
-		$all  = 'ivd_aade_all';
-		$n_ip = (int) get_transient( $who );
-		$n_al = (int) get_transient( $all );
-		if ( $n_ip >= self::RATE_IP || $n_al >= self::RATE_ALL ) {
+	public static function allowed(): bool {
+		$ip  = self::client_ip();
+		$who = substr( wp_hash( '' !== $ip ? $ip : 'none' ), 0, 20 );
+		if ( self::bump( 'ip', $who, 10 * MINUTE_IN_SECONDS ) > self::RATE_IP ) {
 			return false;
 		}
-		if ( $count ) {
-			set_transient( $who, $n_ip + 1, 10 * MINUTE_IN_SECONDS );
-			set_transient( $all, $n_al + 1, HOUR_IN_SECONDS );
+		return self::bump( 'all', 'site', HOUR_IN_SECONDS ) <= self::RATE_ALL;
+	}
+
+	/**
+	 * Adds one to a counter of the current window and returns the new value.
+	 * With a persistent object cache: wp_cache_add + wp_cache_incr. Without
+	 * one: one row per window in the options table, raised with a single
+	 * UPDATE ... SET option_value = option_value + 1, then read back. Each
+	 * request's own increment happens before its read, so a request reads at
+	 * least its own count: no more than the cap can pass, even together.
+	 *
+	 * @param string $kind   'ip' or 'all'.
+	 * @param string $who    Hashed visitor key or 'site'.
+	 * @param int    $window Window length in seconds.
+	 */
+	private static function bump( string $kind, string $who, int $window ): int {
+		$slot = (int) floor( time() / $window );
+		if ( wp_using_ext_object_cache() ) {
+			$key = $kind . '_' . $slot . '_' . $who;
+			wp_cache_add( $key, 0, 'ivd_aade_rl', $window + 60 );
+			$n = wp_cache_incr( $key, 1, 'ivd_aade_rl' );
+			return false === $n ? PHP_INT_MAX : (int) $n;
 		}
-		return true;
+		global $wpdb;
+		$name = self::RL . $kind . '_' . $slot . '_' . $who;
+		$up   = $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", $name );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- atomic counter on our own rows ($up is prepared above); the options API has no atomic increment.
+		$done = $wpdb->query( $up );
+		if ( 0 === $done ) {
+			$made = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, '0', 'off')", $name ) );
+			if ( 1 === $made ) {
+				// A new window: clear the rows of earlier windows of this kind.
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
+						$wpdb->esc_like( self::RL . $kind . '_' ) . '%',
+						$wpdb->esc_like( self::RL . $kind . '_' . $slot . '_' ) . '%'
+					)
+				);
+			}
+			$done = $wpdb->query( $up );
+		}
+		$n = 1 === $done ? $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name ) ) : null;
+		// phpcs:enable
+		return null === $n ? PHP_INT_MAX : (int) $n; // Fail closed: no lookup, the customer types the details.
 	}
 
 	/**
@@ -292,10 +333,22 @@ final class IVD_Aade {
 		if ( '' !== $remote && isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) && self::in_ranges( $remote, self::CF_RANGES ) ) {
 			$cf = sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_CF_CONNECTING_IP'] ) );
 			if ( false !== filter_var( $cf, FILTER_VALIDATE_IP ) ) {
-				return $cf;
+				return self::bucket( $cf );
 			}
 		}
-		return $remote;
+		return self::bucket( $remote );
+	}
+
+	/** An IPv6 address counts per /64 (one household or server), IPv4 as is. */
+	private static function bucket( string $ip ): string {
+		if ( false === strpos( $ip, ':' ) ) {
+			return $ip;
+		}
+		$bin = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- an invalid address stays as it is.
+		if ( false === $bin || 16 !== strlen( $bin ) ) {
+			return $ip;
+		}
+		return bin2hex( substr( $bin, 0, 8 ) ) . '::/64';
 	}
 
 	/** True when $ip is inside one of the CIDR ranges (IPv4 or IPv6). */

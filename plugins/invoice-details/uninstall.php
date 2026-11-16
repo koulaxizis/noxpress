@@ -35,11 +35,12 @@ function ivd_uninstall_site(): void {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 			$wpdb->esc_like( '_transient_ivd_aui_msg_' ) . '%',
 			$wpdb->esc_like( '_transient_timeout_ivd_aui_msg_' ) . '%',
 			$wpdb->esc_like( '_transient_ivd_aade_' ) . '%',
-			$wpdb->esc_like( '_transient_timeout_ivd_aade_' ) . '%'
+			$wpdb->esc_like( '_transient_timeout_ivd_aade_' ) . '%',
+			$wpdb->esc_like( 'ivd_aade_rl_' ) . '%'
 		)
 	);
 
