@@ -1,6 +1,6 @@
 {
-  "display": 1310,
-  "total": 1310,
+  "display": 1319,
+  "total": 1319,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1534,7 +1534,7 @@
     },
     "754517390": {
       "file": "nox-ta-1.7.1/trade-accounts.zip",
-      "count": 2
+      "count": 3
     },
     "754517661": {
       "file": "nox-fp-1.0.8/fast-pages.zip",
@@ -1582,7 +1582,7 @@
     },
     "754533106": {
       "file": "nox-iv-1.1.0/invoice-details.zip",
-      "count": 2
+      "count": 3
     },
     "754592478": {
       "file": "nox-al-1.0.0/activity-log.zip",
@@ -1594,18 +1594,34 @@
     },
     "754625740": {
       "file": "nox-lg-1.0.0/login-guard.zip",
-      "count": 1
+      "count": 2
     },
     "754642632": {
       "file": "nox-sb-1.13.0/site-bridge.zip",
-      "count": 2
+      "count": 3
     },
     "754697840": {
       "file": "nox-fm-1.0.0/forms.zip",
-      "count": 0
+      "count": 3
     },
     "754720372": {
       "file": "nox-lv-1.0.0/live-search.zip",
+      "count": 2
+    },
+    "754741401": {
+      "file": "nox-ws-1.2.6/wish-shelf.zip",
+      "count": 0
+    },
+    "754742058": {
+      "file": "nox-bs-1.0.0/back-in-stock.zip",
+      "count": 0
+    },
+    "754742283": {
+      "file": "nox-ev-1.0.0/events.zip",
+      "count": 0
+    },
+    "754761778": {
+      "file": "nox-gc-1.0.0/gift-cards.zip",
       "count": 0
     }
   }
