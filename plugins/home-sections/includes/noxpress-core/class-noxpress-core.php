@@ -80,6 +80,7 @@ final class Noxpress_Core {
 		'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.' => 'Who changed what and when: products, prices, orders, coupons, pages, users, plugins and settings, with the source of every change (admin, REST, WP-CLI, Site Bridge). No secrets and no customer details, masked IPs, e-mail for critical changes.',
 		'Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.' => 'Every email of the site over SMTP (with a ready setup for Proton Mail) or through Brevo, Mailgun, SendGrid, Postmark and Amazon SES, with a backup connection, a sent log, a test email and sending paused on copies of the site.',
 		'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.' => 'Digital gift cards as a product, delivered on a date by email with a printable PDF, redeemed as a payment in the classic and block checkout, with the balance kept for the next order and a ledger of every movement.',
+		'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.' => 'Buyer watermarks in the PDF and EPUB files you sell, a «My library» page in the customer\'s account and a tool that finds which order a leaked file came from.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -429,6 +430,11 @@ final class Noxpress_Core {
 				'name' => 'Gift Cards',
 				'desc' => __( 'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.', 'noxpress' ),
 				'page' => 'gfc-cards',
+			),
+			'ebook-delivery'    => array(
+				'name' => 'Ebook Delivery',
+				'desc' => __( 'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.', 'noxpress' ),
+				'page' => 'ebd-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

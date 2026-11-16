@@ -88,6 +88,7 @@ SLUGS = {
     'bs': 'back-in-stock',
     'ev': 'events',
     'gc': 'gift-cards',
+    'ed': 'ebook-delivery',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
