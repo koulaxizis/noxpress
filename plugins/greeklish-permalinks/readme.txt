@@ -1,15 +1,15 @@
 === Greeklish Permalinks ===
 Contributors: koulaxizis
 Donate link: https://ko-fi.com/koulaxizis
-Tags: greeklish, permalinks, slugs, greek, transliteration
+Tags: greeklish, permalinks, slugs, greek, rename media
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
-Greek to Latin in new permalinks and, if you want, in uploaded file names, with on-demand bulk conversion of existing ones, redirects and undo.
+Greek to Latin in new permalinks and, if you want, in uploaded file names, with on-demand bulk conversion of existing ones, media file renames, redirects and undo.
 
 == Description ==
 
@@ -36,6 +36,15 @@ Greek to Latin in new permalinks and, if you want, in uploaded file names, with 
 * The last run can be undone; anything edited after the conversion is left as it is and reported.
 * Every change is written to the undo log before it happens. If that write fails, the run stops and everything it changed goes back. "Download backup" saves the last run as JSON, and Tools → Import loads it back for undo.
 
+**Rename a media file (1.3.0)**
+
+* Give any media file a name of your own, Greek or not: a "File name" field on the attachment screen and in the media library details, a "Rename" row action in the list view, and two bulk actions, "File name from the title" and "File name from the product/post" (for example `IMG_4471.jpg` → `o-dromos-tis-siopis.jpg`, up to 50 files at a time).
+* Greek becomes Greeklish with your rules; names are lower case, with dashes for spaces. A name that is taken gets `-2`, `-3`.
+* Before anything changes, Media → Renames shows the final name and what will change: files on disk (sizes, the scaled original, webp / avif copies), posts and pages, downloadable files, and other references that stay on the old URL and rely on the 301. Saving the attachment never renames it.
+* Same engine as the bulk conversion: every file, the links in content, excerpts and downloadable files, and a 301 from each old URL. Older redirects to a renamed file go straight to its newest name. The page caches of the affected pages are cleared.
+* Its own undo log, separate from the bulk conversion: the last 100 renames, each with its own Undo, which works while the file still has the name the rename gave it.
+* For Editors, Shop Managers and Administrators (`edit_others_posts`), because a rename changes URLs across the site.
+
 **Redirects for Greek links**
 
 * A Greek address that leads to a 404 is converted the way new slugs are; when a post or a term lives at the Latin address, the visitor gets a 301 there.
@@ -57,7 +66,7 @@ Greek to Latin in new permalinks and, if you want, in uploaded file names, with 
 
 * `glp_convert( $text, $context )`: Greek to Latin with the site's settings. Context `slug`, `file` or `plain`.
 * `glp_convert` filter ( string $latin, string $original, string $context ): change any conversion.
-* Fires `noxpress_products_changed` after the bulk page changes products.
+* Fires `noxpress_products_changed` after the bulk page changes products, and asks Noxpress Core to clear the page cache of the pages that show a renamed file.
 
 == Installation ==
 
@@ -82,13 +91,17 @@ What changed before the interruption is in the undo log. Scan again: the remaini
 
 = What happens on uninstall? =
 
-The settings, the undo log and the transients are removed. The redirect table is removed too, unless you ticked "Keep the redirect table" in Tools. Slugs and files you converted stay converted, and WordPress's own old-slug redirects for posts stay. The shared Noxpress options stay while another Noxpress plugin is installed.
+The settings, both undo logs and the transients are removed. The redirect table is removed too, unless you ticked "Keep the redirect table" in Tools. Slugs and files you converted stay converted, and WordPress's own old-slug redirects for posts stay. The shared Noxpress options stay while another Noxpress plugin is installed.
 
 == Disclaimer ==
 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: rename a media file to a name of your own, Greek or not. A "File name" field with a live preview on the attachment screen and in the media library, a "Rename" row action, and the bulk actions "File name from the title" and "File name from the product/post". Media → Renames shows the final name and every reference before the change, and keeps the last 100 renames with an Undo for each, in a log separate from the bulk conversion.
+* Renames, like the bulk conversion, now clear the page cache of the affected pages, and older file redirects follow a file that is renamed again.
 
 = 1.2.2 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.

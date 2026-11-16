@@ -23,6 +23,15 @@
  *      "round":    "floor"|"round",
  *      "min":      int 0–99             below this percentage the fallback text shows
  *    },
+ *    "badges": {                        product badges (1.7.0), for the whole store (not per theme)
+ *      "on":  bool,  "max": int 1–4,  "pos": "left"|"right"|"inline",
+ *      "new": { "on": bool, "days": int 1–365, "text": { "el", "en" }, "color": "#rrggbb" },
+ *      "low": { "on": bool, "qty": int 0–9999 (0 = WooCommerce's low stock amount), "text", "color" },
+ *      "out": { "on": bool, "text", "color" },
+ *      "own": { "on": bool, "color" },  per-product text (product meta _tp_badge)
+ *      "rules": [ { "tax": "product_tag"|"product_cat", "term": term id, "el", "en" } ],
+ *      "rule_color": "#rrggbb", "fg": "#rrggbb"
+ *    },
  *    "themes": {
  *      "<stylesheet>": {
  *        "areas":  { "<area id>": { area config } },
@@ -78,6 +87,10 @@ final class TP_Settings {
 	const MAX_PRICE_RULES = 30;
 	const MAX_LABEL_LEN   = 40;
 
+	const MAX_BADGE_RULES = 10;
+	const BADGE_POS       = array( 'left', 'right', 'inline' );
+	const BADGE_TAX       = array( 'product_tag', 'product_cat' );
+
 	/** Per-request cache of the decoded option. */
 	private static $cache = null;
 
@@ -91,7 +104,50 @@ final class TP_Settings {
 			'test_mode' => true,
 			'prices'    => self::prices_defaults(),
 			'sale'      => self::sale_defaults(),
+			'badges'    => self::badges_defaults(),
 			'themes'    => array(),
+		);
+	}
+
+	/** Product badges (1.7.0). Each badge is on once the module is on (Chris 2026-11-16). */
+	public static function badges_defaults(): array {
+		return array(
+			'on'         => false,
+			'max'        => 2,
+			'pos'        => 'left',
+			'new'        => array(
+				'on'    => true,
+				'days'  => 30,
+				'text'  => array(
+					'el' => 'Νέο',
+					'en' => 'New',
+				),
+				'color' => '#6d4aff',
+			),
+			'low'        => array(
+				'on'    => true,
+				'qty'   => 0,
+				'text'  => array(
+					'el' => 'Τελευταία κομμάτια',
+					'en' => 'Last pieces',
+				),
+				'color' => '#b45309',
+			),
+			'out'        => array(
+				'on'    => true,
+				'text'  => array(
+					'el' => 'Εξαντλήθηκε',
+					'en' => 'Sold out',
+				),
+				'color' => '#4b5563',
+			),
+			'own'        => array(
+				'on'    => true,
+				'color' => '#1f2937',
+			),
+			'rules'      => array(),
+			'rule_color' => '#0f766e',
+			'fg'         => '#ffffff',
 		);
 	}
 
@@ -219,6 +275,11 @@ final class TP_Settings {
 	/** Sale badge settings (store-wide). */
 	public static function sale(): array {
 		return self::get()['sale'];
+	}
+
+	/** Product badge settings (store-wide). */
+	public static function badges(): array {
+		return self::get()['badges'];
 	}
 
 	/** Active theme key (child theme stylesheet when a child is active). */
@@ -356,6 +417,9 @@ final class TP_Settings {
 		}
 		if ( isset( $raw['sale'] ) && is_array( $raw['sale'] ) ) {
 			$out['sale'] = self::sanitize_sale( $raw['sale'] );
+		}
+		if ( isset( $raw['badges'] ) && is_array( $raw['badges'] ) ) {
+			$out['badges'] = self::sanitize_badges( $raw['badges'] );
 		}
 
 		if ( isset( $raw['themes'] ) && is_array( $raw['themes'] ) ) {
@@ -526,6 +590,75 @@ final class TP_Settings {
 			);
 		}
 		return $out;
+	}
+
+	/**
+	 * Product badges. A missing badge text (older data, partial import)
+	 * keeps its default; an empty Greek text falls back to the English one
+	 * and then to the default, so a badge that is on never shows empty.
+	 * Rules without a term or a text are dropped; one rule per term.
+	 */
+	public static function sanitize_badges( array $raw ): array {
+		$def = self::badges_defaults();
+		$out = $def;
+
+		$out['on']  = ! empty( $raw['on'] );
+		$out['max'] = isset( $raw['max'] ) && is_numeric( $raw['max'] ) ? max( 1, min( 4, (int) $raw['max'] ) ) : $def['max'];
+		$out['pos'] = isset( $raw['pos'] ) && in_array( $raw['pos'], self::BADGE_POS, true ) ? $raw['pos'] : $def['pos'];
+
+		foreach ( array( 'new', 'low', 'out', 'own' ) as $key ) {
+			$in = isset( $raw[ $key ] ) && is_array( $raw[ $key ] ) ? $raw[ $key ] : array();
+			// A missing switch (older data) keeps the default; a posted form always sends it.
+			$out[ $key ]['on']    = array_key_exists( 'on', $in ) ? ! empty( $in['on'] ) : $def[ $key ]['on'];
+			$out[ $key ]['color'] = self::valid_color( isset( $in['color'] ) ? $in['color'] : '', $def[ $key ]['color'] );
+			if ( isset( $def[ $key ]['text'] ) ) {
+				$pair = isset( $in['text'] ) && is_array( $in['text'] ) ? $in['text'] : $def[ $key ]['text'];
+				$el   = self::valid_label( isset( $pair['el'] ) ? $pair['el'] : '' );
+				$en   = self::valid_label( isset( $pair['en'] ) ? $pair['en'] : '' );
+				if ( '' === $el ) {
+					$el = '' !== $en ? $en : $def[ $key ]['text']['el'];
+				}
+				$out[ $key ]['text'] = array(
+					'el' => $el,
+					'en' => $en,
+				);
+			}
+		}
+		$out['new']['days'] = isset( $raw['new']['days'] ) && is_numeric( $raw['new']['days'] ) ? max( 1, min( 365, (int) $raw['new']['days'] ) ) : $def['new']['days'];
+		$out['low']['qty']  = isset( $raw['low']['qty'] ) && is_numeric( $raw['low']['qty'] ) ? max( 0, min( 9999, (int) $raw['low']['qty'] ) ) : $def['low']['qty'];
+
+		$out['rules'] = array();
+		$seen         = array();
+		if ( isset( $raw['rules'] ) && is_array( $raw['rules'] ) ) {
+			foreach ( $raw['rules'] as $r ) {
+				if ( ! is_array( $r ) || count( $out['rules'] ) >= self::MAX_BADGE_RULES ) {
+					continue;
+				}
+				$tax  = isset( $r['tax'] ) && in_array( $r['tax'], self::BADGE_TAX, true ) ? $r['tax'] : '';
+				$term = isset( $r['term'] ) && is_numeric( $r['term'] ) ? (int) $r['term'] : 0;
+				$el   = self::valid_label( isset( $r['el'] ) ? $r['el'] : '' );
+				$en   = self::valid_label( isset( $r['en'] ) ? $r['en'] : '' );
+				if ( '' === $tax || $term <= 0 || ( '' === $el && '' === $en ) || isset( $seen[ $tax . ':' . $term ] ) ) {
+					continue;
+				}
+				$seen[ $tax . ':' . $term ] = true;
+				$out['rules'][]             = array(
+					'tax'  => $tax,
+					'term' => $term,
+					'el'   => '' !== $el ? $el : $en,
+					'en'   => $en,
+				);
+			}
+		}
+		$out['rule_color'] = self::valid_color( isset( $raw['rule_color'] ) ? $raw['rule_color'] : '', $def['rule_color'] );
+		$out['fg']         = self::valid_color( isset( $raw['fg'] ) ? $raw['fg'] : '', $def['fg'] );
+		return $out;
+	}
+
+	/** "#rrggbb" (lower case), else the fallback. */
+	public static function valid_color( $color, string $fallback ): string {
+		$color = is_string( $color ) ? strtolower( trim( $color ) ) : '';
+		return 1 === preg_match( '/^#[0-9a-f]{6}$/', $color ) ? $color : $fallback;
 	}
 
 	/** Label text: plain text, one line, at most MAX_LABEL_LEN characters. */

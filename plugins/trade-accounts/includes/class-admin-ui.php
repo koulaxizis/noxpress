@@ -401,7 +401,8 @@ final class TRA_Admin_UI {
 
 			<h2 class="tra-h2"><?php esc_html_e( 'Τιμολόγιο', 'trade-accounts' ); ?></h2>
 			<div class="tra-zone">
-				<?php self::checkbox( 'tra_invoice', $s['invoice'], __( 'Οι παραγγελίες χονδρικής θέλουν τιμολόγιο (κλασικό ταμείο)', 'trade-accounts' ) ); ?>
+				<?php self::checkbox( 'tra_invoice', $s['invoice'], __( 'Οι παραγγελίες χονδρικής θέλουν τιμολόγιο', 'trade-accounts' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Με το Invoice Details (1.0.1 ή νεότερο) ενεργό για τους πελάτες, ο κανόνας περνά σε αυτό και ισχύει στο κλασικό και στο block ταμείο· τα δύο πεδία παρακάτω τότε δεν χρειάζονται. Αλλιώς ισχύει μόνο στο κλασικό ταμείο, με το πεδίο τύπου παραστατικού του plugin τιμολόγησης.', 'trade-accounts' ); ?></p>
 				<div class="tra-grid tra-mt-8">
 					<label><span class="tra-label"><?php esc_html_e( 'Πεδίο του ταμείου', 'trade-accounts' ); ?></span>
 						<input type="text" name="tra_inv_field" value="<?php echo esc_attr( $s['inv_field'] ); ?>" maxlength="64" spellcheck="false" /></label>

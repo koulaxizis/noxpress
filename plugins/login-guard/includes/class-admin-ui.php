@@ -29,7 +29,7 @@ final class LGD_Admin_UI {
 	const MAX_JSON    = 262144;
 
 	/** Menu priority (Bible §8): taken at merge time from the next free one. */
-	const MENU_PRIORITY = 400;
+	const MENU_PRIORITY = 430;
 
 	public static function init(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), self::MENU_PRIORITY );

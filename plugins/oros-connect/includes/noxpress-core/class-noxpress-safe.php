@@ -16,7 +16,7 @@
  *    holds text written by visitors or other sites.
  *  - client_ip() / in_ranges(): the visitor's address for rate limits
  *    (Bible §11): REMOTE_ADDR, or CF-Connecting-IP only when REMOTE_ADDR is
- *    a Cloudflare address (Core 1.3.6, from Magic Login 1.0.2).
+ *    a Cloudflare address (Core 1.4.1, from Magic Login 1.0.2).
  *
  * Static, without hooks or state; safe to call from any request.
  */
