@@ -116,10 +116,12 @@ final class Invoice_Details {
 		require_once IVD_PATH . 'includes/class-checkout.php';
 		require_once IVD_PATH . 'includes/class-order.php';
 		require_once IVD_PATH . 'includes/class-abilities.php';
+		require_once IVD_PATH . 'includes/class-privacy.php';
 
 		// Orders that already carry invoice details keep showing them.
 		IVD_Order::init();
 		IVD_Abilities::init();
+		IVD_Privacy::init();
 
 		// Emergency switch (Bible §14): no checkout hooks at all.
 		if ( ! self::killed() ) {

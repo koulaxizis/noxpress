@@ -46,6 +46,7 @@ Customers choose a **receipt or an invoice** at checkout. For an invoice they gi
 * Test mode after activation: only shop managers see the choice until you switch it on for everyone.
 * `define( 'IVD_DISABLE', true );` in wp-config.php stops every checkout hook at once; orders keep showing their details.
 * No cookie, no session, no public endpoint. The only external request is VIES, with the country and the number only.
+* WordPress privacy tools: the invoice details are in the order export and erasure, the customer's saved details have their own exporter and eraser, and a paragraph is suggested for the privacy policy.
 
 **For developers**
 
@@ -83,4 +84,4 @@ The plugin helps collect invoice details; checking that an invoice is issued cor
 == Changelog ==
 
 = 1.0.0 =
-* First release: receipt / invoice choice in the classic checkout and the Checkout block, company name, VAT number, tax office, activity and head office, Greek check digit, VIES for other EU countries (an outage never stops an order), details on the order, in the emails and in My account, admin box with «Check in VIES», orders list column and filter, «Invoices» page with CSV, reading of Timologia / OBS orders and optional compatible meta, test mode, IVD_DISABLE, read-only ability.
+* First release: receipt / invoice choice in the classic checkout and the Checkout block, company name, VAT number, tax office, activity and head office, Greek check digit, VIES for other EU countries (an outage never stops an order), details on the order, in the emails and in My account, admin box with «Check in VIES», orders list column and filter, «Invoices» page with CSV, reading of Timologia / OBS orders and optional compatible meta, test mode, IVD_DISABLE, read-only ability, privacy export and erasure.
