@@ -526,12 +526,12 @@ final class DSR_Engine {
 
 		// 6. Hints: one unit away from the next tier or a free item.
 		foreach ( $rules as $id => $r ) {
-			if ( ! in_array( $r['type'], array( 'tiers', 'xy' ), true ) ) {
+			if ( ! in_array( $r['type'], array( 'tiers', 'xy' ), true ) || ( $r['min'] > 0 && $subtotal + 0.000001 < $r['min'] ) ) {
 				continue;
 			}
 			$mine = array();
 			foreach ( $work as $k => $l ) {
-				if ( self::in_scope( $r, $l['product'] ) && ( ! isset( $taken[ $k ] ) || $taken[ $k ]['rule'] === $id ) ) {
+				if ( self::in_scope( $r, $l['product'] ) ) {
 					$mine[ $k ] = $l;
 				}
 			}
@@ -554,10 +554,29 @@ final class DSR_Engine {
 						}
 					}
 				}
-				if ( 1 === $need ) {
+				if ( 1 !== $need ) {
+					continue;
+				}
+				// Only when one more unit would make this rule worth more on these
+				// lines than what they get now (another rule may already be better).
+				$now = 0.0;
+				$hyp = array();
+				foreach ( $keys as $k ) {
+					$hyp[ $k ] = $mine[ $k ];
+					if ( isset( $disc[ $k ] ) ) {
+						$now += $disc[ $k ];
+					}
+				}
+				$first = reset( $keys );
+				++$hyp[ $first ]['qty'];
+				$gain = 0.0;
+				foreach ( self::evaluate( $r, $hyp ) as $k => $t ) {
+					$gain += $hyp[ $k ]['price'] * $hyp[ $k ]['qty'] - $t;
+				}
+				if ( $gain > $now + 0.005 ) {
 					$res['hints'][ $id ] = array(
 						'rule' => $id,
-						'name' => DSR_Rules::label( $r ),
+						'name' => '' !== DSR_Rules::label( $r ) ? DSR_Rules::label( $r ) : $r['name'],
 						'n'    => 1,
 					);
 				}

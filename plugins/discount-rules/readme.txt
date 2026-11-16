@@ -62,7 +62,7 @@ Dated discount rules for WooCommerce: product sales, quantity tiers, "buy 3 pay 
 * `dsr_get_item_rule( $item )`: an order line's rule (`rule`, `name`, `type`, `before`, `after` per unit, `discount` for the line), or `null`.
 * `dsr_rules_changed` ( int[] $rule_ids ): action after every rule change and when a rule starts or ends.
 * `dsr_eligible` ( bool $ok, WC_Product $product ): `false` = the product never gets a rule (e.g. gift cards).
-* `dsr_line_discount` ( float $discount, array $rule, WC_Product $product, int $qty, float $price ): a cart line's discount, the last word (0 = none).
+* `dsr_line_discount` ( float $discount, int $rule_id, WC_Product $product, int $qty, float $price ): a cart line's discount, the last word (0 = none).
 * `dsr_text` ( string $text, string $key, string $lang ): change any visitor text.
 * WordPress 6.9+ Abilities (read only): `discount-rules/rules` and `discount-rules/preview`.
 
