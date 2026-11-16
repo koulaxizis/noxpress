@@ -7,7 +7,8 @@
  * WooCommerce, so a site can always reach the hub and receive updates.
  *
  * Dispatch map:
- *  - Noxpress_Core     → catalog of suite plugins, top-level menu, language,
+ *  - Noxpress_Core     → catalog of suite plugins (plus plugins known only
+ *                        from the signed list, since 1.4.0), top-level menu, language,
  *                        page-cache helpers (no_page_cache, purge_page_cache)
  *  - Noxpress_Updater  → updates.json (signed, with serial and expiry since
  *                        1.3.0), update transient, plugin details, package
@@ -389,6 +390,46 @@ final class Noxpress_Core {
 		);
 	}
 
+	/** A suite slug: lowercase letters, digits and hyphens (folder and main file name). */
+	const SLUG_RE = '/^[a-z][a-z0-9-]{1,38}[a-z0-9]$/';
+
+	/** Update URI of every suite plugin header (Bible §10), plus the slug. */
+	const UPDATE_URI = 'https://noxpress.tech/updates/';
+
+	/**
+	 * The catalog plus suite plugins that only the signed version list
+	 * knows (Core 1.4.0): a plugin released after this Core copy can be
+	 * installed and updated without waiting for a Core that lists it. Their
+	 * name, description and page come from updates.json (display only; the
+	 * package itself is verified by sha256 and Ed25519 in the updater).
+	 * Reads the cached list only, never fetches.
+	 */
+	public static function suite(): array {
+		$suite  = self::catalog();
+		$cached = get_site_transient( Noxpress_Updater::CACHE );
+		if ( ! is_array( $cached ) ) {
+			return $suite;
+		}
+		$en = 'en' === self::lang();
+		foreach ( $cached as $slug => $entry ) {
+			$slug = (string) $slug;
+			if ( isset( $suite[ $slug ] ) || ! preg_match( self::SLUG_RE, $slug ) || ! is_array( $entry ) ) {
+				continue;
+			}
+			$info  = isset( $entry['info'] ) && is_array( $entry['info'] ) ? $entry['info'] : array();
+			$name  = isset( $info['name'] ) ? (string) $info['name'] : '';
+			$desc  = (string) ( $en ? ( $info['desc_en'] ?? '' ) : ( $info['desc_el'] ?? '' ) );
+			$desc  = '' !== $desc ? $desc : (string) ( $info['desc_en'] ?? '' );
+			$suite[ $slug ] = array(
+				'name'   => '' !== $name ? $name : ucwords( str_replace( '-', ' ', $slug ) ),
+				'desc'   => $desc,
+				'page'   => isset( $info['page'] ) ? (string) $info['page'] : '',
+				'remote' => true,
+			);
+		}
+		return $suite;
+	}
+
 	/** Main plugin file of a suite slug, relative to the plugins folder. */
 	public static function plugin_file( string $slug ): string {
 		return $slug . '/' . $slug . '.php';
@@ -396,7 +437,9 @@ final class Noxpress_Core {
 
 	/**
 	 * Installed suite plugins: slug => header data (get_plugins() format).
-	 * Only the canonical folder/file name counts.
+	 * Only the canonical folder/file name counts. A plugin known only from
+	 * the version list counts only with our Update URI in its header, so a
+	 * third-party plugin in a folder of the same name is never replaced.
 	 */
 	public static function installed(): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -404,11 +447,15 @@ final class Noxpress_Core {
 		}
 		$all = get_plugins();
 		$out = array();
-		foreach ( array_keys( self::catalog() ) as $slug ) {
+		foreach ( self::suite() as $slug => $info ) {
 			$file = self::plugin_file( $slug );
-			if ( isset( $all[ $file ] ) ) {
-				$out[ $slug ] = $all[ $file ];
+			if ( ! isset( $all[ $file ] ) ) {
+				continue;
 			}
+			if ( ! empty( $info['remote'] ) && self::UPDATE_URI . $slug !== (string) ( $all[ $file ]['UpdateURI'] ?? '' ) ) {
+				continue;
+			}
+			$out[ $slug ] = $all[ $file ];
 		}
 		return $out;
 	}
