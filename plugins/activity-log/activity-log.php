@@ -97,6 +97,11 @@ final class Activity_Log {
 	const CAP  = 'manage_options';
 	const CRON = 'acl_daily';
 
+	/** Daily cron: retention (days, then the row limit). */
+	public static function daily(): void {
+		ACL_Store::purge();
+	}
+
 	public static function init(): void {
 		ACL_Lang::init();
 
@@ -107,7 +112,7 @@ final class Activity_Log {
 			}
 		);
 
-		add_action( self::CRON, array( 'ACL_Store', 'purge' ) );
+		add_action( self::CRON, array( __CLASS__, 'daily' ) );
 		ACL_Notify::init();
 		ACL_Privacy::init();
 		ACL_Abilities::init();
