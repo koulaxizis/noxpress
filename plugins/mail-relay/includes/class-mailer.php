@@ -121,7 +121,7 @@ final class MRL_Mailer {
 			return '';
 		}
 		$f = wp_normalize_path( (string) $f );
-		return ( '' === $f || wp_normalize_path( ABSPATH . WPINC . '/pluggable.php' ) === $f ) ? '' : $f;
+		return ( '' === $f || wp_normalize_path( ABSPATH . 'wp-includes/pluggable.php' ) === $f ) ? '' : $f;
 	}
 
 	/** Active plugins that send mail themselves: name list. */
@@ -373,12 +373,12 @@ final class MRL_Mailer {
 			return;
 		}
 		if ( ! class_exists( 'PHPMailer\\PHPMailer\\PHPMailer' ) ) {
-			require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
-			require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
-			require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+			require_once ABSPATH . 'wp-includes/PHPMailer/PHPMailer.php';
+			require_once ABSPATH . 'wp-includes/PHPMailer/SMTP.php';
+			require_once ABSPATH . 'wp-includes/PHPMailer/Exception.php';
 		}
-		if ( ! class_exists( 'WP_PHPMailer' ) && file_exists( ABSPATH . WPINC . '/class-wp-phpmailer.php' ) ) {
-			require_once ABSPATH . WPINC . '/class-wp-phpmailer.php';
+		if ( ! class_exists( 'WP_PHPMailer' ) && file_exists( ABSPATH . 'wp-includes/class-wp-phpmailer.php' ) ) {
+			require_once ABSPATH . 'wp-includes/class-wp-phpmailer.php';
 		}
 		require_once MRL_PATH . 'includes/class-phpmailer.php';
 		$phpmailer = new MRL_PHPMailer( true ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress reuses an existing PHPMailer instance by design.
