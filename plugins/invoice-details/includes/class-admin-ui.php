@@ -452,6 +452,8 @@ final class IVD_Admin_UI {
 			'vat_bad'      => __( 'Μήνυμα: λάθος ΑΦΜ', 'invoice-details' ),
 			'vies_bad'     => __( 'Μήνυμα: ο ΑΦΜ δεν βρέθηκε στο VIES', 'invoice-details' ),
 			'need_invoice' => __( 'Μήνυμα: η παραγγελία θέλει τιμολόγιο', 'invoice-details' ),
+			'aade_found'   => __( 'Μήνυμα: στοιχεία από την ΑΑΔΕ', 'invoice-details' ),
+			'aade_inactive' => __( 'Μήνυμα: ανενεργός ΑΦΜ στην ΑΑΔΕ', 'invoice-details' ),
 		);
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SLUG . '&tab=settings' ) ); ?>">
@@ -515,6 +517,24 @@ final class IVD_Admin_UI {
 				<p class="description"><?php esc_html_e( 'Όταν το VIES δεν απαντά, η παραγγελία περνά πάντα και ο έλεγχος γίνεται αργότερα με το κουμπί «Έλεγχος VIES» στην παραγγελία. Το VIES παίρνει μόνο τη χώρα και τον αριθμό. Γράψε στην πολιτική απορρήτου ότι ο ΑΦΜ επιχειρήσεων της ΕΕ ελέγχεται στην υπηρεσία VIES της Ευρωπαϊκής Επιτροπής.', 'invoice-details' ); ?></p>
 			</div>
 
+			<h2 class="ivd-h2"><?php esc_html_e( 'Στοιχεία από την ΑΑΔΕ', 'invoice-details' ); ?></h2>
+			<div class="ivd-zone">
+				<?php if ( IVD_Aade::configured() ) : ?>
+					<?php self::check( 'aade', $s['aade'], __( 'Συμπλήρωση επωνυμίας, ΔΟΥ, δραστηριότητας και έδρας από την ΑΑΔΕ όταν ο πελάτης γράφει ελληνικό ΑΦΜ', 'invoice-details' ) ); ?>
+					<?php
+					$ivd_last = IVD_Aade::last_error();
+					if ( ! empty( $ivd_last['code'] ) ) {
+						echo '<p class="description">' . esc_html__( 'Τελευταίο σφάλμα της ΑΑΔΕ:', 'invoice-details' ) . ' <code>' . esc_html( (string) $ivd_last['code'] ) . '</code>' . ( ! empty( $ivd_last['at'] ) ? ' · ' . esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $ivd_last['at'] ) ) : '' ) . '</p>';
+					}
+					?>
+				<?php else : ?>
+					<p class="description"><?php esc_html_e( 'Για να συμπληρώνονται τα στοιχεία από την ΑΑΔΕ, βγάλε «ειδικούς κωδικούς» για την υπηρεσία «Αναζήτηση Βασικών Στοιχείων Μητρώου Επιχειρήσεων» στο Taxisnet και γράψε τους στο wp-config.php:', 'invoice-details' ); ?></p>
+					<pre class="ivd-code">define( 'IVD_AADE_USER', '…' );
+define( 'IVD_AADE_PASS', '…' );</pre>
+				<?php endif; ?>
+				<p class="description"><?php esc_html_e( 'Οι κωδικοί μένουν μόνο στο wp-config.php: δεν αποθηκεύονται στη βάση και δεν φαίνονται εδώ. Η ΑΑΔΕ παίρνει μόνο τον ΑΦΜ. Μόνο αριθμοί με σωστό ψηφίο ελέγχου, μία ερώτηση ανά ΑΦΜ για 7 ημέρες και όριο ανά επισκέπτη. Όταν η ΑΑΔΕ δεν απαντά, ο πελάτης γράφει τα στοιχεία ο ίδιος.', 'invoice-details' ); ?></p>
+			</div>
+
 			<h2 class="ivd-h2"><?php esc_html_e( 'Πάροχος τιμολόγησης', 'invoice-details' ); ?></h2>
 			<div class="ivd-zone">
 				<?php
@@ -575,7 +595,7 @@ final class IVD_Admin_UI {
 
 		<h2 class="ivd-h2"><?php esc_html_e( 'Για προγραμματιστές', 'invoice-details' ); ?></h2>
 		<div class="ivd-zone">
-			<p class="description"><code>ivd_get( $order )</code> · <code>ivd_is_invoice( $order )</code> · <code>apply_filters( 'ivd_require_invoice', false, $cart )</code> · <code>ivd_text</code> · <code>IVD_DISABLE</code></p>
+			<p class="description"><code>ivd_get( $order )</code> · <code>ivd_is_invoice( $order )</code> · <code>apply_filters( 'ivd_require_invoice', false, $cart )</code> · <code>ivd_offered()</code> · <code>ivd_text</code> · <code>ivd_aade_response</code> · <code>IVD_DISABLE</code> · <code>IVD_AADE_USER</code> / <code>IVD_AADE_PASS</code></p>
 		</div>
 		<?php
 	}
@@ -600,7 +620,7 @@ final class IVD_Admin_UI {
 				$raw[ $k ] = sanitize_key( wp_unslash( $_POST[ $k ] ) );
 			}
 		}
-		foreach ( array( 'vies', 'column', 'delete_customers' ) as $k ) {
+		foreach ( array( 'vies', 'aade', 'column', 'delete_customers' ) as $k ) {
 			$raw[ $k ] = isset( $_POST[ $k ] );
 		}
 		foreach ( array_keys( IVD_Settings::TEXTS ) as $k ) {

@@ -81,6 +81,9 @@ SLUGS = {
     'fm': 'forms',
     'fd': 'product-feed',
     'iv': 'invoice-details',
+    'lg': 'login-guard',
+    'al': 'activity-log',
+    'mr': 'mail-relay',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

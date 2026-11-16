@@ -1,430 +1,600 @@
 {
-  "expires": 1796035030,
+  "expires": 1796039094,
   "plugins": {
-    "book-feed": {
+    "activity-log": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* First release (beta): products, orders, coupons, content, users, plugins, themes, core, settings, media and suite events; actor and source on every row; secrets and customer details never stored; masked IPs; 90-day retention with a row limit; critical-change e-mail; CSV; «History» box on products and orders; dashboard widget; privacy exporter and eraser; read-only ability activity-log/list; Site Bridge and Login Guard hooks.",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "32c5207c396dce585fc11ab7ab86b73488c4b1174f35a27a018d996259e9d1a3",
-        "sig2": "tBJWcqopfbsnF4Zs3GzbogHBPMIlh9SfB71bROmO7IzLJS7/dAmNSLv/pCy7xhZOnsnk11SiTz7v9yJbReqHDA==",
-        "signature": "GGO1mY/MhebtI/ECK5C88Axa1mMeoYyPNUOo10y+usV2K7tJxAocFAY7HY68+5+9tzTj8cgKnCuQBp/qzEU8Bg==",
+        "sha256": "2d60d631a68972883add8987b3e0a26ed4d0d28271ddbab86a660710e386670f",
+        "sig2": "R++XCvbVCN6vbQzn0bLgM/Wl80+3JmUq8/Jng6ZTGtHn1yQVZlzA8rLG4Ql7Daicnfk2VaxeTS6XlsJsFFO+Bw==",
+        "signature": "3X1zHeLukKPGid3fpzim6t6yngVOr0PBWRwiaFmszoN+i5mDEy1Y3J4wBlQRzyxOhyW/bxIhyeewnEnh6pBvDg==",
         "tested_wp": "7.1",
-        "version": "1.13.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.3/book-feed.zip"
-      }
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-al-1.0.0/activity-log.zip"
+      },
+      "desc_el": "Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.",
+      "desc_en": "Who changed what and when: products, prices, orders, coupons, pages, users, plugins and settings, with the source of every change (admin, REST, WP-CLI, Site Bridge). No secrets and no customer details, masked IPs, e-mail for critical changes.",
+      "name": "Activity Log",
+      "page": "acl-log"
+    },
+    "book-feed": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "213b5c9d29e192c910c2bf8b83d25c242d8fb46a845a9850e607a660b58edf93",
+        "sig2": "BmSSTbRGCtPulS8MV7yxj7QNEc0ec2tRzKZWtfwgDt6MpOSzwyErnAkDsKrNn5xTlOs/ly6W7g9namtpnDdTDQ==",
+        "signature": "iXmqjZT7V/wXCFtRKdnYbLG0pXOP0x1Vsb6zEjjh7qgcILlCIBJAS5IEbEv0qvBG6C0w3jF45su6dX9Y68ACDA==",
+        "tested_wp": "7.1",
+        "version": "1.13.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.4/book-feed.zip"
+      },
+      "desc_el": "Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.",
+      "desc_en": "Titles of other publishers from the Bookpoint catalogue (OSDEL) as products: search and import, rules per publisher and a daily sync of price and availability.",
+      "name": "Book Feed",
+      "page": "bkf-feed"
     },
     "book-preview": {
       "beta": {
-        "changelog": "* New: optional own tab «Ξεφυλλίστε το βιβλίο» / \"Leaf through the book\" on every product with a visible sample (Settings → \"Also in its own tab\"), with its title in Greek and English. With the position \"Only with the shortcode or the block\" the tab holds the only button on the page. Key bpv_preview, priority 35, so Product Tabs can order, rename or hide it with the other tabs.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1114fdd4933ec48d3e8bc9608581b5f086b5b712bbfc879bbfbaaac04805b930",
-        "sig2": "uh7f+tUrDOg9bAuH8gixD52RdE63Sz2fK1ZE1JUF4egunFTLJc2SjSZ0rBPgQh3P6E+X5aVYU7xC6kLKFz3/CQ==",
-        "signature": "XSjPhL32zQSNwG0zkvGrT1NNXsww/8AZaMEnDqE2aAPK6AmlxqTG7A9cx81BqZFlkC3mFZpSSOiDMRpJmW3SBA==",
+        "sha256": "97b2b828671da03d195bca85ff9c37f6c2440f36b202a68f46ac50508d2dde97",
+        "sig2": "YeNFjeJ8SvrhxYS4qDm7jqYuPoxnYNO1nKgZwnyurdv0i0j6bmr/TzH2j6ywRgplCD/f8oJm8wUq5ojwqC2MBw==",
+        "signature": "8wiZMuLSXoISu53/+e6feyjn8Imgv6pNxZuq1WeAizWg5uwKO8q2gKxOvX08Z/t4ffYNbPfmZDrR6ibTb6XnAg==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.3.0/book-preview.zip"
-      }
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.3.1/book-preview.zip"
+      },
+      "desc_el": "Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.",
+      "desc_en": "A book sample on the product page: a separate PDF with only the pages you choose.",
+      "name": "Book Preview",
+      "page": "bpv-samples"
     },
     "broadcast": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "29f6782720e2f77b48fb231dfa8ee1ea3b32036ea06448cb1a94046beb5f3a12",
-        "sig2": "M9ubfMWnrG9LUpZJJ+V4B8kwSJdvigpcCIsJ5eOsE2PyP1guT8jV2eJQVm/NDbueDCFkwnOJPyGHwf67oX2SBQ==",
-        "signature": "Qboo6MMWILolyrXV7cIW1VvvsG88VMJiOvDXTlSkQjackiZzbo7dl0o+rvTOr6dhOs/PWw71h7FUUIX+EPFEAA==",
+        "sha256": "c09d0f8e623610e42a6b9358284748293887cc143244102b9638328fd13caefb",
+        "sig2": "dUianWCMN9qQOxKDr7jF8Of8Nwcv69BlDb9wUdShJImlYr9jzTasR/oUA26+F4WCRBekon5W6Vh+BQHkyJ7pAg==",
+        "signature": "H13+5tRLO0+G6O7MPsC4GYz2XQlbVziLXyfWHS81+rlbgeY4Lhf/TNTfPEM8egL/uXFz1322NDwm8/ZvXp/QCQ==",
         "tested_wp": "7.1",
-        "version": "1.4.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.4.2/broadcast.zip"
-      }
+        "version": "1.4.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.4.3/broadcast.zip"
+      },
+      "desc_el": "Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.",
+      "desc_en": "Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos, new Instagram posts and posts you prepare. A queue with approval, one template per source, no duplicates, a full history.",
+      "name": "Broadcast",
+      "page": "brc-settings"
     },
     "checkout-extras": {
       "beta": {
-        "changelog": "* New: store vacation. The site stays open while buying stops (no buy button, cart and checkout refuse orders, also in the Cart / Checkout blocks and the Store API), or orders are accepted and shipped after the vacation (required checkbox at checkout, note on the order, Shipping Notes estimate from the end date). Optional start and end that open and close the shop by themselves, a warning bar before the start, Close now / Open now, exemptions for digital products, Pre-Orders products and chosen roles, page cache purge on every change and at the change times, an admin bar reminder, and the abilities checkout-extras/vacation-status and vacation-set. Off after the update.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "fcdbeddc7b9cd6eb4393dc0ab5779a4f07d7e497df17f0d6c1f54463571ff6d6",
-        "sig2": "B3srMKYpOkShRJ40ciy2k585vfWM3i412EQyRNNYJPFa77B1lR+KVwSkGv02TbfjzPBt5rp1uhSNrP49820fBw==",
-        "signature": "remM/h1PyHN+WFc5bNfn9hQHYnDVMGaslVP6O9T9mjx0zIP42/fmSOVV5rbTsQnbDEMI9bj9ZhMF6ZbhdO8ZDQ==",
+        "sha256": "d8b53e441b95419827b676099b3dfa7731ee3bff0baaf6b32c1a2c3af34a845a",
+        "sig2": "DansR1cRHminFn/2Q9li8ndGUjEw6ClpqiRexrTJScVwuoMDyfQ9MmGW1DnHHMcijEdQzIqLFHvkMetlfK/jDg==",
+        "signature": "bknIOsFnhvLgvOib9v21Cjw+J1qh49xWfCU3P3axV+eYyp38L2WkzlV5tBGkkG3hzUKYi5iFTxzkQkY9K3RyAw==",
         "tested_wp": "7.1",
-        "version": "1.2.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.2.0/checkout-extras.zip"
-      }
+        "version": "1.2.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.2.1/checkout-extras.zip"
+      },
+      "desc_el": "Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.",
+      "desc_en": "A gift option with a message at checkout, a message and products on the thank-you page, and a thank-you coupon for the next order.",
+      "name": "Checkout Extras",
+      "page": "cke-settings"
     },
     "data-migrator": {
       "beta": {
-        "changelog": "* New: optional backups to your own Dropbox (App folder only). Connect in DM Settings with a pasted code (OAuth 2 with PKCE); the token is sealed with the keys of wp-config.php or set as a constant, and never goes into a backup.\n* New: choose where each backup goes (server, server and Dropbox, only Dropbox) for manual backups, schedules and WP-CLI (`--dest`). Dropbox copies are encrypted by default; the server copy is deleted only after a checked upload.\n* New: uploads in pieces of 4/8/16 MB with retries, per-schedule retention in Dropbox and an optional size limit, \"Read backups in Dropbox\", \"Send to Dropbox\" and \"Get from Dropbox\".\n* The database dump now skips the plugin's own Dropbox token rows.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "a3429b42ad2aac9be2d73fdbff2a048737ba795e89c817ccc128401bc49eaf19",
-        "sig2": "M5aeMhoPjVqYXdEwtCr9SWKto1/CyDVqs+xXzAw0ZAVqBfeXI4v7seRhdwfF3VFWjihEJQ70Rjbau91gscjxBQ==",
-        "signature": "hbKk5e3OYFvcj50r7XvKCkc0Meii2hJ4RTksYGa16X46KzvK9ezlaqRP96WxEgJvNjjVHlcO3EO0D2uE3QpPBA==",
+        "sha256": "bd6f15ee2612732fc84495aaafb09ff2d024442bf72b587fed3e9a06ff75c7c2",
+        "sig2": "0O4g7XUmWp4q2JTc+18YO6y9vTASXkdYUboYm8mnCBcR9g7OqKmjNHlCgkDxgwZ2UxzqZb/t5zvwBsGEeInlCg==",
+        "signature": "hIXsDtjLgEN/sTTspVmy8VG6LxEAY7RYTgzjKYgLfFti6JjQCmkyroYiKL0oGLJZcE8+Ylxa9M3CSbovtxsXCw==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.3.0/data-migrator.zip"
-      }
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.3.1/data-migrator.zip"
+      },
+      "desc_el": "Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.",
+      "desc_en": "Full backup and restore of the site, here or on another server, with a domain change and no manual fixes.",
+      "name": "Data Migrator",
+      "page": "nm-backups"
     },
     "easy-withdrawal": {
       "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "6523c770454728a2e0c15846df35d4b9a41fbf2ea9f6e7d6528baf3a3e340147",
-        "sig2": "68G7Oou6kMTJnCkZ9BpF+L0ks8l7C4LfO5YBQ5+3VhUOBVpBloKffVAJqaSxj/x8ht6uV6aFTfYF6Ld1uvmGCw==",
-        "signature": "RL/eye/Hzw3uIBZEOfKE634JmLXaHwJ49oUxJpaWB+KmGk2uxapj3RJavcT+SDTUypGMs0Vlh+0eQMgWKBxIBg==",
+        "sha256": "cef47776cf524dcacf9c754f0f8d58a9003a668518fd847969ec1d8632ff0b0f",
+        "sig2": "HtrSe87ywVkFRc64tJbUN38NLap9xJu6o1qFQ026qlPUCzdFyRN75SOV1XHLYMJcZAHu+IdreTqCfxZwWCyrAQ==",
+        "signature": "ghaCnyrHch8wkihwmVRkeo4TxDZsWxKshplfU4baYqAhCKXg1O3LUDx/ajuIkfK3NkCof1E4WC1jFkUQXIkiAA==",
         "tested_wp": "7.1",
-        "version": "1.2.5",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.5/easy-withdrawal.zip"
-      }
+        "version": "1.2.6",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.6/easy-withdrawal.zip"
+      },
+      "desc_el": "Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.",
+      "desc_en": "Withdrawal form for customers and guests, with a receipt and a request list.",
+      "name": "Easy Withdrawal",
+      "page": "ewd-requests"
     },
     "fast-pages": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1acbee8eae010fa6059696bcafffe8feeb40466babde99e7fe9805ab6b9f9bc2",
-        "sig2": "Lco2ec0qHPk26DH6bUkoitFwvhuIIwX8/W9h4r8tKNwYC6pKHF0HaXQ0XhX2W8qUH03qo0T+rtwCD5PGP13wBA==",
-        "signature": "QGtQOjjsth2HIMgi8+HEY0GF+Wt8sROeK8tPnc5TMHI0c9nSKFo/bBX2KTJZDtU2RF7+QbfpBo6HE9kx7lW4AQ==",
+        "sha256": "aeba0cd7a64ada5fd9dcaec31754619929de1737564758e470d659a60a65c856",
+        "sig2": "E2CVx+pLo7zLl4XW4j/kqZA5bsGUvFH+ht5CCmp5ZzU5R6BvEotMsTEg2UwaMklnFiWJEZXR7LEOouIby8CzDA==",
+        "signature": "EV30PuTmIMPI1qX0GAAmBUldqpRDF4xsZlpPSbOMhVQ9V19f1bXnBdSH7tRrGYx4yhTPPBLFrRQwvNO1O8kvDQ==",
         "tested_wp": "7.1",
-        "version": "1.0.7",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.7/fast-pages.zip"
-      }
+        "version": "1.0.8",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.8/fast-pages.zip"
+      },
+      "desc_el": "Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.",
+      "desc_en": "A page cache for visitors with smart purging and preload, CSS / JS minify, lazy load and click-to-play YouTube. Replaces WP Rocket; Claude runs it through Site Bridge.",
+      "name": "Fast Pages",
+      "page": "fpg-settings"
     },
     "featured-creators": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f72c57ce51e420191006c92bbcfaa0d5466eb222e9b74f225993566ac283827f",
-        "sig2": "/9RtEOv964hmC4OZru6QQLersksJwjSt394dtB47E+he3Q6zTdDR/sz6S+aWT+S+XUONncy7BHUKHGjOMQ51Bg==",
-        "signature": "rO8axUNMie6ll+MqBeUNWmoI6KDQ+CSu1VqnrconV0pMBtZpXmRuiPDGIkTLSREcS5v01PSE6q0KijiEHwGYDg==",
+        "sha256": "9d0020cf49253cdfab0e058ecd3291089a0967bcf1fa5480d8fdf8560fc1619e",
+        "sig2": "w6ySUj6qKgKiSN1n/VY9pienQYNG/SuQAVtlQRip0Ynx6V+VTJ0/7VVTfM6wBHJ0dQWBU7WeeWrSknXAHi0tDA==",
+        "signature": "5Z6y2DPedBzrq/w029m/1QVBoj0LLcIrwXvGczXqyTFLDk1ZHKVMsBTgkaGmve9bMi3JtXjpTkg867UsGackBg==",
         "tested_wp": "7.1",
-        "version": "1.3.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.3/featured-creators.zip"
-      }
+        "version": "1.3.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.4/featured-creators.zip"
+      },
+      "desc_el": "Μία σελίδα για κάθε δημιουργό, με τα έργα του ανά ρόλο, συνδέσμους από τα προϊόντα και ευρετήριο.",
+      "desc_en": "One page for every creator, with their works by role, links from the products and an index.",
+      "name": "Featured Creators",
+      "page": "crt-settings"
     },
     "greeklish-permalinks": {
       "beta": {
-        "changelog": "* New: rename a media file to a name of your own, Greek or not. A \"File name\" field with a live preview on the attachment screen and in the media library, a \"Rename\" row action, and the bulk actions \"File name from the title\" and \"File name from the product/post\". Media → Renames shows the final name and every reference before the change, and keeps the last 100 renames with an Undo for each, in a log separate from the bulk conversion.\n* Renames, like the bulk conversion, now clear the page cache of the affected pages, and older file redirects follow a file that is renamed again.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e7dc39fdd4f5288c549262eca4a95f06f6be14e7169380266eedd46190734ba8",
-        "sig2": "DpeTAIc2wyYv5bh5FKA5mmxhSuFfeaSgqiUxDO6A9Y0X2L2IquvPeG24U12WrW2bSkjvyskW6cUYWyqt3QhHBA==",
-        "signature": "FmyWRqvD/gA/hfLa/keUKKJnhdf+HN2JhHAQ56arH5+MmtapjdqJ1KrNAYoKQeNOZau2/MlgYIPp6/Sm/UJaAA==",
+        "sha256": "a05006c092a5caf86a2c73bf8c2bdb32b8863bdebce96aa7a894027e5e9591a8",
+        "sig2": "fnyrLQqyA4vopIYb0wPIGtU/Qb+44lD6jKrcgFCXDx3uzinYiGQFLUVAtytGr6yw7fdt7OeHObmxZr95KZtWCw==",
+        "signature": "ZiObA3GbNAu6+NRB2XcdC4tP6AVsYMT+o9j9nWbAIRe32KaM7z9X86RkZLZyxDvOckHIJnVHkxRzWEjoRe93Cw==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.3.0/greeklish-permalinks.zip"
-      }
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.3.1/greeklish-permalinks.zip"
+      },
+      "desc_el": "Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.",
+      "desc_en": "Greek to Latin in slugs and file names, with bulk conversion of existing ones.",
+      "name": "Greeklish Permalinks",
+      "page": "glp-settings"
     },
     "hide-catalog": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "9917204ff4ce8e13caa258cfdee12a283172651a84d9ed58848c3568d8dc601e",
-        "sig2": "sG0Ck4I3tPRn1TmWWCxddVRO6hX5MKiR/GplhLJYeoyDQlD9je5o58E6RmEKUFPft/sHvGgLL2cCj98BG4w8DA==",
-        "signature": "Hb8hiitihXd2iLvC03V719U+yIGhWmPie2jQmAEq1V7KCy37BHxfgJ6xixTEQbCtUUXyehHZ73DZujzBK2c3BQ==",
+        "sha256": "8aa4017bf68073d7285d0d85b1c0139ad93acff19dab842969ca0168d808430a",
+        "sig2": "1J1e+4V/apSKPrvq/maDEsNT4JTzDzpbMIrOAebf4B/A/lVjBopaku/tLUvvhhPuXcicQn3rxzM6rQ0w8KWCCQ==",
+        "signature": "yp7C+MpeMklRKA4zWpalItTn8A5hLHtUGobAF3NKC0OiOFOgHlRxdRlkwYU3cyG+T9tdWbAOuXJQvi9S5cyWAA==",
         "tested_wp": "7.1",
-        "version": "1.1.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.3/hide-catalog.zip"
-      }
+        "version": "1.1.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.4/hide-catalog.zip"
+      },
+      "desc_el": "Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.",
+      "desc_en": "Hide categories and their products from the shop, search and blocks, without changing the products.",
+      "name": "Hide Catalog",
+      "page": "hic-settings"
     },
     "home-sections": {
       "beta": {
-        "changelog": "* New: [hs_video] reads the trailer and presentation videos from Product Tabs (ptb_get_video()) when it is active, and from Custom Product Tabs for WooCommerce for products not imported yet, so the homepage keeps its video before, during and after the switch. The bridge shortcode of Product Tabs keeps old [wb_cpt_youtube_embed_shortcode] content working too.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0a6453c18f2a2dc792ad67990d764410c5b60b472fff7c4e33e289528e4ef13c",
-        "sig2": "+j53CUSaGXssG0y204UMb5rcFq+9h9fu9KKmKQH/pUB0NuryKQFRg/KWlftAfe8BKEe5W2Q+6t2Zf/Ddt1pFCA==",
-        "signature": "SKoAFr3sGfYsvxaWVSKcB7iRN/az0+EuKTfx1wLAsBZKE+hu0PoTTGvysanhrqg/nI4++rlV4EMKk8kXNOY5Dw==",
+        "sha256": "1c264ea241194c53db03da2e730aa321f127415c6a7aea81d1b3f25e33b32d64",
+        "sig2": "L/6Il8H+yujAIjyZUv1HNNC/L4m1MLoiaP+vSyLSvWYQrmYmcoG9FprUJ3Uk2xsMULyFJjMAGDXRf9yokqiyCQ==",
+        "signature": "mbN5om4nsK0J+0QunZA6BEkHYrhdxhEQANGnPOSE6tuKjL/CxXOm6UjY0TCxT9TBdsf+RFZNEvNmqATQkZ/vAA==",
         "tested_wp": "7.1",
-        "version": "1.4.5",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.5/home-sections.zip"
-      }
+        "version": "1.4.6",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.6/home-sections.zip"
+      },
+      "desc_el": "Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.",
+      "desc_en": "Product sections with the [products] shortcode: marker classes that leave out products, categories or pre-orders and filter by a word in the title.",
+      "name": "Home Sections",
+      "page": "hms-settings"
     },
     "invoice-details": {
       "beta": {
-        "changelog": "* New `ivd_offered()`: true when the current visitor sees the receipt / invoice choice. Trade Accounts 1.7.0 uses it to hand its «trade orders need an invoice» rule to Invoice Details, in the classic checkout and the Checkout block.",
+        "changelog": "* New: details from AADE. With the special Taxisnet credentials in wp-config.php, a Greek VAT number fills in the company name, tax office, activity and head office in the classic checkout and the Checkout block, and «Fill in from AADE» on the order fills the empty ones. Only empty fields are filled, one lookup per number for 7 days, limits per visitor and per site, never stops an order. Off until you switch it on.",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "78b3d25234ea337140a62deabae5c8f2aaafc5f5bf33e082899476ec0c5f1011",
-        "sig2": "LqEs3zWGfxcetKjv6Xp9e/hLeRsJqAoWDhyuFvLTGNCgVlxAomm4cU4fXqxnqN9tfN6LhwzViwSP8huYP0YXBA==",
-        "signature": "A/yHZJT/LecVieIVQ7HOKlnN6fxAYpUopR6crdiIUnZZ0Vs6NZR0h017Q7csxBbbtHnbsEnYkTf7IWBFuY0gDQ==",
+        "sha256": "3dd1248bca708615a04d07635b3351a599b3634126a5056572fa3980d821dbbd",
+        "sig2": "lBwkV5AdPAGi3ThEnP9PBpZGnNEeaYg8S56IMXFtkYXFmy6N33nAeWoa0Mz7M1ZQBF3B7cBB8xz8/HeYvsEJCA==",
+        "signature": "aOwxeMtyZ+OhdMXT8kxFGko1S7CLZ4qOoR5K1Jtkku7bREpBOK6CGN9QmyC5JuFhHAkEu1SzJ65RPukLChv9Aw==",
         "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-iv-1.0.1/invoice-details.zip"
-      }
+        "version": "1.1.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-iv-1.1.0/invoice-details.zip"
+      },
+      "desc_el": "Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.",
+      "desc_en": "Receipt or invoice at checkout (classic and block): company name, VAT number, tax office and activity, a check-digit test for Greek numbers and a VIES check for EU ones, the details on the order and in the emails, and an invoice list with CSV for the accountant.",
+      "name": "Invoice Details",
+      "page": "ivd-invoices"
     },
     "lean-images": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "87dab94a2ec025f3812abcd0592f021d97acb407ce54db9972a3a7de9433849b",
-        "sig2": "jPyAJopDgFBffLAimXxRVryuot5vfQiHKUL4y1Q+KKWxGxI2mn7mWa29eixiBvVFgkkdL8JEzmrc8zFG2eDmCw==",
-        "signature": "HLgsdKyVErqpXjKMiq9heBnKmMONwl3v7/dZz26mAg4+AF/CcJdcm7yA18bCYprjgoos3Kvlt3FslyQcI+epDw==",
+        "sha256": "c55d521cf2c4c641931835c17c32eec54c9c3d2001e579d5107dee9424fe43d0",
+        "sig2": "XgX5/xrUmSxqZsvGNWPHjxmgF9yqSAscDr/X6epN94EAGylpRBtsQ1AcuYVk0W2OvcfTfS1gsskPjtqfONEWBQ==",
+        "signature": "v5AagLG7LZzvfHfrtn52hpOp2UawukymOuK0DvFIqvpbJbgQ1s0XYhM7jQORMBrZU1DjQ1+2hOBPfOlLlE9xAQ==",
         "tested_wp": "7.1",
-        "version": "1.0.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.2/lean-images.zip"
-      }
+        "version": "1.0.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.3/lean-images.zip"
+      },
+      "desc_el": "Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.",
+      "desc_en": "JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches. The originals never change; no account, quota or external service.",
+      "name": "Lean Images",
+      "page": "lim-settings"
     },
     "live-operator": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "319a11157e77b276276271a318b0f6756c2cdee8a1acbbf3344c72c7c7ba0ef1",
-        "sig2": "WOpY3dHAPJpHQi0MynWB0wn6qv6RhoY0M868uH4mfb0qd5IOIhrJsxJ7XXODCWvieSmLldC6vHKTnnDyZOEMAw==",
-        "signature": "ddVq25k6xEq5sJYy2L3sSx3aG6JAd0jCmylVGKEgLQsZhYF3OCv+i+gRKDHxlPNBYmCYH/IunAQ2gHLcMejAAg==",
+        "sha256": "c70bc2cf9b0d349757e0023f72063397b4a84550e6bfc65493aeb31187a7e344",
+        "sig2": "EdhNFN/tSYS9+X7/gTdEEJc/ub1clZe0BNzY6WmT/BwmMLuGWdLd3RDePP0ZBMnX1/TS6F8cqSgif0CPuC8vAw==",
+        "signature": "uRFCDCCO3kMhYsOqDWvcw/wXE6/ut3LfG1HMLlxc3EoAm8/aZzGMhckOP7Y86UyY623/tR6p1Ib/ssLnIPfUCQ==",
         "tested_wp": "7.1",
-        "version": "1.5.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.2/live-operator.zip"
+        "version": "1.5.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.3/live-operator.zip"
       },
+      "desc_el": "Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.",
+      "desc_en": "The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an app.",
+      "name": "Live Operator",
+      "page": "lop-settings",
       "stable": {
         "changelog": "* The opening hours in the structured data work with Search Signals too (the `noxpress_seo_graph` filter), so they stay after the switch from Rank Math.",
         "published": "2026-11-03",
         "requires_php": "7.4",
         "requires_wp": "6.0",
         "sha256": "4183a0e7ec9647bda4fb117e1917565f522c213c141cefa78350785eb4487b32",
-        "sig2": "eqr2ZIVGeZAyiCoiazt1c728iK2EheZsvBJLftOsbSRZkPgdSWayHtRtbCJhaAvwhJZncrMNPkCd87irLyDuDA==",
+        "sig2": "W13yj2BwrWARlvPBwQsTtgwyQ4flnigcz35uAGoglOnNp7z8keIfEePe9KPkXXLvtfPn6lRoDXkFxMhYvNggDA==",
         "signature": "nKsKOcvGgZ+DkUlHGf74Ke095yA7EdV7JRxswktFGlLuLRoEneVc8XGUwdcHw91Dl/P0dlUMLN02rMjnUejZAQ==",
         "tested_wp": "7.1",
         "version": "1.5.1",
         "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.1/live-operator.zip"
       }
     },
-    "magic-login": {
+    "login-guard": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Initial release.\n* Failed-login limits per IP (with a longer lockout for repeat offenders) and per account, on wp-login.php, WooCommerce, XML-RPC and Application Passwords; allow list; off after activation, then test mode.\n* Unlock by e-mail, bound to the browser, once, for 15 minutes; limits and neutral answers on lost password (WordPress and WooCommerce).\n* XML-RPC: no logins and no multicall by default, or closed, or open; pingbacks off.\n* User enumeration: neutral login errors, /wp/v2/users, ?author=N, author archives, users sitemap, oEmbed author.\n* E-mails for a new administrator device and for an attack surge.\n* Log with truncated IPs and keyed hashes for 30 days; privacy text.\n* WP-CLI commands, ability login-guard/status, LGD_DISABLE, JSON export and import; Greek and English admin.\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.4.7, with the shared Noxpress_Safe::client_ip()).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "91ed1a3b08dff7cd0f63f0c083d117bec6f9d68c4b4e1ce9659806e6ff66dfbf",
-        "sig2": "2+Eyu+1mnvlAv1gxeGTR2e5WEP5eY1pUt5m/ObejBY6ReJcGvsMPlVqcxNkHYdlvoTFCDx7GvERXXb/2CUXzDQ==",
-        "signature": "bAbc/OuGdgMyRPcd76cAxtFVUJQzzfUVgwENtaVRb34a2Z3MrlKtH9CVpN6YDimzegLCDZbyk3s7CxluP1fCAQ==",
+        "sha256": "18b839ad9b9ff2af9e3143733e28791f9c581f4cd72cebfb5bf3ec34b0439967",
+        "sig2": "PwW2gJexZChlkTpZDB2YU4SWAgzVSmER4WjdPqeAyl36cnf7FB3aILvloFXeL3wCy6F9EjtTG+DmwYPw66BCCA==",
+        "signature": "rJ7pJ1RKkH97qEy6LQV+Ts5plkwJukeOqXsveQzWzjL3V9G//OeFUv9CKxPfZtPHeowZvXjvUYEEieeUufTtBQ==",
         "tested_wp": "7.1",
-        "version": "1.0.5",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.5/magic-login.zip"
-      }
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-lg-1.0.0/login-guard.zip"
+      },
+      "desc_el": "Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.",
+      "desc_en": "Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.",
+      "name": "Login Guard",
+      "page": "lgd-settings"
+    },
+    "magic-login": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "4c236015ceb1ba7d46257ebb389b3c9d47e2d4a0af897f3e7f77ffd1063d5480",
+        "sig2": "SSxhsXt9KV+yZ1M1aaCQp8UXpyZhQwdqkhh8sRKoPdyrEWTNAzK2HXGwETUL2g5akRQbD1fzh9RjLxTC2QQGAQ==",
+        "signature": "vEJRhE+fJirXQ4d+2b71v/wJ/2Jr9wDKqZMhRSqk2aro1wtTj34ZIL4SWnl5fXatJQ6/R+YZ4ogqEE85YWXcDg==",
+        "tested_wp": "7.1",
+        "version": "1.0.6",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.6/magic-login.zip"
+      },
+      "desc_el": "Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.",
+      "desc_en": "Passwordless login for customers: a one-time link by email from the login form and the checkout, with expiry, rate limits and a confirmation page.",
+      "name": "Magic Login",
+      "page": "mgl-settings"
+    },
+    "mail-relay": {
+      "beta": {
+        "changelog": "* First release (beta): SMTP with presets (Proton Mail, Gmail, Microsoft 365, hosting mail), Brevo, Mailgun, SendGrid, Postmark and Amazon SES, backup connection, sent log with source, sealed content for 7 days (off by default, never for sensitive mails), resend, CSV, privacy exporter and eraser, failure banner and hourly summary, staging guard, SPF / DKIM / DMARC check, import from FluentSMTP, settings backup without secrets, Site Bridge abilities.",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "17dab05872506a27444867b84c6b1463afbf928ca0b94ed3f1d04003b4d270a3",
+        "sig2": "WRaALiYuhguS2uK4n/3TkPmkn68/bb7VeIXtsruAHOv8yz7Px0MFdA26R5nxjxVEY7TlARGBWHpjHJOM1gKCAA==",
+        "signature": "pVs93dL2hK03xQwkIrNDUxU6QKnI8K87U9Y6Xm71rXVrBJ9+zexZ7kAJAnPLPFO6Q4WOpCoIwGm9/JvWW5IdCQ==",
+        "tested_wp": "7.1",
+        "version": "1.0.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-mr-1.0.0/mail-relay.zip"
+      },
+      "desc_el": "Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.",
+      "desc_en": "Every email of the site over SMTP (with a ready setup for Proton Mail) or through Brevo, Mailgun, SendGrid, Postmark and Amazon SES, with a backup connection, a sent log, a test email and sending paused on copies of the site.",
+      "name": "Mail Relay",
+      "page": "mrl-settings"
     },
     "oros-connect": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "af3c3980b43c3bd6271b1bdbb93f2567c675b2472df50f6ceb8030d3eec793a1",
-        "sig2": "YLhqLgORIh2vKe8poczK91THRhptUWTWQKwRKOV91IcbaAF/uuEghzYe9crFhXmPuxR8Aw8n8A4VPuOvGiSJAg==",
-        "signature": "TDQvxpYmj5XPz/k5oKsvh8oHLPboPUyJge/Rc99vFp2tGXxWokySXTjX4iN8nZzDx0M4csLZBXlq8jzbiadyCA==",
+        "sha256": "c46d28d477eac54ab75b301d6be5bdd1cd864b936007fe2885980da80acfa729",
+        "sig2": "LNXjn/ta4+V+fuTjV1j4i3WYdseLh1QDS7g9VFVTUv6kcWHlfBYkhNLfzH7L0lFXrxRVtQr1ltR/Sn1xWycmBQ==",
+        "signature": "Re7pJ4tJcVjpDqs36tTgdeE7HzpLYtmBdDrf37HUmmqcTaOVH4vLT61z7AQGKGFvbKI/TxKmyvJNRM6LczmfDw==",
         "tested_wp": "7.1",
-        "version": "1.3.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.3.1/oros-connect.zip"
-      }
+        "version": "1.3.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.3.2/oros-connect.zip"
+      },
+      "desc_el": "Σύνδεση με το orOS σε modules: φόρμα εγγραφής και κουτάκι στο ταμείο για τη λίστα σου στο orOS Newsletter.",
+      "desc_en": "Connects the site to orOS in modules: sign-up form and checkout checkbox for your list in orOS Newsletter.",
+      "name": "orOS Connect",
+      "page": "orc-settings"
     },
     "pre-orders": {
       "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "0aef029ae2082778a205a34d321469ff5e5b7b77350d7e2a4c0064127e289721",
-        "sig2": "DqtUpeUpa4O7yLIMhDwg6CSaIJYM7eDOol046hp/ZheQkmHRl6yPTayp78/rD1p1Oq91VNLZ738EwDGn4X5sAA==",
-        "signature": "GmBCCiiKs6Pctq976AT35Rq9N0EGZupenlbqqQy2PRTEpxvCEnwpzQhHB/AjcNTUwZWX2xiM1usfjgFC7X5BDA==",
+        "sha256": "00db2c499a7f35719ed62a3b62e4140d0394496e654a9eeefdc72ae0fd90d3dd",
+        "sig2": "6Iw/AGWH6LVQecW+T14DTipfO1ta3juSc3ZBjMQ+5Ke6xi5TwNNTb5mjoVTfCE8ProG9rnxmhKB3ie2RkjOIAQ==",
+        "signature": "zoSgXlGxk4s7BgbEWEZ8nSRJ8P/yCDxhTgLpKNR9dLBBnHmFXYJmZug8+r5KDCtE8O2XnFZkoZDu/0v2z+XeBg==",
         "tested_wp": "7.1",
-        "version": "1.1.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.4/pre-orders.zip"
-      }
+        "version": "1.1.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.5/pre-orders.zip"
+      },
+      "desc_el": "Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.",
+      "desc_en": "Pre-orders with a release date: badge and button in the store, the date in the cart and on the order, automatic release and emails.",
+      "name": "Pre-Orders",
+      "page": "por-settings"
     },
     "product-bundles": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "af5d30d63a3f351619efe97c9ebd0b88134e92eb2185be24be0be9bcf41e3a26",
-        "sig2": "A722MdV7oeboRUx8YYODBCuNYdRD/ZsQG4jKtms9UW/D41nKtotc44BL2xZaxcMnNrbA5kzex004thYkvy3qCQ==",
-        "signature": "V+2EbFoHNE6bNFnohtUJJ4cysgkmsiLjFdFpTp0+dFYg3/xFACGR0NJonoeHSmHYQzk40owCBYWkxj2w4wVVCA==",
+        "sha256": "05b6393d1d4af7fc474ea5dbc04b5083ab851e914723d7c9c7638f58a82b61a7",
+        "sig2": "QRmXL5cl20x3Yrc7hsR7253prjG4ar4Ut040y5fAMtomgT3To08DNE7ggdvEIiVGmGnUTH9EhVvgNHWla798Bw==",
+        "signature": "Zehvc4VCGzacH+7PX1Bw9RrLrNcJpdhksTh/ZNDoFrSOZtyf0FyObZP5/e3v4tMWztcLw1rc0eqAM6uC2+yLAw==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.1.2/product-bundles.zip"
-      }
+        "version": "1.1.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.1.3/product-bundles.zip"
+      },
+      "desc_el": "Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.",
+      "desc_en": "Product bundles: every product with its own stock and VAT, a bundle discount and correct sales reports.",
+      "name": "Product Bundles",
+      "page": "pbn-bundles"
     },
     "product-feed": {
       "beta": {
-        "changelog": "* New: feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and a general CSV.\n* New: background builds in batches with atomic replace, schedule, «Refresh now» and a debounced rebuild after changes.\n* New: GTIN / ISBN, brand, pre-orders, Hide Catalog and Book Feed cooperation; digital products out by default.\n* New: build report, preview, legacy path copy, CTX Feed import, settings backup.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "b0601db2edbe2f79e43afb909b788a2fc9465ce2da876949b0851ebfaa334158",
-        "sig2": "43nS/UOLSMHegDL33ZJ85zlumDht9oRMhJcRg2UFNVdraTCjlM5fQJOIjDuguzXS2euKQoDAL3jCOW144o/oDw==",
-        "signature": "FlNLX56yUmqGiJEEK6r5xKbDip/aDJ3yhwtotnSDLUNB2fnylN4NAW+OE+rrPKy2z5o17fepKpT+NZvMmGVTCQ==",
+        "sha256": "ba3eda4124a2f2fbef888d212721470e18be5ac508bb1e67c2bbc3568262003b",
+        "sig2": "9oRsMeXLWVV8658nvITyLYu/uIxySSyBid7Uvz0QVoQNE7U8keBMpVVWn9WZ+jfxnHtCahCM/OJFINBdC3x1Ag==",
+        "signature": "cRS/c+Bvcm8pdG5+sRWaP4y6kW1w7q9sQ7GUTHLyYyZ2+FprN6pYZ4DONqevsQU0lVPK9aLMbzyYziFX7I3hCA==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fd-1.0.0/product-feed.zip"
-      }
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-fd-1.0.1/product-feed.zip"
+      },
+      "desc_el": "Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.",
+      "desc_en": "Product feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and CSV: one static file per feed with a fixed URL, background refresh, GTIN / ISBN, publisher, pre-orders, a check before publishing and an import from CTX Feed.",
+      "name": "Product Feed",
+      "page": "pfd-feeds"
     },
     "product-formats": {
       "beta": {
-        "changelog": "* New: book details (tab \"Books\"). Attribute mapping for pages, year, language, edition, series and binding; book properties in the existing Product schema node (no second node); \"Publication details\" table and `[nox_book_details]`; \"Pages from the description\" tool with preview, batches of 100 and undo. All off until enabled; test mode applies.\n* New filter `pfm_book_schema( $node, $product )`.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1eeeb958ec229e153361c90ecd7a5245fa5c8f945527ef0bb671cdeddaf11051",
-        "sig2": "+F+HJaM4XA20qT+omVc1RMfavTkPbAIz31BFbSpuCNUWaWQG+FsmgIcj1GVz+TV16OfOMuamsbdF+D/Emm9CCg==",
-        "signature": "/DsDWwSs4dkn1Vajhnol0sNh0ThQR0RVazp9mdWpTdO8EvLw3SK9ZYbgO8ZHnhap0BWAp2RatR+DSkmiDJQVAg==",
+        "sha256": "dbd156892a225787b54a0976049c309cb69f6841fa249d17fbf294724a750fd6",
+        "sig2": "z/b047v8Ldlxug3DeKBIHxEB7DYnPul4b6B+HDdB9fCWjwn8lSDtYGBovMFbsq+rjTfXmu52hWud0c+zTMywAw==",
+        "signature": "Co/dGU3M3uEkPsl2Fo/qXsi70BGUUrfmaE6G7AV9AUFaz8XXot9irQbGwCmU90A36Ar03iyBrHQSBB5y0cs3DQ==",
         "tested_wp": "7.1",
-        "version": "1.3.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.3.0/product-formats.zip"
-      }
+        "version": "1.3.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.3.1/product-formats.zip"
+      },
+      "desc_el": "Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».",
+      "desc_en": "Links the formats of a work (print, e-book, audiobook, film) with an \"Available formats\" block.",
+      "name": "Product Formats",
+      "page": "pfm-formats"
     },
     "product-tabs": {
       "beta": {
-        "changelog": "* Initial release.\n* Tabs per product (text or video) with position, on / off and, with Product Formats, sharing with the other formats of the work.\n* Shared tabs by all products, categories, tags and product types, with exceptions, Greek and English texts, and per-product hide or own text.\n* Click-to-load YouTube (youtube-nocookie.com) and Vimeo player, optional YouTube poster image, [nox_video] shortcode.\n* Order, titles and hiding for WooCommerce's tabs and the suite's (Theme Patcher, Featured Creators, Book Preview).\n* Read-only import from Custom Product Tabs for WooCommerce with preview and undo, duplicate hiding while both run, and a bridge for [wb_cpt_youtube_embed_shortcode].\n* ptb_get_video() and ptb_get_tabs() for other plugins; abilities product-tabs/list and product-tabs/import-preview.\n* Test mode, PTB_DISABLE, page cache clearing, settings backup, uninstall that keeps the tabs unless you ask.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "cf96f2abf0625548ba12e2077b7ce5d15fb81292be0b9536e0feb452e4cf9dee",
-        "sig2": "ekmlgX95W+1jZr8yNXysE+buCzJS5K191FT09PZYV+6gs2g2E1c5SRFGyl8QsqXAaB87UHVR6qNIRlPWYihuDQ==",
-        "signature": "cQlXh61iJtjo4m/yoSxUn98Qq3ZbyopikRsM7/4lpFN9ptT/G3os+6pYBwY32c5aXw6zWRYLYn5j5Iam+ngpBg==",
+        "sha256": "06e7cfadbcb7eb354d8ee14aff771a544a2094012ccb72d4cb6abaf429a4c8aa",
+        "sig2": "x45QBcdcvI9mvvfxU/sKCUc47VKd7QovmHLq9x7cq0RntJ5KV8+mrioNSnEeHRZOl+XpSU58vAwEmJV72pOnCA==",
+        "signature": "j40Ju4ut6ol9CFnHyGHGzqqIcPHM9DRXtR/q4bTdBNmfpFXos8O5H3fjCFyVNUeg/FUDN1WBht01jh6viY8vDw==",
         "tested_wp": "7.1",
-        "version": "1.0.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pt-1.0.0/product-tabs.zip"
-      }
+        "version": "1.0.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pt-1.0.1/product-tabs.zip"
+      },
+      "desc_el": "Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.",
+      "desc_en": "Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.",
+      "name": "Product Tabs",
+      "page": "ptb-settings"
     },
     "production-ledger": {
       "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "5a8821787e0132af6299a3bb0ee51c1a26f76177002eda784b7fa487f476079a",
-        "sig2": "ECbG/ccZvEcyAoeyx1H4DCAh7GFYH7zsbIDIGRMQ/fCPH4f1Dm0y3+AhrFW2XCNJGr7mX5BsCSP3QHDVyO7jBg==",
-        "signature": "cD0H97rkS+K1sigXLesZIQMMTMQHJ7OzfnBsesZ2KAUSBHBU4v4PrgwRjsYoFuMGdyDJcBqPrHQ1wGKJX5sABA==",
-        "tested_wp": "7.1",
-        "version": "1.1.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.3/production-ledger.zip"
-      }
-    },
-    "publishing-quote": {
-      "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "fcc3d822c63630fed78d030585883247050b4030ba34a5818611913f37f2067f",
-        "sig2": "1fQWhJ1F3jFW20MU4fMBl78Xtf7gW8rnFTLhzhxQ5F/oIyNU9QI5sw/pShcDlX6f+QfPdjrkooWdlCFRVjFLAQ==",
-        "signature": "RK8uqL3TU+XWKVoNi8nLzB0FaiSN2boekweAU/yHJkSv5qXkdru4aT6/6j7ULLHzZuUDgcjxSXEiQ1iyLjUxDw==",
-        "tested_wp": "7.1",
-        "version": "1.1.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.4/publishing-quote.zip"
-      }
-    },
-    "redirects": {
-      "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV export and import use an empty escape character, so a rule whose source or target ends in a backslash (for example a regex) can no longer move data into the next column. Update recommended.",
-        "published": "2026-11-14",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "8a08eeb0cc4fdd3f567bc1d8e70cfecade67a90dafe63d455d57f28ab79d9142",
-        "sig2": "2aYGEtSH9BLKoHBA6/FQlFJMSF++wylX0B/DOwlwr4irNvpFKNxmtwiZz4vbeTITL0xBCBmPyZY2EyobAOOYCQ==",
-        "signature": "tbEWeHolGUGYw3oD5OFIaMQzwsrh18ZY/ilgMsI3BEr4huRrafLRTWLBzX3UPGWT76Y6375bfd5Osa/+8Q2nAQ==",
-        "tested_wp": "7.1",
-        "version": "1.0.5",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.5/redirects.zip"
-      }
-    },
-    "revenue-splitter": {
-      "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "66a97a610a4c04abbf6947159e29b6c0d38ecdbb0f0646d5e521e09485b56d19",
-        "sig2": "ftHzzDf36tLtZmrCNl2SlA7+V8FyqYTDYfCb4fCEtDljFqVVgkzCXUumqVQMXyoEwU0suk/173Ep5akqV4g0AA==",
-        "signature": "H4zuWFbSlbUwBC4pOYbgpJzxdVVDaGF025XwjieVSziyT4tZN1ZwNnZz5d9uFqSj0ODs44mlaZUzR8q0AjC5AQ==",
-        "tested_wp": "7.1",
-        "version": "1.18.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.3/revenue-splitter.zip"
-      }
-    },
-    "search-signals": {
-      "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
-        "requires_php": "7.4",
-        "requires_wp": "6.0",
-        "sha256": "1507a70490e0d094887b21de274b6d67befcf3773626b253983d5af83b6f74df",
-        "sig2": "YiTvA7YxHfduHZxHqHHi9dexK7JhOo3JMD1K4QeZaJSRYOH//BCpLeA8lk2zO3DqjlHLuQ3uptl7eyh2AnXxDw==",
-        "signature": "fMGLYgFZGPJ9AbjrroY3/WwQFLx61K9eTVnWXjrX64kt802rBSTQSS8DWX0QOjO8RHKnbQonsEhhweyB5e96AA==",
-        "tested_wp": "7.1",
-        "version": "1.0.1",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.1/search-signals.zip"
-      }
-    },
-    "shipping-notes": {
-      "beta": {
-        "changelog": "* New: an optional line on the product page, under the \"Add to cart\" button, that tells what this product does for free shipping with the visitor's cart: how much is still left, or that shipping becomes free. Classic themes, Astra and block themes; its own texts (with {threshold}, {remaining} and {price}); follows the free-shipping test mode. Off until you tick it.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "5738b4001d4fbf1383aa46e421cfbc2420d22f5598425a1a9053aec2fb84a89b",
-        "sig2": "+FyZagXS0Sgb5TxFIONYu4hBueoQdPwGmLv7c55xCuThzyi4Y/Ro4edTOyhguFSU5qgTPdgIzsALuvcCJ1GhDw==",
-        "signature": "Gie+jWB6g+6UhAA18pkG1mPj7T7kxN9hFqPM+CqyU1R9XLjRIP9K/TD3Vjz+d+BWr74hdjub4dxVbwgcPmu7BA==",
+        "sha256": "4f31d2201fc9b9617987e3a6b9e1437e895f35ad7d79728dd16c7fa40ee1f04d",
+        "sig2": "S7SnPvaN1FC56jjPG2P1x0/WFp64P/mzxa8SsP9L4xf34kwAxOpxcWFGP4Bb/+1QQis5dYYzuZwQBtiZ/xcsCw==",
+        "signature": "qhp8WGzMKtz6oY4ZIG3kDuQLVvwlqwkTezW4C+3jwLob9TFeuTEQ03ZkXD9tDDestkz4S2b6legrMTecJ9mcCw==",
         "tested_wp": "7.1",
-        "version": "1.4.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.4.0/shipping-notes.zip"
-      }
+        "version": "1.1.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.4/production-ledger.zip"
+      },
+      "desc_el": "Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.",
+      "desc_en": "Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month's orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.",
+      "name": "Production Ledger",
+      "page": "pl-ledger"
+    },
+    "publishing-quote": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "0d12bc3c009f95b413565ab640922248d75e05527a842d6e7cafc6998404c34b",
+        "sig2": "xT49LKKPXSJNSAgve4en7eiIXnyxdv6zenDl5bxY0HCBeWSu/sRabGXxGjN4mCR1Zj6BeJuOlgzdFccXE9FCCw==",
+        "signature": "zjq6KYXdEiwHU1bWovq7Dg+BJxFg4oZNPzP5dnDS4q2rkm/R5M3Wk2aapdl9bXa9Z/T/41RyNwxU1WdgQ2XgDA==",
+        "tested_wp": "7.1",
+        "version": "1.1.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.5/publishing-quote.zip"
+      },
+      "desc_el": "Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».",
+      "desc_en": "Publishing quotes for prospective authors: an amount per service and a total, with the rates hidden on the server and «I'm interested» requests.",
+      "name": "Publishing Quote",
+      "page": "pbq-settings"
+    },
+    "redirects": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "2857f71a71e780fe6dd0850f32ce6e939f187905fd4d5b30ed989b62b1bfbc45",
+        "sig2": "B2yr6RdzjE8U9VcqtCF+mjYCrFj07f2aTrsFunOF/bczQiVQTavxyntqM4/XA8fhDlpJKH+u6uNMYIPNQtLeCQ==",
+        "signature": "aWsC9+fEUJ//xiuiQ2k7MnRlDPowt4Hl+ZAxJOlj8NRHSZtYosTBUG0nDrtfWGaARNkoAmzdDVgzuFCiyTJ2Ag==",
+        "tested_wp": "7.1",
+        "version": "1.0.6",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.6/redirects.zip"
+      },
+      "desc_el": "Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.",
+      "desc_en": "301 / 410 redirects for old addresses, only where the site answers 404, and a 404 log in a private file without IPs or bots, with suggested targets and import from Rank Math, Redirection, Yoast and CSV.",
+      "name": "Redirects",
+      "page": "rdr-settings"
+    },
+    "revenue-splitter": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "f3696d68ac2affb24e45b4ffcc814aa95f64427834815b69823d47e2a5a755f2",
+        "sig2": "9LtR54js0fIDp6ywrBD4+m6SIYf6P1ns65gZ4rhvlnOtBA31o3n76tdSejSwd9O7I7iafxatWfD3YdVudWUPCw==",
+        "signature": "0EhVZkYEPZZJdqx7CstYw1X69cvai9yTq+ZYkciA4SYOJCqFJDSRKS7ssZ7xwm6MsjF6i+VqUUI0mO9tCC2KAg==",
+        "tested_wp": "7.1",
+        "version": "1.18.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.4/revenue-splitter.zip"
+      },
+      "desc_el": "Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal δικαιούχων.",
+      "desc_en": "Revenue split per beneficiary, VAT, ledger and beneficiary portal.",
+      "name": "Revenue Splitter",
+      "page": "revenue-splitter-dashboard"
+    },
+    "search-signals": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "70aa2704a6290af20c08daf5b81b16f5410fbfb81ad8fd80baceebb9ea75e1c2",
+        "sig2": "5blwRLZEFaze8g2GJ8I95Vgd1aGpyI50t3TM+Zev7xHR7Johelkgl0pHYbZzbhqA3893Ce501hecKdj/aN5lAg==",
+        "signature": "ghCeF81r5Ameou5VVt/sg/Z5IqoMRc2OYXADXl0YviTAVURHeR7C4GIiJsUFQqkoOg9RCK3SSFqCreSc8ILuAw==",
+        "tested_wp": "7.1",
+        "version": "1.0.2",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.2/search-signals.zip"
+      },
+      "desc_el": "Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.",
+      "desc_en": "Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.",
+      "name": "Search Signals",
+      "page": "ssg-settings"
+    },
+    "shipping-notes": {
+      "beta": {
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
+        "requires_php": "7.4",
+        "requires_wp": "6.0",
+        "sha256": "906b44404ac504a6e60649e7273c217dbe3fe98f290aa8db73e9cf72faa6cd49",
+        "sig2": "H7/J5ySH+5jA0fTm7lNROwYYnC44VNSSXB2o0QAQaDdw/AV11KGd9YGw6FKd2M9eL6LGEh08pFgvkNzWpE+1Bw==",
+        "signature": "Qa9tjtS+VmJzNmNnEGpLiJFWeax8XbP9K5Jj7izDuc3Q7xHbDOWebceK8eP/gPDdTVDV2oe9F7ekJXIppKdvCg==",
+        "tested_wp": "7.1",
+        "version": "1.4.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.4.1/shipping-notes.zip"
+      },
+      "desc_el": "Δωρεάν αποστολή με μπάρα προόδου και χρόνος παράδοσης στη σελίδα προϊόντος.",
+      "desc_en": "Free shipping progress bar and delivery time on the product page.",
+      "name": "Shipping Notes",
+      "page": "shn-settings"
     },
     "shop-filters": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "e2cd02f8e08defa7e39e8b0f91bc464aa8916b594c11c4fdcaeeb6d5b7421621",
-        "sig2": "ty7PTz1TadYBgKi6sRx5wANiRWy60XLyr4D1zP/VLmsPCU0webkF3TFHk14g+UA9PemHpImaW64Xb97TlhpYDA==",
-        "signature": "FSNUVDm7s58SkOr7SIRMGcD2pMx/WRiDwWt6Ytl/DyWCfdcWUldlAQ9RFYIWHkyp2BUV16lxXSPMQVtO9saSBw==",
+        "sha256": "e0fdce3b285098f505c149e95c968ae1ccf45434e72f2d19089b4969d39c8988",
+        "sig2": "f69llteV9o/TpIpUQxpnFd+r/5H/3IpJtGV40YY6v/6+XXHTFXBoINR7J6pqk/Ew2il+8kzeuTDrhZt52Gq7Cg==",
+        "signature": "GMzxrZxP7Mrs1xcqe2+dk1hyI0H9nEa0XMpWeFgFcbYY/cdj+4VbFBiXK59FjWfI+JP7F5MfII6OFGgUY4q0Aw==",
         "tested_wp": "7.1",
-        "version": "1.3.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.3/shop-filters.zip"
-      }
+        "version": "1.3.4",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.4/shop-filters.zip"
+      },
+      "desc_el": "Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.",
+      "desc_en": "Lean product filters for classic themes, with value groups for attributes.",
+      "name": "Shop Filters",
+      "page": "shf-filters"
     },
     "site-bridge": {
       "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* New: the actions sbr_call_start( $tool, $client, 0 ) and sbr_call_end( $tool, $status, $log_id ) around every tool run on this site, so Activity Log (1.0.0+) marks the changes Claude made through Site Bridge as such and points them to the row of this audit log. A listener that fails never changes the tool's result.",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f332d9827d9f989aa20eabd13c2a0d979e0f152b2f617dd5a242e45d34df2406",
-        "sig2": "YgylBKfvgt6+wmjSSlBouMadwBXB/MjBy1UdDU0l/G2qH9+zeYijIqwuNGH1V3BHgra3LUzfqx8ypc51UcdYAQ==",
-        "signature": "9BJ+59jS4yz3gCPp0H5ZpOz30cniAFNuvLsL0MVAduKobsvmbn5xZ/Nz6p868jE0MiRLpKf+3w2WNpWpdHYXCg==",
+        "sha256": "260b008b638f6ba7d4bd7f34ed70347d1e4bba82b7f07a79e6b20ae7fa498101",
+        "sig2": "+baB4J9G3FLFj4xCsHKwNX7dkaDX+h+d+FkPBL6bvuMwVh7OWONja9w83SpF3DZj+44QZG1JI2azEt4zI2rLDQ==",
+        "signature": "VhuK1/eP2x81QiGEu+iPtp6kJQAQI6MwJK4m3jM0eymEnC5Hs16YDT+lsneYpVXdiJMzs3aSqtfHLoeTOLBwAg==",
         "tested_wp": "7.1",
-        "version": "1.12.3",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.3/site-bridge.zip"
+        "version": "1.13.0",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.13.0/site-bridge.zip"
       },
+      "desc_el": "Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.",
+      "desc_en": "Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.",
+      "name": "Site Bridge",
+      "page": "sbr-settings",
       "stable": {
         "changelog": "* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.\n* New: \"Close now\" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.\n* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.\n* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.\n* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.",
         "published": "2026-11-07",
         "requires_php": "7.4",
         "requires_wp": "6.0",
         "sha256": "f8928251a06795db462c36d36392802d52c5d9309869d8c557943126f4372101",
-        "sig2": "wDsfEaK88slNa0qF1R1EOHIHWsIWZkzaGg5dvXZx5Liy+cayPYSjnmIlGo6yCBg6VIOdgYiy0lUORQov2QO/Aw==",
+        "sig2": "vyDbr6jlNPBKwhz86ZWDL6wV1xSJMu/qKGrc5YSUIwngX30bIOx3LNUsLxZvgECVluAaBN/SkEq0Z5g7ArmOCg==",
         "signature": "gAXag38Ledy+UUdL5Kw3gGU8ia87dk50wA2+bTlnOo+gBxWfRwmhOKmSu9GwFMtKhJyOwwplS48jyzbTuu2EAw==",
         "tested_wp": "7.1",
         "version": "1.12.0",
@@ -433,116 +603,150 @@
     },
     "smart-formatter": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "1cdf56a9e7761006e84d8b62c157b1d8260efa006b3b78294a40603586a273e3",
-        "sig2": "XGHM5fS5crIuruPpufznr/apx6r8hQsLuxEVnBlH3I1JhSK2eD4fMaAqjS28tY3Sb3N+0E9xaKN3oW8SowfsCg==",
-        "signature": "K/5ujt9yzjwjvGCwfnOzCQXg5TQJsifzkQfKWfbPHc87Ts+iyAV3ku89RaR/5allQ1jXaQWZiZiolIDmpSa+Bg==",
+        "sha256": "6961e7b579b39bbcbfa65c36caba3ceb0f1fa89cc43a4489ba3815f72e0b782b",
+        "sig2": "A5POR6KTqfTr5azi92e5AUaIeOlktPcmg9JMk0koflTA+6uEWaEoIvXOHVo8Gcb7zUECWsWGQaJtZPvTopKIAA==",
+        "signature": "7eKw+RH/alcQZmbhhnR5tKJJO+PR9/roZO0g4s6t38ClWMY8x5bLikNURlKwRUaQyA+3Ur1dvkGzv7olzWO7Bg==",
         "tested_wp": "7.1",
-        "version": "1.5.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.5.2/smart-formatter.zip"
-      }
+        "version": "1.5.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.5.3/smart-formatter.zip"
+      },
+      "desc_el": "Μαζική μορφοποίηση κειμένων προϊόντων με preview, dry run και undo.",
+      "desc_en": "Bulk formatting of product texts with preview, dry run and undo.",
+      "name": "Smart Formatter",
+      "page": "sf-formatter"
     },
     "store-pickup": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "bd477f578bda60bced289d9a599b41862d7dcf4e51d617a6ece6cd13575837f3",
-        "sig2": "3DNfOtv8ib2S3OQ8wrRsxhhdgMpQlPhHRLWOyqVest1wyteUaAh6cCAP2CHQu8TS4DE/7Yhvkx4vEOCVf20nDw==",
-        "signature": "94PBVc0lPfy3lYABI1++STh0BL6YhXl4qQHN7MjZL6KntnvYDmU9cYJbMOyTwZ8qBNtDeBh/X20QHzw7BlqQCw==",
+        "sha256": "7be5738b91ab0fbf0d68971afc645103c70bba6ff3211149c05ad6fa08ab44ae",
+        "sig2": "3ExjveOcsLnacF9NWZyMfItp/s+XYSZzrRGo6Ee9uhVZqSHc6mE3cIT90H3Af9Wzzvv+Cwk8HL1Q2AvZiTtUCQ==",
+        "signature": "yObq7wdC6E70nz1/hORvYenBc1+kOHAjRbYUvLf3Xn3lOfIbQ+0oG10ly1KtIdiuMzG97fiAo39do5wGQtZUDg==",
         "tested_wp": "7.1",
-        "version": "1.2.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.2.2/store-pickup.zip"
-      }
+        "version": "1.2.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.2.3/store-pickup.zip"
+      },
+      "desc_el": "Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.",
+      "desc_en": "Store pickup at checkout, with a choice of store, opening hours and no shipping cost.",
+      "name": "Store Pickup",
+      "page": "pkp-settings"
     },
     "store-pulse": {
       "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "f0e05bd0e5aa1193d69a10a28e61b47587453945b7fe4d3ddf82bf399eb744c9",
-        "sig2": "S9CuwyA71gEZzkngfhJSq3nymQxHMD+yET5hi2zhTY4rGC1FKEkhGJ1wghWC3qC7ZsF3fxdVneV9DIwkGce/CA==",
-        "signature": "qUU+bpdFP/wvGEyi3dAd1htjQU9qGtcAqXCULg+Zi+chNyvbQO89qXZQ1JT33YWfoaqEIKDluoAU25xtqxSdCA==",
+        "sha256": "5287feb4ac2fe2c139d722030379cba46f9e107d854eaab89d013924ac00ff50",
+        "sig2": "3QfXi+AEbr3tCdTJUeDeyhvqRmIb4PD6n26e9XiXmqxaSFjKECAa2b0jpKwWoXwvSIWS5H9KvxOmidLa+vi+AA==",
+        "signature": "sQW6qfE/Kzv6KgImpwqpec6MPXGFP6z3d54DDm/Un5k1D6s6hHMujOu980nl466tfHY64nExmkkke2mj53KmBg==",
         "tested_wp": "7.1",
-        "version": "1.8.8",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.8/store-pulse.zip"
-      }
+        "version": "1.8.9",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.9/store-pulse.zip"
+      },
+      "desc_el": "Εικόνα του καταστήματος με μια ματιά: παραγγελίες, επιστροφές, στοκ και οφειλές.",
+      "desc_en": "Your store at a glance: orders, refunds, stock and amounts owed.",
+      "name": "Store Pulse",
+      "page": "sp-dashboard"
     },
     "theme-patcher": {
       "beta": {
-        "changelog": "* New: product badges for the whole store, in a new Badges tab: \"New\" (published in the last 30 days), \"Last pieces\" (stock from 1 up to a limit, WooCommerce's low stock amount by default, `{stock}` placeholder), \"Sold out\", up to 10 tag or category rules with your own text, and a \"My badge\" field per product. At most 2 per product by default (1–4), the sale badge included; top left, top right or in a row; colours per badge. Greek and English. Off until enabled.\n* New: the badges show in classic shop lists and product pages, in the Product Image and Product Image Gallery blocks of block themes, and in Theme Patcher's card slot. In WooCommerce's blockified templates the classic hooks are taken off, so a badge never shows twice. On the product page a \"top left\" badge moves to the top right when the product is on sale, out of the way of the sale flash.\n* New: products with an active pre-order (Pre-Orders) never show \"Last pieces\" or \"Sold out\".\n* New: filter `tp_badges`. The badges are included in the settings backup; the per-product text (`_tp_badge`) stays after uninstall unless \"delete on uninstall\" is ticked.\n* Changed: the sale badge settings moved from the Prices tab to the Badges tab (values unchanged).",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "35df35aa58c719647a23f7330787dae01dc6bc73616a6823d03783c527dcf101",
-        "sig2": "9DnWzniTr1o+IpOEj11sQDQYw1BZojjtYB2IRb+Iefx33fKV98/MP4zTlhFJxoda+cpneHbpiqbMG36HK+JjAQ==",
-        "signature": "zhdzThT8feNm08HOLuzSAD3uFHQXGaznhS3y24jmOce11zjo0ncHe/xQwr3QvKihytcC2GM8urgjgRMrAOpwAQ==",
+        "sha256": "b85d5c41451370a2e3021273ec0a4d64dda5f73ad720d591f5ecc274d5760eac",
+        "sig2": "0oJjRz+my7P/s8d+SKnVUTzSOKbmwXSnz5fxkIccpnDHlQ06vTAw6tddFMFy66kwlTcT1XYBSKBAgo0F7ZN4CA==",
+        "signature": "MxPjeWyoPnI9ovKLhzrAGOlWtGpsnNGa8CmBYjkCPEKUYlPc9aWtWlp9LhVmB0AzwX6Y1fBxXKIgJo18LAq2AA==",
         "tested_wp": "7.1",
-        "version": "1.7.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.7.0/theme-patcher.zip"
-      }
+        "version": "1.7.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.7.1/theme-patcher.zip"
+      },
+      "desc_el": "Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους.",
+      "desc_en": "Fixes classic WooCommerce themes without a child theme and without editing their files.",
+      "name": "Theme Patcher",
+      "page": "tp-theme-patcher"
     },
     "trade-accounts": {
       "beta": {
-        "changelog": "* The «trade orders need an invoice» rule now works with Invoice Details (1.0.1 or later): when its receipt / invoice choice is shown to the customer, a trade cart must choose an invoice, in the classic checkout and the Checkout block, with your own message. Without Invoice Details, or while it is in test mode for a customer, the rule works as before with the OBS field.",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
         "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "ba6387027bf191292a1e89fa1addbf93d70ff9676583e06a6d6ad3e28c969b30",
-        "sig2": "I3ZoL1tX35cIUJ7Yp0RJPla+Gs4tVXYZ2svL4SDGpgcC957ARiC4SkGINGolAVskTVye1Jh2knEQWijG35mgDA==",
-        "signature": "7Fl6F5Q0Fp1geyJx4UU/DZPr7ARiWZNnMPFm0TpmroXM9NFJFN63nW4KioxtEaQpozY5zMGjSYDP8yRD5X/6CA==",
+        "sha256": "f8fb09186c3a569a5081231525e376e7e8176a4677ed8ab77419c2257f090f95",
+        "sig2": "zNNjkDZJyLGOqXo2jyYTLVY6aj8Z5dpgXCpBuMbjk+1MiOuSt6inTYmaNJjxcIScWlm0/pUOlz/IZqz9LkLOAw==",
+        "signature": "RB8K27NKquud1NKFzlWx/KILpDXInstSyENa//rXTCGwTn6f6rHMi2CtFISUMifw7jl41FgZIsZczBFuORpACw==",
         "tested_wp": "7.1",
-        "version": "1.7.0",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.7.0/trade-accounts.zip"
-      }
+        "version": "1.7.1",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.7.1/trade-accounts.zip"
+      },
+      "desc_el": "Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.",
+      "desc_en": "Trade accounts for bookstores: a preset discount on the titles you choose, and an API (Trade Feed) in JSON or XML to list the books in their own e-shops.",
+      "name": "Trade Accounts",
+      "page": "tra-settings"
     },
     "trade-feed-import": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "243e157fa3767494e040ce71a519263699eff00dfd9815f1ef666725650dea75",
-        "sig2": "8YtvlYerB78y0LQJheGly1061X2UyKjPY4UVK+LNtDuHv+lhN2V97xAkbNBUNLLdX3GoLaIUFSxpyirzk6MQCA==",
-        "signature": "80OXUhtjM9hwRJPVEcAXGyWBBiPR6ulSD7jmqCuIWsYGlZLyIIB3R6Smjx3bnm6taMAtTxIjyPhgofxOhYRmDA==",
+        "sha256": "c17d8c73424e1fd8d9c482c29a2fb129b5c15857739b3f43183391366bea5e72",
+        "sig2": "N6FIyeLX+pNrdFgo4NhjRap13GgU6toIscwJUBdiGESLMZlhtxAHKok+lM/cVIzbrUXfO9XCdPCNKOb9enIQAQ==",
+        "signature": "QgPzPx7n2OhkQwMmMfGrT0tSMoa+BIMTLHLGuf3qpeHRPk0/CIyj5q8LYjMKbqbcsirTqfbcWBL+0NWT3GajCQ==",
         "tested_wp": "7.1",
-        "version": "1.0.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.4/trade-feed-import.zip"
-      }
+        "version": "1.0.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.5/trade-feed-import.zip"
+      },
+      "desc_el": "Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.",
+      "desc_en": "For bookshops: a publisher's titles in your own WooCommerce shop, from the publisher's Trade Feed (Trade Accounts). Paste the publisher's e-mail, press one button, and the books come in with cover, ISBN, authors, category and retail price; price, availability and pre-orders then update by themselves every day.",
+      "name": "Trade Feed Import",
+      "page": "tfi-settings"
     },
     "variation-picker": {
       "beta": {
-        "changelog": "* Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "71802c79790e35df5186efffed8651fe3f68528a691d96a9c375d52338b2c950",
-        "sig2": "Xqc4U+U9oHsgn51jZoeqtR9Xgflejz7PTGnYaLC7frOT/Do8EHUkBGjr/jHtgJJt1ssj6rV1ow35NoVPuzWTCA==",
-        "signature": "O3qTbNn7P2RnjZlg399R2gHMb97cTCQKEtCIKCx3j56vlbPrAewH3Tu7TbPTr1xhGQckSZC9ImMTCEMbcqffDw==",
+        "sha256": "315b2af9ed140d4b33ec7dd0798267849c93aa92feaa11e628a238a51508dcce",
+        "sig2": "MCZa7tGIW6t4XjJEfhB7h89Idvgt/T7zPakDhWCTVbpsG/gT6pX8E3esUR2tuVFVNrDheVn+FNhT89WoXt7sBQ==",
+        "signature": "3VeJCszvtFjyuSXx+eWrTsYyQ+Ko3ROhkF9xBEFtHRiRY5170dmsweEIwb9iFk06YcQ3nJfvOgxWw0yH5PhIAA==",
         "tested_wp": "7.1",
-        "version": "1.1.2",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.1.2/variation-picker.zip"
-      }
+        "version": "1.1.3",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.1.3/variation-picker.zip"
+      },
+      "desc_el": "Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.",
+      "desc_en": "Swatches for variations: colors, images and buttons, a size guide and swatches on shop cards.",
+      "name": "Variation Picker",
+      "page": "vpk-settings"
     },
     "wish-shelf": {
       "beta": {
-        "changelog": "* Security hardening (NXS-29): CSV exports are written with an empty escape character, so a cell that ends in a backslash can no longer move data into the next column when the file is opened in a spreadsheet. Update recommended.",
-        "published": "2026-11-14",
+        "changelog": "* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).",
+        "published": "2026-11-16",
         "requires_php": "7.4",
         "requires_wp": "6.0",
-        "sha256": "8873518e89ca4f01a83c7f2779fca9781a067ac849a058ef726b5be9f72c5403",
-        "sig2": "n18i35kGnuWMTlsj+hdQxE+71QCEuWvHnK6Rj9QQSlbVNkgalPOB1Zqu1omhZd4XbAAtwRjZlAxeUKdmXeG5BQ==",
-        "signature": "4mEbh9asblO/0FuZPH+F0XcP5+591HmN/ce7PGG0eVrT4pwcI4Qw2MH4CXX4TEneYmdHiRsDoxvW9EPUYBLmCg==",
+        "sha256": "af1e0a7d25de3220670d22ec1a7d154e540b712d7a37219df30f62f5920900c8",
+        "sig2": "YJaVKMktgrMWgDOS7NV465q4KS0JDSRSUDIwoeEJZIKQxsJpB2lT4djNqadsAAGU0j9U7Zw0Q3rad2HFo4Y4Cw==",
+        "signature": "Q9GOXLvBEIuEQT8GFwEWCeC7SncDShajcA5sGvHI/qKO2N195WzjCBaWUrNPVfrGAsPfuscgEsjJJfmkYiDPDQ==",
         "tested_wp": "7.1",
-        "version": "1.2.4",
-        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.4/wish-shelf.zip"
-      }
+        "version": "1.2.5",
+        "zip": "https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.5/wish-shelf.zip"
+      },
+      "desc_el": "Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.",
+      "desc_en": "Wishlist: a heart on products, guest lists without cookies, sharing and a report of the most wanted products.",
+      "name": "Wish Shelf",
+      "page": "wsh-settings"
     }
   },
-  "serial": 1794825430
+  "serial": 1794829494,
+  "sig3": "sJsXBMy88q832TZ6eGkPIyESSl0lG0re52bROBXtgFaKrKHikFXboql7XVp8Az+WHPSqdQT9XU/pSsiCTdJiDA==",
+  "signed": "{\"expires\":1796039094,\"plugins\":{\"activity-log\":{\"beta\":{\"changelog\":\"* First release (beta): products, orders, coupons, content, users, plugins, themes, core, settings, media and suite events; actor and source on every row; secrets and customer details never stored; masked IPs; 90-day retention with a row limit; critical-change e-mail; CSV; «History» box on products and orders; dashboard widget; privacy exporter and eraser; read-only ability activity-log/list; Site Bridge and Login Guard hooks.\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"2d60d631a68972883add8987b3e0a26ed4d0d28271ddbab86a660710e386670f\",\"sig2\":\"R++XCvbVCN6vbQzn0bLgM/Wl80+3JmUq8/Jng6ZTGtHn1yQVZlzA8rLG4Ql7Daicnfk2VaxeTS6XlsJsFFO+Bw==\",\"signature\":\"3X1zHeLukKPGid3fpzim6t6yngVOr0PBWRwiaFmszoN+i5mDEy1Y3J4wBlQRzyxOhyW/bxIhyeewnEnh6pBvDg==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.0\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-al-1.0.0/activity-log.zip\"},\"desc_el\":\"Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.\",\"desc_en\":\"Who changed what and when: products, prices, orders, coupons, pages, users, plugins and settings, with the source of every change (admin, REST, WP-CLI, Site Bridge). No secrets and no customer details, masked IPs, e-mail for critical changes.\",\"name\":\"Activity Log\",\"page\":\"acl-log\"},\"book-feed\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"213b5c9d29e192c910c2bf8b83d25c242d8fb46a845a9850e607a660b58edf93\",\"sig2\":\"BmSSTbRGCtPulS8MV7yxj7QNEc0ec2tRzKZWtfwgDt6MpOSzwyErnAkDsKrNn5xTlOs/ly6W7g9namtpnDdTDQ==\",\"signature\":\"iXmqjZT7V/wXCFtRKdnYbLG0pXOP0x1Vsb6zEjjh7qgcILlCIBJAS5IEbEv0qvBG6C0w3jF45su6dX9Y68ACDA==\",\"tested_wp\":\"7.1\",\"version\":\"1.13.4\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-bf-1.13.4/book-feed.zip\"},\"desc_el\":\"Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.\",\"desc_en\":\"Titles of other publishers from the Bookpoint catalogue (OSDEL) as products: search and import, rules per publisher and a daily sync of price and availability.\",\"name\":\"Book Feed\",\"page\":\"bkf-feed\"},\"book-preview\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"97b2b828671da03d195bca85ff9c37f6c2440f36b202a68f46ac50508d2dde97\",\"sig2\":\"YeNFjeJ8SvrhxYS4qDm7jqYuPoxnYNO1nKgZwnyurdv0i0j6bmr/TzH2j6ywRgplCD/f8oJm8wUq5ojwqC2MBw==\",\"signature\":\"8wiZMuLSXoISu53/+e6feyjn8Imgv6pNxZuq1WeAizWg5uwKO8q2gKxOvX08Z/t4ffYNbPfmZDrR6ibTb6XnAg==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-bp-1.3.1/book-preview.zip\"},\"desc_el\":\"Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.\",\"desc_en\":\"A book sample on the product page: a separate PDF with only the pages you choose.\",\"name\":\"Book Preview\",\"page\":\"bpv-samples\"},\"broadcast\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"c09d0f8e623610e42a6b9358284748293887cc143244102b9638328fd13caefb\",\"sig2\":\"dUianWCMN9qQOxKDr7jF8Of8Nwcv69BlDb9wUdShJImlYr9jzTasR/oUA26+F4WCRBekon5W6Vh+BQHkyJ7pAg==\",\"signature\":\"H13+5tRLO0+G6O7MPsC4GYz2XQlbVziLXyfWHS81+rlbgeY4Lhf/TNTfPEM8egL/uXFz1322NDwm8/ZvXp/QCQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.4.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-br-1.4.3/broadcast.zip\"},\"desc_el\":\"Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.\",\"desc_en\":\"Announces your site's events on a Viber Channel: new products, a newsletter that went out, new YouTube videos, new Instagram posts and posts you prepare. A queue with approval, one template per source, no duplicates, a full history.\",\"name\":\"Broadcast\",\"page\":\"brc-settings\"},\"checkout-extras\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"d8b53e441b95419827b676099b3dfa7731ee3bff0baaf6b32c1a2c3af34a845a\",\"sig2\":\"DansR1cRHminFn/2Q9li8ndGUjEw6ClpqiRexrTJScVwuoMDyfQ9MmGW1DnHHMcijEdQzIqLFHvkMetlfK/jDg==\",\"signature\":\"bknIOsFnhvLgvOib9v21Cjw+J1qh49xWfCU3P3axV+eYyp38L2WkzlV5tBGkkG3hzUKYi5iFTxzkQkY9K3RyAw==\",\"tested_wp\":\"7.1\",\"version\":\"1.2.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ce-1.2.1/checkout-extras.zip\"},\"desc_el\":\"Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.\",\"desc_en\":\"A gift option with a message at checkout, a message and products on the thank-you page, and a thank-you coupon for the next order.\",\"name\":\"Checkout Extras\",\"page\":\"cke-settings\"},\"data-migrator\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"bd6f15ee2612732fc84495aaafb09ff2d024442bf72b587fed3e9a06ff75c7c2\",\"sig2\":\"0O4g7XUmWp4q2JTc+18YO6y9vTASXkdYUboYm8mnCBcR9g7OqKmjNHlCgkDxgwZ2UxzqZb/t5zvwBsGEeInlCg==\",\"signature\":\"hIXsDtjLgEN/sTTspVmy8VG6LxEAY7RYTgzjKYgLfFti6JjQCmkyroYiKL0oGLJZcE8+Ylxa9M3CSbovtxsXCw==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-nm-1.3.1/data-migrator.zip\"},\"desc_el\":\"Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.\",\"desc_en\":\"Full backup and restore of the site, here or on another server, with a domain change and no manual fixes.\",\"name\":\"Data Migrator\",\"page\":\"nm-backups\"},\"easy-withdrawal\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"cef47776cf524dcacf9c754f0f8d58a9003a668518fd847969ec1d8632ff0b0f\",\"sig2\":\"HtrSe87ywVkFRc64tJbUN38NLap9xJu6o1qFQ026qlPUCzdFyRN75SOV1XHLYMJcZAHu+IdreTqCfxZwWCyrAQ==\",\"signature\":\"ghaCnyrHch8wkihwmVRkeo4TxDZsWxKshplfU4baYqAhCKXg1O3LUDx/ajuIkfK3NkCof1E4WC1jFkUQXIkiAA==\",\"tested_wp\":\"7.1\",\"version\":\"1.2.6\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ew-1.2.6/easy-withdrawal.zip\"},\"desc_el\":\"Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.\",\"desc_en\":\"Withdrawal form for customers and guests, with a receipt and a request list.\",\"name\":\"Easy Withdrawal\",\"page\":\"ewd-requests\"},\"fast-pages\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"aeba0cd7a64ada5fd9dcaec31754619929de1737564758e470d659a60a65c856\",\"sig2\":\"E2CVx+pLo7zLl4XW4j/kqZA5bsGUvFH+ht5CCmp5ZzU5R6BvEotMsTEg2UwaMklnFiWJEZXR7LEOouIby8CzDA==\",\"signature\":\"EV30PuTmIMPI1qX0GAAmBUldqpRDF4xsZlpPSbOMhVQ9V19f1bXnBdSH7tRrGYx4yhTPPBLFrRQwvNO1O8kvDQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.8\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-fp-1.0.8/fast-pages.zip\"},\"desc_el\":\"Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.\",\"desc_en\":\"A page cache for visitors with smart purging and preload, CSS / JS minify, lazy load and click-to-play YouTube. Replaces WP Rocket; Claude runs it through Site Bridge.\",\"name\":\"Fast Pages\",\"page\":\"fpg-settings\"},\"featured-creators\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"9d0020cf49253cdfab0e058ecd3291089a0967bcf1fa5480d8fdf8560fc1619e\",\"sig2\":\"w6ySUj6qKgKiSN1n/VY9pienQYNG/SuQAVtlQRip0Ynx6V+VTJ0/7VVTfM6wBHJ0dQWBU7WeeWrSknXAHi0tDA==\",\"signature\":\"5Z6y2DPedBzrq/w029m/1QVBoj0LLcIrwXvGczXqyTFLDk1ZHKVMsBTgkaGmve9bMi3JtXjpTkg867UsGackBg==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.4\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-cr-1.3.4/featured-creators.zip\"},\"desc_el\":\"Μία σελίδα για κάθε δημιουργό, με τα έργα του ανά ρόλο, συνδέσμους από τα προϊόντα και ευρετήριο.\",\"desc_en\":\"One page for every creator, with their works by role, links from the products and an index.\",\"name\":\"Featured Creators\",\"page\":\"crt-settings\"},\"greeklish-permalinks\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"a05006c092a5caf86a2c73bf8c2bdb32b8863bdebce96aa7a894027e5e9591a8\",\"sig2\":\"fnyrLQqyA4vopIYb0wPIGtU/Qb+44lD6jKrcgFCXDx3uzinYiGQFLUVAtytGr6yw7fdt7OeHObmxZr95KZtWCw==\",\"signature\":\"ZiObA3GbNAu6+NRB2XcdC4tP6AVsYMT+o9j9nWbAIRe32KaM7z9X86RkZLZyxDvOckHIJnVHkxRzWEjoRe93Cw==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-gl-1.3.1/greeklish-permalinks.zip\"},\"desc_el\":\"Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.\",\"desc_en\":\"Greek to Latin in slugs and file names, with bulk conversion of existing ones.\",\"name\":\"Greeklish Permalinks\",\"page\":\"glp-settings\"},\"hide-catalog\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"8aa4017bf68073d7285d0d85b1c0139ad93acff19dab842969ca0168d808430a\",\"sig2\":\"1J1e+4V/apSKPrvq/maDEsNT4JTzDzpbMIrOAebf4B/A/lVjBopaku/tLUvvhhPuXcicQn3rxzM6rQ0w8KWCCQ==\",\"signature\":\"yp7C+MpeMklRKA4zWpalItTn8A5hLHtUGobAF3NKC0OiOFOgHlRxdRlkwYU3cyG+T9tdWbAOuXJQvi9S5cyWAA==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.4\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-hc-1.1.4/hide-catalog.zip\"},\"desc_el\":\"Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.\",\"desc_en\":\"Hide categories and their products from the shop, search and blocks, without changing the products.\",\"name\":\"Hide Catalog\",\"page\":\"hic-settings\"},\"home-sections\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"1c264ea241194c53db03da2e730aa321f127415c6a7aea81d1b3f25e33b32d64\",\"sig2\":\"L/6Il8H+yujAIjyZUv1HNNC/L4m1MLoiaP+vSyLSvWYQrmYmcoG9FprUJ3Uk2xsMULyFJjMAGDXRf9yokqiyCQ==\",\"signature\":\"mbN5om4nsK0J+0QunZA6BEkHYrhdxhEQANGnPOSE6tuKjL/CxXOm6UjY0TCxT9TBdsf+RFZNEvNmqATQkZ/vAA==\",\"tested_wp\":\"7.1\",\"version\":\"1.4.6\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-hs-1.4.6/home-sections.zip\"},\"desc_el\":\"Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.\",\"desc_en\":\"Product sections with the [products] shortcode: marker classes that leave out products, categories or pre-orders and filter by a word in the title.\",\"name\":\"Home Sections\",\"page\":\"hms-settings\"},\"invoice-details\":{\"beta\":{\"changelog\":\"* New: details from AADE. With the special Taxisnet credentials in wp-config.php, a Greek VAT number fills in the company name, tax office, activity and head office in the classic checkout and the Checkout block, and «Fill in from AADE» on the order fills the empty ones. Only empty fields are filled, one lookup per number for 7 days, limits per visitor and per site, never stops an order. Off until you switch it on.\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"3dd1248bca708615a04d07635b3351a599b3634126a5056572fa3980d821dbbd\",\"sig2\":\"lBwkV5AdPAGi3ThEnP9PBpZGnNEeaYg8S56IMXFtkYXFmy6N33nAeWoa0Mz7M1ZQBF3B7cBB8xz8/HeYvsEJCA==\",\"signature\":\"aOwxeMtyZ+OhdMXT8kxFGko1S7CLZ4qOoR5K1Jtkku7bREpBOK6CGN9QmyC5JuFhHAkEu1SzJ65RPukLChv9Aw==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.0\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-iv-1.1.0/invoice-details.zip\"},\"desc_el\":\"Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.\",\"desc_en\":\"Receipt or invoice at checkout (classic and block): company name, VAT number, tax office and activity, a check-digit test for Greek numbers and a VIES check for EU ones, the details on the order and in the emails, and an invoice list with CSV for the accountant.\",\"name\":\"Invoice Details\",\"page\":\"ivd-invoices\"},\"lean-images\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"c55d521cf2c4c641931835c17c32eec54c9c3d2001e579d5107dee9424fe43d0\",\"sig2\":\"XgX5/xrUmSxqZsvGNWPHjxmgF9yqSAscDr/X6epN94EAGylpRBtsQ1AcuYVk0W2OvcfTfS1gsskPjtqfONEWBQ==\",\"signature\":\"v5AagLG7LZzvfHfrtn52hpOp2UawukymOuK0DvFIqvpbJbgQ1s0XYhM7jQORMBrZU1DjQ1+2hOBPfOlLlE9xAQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-li-1.0.3/lean-images.zip\"},\"desc_el\":\"Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.\",\"desc_en\":\"JPEG and PNG images become WebP (and optionally AVIF) on your own server, in small background batches. The originals never change; no account, quota or external service.\",\"name\":\"Lean Images\",\"page\":\"lim-settings\"},\"live-operator\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"c70bc2cf9b0d349757e0023f72063397b4a84550e6bfc65493aeb31187a7e344\",\"sig2\":\"EdhNFN/tSYS9+X7/gTdEEJc/ub1clZe0BNzY6WmT/BwmMLuGWdLd3RDePP0ZBMnX1/TS6F8cqSgif0CPuC8vAw==\",\"signature\":\"uRFCDCCO3kMhYsOqDWvcw/wXE6/ut3LfG1HMLlxc3EoAm8/aZzGMhckOP7Y86UyY623/tR6p1Ib/ssLnIPfUCQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.5.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.3/live-operator.zip\"},\"desc_el\":\"Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.\",\"desc_en\":\"The live chat of PurioChat Pro on your phone: an online / offline switch kept on the server, a notification for every request and message, and replies from an app.\",\"name\":\"Live Operator\",\"page\":\"lop-settings\",\"stable\":{\"changelog\":\"* The opening hours in the structured data work with Search Signals too (the `noxpress_seo_graph` filter), so they stay after the switch from Rank Math.\",\"published\":\"2026-11-03\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"4183a0e7ec9647bda4fb117e1917565f522c213c141cefa78350785eb4487b32\",\"sig2\":\"W13yj2BwrWARlvPBwQsTtgwyQ4flnigcz35uAGoglOnNp7z8keIfEePe9KPkXXLvtfPn6lRoDXkFxMhYvNggDA==\",\"signature\":\"nKsKOcvGgZ+DkUlHGf74Ke095yA7EdV7JRxswktFGlLuLRoEneVc8XGUwdcHw91Dl/P0dlUMLN02rMjnUejZAQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.5.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-lo-1.5.1/live-operator.zip\"}},\"login-guard\":{\"beta\":{\"changelog\":\"* Initial release.\\n* Failed-login limits per IP (with a longer lockout for repeat offenders) and per account, on wp-login.php, WooCommerce, XML-RPC and Application Passwords; allow list; off after activation, then test mode.\\n* Unlock by e-mail, bound to the browser, once, for 15 minutes; limits and neutral answers on lost password (WordPress and WooCommerce).\\n* XML-RPC: no logins and no multicall by default, or closed, or open; pingbacks off.\\n* User enumeration: neutral login errors, /wp/v2/users, ?author=N, author archives, users sitemap, oEmbed author.\\n* E-mails for a new administrator device and for an attack surge.\\n* Log with truncated IPs and keyed hashes for 30 days; privacy text.\\n* WP-CLI commands, ability login-guard/status, LGD_DISABLE, JSON export and import; Greek and English admin.\\n* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.4.7, with the shared Noxpress_Safe::client_ip()).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"18b839ad9b9ff2af9e3143733e28791f9c581f4cd72cebfb5bf3ec34b0439967\",\"sig2\":\"PwW2gJexZChlkTpZDB2YU4SWAgzVSmER4WjdPqeAyl36cnf7FB3aILvloFXeL3wCy6F9EjtTG+DmwYPw66BCCA==\",\"signature\":\"rJ7pJ1RKkH97qEy6LQV+Ts5plkwJukeOqXsveQzWzjL3V9G//OeFUv9CKxPfZtPHeowZvXjvUYEEieeUufTtBQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.0\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-lg-1.0.0/login-guard.zip\"},\"desc_el\":\"Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.\",\"desc_en\":\"Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.\",\"name\":\"Login Guard\",\"page\":\"lgd-settings\"},\"magic-login\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"4c236015ceb1ba7d46257ebb389b3c9d47e2d4a0af897f3e7f77ffd1063d5480\",\"sig2\":\"SSxhsXt9KV+yZ1M1aaCQp8UXpyZhQwdqkhh8sRKoPdyrEWTNAzK2HXGwETUL2g5akRQbD1fzh9RjLxTC2QQGAQ==\",\"signature\":\"vEJRhE+fJirXQ4d+2b71v/wJ/2Jr9wDKqZMhRSqk2aro1wtTj34ZIL4SWnl5fXatJQ6/R+YZ4ogqEE85YWXcDg==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.6\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ml-1.0.6/magic-login.zip\"},\"desc_el\":\"Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.\",\"desc_en\":\"Passwordless login for customers: a one-time link by email from the login form and the checkout, with expiry, rate limits and a confirmation page.\",\"name\":\"Magic Login\",\"page\":\"mgl-settings\"},\"mail-relay\":{\"beta\":{\"changelog\":\"* First release (beta): SMTP with presets (Proton Mail, Gmail, Microsoft 365, hosting mail), Brevo, Mailgun, SendGrid, Postmark and Amazon SES, backup connection, sent log with source, sealed content for 7 days (off by default, never for sensitive mails), resend, CSV, privacy exporter and eraser, failure banner and hourly summary, staging guard, SPF / DKIM / DMARC check, import from FluentSMTP, settings backup without secrets, Site Bridge abilities.\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"17dab05872506a27444867b84c6b1463afbf928ca0b94ed3f1d04003b4d270a3\",\"sig2\":\"WRaALiYuhguS2uK4n/3TkPmkn68/bb7VeIXtsruAHOv8yz7Px0MFdA26R5nxjxVEY7TlARGBWHpjHJOM1gKCAA==\",\"signature\":\"pVs93dL2hK03xQwkIrNDUxU6QKnI8K87U9Y6Xm71rXVrBJ9+zexZ7kAJAnPLPFO6Q4WOpCoIwGm9/JvWW5IdCQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.0\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-mr-1.0.0/mail-relay.zip\"},\"desc_el\":\"Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.\",\"desc_en\":\"Every email of the site over SMTP (with a ready setup for Proton Mail) or through Brevo, Mailgun, SendGrid, Postmark and Amazon SES, with a backup connection, a sent log, a test email and sending paused on copies of the site.\",\"name\":\"Mail Relay\",\"page\":\"mrl-settings\"},\"oros-connect\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"c46d28d477eac54ab75b301d6be5bdd1cd864b936007fe2885980da80acfa729\",\"sig2\":\"LNXjn/ta4+V+fuTjV1j4i3WYdseLh1QDS7g9VFVTUv6kcWHlfBYkhNLfzH7L0lFXrxRVtQr1ltR/Sn1xWycmBQ==\",\"signature\":\"Re7pJ4tJcVjpDqs36tTgdeE7HzpLYtmBdDrf37HUmmqcTaOVH4vLT61z7AQGKGFvbKI/TxKmyvJNRM6LczmfDw==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.2\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-oc-1.3.2/oros-connect.zip\"},\"desc_el\":\"Σύνδεση με το orOS σε modules: φόρμα εγγραφής και κουτάκι στο ταμείο για τη λίστα σου στο orOS Newsletter.\",\"desc_en\":\"Connects the site to orOS in modules: sign-up form and checkout checkbox for your list in orOS Newsletter.\",\"name\":\"orOS Connect\",\"page\":\"orc-settings\"},\"pre-orders\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"00db2c499a7f35719ed62a3b62e4140d0394496e654a9eeefdc72ae0fd90d3dd\",\"sig2\":\"6Iw/AGWH6LVQecW+T14DTipfO1ta3juSc3ZBjMQ+5Ke6xi5TwNNTb5mjoVTfCE8ProG9rnxmhKB3ie2RkjOIAQ==\",\"signature\":\"zoSgXlGxk4s7BgbEWEZ8nSRJ8P/yCDxhTgLpKNR9dLBBnHmFXYJmZug8+r5KDCtE8O2XnFZkoZDu/0v2z+XeBg==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.5\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-po-1.1.5/pre-orders.zip\"},\"desc_el\":\"Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.\",\"desc_en\":\"Pre-orders with a release date: badge and button in the store, the date in the cart and on the order, automatic release and emails.\",\"name\":\"Pre-Orders\",\"page\":\"por-settings\"},\"product-bundles\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"05b6393d1d4af7fc474ea5dbc04b5083ab851e914723d7c9c7638f58a82b61a7\",\"sig2\":\"QRmXL5cl20x3Yrc7hsR7253prjG4ar4Ut040y5fAMtomgT3To08DNE7ggdvEIiVGmGnUTH9EhVvgNHWla798Bw==\",\"signature\":\"Zehvc4VCGzacH+7PX1Bw9RrLrNcJpdhksTh/ZNDoFrSOZtyf0FyObZP5/e3v4tMWztcLw1rc0eqAM6uC2+yLAw==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-pb-1.1.3/product-bundles.zip\"},\"desc_el\":\"Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.\",\"desc_en\":\"Product bundles: every product with its own stock and VAT, a bundle discount and correct sales reports.\",\"name\":\"Product Bundles\",\"page\":\"pbn-bundles\"},\"product-feed\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"ba3eda4124a2f2fbef888d212721470e18be5ac508bb1e67c2bbc3568262003b\",\"sig2\":\"9oRsMeXLWVV8658nvITyLYu/uIxySSyBid7Uvz0QVoQNE7U8keBMpVVWn9WZ+jfxnHtCahCM/OJFINBdC3x1Ag==\",\"signature\":\"cRS/c+Bvcm8pdG5+sRWaP4y6kW1w7q9sQ7GUTHLyYyZ2+FprN6pYZ4DONqevsQU0lVPK9aLMbzyYziFX7I3hCA==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-fd-1.0.1/product-feed.zip\"},\"desc_el\":\"Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.\",\"desc_en\":\"Product feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and CSV: one static file per feed with a fixed URL, background refresh, GTIN / ISBN, publisher, pre-orders, a check before publishing and an import from CTX Feed.\",\"name\":\"Product Feed\",\"page\":\"pfd-feeds\"},\"product-formats\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"dbd156892a225787b54a0976049c309cb69f6841fa249d17fbf294724a750fd6\",\"sig2\":\"z/b047v8Ldlxug3DeKBIHxEB7DYnPul4b6B+HDdB9fCWjwn8lSDtYGBovMFbsq+rjTfXmu52hWud0c+zTMywAw==\",\"signature\":\"Co/dGU3M3uEkPsl2Fo/qXsi70BGUUrfmaE6G7AV9AUFaz8XXot9irQbGwCmU90A36Ar03iyBrHQSBB5y0cs3DQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-pf-1.3.1/product-formats.zip\"},\"desc_el\":\"Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».\",\"desc_en\":\"Links the formats of a work (print, e-book, audiobook, film) with an \\\"Available formats\\\" block.\",\"name\":\"Product Formats\",\"page\":\"pfm-formats\"},\"product-tabs\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"06e7cfadbcb7eb354d8ee14aff771a544a2094012ccb72d4cb6abaf429a4c8aa\",\"sig2\":\"x45QBcdcvI9mvvfxU/sKCUc47VKd7QovmHLq9x7cq0RntJ5KV8+mrioNSnEeHRZOl+XpSU58vAwEmJV72pOnCA==\",\"signature\":\"j40Ju4ut6ol9CFnHyGHGzqqIcPHM9DRXtR/q4bTdBNmfpFXos8O5H3fjCFyVNUeg/FUDN1WBht01jh6viY8vDw==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-pt-1.0.1/product-tabs.zip\"},\"desc_el\":\"Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.\",\"desc_en\":\"Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.\",\"name\":\"Product Tabs\",\"page\":\"ptb-settings\"},\"production-ledger\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"4f31d2201fc9b9617987e3a6b9e1437e895f35ad7d79728dd16c7fa40ee1f04d\",\"sig2\":\"S7SnPvaN1FC56jjPG2P1x0/WFp64P/mzxa8SsP9L4xf34kwAxOpxcWFGP4Bb/+1QQis5dYYzuZwQBtiZ/xcsCw==\",\"signature\":\"qhp8WGzMKtz6oY4ZIG3kDuQLVvwlqwkTezW4C+3jwLob9TFeuTEQ03ZkXD9tDDestkz4S2b6legrMTecJ9mcCw==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.4\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-pl-1.1.4/production-ledger.zip\"},\"desc_el\":\"Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.\",\"desc_en\":\"Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month's orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.\",\"name\":\"Production Ledger\",\"page\":\"pl-ledger\"},\"publishing-quote\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"0d12bc3c009f95b413565ab640922248d75e05527a842d6e7cafc6998404c34b\",\"sig2\":\"xT49LKKPXSJNSAgve4en7eiIXnyxdv6zenDl5bxY0HCBeWSu/sRabGXxGjN4mCR1Zj6BeJuOlgzdFccXE9FCCw==\",\"signature\":\"zjq6KYXdEiwHU1bWovq7Dg+BJxFg4oZNPzP5dnDS4q2rkm/R5M3Wk2aapdl9bXa9Z/T/41RyNwxU1WdgQ2XgDA==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.5\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-pq-1.1.5/publishing-quote.zip\"},\"desc_el\":\"Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».\",\"desc_en\":\"Publishing quotes for prospective authors: an amount per service and a total, with the rates hidden on the server and «I'm interested» requests.\",\"name\":\"Publishing Quote\",\"page\":\"pbq-settings\"},\"redirects\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"2857f71a71e780fe6dd0850f32ce6e939f187905fd4d5b30ed989b62b1bfbc45\",\"sig2\":\"B2yr6RdzjE8U9VcqtCF+mjYCrFj07f2aTrsFunOF/bczQiVQTavxyntqM4/XA8fhDlpJKH+u6uNMYIPNQtLeCQ==\",\"signature\":\"aWsC9+fEUJ//xiuiQ2k7MnRlDPowt4Hl+ZAxJOlj8NRHSZtYosTBUG0nDrtfWGaARNkoAmzdDVgzuFCiyTJ2Ag==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.6\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-rd-1.0.6/redirects.zip\"},\"desc_el\":\"Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.\",\"desc_en\":\"301 / 410 redirects for old addresses, only where the site answers 404, and a 404 log in a private file without IPs or bots, with suggested targets and import from Rank Math, Redirection, Yoast and CSV.\",\"name\":\"Redirects\",\"page\":\"rdr-settings\"},\"revenue-splitter\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"f3696d68ac2affb24e45b4ffcc814aa95f64427834815b69823d47e2a5a755f2\",\"sig2\":\"9LtR54js0fIDp6ywrBD4+m6SIYf6P1ns65gZ4rhvlnOtBA31o3n76tdSejSwd9O7I7iafxatWfD3YdVudWUPCw==\",\"signature\":\"0EhVZkYEPZZJdqx7CstYw1X69cvai9yTq+ZYkciA4SYOJCqFJDSRKS7ssZ7xwm6MsjF6i+VqUUI0mO9tCC2KAg==\",\"tested_wp\":\"7.1\",\"version\":\"1.18.4\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-rs-1.18.4/revenue-splitter.zip\"},\"desc_el\":\"Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal δικαιούχων.\",\"desc_en\":\"Revenue split per beneficiary, VAT, ledger and beneficiary portal.\",\"name\":\"Revenue Splitter\",\"page\":\"revenue-splitter-dashboard\"},\"search-signals\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"70aa2704a6290af20c08daf5b81b16f5410fbfb81ad8fd80baceebb9ea75e1c2\",\"sig2\":\"5blwRLZEFaze8g2GJ8I95Vgd1aGpyI50t3TM+Zev7xHR7Johelkgl0pHYbZzbhqA3893Ce501hecKdj/aN5lAg==\",\"signature\":\"ghCeF81r5Ameou5VVt/sg/Z5IqoMRc2OYXADXl0YviTAVURHeR7C4GIiJsUFQqkoOg9RCK3SSFqCreSc8ILuAw==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.2\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ss-1.0.2/search-signals.zip\"},\"desc_el\":\"Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.\",\"desc_en\":\"Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.\",\"name\":\"Search Signals\",\"page\":\"ssg-settings\"},\"shipping-notes\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"906b44404ac504a6e60649e7273c217dbe3fe98f290aa8db73e9cf72faa6cd49\",\"sig2\":\"H7/J5ySH+5jA0fTm7lNROwYYnC44VNSSXB2o0QAQaDdw/AV11KGd9YGw6FKd2M9eL6LGEh08pFgvkNzWpE+1Bw==\",\"signature\":\"Qa9tjtS+VmJzNmNnEGpLiJFWeax8XbP9K5Jj7izDuc3Q7xHbDOWebceK8eP/gPDdTVDV2oe9F7ekJXIppKdvCg==\",\"tested_wp\":\"7.1\",\"version\":\"1.4.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.4.1/shipping-notes.zip\"},\"desc_el\":\"Δωρεάν αποστολή με μπάρα προόδου και χρόνος παράδοσης στη σελίδα προϊόντος.\",\"desc_en\":\"Free shipping progress bar and delivery time on the product page.\",\"name\":\"Shipping Notes\",\"page\":\"shn-settings\"},\"shop-filters\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"e0fdce3b285098f505c149e95c968ae1ccf45434e72f2d19089b4969d39c8988\",\"sig2\":\"f69llteV9o/TpIpUQxpnFd+r/5H/3IpJtGV40YY6v/6+XXHTFXBoINR7J6pqk/Ew2il+8kzeuTDrhZt52Gq7Cg==\",\"signature\":\"GMzxrZxP7Mrs1xcqe2+dk1hyI0H9nEa0XMpWeFgFcbYY/cdj+4VbFBiXK59FjWfI+JP7F5MfII6OFGgUY4q0Aw==\",\"tested_wp\":\"7.1\",\"version\":\"1.3.4\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-sh-1.3.4/shop-filters.zip\"},\"desc_el\":\"Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.\",\"desc_en\":\"Lean product filters for classic themes, with value groups for attributes.\",\"name\":\"Shop Filters\",\"page\":\"shf-filters\"},\"site-bridge\":{\"beta\":{\"changelog\":\"* New: the actions sbr_call_start( $tool, $client, 0 ) and sbr_call_end( $tool, $status, $log_id ) around every tool run on this site, so Activity Log (1.0.0+) marks the changes Claude made through Site Bridge as such and points them to the row of this audit log. A listener that fails never changes the tool's result.\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"260b008b638f6ba7d4bd7f34ed70347d1e4bba82b7f07a79e6b20ae7fa498101\",\"sig2\":\"+baB4J9G3FLFj4xCsHKwNX7dkaDX+h+d+FkPBL6bvuMwVh7OWONja9w83SpF3DZj+44QZG1JI2azEt4zI2rLDQ==\",\"signature\":\"VhuK1/eP2x81QiGEu+iPtp6kJQAQI6MwJK4m3jM0eymEnC5Hs16YDT+lsneYpVXdiJMzs3aSqtfHLoeTOLBwAg==\",\"tested_wp\":\"7.1\",\"version\":\"1.13.0\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.13.0/site-bridge.zip\"},\"desc_el\":\"Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.\",\"desc_en\":\"Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.\",\"name\":\"Site Bridge\",\"page\":\"sbr-settings\",\"stable\":{\"changelog\":\"* New: automatic schedule of the write window, per site (Access → Window schedule, off by default). Up to 3 ranges a day in the site's time zone, a range may run past midnight, up to 30 closed dates. Ranges that touch count as one stretch, and no stretch may be longer than 12 hours (the longest manual window); a DST night is cut at 12 hours too. Worked out on every check, so it is right without cron; one WP-Cron event at the next change only writes the log and sends the e-mail.\\n* New: \\\"Close now\\\" inside a scheduled stretch (WP admin, Hub, app or Claude's write_window_close) pauses the schedule until that stretch ends; the next one opens as planned. Opening by hand inside a stretch keeps the later end.\\n* New: an e-mail to the admin address for every change of the write window: opened or closed by hand (and by whom: WP admin, Hub, app or Claude), opened or closed by the schedule, paused, and every schedule edit (before and after). Setting in Access, on by default.\\n* The site's status gives the Hub and the app what keeps the window open (manual / schedule), the next scheduled opening and the end of a pause; the Hub's Sites tab and list_sites show them. The Site Bridge app 1.8.0 notifies about every change.\\n* The schedule lives in option sbr_schedule, which no Site Bridge tool can write. Uninstall removes it and its cron event.\",\"published\":\"2026-11-07\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"f8928251a06795db462c36d36392802d52c5d9309869d8c557943126f4372101\",\"sig2\":\"vyDbr6jlNPBKwhz86ZWDL6wV1xSJMu/qKGrc5YSUIwngX30bIOx3LNUsLxZvgECVluAaBN/SkEq0Z5g7ArmOCg==\",\"signature\":\"gAXag38Ledy+UUdL5Kw3gGU8ia87dk50wA2+bTlnOo+gBxWfRwmhOKmSu9GwFMtKhJyOwwplS48jyzbTuu2EAw==\",\"tested_wp\":\"7.1\",\"version\":\"1.12.0\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-sb-1.12.0/site-bridge.zip\"}},\"smart-formatter\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"6961e7b579b39bbcbfa65c36caba3ceb0f1fa89cc43a4489ba3815f72e0b782b\",\"sig2\":\"A5POR6KTqfTr5azi92e5AUaIeOlktPcmg9JMk0koflTA+6uEWaEoIvXOHVo8Gcb7zUECWsWGQaJtZPvTopKIAA==\",\"signature\":\"7eKw+RH/alcQZmbhhnR5tKJJO+PR9/roZO0g4s6t38ClWMY8x5bLikNURlKwRUaQyA+3Ur1dvkGzv7olzWO7Bg==\",\"tested_wp\":\"7.1\",\"version\":\"1.5.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-sf-1.5.3/smart-formatter.zip\"},\"desc_el\":\"Μαζική μορφοποίηση κειμένων προϊόντων με preview, dry run και undo.\",\"desc_en\":\"Bulk formatting of product texts with preview, dry run and undo.\",\"name\":\"Smart Formatter\",\"page\":\"sf-formatter\"},\"store-pickup\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"7be5738b91ab0fbf0d68971afc645103c70bba6ff3211149c05ad6fa08ab44ae\",\"sig2\":\"3ExjveOcsLnacF9NWZyMfItp/s+XYSZzrRGo6Ee9uhVZqSHc6mE3cIT90H3Af9Wzzvv+Cwk8HL1Q2AvZiTtUCQ==\",\"signature\":\"yObq7wdC6E70nz1/hORvYenBc1+kOHAjRbYUvLf3Xn3lOfIbQ+0oG10ly1KtIdiuMzG97fiAo39do5wGQtZUDg==\",\"tested_wp\":\"7.1\",\"version\":\"1.2.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-pk-1.2.3/store-pickup.zip\"},\"desc_el\":\"Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.\",\"desc_en\":\"Store pickup at checkout, with a choice of store, opening hours and no shipping cost.\",\"name\":\"Store Pickup\",\"page\":\"pkp-settings\"},\"store-pulse\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"5287feb4ac2fe2c139d722030379cba46f9e107d854eaab89d013924ac00ff50\",\"sig2\":\"3QfXi+AEbr3tCdTJUeDeyhvqRmIb4PD6n26e9XiXmqxaSFjKECAa2b0jpKwWoXwvSIWS5H9KvxOmidLa+vi+AA==\",\"signature\":\"sQW6qfE/Kzv6KgImpwqpec6MPXGFP6z3d54DDm/Un5k1D6s6hHMujOu980nl466tfHY64nExmkkke2mj53KmBg==\",\"tested_wp\":\"7.1\",\"version\":\"1.8.9\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-sp-1.8.9/store-pulse.zip\"},\"desc_el\":\"Εικόνα του καταστήματος με μια ματιά: παραγγελίες, επιστροφές, στοκ και οφειλές.\",\"desc_en\":\"Your store at a glance: orders, refunds, stock and amounts owed.\",\"name\":\"Store Pulse\",\"page\":\"sp-dashboard\"},\"theme-patcher\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"b85d5c41451370a2e3021273ec0a4d64dda5f73ad720d591f5ecc274d5760eac\",\"sig2\":\"0oJjRz+my7P/s8d+SKnVUTzSOKbmwXSnz5fxkIccpnDHlQ06vTAw6tddFMFy66kwlTcT1XYBSKBAgo0F7ZN4CA==\",\"signature\":\"MxPjeWyoPnI9ovKLhzrAGOlWtGpsnNGa8CmBYjkCPEKUYlPc9aWtWlp9LhVmB0AzwX6Y1fBxXKIgJo18LAq2AA==\",\"tested_wp\":\"7.1\",\"version\":\"1.7.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-tp-1.7.1/theme-patcher.zip\"},\"desc_el\":\"Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους.\",\"desc_en\":\"Fixes classic WooCommerce themes without a child theme and without editing their files.\",\"name\":\"Theme Patcher\",\"page\":\"tp-theme-patcher\"},\"trade-accounts\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"f8fb09186c3a569a5081231525e376e7e8176a4677ed8ab77419c2257f090f95\",\"sig2\":\"zNNjkDZJyLGOqXo2jyYTLVY6aj8Z5dpgXCpBuMbjk+1MiOuSt6inTYmaNJjxcIScWlm0/pUOlz/IZqz9LkLOAw==\",\"signature\":\"RB8K27NKquud1NKFzlWx/KILpDXInstSyENa//rXTCGwTn6f6rHMi2CtFISUMifw7jl41FgZIsZczBFuORpACw==\",\"tested_wp\":\"7.1\",\"version\":\"1.7.1\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ta-1.7.1/trade-accounts.zip\"},\"desc_el\":\"Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.\",\"desc_en\":\"Trade accounts for bookstores: a preset discount on the titles you choose, and an API (Trade Feed) in JSON or XML to list the books in their own e-shops.\",\"name\":\"Trade Accounts\",\"page\":\"tra-settings\"},\"trade-feed-import\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"c17d8c73424e1fd8d9c482c29a2fb129b5c15857739b3f43183391366bea5e72\",\"sig2\":\"N6FIyeLX+pNrdFgo4NhjRap13GgU6toIscwJUBdiGESLMZlhtxAHKok+lM/cVIzbrUXfO9XCdPCNKOb9enIQAQ==\",\"signature\":\"QgPzPx7n2OhkQwMmMfGrT0tSMoa+BIMTLHLGuf3qpeHRPk0/CIyj5q8LYjMKbqbcsirTqfbcWBL+0NWT3GajCQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.0.5\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ti-1.0.5/trade-feed-import.zip\"},\"desc_el\":\"Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.\",\"desc_en\":\"For bookshops: a publisher's titles in your own WooCommerce shop, from the publisher's Trade Feed (Trade Accounts). Paste the publisher's e-mail, press one button, and the books come in with cover, ISBN, authors, category and retail price; price, availability and pre-orders then update by themselves every day.\",\"name\":\"Trade Feed Import\",\"page\":\"tfi-settings\"},\"variation-picker\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"315b2af9ed140d4b33ec7dd0798267849c93aa92feaa11e628a238a51508dcce\",\"sig2\":\"MCZa7tGIW6t4XjJEfhB7h89Idvgt/T7zPakDhWCTVbpsG/gT6pX8E3esUR2tuVFVNrDheVn+FNhT89WoXt7sBQ==\",\"signature\":\"3VeJCszvtFjyuSXx+eWrTsYyQ+Ko3ROhkF9xBEFtHRiRY5170dmsweEIwb9iFk06YcQ3nJfvOgxWw0yH5PhIAA==\",\"tested_wp\":\"7.1\",\"version\":\"1.1.3\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-vp-1.1.3/variation-picker.zip\"},\"desc_el\":\"Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.\",\"desc_en\":\"Swatches for variations: colors, images and buttons, a size guide and swatches on shop cards.\",\"name\":\"Variation Picker\",\"page\":\"vpk-settings\"},\"wish-shelf\":{\"beta\":{\"changelog\":\"* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).\",\"published\":\"2026-11-16\",\"requires_php\":\"7.4\",\"requires_wp\":\"6.0\",\"sha256\":\"af1e0a7d25de3220670d22ec1a7d154e540b712d7a37219df30f62f5920900c8\",\"sig2\":\"YJaVKMktgrMWgDOS7NV465q4KS0JDSRSUDIwoeEJZIKQxsJpB2lT4djNqadsAAGU0j9U7Zw0Q3rad2HFo4Y4Cw==\",\"signature\":\"Q9GOXLvBEIuEQT8GFwEWCeC7SncDShajcA5sGvHI/qKO2N195WzjCBaWUrNPVfrGAsPfuscgEsjJJfmkYiDPDQ==\",\"tested_wp\":\"7.1\",\"version\":\"1.2.5\",\"zip\":\"https://github.com/koulaxizis/noxpress/releases/download/nox-ws-1.2.5/wish-shelf.zip\"},\"desc_el\":\"Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.\",\"desc_en\":\"Wishlist: a heart on products, guest lists without cookies, sharing and a report of the most wanted products.\",\"name\":\"Wish Shelf\",\"page\":\"wsh-settings\"}},\"serial\":1794829494}"
 }
