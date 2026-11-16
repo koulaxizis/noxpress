@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Greeklish Permalinks
  * Plugin URI:           https://noxpress.tech
- * Description:          Ελληνικά σε λατινικά στα νέα slugs (άρθρα, σελίδες, προϊόντα, κατηγορίες, ετικέτες, χρήστες) και, αν το θέλεις, στα ονόματα των αρχείων που ανεβαίνουν. Απλός ή φωνητικός τρόπος, μονοτονικό και πολυτονικό, δικοί σου κανόνες, ζωντανή δοκιμή, 301 για ελληνικά links, και μαζική μετατροπή των υπαρχόντων με δοκιμή, ανακατευθύνσεις και αναίρεση. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.2.2
+ * Description:          Ελληνικά σε λατινικά στα νέα slugs (άρθρα, σελίδες, προϊόντα, κατηγορίες, ετικέτες, χρήστες) και, αν το θέλεις, στα ονόματα των αρχείων που ανεβαίνουν. Απλός ή φωνητικός τρόπος, μονοτονικό και πολυτονικό, δικοί σου κανόνες, ζωντανή δοκιμή, 301 για ελληνικά links, μαζική μετατροπή των υπαρχόντων με δοκιμή, ανακατευθύνσεις και αναίρεση, και μετονομασία αρχείων πολυμέσων με δικό σου όνομα και 301. Δουλεύει με ή χωρίς WooCommerce.
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -30,6 +30,8 @@
  *  - GLP_Redirects → 301 on a 404: bulk redirect table, Greek addresses
  *  - GLP_Bulk      → on-demand conversion of existing slugs and files,
  *                    dry run, undo log
+ *  - GLP_Rename    → own name for one media file (field, row action, bulk
+ *                    actions, Media → Μετονομασίες page, own undo log)
  *  - GLP_Admin_UI  → menu, settings, live test, bulk page, tools, footer
  *
  * Deviations from the Bible (with reason):
@@ -38,7 +40,8 @@
  *    handles products, product terms, attributes and downloadable files
  *    (Bible 1.20 writes the exception).
  *  - §8 (capability manage_woocommerce): manage_options, a setting of the
- *    whole site.
+ *    whole site. The file renames (1.3.0) are content work: they need
+ *    edit_others_posts and edit_post on the file, and live under Media.
  *  - §14.1 (no effect after activation): converting new slugs is the
  *    plugin's purpose and starts on activation; existing slugs and files
  *    never change without the bulk page. File names are off by default.
@@ -56,7 +59,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GLP_VERSION', '1.2.2' );
+define( 'GLP_VERSION', '1.3.0' );
 define( 'GLP_FILE', __FILE__ );
 define( 'GLP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'GLP_URL', plugin_dir_url( __FILE__ ) );
@@ -121,7 +124,9 @@ final class Greeklish_Permalinks {
 		if ( is_admin() ) {
 			require_once GLP_PATH . 'includes/class-bulk.php';
 			require_once GLP_PATH . 'includes/class-admin-ui.php';
+			require_once GLP_PATH . 'includes/class-rename.php';
 			GLP_Admin_UI::init();
+			GLP_Rename::init();
 		}
 	}
 
