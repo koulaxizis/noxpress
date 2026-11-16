@@ -450,6 +450,7 @@ final class BPV_Admin_UI {
 			'button'     => __( 'Κουμπί', 'book-preview' ),
 			'end_title'  => __( 'Τίτλος της κάρτας', 'book-preview' ),
 			'end_button' => __( 'Κουμπί αγοράς', 'book-preview' ),
+			'tab_title'  => __( 'Τίτλος της καρτέλας', 'book-preview' ),
 		);
 		?>
 		<div class="wrap bpv-wrap">
@@ -486,6 +487,10 @@ final class BPV_Admin_UI {
 					<?php foreach ( self::position_labels() as $k => $l ) : ?>
 						<label class="bpv-check"><input type="radio" name="bpv_position" value="<?php echo esc_attr( $k ); ?>" <?php checked( $s['position'], $k ); ?> /> <?php echo esc_html( $l ); ?></label>
 					<?php endforeach; ?>
+					<label class="bpv-check bpv-mt-8">
+						<input type="checkbox" name="bpv_tab" value="1" <?php checked( $s['tab'] ); ?> />
+						<?php esc_html_e( 'Και σε δική του καρτέλα, σε κάθε προϊόν με δείγμα (με «Μόνο με το shortcode» φαίνεται μόνο εκεί)', 'book-preview' ); ?>
+					</label>
 					<p class="description"><?php esc_html_e( 'Το shortcode [book_preview] δουλεύει παντού ([book_preview id="123"] για άλλο προϊόν, label="…" για άλλο κείμενο). Στο block editor υπάρχει και το block «Δείγμα βιβλίου».', 'book-preview' ); ?></p>
 
 					<span class="bpv-label"><?php esc_html_e( 'Γλώσσα των κειμένων', 'book-preview' ); ?></span>
@@ -630,7 +635,7 @@ final class BPV_Admin_UI {
 		$action = sanitize_key( wp_unslash( $_POST['bpv_action'] ) );
 		if ( 'save_settings' === $action ) {
 			$in = array();
-			foreach ( array( 'enabled', 'test_mode', 'end_card', 'auto_regen', 'external' ) as $k ) {
+			foreach ( array( 'enabled', 'test_mode', 'tab', 'end_card', 'auto_regen', 'external' ) as $k ) {
 				$in[ $k ] = '1' === self::post( 'bpv_' . $k );
 			}
 			foreach ( array( 'position', 'lang', 'first_pages', 'skip_pages', 'warn_mb' ) as $k ) {

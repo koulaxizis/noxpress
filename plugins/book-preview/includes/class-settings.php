@@ -5,8 +5,10 @@
  * One option, bpv_settings (autoload, read on product pages):
  *  - enabled, test_mode                 front end on / off (Bible §14.1–2)
  *  - position                           after_excerpt | after_cart | manual
+ *  - tab                                own product tab with the button (1.3.0)
  *  - lang                               auto | el | en (visitor texts)
  *  - button_el / button_en              the button label
+ *  - tab_title_el / tab_title_en        the tab's title (1.3.0)
  *  - end_card                           "Continue reading" card after the last page
  *  - end_title_el / end_title_en        its title
  *  - end_button_el / end_button_en      its buy button
@@ -33,6 +35,7 @@ final class BPV_Settings {
 		'button'     => array( 'Διαβάστε ένα δείγμα', 'Read a sample' ),
 		'end_title'  => array( 'Συνεχίστε την ανάγνωση', 'Keep reading' ),
 		'end_button' => array( 'Αγορά', 'Buy now' ),
+		'tab_title'  => array( 'Ξεφυλλίστε το βιβλίο', 'Leaf through the book' ),
 	);
 
 	/** @var array|null Per-request cache. */
@@ -43,6 +46,7 @@ final class BPV_Settings {
 			'enabled'       => false,
 			'test_mode'     => true,
 			'position'      => 'after_excerpt',
+			'tab'           => false,
 			'lang'          => 'auto',
 			'button_el'     => '',
 			'button_en'     => '',
@@ -51,6 +55,8 @@ final class BPV_Settings {
 			'end_title_en'  => '',
 			'end_button_el' => '',
 			'end_button_en' => '',
+			'tab_title_el'  => '',
+			'tab_title_en'  => '',
 			'first_pages'   => 10,
 			'skip_pages'    => 0,
 			'warn_mb'       => 10,
@@ -70,7 +76,7 @@ final class BPV_Settings {
 	public static function sanitize( array $in ): array {
 		$d   = self::defaults();
 		$out = array();
-		foreach ( array( 'enabled', 'test_mode', 'end_card', 'external', 'auto_regen' ) as $k ) {
+		foreach ( array( 'enabled', 'test_mode', 'tab', 'end_card', 'external', 'auto_regen' ) as $k ) {
 			$out[ $k ] = array_key_exists( $k, $in ) ? (bool) $in[ $k ] : $d[ $k ];
 		}
 		$pos             = isset( $in['position'] ) && is_scalar( $in['position'] ) ? (string) $in['position'] : '';
