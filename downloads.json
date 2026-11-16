@@ -1,6 +1,6 @@
 {
-  "display": 1332,
-  "total": 1332,
+  "display": 1334,
+  "total": 1334,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1594,7 +1594,7 @@
     },
     "754625740": {
       "file": "nox-lg-1.0.0/login-guard.zip",
-      "count": 2
+      "count": 3
     },
     "754642632": {
       "file": "nox-sb-1.13.0/site-bridge.zip",
@@ -1626,10 +1626,22 @@
     },
     "754810232": {
       "file": "nox-lv-1.0.1/live-search.zip",
-      "count": 0
+      "count": 1
     },
     "754820912": {
       "file": "nox-sp-1.9.0/store-pulse.zip",
+      "count": 0
+    },
+    "754846018": {
+      "file": "nox-pl-1.2.0/production-ledger.zip",
+      "count": 0
+    },
+    "754846273": {
+      "file": "nox-gc-1.0.1/gift-cards.zip",
+      "count": 0
+    },
+    "754862436": {
+      "file": "nox-ev-1.1.0/events.zip",
       "count": 0
     }
   }

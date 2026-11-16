@@ -162,10 +162,65 @@ final class EVT_Metabox {
 					</select></label>
 			</div>
 
+			<?php self::render_tickets( (int) $post->ID ); ?>
+
 			<h4><?php esc_html_e( 'Σχετικά', 'events' ); ?></h4>
 			<?php self::render_products( $e ? $e['products'] : array() ); ?>
 			<?php self::render_creators( $e ? $e['creators'] : array() ); ?>
 		</div>
+		<?php
+	}
+
+	/** Ticket section (1.1.0): link a product or create one, sales start, attendee names. */
+	private static function render_tickets( int $id ): void {
+		if ( ! Events_Plugin::woo() || ! class_exists( 'EVT_Tickets' ) ) {
+			return;
+		}
+		$pid   = (int) get_post_meta( $id, '_evt_ticket', true );
+		$p     = $pid > 0 ? wc_get_product( $pid ) : null;
+		$from  = (int) get_post_meta( $id, '_evt_sales_from', true );
+		$names = '1' === (string) get_post_meta( $id, '_evt_names', true );
+		?>
+		<h4><?php esc_html_e( 'Εισιτήρια στο κατάστημα', 'events' ); ?></h4>
+		<div class="evt-row">
+			<label class="evt-block"><span><?php esc_html_e( 'Προϊόν εισιτηρίου (απλό ή με παραλλαγές για κανονικό, μειωμένο κ.λπ.)', 'events' ); ?></span>
+				<select class="wc-product-search" style="width:100%;" name="evt_ticket_product" data-allow_clear="true" data-placeholder="<?php esc_attr_e( 'Αναζήτηση προϊόντος…', 'events' ); ?>" data-action="woocommerce_json_search_products">
+					<?php if ( $p ) : ?>
+						<option value="<?php echo (int) $pid; ?>" selected="selected"><?php echo esc_html( wp_strip_all_tags( $p->get_formatted_name() ) ); ?></option>
+					<?php endif; ?>
+				</select></label>
+		</div>
+		<?php if ( ! $p && current_user_can( 'publish_products' ) ) : ?>
+			<div class="evt-row">
+				<label class="evt-inline"><input type="checkbox" name="evt_tk_new" value="1" /> <?php esc_html_e( 'Φτιάξε εισιτήριο', 'events' ); ?></label>
+				<label><span><?php esc_html_e( 'Τιμή (€)', 'events' ); ?></span><input type="text" name="evt_tk_price" inputmode="decimal" maxlength="12" placeholder="8" /></label>
+				<label><span><?php esc_html_e( 'Θέσεις', 'events' ); ?></span><input type="number" name="evt_tk_seats" min="1" max="100000" step="1" placeholder="50" /></label>
+			</div>
+			<p class="description"><?php esc_html_e( 'Νέο κρυφό, εικονικό προϊόν με απόθεμα όσο οι θέσεις. Για τύπους εισιτηρίου, άλλαξέ το μετά σε προϊόν με παραλλαγές.', 'events' ); ?></p>
+		<?php endif; ?>
+		<div class="evt-row">
+			<label><span><?php esc_html_e( 'Έναρξη πωλήσεων (κενό: αμέσως)', 'events' ); ?></span>
+				<input type="date" name="evt_sales_d" value="<?php echo esc_attr( $from > 0 ? wp_date( 'Y-m-d', $from ) : '' ); ?>" />
+				<input type="time" name="evt_sales_t" value="<?php echo esc_attr( $from > 0 ? wp_date( 'H:i', $from ) : '' ); ?>" /></label>
+			<label class="evt-inline"><input type="checkbox" name="evt_names" value="1" <?php checked( $names ); ?> /> <?php esc_html_e( 'Ονόματα συμμετεχόντων στη σελίδα των εισιτηρίων', 'events' ); ?></label>
+		</div>
+		<p class="description">
+			<?php
+			/* translators: 1: hours before the start, 2: days after the event */
+			echo esc_html( sprintf( __( 'Οι πωλήσεις κλείνουν %1$d ώρες πριν την έναρξη. Τα ονόματα σβήνονται %2$d ημέρες μετά την εκδήλωση.', 'events' ), (int) EVT_Settings::get()['close_h'], (int) EVT_Settings::get()['names_days'] ) );
+			?>
+		</p>
+		<?php if ( $p && current_user_can( Events_Plugin::cap() ) ) : ?>
+			<?php $c = EVT_Ticket_Store::counts( $id ); ?>
+			<p>
+				<?php
+				/* translators: 1: valid tickets, 2: checked in */
+				echo esc_html( sprintf( __( 'Εισιτήρια: %1$d · μέσα: %2$d', 'events' ), $c['valid'], $c['used'] ) );
+				?>
+				· <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . EVT_Checkin::SLUG . '&view=list&event=' . $id ) ); ?>"><?php esc_html_e( 'Λίστα συμμετεχόντων', 'events' ); ?></a>
+				· <a href="<?php echo esc_url( (string) get_edit_post_link( $pid ) ); ?>"><?php esc_html_e( 'Το προϊόν', 'events' ); ?></a>
+			</p>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -306,11 +361,47 @@ final class EVT_Metabox {
 		update_post_meta( $id, '_evt_link', self::url( self::post( 'evt_link' ) ) );
 		update_post_meta( $id, '_evt_link_kind', 'rsvp' === self::post( 'evt_link_kind' ) ? 'rsvp' : 'tickets' );
 
+		if ( Events_Plugin::woo() && class_exists( 'EVT_Tickets' ) ) {
+			self::save_tickets( $id );
+		}
+
 		$products = Events_Plugin::woo() ? self::post_ids( 'evt_products' ) : EVT_CPT::ids( self::post( 'evt_products_ids' ) );
 		self::set_many( $id, '_evt_product', array_slice( $products, 0, 50 ) );
 		if ( post_type_exists( 'nox_creator' ) ) {
 			self::set_many( $id, '_evt_creator', array_slice( self::post_ids( 'evt_creators' ), 0, 50 ) );
 		}
+	}
+
+	/** Ticket fields (1.1.0). */
+	private static function save_tickets( int $id ): void {
+		$from = self::ts( self::post( 'evt_sales_d' ), '' !== self::post( 'evt_sales_t' ) ? self::post( 'evt_sales_t' ) : '00:00' );
+		if ( $from > 0 ) {
+			update_post_meta( $id, '_evt_sales_from', $from );
+		} else {
+			delete_post_meta( $id, '_evt_sales_from' );
+		}
+		update_post_meta( $id, '_evt_names', '1' === self::post( 'evt_names' ) ? '1' : '' );
+		if ( '1' !== self::post( 'evt_names' ) ) {
+			EVT_Ticket_Store::clear_names_of_event( $id );
+		}
+
+		$old = (int) get_post_meta( $id, '_evt_ticket', true );
+		if ( '1' === self::post( 'evt_tk_new' ) && $old <= 0 ) {
+			$price = wc_format_decimal( str_replace( ',', '.', self::post( 'evt_tk_price' ) ) );
+			$seats = absint( self::post( 'evt_tk_seats' ) );
+			if ( '' !== $price && (float) $price >= 0 && $seats > 0 ) {
+				EVT_Tickets::create_product( $id, (string) $price, min( 100000, $seats ) );
+			}
+			return;
+		}
+		$pid = absint( self::post( 'evt_ticket_product' ) );
+		if ( $pid === $old ) {
+			return;
+		}
+		if ( $pid > 0 && ! current_user_can( 'edit_post', $pid ) ) {
+			return;
+		}
+		EVT_Tickets::link( $id, $pid );
 	}
 
 	/** One meta row per id. */

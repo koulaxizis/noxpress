@@ -57,7 +57,7 @@ final class EVT_Jobs {
 		return array_values( array_unique( $urls ) );
 	}
 
-	private static function purge( int $id ): void {
+	public static function purge( int $id ): void {
 		do_action( 'noxpress_purge_page_cache', self::urls( $id ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- suite hook (Bible §6).
 	}
 

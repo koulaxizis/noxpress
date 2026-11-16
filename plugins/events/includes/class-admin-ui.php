@@ -335,6 +335,17 @@ final class EVT_Admin_UI {
 				<p class="description"><?php esc_html_e( 'Το κουτί εμφανίζεται μόνο όταν υπάρχει επερχόμενη εκδήλωση. Λίστα οπουδήποτε: shortcode [nx_events] ή το block «Εκδηλώσεις».', 'events' ); ?></p>
 			</div>
 
+			<?php if ( Events_Plugin::woo() ) : ?>
+				<h2 class="evt-h2"><?php esc_html_e( 'Εισιτήρια', 'events' ); ?></h2>
+				<div class="evt-zone">
+					<label class="evt-field"><span class="evt-label"><?php esc_html_e( 'Οι πωλήσεις κλείνουν τόσες ώρες πριν την έναρξη', 'events' ); ?></span>
+						<input type="number" class="evt-num" name="evt_close_h" value="<?php echo (int) $s['close_h']; ?>" min="0" max="168" step="1" /></label>
+					<label class="evt-field"><span class="evt-label"><?php esc_html_e( 'Τα ονόματα συμμετεχόντων σβήνονται τόσες ημέρες μετά την εκδήλωση', 'events' ); ?></span>
+						<input type="number" class="evt-num" name="evt_names_days" value="<?php echo (int) $s['names_days']; ?>" min="1" max="365" step="1" /></label>
+					<p class="description"><?php esc_html_e( 'Ένα εισιτήριο είναι προϊόν του καταστήματος που συνδέεις στην εκδήλωση (κουτί «Εισιτήρια στο κατάστημα»). Οι θέσεις είναι το απόθεμά του. Για την είσοδο, δώσε σε όποιον ελέγχει τα εισιτήρια τον ρόλο «Ταμείο εκδήλωσης».', 'events' ); ?></p>
+				</div>
+			<?php endif; ?>
+
 			<h2 class="evt-h2"><?php esc_html_e( 'Ημερολόγιο και SEO', 'events' ); ?></h2>
 			<div class="evt-zone">
 				<?php
@@ -459,6 +470,10 @@ final class EVT_Admin_UI {
 				$s['base']       = self::post( 'evt_base' );
 				$s['venue_base'] = self::post( 'evt_venue_base' );
 				$s['box_count']  = (int) self::post( 'evt_box_count' );
+				if ( Events_Plugin::woo() ) {
+					$s['close_h']    = (int) self::post( 'evt_close_h' );
+					$s['names_days'] = (int) self::post( 'evt_names_days' );
+				}
 				foreach ( array( 'on_product', 'on_creator', 'ics_feed', 'schema' ) as $k ) {
 					$s[ $k ] = '1' === self::post( 'evt_' . $k );
 				}

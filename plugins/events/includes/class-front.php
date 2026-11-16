@@ -296,9 +296,13 @@ final class EVT_Front {
 		}
 		$h .= '</dl>';
 
+		// Tickets sold in the shop (1.1.0) replace the external tickets link.
+		$box = class_exists( 'EVT_Tickets' ) ? EVT_Tickets::box( $e ) : '';
+		$h  .= $box;
+
 		if ( ! $e['ended'] && 'cancelled' !== $e['status'] ) {
 			$h .= '<p class="evt-actions">';
-			if ( '' !== $e['link'] ) {
+			if ( '' !== $e['link'] && '' === $box ) {
 				$h .= '<a class="' . esc_attr( self::button_class() ) . '" href="' . esc_url( $e['link'] ) . '" target="_blank" rel="noopener">' . esc_html( EVT_Settings::text( 'rsvp' === $e['link_kind'] ? 'rsvp' : 'tickets' ) ) . '</a> ';
 			}
 			if ( $e['start'] > 0 ) {
