@@ -24,8 +24,12 @@
  *  - line meta  _tra_discount discount % of the line, and a readable line
  *               «Τιμή χονδρικής: −40%»
  *
- * Invoice (setting, classic checkout): a trade order needs the invoicing
- * plugin's receipt type set to "invoice"; the checkout preselects it.
+ * Invoice (setting): a trade order needs an invoice. With Invoice Details
+ * offering its choice to the visitor (ivd_offered(), Invoice Details
+ * 1.0.1+), the rule goes to its filter ivd_require_invoice, in the classic
+ * checkout and the Checkout block, with this plugin's message. Otherwise
+ * (classic checkout): the invoicing plugin's receipt type field must be
+ * "invoice"; the checkout preselects it.
  *
  * Coupons (settings, on by default):
  *  - no_coupons: a cart with a line at a trade price takes no coupon
@@ -77,6 +81,8 @@ final class TRA_Pricing {
 		add_action( 'woocommerce_checkout_create_order_line_item', array( __CLASS__, 'mark_line' ), 20, 4 );
 		add_action( 'woocommerce_after_checkout_validation', array( __CLASS__, 'check_invoice' ), 20, 2 );
 		add_filter( 'woocommerce_checkout_get_value', array( __CLASS__, 'invoice_default' ), 20, 2 );
+		add_filter( 'ivd_require_invoice', array( __CLASS__, 'ivd_require' ), 10, 2 );
+		add_filter( 'ivd_text', array( __CLASS__, 'ivd_text' ), 10, 3 );
 
 		add_action( 'template_redirect', array( __CLASS__, 'no_page_cache' ), 1 );
 
@@ -238,7 +244,48 @@ final class TRA_Pricing {
 		return false;
 	}
 
+	/** True when Invoice Details shows its choice to this visitor and takes the rule. */
+	private static function ivd(): bool {
+		return function_exists( 'ivd_offered' ) && ivd_offered();
+	}
+
+	/** True when the setting asks for an invoice and the cart holds trade lines. */
+	private static function needs_invoice(): bool {
+		return TRA_Settings::get()['invoice'] && self::applies() && self::trade_cart();
+	}
+
+	/**
+	 * ivd_require_invoice (Invoice Details): a trade cart needs an invoice.
+	 *
+	 * @param mixed $required Required so far.
+	 * @param mixed $cart     Cart.
+	 */
+	public static function ivd_require( $required, $cart = null ): bool {
+		return (bool) $required || self::needs_invoice();
+	}
+
+	/**
+	 * ivd_text (Invoice Details): our message when a trade order has no invoice.
+	 *
+	 * @param mixed  $text Text.
+	 * @param string $key  Text key.
+	 * @param string $lang 'el' | 'en'.
+	 * @return mixed
+	 */
+	public static function ivd_text( $text, $key = '', $lang = '' ) {
+		if ( 'need_invoice' === $key && self::needs_invoice() ) {
+			$own = TRA_Settings::text( 'invoice', in_array( $lang, array( 'el', 'en' ), true ) ? $lang : '' );
+			if ( '' !== $own ) {
+				return $own;
+			}
+		}
+		return $text;
+	}
+
 	public static function check_invoice( $data, $errors ): void {
+		if ( self::ivd() ) {
+			return;
+		}
 		$s = TRA_Settings::get();
 		if ( ! $s['invoice'] || ! $errors instanceof WP_Error || ! self::applies() || ! self::trade_cart() ) {
 			return;
@@ -253,7 +300,7 @@ final class TRA_Pricing {
 
 	public static function invoice_default( $value, $input ) {
 		$s = TRA_Settings::get();
-		if ( null === $value && $s['invoice'] && $input === $s['inv_field'] && self::applies() ) {
+		if ( null === $value && $s['invoice'] && $input === $s['inv_field'] && self::applies() && ! self::ivd() ) {
 			return $s['inv_value'];
 		}
 		return $value;

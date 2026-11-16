@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Theme Patcher
  * Plugin URI:           https://noxpress.tech
- * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή), κείμενο ένδειξης έκπτωσης για όλο το site («Έκπτωση 20%»), καρτέλα «Φροντίδα και ασφάλεια» στη σελίδα προϊόντος. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
- * Version:              1.6.3
+ * Description:          Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους: τιμή, κουμπί καλαθιού, ένδειξη έκπτωσης και hooks στις κάρτες προϊόντων, πίνακας κειμένων, εικόνες και πλακίδια κατηγοριών, προστασία των ρυθμίσεων του θέματος, ονόματα προσβασιμότητας, ετικέτες τιμής («Δωρεάν», προϊόντα χωρίς τιμή), κείμενο ένδειξης έκπτωσης για όλο το site («Έκπτωση 20%»), σήματα προϊόντων («Νέο», «Τελευταία κομμάτια», «Εξαντλήθηκε», ανά ετικέτα, κατηγορία ή προϊόν), καρτέλα «Φροντίδα και ασφάλεια» στη σελίδα προϊόντος. Ανιχνευτής θέματος, σάρωση σελίδας και λειτουργία δοκιμής.
+ * Version:              1.7.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -41,6 +41,9 @@
  *                      labels for products without a price)
  *  - TP_Sale          → sale badge text for the whole store ("Sale
  *                      {percent}", "up to", fallback, product page text)
+ *  - TP_Badges       → product badges for the whole store («Νέο»,
+ *                      «Τελευταία κομμάτια», «Εξαντλήθηκε», per tag /
+ *                      category, per product), 1.7.0
  *  - TP_Care         → "Care & Safety" product tab (care / safety texts
  *                      per product type, manufacturer, EU responsible
  *                      person), product meta, resolution
@@ -67,8 +70,9 @@
  * instructions, warnings, lists). Headings stay plain text.
  *
  * Data kept after uninstall (Bible §12): the per-product choices of the
- * Care & Safety tab (_tp_care_* post meta) stay unless "delete on
- * uninstall" is ticked in the settings; the tp_care option always goes.
+ * Care & Safety tab (_tp_care_* post meta) and the per-product badge text
+ * (_tp_badge, 1.7.0) stay unless "delete on uninstall" is ticked in the
+ * settings; the tp_care option always goes.
  *
  * Cooperation (Bible §6): Theme Patcher changes presentation only, so it
  * fires no suite hook and listens to none.
@@ -76,7 +80,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TP_VERSION', '1.6.3' );
+define( 'TP_VERSION', '1.7.1' );
 define( 'TP_FILE', __FILE__ );
 define( 'TP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TP_URL', plugin_dir_url( __FILE__ ) );
@@ -127,6 +131,7 @@ final class Theme_Patcher {
 		require_once TP_PATH . 'includes/class-categories.php';
 		require_once TP_PATH . 'includes/class-prices.php';
 		require_once TP_PATH . 'includes/class-sale.php';
+		require_once TP_PATH . 'includes/class-badges.php';
 		require_once TP_PATH . 'includes/class-care.php';
 
 		TP_Detector::init();
@@ -140,7 +145,10 @@ final class Theme_Patcher {
 			TP_Page::init();
 			TP_Prices::init();
 			TP_Sale::init();
+			TP_Badges::init();
 		}
+		// Product meta of the badges and its field: always (data, not output).
+		TP_Badges::register();
 		// Product meta registration always; front-end hooks only without TP_DISABLE.
 		TP_Care::init();
 
