@@ -75,6 +75,8 @@ SLUGS = {
     'ss': 'search-signals',
     'pl': 'production-ledger',
     'pt': 'product-tabs',
+    'fd': 'product-feed',
+    'iv': 'invoice-details',
     'ed': 'ebook-delivery',
     'sb': 'site-bridge',
 }

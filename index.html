@@ -1382,6 +1382,48 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="invoice-details">
+		<h2><a href="#invoice-details">Invoice Details</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="iv_desc">Receipt or invoice at checkout, in the classic checkout and the Checkout block: company name, VAT number, tax office and activity, checked before the order is placed, and handed to your invoicing provider on the order, in the emails and in an invoice list with CSV. Moves over from Timologia and OBS without losing old orders.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="iv_li1">«Receipt / Invoice» in the classic checkout and «I need an invoice» in the Checkout block; the Greek fields (tax office, activity) only for a Greek billing address, each required, optional or hidden</li>
+			<li data-i18n="iv_li2">Greek VAT numbers checked locally with the check digit, without any network; numbers of other EU countries checked in the EU VIES service, and an outage never stops an order</li>
+			<li data-i18n="iv_li3">Details on the thank-you page, in My account and in every order email, an editable box on the order with «Check in VIES», and an «Invoices only» filter in the orders list</li>
+			<li data-i18n="iv_li4">«Invoices» page: the invoice orders of a period with net, VAT and total after refunds, and a CSV for the accountant (Excel Greek or standard)</li>
+			<li data-i18n="iv_li5">Reads orders made with Timologia and OBS, can also write their meta names for your invoicing provider; test mode, IVD_DISABLE, read-only ability for Site Bridge, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-iv-1.0.0/invoice-details.zip" rel="nofollow noopener" data-i18n="iv_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/invoice-details" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
+
+	<article class="card" id="product-feed">
+		<h2><a href="#product-feed">Product Feed</a></h2>
+		<div class="meta">v1.0.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="fd_desc">Product feeds for Google Merchant Center, Skroutz, BestPrice and the Meta catalog, plus a general CSV: one static file per feed with a fixed URL, rebuilt in the background, with ISBN / GTIN, publisher, pre-orders and a check before anything is published.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="fd_li1">Google Merchant Center (RSS with g: fields, variations with item_group_id, availability with pre-orders), Skroutz XML with the four availability texts, BestPrice XML, Meta catalog and CSV</li>
+			<li data-i18n="fd_li2">GTIN / ISBN from WooCommerce’s own field with check-digit test, brand from the publisher, real prices with VAT and sale dates, pre-orders from Pre-Orders, Hide Catalog and Book Feed per feed</li>
+			<li data-i18n="fd_li3">Background builds with the Action Scheduler, 100 products a batch, atomic replace so a service never reads half a file, every 1 to 24 hours, «Refresh now» and one debounced rebuild after changes</li>
+			<li data-i18n="fd_li4">A report for every build (how many went in, what stayed out and why, warnings per product with a link) and a preview of the first 20 items or one product, nothing written</li>
+			<li data-i18n="fd_li5">One-click import from CTX Feed without touching it, a copy at the old file path once the old plugin is off, digital products out by default, PFD_DISABLE, settings backup, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-fd-1.0.0/product-feed.zip" rel="nofollow noopener" data-i18n="fd_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/product-feed" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
 
 </section>
 
@@ -1887,6 +1929,20 @@ footer .heart { color: var(--accent-bright); }
 		ed_li4: '«My library» with covers instead of the Downloads tab, a link in the order e-mail and clean file names such as «Author - Title.pdf»',
 		ed_li5: 'Find a leak by its ED- code or by uploading the file, download limit defaults and bulk apply with backup, test mode, EBD_DISABLE, abilities for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		ed_download: 'Download v1.0.0 (.zip)',
+		fd_desc: 'Product feeds for Google Merchant Center, Skroutz, BestPrice and the Meta catalog, plus a general CSV: one static file per feed with a fixed URL, rebuilt in the background, with ISBN / GTIN, publisher, pre-orders and a check before anything is published.',
+		fd_li1: 'Google Merchant Center (RSS with g: fields, variations with item_group_id, availability with pre-orders), Skroutz XML with the four availability texts, BestPrice XML, Meta catalog and CSV',
+		fd_li2: 'GTIN / ISBN from WooCommerce’s own field with check-digit test, brand from the publisher, real prices with VAT and sale dates, pre-orders from Pre-Orders, Hide Catalog and Book Feed per feed',
+		fd_li3: 'Background builds with the Action Scheduler, 100 products a batch, atomic replace so a service never reads half a file, every 1 to 24 hours, «Refresh now» and one debounced rebuild after changes',
+		fd_li4: 'A report for every build (how many went in, what stayed out and why, warnings per product with a link) and a preview of the first 20 items or one product, nothing written',
+		fd_li5: 'One-click import from CTX Feed without touching it, a copy at the old file path once the old plugin is off, digital products out by default, PFD_DISABLE, settings backup, bilingual UI and shared «Noxpress» menu',
+		fd_download: 'Download v1.0.0 (.zip)',
+		iv_desc: 'Receipt or invoice at checkout, in the classic checkout and the Checkout block: company name, VAT number, tax office and activity, checked before the order is placed, and handed to your invoicing provider on the order, in the emails and in an invoice list with CSV. Moves over from Timologia and OBS without losing old orders.',
+		iv_li1: '«Receipt / Invoice» in the classic checkout and «I need an invoice» in the Checkout block; the Greek fields (tax office, activity) only for a Greek billing address, each required, optional or hidden',
+		iv_li2: 'Greek VAT numbers checked locally with the check digit, without any network; numbers of other EU countries checked in the EU VIES service, and an outage never stops an order',
+		iv_li3: 'Details on the thank-you page, in My account and in every order email, an editable box on the order with «Check in VIES», and an «Invoices only» filter in the orders list',
+		iv_li4: '«Invoices» page: the invoice orders of a period with net, VAT and total after refunds, and a CSV for the accountant (Excel Greek or standard)',
+		iv_li5: 'Reads orders made with Timologia and OBS, can also write their meta names for your invoicing provider; test mode, IVD_DISABLE, read-only ability for Site Bridge, bilingual UI and shared «Noxpress» menu',
+		iv_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2293,6 +2349,20 @@ footer .heart { color: var(--accent-bright); }
 		ed_li4: '«Η βιβλιοθήκη μου» με εξώφυλλα στη θέση της καρτέλας Λήψεις, σύνδεσμος στο email της παραγγελίας και καθαρά ονόματα αρχείων, όπως «Συγγραφέας - Τίτλος.pdf»',
 		ed_li5: 'Εύρεση διαρροής από τον κωδικό ED- ή ανεβάζοντας το αρχείο, προεπιλογές και μαζική εφαρμογή ορίων λήψεων με αντίγραφο, λειτουργία δοκιμής, EBD_DISABLE, abilities για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ed_download: 'Λήψη v1.0.0 (.zip)',
+		fd_desc: 'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice και τον κατάλογο Meta, και ένα γενικό CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, που ξαναχτίζεται στο παρασκήνιο, με ISBN / GTIN, εκδότη, προπαραγγελίες και έλεγχο πριν δημοσιευτεί οτιδήποτε.',
+		fd_li1: 'Google Merchant Center (RSS με πεδία g:, παραλλαγές με item_group_id, διαθεσιμότητα με προπαραγγελίες), Skroutz XML με τα τέσσερα κείμενα διαθεσιμότητας, BestPrice XML, κατάλογος Meta και CSV',
+		fd_li2: 'GTIN / ISBN από το πεδίο του WooCommerce με έλεγχο ψηφίου, brand από τον εκδότη, πραγματικές τιμές με ΦΠΑ και ημερομηνίες έκπτωσης, προπαραγγελίες από το Pre-Orders, Hide Catalog και Book Feed ανά feed',
+		fd_li3: 'Χτίσιμο στο παρασκήνιο με το Action Scheduler, 100 προϊόντα ανά παρτίδα, αντικατάσταση σε ένα βήμα ώστε μια υπηρεσία να μη διαβάζει ποτέ μισό αρχείο, κάθε 1 έως 24 ώρες, «Ανανέωση τώρα» και μία ανανέωση μετά από αλλαγές',
+		fd_li4: 'Αναφορά για κάθε χτίσιμο (πόσα μπήκαν, τι έμεινε έξω και γιατί, προειδοποιήσεις ανά προϊόν με σύνδεσμο) και προεπισκόπηση των πρώτων 20 ή ενός προϊόντος, χωρίς να γραφτεί τίποτα',
+		fd_li5: 'Εισαγωγή με ένα κλικ από το CTX Feed χωρίς να το αγγίξει, αντίγραφο στο παλιό path όταν κλείσει το παλιό plugin, ψηφιακά προϊόντα έξω από προεπιλογή, PFD_DISABLE, αντίγραφο ρυθμίσεων, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		fd_download: 'Λήψη v1.0.0 (.zip)',
+		iv_desc: 'Απόδειξη ή τιμολόγιο στο ταμείο, στο κλασικό και στο block: επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, με έλεγχο πριν γίνει η παραγγελία, και τα στοιχεία για τον πάροχο τιμολόγησης στην παραγγελία, στα emails και σε λίστα τιμολογίων με CSV. Αντικαθιστά το Timologia και το OBS χωρίς να χαθούν οι παλιές παραγγελίες.',
+		iv_li1: '«Απόδειξη / Τιμολόγιο» στο κλασικό ταμείο και «Θέλω τιμολόγιο» στο block· τα ελληνικά πεδία (ΔΟΥ, δραστηριότητα) μόνο για διεύθυνση στην Ελλάδα, το καθένα υποχρεωτικό, προαιρετικό ή κρυφό',
+		iv_li2: 'Ο ελληνικός ΑΦΜ ελέγχεται τοπικά με το ψηφίο ελέγχου, χωρίς δίκτυο· οι ΑΦΜ άλλων χωρών της ΕΕ στο VIES, και όταν το VIES δεν απαντά η παραγγελία περνά πάντα',
+		iv_li3: 'Τα στοιχεία στη σελίδα ευχαριστίας, στον λογαριασμό και σε κάθε email παραγγελίας, κουτί στην παραγγελία με αλλαγή και «Έλεγχος VIES», και φίλτρο «Μόνο τιμολόγια» στη λίστα παραγγελιών',
+		iv_li4: 'Σελίδα «Τιμολόγια»: οι παραγγελίες με τιμολόγιο ενός διαστήματος με καθαρό, ΦΠΑ και σύνολο μετά τις επιστροφές, και CSV για τον λογιστή (Excel ελληνικά ή απλό)',
+		iv_li5: 'Διαβάζει τις παραγγελίες του Timologia και του OBS και μπορεί να γράφει και τα δικά τους ονόματα για τον πάροχο τιμολόγησης· λειτουργία δοκιμής, IVD_DISABLE, ability μόνο για ανάγνωση για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		iv_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
