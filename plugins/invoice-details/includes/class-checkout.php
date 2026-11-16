@@ -74,6 +74,11 @@ final class IVD_Checkout {
 		return ! self::$broken && IVD_Settings::visible();
 	}
 
+	/** Public form of offered() for ivd_offered(). */
+	public static function is_offered(): bool {
+		return self::offered();
+	}
+
 	/** True when the store hides WooCommerce's company field (we show ours). */
 	public static function own_company(): bool {
 		return 'hidden' === get_option( 'woocommerce_checkout_company_field', 'optional' );
