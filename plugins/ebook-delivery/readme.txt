@@ -105,7 +105,7 @@ Noto Sans (subset), SIL Open Font License 1.1. See LICENSES.md.
 == Changelog ==
 
 = 1.0.1 =
-* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.0.0 =
 * Initial release.

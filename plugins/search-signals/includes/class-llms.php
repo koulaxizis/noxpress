@@ -44,7 +44,7 @@ final class SSG_Llms {
 			if ( 'llms.txt' !== $path && 'llms-full.txt' !== $path ) {
 				return;
 			}
-			if ( ! Search_Signals::serving() ) {
+			if ( ! Search_Signals::serving() || Search_Signals::site_closed() ) {
 				return;
 			}
 			if ( ! headers_sent() ) {

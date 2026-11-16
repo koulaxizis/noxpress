@@ -84,7 +84,7 @@ Its table, its settings and its scheduled jobs are deleted.
 == Changelog ==
 
 = 1.0.1 =
-* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.0.0 =
 * First release (beta): products, orders, coupons, content, users, plugins, themes, core, settings, media and suite events; actor and source on every row; secrets and customer details never stored; masked IPs; 90-day retention with a row limit; critical-change e-mail; CSV; «History» box on products and orders; dashboard widget; privacy exporter and eraser; read-only ability activity-log/list; Site Bridge and Login Guard hooks.

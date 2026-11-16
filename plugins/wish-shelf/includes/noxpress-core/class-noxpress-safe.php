@@ -138,7 +138,7 @@ final class Noxpress_Safe {
 			} elseif ( '' !== $cell && is_numeric( $cell ) && false === strpbrk( $cell, " \t\r\n" ) ) {
 				$cells[] = $cell;
 			} else {
-				// Every text cell is enclosed (Core 1.4.14): a spreadsheet that
+				// Every text cell is enclosed (Core 1.4.16): a spreadsheet that
 				// splits on another list separator (';' in Greek Excel for a
 				// ',' file) then keeps the cell whole, so text after an
 				// embedded separator never becomes a cell of its own.

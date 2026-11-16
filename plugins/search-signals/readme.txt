@@ -5,7 +5,7 @@ Tags: seo, schema, sitemap, open graph, llms.txt
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -111,8 +111,11 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 
-= 1.0.3 =
-* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+= 1.1.1 =
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+
+= 1.1.0 =
+* Works with Maintenance Mode: while a site is closed as «Coming soon», visitors and crawlers get no sitemaps, no llms.txt and no Sitemap line in robots.txt, so nothing is indexed before the launch. Administrators still see them. Read through the suite filter noxpress_site_closed.
 
 = 1.0.2 =
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).

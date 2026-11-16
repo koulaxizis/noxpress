@@ -78,7 +78,7 @@ final class SSG_Sitemaps {
 	public static function serve( $wp ): void {
 		try {
 			$r = self::route( self::request_path() );
-			if ( ! $r || ! Search_Signals::serving() ) {
+			if ( ! $r || ! Search_Signals::serving() || Search_Signals::site_closed() ) {
 				return;
 			}
 			if ( 'redirect' === $r[0] ) {
@@ -119,7 +119,7 @@ final class SSG_Sitemaps {
 	 */
 	public static function robots_txt( $out, $public = true ) {
 		try {
-			if ( ! $public || ! Search_Signals::serving() ) {
+			if ( ! $public || ! Search_Signals::serving() || Search_Signals::site_closed() ) {
 				return $out;
 			}
 			$line = 'Sitemap: ' . home_url( '/sitemap_index.xml' );

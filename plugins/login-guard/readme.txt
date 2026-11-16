@@ -121,7 +121,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.1.1 =
-* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.1.0 =
 * New: two-step verification with an authenticator app (TOTP, RFC 6238) on wp-login.php and the WooCommerce login forms, with 10 one-time recovery codes, «do not ask again in this browser», required roles with a grace period, a strict guard against sessions that skip the second step, e-mails on every change, and resets by another administrator or WP-CLI (`wp login-guard 2fa`).

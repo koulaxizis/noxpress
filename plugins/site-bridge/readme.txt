@@ -103,7 +103,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.13.1 =
-* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.13.0 =
 * New: the actions sbr_call_start( $tool, $client, 0 ) and sbr_call_end( $tool, $status, $log_id ) around every tool run on this site, so Activity Log (1.0.0+) marks the changes Claude made through Site Bridge as such and points them to the row of this audit log. A listener that fails never changes the tool's result.
