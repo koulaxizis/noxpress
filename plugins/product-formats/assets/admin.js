@@ -9,6 +9,7 @@
  *    WordPress); the row indexes are renumbered before submit so the
  *    posted order is the visual order.
  *  - [data-pfm-checkall]: ticks or clears the checkboxes it names.
+ *  - [data-pfm-confirm] on a submit button: asks before the form is sent (1.3.0).
  *  - Upsell cleanup: batches through AJAX with a progress bar (Bible §5),
  *    then a reload shows the result and the snapshot.
  */
@@ -125,7 +126,16 @@
 		} );
 	}
 
+	function confirms() {
+		$( document ).on( 'click', '[data-pfm-confirm]', function ( e ) {
+			if ( ! window.confirm( $( this ).attr( 'data-pfm-confirm' ) ) ) {
+				e.preventDefault();
+			}
+		} );
+	}
+
 	$( function () {
+		confirms();
 		autocomplete();
 		sortable();
 		checkall();
