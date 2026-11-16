@@ -1361,6 +1361,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="login-guard">
+		<h2><a href="#login-guard">Login Guard</a></h2>
+		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="lg_desc">Limits on failed logins per IP and per account on every way in (login form, WooCommerce, XML-RPC, Application Passwords), with lockouts that end by themselves and an unlock link by e-mail for the real owner, with a test mode first.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="lg_li1">5 failures in 15 minutes lock an IP for 15 minutes, repeat offenders for 24 hours; 20 failures an hour lock an account from any address; every number is a setting, with an allow list</li>
+			<li data-i18n="lg_li2">Unlock by e-mail, once, for 15 minutes and only in the browser that asked; limits and the same answer on «Lost password», on WordPress and WooCommerce</li>
+			<li data-i18n="lg_li3">XML-RPC without logins, multicall and pingbacks by default, or fully closed; neutral login errors and no user names from /wp/v2/users, ?author=N, the sitemap or oEmbed</li>
+			<li data-i18n="lg_li4">E-mail when an administrator logs in from a new device, and one e-mail an hour at most during an attack</li>
+			<li data-i18n="lg_li5">Log with truncated IPs and keyed hashes for 30 days, the real IP only from REMOTE_ADDR or Cloudflare, recovery doors (LGD_DISABLE, WP-CLI), ability for Site Bridge, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-lg-1.0.0/login-guard.zip" rel="nofollow noopener" data-i18n="lg_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/login-guard" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 
 </section>
 
@@ -1859,6 +1880,13 @@ footer .heart { color: var(--accent-bright); }
 		pt_li4: 'Position, new title or hide for the Description, Additional information and Reviews tabs and the suite’s own (Care &amp; Safety, Creators, Book Preview)',
 		pt_li5: 'Read-only import from Custom Product Tabs for WooCommerce with a preview and undo, no duplicates while both run, old shortcodes keep working; test mode, PTB_DISABLE, abilities for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		pt_download: 'Download v1.0.0 (.zip)',
+		lg_desc: 'Limits on failed logins per IP and per account on every way in (login form, WooCommerce, XML-RPC, Application Passwords), with lockouts that end by themselves and an unlock link by e-mail for the real owner, with a test mode first.',
+		lg_li1: '5 failures in 15 minutes lock an IP for 15 minutes, repeat offenders for 24 hours; 20 failures an hour lock an account from any address; every number is a setting, with an allow list',
+		lg_li2: 'Unlock by e-mail, once, for 15 minutes and only in the browser that asked; limits and the same answer on «Lost password», on WordPress and WooCommerce',
+		lg_li3: 'XML-RPC without logins, multicall and pingbacks by default, or fully closed; neutral login errors and no user names from /wp/v2/users, ?author=N, the sitemap or oEmbed',
+		lg_li4: 'E-mail when an administrator logs in from a new device, and one e-mail an hour at most during an attack',
+		lg_li5: 'Log with truncated IPs and keyed hashes for 30 days, the real IP only from REMOTE_ADDR or Cloudflare, recovery doors (LGD_DISABLE, WP-CLI), ability for Site Bridge, bilingual UI and shared «Noxpress» menu',
+		lg_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2258,6 +2286,13 @@ footer .heart { color: var(--accent-bright); }
 		pt_li4: 'Θέση, νέος τίτλος ή απόκρυψη για τις καρτέλες Περιγραφή, Πρόσθετες πληροφορίες και Κριτικές και για τις καρτέλες της σουίτας (Φροντίδα &amp; Ασφάλεια, Δημιουργοί, Book Preview)',
 		pt_li5: 'Εισαγωγή μόνο για ανάγνωση από το Custom Product Tabs for WooCommerce με προεπισκόπηση και αναίρεση, χωρίς διπλές καρτέλες όσο τρέχουν και τα δύο, και τα παλιά shortcodes δουλεύουν· λειτουργία δοκιμής, PTB_DISABLE, abilities για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		pt_download: 'Λήψη v1.0.0 (.zip)',
+		lg_desc: 'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό σε κάθε είσοδο (φόρμα σύνδεσης, WooCommerce, XML-RPC, Application Passwords), με κλειδώματα που λήγουν μόνα τους και σύνδεσμο ξεκλειδώματος με email για τον πραγματικό κάτοχο, με λειτουργία δοκιμής πρώτα.',
+		lg_li1: '5 αποτυχίες σε 15 λεπτά κλειδώνουν μια IP για 15 λεπτά, όσους επιμένουν για 24 ώρες· 20 αποτυχίες την ώρα κλειδώνουν έναν λογαριασμό από όποια διεύθυνση κι αν έρχονται· κάθε αριθμός είναι ρύθμιση, με λίστα έμπιστων διευθύνσεων',
+		lg_li2: 'Ξεκλείδωμα με email, μία φορά, για 15 λεπτά και μόνο στον browser που το ζήτησε· όρια και ίδια απάντηση στο «Ξέχασα τον κωδικό», στο WordPress και στο WooCommerce',
+		lg_li3: 'XML-RPC χωρίς συνδέσεις, multicall και pingbacks από προεπιλογή, ή κλειστό εντελώς· ουδέτερα μηνύματα σύνδεσης και κανένα όνομα χρήστη από το /wp/v2/users, το ?author=N, το sitemap ή το oEmbed',
+		lg_li4: 'Email όταν ένας διαχειριστής συνδέεται από νέα συσκευή, και το πολύ ένα email την ώρα σε κύμα επιθέσεων',
+		lg_li5: 'Ημερολόγιο με κομμένη IP και hash για 30 ημέρες, η πραγματική IP μόνο από το REMOTE_ADDR ή την Cloudflare, πόρτες ανάκτησης (LGD_DISABLE, WP-CLI), ability για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		lg_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',

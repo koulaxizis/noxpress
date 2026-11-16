@@ -13,7 +13,7 @@
  *                        1.3.0), update transient, plugin details, package
  *                        verification (sha256 + Ed25519)
  *  - Noxpress_Safe     → shared security helpers (public URLs, CSV, salts,
- *                        tag attributes, AI note), since 1.3.0
+ *                        tag attributes, AI note, client IP), since 1.3.0
  *  - Noxpress_Hub      → the "Noxpress" landing page, channel setting
  *
  * Language (Bible §9): Greek msgids in the 'noxpress' domain, English from
@@ -70,6 +70,7 @@ final class Noxpress_Core {
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
+		'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.' => 'Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -368,6 +369,11 @@ final class Noxpress_Core {
 				'name' => 'Product Tabs',
 				'desc' => __( 'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.', 'noxpress' ),
 				'page' => 'ptb-settings',
+			),
+			'login-guard'       => array(
+				'name' => 'Login Guard',
+				'desc' => __( 'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.', 'noxpress' ),
+				'page' => 'lgd-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
