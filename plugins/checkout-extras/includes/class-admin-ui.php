@@ -11,6 +11,8 @@
  *  - coupon    mode, statuses, issue rules, the coupon, delivery, reminder,
  *              cleanup, customer texts
  *  - stats     coupons issued / used / revenue for a period, latest coupons
+ *  - vacation  store vacation: status, close / open now, mode, kind,
+ *              dates, warning, exemptions, customer texts
  *  - tools     visitor text language, settings export / import, uninstall
  *              option, cleanup now, filters and API
  *
@@ -47,6 +49,7 @@ final class CKE_Admin_UI {
 			'thankyou' => __( 'Σελίδα ευχαριστίας', 'checkout-extras' ),
 			'coupon'   => __( 'Κουπόνι', 'checkout-extras' ),
 			'stats'    => __( 'Στατιστικά', 'checkout-extras' ),
+			'vacation' => __( 'Διακοπές', 'checkout-extras' ),
 			'tools'    => __( 'Εργαλεία', 'checkout-extras' ),
 		);
 	}
@@ -112,7 +115,7 @@ final class CKE_Admin_UI {
 		?>
 		<div class="wrap cke-wrap">
 			<h1><?php esc_html_e( 'Checkout Extras', 'checkout-extras' ); ?></h1>
-			<p class="description"><?php esc_html_e( 'Δώρο στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία. Κάθε μέρος ενεργοποιείται χωριστά.', 'checkout-extras' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Δώρο στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, κουπόνι ευχαριστίας για την επόμενη παραγγελία, και διακοπές καταστήματος. Κάθε μέρος ενεργοποιείται χωριστά.', 'checkout-extras' ); ?></p>
 
 			<?php
 			if ( Checkout_Extras::killed() ) {
@@ -144,6 +147,9 @@ final class CKE_Admin_UI {
 					break;
 				case 'stats':
 					self::render_stats();
+					break;
+				case 'vacation':
+					self::render_vacation();
 					break;
 				case 'tools':
 					self::render_tools();
@@ -263,6 +269,112 @@ final class CKE_Admin_UI {
 	private static function checkout_is_block(): bool {
 		$id = function_exists( 'wc_get_page_id' ) ? (int) wc_get_page_id( 'checkout' ) : 0;
 		return $id > 0 && has_block( 'woocommerce/checkout', $id );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Tab: vacation
+	 * ------------------------------------------------------------------- */
+
+	/** 'Y-m-d H:i' as the value of a datetime-local input. */
+	private static function dt_value( string $v ): string {
+		return '' === $v ? '' : str_replace( ' ', 'T', $v );
+	}
+
+	private static function render_vacation(): void {
+		$s      = CKE_Settings::get();
+		$status = CKE_Vacation::admin_status();
+		?>
+		<h2 class="cke-h2"><?php esc_html_e( 'Κατάσταση', 'checkout-extras' ); ?></h2>
+		<div class="cke-zone">
+			<p class="cke-status cke-status--<?php echo esc_attr( $status[1] ); ?>"><?php echo esc_html( $status[0] ); ?></p>
+			<form method="post" class="cke-inline-form">
+				<?php self::nonce_field(); ?>
+				<input type="hidden" name="cke_action" value="vacation_now" />
+				<button type="submit" class="button"><?php esc_html_e( 'Κλείσιμο τώρα', 'checkout-extras' ); ?></button>
+			</form>
+			<form method="post" class="cke-inline-form">
+				<?php self::nonce_field(); ?>
+				<input type="hidden" name="cke_action" value="vacation_open" />
+				<button type="submit" class="button"><?php esc_html_e( 'Άνοιγμα τώρα', 'checkout-extras' ); ?></button>
+			</form>
+			<p class="description cke-mt-8"><?php esc_html_e( '«Κλείσιμο τώρα» ενεργοποιεί τις διακοπές για όλους από αυτή τη στιγμή, με τον τρόπο και τη λήξη που έχεις ορίσει. «Άνοιγμα τώρα» τις απενεργοποιεί. Σε κάθε αλλαγή καθαρίζεται η cache των σελίδων (Fast Pages και άλλα).', 'checkout-extras' ); ?></p>
+		</div>
+
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="cke_action" value="save_vacation" />
+
+			<h2 class="cke-h2"><?php esc_html_e( 'Λειτουργία', 'checkout-extras' ); ?></h2>
+			<div class="cke-zone">
+				<?php self::mode_field( 'cke_v_mode', $s['v_mode'], __( 'Λειτουργία δοκιμής: οι διακοπές ισχύουν μόνο για τους διαχειριστές του καταστήματος· οι πελάτες αγοράζουν κανονικά', 'checkout-extras' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Το site μένει ανοιχτό και ευρετηριάσιμο, με τις ίδιες τιμές και τα ίδια δομημένα δεδομένα. Πληρωμή υπάρχουσας παραγγελίας, παραγγελίες από το admin, ο λογαριασμός πελάτη και οι λήψεις δουλεύουν πάντα.', 'checkout-extras' ); ?></p>
+				<?php
+				foreach ( array(
+					'closed' => __( 'Κλειστές αγορές: χωρίς κουμπί αγοράς, το καλάθι και το ταμείο δεν δέχονται παραγγελίες', 'checkout-extras' ),
+					'later'  => __( 'Δεχόμαστε παραγγελίες, αποστολή μετά τις διακοπές: υποχρεωτικό κουτάκι στο ταμείο, σημείωση στην παραγγελία', 'checkout-extras' ),
+				) as $k => $label ) {
+					echo '<label class="cke-check"><input type="radio" name="cke_v_kind" value="' . esc_attr( $k ) . '" ' . checked( $s['v_kind'], $k, false ) . ' /> ' . esc_html( $label ) . '</label>';
+				}
+				?>
+			</div>
+
+			<h2 class="cke-h2"><?php esc_html_e( 'Ημερομηνίες', 'checkout-extras' ); ?></h2>
+			<div class="cke-zone">
+				<p class="cke-field"><span><?php esc_html_e( 'Έναρξη', 'checkout-extras' ); ?></span><input type="datetime-local" name="cke_v_start" value="<?php echo esc_attr( self::dt_value( $s['v_start'] ) ); ?>" /> <span class="cke-muted"><?php esc_html_e( 'κενό = από τώρα', 'checkout-extras' ); ?></span></p>
+				<p class="cke-field"><span><?php esc_html_e( 'Λήξη', 'checkout-extras' ); ?></span><input type="datetime-local" name="cke_v_end" value="<?php echo esc_attr( self::dt_value( $s['v_end'] ) ); ?>" /> <span class="cke-muted"><?php esc_html_e( 'κενό = ανοίγει μόνο με το χέρι', 'checkout-extras' ); ?></span></p>
+				<?php self::input( 'cke_v_warn_days', (string) $s['v_warn_days'], __( 'Προειδοποίηση πριν', 'checkout-extras' ), __( 'ημέρες πριν την έναρξη (0 = χωρίς προειδοποίηση)', 'checkout-extras' ), 'number' ); ?>
+				<p class="description">
+					<?php
+					printf(
+						/* translators: %s: time zone */
+						esc_html__( 'Ώρα του site (%s). Η κατάσταση κρίνεται σε κάθε αίτημα, οπότε το κατάστημα ανοίγει ακριβώς στη λήξη.', 'checkout-extras' ),
+						esc_html( wp_timezone_string() )
+					);
+					?>
+				</p>
+			</div>
+
+			<h2 class="cke-h2"><?php esc_html_e( 'Εξαιρέσεις (μόνο στις κλειστές αγορές)', 'checkout-extras' ); ?></h2>
+			<div class="cke-zone">
+				<?php
+				self::check( 'cke_v_allow_digital', $s['v_allow_digital'], __( 'Τα ψηφιακά προϊόντα (εικονικά και με λήψη, π.χ. e-books) πωλούνται κανονικά', 'checkout-extras' ) );
+				self::check( 'cke_v_allow_preorders', $s['v_allow_preorders'], __( 'Οι προπαραγγελίες του Pre-Orders πωλούνται κανονικά', 'checkout-extras' ) );
+				if ( $s['v_allow_preorders'] && ! function_exists( 'por_get_release' ) ) {
+					echo '<p class="cke-warn">' . esc_html__( 'Το Pre-Orders δεν είναι ενεργό: καμία προπαραγγελία δεν αναγνωρίζεται. Άλλα plugins προπαραγγελίας χρειάζονται το φίλτρο cke_vacation_allow.', 'checkout-extras' ) . '</p>';
+				}
+				?>
+				<p class="cke-label"><?php esc_html_e( 'Ρόλοι που αγοράζουν κανονικά (π.χ. χονδρική)', 'checkout-extras' ); ?></p>
+				<div class="cke-scroll">
+					<?php
+					foreach ( wp_roles()->get_names() as $slug => $name ) {
+						echo '<label class="cke-check"><input type="checkbox" name="cke_v_roles[]" value="' . esc_attr( $slug ) . '" ' . checked( in_array( $slug, $s['v_roles'], true ), true, false ) . ' /> ' . esc_html( translate_user_role( $name ) ) . ' <span class="cke-muted">(' . esc_html( $slug ) . ')</span></label>';
+					}
+					?>
+				</div>
+			</div>
+
+			<h2 class="cke-h2"><?php esc_html_e( 'Κείμενα για τον πελάτη', 'checkout-extras' ); ?></h2>
+			<div class="cke-zone">
+				<p class="description"><?php esc_html_e( 'Placeholders: {return_date} (λήξη), {start_date} (έναρξη), {shop_name}, και {products} στο σφάλμα του καλαθιού. Η πρόταση με placeholder χωρίς τιμή φεύγει ολόκληρη, π.χ. το «Επιστρέφουμε στις …» όταν δεν υπάρχει λήξη.', 'checkout-extras' ); ?></p>
+				<?php
+				self::texts_table(
+					array(
+						'v_bar'          => __( 'Μπάρα σε όλες τις σελίδες: κλειστές αγορές', 'checkout-extras' ),
+						'v_bar_later'    => __( 'Μπάρα, καλάθι και ταμείο: αποστολή μετά', 'checkout-extras' ),
+						'v_warn'         => __( 'Μπάρα προειδοποίησης πριν την έναρξη', 'checkout-extras' ),
+						'v_note'         => __( 'Στη θέση του κουμπιού αγοράς', 'checkout-extras' ),
+						'v_cart_error'   => __( 'Σφάλμα στο καλάθι και στο ταμείο', 'checkout-extras' ),
+						'v_ack'          => __( 'Κουτάκι στο ταμείο (αποστολή μετά)', 'checkout-extras' ),
+						'v_ack_required' => __( 'Σφάλμα: δεν τσεκαρίστηκε το κουτάκι', 'checkout-extras' ),
+						'v_row'          => __( 'Γραμμή στην παραγγελία και στα emails', 'checkout-extras' ),
+						'v_row_value'    => __( 'Τιμή της γραμμής', 'checkout-extras' ),
+					)
+				);
+				?>
+			</div>
+			<p class="cke-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'checkout-extras' ); ?></button></p>
+		</form>
+		<?php
 	}
 
 	/* ---------------------------------------------------------------------
@@ -727,8 +839,11 @@ final class CKE_Admin_UI {
 					<tr><td><code>cke_get_gift( $order )</code></td><td><?php esc_html_e( 'Το δώρο μιας παραγγελίας (gift, message, fee), ή null αν δεν είναι δώρο.', 'checkout-extras' ); ?></td></tr>
 					<tr><td><code>cke_coupon_args( $args, $order )</code></td><td><?php esc_html_e( 'Φίλτρο: οι ιδιότητες του κουπονιού πριν δημιουργηθεί· false = κανένα κουπόνι.', 'checkout-extras' ); ?></td></tr>
 					<tr><td><code>cke_coupon_created( $coupon, $order )</code></td><td><?php esc_html_e( 'Action μετά τη δημιουργία ενός κουπονιού ευχαριστίας.', 'checkout-extras' ); ?></td></tr>
+					<tr><td><code>cke_vacation_allow( $allow, $product )</code></td><td><?php esc_html_e( 'Φίλτρο: true = το προϊόν πωλείται και στις κλειστές αγορές των διακοπών (π.χ. προπαραγγελίες άλλου plugin).', 'checkout-extras' ); ?></td></tr>
+					<tr><td><code>checkout-extras/vacation-status</code>, <code>checkout-extras/vacation-set</code></td><td><?php esc_html_e( 'Abilities (WordPress 6.9+): κατάσταση και αλλαγή των διακοπών, π.χ. από το Site Bridge.', 'checkout-extras' ); ?></td></tr>
 					<tr><td><code>cke_text</code></td><td><?php esc_html_e( 'Φίλτρο για τα κείμενα του πελάτη (π.χ. WPML).', 'checkout-extras' ); ?></td></tr>
 					<tr><td><code>_cke_gift</code>, <code>_cke_gift_message</code>, <code>_cke_coupon_code</code></td><td><?php esc_html_e( 'Order meta: δώρο, αφιέρωση και ο κωδικός που πήρε η παραγγελία.', 'checkout-extras' ); ?></td></tr>
+					<tr><td><code>_cke_vacation_until</code></td><td><?php esc_html_e( 'Order meta: παραγγελία που έγινε δεκτή για αποστολή μετά τις διακοπές (η λήξη, ή yes).', 'checkout-extras' ); ?></td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -777,6 +892,13 @@ final class CKE_Admin_UI {
 				break;
 			case 'save_tools':
 				self::redirect( 'tools', self::do_save_tools() );
+				break;
+			case 'save_vacation':
+				self::redirect( 'vacation', self::do_save_vacation() );
+				break;
+			case 'vacation_now':
+			case 'vacation_open':
+				self::redirect( 'vacation', self::do_vacation_switch( 'vacation_now' === sanitize_key( wp_unslash( $_POST['cke_action'] ) ) ) );
 				break;
 			case 'cleanup':
 				$n = CKE_Coupon::cleanup();
@@ -924,6 +1046,70 @@ final class CKE_Admin_UI {
 		return $msgs;
 	}
 
+	private static function do_save_vacation(): array {
+		$before = CKE_Settings::get();
+		$posted = array(
+			'start' => self::post( 'cke_v_start' ),
+			'end'   => self::post( 'cke_v_end' ),
+		);
+		$raw    = self::collect(
+			$before,
+			array( 'v_mode', 'v_kind', 'v_start', 'v_end', 'v_warn_days' ),
+			array( 'v_allow_digital', 'v_allow_preorders' ),
+			array( 'v_roles' ),
+			array( 'v_bar', 'v_bar_later', 'v_warn', 'v_note', 'v_cart_error', 'v_ack', 'v_ack_required', 'v_row', 'v_row_value' )
+		);
+		CKE_Settings::save( $raw );
+		CKE_Vacation::changed( $before );
+		$s    = CKE_Settings::get();
+		$msgs = self::saved( $s['v_mode'] );
+		foreach ( array( 'start' => 'v_start', 'end' => 'v_end' ) as $k => $key ) {
+			if ( '' !== trim( $posted[ $k ] ) && str_replace( 'T', ' ', substr( trim( $posted[ $k ] ), 0, 16 ) ) !== $s[ $key ] ) {
+				$msgs[] = self::msg( 'warning', __( 'Μια ημερομηνία δεν ήταν έγκυρη και κρατήθηκε η προηγούμενη.', 'checkout-extras' ) );
+				break;
+			}
+		}
+		$start = CKE_Vacation::ts( $s['v_start'] );
+		$end   = CKE_Vacation::ts( $s['v_end'] );
+		if ( $start > 0 && $end > 0 && $end <= $start ) {
+			$msgs[] = self::msg( 'warning', __( 'Η λήξη είναι πριν από την έναρξη: οι διακοπές δεν θα ενεργοποιηθούν.', 'checkout-extras' ) );
+		} elseif ( 'off' !== $s['v_mode'] && $end > 0 && $end <= time() ) {
+			$msgs[] = self::msg( 'warning', __( 'Η λήξη έχει ήδη περάσει: το κατάστημα μένει ανοιχτό.', 'checkout-extras' ) );
+		}
+		if ( $s['v_warn_days'] > 0 && 0 === $start ) {
+			$msgs[] = self::msg( 'info', __( 'Η προειδοποίηση χρειάζεται ημερομηνία έναρξης.', 'checkout-extras' ) );
+		}
+		if ( 'live' === $s['v_mode'] ) {
+			$msgs[] = self::msg( 'info', __( 'Η cache των σελίδων καθαρίστηκε.', 'checkout-extras' ) );
+		}
+		return $msgs;
+	}
+
+	/**
+	 * "Close now" / "Open now".
+	 *
+	 * @param bool $close True = close now.
+	 */
+	private static function do_vacation_switch( bool $close ): array {
+		$before = CKE_Settings::get();
+		$raw    = $before;
+		if ( $close ) {
+			$raw['v_mode']  = 'live';
+			$raw['v_start'] = '';
+			if ( '' !== $raw['v_end'] && CKE_Vacation::ts( $raw['v_end'] ) <= time() ) {
+				$raw['v_end'] = '';
+			}
+		} else {
+			$raw['v_mode'] = 'off';
+		}
+		CKE_Settings::save( $raw );
+		CKE_Vacation::changed( $before );
+		return array(
+			self::msg( 'success', $close ? __( 'Οι διακοπές ενεργοποιήθηκαν για όλους.', 'checkout-extras' ) : __( 'Το κατάστημα άνοιξε: οι διακοπές απενεργοποιήθηκαν.', 'checkout-extras' ) ),
+			self::msg( 'info', __( 'Η cache των σελίδων καθαρίστηκε.', 'checkout-extras' ) ),
+		);
+	}
+
 	private static function do_save_tools(): array {
 		$raw = self::collect( CKE_Settings::get(), array( 'lang' ), array( 'c_delete_on_uninstall' ), array(), array() );
 		CKE_Settings::save( $raw );
@@ -983,8 +1169,10 @@ final class CKE_Admin_UI {
 		if ( ! is_array( $blob ) ) {
 			return array( self::msg( 'error', __( 'Μη έγκυρο αρχείο backup (λείπουν οι ρυθμίσεις του Checkout Extras).', 'checkout-extras' ) ) );
 		}
+		$before = CKE_Settings::get();
 		CKE_Settings::save( $blob );
 		CKE_Coupon::schedule();
+		CKE_Vacation::changed( $before );
 		return array( self::msg( 'success', __( 'Η εισαγωγή ολοκληρώθηκε.', 'checkout-extras' ) ) );
 	}
 
