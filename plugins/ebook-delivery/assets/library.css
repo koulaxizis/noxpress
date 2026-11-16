@@ -1,0 +1,89 @@
+/* Ebook Delivery — «Η βιβλιοθήκη μου» (Bible §14.13: scoped reset, theme colours and buttons). */
+.ebd-lib div, .ebd-lib p, .ebd-lib span, .ebd-lib a.ebd-lib-cover-link {
+	float: none !important;
+	box-shadow: none !important;
+	text-transform: none !important;
+}
+.ebd-lib .ebd-lib-grid {
+	display: grid !important;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+	gap: 1.25em !important;
+	margin: 0 0 1.5em !important;
+	padding: 0 !important;
+}
+.ebd-lib .ebd-lib-item {
+	display: flex !important;
+	gap: 1em !important;
+	align-items: flex-start !important;
+	padding: 1em !important;
+	margin: 0 !important;
+	border: 1px solid rgba(127, 127, 127, 0.25) !important;
+	border-radius: 6px !important;
+	background: transparent !important;
+}
+.ebd-lib .ebd-lib-cover {
+	flex: 0 0 84px !important;
+	width: 84px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.ebd-lib .ebd-lib-cover img {
+	display: block !important;
+	width: 100% !important;
+	height: auto !important;
+	margin: 0 !important;
+	border-radius: 3px !important;
+}
+.ebd-lib .ebd-lib-body {
+	flex: 1 1 auto !important;
+	min-width: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.ebd-lib .ebd-lib-title {
+	margin: 0 0 0.25em !important;
+	font-weight: 600 !important;
+	line-height: 1.3 !important;
+	overflow-wrap: anywhere !important;
+}
+.ebd-lib .ebd-lib-meta,
+.ebd-lib .ebd-lib-note {
+	margin: 0 0 0.5em !important;
+	font-size: 0.85em !important;
+	opacity: 0.75 !important;
+}
+.ebd-lib .ebd-lib-files {
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 0.5em !important;
+	margin: 0.5em 0 0 !important;
+	padding: 0 !important;
+}
+.ebd-lib .ebd-lib-file {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	align-items: center !important;
+	gap: 0.5em !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.ebd-lib .ebd-lib-file .ebd-lib-note {
+	margin: 0 !important;
+}
+.ebd-lib a.ebd-lib-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 0.35em !important;
+	font-size: 0.9em !important;
+	padding: 0.45em 0.9em !important;
+	line-height: 1.2 !important;
+	text-decoration: none !important;
+}
+.ebd-lib a.ebd-lib-btn svg {
+	flex: 0 0 auto;
+}
+@media (max-width: 480px) {
+	.ebd-lib .ebd-lib-grid {
+		grid-template-columns: 1fr !important;
+	}
+}

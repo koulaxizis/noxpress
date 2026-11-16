@@ -70,6 +70,7 @@ final class Noxpress_Core {
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
+		'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.' => 'Buyer watermarks in the PDF and EPUB files you sell, a «My library» page in the customer\'s account and a tool that finds which order a leaked file came from.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -368,6 +369,11 @@ final class Noxpress_Core {
 				'name' => 'Product Tabs',
 				'desc' => __( 'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.', 'noxpress' ),
 				'page' => 'ptb-settings',
+			),
+			'ebook-delivery'    => array(
+				'name' => 'Ebook Delivery',
+				'desc' => __( 'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.', 'noxpress' ),
+				'page' => 'ebd-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
