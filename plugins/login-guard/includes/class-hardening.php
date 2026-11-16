@@ -146,7 +146,9 @@ final class LGD_Hardening {
 			}
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check of a public query var.
 			$raw = isset( $_GET['author'] ) ? wp_unslash( $_GET['author'] ) : ( isset( $wp->query_vars['author'] ) ? $wp->query_vars['author'] : '' );
-			if ( is_scalar( $raw ) && '' !== (string) $raw && preg_match( '/^-?\d+(,\s*-?\d+)*$/', trim( (string) $raw ) ) ) {
+			// The same normalisation as WP_Query, so «1a» or «+1» are caught too.
+			$ids = is_scalar( $raw ) ? preg_replace( '|[^0-9,-]|', '', (string) $raw ) : '';
+			if ( '' !== $ids && preg_match( '/[1-9]/', $ids ) ) {
 				$wp->query_vars = array( 'error' => '404' );
 			}
 		} catch ( \Throwable $e ) {

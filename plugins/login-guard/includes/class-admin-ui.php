@@ -296,11 +296,11 @@ final class LGD_Admin_UI {
 			} else {
 				$trusted = LGD_Store::trusted( $ip );
 				echo '<p><code>' . esc_html( $ip ) . '</code> ' . ( $trusted ? self::badge( __( 'Έμπιστη', 'login-guard' ), 'ok' ) : '' ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge().
-				if ( ! in_array( $ip, $s['allow'], true ) ) {
+				if ( ! in_array( $ip, $s['allow'], true ) && Noxpress_Safe::public_ip( $ip ) ) {
 					self::button_form( 'trust_me', array(), __( 'Πρόσθεσέ τη στις έμπιστες διευθύνσεις', 'login-guard' ) );
 				}
 				if ( ! Noxpress_Safe::public_ip( $ip ) ) {
-					echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Ο server βλέπει ιδιωτική διεύθυνση για αυτό το αίτημα, άρα το site είναι πιθανώς πίσω από reverse proxy που δεν είναι η Cloudflare. Τότε όλοι οι επισκέπτες φαίνονται με την ίδια IP και ένα κλείδωμα IP κλειδώνει όλους. Βάλε τη διεύθυνση του proxy στις έμπιστες ή ζήτησε από τον host να δίνει την πραγματική IP στο REMOTE_ADDR.', 'login-guard' ) . '</p></div>';
+					echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Ο server βλέπει ιδιωτική διεύθυνση για αυτό το αίτημα, άρα το site είναι πιθανώς πίσω από reverse proxy που δεν είναι η Cloudflare. Τότε όλοι οι επισκέπτες φαίνονται με την ίδια IP και ένα κλείδωμα IP κλειδώνει όλους. Ζήτησε από τον host να δίνει την πραγματική IP στο REMOTE_ADDR· μην τη βάλεις στις έμπιστες, γιατί θα ήταν έμπιστος κάθε επισκέπτης.', 'login-guard' ) . '</p></div>';
 				}
 			}
 			?>
@@ -565,7 +565,7 @@ final class LGD_Admin_UI {
 				break;
 			case 'trust_me':
 				$ip = LGD_Store::ip();
-				if ( '' !== $ip ) {
+				if ( '' !== $ip && Noxpress_Safe::public_ip( $ip ) ) {
 					$s          = LGD_Settings::get();
 					$s['allow'] = array_merge( $s['allow'], array( $ip ) );
 					LGD_Settings::save( $s );

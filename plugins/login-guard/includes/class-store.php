@@ -203,8 +203,13 @@ final class LGD_Store {
 		return substr( hash_hmac( 'sha256', $v, wp_salt( 'nonce' ) ), 0, 32 );
 	}
 
+	/** Counter / lock key of an address; IPv6 by its /64, which one client usually holds whole. */
 	public static function key_ip( string $ip ): string {
-		return 'i' . self::hash( 'ip:' . $ip );
+		$bin = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- invalid input falls back to the string.
+		if ( false !== $bin && 16 === strlen( $bin ) ) {
+			return 'i' . self::hash( 'ip6:' . bin2hex( substr( $bin, 0, 8 ) ) );
+		}
+		return 'i' . self::hash( 'ip:' . ( false !== $bin ? (string) inet_ntop( $bin ) : $ip ) );
 	}
 
 	/** Account key for a typed login name or e-mail (see the class docblock). */
@@ -245,7 +250,7 @@ final class LGD_Store {
 		return implode( ':', array_map( static function ( $x ) { return ltrim( $x, '0' ) ?: '0'; }, $h ) ) . '::x'; // phpcs:ignore Universal.Operators.DisallowShortTernary
 	}
 
-	/** True for an address that is never counted (allow list, filter, the saver). */
+	/** True for an address that is never counted or locked per IP (allow list, filter, the saver); account limits still apply. */
 	public static function trusted( string $ip ): bool {
 		if ( '' === $ip ) {
 			return false;
@@ -267,7 +272,8 @@ final class LGD_Store {
 
 	/** The IP that saves the settings stays trusted for 24 hours (anti self-lockout). */
 	public static function remember_saver( string $ip ): void {
-		if ( '' === $ip ) {
+		// A private address is probably a proxy that every visitor shares.
+		if ( '' === $ip || ! Noxpress_Safe::public_ip( $ip ) ) {
 			return;
 		}
 		$st          = self::state();

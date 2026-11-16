@@ -28,6 +28,26 @@ final class LGD_Unlock {
 	const COOKIE = 'lgd_ub';
 	const NONCE  = 'lgd_unlock';
 
+	/** Links that can be valid at the same time for one account. */
+	const MAX_TOKENS = 3;
+
+	/** The account's links that have not expired. */
+	private static function tokens( int $uid, ?string $raw = null ): array {
+		$rec = json_decode( null === $raw ? (string) get_user_meta( $uid, self::META, true ) : $raw, true );
+		if ( is_array( $rec ) && isset( $rec['h'] ) ) {
+			$rec = array( $rec ); // 1.0.0 beta format: one link.
+		}
+		$now = time();
+		return is_array( $rec ) ? array_values(
+			array_filter(
+				$rec,
+				static function ( $t ) use ( $now ) {
+					return is_array( $t ) && isset( $t['h'], $t['x'] ) && (int) $t['x'] > $now;
+				}
+			)
+		) : array();
+	}
+
 	public static function init(): void {
 		add_action( 'login_form_lgd_unlock', array( __CLASS__, 'page' ) );
 		add_action( 'after_password_reset', array( __CLASS__, 'forget' ) );
@@ -146,18 +166,14 @@ final class LGD_Unlock {
 
 	private static function issue( WP_User $user, string $bind ): void {
 		$token = rtrim( strtr( base64_encode( random_bytes( 32 ) ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- random token.
-		update_user_meta(
-			(int) $user->ID,
-			self::META,
-			wp_slash(
-				(string) wp_json_encode(
-					array(
-						'h' => self::hmac( (int) $user->ID, $token, $bind ),
-						'x' => time() + LGD_Settings::UNLOCK_TTL * MINUTE_IN_SECONDS,
-					)
-				)
-			)
+		// Up to MAX_TOKENS links stay valid side by side, so a request from
+		// someone else's browser does not cancel the owner's own link.
+		$list   = array_slice( self::tokens( (int) $user->ID ), - ( self::MAX_TOKENS - 1 ) );
+		$list[] = array(
+			'h' => self::hmac( (int) $user->ID, $token, $bind ),
+			'x' => time() + LGD_Settings::UNLOCK_TTL * MINUTE_IN_SECONDS,
 		);
+		update_user_meta( (int) $user->ID, self::META, wp_slash( (string) wp_json_encode( array_values( $list ) ) ) );
 		$link = add_query_arg(
 			array(
 				'action' => 'lgd_unlock',
@@ -185,11 +201,23 @@ final class LGD_Unlock {
 		$bind = isset( $_COOKIE[ self::COOKIE ] ) ? (string) wp_unslash( $_COOKIE[ self::COOKIE ] ) : '';
 		$ok   = false;
 		if ( $uid > 0 && preg_match( '/^[A-Za-z0-9_-]{43}$/', $token ) && preg_match( '/^[A-Za-z0-9_-]{22}$/', $bind ) ) {
-			$raw = (string) get_user_meta( $uid, self::META, true );
-			$rec = json_decode( $raw, true );
-			if ( is_array( $rec ) && isset( $rec['h'], $rec['x'] ) && (int) $rec['x'] > time() && hash_equals( (string) $rec['h'], self::hmac( $uid, $token, $bind ) ) ) {
-				// Compare-and-delete: only the request that removes the row goes on.
-				$ok = delete_user_meta( $uid, self::META, wp_slash( $raw ) );
+			$raw  = (string) get_user_meta( $uid, self::META, true );
+			$mac  = self::hmac( $uid, $token, $bind );
+			$list = self::tokens( $uid, $raw );
+			$rest = array();
+			$hit  = false;
+			foreach ( $list as $t ) {
+				if ( ! $hit && hash_equals( (string) $t['h'], $mac ) ) {
+					$hit = true;
+					continue;
+				}
+				$rest[] = $t;
+			}
+			if ( $hit ) {
+				// Compare-and-swap: only the request that changes the row goes on.
+				$ok = $rest
+					? update_user_meta( $uid, self::META, wp_slash( (string) wp_json_encode( $rest ) ), $raw )
+					: delete_user_meta( $uid, self::META, wp_slash( $raw ) );
 			}
 		}
 		if ( ! $ok ) {

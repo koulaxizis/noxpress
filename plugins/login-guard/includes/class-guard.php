@@ -46,6 +46,67 @@ final class LGD_Guard {
 		add_action( 'lostpassword_post', array( __CLASS__, 'lost_limit' ), 10, 2 );
 		add_action( 'lostpassword_post', array( __CLASS__, 'lost_neutral_wc' ), 99, 2 );
 		add_filter( 'lostpassword_errors', array( __CLASS__, 'lost_neutral' ), 99, 2 );
+		add_action( 'wp_login', array( __CLASS__, 'remember_device' ), 20, 2 );
+		add_action( 'after_password_reset', array( __CLASS__, 'reset_unlock' ) );
+	}
+
+	/* =====================================================================
+	 * Known devices
+	 * =================================================================== */
+
+	const DEVICE     = 'lgd_kd_';
+	const DEVICE_TTL = 90;
+
+	private static function device_name( int $uid ): string {
+		return self::DEVICE . substr( LGD_Store::hash( 'kd:' . $uid ), 0, 10 );
+	}
+
+	private static function device_mac( WP_User $user, int $exp ): string {
+		// Bound to the password: a new password forgets every known device.
+		return hash_hmac( 'sha256', 'kd|' . $user->ID . '|' . $exp . '|' . substr( (string) $user->user_pass, -10 ), wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * wp_login: this browser logged into the account, so the account
+	 * lockout (which anyone who knows the name can start) never applies
+	 * to it. The IP lockout still does.
+	 */
+	public static function remember_device( $login, $user = null ): void {
+		try {
+			if ( ! $user instanceof WP_User || headers_sent() ) {
+				return;
+			}
+			$exp = time() + self::DEVICE_TTL * DAY_IN_SECONDS;
+			setcookie( self::device_name( (int) $user->ID ), $exp . '.' . self::device_mac( $user, $exp ), $exp, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- httponly cookie.
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/** True when this browser has logged into the account behind $ident before. */
+	public static function known_device( string $ident ): bool {
+		$user = '' !== $ident ? LGD_Store::find_user( $ident ) : null;
+		if ( ! $user ) {
+			return false;
+		}
+		$name = self::device_name( (int) $user->ID );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- validated by the pattern.
+		$v = isset( $_COOKIE[ $name ] ) && is_string( $_COOKIE[ $name ] ) ? (string) wp_unslash( $_COOKIE[ $name ] ) : '';
+		if ( ! preg_match( '/^(\d{10})\.([a-f0-9]{64})$/', $v, $m ) || (int) $m[1] < time() ) {
+			return false;
+		}
+		return hash_equals( self::device_mac( $user, (int) $m[1] ), $m[2] );
+	}
+
+	/** after_password_reset: the owner proved the mailbox, so the account lockout ends. */
+	public static function reset_unlock( $user ): void {
+		try {
+			if ( $user instanceof WP_User ) {
+				LGD_Store::unlock( LGD_Store::key_user( (int) $user->ID ), 'mail' );
+			}
+		} catch ( \Throwable $e ) {
+			return;
+		}
 	}
 
 	/* =====================================================================
@@ -59,12 +120,9 @@ final class LGD_Guard {
 			if ( '' === $username || ! LGD_Settings::live() ) {
 				return $user;
 			}
-			$ip = LGD_Store::ip();
-			if ( ! LGD_Store::trusted( $ip ) ) {
-				$err = self::lock_error( $ip, $username );
-				if ( $err ) {
-					return $err;
-				}
+			$err = self::lock_error( LGD_Store::ip(), $username );
+			if ( $err ) {
+				return $err;
 			}
 			return self::neutral( $user );
 		} catch ( \Throwable $e ) {
@@ -73,16 +131,17 @@ final class LGD_Guard {
 	}
 
 	/**
-	 * The lockout error for this IP or account, or null.
+	 * The lockout error for this IP or account, or null. A trusted address
+	 * skips only the IP lockout; a known device only the account lockout.
 	 *
 	 * @return WP_Error|null
 	 */
 	public static function lock_error( string $ip, string $ident ) {
-		$left = '' !== $ip ? LGD_Store::locked( LGD_Store::key_ip( $ip ) ) : 0;
+		$left = '' !== $ip && ! LGD_Store::trusted( $ip ) ? LGD_Store::locked( LGD_Store::key_ip( $ip ) ) : 0;
 		if ( $left > 0 ) {
 			return new WP_Error( 'lgd_locked', esc_html( LGD_Settings::text( 'locked_ip', array( 'minutes' => (int) ceil( $left / 60 ) ) ) ) );
 		}
-		$left = '' !== $ident ? LGD_Store::locked( LGD_Store::key_ident( $ident ) ) : 0;
+		$left = '' !== $ident && ! self::known_device( $ident ) ? LGD_Store::locked( LGD_Store::key_ident( $ident ) ) : 0;
 		if ( $left > 0 ) {
 			$msg = esc_html( LGD_Settings::text( 'locked_acct', array( 'minutes' => (int) ceil( $left / 60 ) ) ) );
 			if ( LGD_Settings::get()['unlock_mail'] ) {
@@ -119,9 +178,6 @@ final class LGD_Guard {
 				return $user_id;
 			}
 			$ip = LGD_Store::ip();
-			if ( LGD_Store::trusted( $ip ) ) {
-				return $user_id;
-			}
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only hashed.
 			$name = sanitize_user( wp_unslash( (string) $_SERVER['PHP_AUTH_USER'] ) );
 			$err  = self::lock_error( $ip, $name );
@@ -146,11 +202,7 @@ final class LGD_Guard {
 			if ( ! $error instanceof WP_Error || ! $user instanceof WP_User || ! LGD_Settings::live() ) {
 				return;
 			}
-			$ip = LGD_Store::ip();
-			if ( LGD_Store::trusted( $ip ) ) {
-				return;
-			}
-			$err = self::lock_error( $ip, (string) $user->user_login );
+			$err = self::lock_error( LGD_Store::ip(), (string) $user->user_login );
 			if ( $err ) {
 				$error->add( $err->get_error_code(), wp_strip_all_tags( $err->get_error_message() ), array( 'status' => 429 ) );
 			}
@@ -189,16 +241,17 @@ final class LGD_Guard {
 		}
 	}
 
-	/** One failed login for the visitor's IP and the typed account. */
+	/**
+	 * One failed login for the visitor's IP and the typed account. A
+	 * trusted address is not counted per IP, but still counts towards the
+	 * account (a trusted address could be shared, or forged behind a proxy).
+	 */
 	public static function count( string $ident ): void {
 		$ip = LGD_Store::ip();
-		if ( LGD_Store::trusted( $ip ) ) {
-			return;
-		}
-		$s = LGD_Settings::get();
+		$s  = LGD_Settings::get();
 		LGD_Store::stats_hit();
 
-		if ( '' !== $ip ) {
+		if ( '' !== $ip && ! LGD_Store::trusted( $ip ) ) {
 			$kip = LGD_Store::key_ip( $ip );
 			if ( ! LGD_Store::locked( $kip ) && LGD_Store::bump( 'lgd_f_' . $kip, (int) $s['ip_window'] * MINUTE_IN_SECONDS ) >= (int) $s['ip_fails'] ) {
 				self::lock_ip( $kip, $ip );
@@ -206,7 +259,7 @@ final class LGD_Guard {
 		}
 
 		$ident = trim( $ident );
-		if ( '' !== $ident ) {
+		if ( '' !== $ident && ! self::known_device( $ident ) ) {
 			$kac = LGD_Store::key_ident( $ident );
 			if ( ! LGD_Store::locked( $kac ) && LGD_Store::bump( 'lgd_f_' . $kac, (int) $s['acct_window'] * MINUTE_IN_SECONDS ) >= (int) $s['acct_fails'] ) {
 				$user = LGD_Store::find_user( $ident );
@@ -301,19 +354,17 @@ final class LGD_Guard {
 	 * first refusal of a window only.
 	 */
 	public static function over_requests( string $kind, string $ident ): bool {
-		$ip = LGD_Store::ip();
-		if ( LGD_Store::trusted( $ip ) ) {
-			return false;
-		}
+		$ip    = LGD_Store::ip();
 		$over  = false;
 		$first = false;
-		if ( '' !== $ip ) {
+		if ( '' !== $ip && ! LGD_Store::trusted( $ip ) ) {
 			$n     = LGD_Store::bump( 'lgd_r_' . LGD_Store::key_ip( $ip ) . $kind, HOUR_IN_SECONDS );
 			$over  = $n > LGD_Settings::REQ_PER_IP;
 			$first = LGD_Settings::REQ_PER_IP + 1 === $n;
 		}
 		if ( '' !== $ident ) {
-			$m     = LGD_Store::bump( 'lgd_r_' . LGD_Store::key_ident( $ident ) . $kind, HOUR_IN_SECONDS );
+			// The owner's own browser is never refused for the account's quota.
+			$m     = self::known_device( $ident ) ? 0 : LGD_Store::bump( 'lgd_r_' . LGD_Store::key_ident( $ident ) . $kind, HOUR_IN_SECONDS );
 			$over  = $over || $m > LGD_Settings::REQ_PER_ACCT;
 			$first = $first || LGD_Settings::REQ_PER_ACCT + 1 === $m;
 		}
@@ -364,7 +415,8 @@ final class LGD_Guard {
 	public static function lost_neutral_wc( $errors, $user_data = false ): void {
 		try {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verified its nonce before this action.
-			if ( $user_data || ! isset( $_POST['wc_reset_password'] ) || ! function_exists( 'wc_get_account_endpoint_url' ) ) {
+			// Never on wp-login.php (a forged wc_reset_password field there would answer differently).
+			if ( $user_data || did_action( 'login_init' ) || ! isset( $_POST['wc_reset_password'] ) || ! function_exists( 'wc_get_account_endpoint_url' ) ) {
 				return;
 			}
 			if ( ! $errors instanceof WP_Error || $errors->has_errors() || ! LGD_Settings::live() || ! LGD_Settings::get()['enum_errors'] || '' === self::typed_login() ) {

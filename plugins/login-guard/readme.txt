@@ -19,10 +19,10 @@ Nothing a visitor sees changes after activation: the plugin starts switched off.
 
 **Login limits**
 
-* Per IP: 5 failed logins in 15 minutes lock that address for 15 minutes. 4 lockouts in 24 hours lock it for 24 hours.
-* Per account: 20 failures in an hour, from any number of addresses, lock the account for 15 minutes. The real owner can lift that lock with a link by e-mail (below), so an attacker cannot keep you out of your own site.
+* Per IP: 5 failed logins in 15 minutes lock that address for 15 minutes (IPv6 counts by /64). 4 lockouts in 24 hours lock it for 24 hours.
+* Per account: 20 failures in an hour, from any number of addresses, lock the account for 15 minutes. A browser that has logged into the account in the last 90 days is never held by that lock, and the owner can also lift it with a link by e-mail (below) or by resetting the password, so an attacker cannot keep you out of your own site.
 * Counted before the password is checked, on every way in: wp-login.php, the WooCommerce login, XML-RPC and Application Passwords (which answer 429 while locked).
-* Every number is a setting. An allow list (single addresses or ranges, up to /8 for IPv4 and /32 for IPv6) is never locked, and the address you save the settings from is trusted for 24 hours.
+* Every number is a setting. An allow list (single addresses or ranges, up to /8 for IPv4 and /32 for IPv6) is never locked per IP, and the public address you save the settings from is trusted for 24 hours. Account limits apply to trusted addresses too.
 * Lost password: at most 5 requests an hour per address and 3 per account, and the same answer whether the account exists or not, on WordPress and WooCommerce.
 
 **Unlock by e-mail**
@@ -84,7 +84,7 @@ Behind Cloudflare, yes: the visitor's IP is read from CF-Connecting-IP only when
 
 = Will it lock out my office when several people share one IP? =
 
-Only after 5 failures in 15 minutes. Add the office's address to the allow list and it is never locked.
+Only after 5 failures in 15 minutes. Add the office's address to the allow list and it is never locked per IP.
 
 = Is there two-factor authentication? =
 
