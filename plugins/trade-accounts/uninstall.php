@@ -3,7 +3,8 @@
  * Trade Accounts — uninstall.php (v1.0.0)
  *
  * Deleted:
- *  - Options tra_settings, tra_log (Trade Feed call log).
+ *  - Options tra_settings, tra_log (Trade Feed call log),
+ *    tra_meta_fix_backup (1.8.0, old order meta kept by consignment-meta-fix).
  *  - Transients tra_aui_msg_{uid} (PRG notices), tra_pw_{uid} (a new feed
  *    password waiting to be shown), tra_rl_{uid} (rate-limit windows).
  *  - The Application Passwords the plugin made (its app_id only; the
@@ -15,8 +16,9 @@
  *
  * Kept (Bible §12, the shop's record): the trade accounts themselves (they
  * are WordPress users, now customers), and the order marks _tra_trade and
- * the line marks _tra_discount with their readable line. They go with the
- * orders. The rs_lang user meta belongs to Revenue Splitter.
+ * the line marks _tra_discount with their readable line, and (1.8.0) the
+ * order meta _tra_store, _rs_channel and the line meta _tra_share_c of
+ * consignment orders. They go with the orders. The rs_lang user meta belongs to Revenue Splitter.
  *
  * Consignments (post type tra_consignment, 1.5.0) are the shop's records
  * of books at bookstores and money owed: they stay, like orders.
@@ -32,6 +34,7 @@ function tra_uninstall_site(): void {
 
 	delete_option( 'tra_settings' );
 	delete_option( 'tra_log' );
+	delete_option( 'tra_meta_fix_backup' );
 
 	foreach ( array( 'tra_aui_msg_', 'tra_pw_', 'tra_rl_' ) as $tra_prefix ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.

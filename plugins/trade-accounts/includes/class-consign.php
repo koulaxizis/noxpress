@@ -53,7 +53,19 @@
  *
  * Read by orOS (REST GET /wc/v3/tra/consignments, WooCommerce REST keys
  * with read access, manage_woocommerce) and by Revenue Splitter's author
- * portal (tra_consignment_lines()).
+ * portal (tra_consignment_lines(), and from 1.8.0 tra_consignment_summary():
+ * per title and bookstore given, sold, returned, on the shelf, collected and
+ * owed, also as of a past date for the monthly statement).
+ *
+ * 1.8.0 (Christos 16/11/2026): every settlement order and every «Είσπραξη
+ * ποσού» order carries the Revenue Splitter channel «Παρακαταθήκες» (order
+ * meta _rs_channel, RS_Checkout::CHANNEL_META) and the bookstore's name
+ * (order meta _tra_store), so the author portal labels the money as a
+ * receipt from that bookstore instead of a plain sale. Labels only: the
+ * channel changes no amount and no share. Orders made before 1.8.0 get the
+ * same two meta from the ability consignment-meta-fix (dry run first, a
+ * backup of the old values, never amounts). Returns are dated from 1.8.0
+ * (record key «rets»); older returns count as made before any date asked.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -65,6 +77,16 @@ final class TRA_Consign {
 	const ORDER_META = '_tra_consignment';
 	const PAY_META  = '_tra_consignment_pay';
 	const PART_META = '_tra_part';
+	/** 1.8.0: a payment line's share in cents (exact, for summaries as of a date). */
+	const SHARE_META = '_tra_share_c';
+	/** 1.8.0: the bookstore's name on settlement and payment orders. */
+	const STORE_META = '_tra_store';
+	/** 1.8.0: Revenue Splitter's order meta for the sales channel (RS_Checkout::CHANNEL_META). */
+	const RS_CHANNEL_META = '_rs_channel';
+	/** 1.8.0: the channel of consignment money in Revenue Splitter. */
+	const CHANNEL = 'Παρακαταθήκες';
+	/** 1.8.0: backup of the meta replaced by consignment-meta-fix. */
+	const FIX_BACKUP = 'tra_meta_fix_backup';
 	const MAX_LINES = 60;
 	const MAX_QTY   = 9999;
 
@@ -82,6 +104,23 @@ final class TRA_Consign {
 		if ( is_admin() ) {
 			add_action( 'woocommerce_product_options_stock_status', array( __CLASS__, 'product_box' ) );
 		}
+		add_filter( 'woocommerce_hidden_order_itemmeta', array( __CLASS__, 'hide_item_meta' ) );
+	}
+
+	/** 1.8.0: the exact share of a payment line is internal data. */
+	public static function hide_item_meta( $keys ): array {
+		$keys   = is_array( $keys ) ? $keys : array();
+		$keys[] = self::SHARE_META;
+		return $keys;
+	}
+
+	/**
+	 * 1.8.0: the channel «Παρακαταθήκες» and the bookstore's name on a
+	 * settlement or payment order (meta only, not saved here).
+	 */
+	private static function stamp( WC_Order $order, int $uid ): void {
+		$order->update_meta_data( self::RS_CHANNEL_META, self::CHANNEL );
+		$order->update_meta_data( self::STORE_META, self::account_name( $uid ) );
 	}
 
 	public static function register(): void {
@@ -408,6 +447,14 @@ final class TRA_Consign {
 		}
 
 		$moved = array();
+		if ( $back ) {
+			// 1.8.0: dated returns, for summaries as of a past date.
+			$r['rets']   = isset( $r['rets'] ) && is_array( $r['rets'] ) ? $r['rets'] : array();
+			$r['rets'][] = array(
+				'date'  => $date,
+				'lines' => $back,
+			);
+		}
 		foreach ( $r['lines'] as $i => $l ) {
 			$pid = (int) $l['p'];
 			if ( isset( $sell[ $pid ] ) ) {
@@ -532,6 +579,7 @@ final class TRA_Consign {
 
 			$order->update_meta_data( '_tra_trade', (string) $discount );
 			$order->update_meta_data( self::ORDER_META, (string) $id );
+			self::stamp( $order, $uid );
 			$order->set_payment_method_title( __( 'Εκκαθάριση παρακαταθήκης', 'trade-accounts' ) );
 			$created = strtotime( $date . ' 12:00:00' );
 			if ( $date !== self::today() && false !== $created ) {
@@ -614,6 +662,7 @@ final class TRA_Consign {
 		try {
 			$paid_at = strtotime( $date . ' 12:00:00' );
 			$order->set_date_paid( false !== $paid_at && $date !== self::today() ? $paid_at : time() );
+			self::stamp( $order, (int) $r['account'] );
 			$order->update_status( 'completed', __( 'Η είσπραξη της παρακαταθήκης σημειώθηκε.', 'trade-accounts' ) );
 		} finally {
 			self::$busy = false;
@@ -962,11 +1011,13 @@ final class TRA_Consign {
 				$item->set_subtotal( $net );
 				$item->set_total( $net );
 				$item->add_meta_data( self::PART_META, '1', true );
+				$item->add_meta_data( self::SHARE_META, (string) (int) $l['share'], true );
 				$item->add_meta_data( '_tra_discount', (string) $discount, true );
 				$order->add_item( $item );
 			}
 			$order->update_meta_data( '_tra_trade', (string) $discount );
 			$order->update_meta_data( self::PAY_META, (string) $uid );
+			self::stamp( $order, $uid );
 			$order->set_payment_method_title( __( 'Είσπραξη παρακαταθήκης', 'trade-accounts' ) );
 			if ( '' !== $note ) {
 				$order->set_customer_note( $note );
@@ -1130,6 +1181,11 @@ final class TRA_Consign {
 			return;
 		}
 		$r['orders'][ $i ]['paid'] = self::today();
+		$order = wc_get_order( (int) $order_id );
+		if ( $order instanceof WC_Order && self::CHANNEL !== (string) $order->get_meta( self::RS_CHANNEL_META ) ) {
+			self::stamp( $order, (int) $r['account'] );
+			$order->save_meta_data();
+		}
 		/* translators: %d: order number */
 		self::log( $r, 'paid', sprintf( __( 'Η παραγγελία #%d ολοκληρώθηκε από τις παραγγελίες: σημειώθηκε ως είσπραξη.', 'trade-accounts' ), (int) $order_id ) );
 		if ( self::part_sum( $r['orders'][ $i ] ) > 0 ) {
@@ -1392,6 +1448,312 @@ final class TRA_Consign {
 			}
 		}
 		return $out;
+	}
+
+	/**
+	 * 1.8.0: the full picture per title and bookstore, for Revenue
+	 * Splitter's author portal and monthly statement (read only): product
+	 * id => list of rows, one per account, largest «given» first:
+	 * {account, name, city, given, first (Y-m-d of the first delivery),
+	 * sold, returned, open, due (earliest settle-by date of the copies still
+	 * out, '' when none), overdue, price (last unit price, decimal),
+	 * sold_value, collected, owed (decimals, VAT included) and the same
+	 * three in cents (sold_value_c, collected_c, owed_c)}.
+	 *
+	 * Copies count as sold when settled (the order is made), money as
+	 * collected only when paid: a settlement order paid in full counts its
+	 * copies at the delivery's prices, a payment («Είσπραξη ποσού») counts
+	 * its exact share per title. owed = sold value − collected, never below
+	 * zero; cancelled settlement orders count neither.
+	 *
+	 * $as_of (Y-m-d, '' = today) gives the picture at the end of that day:
+	 * deliveries, settlements, returns and payments dated after it are left
+	 * out. Returns made before 1.8.0 have no date and always count.
+	 *
+	 * @param int[]  $products Product ids; empty = every product.
+	 * @param string $as_of    Y-m-d or ''.
+	 * @return array<int, array[]>
+	 */
+	public static function summary_by_product( array $products = array(), string $as_of = '' ): array {
+		$want  = array_flip( array_map( 'intval', $products ) );
+		$as_of = '' !== $as_of ? self::date( $as_of ) : '';
+		$today = self::today();
+		$upto  = '' !== $as_of ? $as_of : $today;
+		$ids   = get_posts(
+			array(
+				'post_type'        => self::CPT,
+				'post_status'      => 'publish',
+				'posts_per_page'   => 1000,
+				'fields'           => 'ids',
+				'orderby'          => 'ID',
+				'order'            => 'ASC',
+				'suppress_filters' => true,
+				'no_found_rows'    => true,
+			)
+		);
+		$acc   = array(); // [pid][uid] => row.
+		$later = array(); // [uid] => pay order ids dated after $upto.
+		foreach ( $ids as $cid ) {
+			$r = self::raw( (int) $cid );
+			if ( null === $r || (string) $r['given'] > $upto ) {
+				continue;
+			}
+			$uid = (int) $r['account'];
+
+			// Dated returns up to the day; the undated rest always counts.
+			$ret_dated = array();
+			$ret_after = array();
+			foreach ( (array) ( $r['rets'] ?? array() ) as $rt ) {
+				foreach ( (array) ( $rt['lines'] ?? array() ) as $pid => $q ) {
+					$key = (string) ( $rt['date'] ?? '' ) > $upto ? 'after' : 'dated';
+					if ( 'after' === $key ) {
+						$ret_after[ (int) $pid ] = ( $ret_after[ (int) $pid ] ?? 0 ) + (int) $q;
+					} else {
+						$ret_dated[ (int) $pid ] = ( $ret_dated[ (int) $pid ] ?? 0 ) + (int) $q;
+					}
+				}
+			}
+			foreach ( (array) ( $r['pays'] ?? array() ) as $py ) {
+				if ( (string) ( $py['date'] ?? '' ) > $upto ) {
+					$later[ $uid ][ (int) $py['order'] ] = true;
+				}
+			}
+
+			foreach ( $r['lines'] as $l ) {
+				$pid = (int) $l['p'];
+				if ( $want && ! isset( $want[ $pid ] ) ) {
+					continue;
+				}
+				if ( ! isset( $acc[ $pid ][ $uid ] ) ) {
+					$acc[ $pid ][ $uid ] = array(
+						'account'  => $uid,
+						'given'    => 0,
+						'first'    => (string) $r['given'],
+						'sold'     => 0,
+						'returned' => 0,
+						'due'      => '',
+						'pc'       => (int) $l['pc'],
+						'sold_c'   => 0,
+						'coll_c'   => 0,
+						'owed_c'   => 0,
+					);
+				}
+				$row              = &$acc[ $pid ][ $uid ];
+				$row['given']    += (int) $l['q'];
+				$row['first']     = min( $row['first'], (string) $r['given'] );
+				$row['pc']        = (int) $l['pc'];
+				$row['returned'] += max( 0, (int) $l['ret'] - ( $ret_after[ $pid ] ?? 0 ) );
+				$sold_here        = 0;
+				foreach ( $r['orders'] as $o ) {
+					if ( ! empty( $o['gone'] ) || (string) $o['date'] > $upto || ! isset( $o['lines'][ $pid ] ) ) {
+						continue;
+					}
+					$q          = (int) $o['lines'][ $pid ];
+					$value      = (int) $l['pc'] * $q;
+					$sold_here += $q;
+					$paid       = (string) $o['paid'];
+					$by_parts   = '' !== (string) ( $o['by'] ?? '' );
+					if ( '' !== $paid && ! $by_parts && $paid <= $upto ) {
+						$col = $value;
+					} else {
+						$col = isset( $o['part'][ $pid ] ) ? (int) $o['part'][ $pid ] : 0;
+					}
+					$row['sold_c'] += $value;
+					$row['coll_c'] += $col;
+				}
+				$row['sold'] += $sold_here;
+				$open         = (int) $l['q'] - $sold_here - max( 0, (int) $l['ret'] - ( $ret_after[ $pid ] ?? 0 ) );
+				if ( $open > 0 && ( '' === $row['due'] || (string) $r['due'] < $row['due'] ) ) {
+					$row['due'] = (string) $r['due'];
+				}
+				unset( $row );
+			}
+		}
+
+		// Payments dated after the day: their exact shares come off.
+		foreach ( $later as $uid => $orders ) {
+			foreach ( array_keys( $orders ) as $oid ) {
+				$order = wc_get_order( (int) $oid );
+				if ( ! $order instanceof WC_Order ) {
+					continue;
+				}
+				foreach ( $order->get_items() as $item ) {
+					if ( ! $item instanceof WC_Order_Item_Product || '1' !== (string) $item->get_meta( self::PART_META ) ) {
+						continue;
+					}
+					$pid = (int) $item->get_product_id();
+					if ( ! isset( $acc[ $pid ][ $uid ] ) ) {
+						continue;
+					}
+					$share = $item->get_meta( self::SHARE_META );
+					$cents = '' !== (string) $share ? (int) $share : (int) round( ( (float) $item->get_total() + (float) $item->get_total_tax() ) * 100 );
+					$acc[ $pid ][ $uid ]['coll_c'] = max( 0, $acc[ $pid ][ $uid ]['coll_c'] - $cents );
+				}
+			}
+		}
+
+		$out = array();
+		foreach ( $acc as $pid => $rows ) {
+			foreach ( $rows as $uid => $row ) {
+				$open = max( 0, $row['given'] - $row['sold'] - $row['returned'] );
+				$owed = max( 0, $row['sold_c'] - $row['coll_c'] );
+				$out[ (int) $pid ][] = array(
+					'account'      => (int) $uid,
+					'name'         => self::account_name( (int) $uid ),
+					'city'         => (string) get_user_meta( (int) $uid, 'billing_city', true ),
+					'given'        => (int) $row['given'],
+					'first'        => (string) $row['first'],
+					'sold'         => (int) $row['sold'],
+					'returned'     => (int) $row['returned'],
+					'open'         => $open,
+					'due'          => $open > 0 ? (string) $row['due'] : '',
+					'overdue'      => $open > 0 && '' !== $row['due'] && $row['due'] < $upto,
+					'price'        => self::money( (int) $row['pc'] ),
+					'sold_value'   => self::money( (int) $row['sold_c'] ),
+					'collected'    => self::money( (int) $row['coll_c'] ),
+					'owed'         => self::money( $owed ),
+					'sold_value_c' => (int) $row['sold_c'],
+					'collected_c'  => (int) $row['coll_c'],
+					'owed_c'       => $owed,
+				);
+			}
+			usort(
+				$out[ (int) $pid ],
+				static function ( $a, $b ) {
+					return $b['given'] <=> $a['given'] ?: strcmp( $a['name'], $b['name'] );
+				}
+			);
+		}
+		ksort( $out );
+		return $out;
+	}
+
+	/* =====================================================================
+	 * 1.8.0: channel and bookstore name on orders made before 1.8.0
+	 * =================================================================== */
+
+	/**
+	 * The settlement and payment orders of an account (from its consignment
+	 * records): order id => kind (settlement | payment).
+	 *
+	 * @return array<int, string>
+	 */
+	private static function account_orders( int $account ): array {
+		$out = array();
+		foreach ( self::query( array( 'account' => $account, 'limit' => 500 ) ) as $c ) {
+			$r = self::raw( (int) $c['id'] );
+			if ( null === $r ) {
+				continue;
+			}
+			foreach ( $r['orders'] as $o ) {
+				$out[ (int) $o['id'] ] = 'settlement';
+			}
+			foreach ( (array) ( $r['pays'] ?? array() ) as $py ) {
+				$out[ (int) $py['order'] ] = 'payment';
+			}
+		}
+		ksort( $out );
+		return $out;
+	}
+
+	/**
+	 * Sets the channel «Παρακαταθήκες» and the bookstore's name on an
+	 * account's settlement and payment orders made before 1.8.0. Meta only:
+	 * never an amount, a status or stock. Before writing, the old values
+	 * are kept in the option tra_meta_fix_backup (order id => {channel,
+	 * store}, the first value seen is never overwritten); $restore puts
+	 * them back. $only limits it to these order ids (they must belong to
+	 * the account). $dry = true changes nothing and shows what would.
+	 *
+	 * @param int[] $only Order ids; empty = all of the account's.
+	 * @return array|WP_Error {dry_run, restore, account, name, orders: [{order, kind, status, total, channel_before, store_before, channel_after, store_after, changed}], changed}
+	 */
+	public static function meta_fix( int $account, array $only = array(), bool $dry = true, bool $restore = false ) {
+		if ( $account <= 0 || ! get_userdata( $account ) instanceof WP_User ) {
+			return new WP_Error( 'trc_account', __( 'Διάλεξε λογαριασμό χονδρικής.', 'trade-accounts' ) );
+		}
+		$mine = self::account_orders( $account );
+		$only = array_values( array_unique( array_filter( array_map( 'intval', $only ) ) ) );
+		foreach ( $only as $oid ) {
+			if ( ! isset( $mine[ $oid ] ) ) {
+				/* translators: %d: order number */
+				return new WP_Error( 'trc_order', sprintf( __( 'Η παραγγελία #%d δεν είναι παραγγελία παρακαταθήκης αυτού του λογαριασμού.', 'trade-accounts' ), $oid ) );
+			}
+		}
+		$list   = $only ? array_intersect_key( $mine, array_flip( $only ) ) : $mine;
+		$backup = get_option( self::FIX_BACKUP, array() );
+		$backup = is_array( $backup ) ? $backup : array();
+		$name   = self::account_name( $account );
+		$rows   = array();
+		$count  = 0;
+		foreach ( $list as $oid => $kind ) {
+			$order = wc_get_order( (int) $oid );
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+			$ch_b = (string) $order->get_meta( self::RS_CHANNEL_META );
+			$st_b = (string) $order->get_meta( self::STORE_META );
+			if ( $restore ) {
+				if ( ! isset( $backup[ $oid ] ) ) {
+					continue;
+				}
+				$ch_a = (string) $backup[ $oid ]['channel'];
+				$st_a = (string) $backup[ $oid ]['store'];
+			} else {
+				$ch_a = self::CHANNEL;
+				$st_a = $name;
+			}
+			$changed = $ch_a !== $ch_b || $st_a !== $st_b;
+			$rows[]  = array(
+				'order'          => (int) $oid,
+				'kind'           => $kind,
+				'status'         => (string) $order->get_status(),
+				'total'          => wc_format_decimal( $order->get_total(), wc_get_price_decimals() ),
+				'channel_before' => $ch_b,
+				'store_before'   => $st_b,
+				'channel_after'  => $ch_a,
+				'store_after'    => $st_a,
+				'changed'        => $changed,
+			);
+			if ( ! $changed ) {
+				continue;
+			}
+			++$count;
+			if ( $dry ) {
+				continue;
+			}
+			if ( ! $restore && ! isset( $backup[ $oid ] ) ) {
+				$backup[ $oid ] = array(
+					'channel' => $ch_b,
+					'store'   => $st_b,
+					'at'      => gmdate( 'c' ),
+				);
+				update_option( self::FIX_BACKUP, $backup, false );
+			}
+			foreach ( array( self::RS_CHANNEL_META => $ch_a, self::STORE_META => $st_a ) as $k => $v ) {
+				if ( '' === $v ) {
+					$order->delete_meta_data( $k );
+				} else {
+					$order->update_meta_data( $k, $v );
+				}
+			}
+			$order->save_meta_data();
+			if ( $restore ) {
+				unset( $backup[ $oid ] );
+				update_option( self::FIX_BACKUP, $backup, false );
+			}
+		}
+		if ( ! $dry && $count > 0 ) {
+			do_action( 'rs_invalidate_cache' );
+		}
+		return array(
+			'dry_run' => $dry,
+			'restore' => $restore,
+			'account' => $account,
+			'name'    => $name,
+			'changed' => $count,
+			'orders'  => $rows,
+		);
 	}
 
 	/** Open copies, overdue consignments and value at bookstores, for the tab's header. */
@@ -1677,6 +2039,53 @@ final class TRA_Consign {
 				'ann'         => array( false, false, false ),
 				'run'         => array( __CLASS__, 'ab_pay' ),
 			),
+			'consignment-summary'  => array(
+				'label'       => 'Trade Accounts: consignments per title and bookstore',
+				'description' => 'Per product and bookstore (trade account): copies given (and first delivery date), sold (settled), returned, still on the shelf (with the earliest settle-by date), sold value, money collected and money still owed (VAT included). Optional product_ids and as_of (YYYY-MM-DD: the picture at the end of that day). Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'product_ids' => array(
+							'type'     => 'array',
+							'items'    => array( 'type' => 'integer' ),
+							'maxItems' => 200,
+						),
+						'as_of'       => array( 'type' => 'string' ),
+					),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'ab_summary' ),
+			),
+			'consignment-meta-fix' => array(
+				'label'       => 'Trade Accounts: label older consignment orders',
+				'description' => 'Sets the Revenue Splitter channel «Παρακαταθήκες» (order meta _rs_channel) and the bookstore\'s name (order meta _tra_store) on an account\'s settlement and payment orders made before Trade Accounts 1.8.0, so the author portal shows them as receipts from that bookstore. Meta only: never amounts, statuses or stock; no share changes. dry_run (default true) only lists the orders with their values before and after. The old values are kept in a backup first; restore = true puts them back. Optional orders limits it to these order ids of the account.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'account' => array(
+							'type'        => 'integer',
+							'minimum'     => 1,
+							'description' => 'User id of the trade account (accounts-list).',
+						),
+						'orders'  => array(
+							'type'     => 'array',
+							'items'    => array( 'type' => 'integer' ),
+							'maxItems' => 500,
+						),
+						'dry_run' => array(
+							'type'    => 'boolean',
+							'default' => true,
+						),
+						'restore' => array( 'type' => 'boolean' ),
+					),
+					'required'             => array( 'account' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, true ),
+				'run'         => array( __CLASS__, 'ab_meta_fix' ),
+			),
 			'consignment-extend' => array(
 				'label'       => 'Trade Accounts: new settle-by date',
 				'description' => 'Moves the settle-by date of a consignment and/or adds a note to its history (doc = delivery note number).',
@@ -1746,7 +2155,27 @@ final class TRA_Consign {
 		);
 	}
 
-	public static function ab_extend( $in = null ) {
+	public static function ab_summary( $in = null ): array {
+		$in   = is_array( $in ) ? $in : array();
+		$ids  = isset( $in['product_ids'] ) && is_array( $in['product_ids'] ) ? array_slice( array_map( 'absint', $in['product_ids'] ), 0, 200 ) : array();
+		$date = isset( $in['as_of'] ) ? self::date( (string) $in['as_of'] ) : '';
+		return array(
+			'as_of'    => '' !== $date ? $date : self::today(),
+			'products' => self::summary_by_product( array_filter( $ids ), $date ),
+		);
+	}
+
+	public static function ab_meta_fix( $in = null ) {
+		$in = is_array( $in ) ? $in : array();
+		return self::meta_fix(
+			isset( $in['account'] ) ? (int) $in['account'] : 0,
+			isset( $in['orders'] ) && is_array( $in['orders'] ) ? $in['orders'] : array(),
+			! isset( $in['dry_run'] ) || ! empty( $in['dry_run'] ),
+			! empty( $in['restore'] )
+		);
+	}
+
+		public static function ab_extend( $in = null ) {
 		$in = is_array( $in ) ? $in : array();
 		$id = isset( $in['id'] ) ? (int) $in['id'] : 0;
 		if ( ! empty( $in['due'] ) ) {

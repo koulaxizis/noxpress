@@ -22,6 +22,7 @@ final class TRA_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		'Η παραγγελία #%d δεν είναι παραγγελία παρακαταθήκης αυτού του λογαριασμού.' => 'Order #%d is not a consignment order of this account.',
 		'Αυτός ο κωδικός δουλεύει μόνο για το Trade Feed.' => 'This password works only for the Trade Feed.',
 		'Ο λογαριασμός σου δεν μπορεί να αλλάξει τον ρόλο αυτού του χρήστη.' => 'Your account cannot change this user\'s role.',
 		// Accounts, scope, bootstrap.
