@@ -1600,6 +1600,12 @@ final class RS_Profile {
 			$id    = isset( $_POST['rs_pf_rid'] ) ? sanitize_text_field( wp_unslash( $_POST['rs_pf_rid'] ) ) : '';
 			$reply = isset( $_POST['rs_pf_reply'] ) ? sanitize_textarea_field( wp_unslash( $_POST['rs_pf_reply'] ) ) : '';
 			$done  = self::close( $id, $act, $reply ) ? 'closed' : 'none';
+			// 1.19.0: copies given → the copies register, prefilled, for confirmation.
+			$req = 'done' === $act && 'closed' === $done ? self::request( $id ) : null;
+			if ( is_array( $req ) && 'copies' === ( $req['type'] ?? '' ) && class_exists( 'RS_Copies' ) ) {
+				wp_safe_redirect( admin_url( 'admin.php?page=' . RS_Copies::SLUG . '&rs_cp_req=' . rawurlencode( (string) $req['id'] ) ) );
+				exit;
+			}
 		}
 		wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG . '&rs_pf_done=' . $done ) );
 		exit;

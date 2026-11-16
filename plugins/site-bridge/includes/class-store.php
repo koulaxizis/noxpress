@@ -115,8 +115,9 @@ final class SBR_Store {
 	 * Writes one row. $row keys: side, grant_id, client, site, tool, class,
 	 * args (array, redacted here), status (ok|denied|error), message,
 	 * bytes, ms, extra (array, e.g. the old value of an option).
+	 * Returns the id of the new row, 0 if it was not written.
 	 */
-	public static function log( array $row ): void {
+	public static function log( array $row ): int {
 		global $wpdb;
 		$args = isset( $row['args'] ) && is_array( $row['args'] ) ? SBR_Guard::redact_args( $row['args'] ) : array();
 		$json = Site_Bridge::json( $args );
@@ -131,7 +132,7 @@ final class SBR_Store {
 			}
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- our own table.
-		$wpdb->insert(
+		$ok = $wpdb->insert(
 			self::log_table(),
 			array(
 				'ts'       => gmdate( 'Y-m-d H:i:s' ),
@@ -151,6 +152,7 @@ final class SBR_Store {
 			),
 			array( '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s' )
 		);
+		return $ok ? (int) $wpdb->insert_id : 0;
 	}
 
 	/**

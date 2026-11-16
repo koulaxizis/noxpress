@@ -7,13 +7,14 @@
  * WooCommerce, so a site can always reach the hub and receive updates.
  *
  * Dispatch map:
- *  - Noxpress_Core     → catalog of suite plugins, top-level menu, language,
+ *  - Noxpress_Core     → catalog of suite plugins (plus plugins known only
+ *                        from the signed list, since 1.4.0), top-level menu, language,
  *                        page-cache helpers (no_page_cache, purge_page_cache)
  *  - Noxpress_Updater  → updates.json (signed, with serial and expiry since
  *                        1.3.0), update transient, plugin details, package
  *                        verification (sha256 + Ed25519)
  *  - Noxpress_Safe     → shared security helpers (public URLs, CSV, salts,
- *                        tag attributes, AI note), since 1.3.0
+ *                        tag attributes, AI note, client IP), since 1.3.0
  *  - Noxpress_Hub      → the "Noxpress" landing page, channel setting
  *
  * Language (Bible §9): Greek msgids in the 'noxpress' domain, English from
@@ -70,8 +71,15 @@ final class Noxpress_Core {
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
 		'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.' => 'Product feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and CSV: one static file per feed with a fixed URL, background refresh, GTIN / ISBN, publisher, pre-orders, a check before publishing and an import from CTX Feed.',
+		'Φόρμα «Ειδοποίησέ με όταν ξαναέρθει» σε εξαντλημένα προϊόντα και παραλλαγές: επιβεβαίωση με email για τους επισκέπτες, ένα email όταν το προϊόν ξαναμπεί σε απόθεμα, αποστολή σε παρτίδες στο παρασκήνιο και ζήτηση ανά προϊόν, χωρίς newsletter.' => 'A «Notify me when it is back» form on out-of-stock products and variations: email confirmation for guests, one email when the product is back in stock, background sending in batches and demand per product, no newsletter.',
+		'Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση και είσοδο, συνδεδεμένες με προϊόντα και δημιουργούς: λίστα επερχόμενων, αρχείο, «Πρόσθεσε στο ημερολόγιο» και Event schema.' => 'Events (book presentations, evenings, signings, concerts, workshops, online) with a date, venue, status and entry, linked to products and creators: an upcoming list, an archive, «Add to calendar» and Event schema.',
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
+		'Αναζήτηση προϊόντων με προτάσεις καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες του θέματος μένουν ίδιες, ένα ακριβές ISBN ανοίγει κατευθείαν το προϊόν, και εισαγωγή από το FiboSearch.' => 'Product search with suggestions as the visitor types: title, ISBN, authors, without accents, with greeklish and tolerant of small typos. The theme\'s forms stay the same, an exact ISBN opens the product directly, and an import from FiboSearch.',
 		'Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.' => 'Receipt or invoice at checkout (classic and block): company name, VAT number, tax office and activity, a check-digit test for Greek numbers and a VIES check for EU ones, the details on the order and in the emails, and an invoice list with CSV for the accountant.',
+		'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.' => 'Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.',
+		'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.' => 'Who changed what and when: products, prices, orders, coupons, pages, users, plugins and settings, with the source of every change (admin, REST, WP-CLI, Site Bridge). No secrets and no customer details, masked IPs, e-mail for critical changes.',
+		'Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.' => 'Every email of the site over SMTP (with a ready setup for Proton Mail) or through Brevo, Mailgun, SendGrid, Postmark and Amazon SES, with a backup connection, a sent log, a test email and sending paused on copies of the site.',
+		'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.' => 'Digital gift cards as a product, delivered on a date by email with a printable PDF, redeemed as a payment in the classic and block checkout, with the balance kept for the next order and a ledger of every movement.',
 		'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.' => 'Buyer watermarks in the PDF and EPUB files you sell, a «My library» page in the customer\'s account and a tool that finds which order a leaked file came from.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
@@ -170,6 +178,7 @@ final class Noxpress_Core {
 		'Το πακέτο δεν υπάρχει στη λίστα εκδόσεων του Noxpress.' => 'The package is not in the Noxpress version list.',
 		'Το πακέτο δεν ταιριάζει με το sha256 της λίστας εκδόσεων. Η εγκατάσταση ακυρώθηκε.' => 'The package does not match the sha256 of the version list. The install was cancelled.',
 		'Η ψηφιακή υπογραφή του πακέτου δεν είναι έγκυρη. Η εγκατάσταση ακυρώθηκε.' => 'The digital signature of the package is not valid. The install was cancelled.',
+		'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.' => 'Contact forms with a block and a shortcode, e-mail notifications and spam protection without third-party services. No message is lost when the e-mail fails, and an import from Contact Form 7 that keeps its shortcode.',
 
 		// Footer (Bible §7).
 		'Made with ❤ by %s'                                     => 'Made with ❤ by %s',
@@ -382,6 +391,46 @@ final class Noxpress_Core {
 				'desc' => __( 'Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.', 'noxpress' ),
 				'page' => 'ivd-invoices',
 			),
+			'login-guard'       => array(
+				'name' => 'Login Guard',
+				'desc' => __( 'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.', 'noxpress' ),
+				'page' => 'lgd-settings',
+			),
+			'activity-log'      => array(
+				'name' => 'Activity Log',
+				'desc' => __( 'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.', 'noxpress' ),
+				'page' => 'acl-log',
+			),
+			'mail-relay'        => array(
+				'name' => 'Mail Relay',
+				'desc' => __( 'Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.', 'noxpress' ),
+				'page' => 'mrl-settings',
+			),
+			'forms'             => array(
+				'name' => 'Forms',
+				'desc' => __( 'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.', 'noxpress' ),
+				'page' => 'frm-forms',
+			),
+			'live-search'       => array(
+				'name' => 'Live Search',
+				'desc' => __( 'Αναζήτηση προϊόντων με προτάσεις καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες του θέματος μένουν ίδιες, ένα ακριβές ISBN ανοίγει κατευθείαν το προϊόν, και εισαγωγή από το FiboSearch.', 'noxpress' ),
+				'page' => 'lvs-settings',
+			),
+			'back-in-stock'     => array(
+				'name' => 'Back in Stock',
+				'desc' => __( 'Φόρμα «Ειδοποίησέ με όταν ξαναέρθει» σε εξαντλημένα προϊόντα και παραλλαγές: επιβεβαίωση με email για τους επισκέπτες, ένα email όταν το προϊόν ξαναμπεί σε απόθεμα, αποστολή σε παρτίδες στο παρασκήνιο και ζήτηση ανά προϊόν, χωρίς newsletter.', 'noxpress' ),
+				'page' => 'bis-requests',
+			),
+			'events'            => array(
+				'name' => 'Events',
+				'desc' => __( 'Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση και είσοδο, συνδεδεμένες με προϊόντα και δημιουργούς: λίστα επερχόμενων, αρχείο, «Πρόσθεσε στο ημερολόγιο» και Event schema.', 'noxpress' ),
+				'page' => 'evt-settings',
+			),
+			'gift-cards'        => array(
+				'name' => 'Gift Cards',
+				'desc' => __( 'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.', 'noxpress' ),
+				'page' => 'gfc-cards',
+			),
 			'ebook-delivery'    => array(
 				'name' => 'Ebook Delivery',
 				'desc' => __( 'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.', 'noxpress' ),
@@ -395,6 +444,46 @@ final class Noxpress_Core {
 		);
 	}
 
+	/** A suite slug: lowercase letters, digits and hyphens (folder and main file name). */
+	const SLUG_RE = '/^[a-z][a-z0-9-]{1,38}[a-z0-9]$/';
+
+	/** Update URI of every suite plugin header (Bible §10), plus the slug. */
+	const UPDATE_URI = 'https://noxpress.tech/updates/';
+
+	/**
+	 * The catalog plus suite plugins that only the signed version list
+	 * knows (Core 1.4.0): a plugin released after this Core copy can be
+	 * installed and updated without waiting for a Core that lists it. Their
+	 * name, description and page come from updates.json (display only; the
+	 * package itself is verified by sha256 and Ed25519 in the updater).
+	 * Reads the cached list only, never fetches.
+	 */
+	public static function suite(): array {
+		$suite  = self::catalog();
+		$cached = get_site_transient( Noxpress_Updater::CACHE );
+		if ( ! is_array( $cached ) ) {
+			return $suite;
+		}
+		$en = 'en' === self::lang();
+		foreach ( $cached as $slug => $entry ) {
+			$slug = (string) $slug;
+			if ( isset( $suite[ $slug ] ) || ! preg_match( self::SLUG_RE, $slug ) || ! is_array( $entry ) ) {
+				continue;
+			}
+			$info  = isset( $entry['info'] ) && is_array( $entry['info'] ) ? $entry['info'] : array();
+			$name  = isset( $info['name'] ) ? (string) $info['name'] : '';
+			$desc  = (string) ( $en ? ( $info['desc_en'] ?? '' ) : ( $info['desc_el'] ?? '' ) );
+			$desc  = '' !== $desc ? $desc : (string) ( $info['desc_en'] ?? '' );
+			$suite[ $slug ] = array(
+				'name'   => '' !== $name ? $name : ucwords( str_replace( '-', ' ', $slug ) ),
+				'desc'   => $desc,
+				'page'   => isset( $info['page'] ) ? (string) $info['page'] : '',
+				'remote' => true,
+			);
+		}
+		return $suite;
+	}
+
 	/** Main plugin file of a suite slug, relative to the plugins folder. */
 	public static function plugin_file( string $slug ): string {
 		return $slug . '/' . $slug . '.php';
@@ -402,7 +491,9 @@ final class Noxpress_Core {
 
 	/**
 	 * Installed suite plugins: slug => header data (get_plugins() format).
-	 * Only the canonical folder/file name counts.
+	 * Only the canonical folder/file name counts. A plugin known only from
+	 * the version list counts only with our Update URI in its header, so a
+	 * third-party plugin in a folder of the same name is never replaced.
 	 */
 	public static function installed(): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -410,11 +501,15 @@ final class Noxpress_Core {
 		}
 		$all = get_plugins();
 		$out = array();
-		foreach ( array_keys( self::catalog() ) as $slug ) {
+		foreach ( self::suite() as $slug => $info ) {
 			$file = self::plugin_file( $slug );
-			if ( isset( $all[ $file ] ) ) {
-				$out[ $slug ] = $all[ $file ];
+			if ( ! isset( $all[ $file ] ) ) {
+				continue;
 			}
+			if ( ! empty( $info['remote'] ) && self::UPDATE_URI . $slug !== (string) ( $all[ $file ]['UpdateURI'] ?? '' ) ) {
+				continue;
+			}
+			$out[ $slug ] = $all[ $file ];
 		}
 		return $out;
 	}

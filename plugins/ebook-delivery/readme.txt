@@ -114,4 +114,4 @@ Noto Sans (subset), SIL Open Font License 1.1. See LICENSES.md.
 * Fingerprint code lookup by code or by file.
 * Defaults for new products and bulk download limits with backup and restore.
 * Off / test / live mode, Greek and English buyer texts, watermark test tool, privacy policy text, settings export / import, EBD_DISABLE, Abilities API.
-* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.3.4).
+* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.4.13).

@@ -45,6 +45,8 @@ final class IVD_Settings {
 		'vat_bad'    => array( 200, false ),
 		'vies_bad'   => array( 250, false ),
 		'need_invoice' => array( 200, false ),
+		'aade_found'   => array( 150, true ),
+		'aade_inactive' => array( 200, true ),
 	);
 
 	/** @var array|null Per-request cache. */
@@ -58,6 +60,7 @@ final class IVD_Settings {
 			'f_hq'             => 'off',
 			'vies'             => true,
 			'vies_invalid'     => 'accept',
+			'aade'             => false,
 			'compat'           => 'none',
 			'column'           => true,
 			'delete_customers' => false,
@@ -119,6 +122,14 @@ final class IVD_Settings {
 				'el' => 'Αυτή η παραγγελία εκδίδεται με τιμολόγιο. Διάλεξε «Τιμολόγιο» και συμπλήρωσε τα στοιχεία.',
 				'en' => 'This order needs an invoice. Choose "Invoice" and fill in the details.',
 			),
+			'aade_found'       => array(
+				'el' => 'Τα στοιχεία συμπληρώθηκαν από την ΑΑΔΕ. Έλεγξέ τα.',
+				'en' => 'The details were filled in from the Greek tax authority. Please check them.',
+			),
+			'aade_inactive'    => array(
+				'el' => 'Η ΑΑΔΕ δείχνει αυτόν τον ΑΦΜ ως ανενεργό. Έλεγξε τον αριθμό.',
+				'en' => 'The Greek tax authority shows this VAT number as inactive. Please check the number.',
+			),
 		);
 	}
 
@@ -156,6 +167,7 @@ final class IVD_Settings {
 		$s['f_hq']             = self::pick( $raw, 'f_hq', array( 'off', 'optional' ), $d['f_hq'] );
 		$s['vies']             = self::flag( $raw, 'vies', $d );
 		$s['vies_invalid']     = self::pick( $raw, 'vies_invalid', array( 'accept', 'reject' ), $d['vies_invalid'] );
+		$s['aade']             = self::flag( $raw, 'aade', $d );
 		$s['compat']           = self::pick( $raw, 'compat', array( 'none', 'timologia', 'obs' ), $d['compat'] );
 		$s['column']           = self::flag( $raw, 'column', $d );
 		$s['delete_customers'] = self::flag( $raw, 'delete_customers', $d );

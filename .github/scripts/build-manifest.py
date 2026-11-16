@@ -14,6 +14,9 @@ Signatures (Ed25519):
     the top of the file. The release workflow runs every week, so a list
     is always valid for at least 7 more days.
   - "signature" (older Core): noxpress|<slug>|<version>|<sha256>.
+  - "sig3" (Core 1.4.0+): noxpress3|<signed>, where "signed" is the whole
+    list (plugins, serial, expires) as compact JSON. Core 1.4.0 reads only
+    the "signed" copy, so every release and field is covered.
 
 Environment:
   GITHUB_REPOSITORY      owner/repo
@@ -75,8 +78,16 @@ SLUGS = {
     'ss': 'search-signals',
     'pl': 'production-ledger',
     'pt': 'product-tabs',
+    'fm': 'forms',
     'fd': 'product-feed',
     'iv': 'invoice-details',
+    'lg': 'login-guard',
+    'lv': 'live-search',
+    'al': 'activity-log',
+    'mr': 'mail-relay',
+    'bs': 'back-in-stock',
+    'ev': 'events',
+    'gc': 'gift-cards',
     'ed': 'ebook-delivery',
     'sb': 'site-bridge',
 }
@@ -162,6 +173,47 @@ def zip_info(path, slug, version):
         'tested_wp': header(readme, 'Tested up to'),
         'changelog': '\n'.join(changelog),
     }
+
+
+CORE = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-core.php'
+
+
+def php_str(s):
+    """Body of a single-quoted PHP string."""
+    return s.replace("\\'", "'").replace('\\\\', '\\')
+
+
+def display_info(slug):
+    """Name, Greek and English description and admin page of a plugin, for
+    Cores whose catalog does not list it yet (Core 1.4.0). From the Core
+    catalog of this checkout, else from the plugin header and readme."""
+    info = {}
+    try:
+        with open(CORE, encoding='utf-8') as fh:
+            core = fh.read()
+    except OSError:
+        core = ''
+    q = r"'((?:[^'\\]|\\.)*)'"
+    m = re.search(r"'" + re.escape(slug) + r"'\s*=>\s*array\(\s*'name'\s*=>\s*" + q + r",\s*'desc'\s*=>\s*__\(\s*" + q + r",\s*'noxpress'\s*\),\s*'page'\s*=>\s*" + q, core)
+    if m:
+        info['name'] = php_str(m.group(1))
+        info['desc_el'] = php_str(m.group(2))
+        info['page'] = php_str(m.group(3))
+        t = re.search(r"\n\t\t" + re.escape("'" + m.group(2) + "'") + r"\s*=>\s*" + q + ",", core)
+        if t:
+            info['desc_en'] = php_str(t.group(1))
+    main = f'plugins/{slug}/{slug}.php'
+    if 'name' not in info and os.path.exists(main):
+        with open(main, encoding='utf-8') as fh:
+            info['name'] = header(fh.read(), 'Plugin Name')
+    readme = f'plugins/{slug}/readme.txt'
+    if 'desc_en' not in info and os.path.exists(readme):
+        with open(readme, encoding='utf-8') as fh:
+            parts = fh.read().split('\n\n')
+        short = [p.strip() for p in parts[1:3] if p.strip() and not p.lstrip().startswith(('=', 'Contributors'))]
+        if short:
+            info['desc_en'] = short[0][:400]
+    return {k: v for k, v in info.items() if v}
 
 
 def asset_digest(rel, slug):
@@ -261,7 +313,14 @@ def main():
                     **info,
                 }
             if entry:
-                manifest['plugins'][slug] = entry
+                manifest['plugins'][slug] = dict(entry, **display_info(slug))
+
+    # The whole list, signed as one (Core 1.4.0, "sig3"): a site then sees
+    # every release and every field exactly as built here, so nobody can
+    # leave a plugin out or change its requirements or changelog.
+    signed = json.dumps(manifest, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    manifest['signed'] = signed
+    manifest['sig3'] = sign(key_file, 'noxpress3|' + signed)
 
     with open(out_file, 'w', encoding='utf-8') as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False, sort_keys=True)

@@ -1,11 +1,12 @@
 <?php
 /**
- * Theme Patcher — uninstall.php (v1.4.0)
+ * Theme Patcher — uninstall.php (v1.7.0)
  *
  * Full cleanup (nothing left after deactivate + delete):
  *  - Options: tp_settings (all themes), tp_cat_images (category image
  *    fallback map), tp_care (Care & Safety tab, 1.4.0).
- *  - Product meta _tp_care_profile, _tp_care_manufacturer, _tp_care_note:
+ *  - Product meta _tp_care_profile, _tp_care_manufacturer, _tp_care_note
+ *    and _tp_badge (per-product badge text, 1.7.0):
  *    written by the shop manager per product, so they STAY (Bible §12,
  *    content written by the user) unless "delete on uninstall" was ticked
  *    in the settings (tp_care.delete_meta, read before the option goes).
@@ -31,7 +32,7 @@ function tp_uninstall_site(): void {
 
 	$tp_care = json_decode( (string) get_option( 'tp_care', '' ), true );
 	if ( is_array( $tp_care ) && ! empty( $tp_care['delete_meta'] ) ) {
-		foreach ( array( '_tp_care_profile', '_tp_care_manufacturer', '_tp_care_note' ) as $tp_meta ) {
+		foreach ( array( '_tp_care_profile', '_tp_care_manufacturer', '_tp_care_note', '_tp_badge' ) as $tp_meta ) {
 			delete_post_meta_by_key( $tp_meta );
 		}
 	}
@@ -72,7 +73,7 @@ if ( is_multisite() ) {
 // ---------------------------------------------------------------------
 
 $tp_suite_left = false;
-foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed', 'live-operator', 'trade-accounts', 'fast-pages', 'broadcast', 'magic-login', 'trade-feed-import', 'lean-images', 'redirects', 'search-signals', 'production-ledger', 'product-tabs', 'product-feed', 'invoice-details', 'ebook-delivery' ) as $tp_slug ) {
+foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-patcher', 'shop-filters', 'product-formats', 'easy-withdrawal', 'book-preview', 'shipping-notes', 'featured-creators', 'store-pickup', 'hide-catalog', 'variation-picker', 'greeklish-permalinks', 'oros-connect', 'product-bundles', 'site-bridge', 'publishing-quote', 'pre-orders', 'wish-shelf', 'checkout-extras', 'data-migrator', 'home-sections', 'book-feed', 'live-operator', 'trade-accounts', 'fast-pages', 'broadcast', 'magic-login', 'trade-feed-import', 'lean-images', 'redirects', 'search-signals', 'production-ledger', 'product-tabs', 'product-feed', 'invoice-details', 'activity-log', 'mail-relay', 'login-guard', 'forms', 'live-search', 'back-in-stock', 'events', 'gift-cards', 'ebook-delivery' ) as $tp_slug ) {
 	if ( 'theme-patcher' !== $tp_slug && file_exists( trailingslashit( WP_PLUGIN_DIR ) . $tp_slug . '/' . $tp_slug . '.php' ) ) {
 		$tp_suite_left = true;
 		break;

@@ -26,6 +26,10 @@
  *                                    today's state (read, 1.14.0)
  *  revenue-splitter/downloads        downloads of each creator's digital
  *                                    files (read, 1.16.0)
+ *  revenue-splitter/copies-list      the copies register (read, 1.19.0)
+ *  revenue-splitter/copies-add       a copies movement, with a dry run
+ *                                    (1.19.0)
+ *  revenue-splitter/copies-undo      undo a movement (destructive, 1.19.0)
  *
  * Nothing here returns an email address or a portal key. Ledger notes are
  * returned only by ledger-add, for the entries the caller just gave.
@@ -274,6 +278,91 @@ final class RS_Abilities {
 				),
 				'ann'         => array( true, false, true ),
 				'run'         => array( 'RS_Profile', 'ability_downloads' ),
+			),
+			'copies-list'       => array(
+				'label'       => 'Revenue Splitter: copies register',
+				'description' => 'The movements of the copies register («RS Αντίτυπα», 1.19.0): copies that left or came back to the warehouse without an e-shop sale or consignment (types promo, review, legal, author_free, author_buy, damaged, return), newest first, with recipient (and whether it is media/press or a private person), beneficiary, unit price and payment mode of author purchases, the stock change made and the linked Ledger deduction. Filters: product_id, ben, type, date_start, date_end, include_undone. Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'product_id'     => array( 'type' => 'integer' ),
+						'ben'            => $name,
+						'type'           => array(
+							'type' => 'string',
+							'enum' => array_keys( RS_Copies::types() ),
+						),
+						'date_start'     => $date,
+						'date_end'       => $date,
+						'include_undone' => array( 'type' => 'boolean' ),
+					),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( 'RS_Copies', 'ability_list' ),
+			),
+			'copies-add'        => array(
+				'label'       => 'Revenue Splitter: record a copies movement',
+				'description' => 'Records copies that leave the warehouse without an e-shop sale or consignment (or come back: type return), as the «RS Αντίτυπα» form does. No order is made. When the product manages stock, the stock changes (undo puts it back). author_free and author_buy need ben (the author); author_buy needs unit_price (VAT included) and payment: offset (a Ledger «Κράτηση» of price × copies for the beneficiary) or separate (no balance change). Warns when the author has an e-shop order of the same title in the last 30 days. recipient_kind media shows the recipient\'s name to the creator; private shows «ιδιώτης». dry_run = true only shows what would happen.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'date'           => $date,
+						'product_id'     => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+						'qty'            => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => RS_Copies::QTY_MAX,
+						),
+						'type'           => array(
+							'type' => 'string',
+							'enum' => array_keys( RS_Copies::types() ),
+						),
+						'recipient'      => array(
+							'type'      => 'string',
+							'maxLength' => RS_Copies::RCPT_MAX,
+						),
+						'recipient_kind' => array(
+							'type' => 'string',
+							'enum' => array( 'media', 'private' ),
+						),
+						'ben'            => $name,
+						'unit_price'     => array( 'type' => 'string' ),
+						'payment'        => array(
+							'type' => 'string',
+							'enum' => array( 'offset', 'separate' ),
+						),
+						'note'           => array(
+							'type'      => 'string',
+							'maxLength' => RS_Copies::NOTE_MAX,
+						),
+						'dry_run'        => array( 'type' => 'boolean' ),
+					),
+					'required'             => array( 'product_id', 'qty', 'type' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( 'RS_Copies', 'ability_add' ),
+			),
+			'copies-undo'       => array(
+				'label'       => 'Revenue Splitter: undo a copies movement',
+				'description' => 'Undoes a movement of the copies register by id: the stock goes back by the change it made and its Ledger deduction (offset author purchase) is deleted; the movement stays, marked undone.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+					),
+					'required'             => array( 'id' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, true, true ),
+				'run'         => array( 'RS_Copies', 'ability_undo' ),
 			),
 			'statement-preview' => array(
 				'label'       => 'Revenue Splitter: one statement',

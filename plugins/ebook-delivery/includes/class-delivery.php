@@ -237,7 +237,7 @@ final class EBD_Delivery {
 		$full  = trim( $first . ' ' . $last );
 		if ( '' === $full ) {
 			// No name: the first letter of the e-mail only, never its domain
-			// (Bible §14.42: the e-mail is never written into a file).
+			// (Bible §14.47: the e-mail is never written into a file).
 			$full = '' !== $email ? mb_substr( $email, 0, 1 ) . '***' : '***';
 		}
 		$display = $full;

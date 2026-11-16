@@ -22,6 +22,7 @@ final class TRA_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		'Η παραγγελία #%d δεν είναι παραγγελία παρακαταθήκης αυτού του λογαριασμού.' => 'Order #%d is not a consignment order of this account.',
 		'Αυτός ο κωδικός δουλεύει μόνο για το Trade Feed.' => 'This password works only for the Trade Feed.',
 		'Ο λογαριασμός σου δεν μπορεί να αλλάξει τον ρόλο αυτού του χρήστη.' => 'Your account cannot change this user\'s role.',
 		// Accounts, scope, bootstrap.
@@ -86,7 +87,8 @@ final class TRA_Lang {
 		'Όνομα στο μενού' => 'Menu name',
 		'Γραμμή στον πίνακα του λογαριασμού' => 'Line on the account dashboard',
 		'Τιμολόγιο' => 'Invoice',
-		'Οι παραγγελίες χονδρικής θέλουν τιμολόγιο (κλασικό ταμείο)' => 'Trade orders need an invoice (classic checkout)',
+		'Οι παραγγελίες χονδρικής θέλουν τιμολόγιο' => 'Trade orders need an invoice',
+		'Με το Invoice Details (1.0.1 ή νεότερο) ενεργό για τους πελάτες, ο κανόνας περνά σε αυτό και ισχύει στο κλασικό και στο block ταμείο· τα δύο πεδία παρακάτω τότε δεν χρειάζονται. Αλλιώς ισχύει μόνο στο κλασικό ταμείο, με το πεδίο τύπου παραστατικού του plugin τιμολόγησης.' => 'With Invoice Details (1.0.1 or later) on for customers, the rule goes to it and works in the classic checkout and the Checkout block; the two fields below are then not needed. Otherwise it works in the classic checkout only, with the document-type field of your invoicing plugin.',
 		'Πεδίο του ταμείου' => 'Checkout field',
 		'Τιμή για «Τιμολόγιο»' => 'Value for «Invoice»',
 		'Προεπιλογή: το πεδίο τύπου παραστατικού του «Timologia for WooCommerce» (OBS). Το ταμείο προεπιλέγει το τιμολόγιο για τον λογαριασμό χονδρικής.' => 'Default: the document-type field of «Timologia for WooCommerce» (OBS). The checkout preselects the invoice for a trade account.',
