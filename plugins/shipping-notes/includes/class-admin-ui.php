@@ -311,7 +311,9 @@ final class SHN_Admin_UI {
 				self::checkbox( 'shn_fs_checkout', $s['fs_checkout'], __( 'Ταμείο (κλασικό)', 'shipping-notes' ) );
 				self::checkbox( 'shn_fs_block_cart', $s['fs_block_cart'], __( 'Μπλοκ «Καλάθι»', 'shipping-notes' ) );
 				self::checkbox( 'shn_fs_block_checkout', $s['fs_block_checkout'], __( 'Μπλοκ «Ταμείο»', 'shipping-notes' ) );
+				self::checkbox( 'shn_fs_product', $s['fs_product'], __( 'Σελίδα προϊόντος: μια γραμμή κάτω από το κουμπί «Προσθήκη στο καλάθι», π.χ. «Με αυτό στο καλάθι η αποστολή είναι δωρεάν.»', 'shipping-notes' ) );
 				?>
+				<p class="description"><?php esc_html_e( 'Η γραμμή φαίνεται πάντα: λογαριάζει το καλάθι του επισκέπτη μαζί με το προϊόν (για προϊόν με παραλλαγές, τη χαμηλότερη τιμή του). Δεν φαίνεται σε ψηφιακά προϊόντα.', 'shipping-notes' ); ?></p>
 				<p class="description"><?php esc_html_e( 'Οπουδήποτε αλλού: το shortcode [nox_free_shipping] ή το μπλοκ «Δωρεάν αποστολή (Shipping Notes)». Στο μπλοκ Mini-Cart των block themes, βάλε το μπλοκ μας στο template part «Mini-Cart» από τον Site Editor.', 'shipping-notes' ); ?></p>
 			</div>
 
@@ -352,10 +354,12 @@ final class SHN_Admin_UI {
 						'fs_t_won'      => __( 'Κερδίσατε', 'shipping-notes' ),
 						'fs_t_sg_title' => __( 'Τίτλος προτάσεων', 'shipping-notes' ),
 						'fs_t_sg_add'   => __( 'Κουμπί προσθήκης', 'shipping-notes' ),
+						'fs_t_p_left'   => __( 'Σελίδα προϊόντος: απομένει ποσό', 'shipping-notes' ),
+						'fs_t_p_won'    => __( 'Σελίδα προϊόντος: δωρεάν', 'shipping-notes' ),
 					)
 				);
 				?>
-				<p class="description"><?php esc_html_e( 'Placeholders: {threshold} όριο, {remaining} ποσό που απομένει, {total} ποσό που μετράει, {percent} ποσοστό.', 'shipping-notes' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Placeholders: {threshold} όριο, {remaining} ποσό που απομένει, {total} ποσό που μετράει, {percent} ποσοστό. Στη σελίδα προϊόντος και {price} η τιμή του προϊόντος.', 'shipping-notes' ); ?></p>
 			</div>
 
 			<p class="shn-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'shipping-notes' ); ?></button></p>
@@ -868,13 +872,13 @@ final class SHN_Admin_UI {
 			$raw['fs_zones'][ $zid ] = is_string( $v ) ? self::local_amount( $v ) : 0;
 		}
 		$raw['fs_cart_pos'] = sanitize_key( self::post( 'shn_fs_cart_pos' ) );
-		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won', 'fs_sg' ) as $k ) {
+		foreach ( array( 'fs_cart', 'fs_minicart', 'fs_checkout', 'fs_block_cart', 'fs_block_checkout', 'fs_bar', 'fs_show_empty', 'fs_show_won', 'fs_sg', 'fs_product' ) as $k ) {
 			$raw[ $k ] = '1' === self::post( 'shn_' . $k );
 		}
 		$raw['fs_color']  = self::post( 'shn_fs_color' );
 		$raw['fs_sg_ids'] = array_filter( array_map( 'trim', explode( ',', self::post( 'shn_fs_sg_ids' ) ) ), 'strlen' );
 		$raw['fs_sg_max'] = self::post( 'shn_fs_sg_max' );
-		$raw              = self::posted_texts( $raw, array( 'fs_t_empty', 'fs_t_left', 'fs_t_won', 'fs_t_sg_title', 'fs_t_sg_add' ) );
+		$raw              = self::posted_texts( $raw, array( 'fs_t_empty', 'fs_t_left', 'fs_t_won', 'fs_t_sg_title', 'fs_t_sg_add', 'fs_t_p_left', 'fs_t_p_won' ) );
 
 		SHN_Settings::save( $raw );
 		$s    = SHN_Settings::get();
