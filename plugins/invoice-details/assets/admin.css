@@ -1,0 +1,444 @@
+/**
+ * Invoice Details — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors ivd-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.ivd-wrap {
+	--ivd-bg: #101218;
+	--ivd-panel: #14161d;
+	--ivd-panel-2: #1d2029;
+	--ivd-input: #1a1d26;
+	--ivd-border: #2e3240;
+	--ivd-border-input: #3a3f52;
+	--ivd-row-border: #23262f;
+	--ivd-stripe: #181b23;
+	--ivd-hover: #1e212c;
+	--ivd-text: #eae8fa;
+	--ivd-heading: #f6f4ff;
+	--ivd-muted: #b7b2d6;
+	--ivd-link: #beb1ff;
+	--ivd-link-hover: #d4c9ff;
+	--ivd-accent: #6d4aff;
+	--ivd-accent-hover: #8263ff;
+	--ivd-warn: #f5c97e;
+	--ivd-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.ivd-wrap {
+	color-scheme: dark;
+	background: var(--ivd-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--ivd-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.ivd-wrap h1,
+.ivd-wrap h2 {
+	color: var(--ivd-heading);
+}
+
+.ivd-wrap a { color: var(--ivd-link); }
+.ivd-wrap a:hover { color: var(--ivd-link-hover); }
+
+.ivd-wrap .ivd-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--ivd-muted);
+	border-bottom: 1px solid var(--ivd-border);
+	padding-bottom: 6px;
+}
+
+.ivd-wrap .description,
+.ivd-wrap p.description,
+.ivd-wrap .ivd-hint {
+	color: var(--ivd-muted) !important;
+}
+
+.ivd-zone {
+	background: var(--ivd-panel);
+	border: 1px solid var(--ivd-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.ivd-wrap input[type="text"],
+.ivd-wrap input[type="url"],
+.ivd-wrap input[type="number"],
+.ivd-wrap input[type="time"],
+.ivd-wrap input[type="date"],
+.ivd-wrap textarea,
+.ivd-wrap select {
+	background-color: var(--ivd-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--ivd-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.ivd-wrap input::placeholder,
+.ivd-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.ivd-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.ivd-wrap input[type="file"] {
+	color: var(--ivd-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.ivd-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.ivd-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.ivd-wrap input[type="checkbox"],
+.ivd-wrap input[type="radio"] {
+	accent-color: var(--ivd-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.ivd-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.ivd-wrap .button:hover:not(:disabled) {
+	border-color: var(--ivd-accent) !important;
+	color: #ffffff !important;
+}
+
+.ivd-wrap .button-primary {
+	background: var(--ivd-accent) !important;
+	border-color: var(--ivd-accent) !important;
+	color: #ffffff !important;
+}
+
+.ivd-wrap .button-primary:hover:not(:disabled) {
+	background: var(--ivd-accent-hover) !important;
+}
+
+.ivd-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.ivd-submit { margin-top: 20px; }
+.ivd-inline-form { display: inline; margin-right: 10px; }
+.ivd-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.ivd-table,
+table.widefat.ivd-table {
+	background: var(--ivd-panel) !important;
+	border: 1px solid var(--ivd-border) !important;
+	border-radius: 6px;
+	color: var(--ivd-text) !important;
+	margin-top: 14px !important;
+}
+
+.ivd-table thead th,
+.ivd-table thead td {
+	background: var(--ivd-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.ivd-table tbody td,
+.ivd-table tbody th {
+	background: var(--ivd-panel) !important;
+	color: var(--ivd-text) !important;
+	border-bottom: 1px solid var(--ivd-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.ivd-table tbody tr:nth-child(2n) td,
+.ivd-table tbody tr:nth-child(2n) th {
+	background: var(--ivd-stripe) !important;
+}
+
+.ivd-table tbody tr:hover td,
+.ivd-table tbody tr:hover th {
+	background: var(--ivd-hover) !important;
+}
+
+.ivd-table td,
+.ivd-table th {
+	padding: 12px 14px;
+}
+
+.ivd-table td code {
+	background: transparent !important;
+	color: var(--ivd-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.ivd-table .ivd-empty {
+	color: var(--ivd-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.ivd-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.ivd-footer a { color: #beb1ff; text-decoration: none; }
+.ivd-footer a:hover { text-decoration: underline; }
+
+.ivd-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.ivd-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.ivd-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.ivd-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.ivd-muted { color: var(--ivd-muted) !important; }
+.ivd-warn { color: var(--ivd-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.ivd-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.ivd-wrap .ivd-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--ivd-heading);
+}
+
+.ivd-status p { margin: 0 0 8px; }
+.ivd-status p:last-child { margin-bottom: 0; }
+.ivd-status code,
+.ivd-wrap .description code,
+.ivd-wrap .ivd-hint code {
+	background: var(--ivd-panel-2);
+	color: var(--ivd-muted);
+	border: 1px solid var(--ivd-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.ivd-suspended { margin: 8px 0 0; }
+.ivd-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.ivd-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--ivd-border);
+	background: var(--ivd-panel-2);
+	color: var(--ivd-text);
+	white-space: nowrap;
+}
+.ivd-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.ivd-badge--muted { color: var(--ivd-muted); }
+.ivd-badge--warn { border-color: #6b5a33; color: var(--ivd-warn); }
+.ivd-badge--danger { border-color: #6b3a3a; color: var(--ivd-danger); }
+
+/* Area fieldsets. */
+.ivd-area {
+	background: var(--ivd-panel);
+	border: 1px solid var(--ivd-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.ivd-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--ivd-heading);
+}
+.ivd-row { margin: 4px 0 8px; }
+
+.ivd-details > summary {
+	cursor: pointer;
+	color: var(--ivd-link);
+	margin: 4px 0;
+}
+.ivd-details[open] > summary { margin-bottom: 12px; }
+
+.ivd-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.ivd-wrap .ivd-label {
+	display: block;
+	font-weight: 600;
+	color: var(--ivd-heading);
+	margin: 8px 0 6px;
+}
+.ivd-grid .ivd-label:first-child { margin-top: 0; }
+
+.ivd-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.ivd-field > span:first-child {
+	min-width: 150px;
+	color: var(--ivd-text);
+}
+.ivd-wrap .ivd-hint { display: block; font-size: 12px; margin-top: 4px; }
+.ivd-wrap td .ivd-hint { display: inline; }
+.ivd-table td.ivd-warn { color: var(--ivd-warn) !important; }
+
+/* Tabs of the main page. */
+.ivd-wrap .ivd-tabs {
+	border-bottom: 1px solid var(--ivd-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.ivd-wrap .ivd-tabs .nav-tab {
+	background: var(--ivd-panel);
+	border-color: var(--ivd-border);
+	color: var(--ivd-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.ivd-wrap .ivd-tabs .nav-tab:hover { color: var(--ivd-link-hover); background: var(--ivd-hover); }
+.ivd-wrap .ivd-tabs .nav-tab-active,
+.ivd-wrap .ivd-tabs .nav-tab-active:hover {
+	background: var(--ivd-bg);
+	border-bottom-color: var(--ivd-bg);
+	color: var(--ivd-heading);
+}
+
+/* One input per line (removal rules). */
+.ivd-wrap .ivd-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.ivd-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--ivd-border);
+	border-radius: 6px;
+	background: var(--ivd-panel-2);
+}
+.ivd-scroll .ivd-field { margin-bottom: 4px; }
+
+/* ===== Fields ===== */
+
+.ivd-wrap .ivd-wide { width: 100%; max-width: 640px; }
+.ivd-wrap .ivd-num { width: 90px; }
+.ivd-wrap .ivd-texts input[type="text"],
+.ivd-wrap .ivd-texts textarea { width: 100%; }
+.ivd-wrap .ivd-texts textarea { min-height: 64px; }
+
+.ivd-wrap .ivd-texts td:first-child { width: 280px; }
+
+/* ===== KPI cards (Bible §5 — recipe of Store Pulse) ===== */
+.ivd-wrap .ivd-grid-kpi {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin: 16px 0 24px;
+}
+.ivd-wrap .ivd-card {
+	background: #17191f !important;
+	border: 1px solid #2e3240;
+	border-left: 3px solid #6d4aff;
+	border-radius: 6px;
+	padding: 16px 20px;
+	box-sizing: border-box;
+}
+.ivd-wrap .ivd-card-label {
+	color: #b7b2d6 !important;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 6px;
+}
+.ivd-wrap .ivd-card-value {
+	color: #f6f4ff !important;
+	font-size: 22px;
+	font-weight: 400;
+	line-height: 1.25;
+	font-variant-numeric: tabular-nums;
+}
+.ivd-wrap .ivd-card-sub {
+	color: #b7b2d6;
+	font-size: 12px;
+	margin-top: 8px;
+}
+.ivd-wrap .ivd-period { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 8px; }
+.ivd-wrap .ivd-ids { width: 100%; max-width: 520px; }
+.ivd-wrap .ivd-statuses { display: flex; flex-wrap: wrap; gap: 4px 18px; }

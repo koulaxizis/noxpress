@@ -79,6 +79,8 @@ final class TP_Render {
 				switch ( $part ) {
 					case 'sale_badge':
 						echo self::sale_badge( $product ); // phpcs:ignore WordPress.Security.EscapeOutput -- built with esc_html.
+						// Product badges (1.7.0), unless the card's classic hook already printed them.
+						echo TP_Badges::slot_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput -- built with esc_html / esc_attr.
 						break;
 					case 'rating':
 						woocommerce_template_loop_rating();
