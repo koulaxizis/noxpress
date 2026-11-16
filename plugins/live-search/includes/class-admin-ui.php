@@ -20,7 +20,7 @@ final class LVS_Admin_UI {
 	const MAX_JSON  = 262144;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 390 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 400 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
