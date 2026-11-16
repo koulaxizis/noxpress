@@ -1,6 +1,6 @@
 {
-  "display": 1317,
-  "total": 1317,
+  "display": 1319,
+  "total": 1319,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1606,7 +1606,7 @@
     },
     "754720372": {
       "file": "nox-lv-1.0.0/live-search.zip",
-      "count": 0
+      "count": 2
     },
     "754741401": {
       "file": "nox-ws-1.2.6/wish-shelf.zip",
@@ -1618,6 +1618,10 @@
     },
     "754742283": {
       "file": "nox-ev-1.0.0/events.zip",
+      "count": 0
+    },
+    "754761778": {
+      "file": "nox-gc-1.0.0/gift-cards.zip",
       "count": 0
     }
   }
