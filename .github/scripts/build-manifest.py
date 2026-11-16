@@ -80,6 +80,7 @@ SLUGS = {
     'pt': 'product-tabs',
     'fd': 'product-feed',
     'iv': 'invoice-details',
+    'al': 'activity-log',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'
