@@ -93,6 +93,9 @@ The plugin helps collect invoice details; checking that an invoice is issued cor
 = 1.1.0 =
 * New: details from AADE. With the special Taxisnet credentials in wp-config.php, a Greek VAT number fills in the company name, tax office, activity and head office in the classic checkout and the Checkout block, and «Fill in from AADE» on the order fills the empty ones. Only empty fields are filled, one lookup per number for 7 days, limits per visitor and per site, never stops an order. Off until you switch it on.
 
+= 1.0.2 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
+
 = 1.0.1 =
 * New `ivd_offered()`: true when the current visitor sees the receipt / invoice choice. Trade Accounts 1.7.0 uses it to hand its «trade orders need an invoice» rule to Invoice Details, in the classic checkout and the Checkout block.
 

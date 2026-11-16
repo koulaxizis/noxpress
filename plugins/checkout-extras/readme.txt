@@ -5,7 +5,7 @@ Tags: woocommerce, gift, thank you page, coupon, vacation mode
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -111,6 +111,9 @@ The settings, the transients and the background jobs are removed. The gift and t
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.1 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
 
 = 1.2.0 =
 * New: store vacation. The site stays open while buying stops (no buy button, cart and checkout refuse orders, also in the Cart / Checkout blocks and the Store API), or orders are accepted and shipped after the vacation (required checkbox at checkout, note on the order, Shipping Notes estimate from the end date). Optional start and end that open and close the shop by themselves, a warning bar before the start, Close now / Open now, exemptions for digital products, Pre-Orders products and chosen roles, page cache purge on every change and at the change times, an admin bar reminder, and the abilities checkout-extras/vacation-status and vacation-set. Off after the update.
