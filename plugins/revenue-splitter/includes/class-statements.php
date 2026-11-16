@@ -255,6 +255,9 @@ final class RS_Statements {
 					'qty'    => (int) $p['qty'],
 					'pct'    => (float) $sp['percent'],
 					'amount' => $amt,
+					// 1.19.0: money from bookstores (name => gross) and part-copy payment lines.
+					'stores' => (array) ( $p['consign']['stores'] ?? array() ),
+					'part0'  => (int) ( $p['consign']['part0'] ?? 0 ),
 				);
 				$vat = self::vat_issue( (int) $p['product_id'], (float) $p['vat_rate'] );
 				if ( '' !== $vat ) {
@@ -298,6 +301,22 @@ final class RS_Statements {
 			}
 		}
 
+		// 1.19.0: «Σε παρακαταθήκη στο τέλος του μήνα» (Trade Accounts), for
+		// information: not part of the balance until the money is collected.
+		$consign = array();
+		foreach ( RS_Consignment::rows( $ben, $end ) as $c ) {
+			if ( $c['open'] <= 0 && $c['owed'] < 0.005 ) {
+				continue;
+			}
+			$consign[] = array(
+				'store'    => $c['store'],
+				'title'    => $c['title'],
+				'open'     => $c['open'],
+				'owed'     => round( $c['owed'], 2 ),
+				'expected' => $c['expected'],
+			);
+		}
+
 		$share   = round( $share, 2 );
 		$income  = round( $income, 2 );
 		$pay     = round( $payments, 2 );
@@ -339,6 +358,7 @@ final class RS_Statements {
 			'closing'    => $closing,
 			'settlement' => '12' === substr( $month, 5, 2 ),
 			'flags'      => $flags,
+			'consign'    => $consign, // 1.19.0; statements made before lack it (read with ?? array()).
 			'status'     => 'draft',
 			'sent_at'    => '',
 			'sent_to'    => '',
@@ -622,7 +642,15 @@ final class RS_Statements {
 			$row( 'Καμία πώληση αυτόν τον μήνα', '', '', self::money( 0 ) );
 		}
 		foreach ( $st['rows'] as $rw ) {
-			$row( (string) $rw['title'], (string) (int) $rw['qty'], self::pct( (float) $rw['pct'] ) . '%', self::money( (float) $rw['amount'] ) );
+			// 1.19.0: «από τα οποία X € είσπραξη από <βιβλιοπωλείο>», «N + μέρος».
+			$label = (string) $rw['title'];
+			foreach ( (array) ( $rw['stores'] ?? array() ) as $store => $gross ) {
+				if ( (float) $gross > 0.005 ) {
+					$label .= ' (από τα οποία ' . self::money( (float) $gross ) . ' είσπραξη από ' . $store . ')';
+				}
+			}
+			$qty = (string) (int) $rw['qty'] . ( (int) ( $rw['part0'] ?? 0 ) > 0 ? ' + μέρος' : '' );
+			$row( $label, $qty, self::pct( (float) $rw['pct'] ) . '%', self::money( (float) $rw['amount'] ) );
 		}
 
 		$inc = array_filter(
@@ -667,8 +695,23 @@ final class RS_Statements {
 		$pdf->line( $l, $y - 12, $r, $y - 12, $dark, 0.8 );
 		$row( 'Υπόλοιπο ' . self::dmy( $st['end'] ), '', '', self::money( (float) $st['closing'] ), true );
 
+		// 1.19.0: books at bookstores at the end of the month, for information.
+		$notes = array( self::closing_note( $st ), 'Τα ποσά είναι το μερίδιό σου από τις καθαρές πωλήσεις, χωρίς ΦΠΑ, μετά τις επιστροφές. Τα δωρεάν αντίτυπα δεν μετρούν.' );
+		if ( ! empty( $st['consign'] ) ) {
+			$y += 10;
+			$section( 'Σε παρακαταθήκη στο τέλος του μήνα' );
+			$pdf->text( $c_qty, $y - 4, 'Στο ράφι', 8.5, true, 'R', $mute );
+			$pdf->text( $c_pct, $y - 4, 'Οφειλόμενα', 8.5, true, 'R', $mute );
+			$pdf->text( $r, $y - 4, 'Αναμ. μερίδιο', 8.5, true, 'R', $mute );
+			$y += 12;
+			foreach ( $st['consign'] as $c ) {
+				$row( $c['store'] . ' · ' . $c['title'], (string) (int) $c['open'], self::money( (float) $c['owed'] ), self::money( (float) $c['expected'] ) );
+			}
+			$notes[] = 'Σε παρακαταθήκη: αντίτυπα στα ράφια βιβλιοπωλείων και ποσά που πουλήθηκαν αλλά δεν έχουν πληρωθεί ακόμη (με ΦΠΑ). Το αναμενόμενο μερίδιο δεν μπαίνει στο υπόλοιπο: μετράει μόνο όταν εισπραχθεί. Το βιβλιοπωλείο πληρώνει συνολικά ποσά, που μοιράζονται στα πουλημένα αντίτυπα ανάλογα με την αξία τους.';
+		}
+
 		$y += 10;
-		foreach ( array( self::closing_note( $st ), 'Τα ποσά είναι το μερίδιό σου από τις καθαρές πωλήσεις, χωρίς ΦΠΑ, μετά τις επιστροφές. Τα δωρεάν αντίτυπα δεν μετρούν.' ) as $note ) {
+		foreach ( $notes as $note ) {
 			foreach ( $pdf->wrap( $note, 9.5, $r - $l ) as $ln ) {
 				if ( $y > RS_PDF::H - 60 ) {
 					$y = $head();

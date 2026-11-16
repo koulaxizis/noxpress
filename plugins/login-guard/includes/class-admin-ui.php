@@ -170,12 +170,13 @@ final class LGD_Admin_UI {
 		return get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 	}
 
-	private static function checkbox( string $name, bool $on, string $label ): void {
+	private static function checkbox( string $name, bool $on, string $label, string $value = '1' ): void {
 		printf(
-			'<label class="lgd-check"><input type="checkbox" name="%1$s" value="1"%2$s /> %3$s</label>',
+			'<label class="lgd-check"><input type="checkbox" name="%1$s" value="%4$s"%2$s /> %3$s</label>',
 			esc_attr( $name ),
 			checked( $on, true, false ),
-			esc_html( $label )
+			esc_html( $label ),
+			esc_attr( $value )
 		);
 	}
 
@@ -288,6 +289,8 @@ final class LGD_Admin_UI {
 			<?php endif; ?>
 		</div>
 
+		<?php self::render_twofa_overview(); ?>
+
 		<h2 class="lgd-h2"><?php esc_html_e( 'Η διεύθυνσή σου', 'login-guard' ); ?></h2>
 		<div class="lgd-zone">
 			<?php
@@ -305,6 +308,57 @@ final class LGD_Admin_UI {
 			}
 			?>
 			<p class="description"><?php esc_html_e( 'Η διεύθυνση από την οποία αποθηκεύεις τις ρυθμίσεις δεν κλειδώνεται για 24 ώρες, ώστε να μην κλειδωθείς έξω μόνος σου.', 'login-guard' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/** Overview: who has 2FA, who still needs it, Application Passwords. */
+	private static function render_twofa_overview(): void {
+		$sum  = LGD_TwoFA::summary();
+		$apps = LGD_TwoFA::app_passwords();
+		?>
+		<h2 class="lgd-h2"><?php esc_html_e( 'Επαλήθευση σε δύο βήματα', 'login-guard' ); ?></h2>
+		<div class="lgd-zone">
+			<?php if ( ! LGD_TwoFA::active() ) : ?>
+				<p><?php echo self::badge( __( 'Ανενεργή', 'login-guard' ), 'warn' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?></p>
+			<?php endif; ?>
+			<div class="lgd-stats">
+				<div class="lgd-stat"><span class="lgd-stat-n"><?php echo esc_html( number_format_i18n( (int) $sum['on'] ) ); ?></span><span class="lgd-stat-l"><?php esc_html_e( 'χρήστες με 2FA', 'login-guard' ); ?></span></div>
+				<div class="lgd-stat"><span class="lgd-stat-n"><?php echo esc_html( number_format_i18n( (int) $sum['missing'] ) ); ?></span><span class="lgd-stat-l"><?php esc_html_e( 'τη χρειάζονται και δεν την έχουν', 'login-guard' ); ?></span></div>
+			</div>
+			<?php if ( $sum['list'] ) : ?>
+				<p>
+					<?php
+					$links = array();
+					foreach ( $sum['list'] as $u ) {
+						$links[] = '<a href="' . esc_url( get_edit_user_link( (int) $u->ID ) ) . '">' . esc_html( $u->user_login ) . '</a>';
+					}
+					echo implode( ', ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped above.
+					?>
+				</p>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'Κάθε χρήστης τη ρυθμίζει στο προφίλ του, με μια εφαρμογή επαλήθευσης και 10 κωδικούς ανάκτησης.', 'login-guard' ); ?> <a href="<?php echo esc_url( admin_url( 'profile.php#lgd-2fa' ) ); ?>"><?php esc_html_e( 'Το προφίλ μου', 'login-guard' ); ?></a></p>
+		</div>
+
+		<h2 class="lgd-h2"><?php esc_html_e( 'Application Passwords', 'login-guard' ); ?></h2>
+		<div class="lgd-zone">
+			<?php if ( ! $apps ) : ?>
+				<p class="lgd-muted"><?php esc_html_e( 'Κανένας χρήστης δεν έχει Application Password.', 'login-guard' ); ?></p>
+			<?php else : ?>
+				<table class="widefat striped lgd-table">
+					<thead><tr><th><?php esc_html_e( 'Λογαριασμός', 'login-guard' ); ?></th><th><?php esc_html_e( 'Πλήθος', 'login-guard' ); ?></th><th><?php esc_html_e( 'Τελευταία χρήση', 'login-guard' ); ?></th></tr></thead>
+					<tbody>
+					<?php foreach ( $apps as $row ) : ?>
+						<tr>
+							<td><a href="<?php echo esc_url( get_edit_user_link( (int) $row[0]->ID ) . '#application-passwords-section' ); ?>"><?php echo esc_html( $row[0]->user_login ); ?></a></td>
+							<td><?php echo esc_html( number_format_i18n( (int) $row[1] ) ); ?></td>
+							<td><?php echo $row[2] ? esc_html( wp_date( self::fmt(), (int) $row[2] ) ) : '<span class="lgd-muted">' . esc_html__( 'ποτέ', 'login-guard' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped here. ?></td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'Τα Application Passwords συνδέονται χωρίς δεύτερο βήμα, από τον σχεδιασμό του WordPress (τα χρησιμοποιούν orOS, Trade Feed Import και άλλα). Ανακαλείς όσα δεν χρειάζεσαι από το προφίλ του χρήστη.', 'login-guard' ); ?></p>
 		</div>
 		<?php
 	}
@@ -384,6 +438,31 @@ final class LGD_Admin_UI {
 				?>
 			</div>
 
+			<h2 class="lgd-h2"><?php esc_html_e( 'Επαλήθευση σε δύο βήματα', 'login-guard' ); ?></h2>
+			<div class="lgd-zone">
+				<?php
+				if ( ! LGD_TwoFA::possible() ) {
+					echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Η επαλήθευση σε δύο βήματα χρειάζεται δικά σου κλειδιά (salts) στο wp-config.php και OpenSSL, για να κρατιούνται τα μυστικά κρυπτογραφημένα.', 'login-guard' ) . '</p></div>';
+				}
+				self::checkbox( 'lgd_twofa', $s['twofa'], __( 'Επαλήθευση σε δύο βήματα με εφαρμογή (TOTP) για όσους τη ρυθμίσουν στο προφίλ τους', 'login-guard' ) );
+				?>
+				<p class="lgd-label"><?php esc_html_e( 'Υποχρεωτική για τους ρόλους (μόνο στο «Ενεργό»)', 'login-guard' ); ?></p>
+				<?php
+				foreach ( wp_roles()->get_names() as $role => $name ) {
+					self::checkbox( 'lgd_tfa_roles[]', in_array( $role, (array) $s['tfa_roles'], true ), translate_user_role( $name ), $role );
+				}
+				?>
+				<p class="description"><?php esc_html_e( 'Ένας ρόλος που έχεις κι εσύ γίνεται υποχρεωτικός μόνο αφού ρυθμίσεις τη δική σου επαλήθευση, ώστε να μην κλειδωθείς έξω. Οι πελάτες δεν τη χρειάζονται.', 'login-guard' ); ?></p>
+				<div class="lgd-grid">
+					<?php
+					self::number( 'lgd_tfa_grace_days', (int) $s['tfa_grace_days'], 0, 30, __( 'Περίοδος χάριτος σε ημέρες (0–30)', 'login-guard' ) );
+					self::number( 'lgd_tfa_grace_logins', (int) $s['tfa_grace_logins'], 0, 20, __( 'ή σε συνδέσεις (0–20)', 'login-guard' ) );
+					self::number( 'lgd_tfa_trust_days', (int) $s['tfa_trust_days'], 0, 90, __( '«Να μη ζητηθεί ξανά σε αυτόν τον browser» για ημέρες (0 = ποτέ, 0–90)', 'login-guard' ) );
+					?>
+				</div>
+				<?php self::checkbox( 'lgd_tfa_strict', $s['tfa_strict'], __( 'Αυστηρός φύλακας: κλείνει κάθε σύνδεση χρήστη με 2FA που δεν πέρασε από το δεύτερο βήμα (π.χ. «σύνδεση ως» άλλων plugins). Εκτός WP-CLI και cron.', 'login-guard' ) ); ?>
+			</div>
+
 			<h2 class="lgd-h2"><?php esc_html_e( 'Ειδοποιήσεις', 'login-guard' ); ?></h2>
 			<div class="lgd-zone">
 				<?php
@@ -402,7 +481,7 @@ final class LGD_Admin_UI {
 				self::radio( 'lgd_lang', 'el', $s['lang'], 'Ελληνικά' );
 				self::radio( 'lgd_lang', 'en', $s['lang'], 'English' );
 				?>
-				<p class="description"><?php esc_html_e( 'Τα {minutes}, {site} και {link} συμπληρώνονται μόνα τους. Κενό αγγλικό κείμενο δείχνει το ελληνικό.', 'login-guard' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Τα {minutes}, {days}, {site} και {link} συμπληρώνονται μόνα τους. Κενό αγγλικό κείμενο δείχνει το ελληνικό.', 'login-guard' ); ?></p>
 				<table class="widefat lgd-table lgd-texts">
 					<thead><tr><th><?php esc_html_e( 'Κείμενο', 'login-guard' ); ?></th><th>Ελληνικά</th><th>English</th></tr></thead>
 					<tbody>
@@ -511,6 +590,10 @@ final class LGD_Admin_UI {
 					<tr><td><?php esc_html_e( 'Άλλος διαχειριστής', 'login-guard' ); ?></td><td><?php esc_html_e( 'Ξεκλειδώνει από την Επισκόπηση.', 'login-guard' ); ?></td></tr>
 					<tr><td><code>define( 'LGD_DISABLE', true );</code></td><td><?php esc_html_e( 'Στο wp-config.php: το Login Guard σταματά εντελώς.', 'login-guard' ); ?></td></tr>
 					<tr><td><code>wp login-guard unlock --all</code></td><td><?php esc_html_e( 'WP-CLI: ξεκλειδώνει τα πάντα. Επίσης unlock --ip=…, unlock --user=…, mode off, status.', 'login-guard' ); ?></td></tr>
+					<tr><td><?php esc_html_e( 'Κωδικός ανάκτησης', 'login-guard' ); ?></td><td><?php esc_html_e( 'Χωρίς το κινητό: ένας από τους 10 κωδικούς ανάκτησης, στο ίδιο πεδίο με τον κωδικό της εφαρμογής.', 'login-guard' ); ?></td></tr>
+					<tr><td><?php esc_html_e( 'Άλλος διαχειριστής με 2FA', 'login-guard' ); ?></td><td><?php esc_html_e( 'Μηδενίζει την επαλήθευση από το προφίλ του χρήστη.', 'login-guard' ); ?></td></tr>
+					<tr><td><code>define( 'LGD_DISABLE_2FA', true );</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά μόνο η επαλήθευση σε δύο βήματα· τα όρια συνεχίζουν.', 'login-guard' ); ?></td></tr>
+					<tr><td><code>wp login-guard 2fa reset &lt;user&gt;</code></td><td><?php esc_html_e( 'WP-CLI: μηδενίζει την επαλήθευση ενός χρήστη.', 'login-guard' ); ?></td></tr>
 					<tr><td><?php esc_html_e( 'FTP ή File Manager', 'login-guard' ); ?></td><td><?php esc_html_e( 'Μετονόμασε τον φάκελο wp-content/plugins/login-guard: το plugin απενεργοποιείται.', 'login-guard' ); ?></td></tr>
 				</tbody>
 			</table>
@@ -522,6 +605,8 @@ final class LGD_Admin_UI {
 				<tbody>
 					<tr><td><code>lgd_locked</code> <?php esc_html_e( '(action)', 'login-guard' ); ?></td><td><?php esc_html_e( 'Ένα κλείδωμα ξεκίνησε: ( $kind \'ip\' | \'user\', $ident_hash, $until ). Ποτέ IP ή όνομα.', 'login-guard' ); ?></td></tr>
 					<tr><td><code>lgd_unlocked</code> <?php esc_html_e( '(action)', 'login-guard' ); ?></td><td><?php esc_html_e( 'Ένα κλείδωμα τελείωσε νωρίς: ( $kind, $ident_hash, $by \'admin\' | \'mail\' | \'cli\' ).', 'login-guard' ); ?></td></tr>
+					<tr><td><code>lgd_2fa_passed</code>, <code>lgd_2fa_failed</code>, <code>lgd_session_blocked</code> <?php esc_html_e( '(actions)', 'login-guard' ); ?></td><td><?php esc_html_e( '( int $user_id ): το δεύτερο βήμα πέρασε, ένας λάθος κωδικός, ο φύλακας έκλεισε ένα session.', 'login-guard' ); ?></td></tr>
+					<tr><td><code>lgd_requires_2fa</code> <?php esc_html_e( '(φίλτρο)', 'login-guard' ); ?></td><td><?php esc_html_e( '( bool $required, WP_User $user ): κάνει υποχρεωτική την επαλήθευση για έναν χρήστη. Μόνο προσθέτει, ποτέ δεν αφαιρεί.', 'login-guard' ); ?></td></tr>
 					<tr><td><code>lgd_trusted_ip</code> <?php esc_html_e( '(φίλτρο)', 'login-guard' ); ?></td><td><?php esc_html_e( '( bool $ok, string $ip ): μια διεύθυνση που δεν μετριέται ποτέ.', 'login-guard' ); ?></td></tr>
 					<tr><td><code>lgd_text</code> <?php esc_html_e( '(φίλτρο)', 'login-guard' ); ?></td><td><?php esc_html_e( '( $text, $key, $lang ): τα κείμενα των επισκεπτών, π.χ. για WPML.', 'login-guard' ); ?></td></tr>
 					<tr><td><code>login-guard/status</code></td><td><?php esc_html_e( 'Ability (WordPress 6.9+) για το Site Bridge, μόνο ανάγνωση, με το ίδιο δικαίωμα (manage_options). Ποτέ IP, όνομα ή email.', 'login-guard' ); ?></td></tr>
@@ -585,25 +670,52 @@ final class LGD_Admin_UI {
 		}
 	}
 
+	/**
+	 * Multisite: a super admin's 2FA must not depend on one subsite's
+	 * administrator, so only a super admin changes the mode and the 2FA
+	 * switches there.
+	 */
+	private static function network_policy( array $s ): array {
+		if ( ! is_multisite() || is_super_admin() ) {
+			return $s;
+		}
+		$cur = LGD_Settings::get();
+		foreach ( array( 'mode', 'twofa', 'tfa_strict' ) as $k ) {
+			$s[ $k ] = $cur[ $k ];
+		}
+		return $s;
+	}
+
 	private static function do_save_settings(): void {
 		$s    = LGD_Settings::get();
 		$prev = $s['mode'];
 		foreach ( array( 'mode', 'xmlrpc', 'lang' ) as $k ) {
 			$s[ $k ] = sanitize_key( self::post( 'lgd_' . $k ) );
 		}
-		foreach ( array( 'unlock_mail', 'pingbacks', 'enum_rest', 'enum_author', 'enum_sitemap', 'enum_oembed', 'enum_errors', 'enum_archives', 'lostpw', 'notify_device', 'notify_surge', 'keep' ) as $k ) {
+		foreach ( array( 'unlock_mail', 'pingbacks', 'enum_rest', 'enum_author', 'enum_sitemap', 'enum_oembed', 'enum_errors', 'enum_archives', 'lostpw', 'notify_device', 'notify_surge', 'keep', 'twofa', 'tfa_strict' ) as $k ) {
 			$s[ $k ] = '1' === self::post( 'lgd_' . $k );
 		}
-		foreach ( array( 'ip_fails', 'ip_window', 'ip_lock', 'esc_count', 'esc_hours', 'acct_fails', 'acct_window', 'acct_lock', 'surge_at' ) as $k ) {
+		foreach ( array( 'ip_fails', 'ip_window', 'ip_lock', 'esc_count', 'esc_hours', 'acct_fails', 'acct_window', 'acct_lock', 'surge_at', 'tfa_grace_days', 'tfa_grace_logins', 'tfa_trust_days' ) as $k ) {
 			$s[ $k ] = (int) self::post( 'lgd_' . $k );
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked in route().
+		$roles   = isset( $_POST['lgd_tfa_roles'] ) && is_array( $_POST['lgd_tfa_roles'] ) ? array_map( 'sanitize_key', wp_unslash( $_POST['lgd_tfa_roles'] ) ) : array();
+		$roles   = array_values( array_intersect( $roles, array_keys( wp_roles()->get_names() ) ) );
+		$me      = wp_get_current_user();
+		$dropped = array();
+		if ( ! LGD_TwoFA::is_on( (int) $me->ID ) ) {
+			// Anti self-lockout: a role of the saver becomes required only after the saver has 2FA.
+			$dropped = array_values( array_intersect( $roles, (array) $me->roles ) );
+			$roles   = array_values( array_diff( $roles, $dropped ) );
+		}
+		$s['tfa_roles'] = $roles;
 		$s['allow'] = sanitize_textarea_field( self::post( 'lgd_allow' ) );
 		foreach ( array_keys( LGD_Settings::texts() ) as $k ) {
 			foreach ( array( 'el', 'en' ) as $l ) {
 				$s[ 't_' . $k . '_' . $l ] = self::post( 'lgd_t_' . $k . '_' . $l );
 			}
 		}
-		$saved = LGD_Settings::save( $s );
+		$saved = LGD_Settings::save( self::network_policy( $s ) );
 
 		// Anti self-lockout: the address that saves stays trusted for 24 hours.
 		LGD_Store::remember_saver( LGD_Store::ip() );
@@ -623,6 +735,9 @@ final class LGD_Admin_UI {
 		if ( $bad > 0 ) {
 			/* translators: %d: number of entries */
 			$msgs[] = self::msg( 'warning', sprintf( _n( '%d γραμμή στις έμπιστες διευθύνσεις δεν είναι έγκυρη IP ή εύρος (ή είναι ευρύτερο από /8) και αγνοήθηκε.', '%d γραμμές στις έμπιστες διευθύνσεις δεν είναι έγκυρες IP ή εύρη (ή είναι ευρύτερα από /8) και αγνοήθηκαν.', $bad, 'login-guard' ), $bad ) );
+		}
+		if ( $dropped ) {
+			$msgs[] = self::msg( 'warning', __( 'Ο ρόλος σου δεν έγινε υποχρεωτικός για επαλήθευση σε δύο βήματα: ρύθμισε πρώτα τη δική σου στο προφίλ και αποθήκευσε ξανά.', 'login-guard' ) );
 		}
 		if ( 'live' === $saved['mode'] && 'live' !== $prev ) {
 			$msgs[] = self::msg( 'info', __( 'Ενεργό. Δοκίμασε μια σύνδεση από ιδιωτικό παράθυρο. Η δική σου διεύθυνση δεν κλειδώνεται για 24 ώρες.', 'login-guard' ) );
@@ -674,7 +789,7 @@ final class LGD_Admin_UI {
 		}
 		$in         = $state['options'][ LGD_Settings::OPT ];
 		$in['mode'] = LGD_Settings::mode(); // A backup never switches the mode.
-		LGD_Settings::save( $in );
+		LGD_Settings::save( self::network_policy( $in ) );
 		return array( self::msg( 'success', __( 'Οι ρυθμίσεις επανήλθαν. Η λειτουργία έμεινε όπως ήταν.', 'login-guard' ) ) );
 	}
 

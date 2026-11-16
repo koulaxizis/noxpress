@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Events
  * Plugin URI:           https://noxpress.tech
- * Description:          Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση, είσοδο και σύνδεση με προϊόντα και δημιουργούς: λίστα επερχόμενων με shortcode και block, αρχείο, «Πρόσθεσε στο ημερολόγιο» (.ics και Google Calendar) και Event JSON-LD. Το WooCommerce είναι προαιρετικό.
- * Version:              1.0.1
+ * Description:          Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση, είσοδο και σύνδεση με προϊόντα και δημιουργούς: λίστα επερχόμενων με shortcode και block, αρχείο, «Πρόσθεσε στο ημερολόγιο» (.ics και Google Calendar) και Event JSON-LD. Με το WooCommerce: εισιτήρια με θέσεις, κωδικούς και QR, είσοδος από κινητό και λίστα συμμετεχόντων.
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -39,7 +39,14 @@
  *  - EVT_Jobs      → page cache purges on save and the day after an event
  *                    ends (Action Scheduler or WP-Cron)
  *  - EVT_Admin_UI  → menu, list columns, settings, tools, footer
- *  - EVT_Abilities → events/list (read) and events/create-draft
+ *  - EVT_Abilities → events/list (read), events/create-draft and
+ *                    events/tickets (read-only counts)
+ *  - EVT_Ticket_Store → the {prefix}evt_tickets table, derived codes (1.1.0)
+ *  - EVT_Tickets   → ticket products, sales window, codes on payment,
+ *                    the ticket page, My account tab, privacy (1.1.0)
+ *  - EVT_Checkin   → the «Ταμείο εκδήλωσης» role, the door page, the
+ *                    attendee list, CSV, «notify the ticket holders» (1.1.0)
+ *  - EVT_Email_Update → the WooCommerce e-mail of that notice (off by default)
  *
  * Front-end rules (Bible §14): test mode after activation (only managers
  * see event pages, lists and boxes); EVT_DISABLE in wp-config.php stops
@@ -61,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'EVT_VERSION', '1.0.1' );
+define( 'EVT_VERSION', '1.1.1' );
 define( 'EVT_FILE', __FILE__ );
 define( 'EVT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EVT_URL', plugin_dir_url( __FILE__ ) );
@@ -118,6 +125,14 @@ final class Events_Plugin {
 			EVT_Admin_UI::init();
 		}
 
+		if ( self::woo() ) {
+			require_once EVT_PATH . 'includes/class-ticket-store.php';
+			require_once EVT_PATH . 'includes/class-tickets.php';
+			require_once EVT_PATH . 'includes/class-checkin.php';
+			EVT_Tickets::init();
+			EVT_Checkin::init();
+		}
+
 		require_once EVT_PATH . 'includes/class-abilities.php';
 		EVT_Abilities::init();
 	}
@@ -167,6 +182,13 @@ register_activation_hook(
 		EVT_CPT::register();
 		flush_rewrite_rules( false );
 		add_option( 'evt_settings', array( 'mode' => 'test' ), '', true );
+		if ( class_exists( 'WooCommerce' ) ) {
+			require_once EVT_PATH . 'includes/class-ticket-store.php';
+			require_once EVT_PATH . 'includes/class-checkin.php';
+			EVT_Ticket_Store::install();
+			EVT_Checkin::ensure_role();
+			add_option( 'evt_flush', '1', '', false );
+		}
 	}
 );
 

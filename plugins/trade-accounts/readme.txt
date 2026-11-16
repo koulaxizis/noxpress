@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.2
+Stable tag: 1.8.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -48,7 +48,8 @@ Every module is off after activation. A module that is off loads no code.
 * Settlement orders never reduce stock again and send no e-mails (an optional «completed» e-mail to the bookstore when collected).
 * Open, overdue and closed consignments with copies and value at bookstores and money to collect; a check date every 30 days (setting) while copies are out; «On consignment» in the product's Inventory tab; a printable delivery note (print or save as PDF) with signatures.
 * REST (read, WooCommerce REST keys): `GET /wc/v3/tra/consignments` (filters state, account, product) and `/wc/v3/tra/consignments/<id>`, for orOS.
-* Abilities: `consignments-list`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-extend`.
+* Abilities: `consignments-list`, `consignment-summary`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-payment`, `consignment-extend`, `consignment-meta-fix`.
+* Settlement and payment orders carry Revenue Splitter's channel «Παρακαταθήκες» and the bookstore's name, so the author portal shows the money as a receipt from that bookstore (labels only, no amount changes).
 
 **Safe by design**
 
@@ -62,7 +63,7 @@ Every module is off after activation. A module that is off loads no code.
 **For developers**
 
 * `tra_is_trade( int $user_id = 0 )`, `tra_is_eligible( $product )`, `tra_trade_price( $product, int $user_id = 0 )`.
-* `tra_consignments( array $args = array() )` and `tra_consignment_lines( array $product_ids = array() )` (copies still at bookstores per product, for an author portal); actions `tra_consignment_created`, `tra_consignment_settled`, `tra_consignment_paid`.
+* `tra_consignments( array $args = array() )`, `tra_consignment_lines( array $product_ids = array() )` (copies still at bookstores per product, for an author portal) and `tra_consignment_summary( array $product_ids = array(), string $as_of = '' )` (per title and bookstore: given, sold, returned, on the shelf, collected and owed, also as of a past date); actions `tra_consignment_created`, `tra_consignment_settled`, `tra_consignment_paid`.
 * Filters `tra_eligible` ( bool $ok, WC_Product $product ), `tra_discount` ( float $percent, int $user_id ), `tra_feed_item` ( array $item, WC_Product $product ), `tra_text` ( string $text, string $key, string $lang ).
 
 == Installation ==
@@ -97,8 +98,14 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 
-= 1.7.2 =
+= 1.8.1 =
 * Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+
+= 1.8.0 =
+* New: `tra_consignment_summary()` and the ability `consignment-summary` (read only): per title and bookstore the copies given (with the first delivery date), sold, returned and still on the shelf (with the settle-by date), and the money collected and still owed, also as of a past date. Revenue Splitter 1.19.0 shows it in the author portal and the monthly statement.
+* Settlement orders and «Amount received» orders now carry Revenue Splitter's sales channel «Παρακαταθήκες» and the bookstore's name, so creators see the money as a receipt from that bookstore instead of a plain sale. Labels only: no amount, share or balance changes.
+* New ability `consignment-meta-fix` (dry run by default) to put the same channel and name on an account's orders made before 1.8.0. Meta only, never amounts; the old values are kept in a backup first and `restore` puts them back.
+* Returns are now dated, and each payment line keeps its exact share, so a summary as of a past date is exact.
 
 = 1.7.1 =
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).

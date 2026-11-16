@@ -1022,6 +1022,22 @@ final class RS_Portal {
 
 		// ---------- Ιστορικό συναλλαγών (v1.3.5 #1) ----------
 		$history = RS_Ledger::for_beneficiary( $who );
+		// 1.19.0: bookstore receipts, display only (already inside the sales shares).
+		foreach ( RS_Consignment::receipts( $who ) as $rc ) {
+			$history[] = array(
+				'date'    => $rc['date'],
+				'type'    => 'consign',
+				'amount'  => $rc['share'],
+				'id'      => 0,
+				'receipt' => $rc,
+			);
+		}
+		usort(
+			$history,
+			static function ( $a, $b ) {
+				return strcmp( (string) $b['date'], (string) $a['date'] ) ?: (int) $b['id'] <=> (int) $a['id'];
+			}
+		);
 
 		$cur = self::currency_fmt();
 
@@ -1109,6 +1125,9 @@ final class RS_Portal {
 			RS_Contracts::render_portal( $who );
 			// 1.18.0: «Το έργο σου σε παραγωγή» (RS_Production, pushed by orOS).
 			RS_Production::render_portal( $who );
+			// 1.19.0: «Σε παρακαταθήκη» (Trade Accounts, all time) and «Πορεία αντιτύπων».
+			RS_Consignment::render_portal( $who );
+			RS_Copies::render_portal( $who );
 			?>
 
 			<div class="rs-pt-chart-head">
@@ -1173,9 +1192,10 @@ final class RS_Portal {
 					}
 					$rows++;
 					?>
+					<?php $notes = RS_Consignment::product_notes( $p, $cur ); ?>
 					<tr>
-						<td><?php echo esc_html( $p['title'] ); ?></td>
-						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty'] ) ); ?></td>
+						<td><?php echo esc_html( $p['title'] ); ?><?php foreach ( $notes as $note ) : ?><br /><small class="rs-pt-muted"><?php echo esc_html( $note ); ?></small><?php endforeach; ?></td>
+						<td class="num"<?php echo (int) ( $p['consign']['part0'] ?? 0 ) > 0 ? ' title="' . esc_attr( RS_Consignment::part_tip() ) . '"' : ''; ?>><?php echo esc_html( RS_Consignment::qty_label( $p ) ); ?></td>
 						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_full'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( number_format_i18n( (int) $p['qty_disc'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( number_format_i18n( $p['disc_pct'], 1 ) ); ?>%</td>
@@ -1190,7 +1210,7 @@ final class RS_Portal {
 						<td class="num"><?php echo esc_html( $cur( $p['gross'] ) ); ?></td>
 						<td class="num">−<?php echo esc_html( $cur( $p['vat'] ) ); ?></td>
 						<td class="num"><?php echo esc_html( $cur( $p['net'] ) ); ?></td>
-						<td class="num"><?php echo esc_html( RS_Admin_UI::product_stock( (int) $p['product_id'] ) ); ?></td>
+						<td class="num"><?php echo esc_html( RS_Admin_UI::product_stock( (int) $p['product_id'], true ) ); ?></td>
 						<td class="num"><strong><?php echo esc_html( $cur( $mine['amount'] ) ); ?></strong> <small><?php echo esc_html( number_format_i18n( $mine['percent'], 1 ) ); ?>%</small></td>
 					</tr>
 				<?php endforeach; ?>
@@ -1250,12 +1270,21 @@ final class RS_Portal {
 					<tr><td colspan="4" class="rs-empty"><?php esc_html_e( 'Καμία εγγραφή.', 'revenue-splitter' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $history as $e ) : ?>
+					<?php if ( 'consign' === $e['type'] ) : ?>
+					<tr class="rs-pt-receipt">
+						<td><?php echo esc_html( RS_Lang::fmt_date( $e['date'] ) ); ?></td>
+						<td><?php esc_html_e( 'Είσπραξη παρακαταθήκης', 'revenue-splitter' ); ?></td>
+						<td class="num"><span class="rs-pt-muted"><?php echo esc_html( $cur( (float) $e['amount'] ) ); ?></span></td>
+						<td><?php echo esc_html( sprintf( /* translators: %s: bookstore */ __( 'Είσπραξη από %s. Το μερίδιό σου περιλαμβάνεται ήδη στα μερίδια από πωλήσεις.', 'revenue-splitter' ), (string) $e['receipt']['store'] ) ); ?></td>
+					</tr>
+					<?php else : ?>
 					<tr>
 							<td><?php echo esc_html( RS_Lang::fmt_date( $e['date'] ) ); ?></td>
 						<td><?php echo esc_html( RS_Ledger::type_label( $e['type'] ) ); ?></td>
 						<td class="num"><strong><?php echo esc_html( ( RS_Ledger::signed( $e ) < 0 ? '−' : '+' ) . $cur( abs( (float) $e['amount'] ) ) ); ?></strong></td>
 						<td><?php echo esc_html( RS_Ledger::describe( $e ) ); ?></td>
 					</tr>
+					<?php endif; ?>
 					<?php endforeach; ?>
 				<?php endif; ?>
 				</tbody>

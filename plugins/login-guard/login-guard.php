@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Login Guard
  * Plugin URI:           https://noxpress.tech
- * Description:          Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα που κλιμακώνεται και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email όταν ένας διαχειριστής συνδέεται από νέα συσκευή. Σωστή IP πίσω από Cloudflare, λειτουργία δοκιμής και πολλοί τρόποι ανάκτησης.
- * Version:              1.0.1
+ * Description:          Επαλήθευση σε δύο βήματα με εφαρμογή (TOTP) και κωδικούς ανάκτησης, όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα που κλιμακώνεται και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email όταν ένας διαχειριστής συνδέεται από νέα συσκευή. Σωστή IP πίσω από Cloudflare, λειτουργία δοκιμής και πολλοί τρόποι ανάκτησης.
+ * Version:              1.1.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -33,6 +33,12 @@
  *                      e-mail for a locked account
  *  - LGD_Hardening   → XML-RPC and user-enumeration protections
  *  - LGD_Notify      → new-device e-mail for administrators, attack digest
+ *  - LGD_Crypt       → AES-256-GCM sealing of 2FA secrets (salts, user id)
+ *  - LGD_TOTP        → RFC 6238 codes, base32, otpauth:// URI
+ *  - LGD_TwoFA       → second step at login (wp-login.php?action=lgd_2fa),
+ *                      recovery codes, remembered browsers, strict guard,
+ *                      required 2FA per role with grace, e-mails
+ *  - LGD_Profile     → «Two-step verification» in the user profile
  *  - LGD_Admin_UI    → menu, tabs (overview, settings, log, tools), footer
  *  - LGD_Abilities   → login-guard/status (read only)
  *  - LGD_CLI         → wp login-guard status | unlock | mode
@@ -65,15 +71,17 @@
  *    is the purpose of the plugin. A visitor who does not submit a login,
  *    lost-password or unlock form writes nothing.
  *
- * Cooperation (Bible §6): actions lgd_locked( $kind, $ident_hash, $until )
- * and lgd_unlocked( $kind, $ident_hash, $by ), filters lgd_trusted_ip and
- * lgd_text. Reads no other plugin's data. The visitor address comes from
+ * Cooperation (Bible §6): actions lgd_locked( $kind, $ident_hash, $until ),
+ * lgd_unlocked( $kind, $ident_hash, $by ), lgd_2fa_passed( $user_id ),
+ * lgd_2fa_failed( $user_id ) and lgd_session_blocked( $user_id ), filters
+ * lgd_trusted_ip, lgd_text and lgd_requires_2fa( $required, $user ) (can
+ * only add). LGD_DISABLE_2FA in wp-config.php switches off 2FA only. Reads no other plugin's data. The visitor address comes from
  * Noxpress_Safe::client_ip() (Core 1.4.7).
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LGD_VERSION', '1.0.1' );
+define( 'LGD_VERSION', '1.1.1' );
 define( 'LGD_FILE', __FILE__ );
 define( 'LGD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LGD_URL', plugin_dir_url( __FILE__ ) );
@@ -101,6 +109,10 @@ require_once LGD_PATH . 'includes/class-unlock.php';
 require_once LGD_PATH . 'includes/class-hardening.php';
 require_once LGD_PATH . 'includes/class-notify.php';
 require_once LGD_PATH . 'includes/class-abilities.php';
+require_once LGD_PATH . 'includes/class-crypt.php';
+require_once LGD_PATH . 'includes/class-totp.php';
+require_once LGD_PATH . 'includes/class-twofa.php';
+require_once LGD_PATH . 'includes/class-profile.php';
 
 final class Login_Guard {
 
@@ -126,6 +138,9 @@ final class Login_Guard {
 			LGD_Guard::init();
 			LGD_Unlock::init();
 			LGD_Notify::init();
+			if ( LGD_TwoFA::active() ) {
+				LGD_TwoFA::init();
+			}
 			if ( LGD_Settings::live() ) {
 				LGD_Hardening::init();
 			}
@@ -135,6 +150,9 @@ final class Login_Guard {
 			add_action( 'admin_init', array( __CLASS__, 'upkeep' ) );
 			require_once LGD_PATH . 'includes/class-admin-ui.php';
 			LGD_Admin_UI::init();
+			if ( ! self::killed() ) {
+				LGD_Profile::init();
+			}
 		}
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -168,6 +186,8 @@ final class Login_Guard {
 			'Login Guard',
 			wpautop(
 				esc_html__( 'Για να προστατεύσουμε τους λογαριασμούς από επιθέσεις, όταν μια σύνδεση αποτυγχάνει μετράμε τις προσπάθειες ανά διεύθυνση IP και ανά λογαριασμό για λίγα λεπτά, μόνο ως κρυπτογραφικό hash. Όταν μια διεύθυνση ή ένας λογαριασμός κλειδώνεται, κρατάμε για 30 ημέρες την ώρα, τη διεύθυνση IP χωρίς το τελευταίο της μέρος (π.χ. 203.0.113.x) και, αν υπάρχει, τον αριθμό του λογαριασμού. Για τους διαχειριστές κρατάμε 30 ημέρες ένα hash της συσκευής (τμήμα της IP, browser και λειτουργικό), ώστε να τους ειδοποιούμε με email όταν συνδέονται από νέα συσκευή. Τίποτα από αυτά δεν στέλνεται σε τρίτους. Νομική βάση: έννομο συμφέρον για την ασφάλεια του site.', 'login-guard' )
+			) . wpautop(
+				esc_html__( 'Για όσους ενεργοποιούν την επαλήθευση σε δύο βήματα κρατάμε το μυστικό κλειδί της εφαρμογής κρυπτογραφημένο και τους κωδικούς ανάκτησης μόνο ως hash, μέχρι να την απενεργοποιήσουν. Αν επιλέξουν «να μη ζητηθεί ξανά σε αυτόν τον browser», ο browser κρατά ένα cookie με υπογραφή για όσες ημέρες ορίζει ο διαχειριστής.', 'login-guard' )
 			)
 		);
 	}

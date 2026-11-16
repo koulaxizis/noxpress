@@ -2677,7 +2677,7 @@ final class RS_Admin_UI {
 			number_format( (float) $p['gross'], 2, ',', '.' ),
 			number_format( (float) $p['vat'], 2, ',', '.' ),
 			number_format( (float) $p['net'], 2, ',', '.' ),
-			self::product_stock( (int) $p['product_id'] ),
+			self::product_stock( (int) $p['product_id'], true ),
 			implode( ' | ', $splits ),
 		);
 	}
@@ -2966,8 +2966,12 @@ final class RS_Admin_UI {
 	 * Στοκ προϊόντος σε readable μορφή ('∞' για μη λογιζόμενα).
 	 *
 	 * Public (v1.3.1 #16) — μοιράζεται με το RS_Portal (μία υλοποίηση).
+	 *
+	 * 1.19.0: $dash = true answers «—» instead of «∞» when the product does
+	 * not manage stock (Author Portal and exports: «∞» read as «endless
+	 * copies»). The admin table keeps «∞».
 	 */
-	public static function product_stock( int $pid ): string {
+	public static function product_stock( int $pid, bool $dash = false ): string {
 
 		$product = wc_get_product( $pid );
 
@@ -2976,7 +2980,7 @@ final class RS_Admin_UI {
 		}
 
 		if ( ! $product->get_manage_stock() ) {
-			return '∞';
+			return $dash ? '—' : '∞';
 		}
 
 		return (string) $product->get_stock_quantity();

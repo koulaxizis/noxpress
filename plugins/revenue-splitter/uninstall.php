@@ -81,6 +81,7 @@ $rs_uninstall_options = array(
 	'rs_production_meta',
 	'rs_production_hist',
 	'rs_production_texts',
+	'rs_copies',             // 1.19.0: copies register («RS Αντίτυπα»).
 );
 
 // 1.15.0: one option per month of statements (rs_stmt_m_YYYY-MM), listed in rs_stmt_months.
