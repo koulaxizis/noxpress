@@ -79,6 +79,7 @@ final class Noxpress_Core {
 		'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.' => 'Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.',
 		'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.' => 'Who changed what and when: products, prices, orders, coupons, pages, users, plugins and settings, with the source of every change (admin, REST, WP-CLI, Site Bridge). No secrets and no customer details, masked IPs, e-mail for critical changes.',
 		'Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.' => 'Every email of the site over SMTP (with a ready setup for Proton Mail) or through Brevo, Mailgun, SendGrid, Postmark and Amazon SES, with a backup connection, a sent log, a test email and sending paused on copies of the site.',
+		'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.' => 'Digital gift cards as a product, delivered on a date by email with a printable PDF, redeemed as a payment in the classic and block checkout, with the balance kept for the next order and a ledger of every movement.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -423,6 +424,11 @@ final class Noxpress_Core {
 				'name' => 'Events',
 				'desc' => __( 'Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση και είσοδο, συνδεδεμένες με προϊόντα και δημιουργούς: λίστα επερχόμενων, αρχείο, «Πρόσθεσε στο ημερολόγιο» και Event schema.', 'noxpress' ),
 				'page' => 'evt-settings',
+			),
+			'gift-cards'        => array(
+				'name' => 'Gift Cards',
+				'desc' => __( 'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.', 'noxpress' ),
+				'page' => 'gfc-cards',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
