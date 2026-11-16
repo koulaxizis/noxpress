@@ -61,6 +61,8 @@ final class PL_Lang {
 		'Αποστολή ±' => 'Shipping ±',
 		'Αρ. παραστατικού' => 'Invoice no.',
 		'Γενικά έξοδα' => 'General expenses',
+		'Ανεξόφλητες δωροκάρτες:' => 'Outstanding gift cards:',
+		'(υπόλοιπο σήμερα· χρήματα που χρωστά το κατάστημα, όχι έσοδο. Οι πωλήσεις δωροκαρτών δεν μετρούν στα έσοδα· μετρούν τα προϊόντα που αγοράζονται με αυτές.)' => '(balance today; money the shop owes, not revenue. Gift card sales do not count as revenue; the products bought with them do.)',
 		'Γενικό' => 'General',
 		'Γενικό έξοδο' => 'General expense',
 		'Γράψε 3 γράμματα ή το ID' => 'Type 3 letters or the ID',
