@@ -31,7 +31,7 @@ A «Notify me when it is back» form on out-of-stock products and variations: em
 * When the product or variation is back in stock (product screen, REST, import, orders, Book Feed: every change that goes through WooCommerce), a job waits 10 minutes, checks the stock again and sends one email per request in batches of 50, in the background with WooCommerce's Action Scheduler.
 * A request is marked sent only once its email has left; a failure stays active and the daily job tries again.
 * The email uses the shop's WooCommerce template, in the language of the request, with image, price, «View the product», other formats in stock (Product Formats) and a link to cancel every notification of that address. It goes through wp_mail, so FluentSMTP or any SMTP plugin sends it.
-* With Wish Shelf 1.2.5 or later, a customer who has the product on their list and also asked here gets one email, not two.
+* With Wish Shelf 1.2.6 or later, a customer who has the product on their list and also asked here gets one email, not two.
 
 **For the shop**
 

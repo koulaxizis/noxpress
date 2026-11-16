@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -96,6 +96,9 @@ The settings, the call log, the plugin's user and product meta, its Application 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.7.1 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
 
 = 1.7.0 =
 * The «trade orders need an invoice» rule now works with Invoice Details (1.0.1 or later): when its receipt / invoice choice is shown to the customer, a trade cart must choose an invoice, in the classic checkout and the Checkout block, with your own message. Without Invoice Details, or while it is in test mode for a customer, the rule works as before with the OBS field.
