@@ -173,6 +173,7 @@ final class Noxpress_Core {
 		'Το πακέτο δεν υπάρχει στη λίστα εκδόσεων του Noxpress.' => 'The package is not in the Noxpress version list.',
 		'Το πακέτο δεν ταιριάζει με το sha256 της λίστας εκδόσεων. Η εγκατάσταση ακυρώθηκε.' => 'The package does not match the sha256 of the version list. The install was cancelled.',
 		'Η ψηφιακή υπογραφή του πακέτου δεν είναι έγκυρη. Η εγκατάσταση ακυρώθηκε.' => 'The digital signature of the package is not valid. The install was cancelled.',
+		'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.' => 'Contact forms with a block and a shortcode, e-mail notifications and spam protection without third-party services. No message is lost when the e-mail fails, and an import from Contact Form 7 that keeps its shortcode.',
 
 		// Footer (Bible §7).
 		'Made with ❤ by %s'                                     => 'Made with ❤ by %s',
@@ -399,6 +400,11 @@ final class Noxpress_Core {
 				'name' => 'Mail Relay',
 				'desc' => __( 'Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.', 'noxpress' ),
 				'page' => 'mrl-settings',
+			),
+			'forms'             => array(
+				'name' => 'Forms',
+				'desc' => __( 'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.', 'noxpress' ),
+				'page' => 'frm-forms',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
