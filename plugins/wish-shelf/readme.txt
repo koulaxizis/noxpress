@@ -114,7 +114,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.2.6 =
-* With Back in Stock: when the customer also asked Back in Stock to be notified about the same product (or variation), the daily email leaves out its «back in stock» line, so the customer gets one email, not two. Noxpress Core 1.4.9.
+* With Back in Stock: when the customer also asked Back in Stock to be notified about the same product (or variation), the daily email leaves out its «back in stock» line, so the customer gets one email, not two. Noxpress Core 1.4.10.
 
 = 1.2.5 =
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
