@@ -215,6 +215,12 @@ final class SBR_Settings {
 			return null;
 		}
 		$u = get_userdata( $id );
+		// 1.13.2: on multisite the user must belong to this site and must not
+		// be a network administrator (a site admin could otherwise drive that
+		// identity); use a site administrator account for Site Bridge.
+		if ( $u instanceof WP_User && is_multisite() && ( ! is_user_member_of_blog( $u->ID ) || is_super_admin( $u->ID ) ) ) {
+			return null;
+		}
 		return ( $u instanceof WP_User && user_can( $u, 'manage_options' ) ) ? $u : null;
 	}
 }

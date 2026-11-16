@@ -81,6 +81,8 @@ final class BKF_Settings {
 	const RULES  = 'bkf_rules';
 	const SEEN   = 'bkf_seen';
 	const PASS   = 'bkf_pass';
+	/** 1.13.6: the endpoint (host:port and TLS) the password belongs to. */
+	const PASS_FOR = 'bkf_pass_for';
 
 	const DEFAULT_URL = 'https://ws.bookpoint.gr/solr/index.php';
 
@@ -176,6 +178,8 @@ final class BKF_Settings {
 	 * 1.13.2: the service password belongs to the service host. Moving to
 	 * another host needs an administrator (manage_options) and drops the
 	 * saved password, so it is never sent to an address someone else picked.
+	 * 1.13.6: the same holds for a move from https to plain http on the
+	 * same host (no TLS, so the password would travel in clear text).
 	 */
 	public static function save( array $v ): void {
 		self::$cache    = null;
@@ -183,16 +187,59 @@ final class BKF_Settings {
 		$clean          = self::clean( $v );
 		$was            = get_option( self::OPTION, array() );
 		$old            = is_array( $was ) && isset( $was['url'] ) && is_string( $was['url'] ) ? $was['url'] : self::DEFAULT_URL;
+		$old_https      = is_array( $was ) && array_key_exists( 'https', $was ) ? ! empty( $was['https'] ) : true;
+		$admin          = current_user_can( 'manage_options' );
 		if ( self::host_of( $old ) !== self::host_of( $clean['url'] ) ) {
-			if ( current_user_can( 'manage_options' ) ) {
+			if ( $admin ) {
 				delete_option( self::PASS );
 			} else {
 				$clean['url']   = $old;
+				$clean['https'] = $old_https;
 				self::$url_kept = true;
 			}
+		} elseif ( ! $admin && self::tls_level( $clean['url'], $clean['https'] ) < self::tls_level( $old, $old_https ) ) {
+			$clean['url']   = $old;
+			$clean['https'] = $old_https;
+			self::$url_kept = true;
 		}
 		update_option( self::OPTION, $clean, false );
 		self::$cache = null;
+		if ( $admin || ! get_option( self::PASS_FOR, '' ) ) {
+			update_option( self::PASS_FOR, self::endpoint( $clean ), false );
+		}
+	}
+
+	/**
+	 * How the password travels (1.13.6): 2 = https:// only, 1 = http:// with
+	 * «try https first» (TLS once it has worked), 0 = plain http. Only an
+	 * administrator lowers it.
+	 */
+	public static function tls_level( string $url, bool $https_first ): int {
+		if ( 0 === stripos( $url, 'https://' ) ) {
+			return 2;
+		}
+		return $https_first ? 1 : 0;
+	}
+
+	/** The endpoint a password belongs to: host:port and whether TLS is used. */
+	public static function endpoint( array $s ): string {
+		$url = isset( $s['url'] ) ? (string) $s['url'] : '';
+		return self::host_of( $url ) . '|' . array( 'plain', 'try-tls', 'tls' )[ self::tls_level( $url, ! empty( $s['https'] ) ) ];
+	}
+
+	/**
+	 * True when the stored endpoint is the current one (1.13.6). A change
+	 * written past save() (another plugin, a direct option write) leaves
+	 * the password unread until an administrator saves the settings.
+	 */
+	public static function endpoint_ok(): bool {
+		$now  = self::endpoint( self::get() );
+		$bind = get_option( self::PASS_FOR, '' );
+		if ( ! is_string( $bind ) || '' === $bind ) {
+			update_option( self::PASS_FOR, $now, false ); // First read after the update.
+			return true;
+		}
+		return hash_equals( $bind, $now );
 	}
 
 	/** host:port of an address, lower case ('' when there is none). */
@@ -626,6 +673,9 @@ final class BKF_Settings {
 
 	/** The password, or null when there is none to read. */
 	public static function password(): ?string {
+		if ( ! self::endpoint_ok() ) {
+			return null;
+		}
 		if ( defined( 'BKF_PASSWORD' ) && is_string( BKF_PASSWORD ) && '' !== BKF_PASSWORD ) {
 			return BKF_PASSWORD;
 		}
@@ -644,6 +694,7 @@ final class BKF_Settings {
 			return false;
 		}
 		update_option( self::PASS, $sealed, false );
+		update_option( self::PASS_FOR, self::endpoint( self::get() ), false );
 		return true;
 	}
 

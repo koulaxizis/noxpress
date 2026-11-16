@@ -74,23 +74,9 @@ final class BKF_Client {
 	 * http_request_host_is_external filter keeps that choice.
 	 */
 	public static function public_url( string $url ): bool {
-		$host = strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) );
-		if ( '' === $host ) {
-			return false;
-		}
-		if ( apply_filters( 'http_request_host_is_external', false, $host, $url ) ) {
-			return true;
-		}
-		$ips = filter_var( $host, FILTER_VALIDATE_IP ) ? array( $host ) : gethostbynamel( $host );
-		if ( ! is_array( $ips ) || ! $ips ) {
-			return true; // Not resolvable here: the request itself fails.
-		}
-		foreach ( $ips as $ip ) {
-			if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
-				return false;
-			}
-		}
-		return true;
+		// 1.13.6: Core's check, which also refuses 100.64/10, 192.0.0/24,
+		// 198.18/15 and 224/3 (the PHP flags alone do not).
+		return Noxpress_Safe::public_url( $url );
 	}
 
 	/** Requests hook: a redirect to a non-public address stops the request (1.13.2). */
@@ -131,6 +117,10 @@ final class BKF_Client {
 			$known = get_transient( self::SCHEME_TR );
 			if ( 'http' === $known ) {
 				$tries = array( $base );
+			} elseif ( 'https' === $known ) {
+				// 1.13.6: once https has worked, a failure never falls back to
+				// plain http, where the password would travel in clear text.
+				$tries = array( $https );
 			} else {
 				$tries = array( $https, $base );
 			}
@@ -154,7 +144,8 @@ final class BKF_Client {
 				continue; // transport failure: try the next address
 			}
 			if ( $s['https'] && $https !== $base ) {
-				set_transient( self::SCHEME_TR, 0 === stripos( $url, 'https://' ) ? 'https' : 'http', 12 * HOUR_IN_SECONDS );
+				$tls = 0 === stripos( $url, 'https://' );
+				set_transient( self::SCHEME_TR, $tls ? 'https' : 'http', $tls ? 0 : 12 * HOUR_IN_SECONDS ); // https is kept until the address changes.
 			}
 			$code = (int) wp_remote_retrieve_response_code( $r );
 			$body = (string) wp_remote_retrieve_body( $r );

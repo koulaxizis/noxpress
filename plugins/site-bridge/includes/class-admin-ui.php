@@ -517,7 +517,7 @@ final class SBR_Admin_UI {
 			} else {
 				echo '<p class="description">' . esc_html__( 'Το site δεν έχει Hub ακόμα.', 'site-bridge' ) . '</p>';
 			}
-			$code = get_transient( 'sbr_pair_show_' . get_current_user_id() );
+			$code = self::show_get( 'sbr_pair_show_' );
 			if ( is_string( $code ) && '' !== $code ) {
 				echo '<p>' . esc_html__( 'Αντέγραψε τον κωδικό στο Hub (Sites → Προσθήκη site). Ισχύει 15 λεπτά και μία φορά:', 'site-bridge' ) . '</p>';
 				echo '<textarea id="sbr-pair-code" class="sbr-code" readonly>' . esc_textarea( $code ) . '</textarea>';
@@ -703,7 +703,7 @@ final class SBR_Admin_UI {
 	private static function render_app(): void {
 		$s       = SBR_Settings::get();
 		$devices = SBR_App::devices();
-		$code    = get_transient( 'sbr_app_code_' . get_current_user_id() );
+		$code    = self::show_get( 'sbr_app_code_' );
 		?>
 		<h2 class="sbr-h2"><?php esc_html_e( 'Εφαρμογή Android', 'site-bridge' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Η εφαρμογή Site Bridge ανοίγει και κλείνει το παράθυρο εγγραφής των sites αυτού του Hub από το κινητό, και δείχνει το ιστορικό. Τίποτα άλλο. Βλέπει μόνο sites με επίπεδο Εγγραφή ή Διαχείριση, και ανοίγει παράθυρο μόνο όπου το site το επιτρέπει στο Hub.', 'site-bridge' ); ?></p>
@@ -920,10 +920,26 @@ final class SBR_Admin_UI {
 				$s['window_email'] = '1' === self::post( 'sbr_window_email' );
 				$s['site_ips']    = self::post( 'sbr_site_ips' );
 				$s['zip_hosts']   = self::post( 'sbr_zip_hosts' );
+				// 1.13.2: on multisite a site administrator is not a network
+				// administrator. Only a super admin turns on the admin level,
+				// changes the zip sources or runs the tools as a super admin.
+				$net_lock = is_multisite() && ! is_super_admin();
+				$net_msgs = array();
+				if ( $net_lock ) {
+					$prev = SBR_Settings::get();
+					if ( 'admin' === $s['level'] && 'admin' !== $old ) {
+						$s['level'] = 'write';
+						$net_msgs[] = self::msg( 'error', __( 'Σε multisite μόνο ο διαχειριστής του δικτύου ανοίγει το επίπεδο admin.', 'site-bridge' ) );
+					}
+					$s['zip_hosts'] = $prev['zip_hosts'];
+				}
+				if ( is_multisite() && (int) $s['run_as'] > 0 && is_super_admin( (int) $s['run_as'] ) ) {
+					$net_msgs[] = self::msg( 'error', __( 'Σε multisite ο χρήστης εκτέλεσης είναι διαχειριστής αυτού του site, όχι του δικτύου.', 'site-bridge' ) );
+				}
 				SBR_Settings::save( $s );
 				$s = SBR_Settings::get();
 				self::audit( 'access', array( 'level' => $old . ' → ' . $s['level'], 'pii_mask' => $s['pii_mask'], 'remote_window' => $s['remote_window'], 'nowin' => $s['nowin'] ) );
-				$msgs = array_merge( $saved, self::dropped( array( 'sbr_site_ips' => 'site_ips', 'sbr_zip_hosts' => 'zip_hosts' ) ) );
+				$msgs = array_merge( $saved, $net_lock ? array() : self::dropped( array( 'sbr_site_ips' => 'site_ips', 'sbr_zip_hosts' => 'zip_hosts' ) ), $net_msgs );
 				if ( (int) self::post( 'sbr_run_as' ) && ! SBR_Settings::run_as_user() ) {
 					$msgs[] = self::msg( 'error', __( 'Ο χρήστης εκτέλεσης πρέπει να είναι διαχειριστής.', 'site-bridge' ) );
 				}
@@ -975,7 +991,7 @@ final class SBR_Admin_UI {
 				self::redirect( 'access', array( self::msg( 'success', __( 'Το παράθυρο εγγραφής έκλεισε.', 'site-bridge' ) ) ) );
 				break;
 			case 'pair_code':
-				set_transient( 'sbr_pair_show_' . get_current_user_id(), SBR_Site::new_code(), 15 * MINUTE_IN_SECONDS );
+				self::show_put( 'sbr_pair_show_', SBR_Site::new_code(), 15 * MINUTE_IN_SECONDS );
 				self::redirect( 'access', array() );
 				break;
 			case 'forget_hub':
@@ -1039,7 +1055,7 @@ final class SBR_Admin_UI {
 				self::redirect( 'app', $saved );
 				break;
 			case 'app_code':
-				set_transient( 'sbr_app_code_' . get_current_user_id(), SBR_App::new_code(), SBR_App::CODE_TTL );
+				self::show_put( 'sbr_app_code_', SBR_App::new_code(), SBR_App::CODE_TTL );
 				self::redirect( 'app', array() );
 				break;
 			case 'app_revoke':
@@ -1051,6 +1067,40 @@ final class SBR_Admin_UI {
 			default:
 				self::redirect( 'overview', array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'site-bridge' ) ) ) );
 		}
+	}
+
+	/** Key that seals a pairing code kept for display (1.13.2): from the site's salts, never stored. */
+	private static function show_key(): string {
+		return hash( 'sha256', wp_salt( 'auth' ) . '|sbr_show_code', true );
+	}
+
+	/**
+	 * Keeps a fresh pairing code for the page after the redirect (1.13.2):
+	 * sealed with a key from the salts, so the raw token is never at rest
+	 * in the options table, where SBR_App and SBR_Site keep only its hash.
+	 */
+	private static function show_put( string $prefix, string $code, int $ttl ): void {
+		$name = $prefix . get_current_user_id();
+		if ( '' === $code || ! function_exists( 'sodium_crypto_secretbox' ) ) {
+			delete_transient( $name );
+			return;
+		}
+		$nonce = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+		set_transient( $name, base64_encode( $nonce . sodium_crypto_secretbox( $code, $nonce, self::show_key() ) ), $ttl ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- sealed bytes.
+	}
+
+	/** The pairing code sealed by show_put(), or ''. */
+	private static function show_get( string $prefix ): string {
+		$raw = get_transient( $prefix . get_current_user_id() );
+		if ( ! is_string( $raw ) || '' === $raw || ! function_exists( 'sodium_crypto_secretbox_open' ) ) {
+			return '';
+		}
+		$bin = base64_decode( $raw, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- sealed bytes.
+		if ( false === $bin || strlen( $bin ) <= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ) {
+			return '';
+		}
+		$plain = sodium_crypto_secretbox_open( substr( $bin, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ), substr( $bin, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ), self::show_key() );
+		return is_string( $plain ) ? $plain : '';
 	}
 
 	/** A warning when lines of a list field were not valid and were left out. */

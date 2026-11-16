@@ -469,6 +469,12 @@ class RS_Lang {
 		'Η αποστολή απέτυχε — έλεγξε τις ρυθμίσεις email του WordPress (π.χ. SMTP plugin ή PHP mail).' => 'Sending failed — check the WordPress email settings (e.g. SMTP plugin or PHP mail).',
 
 		'Αν το email υπάρχει στα αρχεία μας, θα λάβεις νέο κλειδί σε λίγα λεπτά.' => 'If the email is in our records, you will receive a new key in a few minutes.',
+		'Αν το email υπάρχει στα αρχεία μας, θα λάβεις σε λίγα λεπτά ένα link για νέο κλειδί.' => 'If the email is in our records, you will receive a link for a new key in a few minutes.',
+		'Το νέο σου κλειδί στάλθηκε στο email σου.' => 'Your new key has been sent to your email.',
+		'Το link έληξε ή χρησιμοποιήθηκε ήδη. Ζήτησε νέο από το «Ξέχασες το κλειδί;».' => 'This link has expired or was already used. Ask for a new one under “Forgot your key?”.',
+		'Πάτησε για να πάρεις νέο κλειδί. Το παλιό κλειδί θα ακυρωθεί και θα σου σταλεί το νέο με email.' => 'Press to get a new key. Your old key stops working and the new one is sent to you by email.',
+		'Ζητήθηκε νέο κλειδί για το Author Portal. Άνοιξε το link μέσα σε μία ώρα και πάτησε «Νέο κλειδί»:' => 'A new Author Portal key was requested. Open the link within one hour and press “New key”:',
+		'Αν δεν το ζήτησες εσύ, αγνόησε αυτό το email: το κλειδί σου δεν άλλαξε.' => 'If you did not ask for this, ignore this email: your key has not changed.',
 		'Ξέχασες το κλειδί;' => 'Forgot your key?',
 		'Στείλε νέο κλειδί' => 'Send a new key',
 		'Μηνιαία αναφορά email' => 'Monthly email report',
