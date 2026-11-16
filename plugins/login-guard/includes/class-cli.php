@@ -8,6 +8,8 @@
  *   wp login-guard unlock --user=<login|email|id>
  *   wp login-guard unlock --all
  *   wp login-guard mode <off|test|live>
+ *   wp login-guard 2fa status
+ *   wp login-guard 2fa reset <login|email|id>
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -100,5 +102,44 @@ final class LGD_CLI {
 		$s['mode'] = $m;
 		LGD_Settings::save( $s );
 		\WP_CLI::success( 'Mode: ' . $m );
+	}
+	/**
+	 * Two-step verification: who has it, or reset it for one user.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <action>
+	 * : status | reset
+	 *
+	 * [<user>]
+	 * : Login, e-mail or id (reset only).
+	 *
+	 * @subcommand 2fa
+	 *
+	 * @param array $args
+	 * @param array $assoc
+	 */
+	public function twofa( $args, $assoc ): void {
+		$action = isset( $args[0] ) ? (string) $args[0] : 'status';
+		if ( 'reset' === $action ) {
+			$ident = isset( $args[1] ) ? (string) $args[1] : '';
+			$user  = ctype_digit( $ident ) ? get_userdata( (int) $ident ) : LGD_Store::find_user( $ident );
+			if ( ! $user instanceof WP_User ) {
+				\WP_CLI::error( 'No such user.' );
+			}
+			if ( ! LGD_TwoFA::is_on( (int) $user->ID ) ) {
+				\WP_CLI::success( $user->user_login . ' has no two-step verification.' );
+				return;
+			}
+			LGD_TwoFA::disable( $user, 'cli' );
+			\WP_CLI::success( 'Two-step verification reset for ' . $user->user_login . '.' );
+			return;
+		}
+		$sum = LGD_TwoFA::summary();
+		\WP_CLI::line( 'Two-step verification: ' . ( LGD_TwoFA::active() ? 'active' : 'inactive' ) . ( defined( 'LGD_DISABLE_2FA' ) && LGD_DISABLE_2FA ? ' (LGD_DISABLE_2FA is set)' : '' ) );
+		\WP_CLI::line( 'Users with 2FA: ' . $sum['on'] . '; required but missing: ' . $sum['missing'] );
+		foreach ( $sum['list'] as $u ) {
+			\WP_CLI::line( '  missing: ' . $u->user_login );
+		}
 	}
 }

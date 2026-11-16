@@ -29,6 +29,14 @@
  *  - surge_at    lockouts in an hour that send the digest (3–500, 10)
  *  - lang        visitor texts: 'auto' (site locale) | 'el' | 'en'
  *  - keep        bool  keep the settings and the log on uninstall
+ *  - twofa       bool  two-step verification available (default on; it
+ *                is asked only from users who set it up, Bible §14.1)
+ *  - tfa_roles   string[] roles that must use 2FA in live mode
+ *                (default administrator; the saver must have it first)
+ *  - tfa_grace_days / tfa_grace_logins  grace before required 2FA is
+ *                enforced (7 days / 3 logins, whichever ends first)
+ *  - tfa_trust_days  «do not ask again in this browser» (0–90, 30)
+ *  - tfa_strict  bool  strict guard: no session without the second step
  *  - t_<key>_el / t_<key>_en  visitor texts (Bible §14.17), keys in texts()
  *
  * Autoloaded: every login reads it.
@@ -72,6 +80,14 @@ final class LGD_Settings {
 			'unlock_done'    => array( 'Η σύνδεση ξεκλειδώθηκε. Μπορείς να συνδεθείς με τον κωδικό σου.', 'Logins are unlocked. You can log in with your password.', 200 ),
 			'unlock_invalid' => array( 'Ο σύνδεσμος έληξε, χρησιμοποιήθηκε ήδη ή άνοιξε σε άλλον browser. Ζήτησε νέο.', 'The link has expired, was already used or was opened in another browser. Please ask for a new one.', 200 ),
 			'mail_subject'   => array( 'Ξεκλείδωμα σύνδεσης στο {site}', 'Unlock your login at {site}', 120 ),
+			'tfa_title'      => array( 'Επαλήθευση σε δύο βήματα', 'Two-step verification', 80 ),
+			'tfa_intro'      => array( 'Γράψε τον 6ψήφιο κωδικό από την εφαρμογή επαλήθευσης ή έναν από τους κωδικούς ανάκτησης.', 'Enter the 6-digit code from your authenticator app, or one of your recovery codes.', 300 ),
+			'tfa_field'      => array( 'Κωδικός', 'Code', 40 ),
+			'tfa_trust'      => array( 'Να μη ζητηθεί ξανά σε αυτόν τον browser για {days} ημέρες', 'Do not ask again in this browser for {days} days', 120 ),
+			'tfa_go'         => array( 'Σύνδεση', 'Log in', 40 ),
+			'tfa_wrong'      => array( 'Λάθος κωδικός. Δοκίμασε ξανά με τον νέο κωδικό της εφαρμογής.', 'Wrong code. Please try again with the new code from your app.', 200 ),
+			'tfa_expired'    => array( 'Η σύνδεση έληξε ή δεν ολοκληρώθηκε. Γράψε ξανά το όνομα χρήστη και τον κωδικό σου.', 'The login has expired or was not completed. Please enter your username and password again.', 200 ),
+			'tfa_api'        => array( 'Αυτός ο λογαριασμός έχει επαλήθευση σε δύο βήματα: σύνδεση μόνο από τη σελίδα σύνδεσης ή με Application Password.', 'This account uses two-step verification: log in from the login page, or use an Application Password.', 200 ),
 			'mail_body'      => array( 'Κάποιος, ελπίζουμε εσύ, ζήτησε να ξεκλειδώσει τη σύνδεση στον λογαριασμό σου στο {site}. Άνοιξε αυτόν τον σύνδεσμο μέσα σε {minutes} λεπτά, στον ίδιο browser: {link} Αν δεν το ζήτησες εσύ, αγνόησε αυτό το email. Ο κωδικός σου δεν αλλάζει.', 'Someone, hopefully you, asked to unlock logins to your account at {site}. Open this link within {minutes} minutes, in the same browser: {link} If it was not you, ignore this email. Your password does not change.', 600 ),
 		);
 	}
@@ -91,6 +107,8 @@ final class LGD_Settings {
 			'notify_device' => true,
 			'notify_surge'  => true,
 			'keep'          => false,
+			'twofa'         => true,
+			'tfa_strict'    => true,
 		);
 	}
 
@@ -106,6 +124,9 @@ final class LGD_Settings {
 			'acct_window' => array( 60, 5, 1440 ),
 			'acct_lock'   => array( 15, 1, 1440 ),
 			'surge_at'    => array( 10, 3, 500 ),
+			'tfa_grace_days'   => array( 7, 0, 30 ),
+			'tfa_grace_logins' => array( 3, 0, 20 ),
+			'tfa_trust_days'   => array( 30, 0, 90 ),
 		);
 	}
 
@@ -115,6 +136,7 @@ final class LGD_Settings {
 			'xmlrpc' => 'auth_off',
 			'lang'   => 'auto',
 			'allow'  => array(),
+			'tfa_roles' => array( 'administrator' ),
 		);
 		foreach ( self::bools() as $k => $v ) {
 			$d[ $k ] = $v;
@@ -171,6 +193,15 @@ final class LGD_Settings {
 		}
 
 		$out['allow'] = self::sanitize_allow( isset( $in['allow'] ) ? $in['allow'] : array() );
+
+		$roles = isset( $in['tfa_roles'] ) && is_array( $in['tfa_roles'] ) ? $in['tfa_roles'] : $d['tfa_roles'];
+		$out['tfa_roles'] = array();
+		foreach ( $roles as $r ) {
+			$r = is_string( $r ) ? sanitize_key( $r ) : '';
+			if ( '' !== $r && ! in_array( $r, $out['tfa_roles'], true ) && count( $out['tfa_roles'] ) < 50 ) {
+				$out['tfa_roles'][] = $r;
+			}
+		}
 
 		foreach ( self::texts() as $k => $t ) {
 			foreach ( array( 'el' => 0, 'en' => 1 ) as $lang => $i ) {
