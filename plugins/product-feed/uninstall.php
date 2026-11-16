@@ -30,7 +30,7 @@ function pfd_uninstall_site(): void {
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
 		foreach ( array( 'pfd_tick', 'pfd_batch', 'pfd_changed' ) as $pfd_hook ) {
-			as_unschedule_all_actions( $pfd_hook, array(), 'product-feed', 'maintenance-mode' );
+			as_unschedule_all_actions( $pfd_hook, array(), 'product-feed' );
 		}
 	}
 
