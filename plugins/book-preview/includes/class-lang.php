@@ -134,6 +134,8 @@ final class BPV_Lang {
 		'Όλες οι κατηγορίες'                                        => 'All categories',
 		'Κουμπί'                                                    => 'Button',
 		'Τίτλος της κάρτας'                                         => 'Card title',
+		'Τίτλος της καρτέλας' => 'Tab title',
+		'Και σε δική του καρτέλα, σε κάθε προϊόν με δείγμα (με «Μόνο με το shortcode» φαίνεται μόνο εκεί)' => 'Also in its own tab, on every product with a sample (with "Only with the shortcode" it shows only there)',
 		'Κουμπί αγοράς'                                             => 'Buy button',
 		'Λειτουργία'                                                => 'Mode',
 		'Ενεργοποίηση στο front end'                                => 'Turn on on the front end',

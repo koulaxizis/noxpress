@@ -299,7 +299,7 @@ final class HMS_Admin_UI {
 		?>
 		<h2 class="hms-h2"><?php esc_html_e( 'Shortcode βίντεο', 'home-sections' ); ?></h2>
 		<div class="hms-zone">
-			<p class="description"><?php esc_html_e( 'Το [hs_video] δείχνει το νεότερο δημοσιευμένο προϊόν που έχει βίντεο στην καρτέλα του (Custom Product Tabs for WooCommerce): εικόνα και κουμπί αναπαραγωγής, και ο player του YouTube φορτώνει μόνο με το πάτημα. Χωρίς αποτέλεσμα δεν τυπώνει τίποτα.', 'home-sections' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Το [hs_video] δείχνει το νεότερο δημοσιευμένο προϊόν που έχει βίντεο στην καρτέλα του (Product Tabs, ή Custom Product Tabs for WooCommerce για όσα δεν έχουν εισαχθεί): εικόνα και κουμπί αναπαραγωγής, και ο player του YouTube φορτώνει μόνο με το πάτημα. Χωρίς αποτέλεσμα δεν τυπώνει τίποτα.', 'home-sections' ); ?></p>
 			<table class="widefat hms-table">
 				<tbody>
 					<?php foreach ( $rows as $att => $text ) : ?>

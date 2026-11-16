@@ -14,6 +14,11 @@
  * video_id="ID" …] in the tab content, or from a youtube.com/watch?v=ID,
  * youtu.be/ID or /embed/ID URL; IDs must match [A-Za-z0-9_-]{11}.
  *
+ * Product Tabs (1.4.5): when it is active, ptb_get_video( $id, $type )
+ * is read first and the scan also takes products with its meta
+ * _ptb_tabs; the meta above stays the fallback for products not
+ * imported yet, so nothing changes before or during the switch.
+ *
  * Picking: the newest 50 published, visible products that have the meta
  * (post_date, then ID), parsed in PHP, first match wins. A meta_query on
  * the serialized array would be fragile. The result (product ID + video
@@ -47,6 +52,9 @@ final class HMS_Video {
 	const MAX_KEYS = 50;
 
 	const ID_RE = '[A-Za-z0-9_-]{11}';
+
+	/** Meta of Product Tabs (1.4.5). */
+	const PTB_META = '_ptb_tabs';
 
 	/** True after an error: the rest of the request runs without us (Bible §14.6). */
 	private static $off = false;
@@ -217,6 +225,12 @@ final class HMS_Video {
 
 	/** The video ID of a product for a type, or ''. */
 	public static function product_video( int $product_id, string $type ): string {
+		if ( function_exists( 'ptb_get_video' ) && in_array( $type, self::types(), true ) ) {
+			$vid = (string) ptb_get_video( $product_id, $type );
+			if ( preg_match( '/^' . self::ID_RE . '$/', $vid ) ) {
+				return $vid;
+			}
+		}
 		$src = self::source();
 		if ( ! isset( $src['positions'][ $type ] ) ) {
 			return '';
@@ -270,12 +284,7 @@ final class HMS_Video {
 			'fields'              => 'ids',
 			'no_found_rows'       => true,
 			'ignore_sticky_posts' => true,
-			'meta_query'          => array( // phpcs:ignore WordPress.DB.SlowDBQuery -- EXISTS on one key, 50 rows.
-				array(
-					'key'     => $src['meta_key'],
-					'compare' => 'EXISTS',
-				),
-			),
+			'meta_query'          => self::meta_query( $src['meta_key'] ), // phpcs:ignore WordPress.DB.SlowDBQuery -- EXISTS on one or two keys, 50 rows.
 			'tax_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery -- catalog visibility, as WooCommerce does.
 				array(
 					'taxonomy' => 'product_visibility',
@@ -303,6 +312,24 @@ final class HMS_Video {
 				'titles'    => array(),
 			)
 		);
+	}
+
+	/** EXISTS on the tabs meta, and on Product Tabs' meta while it is active. */
+	private static function meta_query( string $key ): array {
+		$q = array(
+			array(
+				'key'     => $key,
+				'compare' => 'EXISTS',
+			),
+		);
+		if ( function_exists( 'ptb_get_video' ) && self::PTB_META !== $key ) {
+			$q[]           = array(
+				'key'     => self::PTB_META,
+				'compare' => 'EXISTS',
+			);
+			$q['relation'] = 'OR';
+		}
+		return $q;
 	}
 
 	/**
@@ -389,9 +416,9 @@ final class HMS_Video {
 		}
 	}
 
-	/** added / updated / deleted_post_meta for the tabs meta key. */
+	/** added / updated / deleted_post_meta for the tabs meta keys. */
 	public static function on_meta( $meta_id, $object_id, $meta_key ): void {
-		if ( self::source()['meta_key'] === $meta_key ) {
+		if ( self::source()['meta_key'] === $meta_key || self::PTB_META === $meta_key ) {
 			self::flush();
 		}
 	}

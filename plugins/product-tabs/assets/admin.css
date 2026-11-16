@@ -1,0 +1,429 @@
+/**
+ * Product Tabs — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors ptb-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.ptb-wrap {
+	--ptb-bg: #101218;
+	--ptb-panel: #14161d;
+	--ptb-panel-2: #1d2029;
+	--ptb-input: #1a1d26;
+	--ptb-border: #2e3240;
+	--ptb-border-input: #3a3f52;
+	--ptb-row-border: #23262f;
+	--ptb-stripe: #181b23;
+	--ptb-hover: #1e212c;
+	--ptb-text: #eae8fa;
+	--ptb-heading: #f6f4ff;
+	--ptb-muted: #b7b2d6;
+	--ptb-link: #beb1ff;
+	--ptb-link-hover: #d4c9ff;
+	--ptb-accent: #6d4aff;
+	--ptb-accent-hover: #8263ff;
+	--ptb-warn: #f5c97e;
+	--ptb-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.ptb-wrap {
+	color-scheme: dark;
+	background: var(--ptb-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--ptb-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.ptb-wrap h1,
+.ptb-wrap h2 {
+	color: var(--ptb-heading);
+}
+
+.ptb-wrap a { color: var(--ptb-link); }
+.ptb-wrap a:hover { color: var(--ptb-link-hover); }
+
+.ptb-wrap .ptb-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--ptb-muted);
+	border-bottom: 1px solid var(--ptb-border);
+	padding-bottom: 6px;
+}
+
+.ptb-wrap .description,
+.ptb-wrap p.description,
+.ptb-wrap .ptb-hint {
+	color: var(--ptb-muted) !important;
+}
+
+.ptb-zone {
+	background: var(--ptb-panel);
+	border: 1px solid var(--ptb-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.ptb-wrap input[type="text"],
+.ptb-wrap input[type="url"],
+.ptb-wrap input[type="number"],
+.ptb-wrap input[type="time"],
+.ptb-wrap input[type="date"],
+.ptb-wrap textarea,
+.ptb-wrap select {
+	background-color: var(--ptb-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--ptb-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.ptb-wrap input::placeholder,
+.ptb-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.ptb-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.ptb-wrap input[type="file"] {
+	color: var(--ptb-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.ptb-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.ptb-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.ptb-wrap input[type="checkbox"],
+.ptb-wrap input[type="radio"] {
+	accent-color: var(--ptb-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.ptb-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.ptb-wrap .button:hover:not(:disabled) {
+	border-color: var(--ptb-accent) !important;
+	color: #ffffff !important;
+}
+
+.ptb-wrap .button-primary {
+	background: var(--ptb-accent) !important;
+	border-color: var(--ptb-accent) !important;
+	color: #ffffff !important;
+}
+
+.ptb-wrap .button-primary:hover:not(:disabled) {
+	background: var(--ptb-accent-hover) !important;
+}
+
+.ptb-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.ptb-submit { margin-top: 20px; }
+.ptb-inline-form { display: inline; margin-right: 10px; }
+.ptb-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.ptb-table,
+table.widefat.ptb-table {
+	background: var(--ptb-panel) !important;
+	border: 1px solid var(--ptb-border) !important;
+	border-radius: 6px;
+	color: var(--ptb-text) !important;
+	margin-top: 14px !important;
+}
+
+.ptb-table thead th,
+.ptb-table thead td {
+	background: var(--ptb-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.ptb-table tbody td,
+.ptb-table tbody th {
+	background: var(--ptb-panel) !important;
+	color: var(--ptb-text) !important;
+	border-bottom: 1px solid var(--ptb-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.ptb-table tbody tr:nth-child(2n) td,
+.ptb-table tbody tr:nth-child(2n) th {
+	background: var(--ptb-stripe) !important;
+}
+
+.ptb-table tbody tr:hover td,
+.ptb-table tbody tr:hover th {
+	background: var(--ptb-hover) !important;
+}
+
+.ptb-table td,
+.ptb-table th {
+	padding: 12px 14px;
+}
+
+.ptb-table td code {
+	background: transparent !important;
+	color: var(--ptb-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.ptb-table .ptb-empty {
+	color: var(--ptb-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.ptb-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.ptb-footer a { color: #beb1ff; text-decoration: none; }
+.ptb-footer a:hover { text-decoration: underline; }
+
+.ptb-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.ptb-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.ptb-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.ptb-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.ptb-muted { color: var(--ptb-muted) !important; }
+.ptb-warn { color: var(--ptb-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.ptb-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.ptb-wrap .ptb-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--ptb-heading);
+}
+
+.ptb-status p { margin: 0 0 8px; }
+.ptb-status p:last-child { margin-bottom: 0; }
+.ptb-status code,
+.ptb-wrap .description code,
+.ptb-wrap .ptb-hint code {
+	background: var(--ptb-panel-2);
+	color: var(--ptb-muted);
+	border: 1px solid var(--ptb-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.ptb-suspended { margin: 8px 0 0; }
+.ptb-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.ptb-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--ptb-border);
+	background: var(--ptb-panel-2);
+	color: var(--ptb-text);
+	white-space: nowrap;
+}
+.ptb-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.ptb-badge--muted { color: var(--ptb-muted); }
+.ptb-badge--warn { border-color: #6b5a33; color: var(--ptb-warn); }
+.ptb-badge--danger { border-color: #6b3a3a; color: var(--ptb-danger); }
+
+/* Area fieldsets. */
+.ptb-area {
+	background: var(--ptb-panel);
+	border: 1px solid var(--ptb-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.ptb-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--ptb-heading);
+}
+.ptb-row { margin: 4px 0 8px; }
+
+.ptb-details > summary {
+	cursor: pointer;
+	color: var(--ptb-link);
+	margin: 4px 0;
+}
+.ptb-details[open] > summary { margin-bottom: 12px; }
+
+.ptb-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.ptb-wrap .ptb-label {
+	display: block;
+	font-weight: 600;
+	color: var(--ptb-heading);
+	margin: 8px 0 6px;
+}
+.ptb-grid .ptb-label:first-child { margin-top: 0; }
+
+.ptb-field {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.ptb-field > span:first-child {
+	min-width: 150px;
+	color: var(--ptb-text);
+}
+.ptb-wrap .ptb-hint { display: block; font-size: 12px; margin-top: 4px; }
+.ptb-wrap td .ptb-hint { display: inline; }
+.ptb-table td.ptb-warn { color: var(--ptb-warn) !important; }
+
+/* Tabs of the main page. */
+.ptb-wrap .ptb-tabs {
+	border-bottom: 1px solid var(--ptb-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.ptb-wrap .ptb-tabs .nav-tab {
+	background: var(--ptb-panel);
+	border-color: var(--ptb-border);
+	color: var(--ptb-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.ptb-wrap .ptb-tabs .nav-tab:hover { color: var(--ptb-link-hover); background: var(--ptb-hover); }
+.ptb-wrap .ptb-tabs .nav-tab-active,
+.ptb-wrap .ptb-tabs .nav-tab-active:hover {
+	background: var(--ptb-bg);
+	border-bottom-color: var(--ptb-bg);
+	color: var(--ptb-heading);
+}
+
+/* One input per line (removal rules). */
+.ptb-wrap .ptb-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.ptb-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--ptb-border);
+	border-radius: 6px;
+	background: var(--ptb-panel-2);
+}
+.ptb-scroll .ptb-field { margin-bottom: 4px; }
+
+/* ===== Shipping Notes ===== */
+
+.ptb-wrap .ptb-wide { width: 100%; max-width: 640px; }
+.ptb-wrap .ptb-num { width: 90px; }
+.ptb-wrap .ptb-texts input[type="text"] { width: 100%; }
+
+/* ===== Rule cards ===== */
+.ptb-wrap .ptb-rule-card {
+	min-width: 0; /* fieldsets default to min-content and overflow narrow screens */
+	margin: 12px 0 0;
+	padding: 12px 18px 10px;
+}
+.ptb-wrap .ptb-rule-card legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--ptb-heading);
+}
+.ptb-wrap .ptb-rule-card--new { border-style: dashed; }
+.ptb-wrap .ptb-rule-card--new legend { color: var(--ptb-muted); }
+.ptb-wrap .ptb-rule-card .ptb-label { margin: 0; }
+.ptb-wrap .ptb-rule-card .ptb-label .ptb-wide {
+	display: block;
+	width: 100%;
+	max-width: none;
+	margin-top: 6px;
+	font-weight: 400;
+}
+.ptb-wrap .ptb-rule-card textarea { min-height: 64px; }
+.ptb-wrap .ptb-rule-card .ptb-badge { white-space: normal; max-width: 100%; }
+.ptb-wrap .ptb-rule-card select,
+.ptb-wrap input[type="file"] { max-width: 100%; }
+.ptb-wrap .ptb-texts td:first-child { width: 280px; }

@@ -3,7 +3,7 @@
  * Plugin Name:          Home Sections
  * Plugin URI:           https://noxpress.tech
  * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets, το [hs_video] με το νεότερο book trailer ή παρουσίαση από τις καρτέλες βίντεο των προϊόντων, και το [hs_stats] με ζωντανούς μετρητές για διαθέσιμα προϊόντα, ολοκληρωμένες παραγγελίες, αγοραστές και προϊόντα ανά ομάδα κατηγοριών. Τα προϊόντα δεν αλλάζουν.
- * Version:              1.4.4
+ * Version:              1.4.5
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -66,6 +66,8 @@
  *    hms_preorder_meta adds or removes keys. The same applies to the
  *    video tabs of [hs_video] (meta wb_custom_tabs of Custom Product Tabs
  *    for WooCommerce, read with get_post_meta; filter hms_video_source).
+ *    1.4.5: Product Tabs is read through its API ptb_get_video(); only
+ *    the scan query names its meta _ptb_tabs (EXISTS), as above.
  *  - §14.5 (no write on a visitor request): [hs_video] keeps its pick
  *    (product ID + video ID per attribute set) in ONE transient,
  *    hms_video_cache (12 h), written when a visitor request finds it
@@ -85,7 +87,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HMS_VERSION', '1.4.4' );
+define( 'HMS_VERSION', '1.4.5' );
 define( 'HMS_FILE', __FILE__ );
 define( 'HMS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HMS_URL', plugin_dir_url( __FILE__ ) );

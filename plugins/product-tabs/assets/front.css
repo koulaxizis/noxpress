@@ -1,0 +1,74 @@
+/**
+ * Product Tabs — front.css (v1.0.0)
+ *
+ * Only the click-to-load player (Bible §14.9: prefixed, theme-proof,
+ * loaded only on pages that show a video of ours). The tabs themselves
+ * stay the theme's.
+ */
+.ptb-video {
+	position: relative;
+	width: 100%;
+	max-width: 1120px;
+	margin: 0 auto 1em;
+	aspect-ratio: 16 / 9;
+	background: #000;
+	border-radius: 6px;
+	overflow: hidden;
+}
+.ptb-video .ptb-play {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: #000;
+	box-shadow: none;
+	cursor: pointer;
+}
+.ptb-video .ptb-play img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	object-fit: cover;
+	opacity: .92;
+}
+.ptb-video .ptb-play-icon {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 68px;
+	height: 48px;
+	margin: -24px 0 0 -34px;
+	border-radius: 12px;
+	background: rgba(0, 0, 0, .72);
+	transition: background .15s ease;
+}
+.ptb-video .ptb-play-icon::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -10px 0 0 -7px;
+	border-style: solid;
+	border-width: 10px 0 10px 18px;
+	border-color: transparent transparent transparent #fff;
+}
+.ptb-video .ptb-play:hover .ptb-play-icon,
+.ptb-video .ptb-play:focus-visible .ptb-play-icon { background: #d00; }
+.ptb-video .ptb-play:focus-visible { outline: 3px solid #fff; outline-offset: -6px; }
+.ptb-video iframe {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+@supports not (aspect-ratio: 16 / 9) {
+	.ptb-video { height: 0; padding-top: 56.25%; }
+}
