@@ -46,6 +46,7 @@ final class GFC_Product {
 		add_filter( 'woocommerce_order_item_display_meta_key', array( __CLASS__, 'meta_label' ), 10, 2 );
 		// Suite contract (Bible §6): a gift-card line is stored value, not a product sale.
 		add_filter( 'noxpress_is_stored_value_item', array( __CLASS__, 'stored_value' ), 10, 2 );
+		add_filter( 'noxpress_stored_value_owed', array( __CLASS__, 'owed' ) );
 
 		if ( Gift_Cards::killed() ) {
 			add_filter( 'woocommerce_is_purchasable', array( __CLASS__, 'not_purchasable' ), 99, 2 );
@@ -536,6 +537,25 @@ final class GFC_Product {
 	 * @param bool  $is   Current value.
 	 * @param mixed $item Order item.
 	 */
+	/**
+	 * Suite filter noxpress_stored_value_owed: what the shop owes on gift
+	 * cards today, per currency (Production Ledger shows it apart).
+	 *
+	 * @return array<string,float>
+	 */
+	public static function owed( $owed ): array {
+		global $wpdb;
+		$owed = is_array( $owed ) ? $owed : array();
+		$t    = GFC_Schema::cards();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- own table, no input.
+		$rows = $wpdb->get_results( "SELECT currency, SUM(balance) AS s FROM $t WHERE status IN ('pending','review','active','disabled','locked') AND balance > 0 GROUP BY currency", ARRAY_A );
+		foreach ( is_array( $rows ) ? $rows : array() as $r ) {
+			$cur          = (string) $r['currency'];
+			$owed[ $cur ] = (float) ( $owed[ $cur ] ?? 0 ) + (int) $r['s'] / 100;
+		}
+		return $owed;
+	}
+
 	public static function stored_value( $is, $item ): bool {
 		return (bool) $is || ( $item instanceof WC_Order_Item_Product && null !== self::line_data( $item ) );
 	}
