@@ -1,7 +1,8 @@
 /**
- * Shipping Notes — front.css (v1.1.0)
+ * Shipping Notes — front.css (v1.4.0)
  *
- * Scoped to .shn-fs (free-shipping bar), .shn-dl (delivery time) and
+ * Scoped to .shn-fs (free-shipping bar), .shn-fsp (its product page line,
+ * 1.4.0), .shn-dl (delivery time) and
  * .shn-mx / .shn-mx-hint / .shn-parcels-order (parcels, 1.1.0).
  * Layout properties carry !important so theme rules with an id (e.g.
  * "#sidebar span { float: right; background: … }", which outrank any
@@ -14,6 +15,7 @@
 .shn-fs-wrap:empty { display: none !important; }
 
 .shn-fs,
+.shn-fsp,
 .shn-dl {
 	display: block !important;
 	float: none !important;
@@ -203,3 +205,16 @@
 .woocommerce-checkout .shn-sg {
 	display: none !important;
 }
+
+/* ===== Free shipping: product page line (1.4.0) ===== */
+
+.shn-fsp {
+	margin: .75em 0 1em !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: none !important;
+	font-size: .95em !important;
+	text-transform: none !important;
+}
+.shn-fsp--won { color: var(--shn-color, inherit) !important; font-weight: 600 !important; }
+.shn-fsp .woocommerce-Price-amount { font-weight: 600 !important; white-space: nowrap !important; }

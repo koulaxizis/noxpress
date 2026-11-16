@@ -84,6 +84,62 @@ final class SHN_Threshold {
 	}
 
 	/**
+	 * What one product does for free shipping with the current cart
+	 * (product page line, 1.4.0). The amount is the cart's counted amount
+	 * plus the product's price once, with or without tax as the cart shows
+	 * it (its lowest price for a
+	 * variable product, so the line never promises too much); a product
+	 * already in the cart is counted only once. "Won" when the cart has
+	 * free shipping already or the sum reaches the threshold.
+	 *
+	 * @return array|null State as for_cart() ('left' | 'won'), or null when
+	 *                    nothing should show (no shipping needed, no rule).
+	 */
+	public static function for_product( WC_Product $product ): ?array {
+		if ( ! function_exists( 'WC' ) || ! WC()->cart instanceof WC_Cart || ! $product->needs_shipping() ) {
+			return null;
+		}
+		$cart = WC()->cart;
+		$now  = self::for_cart();
+		if ( null === $now && ! $cart->is_empty() && $cart->needs_shipping() ) {
+			return null; // The cart bar says nothing (e.g. another plugin refuses free shipping): neither does the line.
+		}
+		if ( null !== $now && 'won' === $now['state'] ) {
+			return self::state( 'won', (float) $now['threshold'], (float) $now['total'] );
+		}
+		$packages = $cart->get_shipping_packages();
+		$package  = is_array( $packages ) && $packages ? reset( $packages ) : array();
+		if ( ! is_array( $package ) || ! isset( $package['destination'] ) ) {
+			return null;
+		}
+		$rule = self::rule( WC_Shipping_Zones::get_zone_matching_package( $package ), $cart );
+		if ( null === $rule ) {
+			return null;
+		}
+		if ( $rule['threshold'] <= 0 ) {
+			// Only an "always free" method: free with any order.
+			return $rule['methods'] ? self::state( 'won', 0.0, 0.0 ) : null;
+		}
+		$total = $cart->is_empty() ? 0.0 : self::counted_total( $cart, $rule['ignore_discounts'] );
+		if ( ! self::in_cart( $cart, $product ) ) {
+			// As the cart shows prices (its subtotal is what counts), not as the shop does.
+			$total += (float) ( $cart->display_prices_including_tax() ? wc_get_price_including_tax( $product ) : wc_get_price_excluding_tax( $product ) );
+		}
+		$total = round( $total, wc_get_price_decimals() );
+		return self::state( $total >= $rule['threshold'] ? 'won' : 'left', (float) $rule['threshold'], $total );
+	}
+
+	private static function in_cart( WC_Cart $cart, WC_Product $product ): bool {
+		$id = (int) $product->get_id();
+		foreach ( $cart->get_cart() as $item ) {
+			if ( (int) ( $item['product_id'] ?? 0 ) === $id || (int) ( $item['variation_id'] ?? 0 ) === $id ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * The rule of a zone: threshold (0 = only "won" can show), the free
 	 * methods to confirm with, and their discount setting. Null = nothing to show.
 	 *
