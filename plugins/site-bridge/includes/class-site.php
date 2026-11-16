@@ -109,6 +109,7 @@ final class SBR_Site {
 
 		$prev = get_current_user_id();
 		wp_set_current_user( SBR_Settings::run_as_user()->ID );
+		self::announce( 'sbr_call_start', $tool, (string) ( $ctx['client'] ?? '' ), 0 );
 		try {
 			$res = SBR_Tools::run( $tool, $args );
 		} catch ( \Throwable $e ) {
@@ -117,7 +118,8 @@ final class SBR_Site {
 		wp_set_current_user( $prev );
 
 		if ( is_wp_error( $res ) ) {
-			self::log( $tool, $class, $args, $ctx, 'error', $res->get_error_message(), 0, $start );
+			$log_id = self::log( $tool, $class, $args, $ctx, 'error', $res->get_error_message(), 0, $start );
+			self::announce( 'sbr_call_end', $tool, 'error', $log_id );
 			return array(
 				'ok'    => false,
 				'error' => array(
@@ -132,7 +134,8 @@ final class SBR_Site {
 			unset( $res['_log_extra'] );
 		}
 		$bytes = strlen( Site_Bridge::json( $res ) );
-		self::log( $tool, $class, $args, $ctx, 'ok', '', $bytes, $start, $extra );
+		$log_id = self::log( $tool, $class, $args, $ctx, 'ok', '', $bytes, $start, $extra );
+		self::announce( 'sbr_call_end', $tool, 'ok', $log_id );
 		if ( 'admin' === $class && SBR_Settings::v( 'email_admin' ) ) {
 			self::mail_admin( $tool, $args, $ctx );
 		}
@@ -176,8 +179,28 @@ final class SBR_Site {
 			&& in_array( SBR_Tools::a_str( $args, 'name' ), self::NO_WINDOW, true );
 	}
 
-	private static function log( string $tool, string $class, array $args, array $ctx, string $status, string $msg, int $bytes, float $start, array $extra = array() ): void {
-		SBR_Store::log(
+	/**
+	 * Tells other plugins (Activity Log) that a tool runs on behalf of
+	 * Site Bridge: sbr_call_start( $tool, $client, 0 ) right before the
+	 * tool, as the run-as user, and sbr_call_end( $tool, $status, $log_id )
+	 * after this site's audit row is written. Read-only for listeners: a
+	 * listener that fails never changes the tool's result.
+	 *
+	 * @param string     $hook sbr_call_start | sbr_call_end.
+	 * @param string     $tool Tool name.
+	 * @param string     $info Client name (start) or status (end).
+	 * @param int        $id   Audit row id (end), 0 at start.
+	 */
+	private static function announce( string $hook, string $tool, string $info, int $id ): void {
+		try {
+			do_action( $hook, $tool, $info, $id );
+		} catch ( \Throwable $e ) {
+			unset( $e ); // Another plugin's failure stays out of the tool's result.
+		}
+	}
+
+	private static function log( string $tool, string $class, array $args, array $ctx, string $status, string $msg, int $bytes, float $start, array $extra = array() ): int {
+		return SBR_Store::log(
 			array(
 				'side'     => 'site',
 				'grant_id' => (int) ( $ctx['grant_id'] ?? 0 ),
