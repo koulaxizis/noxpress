@@ -69,6 +69,7 @@ final class Noxpress_Core {
 		'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.' => '301 / 410 redirects for old addresses, only where the site answers 404, and a 404 log in a private file without IPs or bots, with suggested targets and import from Rank Math, Redirection, Yoast and CSV.',
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
+		'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.' => 'Digital gift cards as a product, delivered on a date by email with a printable PDF, redeemed as a payment in the classic and block checkout, with the balance kept for the next order and a ledger of every movement.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -362,6 +363,11 @@ final class Noxpress_Core {
 				'name' => 'Production Ledger',
 				'desc' => __( 'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.', 'noxpress' ),
 				'page' => 'pl-ledger',
+			),
+			'gift-cards'        => array(
+				'name' => 'Gift Cards',
+				'desc' => __( 'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.', 'noxpress' ),
+				'page' => 'gfc-cards',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
