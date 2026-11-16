@@ -183,7 +183,7 @@ final class DSR_Abilities {
 			}
 			$p   = wc_get_product( (int) $it['product_id'] );
 			$qty = max( 0, min( 9999, (int) $it['qty'] ) );
-			if ( ! $p instanceof WC_Product || $qty <= 0 || ! $p->is_purchasable() || $p->is_type( 'variable' ) || $p->is_type( 'grouped' ) ) {
+			if ( ! $p instanceof WC_Product || $qty <= 0 || ! $p->is_purchasable() || $p->is_type( 'variable' ) || $p->is_type( 'grouped' ) || DSR_Engine::is_stored_value( $p ) ) {
 				continue;
 			}
 			$price     = (float) $p->get_price( 'edit' );

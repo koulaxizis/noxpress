@@ -148,6 +148,9 @@ final class DSR_Cart {
 					$cart->cart_contents[ $k ]['data']->set_price( self::$orig[ $oid ] );
 				}
 				unset( $cart->cart_contents[ $k ][ self::KEY ] );
+				if ( DSR_Engine::is_stored_value( $item['data'] ) ) {
+					continue; // Gift cards: no rule, and not part of the minimums or the cap.
+				}
 				$price     = (float) $item['data']->get_price();
 				$qty       = (int) $item['quantity'];
 				$subtotal += $price * $qty;
@@ -263,7 +266,7 @@ final class DSR_Cart {
 			$lines    = array();
 			$subtotal = 0.0;
 			foreach ( WC()->cart->get_cart() as $k => $item ) {
-				if ( ! isset( $item['data'] ) || ! $item['data'] instanceof WC_Product ) {
+				if ( ! isset( $item['data'] ) || ! $item['data'] instanceof WC_Product || DSR_Engine::is_stored_value( $item['data'] ) ) {
 					continue;
 				}
 				$price     = (float) $item['data']->get_price();

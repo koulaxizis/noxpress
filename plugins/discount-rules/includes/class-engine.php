@@ -129,6 +129,20 @@ final class DSR_Engine {
 	}
 
 	/**
+	 * True for a gift card (stored value, Gift Cards, Bible §14.43): it never
+	 * gets a rule and never counts toward a cart minimum or the order cap.
+	 *
+	 * @param WC_Product $p Product or variation.
+	 */
+	public static function is_stored_value( WC_Product $p ): bool {
+		if ( ! function_exists( 'gfc_is_gift_card_product' ) ) {
+			return false;
+		}
+		$parent = (int) $p->get_parent_id();
+		return gfc_is_gift_card_product( $p ) || ( $parent > 0 && gfc_is_gift_card_product( $parent ) );
+	}
+
+	/**
 	 * True when a product may get any rule at all: not another publisher's
 	 * title, not a pre-order (when so set), not excluded by code.
 	 *
@@ -142,8 +156,7 @@ final class DSR_Engine {
 		$main = self::main_id( $p );
 		$s    = DSR_Settings::get();
 		$ok   = true;
-		// Gift cards are stored value, never a sale (Gift Cards, Bible §14.43).
-		if ( function_exists( 'gfc_is_gift_card_product' ) && ( gfc_is_gift_card_product( $p ) || ( $main !== $id && gfc_is_gift_card_product( $main ) ) ) ) {
+		if ( self::is_stored_value( $p ) ) {
 			$ok = false;
 		}
 		if ( $ok && 'yes' === $s['ex_others'] ) {
