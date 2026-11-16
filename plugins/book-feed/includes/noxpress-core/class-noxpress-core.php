@@ -71,6 +71,8 @@ final class Noxpress_Core {
 		'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.' => 'Titles and descriptions from templates, robots, canonical, one JSON-LD graph, Open Graph, XML sitemaps and an llms.txt without personal data. Import from Rank Math with a dry run, a comparison before the switch and a one-click switch-over.',
 		'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.' => 'Costs and net result per product: production by category, shipping, consumables and payment fees spread over the month\'s orders, creator payouts, general expenses, break-even, CSV and a feed for orOS Budget.',
 		'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.' => 'Product feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and CSV: one static file per feed with a fixed URL, background refresh, GTIN / ISBN, publisher, pre-orders, a check before publishing and an import from CTX Feed.',
+		'Φόρμα «Ειδοποίησέ με όταν ξαναέρθει» σε εξαντλημένα προϊόντα και παραλλαγές: επιβεβαίωση με email για τους επισκέπτες, ένα email όταν το προϊόν ξαναμπεί σε απόθεμα, αποστολή σε παρτίδες στο παρασκήνιο και ζήτηση ανά προϊόν, χωρίς newsletter.' => 'A «Notify me when it is back» form on out-of-stock products and variations: email confirmation for guests, one email when the product is back in stock, background sending in batches and demand per product, no newsletter.',
+		'Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση και είσοδο, συνδεδεμένες με προϊόντα και δημιουργούς: λίστα επερχόμενων, αρχείο, «Πρόσθεσε στο ημερολόγιο» και Event schema.' => 'Events (book presentations, evenings, signings, concerts, workshops, online) with a date, venue, status and entry, linked to products and creators: an upcoming list, an archive, «Add to calendar» and Event schema.',
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
 		'Αναζήτηση προϊόντων με προτάσεις καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες του θέματος μένουν ίδιες, ένα ακριβές ISBN ανοίγει κατευθείαν το προϊόν, και εισαγωγή από το FiboSearch.' => 'Product search with suggestions as the visitor types: title, ISBN, authors, without accents, with greeklish and tolerant of small typos. The theme\'s forms stay the same, an exact ISBN opens the product directly, and an import from FiboSearch.',
 		'Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.' => 'Receipt or invoice at checkout (classic and block): company name, VAT number, tax office and activity, a check-digit test for Greek numbers and a VIES check for EU ones, the details on the order and in the emails, and an invoice list with CSV for the accountant.',
@@ -411,6 +413,16 @@ final class Noxpress_Core {
 				'name' => 'Live Search',
 				'desc' => __( 'Αναζήτηση προϊόντων με προτάσεις καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες του θέματος μένουν ίδιες, ένα ακριβές ISBN ανοίγει κατευθείαν το προϊόν, και εισαγωγή από το FiboSearch.', 'noxpress' ),
 				'page' => 'lvs-settings',
+			),
+			'back-in-stock'     => array(
+				'name' => 'Back in Stock',
+				'desc' => __( 'Φόρμα «Ειδοποίησέ με όταν ξαναέρθει» σε εξαντλημένα προϊόντα και παραλλαγές: επιβεβαίωση με email για τους επισκέπτες, ένα email όταν το προϊόν ξαναμπεί σε απόθεμα, αποστολή σε παρτίδες στο παρασκήνιο και ζήτηση ανά προϊόν, χωρίς newsletter.', 'noxpress' ),
+				'page' => 'bis-requests',
+			),
+			'events'            => array(
+				'name' => 'Events',
+				'desc' => __( 'Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση και είσοδο, συνδεδεμένες με προϊόντα και δημιουργούς: λίστα επερχόμενων, αρχείο, «Πρόσθεσε στο ημερολόγιο» και Event schema.', 'noxpress' ),
+				'page' => 'evt-settings',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
