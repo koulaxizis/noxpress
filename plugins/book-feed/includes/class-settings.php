@@ -197,7 +197,7 @@ final class BKF_Settings {
 				$clean['https'] = $old_https;
 				self::$url_kept = true;
 			}
-		} elseif ( ! $admin && self::tls_of( $old, $old_https ) && ! self::tls_of( $clean['url'], $clean['https'] ) ) {
+		} elseif ( ! $admin && self::tls_level( $clean['url'], $clean['https'] ) < self::tls_level( $old, $old_https ) ) {
 			$clean['url']   = $old;
 			$clean['https'] = $old_https;
 			self::$url_kept = true;
@@ -210,18 +210,21 @@ final class BKF_Settings {
 	}
 
 	/**
-	 * True when requests to this address always go over TLS. «Try https
-	 * first» on an http:// address does not count: it can fall back.
+	 * How the password travels (1.13.6): 2 = https:// only, 1 = http:// with
+	 * «try https first» (TLS once it has worked), 0 = plain http. Only an
+	 * administrator lowers it.
 	 */
-	public static function tls_of( string $url, bool $https_first ): bool {
-		unset( $https_first );
-		return 0 === stripos( $url, 'https://' );
+	public static function tls_level( string $url, bool $https_first ): int {
+		if ( 0 === stripos( $url, 'https://' ) ) {
+			return 2;
+		}
+		return $https_first ? 1 : 0;
 	}
 
 	/** The endpoint a password belongs to: host:port and whether TLS is used. */
 	public static function endpoint( array $s ): string {
 		$url = isset( $s['url'] ) ? (string) $s['url'] : '';
-		return self::host_of( $url ) . '|' . ( self::tls_of( $url, ! empty( $s['https'] ) ) ? 'tls' : 'plain' );
+		return self::host_of( $url ) . '|' . array( 'plain', 'try-tls', 'tls' )[ self::tls_level( $url, ! empty( $s['https'] ) ) ];
 	}
 
 	/**

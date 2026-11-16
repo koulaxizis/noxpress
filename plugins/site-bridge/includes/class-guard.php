@@ -616,7 +616,7 @@ final class SBR_Guard {
 		}
 		// 1.13.2: settings that say where a stored password is sent. Other
 		// plugins add theirs with the sbr_credential_options filter.
-		$cred = (array) apply_filters( 'sbr_credential_options', array( 'bkf_settings', 'bkf_pass_for', 'tfi_settings', 'mrl_settings', 'mrl_const_pin' ) );
+		$cred = (array) apply_filters( 'sbr_credential_options', array( 'mailserver_url', 'mailserver_port', 'mailserver_login', 'bkf_settings', 'bkf_pass_for', 'tfi_settings', 'mrl_settings', 'mrl_const_pin' ) );
 		if ( in_array( $name, array_map( 'strtolower', array_map( 'strval', $cred ) ), true ) ) {
 			return 'This option decides where a stored password is sent, so it changes only on the site.';
 		}
