@@ -209,9 +209,13 @@ final class BKF_Settings {
 		}
 	}
 
-	/** True when requests to this address go over TLS (https, or https first). */
+	/**
+	 * True when requests to this address always go over TLS. «Try https
+	 * first» on an http:// address does not count: it can fall back.
+	 */
 	public static function tls_of( string $url, bool $https_first ): bool {
-		return 0 === stripos( $url, 'https://' ) || $https_first;
+		unset( $https_first );
+		return 0 === stripos( $url, 'https://' );
 	}
 
 	/** The endpoint a password belongs to: host:port and whether TLS is used. */

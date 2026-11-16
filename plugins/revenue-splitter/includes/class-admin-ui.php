@@ -2179,10 +2179,15 @@ final class RS_Admin_UI {
 					if ( '_rs_free_reason' === $key ) {
 						// 1.19.2: the reason is plain text, as RS_Checkout saves it; a
 						// serialized or non-scalar value is never imported.
-						if ( ! is_scalar( $row['value'] ) || is_serialized( (string) $row['value'] ) ) {
+						if ( ! is_scalar( $row['value'] ) ) {
 							continue;
 						}
+						// Sanitize first, then check the final text: sanitizing can
+						// turn a string into serialized data (stripped tags, %xx).
 						$row['value'] = mb_substr( sanitize_textarea_field( (string) $row['value'] ), 0, 500 );
+						if ( is_serialized( $row['value'] ) ) {
+							continue;
+						}
 
 						// HPOS site + η παραγγελία υπάρχει στο wc_orders →
 						// γράψ' το εκεί (DELETE-first — το table δεν έχει
@@ -2203,7 +2208,7 @@ final class RS_Admin_UI {
 								array(
 									'order_id'   => $pid,
 									'meta_key'   => '_rs_free_reason',
-									'meta_value' => (string) $row['value'],
+									'meta_value' => maybe_serialize( (string) $row['value'] ),
 								)
 							);
 
@@ -2356,7 +2361,7 @@ final class RS_Admin_UI {
 						array(
 							'order_id'   => $oid,
 							'meta_key'   => '_rs_free_reason',
-							'meta_value' => (string) $row['value'],
+							'meta_value' => maybe_serialize( (string) $row['value'] ),
 						)
 					);
 					$applied++;

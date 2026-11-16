@@ -932,10 +932,9 @@ final class SBR_Admin_UI {
 						$net_msgs[] = self::msg( 'error', __( 'Σε multisite μόνο ο διαχειριστής του δικτύου ανοίγει το επίπεδο admin.', 'site-bridge' ) );
 					}
 					$s['zip_hosts'] = $prev['zip_hosts'];
-					if ( (int) $s['run_as'] !== (int) $prev['run_as'] && is_super_admin( (int) $s['run_as'] ) ) {
-						$s['run_as'] = $prev['run_as'];
-						$net_msgs[] = self::msg( 'error', __( 'Σε multisite μόνο ο διαχειριστής του δικτύου ορίζει διαχειριστή δικτύου ως χρήστη εκτέλεσης.', 'site-bridge' ) );
-					}
+				}
+				if ( is_multisite() && (int) $s['run_as'] > 0 && is_super_admin( (int) $s['run_as'] ) ) {
+					$net_msgs[] = self::msg( 'error', __( 'Σε multisite ο χρήστης εκτέλεσης είναι διαχειριστής αυτού του site, όχι του δικτύου.', 'site-bridge' ) );
 				}
 				SBR_Settings::save( $s );
 				$s = SBR_Settings::get();

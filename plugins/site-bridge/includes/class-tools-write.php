@@ -348,6 +348,16 @@ final class SBR_Tools_Write {
 				);
 				continue;
 			}
+			// 1.13.2: on multisite a network-only plugin needs a network administrator.
+			if ( is_multisite() && is_network_only_plugin( $file ) && ! current_user_can( 'manage_network_plugins' ) ) {
+				$out[] = array(
+					'plugin' => $p,
+					'file'   => $file,
+					'status' => 'error',
+					'error'  => 'This plugin activates only for the whole network, which needs a network administrator.',
+				);
+				continue;
+			}
 			$res   = activate_plugin( $file );
 			$out[] = is_wp_error( $res )
 				? array(
@@ -396,6 +406,16 @@ final class SBR_Tools_Write {
 					'plugin' => $p,
 					'file'   => $file,
 					'status' => 'already inactive',
+				);
+				continue;
+			}
+			// 1.13.2: a network-activated plugin is off for every site only by a network administrator.
+			if ( is_multisite() && is_plugin_active_for_network( $file ) && ! current_user_can( 'manage_network_plugins' ) ) {
+				$out[] = array(
+					'plugin' => $p,
+					'file'   => $file,
+					'status' => 'error',
+					'error'  => 'This plugin is active for the whole network; only a network administrator can deactivate it.',
 				);
 				continue;
 			}
@@ -516,6 +536,11 @@ final class SBR_Tools_Write {
 	public static function tool_noxpress_channel_set( array $a ) {
 		if ( ! class_exists( 'Noxpress_Updater' ) ) {
 			return new WP_Error( 'sbr_tool', 'Noxpress Core is not loaded on this site.' );
+		}
+		// 1.13.2: the channel is a network-wide setting on multisite.
+		$cap = self::may( is_multisite() ? 'manage_network_options' : 'manage_options' );
+		if ( is_wp_error( $cap ) ) {
+			return $cap;
 		}
 		$ch = 'beta' === SBR_Tools::a_str( $a, 'channel' ) ? 'beta' : 'stable';
 		$old = Noxpress_Updater::channel();

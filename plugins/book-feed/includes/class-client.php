@@ -117,6 +117,10 @@ final class BKF_Client {
 			$known = get_transient( self::SCHEME_TR );
 			if ( 'http' === $known ) {
 				$tries = array( $base );
+			} elseif ( 'https' === $known ) {
+				// 1.13.6: once https has worked, a failure never falls back to
+				// plain http, where the password would travel in clear text.
+				$tries = array( $https );
 			} else {
 				$tries = array( $https, $base );
 			}
@@ -140,7 +144,8 @@ final class BKF_Client {
 				continue; // transport failure: try the next address
 			}
 			if ( $s['https'] && $https !== $base ) {
-				set_transient( self::SCHEME_TR, 0 === stripos( $url, 'https://' ) ? 'https' : 'http', 12 * HOUR_IN_SECONDS );
+				$tls = 0 === stripos( $url, 'https://' );
+				set_transient( self::SCHEME_TR, $tls ? 'https' : 'http', $tls ? 0 : 12 * HOUR_IN_SECONDS ); // https is kept until the address changes.
 			}
 			$code = (int) wp_remote_retrieve_response_code( $r );
 			$body = (string) wp_remote_retrieve_body( $r );

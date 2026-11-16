@@ -402,6 +402,7 @@ final class RS_Portal {
 			array(
 				'who'   => $who,
 				'email' => $email,
+				'k'     => self::key_mark( $who ),
 			),
 			HOUR_IN_SECONDS
 		);
@@ -426,7 +427,16 @@ final class RS_Portal {
 			return null;
 		}
 		$r = get_transient( self::reset_slot( $tok ) );
-		return is_array( $r ) && ! empty( $r['who'] ) && ! empty( $r['email'] ) ? $r : null;
+		if ( ! is_array( $r ) || empty( $r['who'] ) || empty( $r['email'] ) ) {
+			return null;
+		}
+		// The link stops working when the admin changed the person's key or
+		// e-mail after it was sent.
+		if ( ! isset( $r['k'] ) || ! hash_equals( (string) $r['k'], self::key_mark( (string) $r['who'] ) )
+			|| (string) $r['who'] !== RS_Emails::name_for_email( (string) $r['email'] ) ) {
+			return null;
+		}
+		return $r;
 	}
 
 	/**
