@@ -1,0 +1,29 @@
+/**
+ * Events — front.css (v1.0.0). Theme-proof: own classes only, colours
+ * from the theme (currentColor + transparency), no fixed fonts.
+ */
+.evt-root{margin:1.5em 0}
+.evt-banner{margin:0 0 1em;padding:.6em .85em;border-radius:5px;font-weight:600;background:rgba(0,0,0,.06)}
+.evt-banner--cancelled{background:rgba(204,0,0,.09)}
+.evt-banner--postponed,.evt-banner--rescheduled{background:rgba(214,150,0,.12)}
+.evt-facts{display:grid;grid-template-columns:max-content 1fr;gap:.45em 1.1em;margin:0 0 1em;padding:1em 1.1em;border:1px solid rgba(0,0,0,.14);border-radius:6px}
+.evt-facts dt{margin:0;font-weight:600}
+.evt-facts dd{margin:0}
+.evt-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.6em 1em;margin:0}
+.evt-cal{font-size:.95em}
+.evt-list-title{margin:0 0 .6em}
+.evt-list{list-style:none;margin:0;padding:0}
+.evt-item{display:flex;gap:.9em;align-items:flex-start;margin:0;padding:.75em 0;border-top:1px solid rgba(0,0,0,.1)}
+.evt-item:first-child{border-top:0}
+.evt-date{flex:0 0 3.4em;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.3em 0;border:1px solid rgba(0,0,0,.16);border-radius:6px;line-height:1.1;text-align:center}
+.evt-date__d{font-size:1.35em;font-weight:700}
+.evt-date__m{font-size:.8em;text-transform:uppercase;letter-spacing:.04em}
+.evt-item__body{display:flex;flex-direction:column;gap:.15em;min-width:0}
+.evt-item__title{font-weight:600}
+.evt-item__meta{font-size:.92em;opacity:.8}
+.evt-item--cancelled .evt-item__title{text-decoration:line-through}
+.evt-badge{align-self:flex-start;margin-top:.2em;padding:.05em .55em;border-radius:1em;font-size:.8em;background:rgba(0,0,0,.07)}
+.evt-none{margin:0;opacity:.8}
+.evt-more{margin:.6em 0 0}
+@media (max-width:480px){.evt-facts{grid-template-columns:1fr;gap:.15em}.evt-facts dd{margin-bottom:.5em}}
+.evt-switch{margin:.25em 0 1em}
