@@ -1,16 +1,23 @@
 <?php
 /**
- * Events — uninstall.php (v1.0.0)
+ * Events — uninstall.php (v1.1.0)
  *
  * Always deleted:
- *  - Options evt_settings and evt_flush.
- *  - Transients evt_aui_msg_{uid} (PRG notices).
- *  - Scheduled jobs evt_after_end (Action Scheduler group events, WP-Cron).
+ *  - Options evt_settings, evt_flush, evt_role_v and
+ *    woocommerce_evt_update_settings (the notice e-mail).
+ *  - The role «Ταμείο εκδήλωσης» (evt_cashier).
+ *  - Transients evt_aui_msg_{uid} (PRG notices) and evt_ci_{uid}_{minute}
+ *    (check-in rate limit).
+ *  - Scheduled jobs evt_after_end, evt_daily and evt_notify_batch (Action
+ *    Scheduler group events, WP-Cron).
  *
  * Only when the setting «Delete the events on uninstall» is on (Bible §12
  * deviation, see events.php): every nox_event post (any status, with its
- * meta and revisions) and every nox_venue term (with its meta). Otherwise
- * the events and venues stay: they are content the site wrote.
+ * meta and revisions), every nox_venue term (with its meta), the tickets
+ * table {prefix}evt_tickets, the options evt_db_version and evt_ticket_key
+ * and the _evt_event meta of the ticket products. Otherwise they stay: the
+ * events are content the site wrote and the tickets belong to orders that
+ * may still be used at the door after a reinstall.
  *
  * Multisite: every site ONCE (the main site included in the loop). No
  * product, creator or other post is touched.
@@ -52,7 +59,16 @@ function evt_uninstall_site(): void {
 				wp_delete_term( (int) $evt_term, 'nox_venue' );
 			}
 		}
+		// Tickets (1.1.0). The table name comes from the prefix only.
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}evt_tickets" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL -- one-off uninstall cleanup.
+		delete_option( 'evt_db_version' );
+		delete_option( 'evt_ticket_key' );
+		delete_post_meta_by_key( '_evt_event' );
 	}
+
+	remove_role( 'evt_cashier' );
+	delete_option( 'evt_role_v' );
+	delete_option( 'woocommerce_evt_update_settings' );
 
 	delete_option( 'evt_settings' );
 	delete_option( 'evt_flush' );
@@ -65,12 +81,22 @@ function evt_uninstall_site(): void {
 			$wpdb->esc_like( '_transient_timeout_evt_aui_msg_' ) . '%'
 		)
 	);
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+			$wpdb->esc_like( '_transient_evt_ci_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_evt_ci_' ) . '%'
+		)
+	);
 
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'evt_after_end' ); // By hook: every args set.
-	}
-	if ( function_exists( 'wp_unschedule_hook' ) ) {
-		wp_unschedule_hook( 'evt_after_end' );
+	foreach ( array( 'evt_after_end', 'evt_daily', 'evt_notify_batch' ) as $evt_hook ) {
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( $evt_hook ); // By hook: every args set (the hooks are prefixed).
+		}
+		if ( function_exists( 'wp_unschedule_hook' ) ) {
+			wp_unschedule_hook( $evt_hook );
+		}
 	}
 	flush_rewrite_rules( false );
 }

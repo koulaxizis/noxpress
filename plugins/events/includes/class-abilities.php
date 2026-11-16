@@ -8,6 +8,10 @@
  *  events/create-draft  a DRAFT event (title, text, start, end, venue by
  *                       name, online link, entry, price, external link).
  *                       Never publishes. Capability edit_others_posts.
+ *  events/tickets       (1.1.0, WooCommerce) ticket counts of one event:
+ *                       seats left, sold, checked in, cancelled, sales
+ *                       state. No names, codes or orders. Read only.
+ *                       Capability manage_woocommerce.
  *
  * Registered only on WordPress 6.9+, where the Abilities API exists.
  */
@@ -92,6 +96,39 @@ final class EVT_Abilities {
 				),
 			)
 		);
+		if ( class_exists( 'EVT_Tickets' ) ) {
+			wp_register_ability(
+				'events/tickets',
+				array(
+					'label'               => 'Events: ticket counts',
+					'description'         => 'Ticket counts of one event (`event` = event id): seats left (stock of the ticket product), valid tickets sold, checked in, cancelled, and the sales state (open, soon, closed, sold_out, off). Never returns names, codes or orders. Changes nothing.',
+					'category'            => self::CAT,
+					'input_schema'        => array(
+						'type'                 => 'object',
+						'required'             => array( 'event' ),
+						'properties'           => array(
+							'event' => array(
+								'type'    => 'integer',
+								'minimum' => 1,
+							),
+						),
+						'additionalProperties' => false,
+					),
+					'execute_callback'    => array( __CLASS__, 'tickets' ),
+					'permission_callback' => static function () {
+						return current_user_can( Events_Plugin::cap() );
+					},
+					'meta'                => array(
+						'annotations'  => array(
+							'readonly'    => true,
+							'destructive' => false,
+							'idempotent'  => true,
+						),
+						'show_in_rest' => false,
+					),
+				)
+			);
+		}
 		wp_register_ability(
 			'events/create-draft',
 			array(
@@ -277,6 +314,41 @@ final class EVT_Abilities {
 			'id'        => $id,
 			'status'    => 'draft',
 			'edit_link' => admin_url( 'post.php?post=' . $id . '&action=edit' ),
+		);
+	}
+
+	/** events/tickets: counts only (no personal data). */
+	public static function tickets( $in ) {
+		$id = is_array( $in ) ? absint( $in['event'] ?? 0 ) : 0;
+		if ( $id <= 0 || EVT_CPT::PT !== get_post_type( $id ) ) {
+			return new WP_Error( 'evt_not_found', 'No such event.' );
+		}
+		$p = EVT_Tickets::product_of( $id );
+		if ( ! $p ) {
+			return new WP_Error( 'evt_no_tickets', 'This event has no ticket product.' );
+		}
+		$c     = EVT_Ticket_Store::counts( $id );
+		$e     = EVT_CPT::event( $id, true );
+		$seats = null;
+		if ( $p->is_type( 'variable' ) ) {
+			foreach ( $p->get_children() as $vid ) {
+				$v = wc_get_product( $vid );
+				if ( $v && $v->managing_stock() ) {
+					$seats = (int) $seats + max( 0, (int) $v->get_stock_quantity() );
+				}
+			}
+		}
+		if ( null === $seats && $p->managing_stock() ) {
+			$seats = max( 0, (int) $p->get_stock_quantity() );
+		}
+		return array(
+			'event'      => $id,
+			'product'    => (int) $p->get_id(),
+			'seats_left' => $seats,
+			'sold'       => (int) $c['valid'],
+			'checked_in' => (int) $c['used'],
+			'cancelled'  => (int) $c['void'],
+			'sales'      => $e ? EVT_Tickets::state( $e, $p ) : 'off',
 		);
 	}
 }
