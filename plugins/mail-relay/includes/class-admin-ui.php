@@ -3,7 +3,7 @@
  * MRL_Admin_UI — menu, tabs, forms (Bible §3–§8, §11).
  *
  * Submenu «Mail Relay» of the shared "Noxpress" menu (admin_menu priority
- * 400), slug mrl-settings, capability manage_options. Tabs:
+ * 420), slug mrl-settings, capability manage_options. Tabs:
  *  - log         the sent log: filters, a mail's content when it was kept,
  *                resend, CSV, empty the log
  *  - connection  mode (on / off), sender, primary and backup connections
@@ -30,7 +30,7 @@ final class MRL_Admin_UI {
 	const TEST_LIMIT  = 5;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 400 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 420 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
