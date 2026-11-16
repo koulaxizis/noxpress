@@ -176,12 +176,32 @@ final class PTB_Front {
 				}
 			}
 
+			// WooCommerce sorts at priority 99, before us: sort again (stable, also on PHP 7.4).
+			$tabs = self::sort( $tabs );
+
 			$tabs = apply_filters( 'ptb_tabs', $tabs, $pid );
 			return is_array( $tabs ) ? $tabs : $orig;
 		} catch ( \Throwable $e ) {
 			self::$broken = true;
 			return $orig;
 		}
+	}
+
+	/** Tabs by priority; equal priorities keep their order. */
+	private static function sort( array $tabs ): array {
+		$i    = 0;
+		$keys = array();
+		foreach ( $tabs as $k => $t ) {
+			$p          = is_array( $t ) && isset( $t['priority'] ) && is_numeric( $t['priority'] ) ? (float) $t['priority'] : 0.0;
+			$keys[ $k ] = array( $p, $i++ );
+		}
+		uksort(
+			$tabs,
+			static function ( $a, $b ) use ( $keys ) {
+				return $keys[ $a ] <=> $keys[ $b ];
+			}
+		);
+		return $tabs;
 	}
 
 	/** A WooCommerce tab entry for one of our tabs. */
