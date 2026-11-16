@@ -43,8 +43,8 @@ function bis_uninstall_site(): void {
 	}
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'bis_send', array(), 'back-in-stock' );
-		as_unschedule_all_actions( 'bis_daily', array(), 'back-in-stock' );
+		as_unschedule_all_actions( 'bis_send' ); // By hook: every args set.
+		as_unschedule_all_actions( 'bis_daily' );
 	}
 }
 

@@ -67,7 +67,7 @@ function evt_uninstall_site(): void {
 	);
 
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'evt_after_end', array(), 'events' );
+		as_unschedule_all_actions( 'evt_after_end' ); // By hook: every args set.
 	}
 	if ( function_exists( 'wp_unschedule_hook' ) ) {
 		wp_unschedule_hook( 'evt_after_end' );
