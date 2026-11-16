@@ -5,7 +5,7 @@ Tags: woocommerce, product formats, ebook, audiobook, linked products
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.3.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -40,6 +40,13 @@ Many shops sell one work as separate products, one per format: a printed book, i
 
 * Hide them on the front end (no change to the products), or
 * Clean them up for good: a preview lists what goes and what stays (upsells to other products are kept), the cleanup runs in batches with a progress bar, and a snapshot of every changed product allows a full restore.
+
+**Book details (1.3.0)**
+
+* Map the attributes your shop already has (pages, publication year, language, edition, series, binding) in the new "Books" tab; suggestions come from the attribute names.
+* Schema: the book details go into the Product node the page already prints (WooCommerce, Search Signals or Rank Math, after Featured Creators), never a second node: `numberOfPages`, `datePublished`, `inLanguage`, `bookEdition`, `isPartOf` (BookSeries), `bookFormat` (Hardcover / Paperback from the binding, EBook, AudiobookFormat), `isbn` from the GTIN field, and `workExample` with the other formats of the work. Optionally marks print and e-book products as Book and audiobooks as Audiobook when no work type is set. Filter `pfm_book_schema`.
+* "Publication details" table on the product page (format, ISBN, pages, year, binding, dimensions, language, edition, series; only filled rows), below the product meta, above the tabs, or with `[nox_book_details]`.
+* "Pages from the description" tool: finds "176 pages" style phrases in descriptions, shows a preview, writes only the checked rows to a "Pages" attribute (never over an existing value), and undoes exactly what it wrote.
 
 **Safe by design:** off until enabled; test mode shows the block to shop managers only; `define( 'PFM_DISABLE', true );` in wp-config.php stops every front-end hook. No database writes on visitor requests: the member list of each work is stored when a product is saved, and caches (WooCommerce, WP Rocket, LiteSpeed) are purged for every product of a work that changes.
 
@@ -81,6 +88,13 @@ The plugin's options, works, product meta and transients are removed, including 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.1 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
+
+= 1.3.0 =
+* New: book details (tab "Books"). Attribute mapping for pages, year, language, edition, series and binding; book properties in the existing Product schema node (no second node); "Publication details" table and `[nox_book_details]`; "Pages from the description" tool with preview, batches of 100 and undo. All off until enabled; test mode applies.
+* New filter `pfm_book_schema( $node, $product )`.
 
 = 1.2.4 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.

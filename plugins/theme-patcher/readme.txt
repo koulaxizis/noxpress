@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, price labels, product bad
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -152,6 +152,9 @@ Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.7.1 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
 
 = 1.7.0 =
 * New: product badges for the whole store, in a new Badges tab: "New" (published in the last 30 days), "Last pieces" (stock from 1 up to a limit, WooCommerce's low stock amount by default, `{stock}` placeholder), "Sold out", up to 10 tag or category rules with your own text, and a "My badge" field per product. At most 2 per product by default (1–4), the sale badge included; top left, top right or in a row; colours per badge. Greek and English. Off until enabled.

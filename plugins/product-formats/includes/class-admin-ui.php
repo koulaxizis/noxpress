@@ -6,7 +6,9 @@
  *  - pfm-formats   tabs "Έργα" (list, edit, new, merge, delete),
  *                  "Προτάσεις" (scan, accept / reject one by one or the
  *                  checked ones), "Μορφές" (format registry), "Upsells"
- *                  (cleanup with preview, progress bar, restore)
+ *                  (cleanup with preview, progress bar, restore),
+ *                  "Βιβλία" (1.3.0, PFM_Book_Admin: book details for
+ *                  schema and the table, pages from the description)
  *  - pfm-settings  mode, test mode, block, list line, upsell hiding,
  *                  backup (export / import JSON)
  *
@@ -37,6 +39,7 @@ final class PFM_Admin_UI {
 		'suggest' => 'Προτάσεις',
 		'formats' => 'Μορφές',
 		'upsells' => 'Upsells',
+		'book'    => 'Βιβλία',
 	);
 
 	public static function init(): void {
@@ -194,6 +197,12 @@ final class PFM_Admin_UI {
 				self::render_formats();
 			} elseif ( 'upsells' === $tab ) {
 				self::render_upsells();
+			} elseif ( 'book' === $tab ) {
+				PFM_Book_Admin::render(
+					static function () {
+						self::nonce_field();
+					}
+				);
 			} else {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
 				$work_id = isset( $_GET['work'] ) ? absint( $_GET['work'] ) : 0;
@@ -949,6 +958,15 @@ final class PFM_Admin_UI {
 				$msgs = array( $ok ? self::msg( 'success', __( 'Το snapshot διαγράφηκε.', 'product-formats' ) ) : self::msg( 'error', __( 'Το snapshot δεν βρέθηκε.', 'product-formats' ) ) );
 				$back = self::SLUG_MAIN . '&tab=upsells';
 				break;
+			case 'save_book':
+			case 'pages_attr':
+			case 'pages_scan':
+			case 'pages_apply':
+			case 'pages_undo':
+			case 'pages_clear':
+				$msgs = PFM_Book_Admin::handle( $action );
+				$back = self::SLUG_MAIN . '&tab=book';
+				break;
 			default:
 				$msgs = array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'product-formats' ) ) );
 		}
@@ -956,7 +974,7 @@ final class PFM_Admin_UI {
 		PFM_Works::flush();
 
 		$s = PFM_Settings::get();
-		if ( 'save_settings' !== $action && empty( $s['enabled'] ) && PFM_Works::count() ) {
+		if ( 'save_settings' !== $action && 0 !== strpos( $action, 'pages_' ) && 'save_book' !== $action && empty( $s['enabled'] ) && PFM_Works::count() ) {
 			$msgs[] = self::msg( 'warning', __( 'Το μπλοκ δεν φαίνεται ακόμα στο front end: ενεργοποίησέ το από τις Ρυθμίσεις (με τη λειτουργία δοκιμής ενεργή, το βλέπεις μόνο εσύ).', 'product-formats' ) );
 		}
 
@@ -1441,6 +1459,7 @@ final class PFM_Admin_UI {
 				'options' => array(
 					PFM_Settings::OPT_SETTINGS => PFM_Settings::get(),
 					PFM_Settings::OPT_FORMATS  => PFM_Settings::formats(),
+					PFM_Book::OPT              => PFM_Book::get(),
 				),
 				'works'   => $works,
 			);
@@ -1514,6 +1533,15 @@ final class PFM_Admin_UI {
 			} else {
 				++$bad;
 				$msgs[] = self::msg( 'error', __( 'Οι μορφές δεν ήταν έγκυρες και δεν άλλαξαν.', 'product-formats' ) );
+			}
+		}
+		if ( isset( $opts[ PFM_Book::OPT ] ) ) {
+			if ( is_array( $opts[ PFM_Book::OPT ] ) ) {
+				PFM_Book::save( $opts[ PFM_Book::OPT ] );
+				++$ok;
+			} else {
+				++$bad;
+				$msgs[] = self::msg( 'error', __( 'Οι ρυθμίσεις βιβλίων δεν ήταν έγκυρες και δεν άλλαξαν.', 'product-formats' ) );
 			}
 		}
 		if ( isset( $state['works'] ) ) {

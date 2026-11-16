@@ -1,6 +1,6 @@
 {
-  "display": 1198,
-  "total": 1198,
+  "display": 1223,
+  "total": 1223,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1294,7 +1294,7 @@
     },
     "748385157": {
       "file": "nox-ce-1.1.2/checkout-extras.zip",
-      "count": 2
+      "count": 3
     },
     "748385365": {
       "file": "nox-nm-1.2.4/data-migrator.zip",
@@ -1390,22 +1390,198 @@
     },
     "754286790": {
       "file": "nox-bp-1.3.0/book-preview.zip",
-      "count": 2
+      "count": 3
     },
     "754287136": {
       "file": "nox-hs-1.4.5/home-sections.zip",
-      "count": 2
+      "count": 3
     },
     "754287404": {
       "file": "nox-pt-1.0.0/product-tabs.zip",
-      "count": 2
+      "count": 3
     },
     "754338264": {
       "file": "nox-fd-1.0.0/product-feed.zip",
-      "count": 0
+      "count": 4
     },
     "754362327": {
       "file": "nox-tp-1.7.0/theme-patcher.zip",
+      "count": 3
+    },
+    "754395414": {
+      "file": "nox-ta-1.7.0/trade-accounts.zip",
+      "count": 2
+    },
+    "754395920": {
+      "file": "nox-iv-1.0.1/invoice-details.zip",
+      "count": 2
+    },
+    "754410911": {
+      "file": "nox-gl-1.3.0/greeklish-permalinks.zip",
+      "count": 3
+    },
+    "754420830": {
+      "file": "nox-pf-1.3.0/product-formats.zip",
+      "count": 2
+    },
+    "754424237": {
+      "file": "nox-sn-1.4.0/shipping-notes.zip",
+      "count": 2
+    },
+    "754440055": {
+      "file": "nox-ce-1.2.0/checkout-extras.zip",
+      "count": 3
+    },
+    "754512606": {
+      "file": "nox-rs-1.18.4/revenue-splitter.zip",
+      "count": 0
+    },
+    "754512857": {
+      "file": "nox-sp-1.8.9/store-pulse.zip",
+      "count": 0
+    },
+    "754513044": {
+      "file": "nox-sf-1.5.3/smart-formatter.zip",
+      "count": 0
+    },
+    "754513229": {
+      "file": "nox-tp-1.7.1/theme-patcher.zip",
+      "count": 0
+    },
+    "754513414": {
+      "file": "nox-sh-1.3.4/shop-filters.zip",
+      "count": 0
+    },
+    "754513549": {
+      "file": "nox-pf-1.3.1/product-formats.zip",
+      "count": 0
+    },
+    "754513721": {
+      "file": "nox-ew-1.2.6/easy-withdrawal.zip",
+      "count": 0
+    },
+    "754513885": {
+      "file": "nox-sn-1.4.1/shipping-notes.zip",
+      "count": 0
+    },
+    "754514119": {
+      "file": "nox-bp-1.3.1/book-preview.zip",
+      "count": 0
+    },
+    "754514290": {
+      "file": "nox-cr-1.3.4/featured-creators.zip",
+      "count": 0
+    },
+    "754514472": {
+      "file": "nox-pk-1.2.3/store-pickup.zip",
+      "count": 0
+    },
+    "754514657": {
+      "file": "nox-hc-1.1.4/hide-catalog.zip",
+      "count": 0
+    },
+    "754514798": {
+      "file": "nox-vp-1.1.3/variation-picker.zip",
+      "count": 0
+    },
+    "754514955": {
+      "file": "nox-gl-1.3.1/greeklish-permalinks.zip",
+      "count": 0
+    },
+    "754515122": {
+      "file": "nox-oc-1.3.2/oros-connect.zip",
+      "count": 0
+    },
+    "754515267": {
+      "file": "nox-pb-1.1.3/product-bundles.zip",
+      "count": 0
+    },
+    "754515499": {
+      "file": "nox-sb-1.12.4/site-bridge.zip",
+      "count": 0
+    },
+    "754515728": {
+      "file": "nox-pq-1.1.5/publishing-quote.zip",
+      "count": 0
+    },
+    "754515984": {
+      "file": "nox-po-1.1.5/pre-orders.zip",
+      "count": 0
+    },
+    "754516216": {
+      "file": "nox-ws-1.2.5/wish-shelf.zip",
+      "count": 0
+    },
+    "754516450": {
+      "file": "nox-ce-1.2.1/checkout-extras.zip",
+      "count": 0
+    },
+    "754516641": {
+      "file": "nox-nm-1.3.1/data-migrator.zip",
+      "count": 0
+    },
+    "754516769": {
+      "file": "nox-hs-1.4.6/home-sections.zip",
+      "count": 0
+    },
+    "754517026": {
+      "file": "nox-bf-1.13.4/book-feed.zip",
+      "count": 0
+    },
+    "754517219": {
+      "file": "nox-lo-1.5.3/live-operator.zip",
+      "count": 0
+    },
+    "754517390": {
+      "file": "nox-ta-1.7.1/trade-accounts.zip",
+      "count": 0
+    },
+    "754517661": {
+      "file": "nox-fp-1.0.8/fast-pages.zip",
+      "count": 0
+    },
+    "754517878": {
+      "file": "nox-br-1.4.3/broadcast.zip",
+      "count": 0
+    },
+    "754518104": {
+      "file": "nox-ml-1.0.6/magic-login.zip",
+      "count": 0
+    },
+    "754518369": {
+      "file": "nox-ti-1.0.5/trade-feed-import.zip",
+      "count": 0
+    },
+    "754518593": {
+      "file": "nox-li-1.0.3/lean-images.zip",
+      "count": 0
+    },
+    "754518801": {
+      "file": "nox-rd-1.0.6/redirects.zip",
+      "count": 0
+    },
+    "754519072": {
+      "file": "nox-ss-1.0.2/search-signals.zip",
+      "count": 0
+    },
+    "754519277": {
+      "file": "nox-pl-1.1.4/production-ledger.zip",
+      "count": 0
+    },
+    "754519484": {
+      "file": "nox-pt-1.0.1/product-tabs.zip",
+      "count": 0
+    },
+    "754519659": {
+      "file": "nox-fd-1.0.1/product-feed.zip",
+      "count": 0
+    },
+    "754519856": {
+      "file": "nox-iv-1.0.2/invoice-details.zip",
+      "count": 0
+    },
+    "754533106": {
+      "file": "nox-iv-1.1.0/invoice-details.zip",
       "count": 0
     }
   }

@@ -74,6 +74,11 @@ final class IVD_Checkout {
 		return ! self::$broken && IVD_Settings::visible();
 	}
 
+	/** Public form of offered() for ivd_offered(). */
+	public static function is_offered(): bool {
+		return self::offered();
+	}
+
 	/** True when the store hides WooCommerce's company field (we show ours). */
 	public static function own_company(): bool {
 		return 'hidden' === get_option( 'woocommerce_checkout_company_field', 'optional' );
@@ -587,10 +592,19 @@ final class IVD_Checkout {
 		if ( ! self::offered() || ! function_exists( 'is_checkout' ) || ! is_checkout() || is_order_received_page() ) {
 			return;
 		}
+		$aade = class_exists( 'IVD_Aade' ) ? IVD_Aade::script_data() : null;
+		$data = null !== $aade ? 'window.ivdAade = ' . wp_json_encode( $aade ) . ';' : '';
 		if ( function_exists( 'has_block' ) && has_block( 'woocommerce/checkout' ) ) {
+			if ( '' !== $data ) {
+				wp_enqueue_script( 'ivd-block', IVD_URL . 'assets/block.js', array( 'wp-data', 'wc-blocks-data-store' ), IVD_VERSION, true );
+				wp_add_inline_script( 'ivd-block', $data, 'before' );
+			}
 			return;
 		}
 		wp_enqueue_script( 'ivd-front', IVD_URL . 'assets/front.js', array(), IVD_VERSION, true );
+		if ( '' !== $data ) {
+			wp_add_inline_script( 'ivd-front', $data, 'before' );
+		}
 		wp_register_style( 'ivd-front', false, array(), IVD_VERSION );
 		wp_enqueue_style( 'ivd-front' );
 		wp_add_inline_style( 'ivd-front', '#ivd-box{margin:1em 0 0;clear:both}#ivd-box .ivd-type label.radio,#ivd-box .ivd-type input{display:inline-block;margin-right:.4em}#ivd-box .ivd-type label.radio{margin-right:1.2em}#ivd-box .ivd-fields::after{content:"";display:table;clear:both}#ivd-box .ivd-help{font-size:.9em;opacity:.85}' );

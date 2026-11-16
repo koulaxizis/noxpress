@@ -287,6 +287,18 @@ a.ivd-kofi:hover {
 	font-size: 12px;
 }
 
+.ivd-wrap pre.ivd-code {
+	background: var(--ivd-panel-2);
+	color: var(--ivd-text);
+	border: 1px solid var(--ivd-border);
+	border-radius: 4px;
+	padding: 8px 12px;
+	margin: 8px 0;
+	font-size: 12px;
+	overflow-x: auto;
+	white-space: pre;
+}
+
 .ivd-suspended { margin: 8px 0 0; }
 .ivd-suspended .button { margin-left: 8px; }
 

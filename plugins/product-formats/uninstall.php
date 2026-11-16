@@ -4,7 +4,9 @@
  *
  * Full cleanup (nothing left after deactivate + delete):
  *  - Options: pfm_settings, pfm_formats, pfm_rejected,
- *    pfm_upsell_snapshots (the cleanup snapshots).
+ *    pfm_upsell_snapshots (the cleanup snapshots), pfm_book (book
+ *    details settings), pfm_pages_run (the pages tool's undo list).
+ *    The "Σελίδες" attribute and its terms stay: they are shop data.
  *  - Transients: pfm_aui_msg_{uid} (PRG notices), pfm_scan_{uid} (the
  *    last scan of the suggestions).
  *  - Works: the terms of the hidden pfm_work taxonomy with their term
@@ -32,9 +34,11 @@ function pfm_uninstall_site(): void {
 	delete_option( 'pfm_formats' );
 	delete_option( 'pfm_rejected' );
 	delete_option( 'pfm_upsell_snapshots' );
+	delete_option( 'pfm_book' );
+	delete_option( 'pfm_pages_run' );
 
 	// Transients: LIKE with escaped '_' (otherwise a wildcard).
-	foreach ( array( 'pfm_aui_msg_', 'pfm_scan_' ) as $pfm_prefix ) {
+	foreach ( array( 'pfm_aui_msg_', 'pfm_scan_', 'pfm_pages_' ) as $pfm_prefix ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 		$wpdb->query(
 			$wpdb->prepare(
