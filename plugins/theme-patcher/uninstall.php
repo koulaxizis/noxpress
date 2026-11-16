@@ -1,11 +1,12 @@
 <?php
 /**
- * Theme Patcher — uninstall.php (v1.4.0)
+ * Theme Patcher — uninstall.php (v1.7.0)
  *
  * Full cleanup (nothing left after deactivate + delete):
  *  - Options: tp_settings (all themes), tp_cat_images (category image
  *    fallback map), tp_care (Care & Safety tab, 1.4.0).
- *  - Product meta _tp_care_profile, _tp_care_manufacturer, _tp_care_note:
+ *  - Product meta _tp_care_profile, _tp_care_manufacturer, _tp_care_note
+ *    and _tp_badge (per-product badge text, 1.7.0):
  *    written by the shop manager per product, so they STAY (Bible §12,
  *    content written by the user) unless "delete on uninstall" was ticked
  *    in the settings (tp_care.delete_meta, read before the option goes).
@@ -31,7 +32,7 @@ function tp_uninstall_site(): void {
 
 	$tp_care = json_decode( (string) get_option( 'tp_care', '' ), true );
 	if ( is_array( $tp_care ) && ! empty( $tp_care['delete_meta'] ) ) {
-		foreach ( array( '_tp_care_profile', '_tp_care_manufacturer', '_tp_care_note' ) as $tp_meta ) {
+		foreach ( array( '_tp_care_profile', '_tp_care_manufacturer', '_tp_care_note', '_tp_badge' ) as $tp_meta ) {
 			delete_post_meta_by_key( $tp_meta );
 		}
 	}

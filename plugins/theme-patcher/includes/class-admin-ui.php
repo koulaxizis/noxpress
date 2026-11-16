@@ -47,6 +47,7 @@ final class TP_Admin_UI {
 		'theme'  => 'Ρυθμίσεις θέματος',
 		'cats'   => 'Κατηγορίες',
 		'prices' => 'Τιμές',
+		'badges' => 'Σήματα',
 		'care'   => 'Φροντίδα',
 		'checks' => 'Έλεγχοι',
 	);
@@ -184,7 +185,7 @@ final class TP_Admin_UI {
 	}
 
 	/** Tabs that also apply on block themes (store-wide features). */
-	const BLOCK_TABS = array( 'prices', 'care' );
+	const BLOCK_TABS = array( 'prices', 'badges', 'care' );
 
 	private static function current_tab(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing.
@@ -220,6 +221,8 @@ final class TP_Admin_UI {
 			self::render_tabs( $tab );
 			if ( 'prices' === $tab ) {
 				self::render_prices();
+			} elseif ( 'badges' === $tab ) {
+				self::render_badges();
 			} elseif ( 'care' === $tab ) {
 				TP_Care_Admin::render();
 			} else {
@@ -1101,8 +1104,6 @@ final class TP_Admin_UI {
 				?>
 			</p>
 
-			<?php self::render_sale_fields(); ?>
-
 			<h3 class="tp-h3"><?php esc_html_e( 'Γλώσσα των ετικετών', 'theme-patcher' ); ?></h3>
 			<div class="tp-zone">
 				<select name="tp_prices[lang]">
@@ -1111,6 +1112,7 @@ final class TP_Admin_UI {
 					<?php endforeach; ?>
 				</select>
 				<span class="tp-hint"><?php esc_html_e( 'Αυτόματα: ελληνικά όταν η γλώσσα του site είναι ελληνική, αλλιώς αγγλικά. Κενό αγγλικό κείμενο δείχνει το ελληνικό.', 'theme-patcher' ); ?></span>
+				<span class="tp-hint"><?php esc_html_e( 'Ισχύει και για την ένδειξη έκπτωσης και τα σήματα (καρτέλα «Σήματα»).', 'theme-patcher' ); ?></span>
 			</div>
 
 			<p class="tp-submit">
@@ -1118,10 +1120,231 @@ final class TP_Admin_UI {
 			</p>
 		</form>
 		<?php
+	}
+
+	/* ---------- Tab: badges (1.7.0) ---------- */
+
+	/** Product tags for the badge rules: id => name (at most 500, by name). */
+	private static function tag_options(): array {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_tag',
+				'hide_empty' => false,
+				'number'     => 500,
+				'orderby'    => 'name',
+			)
+		);
+		$out = array();
+		if ( is_array( $terms ) ) {
+			foreach ( $terms as $t ) {
+				$out[ (int) $t->term_id ] = $t->name;
+			}
+		}
+		return $out;
+	}
+
+	/** Sale badge text and product badges, one form (store-wide). */
+	private static function render_badges(): void {
+		$b      = TP_Settings::badges();
+		$max    = (string) TP_Settings::MAX_LABEL_LEN;
+		$counts = TP_Badges::counts();
+		$cats   = self::cat_options();
+		$tags   = self::tag_options();
+		$rules  = $b['rules'];
+		$free   = max( 0, min( self::NEW_FIX_ROWS, TP_Settings::MAX_BADGE_RULES - count( $rules ) ) );
+		for ( $i = 0; $i < $free; $i++ ) {
+			$rules[] = array(
+				'tax'  => 'product_tag',
+				'term' => 0,
+				'el'   => '',
+				'en'   => '',
+			);
+		}
+		$store_low = (int) get_option( 'woocommerce_notify_low_stock_amount', 2 );
+		$positions = array(
+			'left'   => __( 'Πάνω αριστερά στην εικόνα', 'theme-patcher' ),
+			'right'  => __( 'Πάνω δεξιά στην εικόνα', 'theme-patcher' ),
+			'inline' => __( 'Σε σειρά, πάνω από την εικόνα', 'theme-patcher' ),
+		);
+		$types = array(
+			'own' => array( __( 'Δικό μου σήμα (ανά προϊόν)', 'theme-patcher' ), '', '' ),
+			'low' => array( __( 'Τελευταία κομμάτια', 'theme-patcher' ), 'Τελευταία κομμάτια', 'Last pieces' ),
+			'new' => array( __( 'Νέο', 'theme-patcher' ), 'Νέο', 'New' ),
+			'out' => array( __( 'Εξαντλήθηκε', 'theme-patcher' ), 'Εξαντλήθηκε', 'Sold out' ),
+		);
+		?>
+		<h2 class="tp-h2"><?php esc_html_e( 'Σήματα', 'theme-patcher' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Μικρές ετικέτες στην εικόνα του προϊόντος, στις λίστες και στη σελίδα προϊόντος: η ένδειξη έκπτωσης και τα σήματα «Νέο», «Τελευταία κομμάτια», «Εξαντλήθηκε», ανά ετικέτα ή κατηγορία και ανά προϊόν. Ισχύουν για όλο το κατάστημα, με οποιοδήποτε θέμα. Μόνο εμφάνιση: τιμές, παραγγελίες, emails, feeds και schema δεν αλλάζουν.', 'theme-patcher' ); ?></p>
+		<p>
+			<?php
+			printf(
+				/* translators: 1: new products, 2: products with few pieces left, 3: sold out products, 4: products with their own badge */
+				esc_html__( 'Δημοσιευμένα προϊόντα σήμερα: %1$d νέα, %2$d με λίγα κομμάτια (απλά προϊόντα), %3$d εξαντλημένα, %4$d με δικό τους σήμα.', 'theme-patcher' ),
+				(int) $counts['new'],
+				(int) $counts['low'],
+				(int) $counts['out'],
+				(int) $counts['own']
+			);
+			?>
+		</p>
+
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="tp_action" value="save_badges" />
+			<?php self::tab_field( 'badges' ); ?>
+
+			<?php self::render_sale_fields(); ?>
+
+			<h3 class="tp-h3"><?php esc_html_e( 'Σήματα προϊόντων', 'theme-patcher' ); ?></h3>
+			<div class="tp-zone">
+				<label class="tp-check">
+					<input type="checkbox" name="tp_badges[on]" value="1" <?php checked( $b['on'] ); ?> />
+					<?php esc_html_e( 'Σήματα προϊόντων σε όλο το site', 'theme-patcher' ); ?>
+				</label>
+				<span class="tp-hint"><?php esc_html_e( 'Λίστες καταστήματος και κατηγοριών, σχετικά προϊόντα, σελίδα προϊόντος, τα μπλοκ «Product Image» και «Product Image Gallery» και οι κάρτες του Theme Patcher που δείχνουν ένδειξη έκπτωσης. Θέματα που φτιάχνουν δικές τους κάρτες χωρίς τα hooks του WooCommerce δεν τα δείχνουν.', 'theme-patcher' ); ?></span>
+				<span class="tp-hint"><?php esc_html_e( 'Σειρά: έκπτωση, δικό μου σήμα, ετικέτα ή κατηγορία, τελευταία κομμάτια, νέο, εξαντλήθηκε. Η ένδειξη έκπτωσης μετράει στο όριο. Σε προϊόν με ενεργή προπαραγγελία (Pre-Orders) δεν φαίνονται τα «Τελευταία κομμάτια» και «Εξαντλήθηκε».', 'theme-patcher' ); ?></span>
+				<div class="tp-row">
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Έως πόσα ανά προϊόν', 'theme-patcher' ); ?></span>
+						<select name="tp_badges[max]">
+							<?php for ( $n = 1; $n <= 4; $n++ ) : ?>
+								<option value="<?php echo (int) $n; ?>" <?php selected( (int) $b['max'], $n ); ?>><?php echo (int) $n; ?></option>
+							<?php endfor; ?>
+						</select>
+					</label>
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Θέση', 'theme-patcher' ); ?></span>
+						<select name="tp_badges[pos]">
+							<?php foreach ( $positions as $k => $label ) : ?>
+								<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $b['pos'], $k ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</label>
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Χρώμα κειμένου', 'theme-patcher' ); ?></span>
+						<input type="color" name="tp_badges[fg]" value="<?php echo esc_attr( $b['fg'] ); ?>" />
+					</label>
+				</div>
+
+				<table class="widefat striped tp-table tp-mt-8">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Σήμα', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'Ενεργό', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'Ελληνικά', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'English', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'Όριο', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'Χρώμα', 'theme-patcher' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $types as $key => $row ) : ?>
+							<?php $n = 'tp_badges[' . $key . ']'; ?>
+							<tr>
+								<td><?php echo esc_html( $row[0] ); ?></td>
+								<td>
+									<input type="hidden" name="<?php echo esc_attr( $n . '[on]' ); ?>" value="0" />
+									<input type="checkbox" name="<?php echo esc_attr( $n . '[on]' ); ?>" value="1" <?php checked( $b[ $key ]['on'] ); ?> />
+								</td>
+								<?php if ( 'own' === $key ) : ?>
+									<td colspan="2"><span class="tp-hint"><?php esc_html_e( 'Το κείμενο γράφεται σε κάθε προϊόν: Δεδομένα προϊόντος → Γενικά → «Δικό μου σήμα».', 'theme-patcher' ); ?></span></td>
+								<?php else : ?>
+									<td><input type="text" class="regular-text" name="<?php echo esc_attr( $n . '[text][el]' ); ?>" value="<?php echo esc_attr( $b[ $key ]['text']['el'] ); ?>" maxlength="<?php echo esc_attr( $max ); ?>" placeholder="<?php echo esc_attr( $row[1] ); ?>" /></td>
+									<td><input type="text" class="regular-text" name="<?php echo esc_attr( $n . '[text][en]' ); ?>" value="<?php echo esc_attr( $b[ $key ]['text']['en'] ); ?>" maxlength="<?php echo esc_attr( $max ); ?>" placeholder="<?php echo esc_attr( $row[2] ); ?>" /></td>
+								<?php endif; ?>
+								<td>
+									<?php if ( 'new' === $key ) : ?>
+										<label><input type="number" min="1" max="365" class="small-text" name="tp_badges[new][days]" value="<?php echo (int) $b['new']['days']; ?>" /> <?php esc_html_e( 'μέρες', 'theme-patcher' ); ?></label>
+									<?php elseif ( 'low' === $key ) : ?>
+										<label><input type="number" min="0" max="9999" class="small-text" name="tp_badges[low][qty]" value="<?php echo (int) $b['low']['qty']; ?>" /> <?php esc_html_e( 'κομμάτια', 'theme-patcher' ); ?></label>
+									<?php endif; ?>
+								</td>
+								<td><input type="color" name="<?php echo esc_attr( $n . '[color]' ); ?>" value="<?php echo esc_attr( $b[ $key ]['color'] ); ?>" /></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<span class="tp-hint">
+					<?php
+					printf(
+						/* translators: %d: WooCommerce's low stock amount */
+						esc_html__( '«Τελευταία κομμάτια»: προϊόντα με διαχείριση αποθέματος, διαθέσιμα, με απόθεμα από 1 έως το όριο. Όριο 0 = το «χαμηλό απόθεμα» του WooCommerce (σήμερα %d). Το {stock} γράφει την ποσότητα, π.χ. «Μόνο {stock} κομμάτια».', 'theme-patcher' ),
+						(int) $store_low
+					);
+					?>
+				</span>
+				<span class="tp-hint"><?php esc_html_e( '«Νέο»: προϊόντα που δημοσιεύτηκαν μέσα στις τελευταίες μέρες του ορίου. Με cache σελίδων μπορεί να φαίνεται λίγες ώρες παραπάνω.', 'theme-patcher' ); ?></span>
+			</div>
+
+			<h3 class="tp-h3"><?php esc_html_e( 'Σήματα ανά ετικέτα ή κατηγορία', 'theme-patcher' ); ?></h3>
+			<div class="tp-zone">
+				<table class="widefat striped tp-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Ετικέτα ή κατηγορία', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'Ελληνικά', 'theme-patcher' ); ?></th>
+							<th><?php esc_html_e( 'English', 'theme-patcher' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $rules as $i => $r ) : ?>
+							<?php
+							$n   = 'tp_badges[rules][' . $i . ']';
+							$cur = $r['term'] ? $r['tax'] . ':' . (int) $r['term'] : '';
+							?>
+							<tr>
+								<td>
+									<select name="<?php echo esc_attr( $n . '[pick]' ); ?>">
+										<option value=""><?php esc_html_e( '— Καμία —', 'theme-patcher' ); ?></option>
+										<?php if ( $tags ) : ?>
+											<optgroup label="<?php esc_attr_e( 'Ετικέτες', 'theme-patcher' ); ?>">
+												<?php foreach ( $tags as $tid => $label ) : ?>
+													<option value="<?php echo esc_attr( 'product_tag:' . (int) $tid ); ?>" <?php selected( $cur, 'product_tag:' . (int) $tid ); ?>><?php echo esc_html( $label ); ?></option>
+												<?php endforeach; ?>
+											</optgroup>
+										<?php endif; ?>
+										<?php if ( $cats ) : ?>
+											<optgroup label="<?php esc_attr_e( 'Κατηγορίες', 'theme-patcher' ); ?>">
+												<?php foreach ( $cats as $tid => $label ) : ?>
+													<option value="<?php echo esc_attr( 'product_cat:' . (int) $tid ); ?>" <?php selected( $cur, 'product_cat:' . (int) $tid ); ?>><?php echo esc_html( $label ); ?></option>
+												<?php endforeach; ?>
+											</optgroup>
+										<?php endif; ?>
+									</select>
+								</td>
+								<td><input type="text" class="regular-text" name="<?php echo esc_attr( $n . '[el]' ); ?>" value="<?php echo esc_attr( $r['el'] ); ?>" maxlength="<?php echo esc_attr( $max ); ?>" placeholder="Βραβείο" /></td>
+								<td><input type="text" class="regular-text" name="<?php echo esc_attr( $n . '[en]' ); ?>" value="<?php echo esc_attr( $r['en'] ); ?>" maxlength="<?php echo esc_attr( $max ); ?>" placeholder="Award" /></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<div class="tp-row tp-mt-8">
+					<label class="tp-field">
+						<span><?php esc_html_e( 'Χρώμα', 'theme-patcher' ); ?></span>
+						<input type="color" name="tp_badges[rule_color]" value="<?php echo esc_attr( $b['rule_color'] ); ?>" />
+					</label>
+				</div>
+				<span class="tp-hint">
+					<?php
+					printf(
+						/* translators: %d: maximum number of rules */
+						esc_html__( 'Μια κατηγορία ισχύει και για τις υποκατηγορίες της. Διάλεξε «— Καμία —» για να διαγράψεις έναν κανόνα. Έως %d κανόνες· μετά την αποθήκευση εμφανίζονται δύο νέες κενές γραμμές.', 'theme-patcher' ),
+						(int) TP_Settings::MAX_BADGE_RULES
+					);
+					?>
+				</span>
+				<span class="tp-hint"><?php esc_html_e( 'Τα χρώματα αλλάζουν και από το θέμα με τις μεταβλητές CSS --tp-badge-new-bg, --tp-badge-low-bg, --tp-badge-out-bg, --tp-badge-own-bg, --tp-badge-rule-bg και --tp-badge-fg.', 'theme-patcher' ); ?></span>
+			</div>
+
+			<p class="tp-submit">
+				<button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση σημάτων', 'theme-patcher' ); ?></button>
+			</p>
+		</form>
+		<?php
 		self::render_sale_import();
 	}
 
-	/** Sale badge section of the prices form (store-wide, TP_Sale). */
+	/** Sale badge section of the badges form (store-wide, TP_Sale). */
 	private static function render_sale_fields(): void {
 		$s    = TP_Settings::sale();
 		$max  = (string) TP_Settings::MAX_LABEL_LEN;
@@ -1212,7 +1435,7 @@ final class TP_Admin_UI {
 		<form method="post" class="tp-mt-8">
 			<?php self::nonce_field(); ?>
 			<input type="hidden" name="tp_action" value="sale_import" />
-			<?php self::tab_field( 'prices' ); ?>
+			<?php self::tab_field( 'badges' ); ?>
 			<p>
 				<?php
 				printf(
@@ -1438,9 +1661,9 @@ final class TP_Admin_UI {
 				<div class="tp-zone">
 					<label class="tp-check">
 						<input type="checkbox" name="tp_care_delete_meta" value="1" <?php checked( TP_Care::get()['delete_meta'] ); ?> />
-						<?php esc_html_e( 'Διαγραφή των στοιχείων φροντίδας από τα προϊόντα όταν διαγραφεί το plugin', 'theme-patcher' ); ?>
+						<?php esc_html_e( 'Διαγραφή των στοιχείων φροντίδας και των σημάτων από τα προϊόντα όταν διαγραφεί το plugin', 'theme-patcher' ); ?>
 					</label>
-					<span class="tp-hint"><?php esc_html_e( 'Οι ρυθμίσεις του Theme Patcher φεύγουν πάντα με τη διαγραφή του plugin. Το προφίλ, ο κατασκευαστής και η σημείωση κάθε προϊόντος μένουν, εκτός αν τσεκάρεις αυτή την επιλογή.', 'theme-patcher' ); ?></span>
+					<span class="tp-hint"><?php esc_html_e( 'Οι ρυθμίσεις του Theme Patcher φεύγουν πάντα με τη διαγραφή του plugin. Το προφίλ, ο κατασκευαστής, η σημείωση και το «Δικό μου σήμα» κάθε προϊόντος μένουν, εκτός αν τσεκάρεις αυτή την επιλογή.', 'theme-patcher' ); ?></span>
 				</div>
 
 				<p class="tp-submit">
@@ -1542,6 +1765,9 @@ final class TP_Admin_UI {
 			case 'save_prices':
 				$msgs = self::do_save_prices();
 				break;
+			case 'save_badges':
+				$msgs = self::do_save_badges();
+				break;
 			case 'sale_import':
 				$msgs = self::do_sale_import();
 				break;
@@ -1563,7 +1789,7 @@ final class TP_Admin_UI {
 
 		$s     = TP_Settings::get();
 		$saves = 0 === strpos( $action, 'save_' ) || 0 === strpos( $action, 'care_save_' ) || 'sale_import' === $action;
-		if ( $saves && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() || TP_Settings::sale()['on'] || TP_Care::get()['enabled'] ) ) {
+		if ( $saves && 'save_settings' !== $action && empty( $s['enabled'] ) && ( TP_Settings::has_anything() || TP_Prices::configured() || TP_Settings::sale()['on'] || TP_Settings::badges()['on'] || TP_Care::get()['enabled'] ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Το Theme Patcher είναι ακόμη ανενεργό: δοκίμασε με τη σάρωση σελίδας και ενεργοποίησέ το από τις Ρυθμίσεις.', 'theme-patcher' ) );
 		}
 
@@ -1788,7 +2014,6 @@ final class TP_Admin_UI {
 
 		$s           = TP_Settings::get();
 		$s['prices'] = $clean;
-		$s['sale']   = TP_Settings::sanitize_sale( self::posted_array( 'tp_sale' ) );
 		TP_Settings::save( $s );
 
 		$msgs = array( self::msg( 'success', __( 'Οι ετικέτες τιμής αποθηκεύτηκαν.', 'theme-patcher' ) ) );
@@ -1797,6 +2022,39 @@ final class TP_Admin_UI {
 		}
 		if ( count( $clean['rules'] ) + $blank < count( $keyed ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Κάθε κατηγορία μπαίνει σε έναν μόνο κανόνα: οι επαναλήψεις αγνοήθηκαν.', 'theme-patcher' ) );
+		}
+		$msgs[] = self::msg( 'info', __( 'Αν το site έχει cache σελίδων (π.χ. WP Rocket), καθάρισέ το για να δουν οι επισκέπτες τις αλλαγές.', 'theme-patcher' ) );
+		return $msgs;
+	}
+
+	/** Sale badge text and product badges (one form). */
+	private static function do_save_badges(): array {
+		$raw   = self::posted_array( 'tp_badges' );
+		$rules = array();
+		if ( isset( $raw['rules'] ) && is_array( $raw['rules'] ) ) {
+			foreach ( $raw['rules'] as $r ) {
+				if ( ! is_array( $r ) || empty( $r['pick'] ) || ! is_string( $r['pick'] ) || false === strpos( $r['pick'], ':' ) ) {
+					continue;
+				}
+				list( $tax, $term ) = explode( ':', $r['pick'], 2 );
+				$rules[]            = array(
+					'tax'  => $tax,
+					'term' => $term,
+					'el'   => isset( $r['el'] ) ? $r['el'] : '',
+					'en'   => isset( $r['en'] ) ? $r['en'] : '',
+				);
+			}
+		}
+		$raw['rules'] = $rules;
+
+		$s           = TP_Settings::get();
+		$s['sale']   = TP_Settings::sanitize_sale( self::posted_array( 'tp_sale' ) );
+		$s['badges'] = TP_Settings::sanitize_badges( $raw );
+		TP_Settings::save( $s );
+
+		$msgs = array( self::msg( 'success', __( 'Τα σήματα αποθηκεύτηκαν.', 'theme-patcher' ) ) );
+		if ( count( $s['badges']['rules'] ) < count( $rules ) ) {
+			$msgs[] = self::msg( 'warning', __( 'Κανόνες χωρίς κείμενο ή επαναλήψεις της ίδιας ετικέτας ή κατηγορίας αγνοήθηκαν.', 'theme-patcher' ) );
 		}
 		$msgs[] = self::msg( 'info', __( 'Αν το site έχει cache σελίδων (π.χ. WP Rocket), καθάρισέ το για να δουν οι επισκέπτες τις αλλαγές.', 'theme-patcher' ) );
 		return $msgs;
