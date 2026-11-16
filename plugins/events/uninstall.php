@@ -14,7 +14,7 @@
  * Only when the setting «Delete the events on uninstall» is on (Bible §12
  * deviation, see events.php): every nox_event post (any status, with its
  * meta and revisions), every nox_venue term (with its meta), the tickets
- * table {prefix}evt_tickets, the options evt_db_version and evt_ticket_key
+ * table {prefix}evt_tickets, the options evt_db_version and evt_ticket_secret
  * and the _evt_event meta of the ticket products. Otherwise they stay: the
  * events are content the site wrote and the tickets belong to orders that
  * may still be used at the door after a reinstall.
@@ -62,7 +62,7 @@ function evt_uninstall_site(): void {
 		// Tickets (1.1.0). The table name comes from the prefix only.
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}evt_tickets" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL -- one-off uninstall cleanup.
 		delete_option( 'evt_db_version' );
-		delete_option( 'evt_ticket_key' );
+		delete_option( 'evt_ticket_secret' );
 		delete_post_meta_by_key( '_evt_event' );
 	}
 

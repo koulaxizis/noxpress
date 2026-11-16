@@ -10,7 +10,7 @@
  *
  * Codes: 10 characters from an alphabet without 0/O/1/I (32 symbols,
  * 50 bits), derived with HMAC-SHA256 from the plugin's own random key
- * (option evt_ticket_key, never autoloaded, not tied to the WordPress salts)
+ * (option evt_ticket_secret, never autoloaded, not tied to the WordPress salts)
  * and the ticket row, so they can be shown again to the buyer without being
  * stored. The table keeps only an HMAC of the code (code_hash) for the
  * check-in lookup. Never a serial number.
@@ -22,7 +22,7 @@ final class EVT_Ticket_Store {
 
 	const DB_VERSION = '1';
 	const DB_OPT     = 'evt_db_version';
-	const KEY_OPT    = 'evt_ticket_key';
+	const KEY_OPT    = 'evt_ticket_secret'; // A name Site Bridge masks as a secret.
 	const ALPHABET   = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 	public static function table(): string {

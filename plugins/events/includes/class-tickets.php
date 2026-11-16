@@ -52,6 +52,8 @@ final class EVT_Tickets {
 		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'status_changed' ), 20, 3 );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync' ), 20 );
 		add_action( 'woocommerce_order_item_meta_end', array( __CLASS__, 'item_codes' ), 20, 4 );
+		add_action( 'woocommerce_email_order_details', array( __CLASS__, 'email_start' ), 1 );
+		add_action( 'woocommerce_email_order_details', array( __CLASS__, 'email_end' ), PHP_INT_MAX );
 
 		add_filter( 'woocommerce_account_menu_items', array( __CLASS__, 'account_menu' ), 30 );
 		add_action( 'woocommerce_account_' . self::ENDPOINT . '_endpoint', array( __CLASS__, 'account_page' ) );
@@ -158,14 +160,24 @@ final class EVT_Tickets {
 	 * Sales window (Π24)
 	 * =================================================================== */
 
-	/** A storefront or Store API request (never WP admin, cron or REST with a user). */
+	/**
+	 * Whether the sales window applies to this request. It always does for
+	 * visitors and customers, in every context (pages, admin-ajax, REST):
+	 * only a user who can manage orders is exempt, and only outside the
+	 * storefront (WP admin screens, admin-ajax called from WP admin, REST
+	 * other than the Store API), so staff can still add tickets to orders.
+	 * Cron and WP-CLI are exempt. The referer alone never exempts anyone.
+	 */
 	private static function storefront(): bool {
 		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			return false;
 		}
+		if ( ! current_user_can( 'edit_shop_orders' ) && ! current_user_can( Events_Plugin::cap() ) ) {
+			return true;
+		}
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- only compared.
-			return false !== strpos( $uri, '/wc/store/' ) || false !== strpos( $uri, 'wc%2Fstore' ) || false !== strpos( $uri, 'rest_route=/wc/store' );
+			$route = isset( $GLOBALS['wp']->query_vars['rest_route'] ) ? (string) $GLOBALS['wp']->query_vars['rest_route'] : '';
+			return 0 === strpos( strtolower( '/' . ltrim( rawurldecode( $route ), '/' ) ), '/wc/store/' );
 		}
 		if ( is_admin() ) {
 			if ( ! wp_doing_ajax() ) {
@@ -396,8 +408,41 @@ final class EVT_Tickets {
 	}
 
 	/** Codes under a ticket item: thank-you page, emails, My account → order. */
+	/** True while WooCommerce writes an order e-mail. */
+	private static $in_email = false;
+
+	public static function email_start(): void {
+		self::$in_email = true;
+	}
+
+	public static function email_end(): void {
+		self::$in_email = false;
+	}
+
+	/**
+	 * Codes are bearer credentials: shown in the order e-mails, to the
+	 * customer who owns the order, or with the order key in the URL (the
+	 * thank-you page). Never on «Track your order», which needs only the
+	 * order number and the billing e-mail.
+	 */
+	private static function may_see_codes( WC_Order $order ): bool {
+		if ( self::$in_email ) {
+			return true;
+		}
+		if ( did_action( 'woocommerce_track_order' ) ) {
+			return false;
+		}
+		$uid = get_current_user_id();
+		if ( $uid > 0 && (int) $order->get_customer_id() === $uid ) {
+			return true;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the order key itself authorises.
+		$key = isset( $_GET['key'] ) && is_scalar( $_GET['key'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['key'] ) ) : '';
+		return '' !== $key && hash_equals( (string) $order->get_order_key(), $key );
+	}
+
 	public static function item_codes( $item_id, $item, $order, $plain = false ): void {
-		if ( ! $order instanceof WC_Order || ! in_array( $order->get_status(), self::PAID, true ) ) {
+		if ( ! $order instanceof WC_Order || ! in_array( $order->get_status(), self::PAID, true ) || ! self::may_see_codes( $order ) ) {
 			return;
 		}
 		$rows = array_filter(
