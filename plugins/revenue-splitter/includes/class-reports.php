@@ -129,7 +129,9 @@ class RS_Reports {
 				)
 			);
 		}
-		update_option( 'rs_cache_version', (string) time() );
+		// 1.19.0: unique per flush (two flushes in the same second used to
+		// keep the same key, so a persistent object cache served old data).
+		update_option( 'rs_cache_version', uniqid( '', true ) );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -372,6 +374,11 @@ class RS_Reports {
 				$order_channel = RS_Admin_UI::default_channel(); // Αμυντικά (ποτέ κενό key).
 			}
 
+			// 1.19.0: money from a bookstore on consignment (Trade Accounts
+			// settlement or «Είσπραξη ποσού» order): labelled with the
+			// bookstore's name. Labels only, the amounts are counted as before.
+			$tra_store = self::consign_store( $order );
+
 			foreach ( $order->get_items() as $item ) {
 				/** @var WC_Order_Item_Product $item */
 
@@ -418,6 +425,10 @@ class RS_Reports {
 						'disc_amt' => 0.0, // Συνολική έκπτωση (μικτή, incl ΦΠΑ).
 						'coupons'  => array(), // v1.3.5 (#8): κωδικοί κουπονιών (strings).
 						'sale_est' => false, // Audit (#2): η native έκπτωση εκτιμήθηκε από τρέχοντα τιμοκατάλογο (χωρίς stamped τιμή).
+						'tra_qty'  => 0,       // 1.19.0: copies sold through bookstores (consignment orders).
+						'tra_gross' => 0.0,    // 1.19.0: money from bookstores, VAT included.
+						'tra_st'   => array(), // 1.19.0: bookstore name => gross.
+						'part0'    => 0,       // 1.19.0: consignment payment lines that paid only part of a copy.
 				);
 				}
 
@@ -491,6 +502,15 @@ class RS_Reports {
 				}
 
 				$per_product[ $pid ]['qty'] += $qty;
+
+				if ( '' !== $tra_store ) {
+					$per_product[ $pid ]['tra_qty']   += $qty;
+					$per_product[ $pid ]['tra_gross'] += $net_gross;
+					$per_product[ $pid ]['tra_st'][ $tra_store ] = ( $per_product[ $pid ]['tra_st'][ $tra_store ] ?? 0.0 ) + $net_gross;
+					if ( $part && 0 === $qty ) {
+						++$per_product[ $pid ]['part0'];
+					}
+				}
 
 				if ( $disc_line > 0.01 ) {
 					$per_product[ $pid ]['qty_disc'] += $qty;
@@ -580,6 +600,13 @@ class RS_Reports {
 				'disc_pct'    => $acc['qty_disc'] > 0 ? round( $acc['disc_w'] / $acc['qty_disc'], 1 ) : 0.0,
 				'coupons'     => array_values( array_unique( $acc['coupons'] ) ), // v1.3.5 (#8) — strings.
 				'splits'      => $splits,
+				// 1.19.0: the part of the row that came from bookstores on consignment.
+				'consign'     => array(
+					'qty'    => (int) $acc['tra_qty'],
+					'gross'  => round( (float) $acc['tra_gross'], 2 ),
+					'stores' => array_map( static function ( $g ) { return round( (float) $g, 2 ); }, $acc['tra_st'] ),
+					'part0'  => (int) $acc['part0'],
+				),
 			);
 		}
 
@@ -643,6 +670,27 @@ class RS_Reports {
 			'warnings'      => $warnings,
 			'order_count'   => count( $matched_orders ),
 		);
+	}
+
+	/**
+	 * 1.19.0: the bookstore of a consignment order of Trade Accounts (a
+	 * settlement order, meta _tra_consignment, or an «Είσπραξη ποσού»
+	 * order, meta _tra_consignment_pay), or '' for any other order. The name
+	 * is the order meta _tra_store (Trade Accounts 1.8.0+), else the billing
+	 * company, else the billing name.
+	 */
+	public static function consign_store( WC_Order $order ): string {
+		if ( '' === (string) $order->get_meta( '_tra_consignment' ) && '' === (string) $order->get_meta( '_tra_consignment_pay' ) ) {
+			return '';
+		}
+		$name = trim( sanitize_text_field( (string) $order->get_meta( '_tra_store' ) ) );
+		if ( '' === $name ) {
+			$name = trim( (string) $order->get_billing_company() );
+		}
+		if ( '' === $name ) {
+			$name = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
+		}
+		return '' !== $name ? $name : __( 'Βιβλιοπωλείο', 'revenue-splitter' );
 	}
 
 	/* ---------------------------------------------------------------------
