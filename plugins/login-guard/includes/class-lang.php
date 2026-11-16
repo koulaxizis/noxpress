@@ -171,6 +171,10 @@ final class LGD_Lang {
 		'Οι ρυθμίσεις επανήλθαν. Η λειτουργία έμεινε όπως ήταν.' => 'Settings restored. The mode stayed as it was.',
 		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
 		'Για να προστατεύσουμε τους λογαριασμούς από επιθέσεις, όταν μια σύνδεση αποτυγχάνει μετράμε τις προσπάθειες ανά διεύθυνση IP και ανά λογαριασμό για λίγα λεπτά, μόνο ως κρυπτογραφικό hash. Όταν μια διεύθυνση ή ένας λογαριασμός κλειδώνεται, κρατάμε για 30 ημέρες την ώρα, τη διεύθυνση IP χωρίς το τελευταίο της μέρος (π.χ. 203.0.113.x) και, αν υπάρχει, τον αριθμό του λογαριασμού. Για τους διαχειριστές κρατάμε 30 ημέρες ένα hash της συσκευής (τμήμα της IP, browser και λειτουργικό), ώστε να τους ειδοποιούμε με email όταν συνδέονται από νέα συσκευή. Τίποτα από αυτά δεν στέλνεται σε τρίτους. Νομική βάση: έννομο συμφέρον για την ασφάλεια του site.' => 'To protect accounts from attacks, when a login fails we count the attempts per IP address and per account for a few minutes, only as a cryptographic hash. When an address or an account is locked, we keep for 30 days the time, the IP address without its last part (e.g. 203.0.113.x) and, if there is one, the account number. For administrators we keep for 30 days a hash of the device (part of the IP, browser and system), so we can e-mail them when they log in from a new device. None of this is sent to third parties. Legal basis: legitimate interest in the security of the site.',
+		'Τελείωσε %d κλείδωμα.' => '%d lockout ended.',
+		'Τελείωσαν %d κλειδώματα.' => '%d lockouts ended.',
+		'%d γραμμή στις έμπιστες διευθύνσεις δεν είναι έγκυρη IP ή εύρος (ή είναι ευρύτερο από /8) και αγνοήθηκε.' => '%d line in the trusted addresses is not a valid IP or range (or is wider than /8) and was ignored.',
+		'%d γραμμές στις έμπιστες διευθύνσεις δεν είναι έγκυρες IP ή εύρη (ή είναι ευρύτερα από /8) και αγνοήθηκαν.' => '%d lines in the trusted addresses are not valid IPs or ranges (or are wider than /8) and were ignored.',
 	);
 
 	public static function init(): void {
