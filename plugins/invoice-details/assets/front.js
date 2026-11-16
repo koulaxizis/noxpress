@@ -1,7 +1,9 @@
 /**
- * Invoice Details — front.js (v1.0.0), classic checkout only.
+ * Invoice Details — front.js (v1.1.0), classic checkout only.
  * Shows the invoice fields when «Τιμολόγιο» is chosen and the Greek ones
- * (ΔΟΥ, activity) for a Greek billing address. No request, no storage.
+ * (ΔΟΥ, activity) for a Greek billing address. With the AADE lookup set up
+ * (window.ivdAade), asks the shop for the company details of a Greek VAT
+ * number once per number. No storage.
  */
 ( function () {
 	'use strict';
@@ -46,4 +48,83 @@
 	} else {
 		update();
 	}
+
+	/*
+	 * 1.1.0: company details from AADE for a Greek VAT number (only when the
+	 * shop set it up: window.ivdAade). Fills only empty fields, or fields this
+	 * script filled before; the customer can change everything.
+	 */
+	var aade = window.ivdAade;
+	if ( ! aade || ! window.fetch || ! window.FormData ) {
+		return;
+	}
+	var asked = '';
+	function field( id ) {
+		return document.getElementById( id );
+	}
+	function put( el, value ) {
+		if ( ! el || ! value ) {
+			return;
+		}
+		if ( '' === el.value || el.getAttribute( 'data-ivd-aade' ) === el.value ) {
+			el.value = value;
+			el.setAttribute( 'data-ivd-aade', value );
+			el.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}
+	}
+	function say( text ) {
+		var vat = field( 'ivd_vat_field' );
+		if ( ! vat ) {
+			return;
+		}
+		var msg = vat.querySelector( '.ivd-aade-msg' );
+		if ( ! msg ) {
+			msg = document.createElement( 'small' );
+			msg.className = 'ivd-aade-msg';
+			msg.setAttribute( 'aria-live', 'polite' );
+			msg.style.display = 'block';
+			vat.appendChild( msg );
+		}
+		msg.textContent = text || '';
+	}
+	function lookup() {
+		var vat = field( 'ivd_vat' );
+		var country = field( 'billing_country' );
+		if ( ! vat ) {
+			return;
+		}
+		var raw = String( vat.value || '' ).toUpperCase().replace( /[\s.\-\/]/g, '' );
+		var greek = /^(EL|GR)?\d{9}$/.test( raw ) && ( /^(EL|GR)/.test( raw ) || ! country || ! country.value || 'GR' === country.value );
+		if ( ! greek || raw === asked ) {
+			return;
+		}
+		asked = raw;
+		var body = new FormData();
+		body.append( 'action', 'ivd_aade' );
+		body.append( 'nonce', aade.nonce );
+		body.append( 'vat', raw );
+		fetch( aade.url, { method: 'POST', credentials: 'same-origin', body: body } )
+			.then( function ( r ) {
+				return r.json();
+			} )
+			.then( function ( r ) {
+				if ( ! r || ! r.success || ! r.data ) {
+					say( '' );
+					return;
+				}
+				put( field( aade.own ? 'ivd_company' : 'billing_company' ), r.data.name );
+				put( field( 'ivd_tax_office' ), r.data.tax_office );
+				put( field( 'ivd_activity' ), r.data.activity );
+				put( field( 'ivd_hq' ), r.data.hq );
+				say( 'inactive' === r.data.status ? aade.msg.inactive : aade.msg.found );
+			} )
+			.catch( function () {
+				say( '' );
+			} );
+	}
+	document.addEventListener( 'change', function ( e ) {
+		if ( e.target && 'ivd_vat' === e.target.id ) {
+			lookup();
+		}
+	} );
 }() );

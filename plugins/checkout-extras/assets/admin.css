@@ -84,6 +84,7 @@
 .cke-wrap input[type="number"],
 .cke-wrap input[type="time"],
 .cke-wrap input[type="date"],
+.cke-wrap input[type="datetime-local"],
 .cke-wrap textarea,
 .cke-wrap select {
 	background-color: var(--cke-input) !important;
@@ -442,3 +443,19 @@ a.cke-kofi:hover {
 .cke-wrap .cke-period { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 8px; }
 .cke-wrap .cke-ids { width: 100%; max-width: 520px; }
 .cke-wrap .cke-statuses { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+
+/* Store vacation (1.2.0) */
+.cke-wrap .cke-status {
+	margin: 0 0 12px;
+	padding: 10px 14px;
+	border: 1px solid var(--cke-border);
+	border-left-width: 4px;
+	border-radius: 6px;
+	background: var(--cke-panel-2);
+	color: var(--cke-text) !important;
+	font-weight: 600;
+}
+.cke-wrap .cke-status--ok { border-left-color: #3d6b4f; }
+.cke-wrap .cke-status--warn { border-left-color: var(--cke-warn); }
+.cke-wrap .cke-status--off { border-left-color: var(--cke-border-input); }
+.cke-wrap input[type="datetime-local"] { color-scheme: dark; }

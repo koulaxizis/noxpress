@@ -5,7 +5,7 @@ Tags: woocommerce, invoice, vat number, vies, greece
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,6 +23,11 @@ Customers choose a **receipt or an invoice** at checkout. For an invoice they gi
 * Tax office and activity: required, optional or hidden. Head-office address: optional.
 * Returning customers find their details filled in; they can change them in My account.
 * Another plugin can ask for an invoice (filter `ivd_require_invoice`), e.g. for trade orders.
+
+**Details from AADE (optional)**
+
+* With your special Taxisnet credentials for the «Basic Registry Details» service in wp-config.php (`IVD_AADE_USER`, `IVD_AADE_PASS`), a Greek VAT number fills in the company name, tax office, activity and head office at checkout (classic and block) and with «Fill in from AADE» on the order. Only empty fields are filled; the customer can change everything.
+* The credentials are never stored in the database or shown in a screen. AADE receives the VAT number only. Only numbers with a correct check digit, one lookup per number for 7 days, at most 10 lookups per visitor in 10 minutes and 300 per hour for the site. An outage changes nothing: the customer types the details.
 
 **Checking the number**
 
@@ -45,7 +50,7 @@ Customers choose a **receipt or an invoice** at checkout. For an invoice they gi
 
 * Test mode after activation: only shop managers see the choice until you switch it on for everyone.
 * `define( 'IVD_DISABLE', true );` in wp-config.php stops every checkout hook at once; orders keep showing their details.
-* No cookie, no session, no public endpoint. The only external request is VIES, with the country and the number only.
+* No cookie, no session. The only external requests are VIES (country and number) and, when you set it up, AADE (the Greek number). The only public point is the AADE lookup at checkout (nonce, check digit, cache, limits).
 * WordPress privacy tools: the invoice details are in the order export and erasure, the customer's saved details have their own exporter and eraser, and a paragraph is suggested for the privacy policy.
 
 **For developers**
@@ -56,6 +61,7 @@ Customers choose a **receipt or an invoice** at checkout. For an invoice they gi
 * Filter `ivd_require_invoice( bool $required, WC_Cart|null $cart )`.
 * Filter `ivd_text( string $text, string $key, string $lang )` for the customer texts.
 * Filter `ivd_vies_response( $pre, string $country, string $number )` to answer VIES in tests.
+* Filter `ivd_aade_response( $pre, string $afm )` to answer AADE in tests (the SOAP answer as XML).
 * Ability `invoice-details/get-order` (WordPress 6.9+, read only).
 
 == Installation ==
@@ -83,6 +89,12 @@ The details on the orders (they are store records) and, unless you tick the opti
 The plugin helps collect invoice details; checking that an invoice is issued correctly and on time stays with the store and its accountant.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: details from AADE. With the special Taxisnet credentials in wp-config.php, a Greek VAT number fills in the company name, tax office, activity and head office in the classic checkout and the Checkout block, and «Fill in from AADE» on the order fills the empty ones. Only empty fields are filled, one lookup per number for 7 days, limits per visitor and per site, never stops an order. Off until you switch it on.
+
+= 1.0.2 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
 
 = 1.0.1 =
 * New `ivd_offered()`: true when the current visitor sees the receipt / invoice choice. Trade Accounts 1.7.0 uses it to hand its «trade orders need an invoice» rule to Invoice Details, in the classic checkout and the Checkout block.
