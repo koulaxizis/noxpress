@@ -5,7 +5,7 @@ Tags: woocommerce, product tabs, custom tabs, size guide, product video
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 

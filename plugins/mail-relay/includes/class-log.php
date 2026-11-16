@@ -480,6 +480,6 @@ final class MRL_Log {
 			$c       = (string) $c;
 			$cells[] = ( '' !== $c && ! is_numeric( $c ) && false !== strpos( "=+-@\t\r", $c[0] ) ) ? "'" . $c : $c;
 		}
-		fputcsv( $fh, $cells, ',', '"', '' );
+		Noxpress_Safe::csv_row( $fh, $cells, ',' );
 	}
 }

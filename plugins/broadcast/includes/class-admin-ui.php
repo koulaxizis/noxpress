@@ -1603,7 +1603,7 @@ final class BRC_Admin_UI {
 		header( 'Content-Disposition: attachment; filename="broadcast-history-' . $from . '_' . $to . '.csv"' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://output.
-		fputcsv(
+		Noxpress_Safe::csv_row(
 			$out,
 			array(
 				__( 'Πότε', 'broadcast' ),
@@ -1616,15 +1616,13 @@ final class BRC_Admin_UI {
 				__( 'Προσπάθειες', 'broadcast' ),
 				__( 'Απάντηση', 'broadcast' ),
 			),
-			$sep,
-			'"',
-			''
+			$sep
 		);
 		$names    = self::module_names();
 		$statuses = self::status_names();
 		$reasons  = self::reason_names();
 		foreach ( $rows as $r ) {
-			fputcsv(
+			Noxpress_Safe::csv_row(
 				$out,
 				array(
 					wp_date( 'Y-m-d H:i', $r['sent_at'] ? $r['sent_at'] : $r['created'] ),
@@ -1637,9 +1635,7 @@ final class BRC_Admin_UI {
 					$r['tries'],
 					self::cell( $r['result'] ),
 				),
-				$sep,
-				'"',
-				''
+				$sep
 			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output.

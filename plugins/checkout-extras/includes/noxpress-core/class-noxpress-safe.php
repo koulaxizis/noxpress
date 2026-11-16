@@ -110,9 +110,11 @@ final class Noxpress_Safe {
 	}
 
 	/**
-	 * One CSV row: an empty escape (a cell ending in a backslash cannot move
-	 * data to the next column) and a quote before text that a spreadsheet
-	 * would run as a formula. Numbers stay numbers, negatives included
+	 * One CSV row: every text cell enclosed in double quotes (no escape
+	 * character, so a cell ending in a backslash cannot move data to the
+	 * next column, and an embedded list separator of another locale cannot
+	 * start a new cell) and a quote before text that a spreadsheet would
+	 * run as a formula. Numbers stay numbers, negatives included
 	 * (Bible §5, §10).
 	 *
 	 * @param resource $fh  Open file handle.
@@ -120,11 +122,27 @@ final class Noxpress_Safe {
 	 * @return int|false Bytes written.
 	 */
 	public static function csv_row( $fh, array $row, string $sep = ',' ) {
+		$sep   = 1 === strlen( $sep ) && false === strpos( "\"\r\n", $sep ) ? $sep : ',';
 		$cells = array();
 		foreach ( $row as $cell ) {
-			$cells[] = self::csv_cell( $cell );
+			$cell = self::csv_cell( $cell );
+			if ( is_int( $cell ) || is_float( $cell ) ) {
+				$cells[] = (string) $cell;
+			} elseif ( is_bool( $cell ) ) {
+				$cells[] = $cell ? '1' : '';
+			} elseif ( null === $cell ) {
+				$cells[] = '';
+			} elseif ( '' !== $cell && is_numeric( $cell ) && false === strpbrk( $cell, " \t\r\n" ) ) {
+				$cells[] = $cell;
+			} else {
+				// Every text cell is enclosed (Core 1.4.8): a spreadsheet that
+				// splits on another list separator (';' in Greek Excel for a
+				// ',' file) then keeps the cell whole, so text after an
+				// embedded separator never becomes a cell of its own.
+				$cells[] = '"' . str_replace( '"', '""', (string) $cell ) . '"';
+			}
 		}
-		return fputcsv( $fh, $cells, $sep, '"', '' );
+		return fwrite( $fh, implode( $sep, $cells ) . "\n" );
 	}
 
 	/** A CSV cell with the formula guard of csv_row(). */

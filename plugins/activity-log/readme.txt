@@ -5,7 +5,7 @@ Tags: activity log, audit log, history, security, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -82,6 +82,9 @@ Only administrators (manage_options).
 Its table, its settings and its scheduled jobs are deleted.
 
 == Changelog ==
+
+= 1.0.1 =
+* Core 1.4.8: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.0.0 =
 * First release (beta): products, orders, coupons, content, users, plugins, themes, core, settings, media and suite events; actor and source on every row; secrets and customer details never stored; masked IPs; 90-day retention with a row limit; critical-change e-mail; CSV; «History» box on products and orders; dashboard widget; privacy exporter and eraser; read-only ability activity-log/list; Site Bridge and Login Guard hooks.
