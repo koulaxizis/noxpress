@@ -231,7 +231,7 @@ final class MRL_Crypt {
 		if ( is_multisite() ) {
 			return true;
 		}
-		return ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) && ! ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT );
+		return wp_is_file_mod_allowed( 'mrl_constant_pin' ) && ! ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT );
 	}
 
 	/** Deletes a stored secret whose bind is not the current one (or that cannot be read any more is kept, so the page can say so). */
