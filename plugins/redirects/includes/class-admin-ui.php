@@ -96,7 +96,11 @@ final class RDR_Admin_UI {
 	}
 
 	private static function url( string $tab, array $args = array() ): string {
-		return add_query_arg( array_merge( array( 'page' => self::SLUG, 'tab' => $tab ), $args ), admin_url( 'admin.php' ) );
+		// 1.0.8: add_query_arg() does not encode values, and a logged 404
+		// path is visitor text; every value is URL-encoded so '&' or '='
+		// in it cannot add parameters to an admin link.
+		$args = array_map( static function ( $v ) { return is_scalar( $v ) ? rawurlencode( (string) $v ) : $v; }, $args );
+		return add_query_arg( array_merge( array( 'page' => self::SLUG, 'tab' => rawurlencode( $tab ) ), $args ), admin_url( 'admin.php' ) );
 	}
 
 	public static function assets(): void {

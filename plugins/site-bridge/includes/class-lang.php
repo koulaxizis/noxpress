@@ -213,6 +213,8 @@ final class SBR_Lang {
 		// Notices.
 		'Οι ρυθμίσεις αποθηκεύτηκαν.'                                 => 'Settings saved.',
 		'Ο χρήστης εκτέλεσης πρέπει να είναι διαχειριστής.'           => 'The run-as user must be an administrator.',
+		'Σε multisite μόνο ο διαχειριστής του δικτύου ανοίγει το επίπεδο admin.' => 'On multisite only a network administrator can turn on the admin level.',
+		'Σε multisite μόνο ο διαχειριστής του δικτύου ορίζει διαχειριστή δικτύου ως χρήστη εκτέλεσης.' => 'On multisite only a network administrator can make a network administrator the run-as user.',
 		'Το παράθυρο εγγραφής είναι ανοιχτό ως %s.'                   => 'The write window is open until %s.',
 		'Το παράθυρο εγγραφής έκλεισε.'                               => 'The write window is closed.',
 		'Το site ξέχασε το Hub.'                                      => 'The site forgot the Hub.',

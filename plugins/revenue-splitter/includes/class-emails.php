@@ -555,6 +555,33 @@ final class RS_Emails {
 	}
 
 	/**
+	 * «Ξέχασες το κλειδί;» link (1.19.2): the key changes only after the
+	 * mailbox owner opens this link and confirms.
+	 */
+	public static function send_reset_link( string $who, string $url, string $to_email ): bool {
+
+		if ( '' === $to_email || false === is_email( $to_email ) ) {
+			return false;
+		}
+
+		$inner  = '<h2 style="margin:0 0 14px;color:#f6f4ff;">' . esc_html__( 'Νέο κλειδί portal', 'revenue-splitter' ) . '</h2>';
+		$inner .= '<p style="margin:0 0 10px;">' . esc_html__( 'Γεια σου', 'revenue-splitter' ) . ' <strong>' . esc_html( $who ) . '</strong>,</p>';
+		$inner .= '<p style="margin:0 0 10px;">' . esc_html__( 'Ζητήθηκε νέο κλειδί για το Author Portal. Άνοιξε το link μέσα σε μία ώρα και πάτησε «Νέο κλειδί»:', 'revenue-splitter' ) . '</p>';
+		$inner .= '<p style="margin:0 0 10px;"><a href="' . esc_url( $url ) . '" style="color:#b9a8ff;word-break:break-all;">' . esc_html( $url ) . '</a></p>';
+		$inner .= '<p style="margin:0 0 0;">' . esc_html__( 'Αν δεν το ζήτησες εσύ, αγνόησε αυτό το email: το κλειδί σου δεν άλλαξε.', 'revenue-splitter' ) . '</p>';
+
+		return self::send(
+			$to_email,
+			sprintf(
+				/* translators: %s: όνομα δικαιούχου */
+				__( 'Νέο κλειδί portal — %s', 'revenue-splitter' ),
+				$who
+			),
+			self::wrap( $inner )
+		);
+	}
+
+	/**
 	 * Ειδοποίηση στον admin για frontend key-rotation (anti-abuse:
 	 * ο κυβερνώτας admin πρέπει να βλέπει rotations που ΔΕΝ έκανε ο ίδιος).
 	 */

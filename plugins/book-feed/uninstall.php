@@ -65,7 +65,7 @@ function bkf_uninstall_site(): void {
 		} while ( $ids );
 	}
 
-	foreach ( array( 'bkf_settings', 'bkf_rules', 'bkf_seen', 'bkf_pass', 'bkf_log', 'bkf_job', 'bkf_lock', 'bkf_last', 'bkf_bulk', 'bkf_bulk_last' ) as $bkf_opt ) {
+	foreach ( array( 'bkf_settings', 'bkf_rules', 'bkf_seen', 'bkf_pass', 'bkf_pass_for', 'bkf_log', 'bkf_job', 'bkf_lock', 'bkf_last', 'bkf_bulk', 'bkf_bulk_last' ) as $bkf_opt ) {
 		delete_option( $bkf_opt );
 	}
 	delete_transient( 'bkf_scheme' );

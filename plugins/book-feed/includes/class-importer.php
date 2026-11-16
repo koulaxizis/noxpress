@@ -1238,9 +1238,22 @@ final class BKF_Importer {
 			return (int) $found[0];
 		}
 
-		$tmp = download_url( $url, 10 );
-		if ( is_wp_error( $tmp ) ) {
-			BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'image' ), $tmp->get_error_message() );
+		// 1.13.6: the cover URL can come from a fetched publisher page, so it
+		// goes through the public-address check, redirects included.
+		$tmp = wp_tempnam( $url );
+		$res = $tmp ? BKF_Client::public_get(
+			$url,
+			array(
+				'timeout'  => 10,
+				'stream'   => true,
+				'filename' => $tmp,
+			)
+		) : new WP_Error( 'bkf_tmp', __( 'Δεν δημιουργήθηκε προσωρινό αρχείο.', 'book-feed' ) );
+		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+			if ( $tmp ) {
+				wp_delete_file( $tmp );
+			}
+			BKF_Log::add( 'error', $pid, $r['isbn'], $r['title'], array( 'image' ), is_wp_error( $res ) ? $res->get_error_message() : 'HTTP ' . (int) wp_remote_retrieve_response_code( $res ) );
 			return 0;
 		}
 		$size = (int) @filesize( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors

@@ -1180,7 +1180,7 @@ final class BKF_Admin_UI {
 		}
 		BKF_Settings::save( $new );
 		if ( BKF_Settings::$url_kept ) {
-			$msgs[] = self::msg( 'warning', __( 'Η διεύθυνση της υπηρεσίας δεν άλλαξε: σε άλλον server την αλλάζει μόνο διαχειριστής, και τότε ο κωδικός δίνεται ξανά.', 'book-feed' ) );
+			$msgs[] = self::msg( 'warning', __( 'Η διεύθυνση της υπηρεσίας δεν άλλαξε: σε άλλον server, ή από https σε http, την αλλάζει μόνο διαχειριστής.', 'book-feed' ) );
 		}
 		if ( $new['url'] !== $cur['url'] || ! empty( $in['https'] ) !== $cur['https'] ) {
 			delete_transient( BKF_Client::SCHEME_TR );

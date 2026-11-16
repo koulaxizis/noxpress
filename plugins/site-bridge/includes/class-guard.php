@@ -614,6 +614,10 @@ final class SBR_Guard {
 		if ( self::is_secret( $name ) ) {
 			return 'Options with secrets do not change through Site Bridge.';
 		}
+		// 1.13.2: settings that say where a stored password is sent.
+		if ( in_array( $name, array( 'bkf_settings', 'bkf_pass_for', 'mrl_settings', 'mrl_const_pin' ), true ) ) {
+			return 'This option decides where a stored password is sent, so it changes only on the site.';
+		}
 		return '';
 	}
 

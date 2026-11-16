@@ -59,15 +59,29 @@ final class SBR_Tools_Write {
 
 	public static function tool_media_upload_from_url( array $a ) {
 		$url = SBR_Tools::a_str( $a, 'url' );
-		if ( ! wp_http_validate_url( $url ) ) {
+		// 1.13.2: Core's public check (169.254/16, 100.64/10 and the other
+		// non-public ranges), on the URL and on every redirect.
+		if ( ! wp_http_validate_url( $url ) || ! Noxpress_Safe::public_url( $url ) ) {
 			return new WP_Error( 'sbr_args', 'Invalid or non-public URL.' );
 		}
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
-		$tmp = download_url( $url, 60 );
-		if ( is_wp_error( $tmp ) ) {
-			return new WP_Error( 'sbr_http', 'Download failed: ' . $tmp->get_error_message() );
+		$tmp = wp_tempnam( $url );
+		if ( ! $tmp ) {
+			return new WP_Error( 'sbr_http', 'Download failed: no temporary file.' );
+		}
+		$res = Noxpress_Safe::public_get(
+			$url,
+			array(
+				'timeout'  => 60,
+				'stream'   => true,
+				'filename' => $tmp,
+			)
+		);
+		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+			wp_delete_file( $tmp );
+			return new WP_Error( 'sbr_http', 'Download failed: ' . ( is_wp_error( $res ) ? $res->get_error_message() : 'HTTP ' . (int) wp_remote_retrieve_response_code( $res ) ) );
 		}
 		$name = basename( (string) wp_parse_url( $url, PHP_URL_PATH ) );
 		$name = '' === $name ? 'file' : $name;
@@ -165,6 +179,20 @@ final class SBR_Tools_Write {
 	 * Admin: plugins, themes, channel
 	 * =================================================================== */
 
+	/**
+	 * 1.13.2: the run-as user must hold WordPress's own capability for the
+	 * change (on multisite only network administrators do), not only the
+	 * site's admin level.
+	 */
+	private static function may( string ...$caps ) {
+		foreach ( $caps as $cap ) {
+			if ( ! current_user_can( $cap ) ) {
+				return new WP_Error( 'sbr_cap', 'The run-as user lacks the "' . $cap . '" capability on this site.' );
+			}
+		}
+		return true;
+	}
+
 	private static function upgrader_ready() {
 		if ( ! wp_is_file_mod_allowed( 'site_bridge' ) ) {
 			return new WP_Error( 'sbr_files', 'DISALLOW_FILE_MODS is set on this site: plugins and themes cannot change.' );
@@ -215,6 +243,10 @@ final class SBR_Tools_Write {
 	}
 
 	public static function tool_plugins_install( array $a ) {
+		$cap = self::may( 'install_plugins', 'activate_plugins' );
+		if ( is_wp_error( $cap ) ) {
+			return $cap;
+		}
 		$ok = self::upgrader_ready();
 		if ( is_wp_error( $ok ) ) {
 			return $ok;
@@ -292,6 +324,10 @@ final class SBR_Tools_Write {
 	}
 
 	public static function tool_plugins_activate( array $a ) {
+		$cap = self::may( 'activate_plugins' );
+		if ( is_wp_error( $cap ) ) {
+			return $cap;
+		}
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$out = array();
 		foreach ( SBR_Tools::a_list( $a, 'plugins', 50 ) as $p ) {
@@ -330,6 +366,10 @@ final class SBR_Tools_Write {
 	}
 
 	public static function tool_plugins_deactivate( array $a ) {
+		$cap = self::may( 'activate_plugins' );
+		if ( is_wp_error( $cap ) ) {
+			return $cap;
+		}
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$self = plugin_basename( SBR_FILE );
 		$out  = array();
@@ -370,6 +410,10 @@ final class SBR_Tools_Write {
 	}
 
 	public static function tool_plugins_update( array $a ) {
+		$cap = self::may( 'update_plugins' );
+		if ( is_wp_error( $cap ) ) {
+			return $cap;
+		}
 		$ok = self::upgrader_ready();
 		if ( is_wp_error( $ok ) ) {
 			return $ok;
@@ -433,6 +477,10 @@ final class SBR_Tools_Write {
 	}
 
 	public static function tool_themes_update( array $a ) {
+		$cap = self::may( 'update_themes' );
+		if ( is_wp_error( $cap ) ) {
+			return $cap;
+		}
 		$ok = self::upgrader_ready();
 		if ( is_wp_error( $ok ) ) {
 			return $ok;

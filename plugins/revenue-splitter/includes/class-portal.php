@@ -385,8 +385,10 @@ final class RS_Portal {
 	/**
 	 * Background half of «Ξέχασες το κλειδί;» (1.18.1). Reverse lookup:
 	 * only here is the name found. Throttle per beneficiary (3/hour),
-	 * independent of login/IP and never reset by success: no mail-bombing
-	 * or endless rotation of someone else's key.
+	 * independent of login/IP and never reset by success: no mail-bombing.
+	 * 1.19.2: the key is NOT replaced here. The e-mail carries a one-time
+	 * link (1 hour, stored only as an HMAC); the key changes, and open
+	 * sessions end, only when the mailbox owner confirms on that link.
 	 */
 	public static function reset_send( $email ): void {
 		$email = is_string( $email ) ? trim( $email ) : '';
@@ -394,11 +396,37 @@ final class RS_Portal {
 		if ( '' === $who || ! self::reset_allowed( $who ) ) {
 			return;
 		}
-		$plain = self::rotate_key( $who );
-		if ( '' !== $plain ) {
-			RS_Emails::send_key( $who, $plain, $email );
-			RS_Emails::notify_admin_rotation( $who );
+		$tok = wp_generate_password( 40, false, false );
+		set_transient(
+			self::reset_slot( $tok ),
+			array(
+				'who'   => $who,
+				'email' => $email,
+			),
+			HOUR_IN_SECONDS
+		);
+		RS_Emails::send_reset_link( $who, add_query_arg( 'rs_rk', $tok, self::portal_url() ), $email );
+	}
+
+	/** Transient name of a reset link (1.19.2): an HMAC of the token. */
+	private static function reset_slot( string $tok ): string {
+		return 'rs_rk_' . substr( hash_hmac( 'sha256', $tok, wp_salt( 'auth' ) ), 0, 40 );
+	}
+
+	/** The reset token of this request (GET or POST), or ''. */
+	private static function reset_token(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification -- the token itself is the proof; checked against the stored HMAC.
+		$raw = isset( $_REQUEST['rs_rk'] ) ? (string) wp_unslash( $_REQUEST['rs_rk'] ) : '';
+		return preg_match( '/^[A-Za-z0-9]{40}$/', $raw ) ? $raw : '';
+	}
+
+	/** The stored request of a reset token, or null when unknown/expired. */
+	private static function reset_request( string $tok ): ?array {
+		if ( '' === $tok ) {
+			return null;
 		}
+		$r = get_transient( self::reset_slot( $tok ) );
+		return is_array( $r ) && ! empty( $r['who'] ) && ! empty( $r['email'] ) ? $r : null;
 	}
 
 	/**
@@ -494,6 +522,33 @@ final class RS_Portal {
 			}
 
 			self::stream_csv( $who );
+		}
+
+		// ---------- 1.19.2: confirm a reset link (POST from the link's page) ----------
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce ελέγχεται αμέσως παρακάτω.
+		if ( isset( $_POST['rs_portal_reset_confirm'] ) ) {
+
+			if ( ! isset( $_POST['rs_portal_rk_nonce'] )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['rs_portal_rk_nonce'] ) ), 'rs_portal_rk' ) ) {
+				return;
+			}
+
+			$tok = self::reset_token();
+			$req = self::reset_request( $tok );
+			$back = self::portal_url();
+			if ( null === $req ) {
+				wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rx', $back ) );
+				exit;
+			}
+			delete_transient( self::reset_slot( $tok ) );
+
+			$plain = self::rotate_key( (string) $req['who'] );
+			if ( '' !== $plain ) {
+				RS_Emails::send_key( (string) $req['who'], $plain, (string) $req['email'] );
+				RS_Emails::notify_admin_rotation( (string) $req['who'] );
+			}
+			wp_safe_redirect( add_query_arg( 'rs_pt_msg', 'rk', $back ) );
+			exit;
 		}
 
 		// ---------- vNext (#3): Forgot-key reset (email → νέο κλειδί) ----------
@@ -629,46 +684,13 @@ final class RS_Portal {
 	}
 
 	/**
-	 * Πραγματική IP επισκέπτη (behind-proxy aware — δες v1.3.2 FIX #5).
+	 * The visitor's address for rate limits and request records (Bible §11).
+	 * 1.19.2: Core's Noxpress_Safe::client_ip(), so CF-Connecting-IP counts
+	 * only from a Cloudflare address and X-Forwarded-For is never read.
 	 */
 	public static function client_ip(): string {
-
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- IP addresses.
-		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
-
-		if ( '' === $remote ) {
-			return 'unknown';
-		}
-
-		if ( ! self::is_reserved( $remote ) ) {
-			return $remote;
-		}
-
-		if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
-			$cf = trim( (string) $_SERVER['HTTP_CF_CONNECTING_IP'] );
-			if ( '' !== $cf && false !== filter_var( $cf, FILTER_VALIDATE_IP ) ) {
-				return $cf;
-			}
-		}
-
-		if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- IP chain.
-			$chain = array_map( 'trim', explode( ',', (string) $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-			if ( ! empty( $chain[0] ) && false !== filter_var( $chain[0], FILTER_VALIDATE_IP ) ) {
-				return $chain[0];
-			}
-		}
-
-		return $remote;
-	}
-
-	private static function is_reserved( string $ip ): bool {
-
-		if ( '' === $ip || 'unknown' === $ip ) {
-			return false;
-		}
-
-		return false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+		$ip = Noxpress_Safe::client_ip();
+		return '' === $ip ? 'unknown' : $ip;
 	}
 
 	/* =====================================================================
@@ -880,7 +902,21 @@ final class RS_Portal {
 				</form>
 
 				<?php if ( 'rq' === $err ) : ?>
-					<p class="rs-pt-msg-ok"><?php esc_html_e( 'Αν το email υπάρχει στα αρχεία μας, θα λάβεις νέο κλειδί σε λίγα λεπτά.', 'revenue-splitter' ); ?></p>
+					<p class="rs-pt-msg-ok"><?php esc_html_e( 'Αν το email υπάρχει στα αρχεία μας, θα λάβεις σε λίγα λεπτά ένα link για νέο κλειδί.', 'revenue-splitter' ); ?></p>
+				<?php elseif ( 'rk' === $err ) : ?>
+					<p class="rs-pt-msg-ok"><?php esc_html_e( 'Το νέο σου κλειδί στάλθηκε στο email σου.', 'revenue-splitter' ); ?></p>
+				<?php elseif ( 'rx' === $err ) : ?>
+					<p class="rs-pt-error"><?php esc_html_e( 'Το link έληξε ή χρησιμοποιήθηκε ήδη. Ζήτησε νέο από το «Ξέχασες το κλειδί;».', 'revenue-splitter' ); ?></p>
+				<?php endif; ?>
+
+				<?php $rk = self::reset_token(); ?>
+				<?php if ( '' !== $rk && null !== self::reset_request( $rk ) ) : ?>
+					<form method="post" class="rs-pt-reset">
+						<?php wp_nonce_field( 'rs_portal_rk', 'rs_portal_rk_nonce' ); ?>
+						<input type="hidden" name="rs_rk" value="<?php echo esc_attr( $rk ); ?>" />
+						<p><?php esc_html_e( 'Πάτησε για να πάρεις νέο κλειδί. Το παλιό κλειδί θα ακυρωθεί και θα σου σταλεί το νέο με email.', 'revenue-splitter' ); ?></p>
+						<button type="submit" name="rs_portal_reset_confirm" value="1"><?php esc_html_e( 'Νέο κλειδί', 'revenue-splitter' ); ?></button>
+					</form>
 				<?php endif; ?>
 
 				<details class="rs-pt-forgot">

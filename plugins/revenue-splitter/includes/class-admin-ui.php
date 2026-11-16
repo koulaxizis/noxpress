@@ -2177,6 +2177,12 @@ final class RS_Admin_UI {
 					// get_post() πιο κάτω θα την μάρκαρε άδικα ως
 					// «προϊόν δεν βρέθηκε». Χειριζόμαστε εδώ, ξεχωριστά:
 					if ( '_rs_free_reason' === $key ) {
+						// 1.19.2: the reason is plain text, as RS_Checkout saves it; a
+						// serialized or non-scalar value is never imported.
+						if ( ! is_scalar( $row['value'] ) || is_serialized( (string) $row['value'] ) ) {
+							continue;
+						}
+						$row['value'] = mb_substr( sanitize_textarea_field( (string) $row['value'] ), 0, 500 );
 
 						// HPOS site + η παραγγελία υπάρχει στο wc_orders →
 						// γράψ' το εκεί (DELETE-first — το table δεν έχει
@@ -2780,7 +2786,7 @@ final class RS_Admin_UI {
 		foreach ( $report['products'] as $p ) {
 			echo '<tr>';
 			foreach ( self::product_cells( $p ) as $cell ) {
-				echo '<td>' . esc_html( $cell ) . '</td>';
+				echo '<td>' . esc_html( (string) Noxpress_Safe::csv_cell( $cell ) ) . '</td>';
 			}
 			echo '</tr>';
 		}
@@ -2800,7 +2806,7 @@ final class RS_Admin_UI {
 		foreach ( $channel_rows as $cr ) {
 			echo '<tr>';
 			foreach ( self::channel_cells( $cr ) as $cell ) {
-				echo '<td>' . esc_html( $cell ) . '</td>';
+				echo '<td>' . esc_html( (string) Noxpress_Safe::csv_cell( $cell ) ) . '</td>';
 			}
 			echo '</tr>';
 		}

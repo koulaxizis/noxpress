@@ -215,6 +215,10 @@ final class SBR_Settings {
 			return null;
 		}
 		$u = get_userdata( $id );
+		// 1.13.2: on multisite the user must also belong to this site.
+		if ( $u instanceof WP_User && is_multisite() && ! is_user_member_of_blog( $u->ID ) ) {
+			return null;
+		}
 		return ( $u instanceof WP_User && user_can( $u, 'manage_options' ) ) ? $u : null;
 	}
 }
