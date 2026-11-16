@@ -80,6 +80,7 @@ SLUGS = {
     'pt': 'product-tabs',
     'fd': 'product-feed',
     'iv': 'invoice-details',
+    'al': 'activity-log',
     'mr': 'mail-relay',
     'sb': 'site-bridge',
 }
