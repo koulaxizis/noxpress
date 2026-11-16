@@ -131,7 +131,7 @@ final class Noxpress_Hub {
 		} elseif ( 'hide' === $action ) {
 			$slug    = isset( $_POST['noxpress_slug'] ) ? sanitize_key( wp_unslash( $_POST['noxpress_slug'] ) ) : '';
 			$version = isset( $_POST['noxpress_version'] ) ? sanitize_text_field( wp_unslash( $_POST['noxpress_version'] ) ) : '';
-			$catalog = Noxpress_Core::catalog();
+			$catalog = Noxpress_Core::suite();
 			if ( isset( $catalog[ $slug ] ) && preg_match( '/^\d+\.\d+\.\d+$/', $version ) ) {
 				Noxpress_Updater::hide( $slug, $version );
 				/* translators: 1: plugin name, 2: version number */
@@ -171,7 +171,7 @@ final class Noxpress_Hub {
 		$auto = (array) get_site_option( 'auto_update_plugins', array() );
 		$rows = array();
 
-		foreach ( Noxpress_Core::catalog() as $slug => $info ) {
+		foreach ( Noxpress_Core::suite() as $slug => $info ) {
 			$file   = Noxpress_Core::plugin_file( $slug );
 			$is_in  = isset( $installed[ $slug ] );
 			if ( ! $is_in && ! empty( $info['unlisted'] ) ) {

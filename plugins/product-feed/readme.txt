@@ -5,7 +5,7 @@ Tags: product feed, google merchant center, skroutz, bestprice, facebook catalog
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -80,6 +80,9 @@ Google does not accept digital books in Shopping ads. Downloadable and virtual p
 Yes: switch the old plugin off, then put its file path (relative to uploads) in «Also write to this path». The copy is replaced in one step, like the feed itself.
 
 == Changelog ==
+
+= 1.0.1 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
 
 = 1.0.0 =
 * New: feeds for Google Merchant Center, Skroutz, BestPrice, the Meta catalog and a general CSV.

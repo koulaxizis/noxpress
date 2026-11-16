@@ -3,7 +3,7 @@
  * Plugin Name:          Trade Accounts
  * Plugin URI:           https://noxpress.tech
  * Description:          Λογαριασμοί χονδρικής για βιβλιοπωλεία και μεταπωλητές. Modules που ενεργοποιείς ένα-ένα: Τιμές χονδρικής (ρόλος «Χονδρική» με προκαθορισμένη έκπτωση μόνο στα προϊόντα που ορίζεις, στο κατάστημα, στο καλάθι και στην παραγγελία, με υποχρεωτικό τιμολόγιο αν θέλεις) Trade Feed (API με όνομα χρήστη και Application Password ανά λογαριασμό, JSON ή XML, με φίλτρα, όριο κλήσεων και ημερολόγιο) και Παρακαταθήκες (βιβλία σε βιβλιοπωλεία: απόθεμα, εκκαθάριση, είσπραξη).
- * Version:              1.6.2
+ * Version:              1.8.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -93,14 +93,15 @@
  *
  * Cooperation (Bible §6): tra_is_trade( $user_id ), tra_trade_price(
  * $product, $user_id ), tra_is_eligible( $product ), tra_consignments(
- * $args ), tra_consignment_lines( $product_ids ); filters tra_eligible,
+ * $args ), tra_consignment_lines( $product_ids ), tra_consignment_summary(
+ * $product_ids, $as_of ) (1.8.0); filters tra_eligible,
  * tra_discount, tra_feed_item and tra_text; actions
  * tra_consignment_created, tra_consignment_settled, tra_consignment_paid.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TRA_VERSION', '1.6.2' );
+define( 'TRA_VERSION', '1.8.0' );
 define( 'TRA_FILE', __FILE__ );
 define( 'TRA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TRA_URL', plugin_dir_url( __FILE__ ) );
@@ -255,6 +256,21 @@ function tra_consignments( array $args = array() ): array {
  */
 function tra_consignment_lines( array $product_ids = array() ): array {
 	return class_exists( 'TRA_Consign' ) ? TRA_Consign::open_lines( $product_ids ) : array();
+}
+
+/**
+ * 1.8.0: the full consignment picture per title and bookstore (read only),
+ * for Revenue Splitter's author portal and monthly statement: product id =>
+ * list of {account, name, city, given, first, sold, returned, open, due,
+ * overdue, price, sold_value, collected, owed, sold_value_c, collected_c,
+ * owed_c} (money VAT included; *_c in cents). $as_of (Y-m-d) = the picture
+ * at the end of that day; '' = today. Empty while the module is off.
+ *
+ * @param int[]  $product_ids Products; empty = every product.
+ * @param string $as_of       Y-m-d or ''.
+ */
+function tra_consignment_summary( array $product_ids = array(), string $as_of = '' ): array {
+	return class_exists( 'TRA_Consign' ) ? TRA_Consign::summary_by_product( $product_ids, $as_of ) : array();
 }
 
 // Priority 20 like the other suite plugins.

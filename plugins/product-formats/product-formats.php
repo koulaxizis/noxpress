@@ -3,7 +3,7 @@
  * Plugin Name:          Product Formats
  * Plugin URI:           https://noxpress.tech
  * Description:          Ομαδοποιεί τα προϊόντα που είναι το ίδιο έργο σε άλλη μορφή (έντυπο, ebook, ηχητικό βιβλίο, ταινία, μουσική ή δικές σου μορφές) και δείχνει στη σελίδα κάθε προϊόντος το μπλοκ «Διαθέσιμες μορφές» με ετικέτα, τιμή και σύνδεσμο. Προτείνει ομάδες από τίτλους, slugs και upsells, και καθαρίζει με ασφάλεια τα upsells που έκαναν αυτή τη δουλειά.
- * Version:              1.2.4
+ * Version:              1.3.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -35,6 +35,11 @@
  *                      upsell hiding, front-end CSS
  *  - PFM_Upsells     → upsell cleanup: preview, batches, snapshots, restore
  *  - PFM_Product_Tab → "Formats" tab in the product data panel
+ *  - PFM_Book        → book details (1.3.0): schema.org properties of the
+ *                      Product node and the "Publication details" table,
+ *                      from the shop's attributes
+ *  - PFM_Book_Admin  → tab "Βιβλία": book settings and the "Pages from
+ *                      the description" tool (preview, batches, undo)
  *  - PFM_Admin_UI    → menu, pages, PRG routes, AJAX, backup, footer
  *
  * Front-end rules (Bible §14): nothing changes until enabled; test mode
@@ -45,14 +50,17 @@
  *
  * Cooperation (Bible §6): the upsell cleanup changes product data, so it
  * fires `noxpress_products_changed( $ids )`. Public API for other plugins:
- * pfm_get_work( $product_id ) and the filter `pfm_formats`.
+ * pfm_get_work( $product_id ) and the filter `pfm_formats`; 1.3.0 adds the
+ * filter `pfm_book_schema( $node, $product )`. The book schema goes into
+ * the Product node WooCommerce / Search Signals / Rank Math already print
+ * (after Featured Creators), never a second node (Bible §14.38).
  *
  * Deviations from the Bible: none.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PFM_VERSION', '1.2.4' );
+define( 'PFM_VERSION', '1.3.1' );
 define( 'PFM_FILE', __FILE__ );
 define( 'PFM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PFM_URL', plugin_dir_url( __FILE__ ) );
@@ -95,6 +103,7 @@ final class Product_Formats {
 		require_once PFM_PATH . 'includes/class-settings.php';
 		require_once PFM_PATH . 'includes/class-works.php';
 		require_once PFM_PATH . 'includes/class-front.php';
+		require_once PFM_PATH . 'includes/class-book.php';
 
 		// The taxonomy and the save hooks keep the member map right even with
 		// PFM_DISABLE: they never print anything.
@@ -103,12 +112,14 @@ final class Product_Formats {
 		// Emergency switch (Bible §14): no front-end hook at all.
 		if ( ! self::killed() ) {
 			PFM_Front::init();
+			PFM_Book::init();
 		}
 
 		if ( is_admin() ) {
 			require_once PFM_PATH . 'includes/class-suggest.php';
 			require_once PFM_PATH . 'includes/class-upsells.php';
 			require_once PFM_PATH . 'includes/class-product-tab.php';
+			require_once PFM_PATH . 'includes/class-book-admin.php';
 			require_once PFM_PATH . 'includes/class-admin-ui.php';
 			PFM_Product_Tab::init();
 			PFM_Admin_UI::init();

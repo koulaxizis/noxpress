@@ -28,6 +28,15 @@
  * (noxpress|<slug>|<version>|<sha256>) stays in the file for sites with
  * older Core copies; this Core no longer reads it.
  *
+ * Whole-list signature (Core 1.4.0): "sig3" signs the compact JSON copy
+ * of the list in "signed" (noxpress3|<signed>); only that copy is read,
+ * so no release can be hidden and no requirement or changelog changed.
+ *
+ * New plugins (Core 1.4.0): every validly signed plugin of the list is
+ * read, also one this Core copy's catalog does not list yet, so the hub
+ * can install it. Its name and description come from the list; it counts
+ * as installed only with our Update URI in its header.
+ *
  * Requests: wp_safe_remote_get only, 10 s timeout, cached for 12 hours
  * (1 hour after a failure), never on visitor requests: update checks run
  * in the admin and in WP-Cron only.
@@ -44,6 +53,9 @@ final class Noxpress_Updater {
 
 	/** Ed25519 public key (base64) matching the NOXPRESS_SIGNING_KEY secret of the repo. */
 	const PUBLIC_KEY = 'xtCTPe6qjQzMxplW3cNmUqELvAuNMVvit/P0IOaSgd0=';
+
+	/** Most plugins read from one list. */
+	const MAX_PLUGINS = 200;
 
 	/** Site transient holding the decoded manifest (or an empty array after a failure). */
 	const CACHE = 'noxpress_manifest';
@@ -124,16 +136,25 @@ final class Noxpress_Updater {
 	}
 
 	/**
-	 * Strict parse of updates.json: unknown plugins and malformed or
-	 * unsigned releases are dropped. The whole list is refused when it has
-	 * expired, is older than the newest list this site has seen, or has no
-	 * valid release at all.
+	 * Strict parse of updates.json. Since 1.4.0 only the "signed" copy of
+	 * the list counts, and only with a valid "sig3" over it: every release,
+	 * requirement and changelog is then exactly as the release workflow
+	 * built it, and no plugin can be left out. Malformed or unsigned
+	 * releases inside it are still dropped. The whole list is refused when
+	 * sig3 fails, it has expired, is older than the newest list this site
+	 * has seen, or has no valid release at all.
 	 *
 	 * @param string $problem Set to '' | 'expired' | 'rollback' | 'signature'.
 	 */
 	public static function parse( string $json, &$problem = '' ): array {
 		$problem = 'signature';
-		$raw     = json_decode( $json, true );
+		$outer   = json_decode( $json, true );
+		if ( ! is_array( $outer ) || ! isset( $outer['signed'], $outer['sig3'] ) || ! is_string( $outer['signed'] ) || ! is_string( $outer['sig3'] )
+			|| ! preg_match( '#^[A-Za-z0-9+/]{86}==$#', $outer['sig3'] )
+			|| ! self::signed( 'noxpress3|' . $outer['signed'], $outer['sig3'] ) ) {
+			return array();
+		}
+		$raw = json_decode( $outer['signed'], true );
 		if ( ! is_array( $raw ) || ! isset( $raw['plugins'] ) || ! is_array( $raw['plugins'] ) ) {
 			return array();
 		}
@@ -150,9 +171,14 @@ final class Noxpress_Updater {
 			$problem = 'rollback';
 			return array();
 		}
-		$out = array();
-		foreach ( array_keys( Noxpress_Core::catalog() ) as $slug ) {
-			if ( ! isset( $raw['plugins'][ $slug ] ) || ! is_array( $raw['plugins'][ $slug ] ) ) {
+		$out     = array();
+		$catalog = Noxpress_Core::catalog();
+		// Every validly signed plugin of the list counts, also one this Core
+		// copy does not list yet (1.4.0): the signature binds the slug and the
+		// zip must be that slug's own release asset.
+		foreach ( array_slice( array_keys( $raw['plugins'] ), 0, self::MAX_PLUGINS ) as $slug ) {
+			$slug = (string) $slug;
+			if ( ! preg_match( Noxpress_Core::SLUG_RE, $slug ) || ! is_array( $raw['plugins'][ $slug ] ) ) {
 				continue;
 			}
 			$entry = array();
@@ -160,12 +186,33 @@ final class Noxpress_Updater {
 				$rel               = isset( $raw['plugins'][ $slug ][ $channel ] ) ? self::release( $slug, $channel, $raw['plugins'][ $slug ][ $channel ], $serial, $expires ) : null;
 				$entry[ $channel ] = $rel;
 			}
-			if ( $entry['stable'] || $entry['beta'] ) {
-				$out[ $slug ] = $entry;
+			if ( ! $entry['stable'] && ! $entry['beta'] ) {
+				continue;
 			}
+			if ( ! isset( $catalog[ $slug ] ) ) {
+				$entry['info'] = self::info_of( $raw['plugins'][ $slug ] );
+			}
+			$out[ $slug ] = $entry;
 		}
 		$problem = $out ? '' : 'signature';
 		return $out;
+	}
+
+	/**
+	 * Display data of a plugin this Core does not list: name, Greek and
+	 * English description, admin page. Unsigned, so plain text with limits.
+	 */
+	private static function info_of( array $p ): array {
+		$text = static function ( $key, $max ) use ( $p ): string {
+			return isset( $p[ $key ] ) && is_scalar( $p[ $key ] ) ? mb_substr( sanitize_text_field( (string) $p[ $key ] ), 0, $max ) : '';
+		};
+		$page = isset( $p['page'] ) && is_string( $p['page'] ) ? sanitize_key( $p['page'] ) : '';
+		return array(
+			'name'    => $text( 'name', 60 ),
+			'desc_el' => $text( 'desc_el', 400 ),
+			'desc_en' => $text( 'desc_en', 400 ),
+			'page'    => substr( $page, 0, 40 ),
+		);
 	}
 
 	/** Newest list serial this site has accepted (0 = none yet). */
@@ -408,7 +455,7 @@ final class Noxpress_Updater {
 		if ( ! isset( $_GET[ self::PICK ] ) || ! is_object( $transient ) ) {
 			return $transient;
 		}
-		foreach ( array_keys( Noxpress_Core::catalog() ) as $slug ) {
+		foreach ( array_keys( Noxpress_Core::suite() ) as $slug ) {
 			$rel = self::picked( $slug );
 			if ( ! $rel ) {
 				continue;
@@ -487,7 +534,7 @@ final class Noxpress_Updater {
 			return null;
 		}
 		$slug    = $args->slug;
-		$catalog = Noxpress_Core::catalog();
+		$catalog = Noxpress_Core::suite();
 		if ( ! isset( $catalog[ $slug ] ) ) {
 			return null;
 		}
