@@ -30,15 +30,18 @@ final class ACL_Context {
 		'2a06:98c0::/29', '2c0f:f248::/32',
 	);
 
-	/** @var array|null Site Bridge call in progress: array( tool, ref ). */
+	/** @var array|null Site Bridge call in progress: array( tool, ref, call ). */
 	private static $bridge = null;
+
+	/** @var int Number of Site Bridge calls seen in this request. */
+	private static $calls = 0;
 
 	/** @var bool Inside an Action Scheduler run. */
 	private static $queue = false;
 
 	public static function init(): void {
 		add_action( 'sbr_call_start', array( __CLASS__, 'bridge_start' ), 10, 3 );
-		add_action( 'sbr_call_end', array( __CLASS__, 'bridge_end' ), 10, 0 );
+		add_action( 'sbr_call_end', array( __CLASS__, 'bridge_end' ), 10, 3 );
 		add_action( 'action_scheduler_before_execute', array( __CLASS__, 'queue_start' ), 10, 0 );
 		add_action( 'action_scheduler_after_execute', array( __CLASS__, 'queue_end' ), 10, 0 );
 		add_action( 'action_scheduler_failed_execution', array( __CLASS__, 'queue_end' ), 10, 0 );
@@ -49,18 +52,37 @@ final class ACL_Context {
 	 *
 	 * @param mixed $tool   Tool name.
 	 * @param mixed $client OAuth client name (not stored: the ref is enough).
-	 * @param mixed $ref    Id of the Site Bridge audit log row, 0 if unknown.
+	 * @param mixed $ref    Id of the Site Bridge audit log row, 0 if unknown
+	 *                      (Site Bridge writes its row after the tool and
+	 *                      passes the id to sbr_call_end instead).
 	 */
 	public static function bridge_start( $tool = '', $client = '', $ref = 0 ): void {
 		unset( $client );
 		self::$bridge = array(
 			'tool' => substr( sanitize_key( (string) $tool ), 0, 64 ),
 			'ref'  => max( 0, (int) $ref ),
+			'call' => ++self::$calls,
 		);
 	}
 
-	public static function bridge_end(): void {
+	/**
+	 * Site Bridge finished the tool and wrote its audit row.
+	 *
+	 * @param mixed $tool   Tool name.
+	 * @param mixed $status ok | error | denied.
+	 * @param mixed $log_id Id of the Site Bridge audit log row, 0 if unknown.
+	 */
+	public static function bridge_end( $tool = '', $status = '', $log_id = 0 ): void {
+		unset( $tool, $status );
+		if ( null !== self::$bridge && (int) $log_id > 0 ) {
+			ACL_Store::stamp( (int) self::$bridge['call'], 'sbr:' . (int) $log_id );
+		}
 		self::$bridge = null;
+	}
+
+	/** Number of the Site Bridge call in progress, 0 outside one. */
+	public static function call(): int {
+		return null !== self::$bridge ? (int) self::$bridge['call'] : 0;
 	}
 
 	public static function queue_start(): void {

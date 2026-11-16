@@ -129,6 +129,7 @@ final class ACL_Store {
 			'context'      => ACL_Context::context(),
 			'ip'           => ACL_Context::stored_ip(),
 			'ref'          => ACL_Context::ref(),
+			'_call'        => ACL_Context::call(),
 		);
 
 		/** Return true to drop an event (e.g. a noisy option of your own). */
@@ -165,6 +166,18 @@ final class ACL_Store {
 		if ( ! self::$hooked ) {
 			self::$hooked = true;
 			add_action( 'shutdown', array( __CLASS__, 'flush' ), 1 );
+		}
+	}
+
+	/** Points the queued rows of one Site Bridge call to its audit row. */
+	public static function stamp( int $call, string $ref ): void {
+		if ( $call <= 0 ) {
+			return;
+		}
+		foreach ( self::$buffer as $key => $row ) {
+			if ( $call === (int) ( $row['_call'] ?? 0 ) && '' === $row['ref'] ) {
+				self::$buffer[ $key ]['ref'] = substr( $ref, 0, 32 );
+			}
 		}
 	}
 
