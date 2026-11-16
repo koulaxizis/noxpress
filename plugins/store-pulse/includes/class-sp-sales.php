@@ -446,7 +446,8 @@ final class SP_Sales {
 				$oid     = $order->get_id();
 
 				foreach ( $order->get_items() as $item_id => $item ) {
-					if ( ! $item instanceof WC_Order_Item_Product ) {
+					// Stored value (gift cards) is not a sale (Bible §6).
+					if ( ! $item instanceof WC_Order_Item_Product || SP_Data::is_stored_value( $item ) ) {
 						continue;
 					}
 

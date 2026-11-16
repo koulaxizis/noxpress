@@ -1,0 +1,444 @@
+/**
+ * Gift Cards — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors gfc-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.gfc-wrap {
+	--gfc-bg: #101218;
+	--gfc-panel: #14161d;
+	--gfc-panel-2: #1d2029;
+	--gfc-input: #1a1d26;
+	--gfc-border: #2e3240;
+	--gfc-border-input: #3a3f52;
+	--gfc-row-border: #23262f;
+	--gfc-stripe: #181b23;
+	--gfc-hover: #1e212c;
+	--gfc-text: #eae8fa;
+	--gfc-heading: #f6f4ff;
+	--gfc-muted: #b7b2d6;
+	--gfc-link: #beb1ff;
+	--gfc-link-hover: #d4c9ff;
+	--gfc-accent: #6d4aff;
+	--gfc-accent-hover: #8263ff;
+	--gfc-warn: #f5c97e;
+	--gfc-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.gfc-wrap {
+	color-scheme: dark;
+	background: var(--gfc-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--gfc-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.gfc-wrap h1,
+.gfc-wrap h2 {
+	color: var(--gfc-heading);
+}
+
+.gfc-wrap a { color: var(--gfc-link); }
+.gfc-wrap a:hover { color: var(--gfc-link-hover); }
+
+.gfc-wrap .gfc-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--gfc-muted);
+	border-bottom: 1px solid var(--gfc-border);
+	padding-bottom: 6px;
+}
+
+.gfc-wrap .description,
+.gfc-wrap p.description,
+.gfc-wrap .gfc-hint {
+	color: var(--gfc-muted) !important;
+}
+
+.gfc-zone {
+	background: var(--gfc-panel);
+	border: 1px solid var(--gfc-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.gfc-wrap input[type="text"],
+.gfc-wrap input[type="url"],
+.gfc-wrap input[type="number"],
+.gfc-wrap input[type="time"],
+.gfc-wrap input[type="date"],
+.gfc-wrap textarea,
+.gfc-wrap select {
+	background-color: var(--gfc-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--gfc-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.gfc-wrap input::placeholder,
+.gfc-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.gfc-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.gfc-wrap input[type="file"] {
+	color: var(--gfc-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.gfc-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.gfc-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.gfc-wrap input[type="checkbox"],
+.gfc-wrap input[type="radio"] {
+	accent-color: var(--gfc-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.gfc-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.gfc-wrap .button:hover:not(:disabled) {
+	border-color: var(--gfc-accent) !important;
+	color: #ffffff !important;
+}
+
+.gfc-wrap .button-primary {
+	background: var(--gfc-accent) !important;
+	border-color: var(--gfc-accent) !important;
+	color: #ffffff !important;
+}
+
+.gfc-wrap .button-primary:hover:not(:disabled) {
+	background: var(--gfc-accent-hover) !important;
+}
+
+.gfc-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.gfc-submit { margin-top: 20px; }
+.gfc-inline-form { display: inline; margin-right: 10px; }
+.gfc-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.gfc-table,
+table.widefat.gfc-table {
+	background: var(--gfc-panel) !important;
+	border: 1px solid var(--gfc-border) !important;
+	border-radius: 6px;
+	color: var(--gfc-text) !important;
+	margin-top: 14px !important;
+}
+
+.gfc-table thead th,
+.gfc-table thead td {
+	background: var(--gfc-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.gfc-table tbody td,
+.gfc-table tbody th {
+	background: var(--gfc-panel) !important;
+	color: var(--gfc-text) !important;
+	border-bottom: 1px solid var(--gfc-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.gfc-table tbody tr:nth-child(2n) td,
+.gfc-table tbody tr:nth-child(2n) th {
+	background: var(--gfc-stripe) !important;
+}
+
+.gfc-table tbody tr:hover td,
+.gfc-table tbody tr:hover th {
+	background: var(--gfc-hover) !important;
+}
+
+.gfc-table td,
+.gfc-table th {
+	padding: 12px 14px;
+}
+
+.gfc-table td code {
+	background: transparent !important;
+	color: var(--gfc-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.gfc-table .gfc-empty {
+	color: var(--gfc-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.gfc-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.gfc-footer a { color: #beb1ff; text-decoration: none; }
+.gfc-footer a:hover { text-decoration: underline; }
+
+.gfc-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.gfc-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.gfc-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.gfc-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.gfc-muted { color: var(--gfc-muted) !important; }
+.gfc-warn { color: var(--gfc-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.gfc-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.gfc-wrap .gfc-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--gfc-heading);
+}
+
+.gfc-status p { margin: 0 0 8px; }
+.gfc-status p:last-child { margin-bottom: 0; }
+.gfc-status code,
+.gfc-wrap .description code,
+.gfc-wrap .gfc-hint code {
+	background: var(--gfc-panel-2);
+	color: var(--gfc-muted);
+	border: 1px solid var(--gfc-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.gfc-suspended { margin: 8px 0 0; }
+.gfc-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.gfc-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--gfc-border);
+	background: var(--gfc-panel-2);
+	color: var(--gfc-text);
+	white-space: nowrap;
+}
+.gfc-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.gfc-badge--muted { color: var(--gfc-muted); }
+.gfc-badge--warn { border-color: #6b5a33; color: var(--gfc-warn); }
+.gfc-badge--danger { border-color: #6b3a3a; color: var(--gfc-danger); }
+
+/* Area fieldsets. */
+.gfc-area {
+	background: var(--gfc-panel);
+	border: 1px solid var(--gfc-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.gfc-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--gfc-heading);
+}
+.gfc-row { margin: 4px 0 8px; }
+
+.gfc-details > summary {
+	cursor: pointer;
+	color: var(--gfc-link);
+	margin: 4px 0;
+}
+.gfc-details[open] > summary { margin-bottom: 12px; }
+
+.gfc-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.gfc-wrap .gfc-label {
+	display: block;
+	font-weight: 600;
+	color: var(--gfc-heading);
+	margin: 8px 0 6px;
+}
+.gfc-grid .gfc-label:first-child { margin-top: 0; }
+
+.gfc-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.gfc-field > span:first-child {
+	min-width: 150px;
+	color: var(--gfc-text);
+}
+.gfc-wrap .gfc-hint { display: block; font-size: 12px; margin-top: 4px; }
+.gfc-wrap td .gfc-hint { display: inline; }
+.gfc-table td.gfc-warn { color: var(--gfc-warn) !important; }
+
+/* Tabs of the main page. */
+.gfc-wrap .gfc-tabs {
+	border-bottom: 1px solid var(--gfc-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.gfc-wrap .gfc-tabs .nav-tab {
+	background: var(--gfc-panel);
+	border-color: var(--gfc-border);
+	color: var(--gfc-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.gfc-wrap .gfc-tabs .nav-tab:hover { color: var(--gfc-link-hover); background: var(--gfc-hover); }
+.gfc-wrap .gfc-tabs .nav-tab-active,
+.gfc-wrap .gfc-tabs .nav-tab-active:hover {
+	background: var(--gfc-bg);
+	border-bottom-color: var(--gfc-bg);
+	color: var(--gfc-heading);
+}
+
+/* One input per line (removal rules). */
+.gfc-wrap .gfc-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.gfc-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--gfc-border);
+	border-radius: 6px;
+	background: var(--gfc-panel-2);
+}
+.gfc-scroll .gfc-field { margin-bottom: 4px; }
+
+/* ===== Fields ===== */
+
+.gfc-wrap .gfc-wide { width: 100%; max-width: 640px; }
+.gfc-wrap .gfc-num { width: 90px; }
+.gfc-wrap .gfc-texts input[type="text"],
+.gfc-wrap .gfc-texts textarea { width: 100%; }
+.gfc-wrap .gfc-texts textarea { min-height: 64px; }
+
+.gfc-wrap .gfc-texts td:first-child { width: 280px; }
+
+/* ===== KPI cards (Bible §5 — recipe of Store Pulse) ===== */
+.gfc-wrap .gfc-grid-kpi {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin: 16px 0 24px;
+}
+.gfc-wrap .gfc-card {
+	background: #17191f !important;
+	border: 1px solid #2e3240;
+	border-left: 3px solid #6d4aff;
+	border-radius: 6px;
+	padding: 16px 20px;
+	box-sizing: border-box;
+}
+.gfc-wrap .gfc-card-label {
+	color: #b7b2d6 !important;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 6px;
+}
+.gfc-wrap .gfc-card-value {
+	color: #f6f4ff !important;
+	font-size: 22px;
+	font-weight: 400;
+	line-height: 1.25;
+	font-variant-numeric: tabular-nums;
+}
+.gfc-wrap .gfc-card-sub {
+	color: #b7b2d6;
+	font-size: 12px;
+	margin-top: 8px;
+}
+.gfc-wrap .gfc-period { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 8px; }
+.gfc-wrap .gfc-ids { width: 100%; max-width: 520px; }
+.gfc-wrap .gfc-statuses { display: flex; flex-wrap: wrap; gap: 4px 18px; }

@@ -376,7 +376,8 @@ final class PL_Report {
 		$ref   = self::refunds_by_item( $order );
 		$lines = array();
 		foreach ( $order->get_items() as $item_id => $item ) {
-			if ( ! $item instanceof WC_Order_Item_Product ) {
+			// Stored value (a gift card) is money owed, not a sale (Bible §6).
+			if ( ! $item instanceof WC_Order_Item_Product || self::is_stored_value( $item ) ) {
 				continue;
 			}
 			$qty = (int) $item->get_quantity();
@@ -495,6 +496,30 @@ final class PL_Report {
 	}
 
 	/** The product (parent of a variation) of an order line, or 0. */
+	/** A line that is stored value (gift card): the suite filter of Bible §6. */
+	public static function is_stored_value( $item ): bool {
+		return $item instanceof WC_Order_Item && (bool) apply_filters( 'noxpress_is_stored_value_item', false, $item );
+	}
+
+	/**
+	 * What the shop owes in stored value today (gift card balances), per
+	 * currency, from the plugin that keeps it. Empty when there is none.
+	 *
+	 * @return array<string,float>
+	 */
+	public static function stored_value_owed(): array {
+		$raw = apply_filters( 'noxpress_stored_value_owed', array() );
+		$out = array();
+		if ( is_array( $raw ) ) {
+			foreach ( $raw as $cur => $amount ) {
+				if ( is_string( $cur ) && preg_match( '/^[A-Z]{3}$/', $cur ) && is_numeric( $amount ) && (float) $amount > 0 ) {
+					$out[ $cur ] = round( (float) $amount, 2 );
+				}
+			}
+		}
+		return $out;
+	}
+
 	public static function product_of( WC_Order_Item_Product $item ): int {
 		$p = $item->get_product();
 		if ( $p instanceof WC_Product_Variation ) {

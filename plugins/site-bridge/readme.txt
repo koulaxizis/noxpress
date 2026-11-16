@@ -5,7 +5,7 @@ Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.12.4
+Stable tag: 1.13.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -102,6 +102,8 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 
+= 1.13.0 =
+* New: the actions sbr_call_start( $tool, $client, 0 ) and sbr_call_end( $tool, $status, $log_id ) around every tool run on this site, so Activity Log (1.0.0+) marks the changes Claude made through Site Bridge as such and points them to the row of this audit log. A listener that fails never changes the tool's result.
 = 1.12.4 =
 * Site info lists suite plugins that only the signed version list knows (Core 1.4.0).
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
