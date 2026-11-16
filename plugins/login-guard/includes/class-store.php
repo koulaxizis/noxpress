@@ -58,6 +58,14 @@ final class LGD_Store {
 			'xmlrpc'      => __( 'XML-RPC κλειστό', 'login-guard' ),
 			'new_device'  => __( 'Διαχειριστής από νέα συσκευή', 'login-guard' ),
 			'surge'       => __( 'Email για κύμα επιθέσεων', 'login-guard' ),
+			'2fa_on'        => __( '2FA ενεργοποιήθηκε', 'login-guard' ),
+			'2fa_off'       => __( '2FA απενεργοποιήθηκε', 'login-guard' ),
+			'2fa_reset'     => __( '2FA μηδενίστηκε', 'login-guard' ),
+			'2fa_codes'     => __( 'Νέοι κωδικοί ανάκτησης', 'login-guard' ),
+			'2fa_fail'      => __( 'Λάθος κωδικός 2FA', 'login-guard' ),
+			'2fa_rc'        => __( 'Σύνδεση με κωδικό ανάκτησης', 'login-guard' ),
+			'session_block' => __( 'Ο φύλακας έκλεισε session χωρίς 2FA', 'login-guard' ),
+			'test_session'  => __( 'Δοκιμή: ο φύλακας θα έκλεινε session', 'login-guard' ),
 		);
 	}
 
