@@ -109,4 +109,4 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 * E-mails for a new administrator device and for an attack surge.
 * Log with truncated IPs and keyed hashes for 30 days; privacy text.
 * WP-CLI commands, ability login-guard/status, LGD_DISABLE, JSON export and import; Greek and English admin.
-* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.4.1, with the shared Noxpress_Safe::client_ip()).
+* Noxpress hub and updates from noxpress.tech (Noxpress Core 1.4.7, with the shared Noxpress_Safe::client_ip()).

@@ -1344,6 +1344,27 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
 	</article>
+	<article class="card" id="activity-log">
+		<h2><a href="#activity-log">Activity Log</a></h2>
+		<div class="meta">v1.0.0 · WordPress · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="al_desc">Who changed what and when: products, prices, stock, orders, coupons, pages, users and logins, plugins, themes and settings, with the source of every change: admin, REST API, WP-CLI, cron or Claude through Site Bridge. No secrets and no customer details.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="al_li1">Old → new value for every changed field: price, sale price and dates, stock, SKU, status, categories, settings of WordPress, WooCommerce and the suite</li>
+			<li data-i18n="al_li2">Order status changes with who moved them (staff, the customer, a payment gateway or cron), refunds and admin edits; orders and customers only as numbers</li>
+			<li data-i18n="al_li3">Passwords, keys and tokens never stored; customer names, e-mails and addresses never stored; failed logins without the typed text; IPs masked by default</li>
+			<li data-i18n="al_li4">Filters by date, person, category, source and importance, a «History» box on every product and order, CSV export and a dashboard widget</li>
+			<li data-i18n="al_li5">E-mail for critical changes (new administrator, plugin installed or activated, theme switched, site address changed), at most one every 15 minutes</li>
+			<li data-i18n="al_li6">Kept 90 days (you choose), WordPress privacy export and erase, a read-only ability for Site Bridge; bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-al-1.0.0/activity-log.zip" rel="nofollow noopener" data-i18n="al_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/activity-log" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
 
 	<article class="card" id="product-tabs">
 		<h2><a href="#product-tabs">Product Tabs</a></h2>
@@ -1955,6 +1976,14 @@ footer .heart { color: var(--accent-bright); }
 		lg_li4: 'E-mail when an administrator logs in from a new device, and one e-mail an hour at most during an attack',
 		lg_li5: 'Log with truncated IPs and keyed hashes for 30 days, the real IP only from REMOTE_ADDR or Cloudflare, recovery doors (LGD_DISABLE, WP-CLI), ability for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		lg_download: 'Download v1.0.0 (.zip)',
+		al_desc: 'Who changed what and when: products, prices, stock, orders, coupons, pages, users and logins, plugins, themes and settings, with the source of every change: admin, REST API, WP-CLI, cron or Claude through Site Bridge. No secrets and no customer details.',
+		al_li1: 'Old → new value for every changed field: price, sale price and dates, stock, SKU, status, categories, settings of WordPress, WooCommerce and the suite',
+		al_li2: 'Order status changes with who moved them (staff, the customer, a payment gateway or cron), refunds and admin edits; orders and customers only as numbers',
+		al_li3: 'Passwords, keys and tokens never stored; customer names, e-mails and addresses never stored; failed logins without the typed text; IPs masked by default',
+		al_li4: 'Filters by date, person, category, source and importance, a «History» box on every product and order, CSV export and a dashboard widget',
+		al_li5: 'E-mail for critical changes (new administrator, plugin installed or activated, theme switched, site address changed), at most one every 15 minutes',
+		al_li6: 'Kept 90 days (you choose), WordPress privacy export and erase, a read-only ability for Site Bridge; bilingual UI and shared «Noxpress» menu',
+		al_download: 'Download v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
@@ -2381,6 +2410,14 @@ footer .heart { color: var(--accent-bright); }
 		lg_li4: 'Email όταν ένας διαχειριστής συνδέεται από νέα συσκευή, και το πολύ ένα email την ώρα σε κύμα επιθέσεων',
 		lg_li5: 'Ημερολόγιο με κομμένη IP και hash για 30 ημέρες, η πραγματική IP μόνο από το REMOTE_ADDR ή την Cloudflare, πόρτες ανάκτησης (LGD_DISABLE, WP-CLI), ability για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		lg_download: 'Λήψη v1.0.0 (.zip)',
+		al_desc: 'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, απόθεμα, παραγγελίες, κουπόνια, σελίδες, χρήστες και συνδέσεις, plugins, θέματα και ρυθμίσεις, με την πηγή κάθε αλλαγής: admin, REST API, WP-CLI, cron ή το Claude μέσω Site Bridge. Χωρίς μυστικά και χωρίς στοιχεία πελατών.',
+		al_li1: 'Παλιά → νέα τιμή για κάθε πεδίο που άλλαξε: τιμή, τιμή και ημερομηνίες προσφοράς, απόθεμα, SKU, κατάσταση, κατηγορίες, ρυθμίσεις του WordPress, του WooCommerce και της σουίτας',
+		al_li2: 'Αλλαγές κατάστασης παραγγελιών με το ποιος τις έκανε (προσωπικό, ο πελάτης, η πύλη πληρωμής ή το cron), επιστροφές χρημάτων και αλλαγές από το admin· παραγγελίες και πελάτες μόνο ως αριθμοί',
+		al_li3: 'Κωδικοί, κλειδιά και tokens δεν αποθηκεύονται ποτέ· ούτε ονόματα, email και διευθύνσεις πελατών· αποτυχημένες συνδέσεις χωρίς ό,τι πληκτρολογήθηκε· IP με μάσκα από προεπιλογή',
+		al_li4: 'Φίλτρα ανά ημερομηνία, πρόσωπο, κατηγορία, πηγή και σημασία, κουτί «Ιστορικό» σε κάθε προϊόν και παραγγελία, εξαγωγή CSV και widget στον πίνακα ελέγχου',
+		al_li5: 'Email για κρίσιμες αλλαγές (νέος διαχειριστής, εγκατάσταση ή ενεργοποίηση plugin, αλλαγή θέματος, αλλαγή διεύθυνσης του site), το πολύ ένα κάθε 15 λεπτά',
+		al_li6: 'Κρατά 90 ημέρες (το διαλέγεις), εξαγωγή και διαγραφή προσωπικών δεδομένων του WordPress, ability μόνο για ανάγνωση για το Site Bridge· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		al_download: 'Λήψη v1.0.0 (.zip)',
 		badge_beta: 'beta',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',

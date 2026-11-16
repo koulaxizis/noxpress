@@ -74,6 +74,7 @@ final class Noxpress_Core {
 		'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.' => 'Extra tabs on the product page, per product and shared by category, tag or product type, videos that load only on a click, one order for every tab, and an import from Custom Product Tabs for WooCommerce.',
 		'Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.' => 'Receipt or invoice at checkout (classic and block): company name, VAT number, tax office and activity, a check-digit test for Greek numbers and a VIES check for EU ones, the details on the order and in the emails, and an invoice list with CSV for the accountant.',
 		'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.' => 'Limits on failed logins per IP and per account, with lockouts and an unlock link by e-mail, XML-RPC logins switched off, protection against user enumeration and an e-mail when an administrator logs in from a new device.',
+		'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.' => 'Who changed what and when: products, prices, orders, coupons, pages, users, plugins and settings, with the source of every change (admin, REST, WP-CLI, Site Bridge). No secrets and no customer details, masked IPs, e-mail for critical changes.',
 
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
@@ -387,6 +388,11 @@ final class Noxpress_Core {
 				'name' => 'Login Guard',
 				'desc' => __( 'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.', 'noxpress' ),
 				'page' => 'lgd-settings',
+			),
+			'activity-log'      => array(
+				'name' => 'Activity Log',
+				'desc' => __( 'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.', 'noxpress' ),
+				'page' => 'acl-log',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

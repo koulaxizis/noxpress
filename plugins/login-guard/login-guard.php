@@ -68,7 +68,7 @@
  * Cooperation (Bible §6): actions lgd_locked( $kind, $ident_hash, $until )
  * and lgd_unlocked( $kind, $ident_hash, $by ), filters lgd_trusted_ip and
  * lgd_text. Reads no other plugin's data. The visitor address comes from
- * Noxpress_Safe::client_ip() (Core 1.4.1).
+ * Noxpress_Safe::client_ip() (Core 1.4.7).
  */
 
 defined( 'ABSPATH' ) || exit;
