@@ -1,0 +1,204 @@
+/**
+ * Live Search — the suggestions panel (v1.0.0).
+ *
+ * Bible §14.13: every selector prefixed lvs-, nothing outside the panel;
+ * the font and text colour come from the theme (the panel is a child of
+ * <body>), the background from the block theme's palette when there is
+ * one, else white. Targets at least 44 px high (§14.16).
+ */
+
+.lvs-panel {
+	position: absolute;
+	z-index: 100000;
+	box-sizing: border-box;
+	max-height: min(70vh, 640px);
+	overflow-y: auto;
+	margin: 0;
+	padding: 6px 0;
+	background: var(--wp--preset--color--base, #fff);
+	color: var(--wp--preset--color--contrast, inherit);
+	border: 1px solid rgba(0, 0, 0, 0.14);
+	border-radius: 8px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+	font-size: 15px;
+	line-height: 1.35;
+	text-align: left;
+	-webkit-overflow-scrolling: touch;
+}
+
+.lvs-panel[hidden] {
+	display: none !important;
+}
+
+.lvs-panel * {
+	box-sizing: border-box;
+}
+
+.lvs-panel .lvs-head {
+	padding: 8px 14px 4px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	opacity: 0.65;
+}
+
+.lvs-panel .lvs-note {
+	padding: 14px;
+	opacity: 0.8;
+}
+
+.lvs-panel .lvs-opt {
+	display: block;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.lvs-panel .lvs-opt.lvs-active,
+.lvs-panel .lvs-opt:hover {
+	background: rgba(127, 127, 127, 0.12);
+}
+
+.lvs-panel .lvs-link {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 44px;
+	padding: 6px 14px;
+	color: inherit !important;
+	text-decoration: none !important;
+	box-shadow: none !important;
+	border: 0 !important;
+}
+
+.lvs-panel .lvs-img {
+	flex: 0 0 48px;
+	width: 48px !important;
+	height: 48px !important;
+	max-width: none !important;
+	margin: 0 !important;
+	object-fit: cover;
+	border-radius: 4px;
+	background: rgba(127, 127, 127, 0.12);
+}
+
+.lvs-panel .lvs-body {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 2px;
+}
+
+.lvs-panel .lvs-title {
+	font-weight: 500;
+	overflow-wrap: anywhere;
+}
+
+.lvs-panel .lvs-title mark {
+	padding: 0;
+	background: transparent;
+	color: inherit;
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+.lvs-panel .lvs-by {
+	font-size: 13px;
+	opacity: 0.75;
+}
+
+.lvs-panel .lvs-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+}
+
+.lvs-panel .lvs-price del {
+	opacity: 0.6;
+}
+
+.lvs-panel .lvs-price ins {
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.lvs-panel .lvs-badge {
+	padding: 1px 6px;
+	border-radius: 999px;
+	font-size: 11px;
+	line-height: 1.5;
+	border: 1px solid currentColor;
+	opacity: 0.8;
+}
+
+.lvs-panel .lvs-formats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 0 14px 8px 74px;
+}
+
+.lvs-panel .lvs-fmt {
+	display: inline-flex;
+	align-items: center;
+	min-height: 28px;
+	padding: 2px 10px;
+	border: 1px solid rgba(127, 127, 127, 0.45);
+	border-radius: 999px;
+	color: inherit !important;
+	font-size: 12px;
+	text-decoration: none !important;
+}
+
+.lvs-panel .lvs-fmt.lvs-cur {
+	border-color: currentColor;
+	font-weight: 600;
+}
+
+.lvs-panel .lvs-all {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	margin-top: 4px;
+	padding: 6px 14px;
+	border-top: 1px solid rgba(127, 127, 127, 0.2);
+	font-weight: 600;
+}
+
+.lvs-panel .lvs-count {
+	margin-left: 4px;
+	font-weight: 400;
+	opacity: 0.7;
+}
+
+.lvs-sr {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+@media (max-width: 599px) {
+	.lvs-panel {
+		max-height: 75vh;
+	}
+	.lvs-panel .lvs-formats {
+		padding-left: 14px;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.lvs-panel .lvs-opt {
+		transition: background-color 0.12s ease;
+	}
+}
