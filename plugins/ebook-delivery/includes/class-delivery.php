@@ -236,7 +236,9 @@ final class EBD_Delivery {
 		$email = (string) $download->get_user_email();
 		$full  = trim( $first . ' ' . $last );
 		if ( '' === $full ) {
-			$full = self::mask_email( $email );
+			// No name: the first letter of the e-mail only, never its domain
+			// (Bible §14.42: the e-mail is never written into a file).
+			$full = '' !== $email ? mb_substr( $email, 0, 1 ) . '***' : '***';
 		}
 		$display = $full;
 		if ( 'initial' === EBD_Settings::get()['name_style'] && '' !== $first && '' !== $last ) {

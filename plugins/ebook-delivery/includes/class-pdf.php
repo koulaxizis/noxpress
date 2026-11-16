@@ -978,21 +978,36 @@ final class EBD_Pdf_Reader {
 		return $data;
 	}
 
+	/** Largest inflated stream (a small "zip bomb" stream never fills the memory). */
+	const MAX_INFLATE = 67108864; // 64 MB.
+
 	public static function inflate( string $data ): string {
-		$out = @gzuncompress( $data ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- tried in order below.
+		$out = @gzuncompress( $data, self::MAX_INFLATE ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- tried in order below.
 		if ( false !== $out ) {
 			return $out;
 		}
-		$out = @gzinflate( substr( $data, 2 ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		$out = @gzinflate( substr( $data, 2 ), self::MAX_INFLATE ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 		if ( false !== $out ) {
 			return $out;
 		}
-		// Truncated or damaged data: keep what inflates.
+		// Truncated or damaged data (or over the limit): keep what inflates,
+		// chunk by chunk, up to the limit.
 		if ( function_exists( 'inflate_init' ) ) {
 			$ctx = @inflate_init( ZLIB_ENCODING_DEFLATE ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 			if ( $ctx ) {
-				$out = @inflate_add( $ctx, $data, ZLIB_SYNC_FLUSH ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-				if ( is_string( $out ) && '' !== $out ) {
+				$out = '';
+				$len = strlen( $data );
+				for ( $i = 0; $i < $len; $i += 8192 ) {
+					$part = @inflate_add( $ctx, substr( $data, $i, 8192 ), ZLIB_SYNC_FLUSH ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+					if ( ! is_string( $part ) ) {
+						break;
+					}
+					$out .= $part;
+					if ( strlen( $out ) > self::MAX_INFLATE ) {
+						throw new EBD_Pdf_Error( 'too_big', 'inflate' );
+					}
+				}
+				if ( '' !== $out ) {
 					return $out;
 				}
 			}

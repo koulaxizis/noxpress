@@ -183,11 +183,20 @@ final class EBD_Settings {
 		if ( '' === $v && 'en' === $lang ) {
 			$v = isset( $s[ 't_' . $key . '_el' ] ) ? (string) $s[ 't_' . $key . '_el' ] : '';
 		}
+		// One pass: a value (e.g. a buyer's name) is never read as a
+		// placeholder; unknown placeholders never reach the visitor.
+		$map = array();
 		foreach ( $vars as $name => $value ) {
-			$v = str_replace( '{' . $name . '}', (string) $value, $v );
+			$map[ '{' . $name . '}' ] = (string) $value;
 		}
-		// Unknown placeholders never reach the visitor.
-		$v = trim( (string) preg_replace( '/\{[a-z_]+\}/', '', $v ) );
+		$v = (string) preg_replace_callback(
+			'/\{[a-z_]+\}/',
+			static function ( $m ) use ( $map ) {
+				return $map[ $m[0] ] ?? '';
+			},
+			$v
+		);
+		$v = trim( $v );
 		/**
 		 * Filters a visitor text (e.g. for WPML / Polylang).
 		 *

@@ -4,7 +4,7 @@
  * status, tools (Bible §3–§8, §11).
  *
  * Submenu «Ebook Delivery» of the shared "Noxpress" menu (admin_menu
- * priority 360), slug ebd-settings, capability Ebook_Delivery::cap(). Tabs:
+ * priority 370), slug ebd-settings, capability Ebook_Delivery::cap(). Tabs:
  *  - settings  mode (off / test / live), formats, name style, line size,
  *              size limit, cache days, clean file names and the author
  *              attribute, visitor language, watermark texts
@@ -33,7 +33,7 @@ final class EBD_Admin_UI {
 	const MAX_IMPORT  = 262144;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 360 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 370 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_init', array( __CLASS__, 'privacy' ) );
