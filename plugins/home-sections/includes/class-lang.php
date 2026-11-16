@@ -59,7 +59,7 @@ final class HMS_Lang {
 		'Αποθήκευση'                                                => 'Save',
 
 		'Shortcode βίντεο'                                          => 'Video shortcode',
-		'Το [hs_video] δείχνει το νεότερο δημοσιευμένο προϊόν που έχει βίντεο στην καρτέλα του (Custom Product Tabs for WooCommerce): εικόνα και κουμπί αναπαραγωγής, και ο player του YouTube φορτώνει μόνο με το πάτημα. Χωρίς αποτέλεσμα δεν τυπώνει τίποτα.' => '[hs_video] shows the newest published product that has a video in its tab (Custom Product Tabs for WooCommerce): a poster and a play button, and the YouTube player loads only on click. With no result it prints nothing.',
+		'Το [hs_video] δείχνει το νεότερο δημοσιευμένο προϊόν που έχει βίντεο στην καρτέλα του (Product Tabs, ή Custom Product Tabs for WooCommerce για όσα δεν έχουν εισαχθεί): εικόνα και κουμπί αναπαραγωγής, και ο player του YouTube φορτώνει μόνο με το πάτημα. Χωρίς αποτέλεσμα δεν τυπώνει τίποτα.' => '[hs_video] shows the newest published product that has a video in its tab (Product Tabs, or Custom Product Tabs for WooCommerce for products not imported yet): a poster and a play button, and the YouTube player loads only on click. With no result it prints nothing.',
 		'trailer (προεπιλογή) ή presentation: η καρτέλα βίντεο του προϊόντος (θέση 30 ή 31).' => 'trailer (default) or presentation: the product\'s video tab (position 30 or 31).',
 		'Ένα συγκεκριμένο προϊόν αντί για το νεότερο.'              => 'A specific product instead of the newest one.',
 		'IDs προϊόντων που μένουν έξω, χωρισμένα με κόμμα.'         => 'Product IDs to leave out, comma-separated.',

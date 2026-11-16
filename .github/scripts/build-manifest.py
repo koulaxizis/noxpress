@@ -74,6 +74,7 @@ SLUGS = {
     'rd': 'redirects',
     'ss': 'search-signals',
     'pl': 'production-ledger',
+    'pt': 'product-tabs',
     'iv': 'invoice-details',
     'sb': 'site-bridge',
 }

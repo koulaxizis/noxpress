@@ -1,0 +1,33 @@
+/**
+ * Product Tabs — metabox.css (v1.0.0)
+ *
+ * The "Product tabs" box on the product screen. It lives on a WordPress
+ * screen, not in a Noxpress panel, so it keeps the WordPress look (as the
+ * Book Preview box does); selectors prefixed ptb-mb-.
+ */
+#ptb-tabs .ptb-mb-row {
+	margin: 12px 0;
+	padding: 10px 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fbfbfc;
+}
+#ptb-tabs .ptb-mb-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	margin-bottom: 8px;
+}
+#ptb-tabs .ptb-mb-title input { width: 260px; max-width: 100%; }
+#ptb-tabs .ptb-mb-remove { margin-left: auto; color: #b32d2e; }
+#ptb-tabs .ptb-mb-row[data-type="video"] .ptb-mb-text,
+#ptb-tabs .ptb-mb-row[data-type="text"] .ptb-mb-video { display: none; }
+#ptb-tabs .ptb-mb-video { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+#ptb-tabs .ptb-mb-video .description { flex-basis: 100%; margin: 0; }
+#ptb-tabs .ptb-mb-inline { white-space: nowrap; }
+#ptb-tabs .ptb-mb-block { display: block; margin-top: 6px; }
+#ptb-tabs .ptb-mb-h { margin: 18px 0 6px; }
+#ptb-tabs .ptb-mb-shared { margin: 8px 0; padding: 8px 12px; border-left: 3px solid #6d4aff; background: #f6f7f7; }
+#ptb-tabs .ptb-mb-shared .ptb-mb-inline { margin-left: 16px; }
+#ptb-tabs .ptb-mb-note { padding: 8px 12px; border-left: 3px solid #dba617; background: #fcf9e8; }

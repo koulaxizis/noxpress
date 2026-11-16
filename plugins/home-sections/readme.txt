@@ -5,7 +5,7 @@ Tags: woocommerce, products shortcode, homepage, book trailer, store stats
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -37,7 +37,7 @@ Example:
 
 **Homepage video: [hs_video]**
 
-* Shows the newest published, visible product that has a video in its tab (Custom Product Tabs for WooCommerce, meta `wb_custom_tabs`): the trailer tab (position 30) or the presentation tab (position 31). A new trailer reaches the homepage without editing the page.
+* Shows the newest published, visible product that has a video in its tab: from Product Tabs (the "Trailer" or "Presentation" video role) when it is active, else from Custom Product Tabs for WooCommerce (meta `wb_custom_tabs`), the trailer tab (position 30) or the presentation tab (position 31). A new trailer reaches the homepage without editing the page.
 * The video ID comes from `[wb_cpt_youtube_embed_shortcode video_id="…"]` in the tab, or from a `youtube.com/watch?v=…`, `youtu.be/…` or `/embed/…` URL.
 * `[hs_video type="trailer"]` or `[hs_video type="presentation"]`. Optional: `id="123"` (a specific product), `exclude="1,2"`, `category="slug,slug"`, `preorders="no"` (leave pre-orders out), `heading="…"` (empty = no heading).
 * Prints a heading, a poster button and a line with the product name, its authors and a link. No iframe is printed: a small script, loaded only on pages with the shortcode, swaps the poster for the YouTube player (youtube-nocookie.com) on click, and it works next to a page script that already does the same.
@@ -104,7 +104,7 @@ It uses the database's own comparison, which ignores case under the usual collat
 
 = Does [hs_video] need Custom Product Tabs for WooCommerce? =
 
-It reads that plugin's tab meta. For another source, point the `hms_video_source` filter at a meta key that holds the same list of tabs.
+No. Since 1.4.5 it reads Product Tabs first (the video tabs with the role "Trailer" or "Presentation"), and that plugin's tab meta only for products not imported yet. For another source, point the `hms_video_source` filter at a meta key that holds the same list of tabs.
 
 = Why did [hs_video] pick a pre-order? =
 
@@ -119,6 +119,9 @@ The settings, the stored counts, the background actions and the transients are r
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.5 =
+* New: [hs_video] reads the trailer and presentation videos from Product Tabs (ptb_get_video()) when it is active, and from Custom Product Tabs for WooCommerce for products not imported yet, so the homepage keeps its video before, during and after the switch. The bridge shortcode of Product Tabs keeps old [wb_cpt_youtube_embed_shortcode] content working too.
 
 = 1.4.4 =
 * Security hardening (NXS-21): Noxpress Core 1.3.0. The update list is now signed together with each release's channel, a serial and an expiry date, so a site refuses an old, expired or altered list, a beta presented as stable, and a package older than the installed version; the hub says why. New shared security helpers. Update recommended.
