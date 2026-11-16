@@ -5,7 +5,7 @@ Tags: woocommerce, search, live search, ajax search, isbn
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,9 @@ The index table, the index files, the statistics, the settings and the scheduled
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+= 1.0.1 =
+* Fix: the first full index now starts right after activation (and on the next hourly run if it never ran), instead of waiting for the nightly pass.
+
 = 1.0.0 =
 * Initial release.
 * Suggestions as the visitor types, from a static index file in the browser or, for big catalogues, from the lvs/v1/suggest route.
