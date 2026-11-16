@@ -191,8 +191,14 @@ final class FRM_CF7 {
 		}
 		// The text since the previous tag or block boundary.
 		$before = substr( $tpl, 0, $tag['pos'] );
-		$cut    = max( (int) strrpos( $before, ']' ), (int) strrpos( $before, '</p>' ), (int) strrpos( $before, '</div>' ), (int) strrpos( $before, '</label>' ) );
-		$text   = self::plain( substr( $before, $cut > 0 ? $cut + 1 : 0 ) );
+		$cut    = 0;
+		foreach ( array( ']', '</p>', '</div>', '</label>', '<p>', '<div>' ) as $edge ) {
+			$at = strrpos( $before, $edge );
+			if ( false !== $at ) {
+				$cut = max( $cut, $at + strlen( $edge ) );
+			}
+		}
+		$text = self::plain( substr( $before, $cut ) );
 		if ( '' !== $text && mb_strlen( $text ) <= 120 ) {
 			return $text;
 		}
@@ -338,8 +344,11 @@ final class FRM_CF7 {
 			},
 			(string) $subject
 		);
-		$subject                 = trim( preg_replace( '/\s+/', ' ', (string) $subject ) );
-		$s['mail']['subject_el'] = '' !== $subject ? mb_substr( $subject, 0, 200 ) : '[{site}] {form}';
+		// Quotes left empty by a tag of a field the form does not have.
+		$subject                 = preg_replace( '/"\s*"|«\s*»|\'\s*\'|“\s*”/u', '', (string) $subject );
+		$subject                 = trim( preg_replace( '/\s+/', ' ', (string) $subject ), " \t:-–" );
+		// Without any field in it (e.g. «[_site_title]» alone), the Forms default.
+		$s['mail']['subject_el'] = preg_match( '/\{(?!site\})[a-z0-9_-]+\}/', $subject ) ? mb_substr( $subject, 0, 200 ) : '[{site}] {form}';
 
 		$headers = isset( $mail['additional_headers'] ) ? (string) $mail['additional_headers'] : '';
 		if ( preg_match( '/reply-to:[^\[]*\[\s*([a-zA-Z0-9_-]+)\s*\]/i', $headers, $rm ) ) {

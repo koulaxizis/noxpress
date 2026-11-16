@@ -3,7 +3,7 @@
  * FRM_Admin_UI — menu, forms and builder, messages, settings, texts, tools
  * (Bible §3–§8, §11).
  *
- * Submenu «Forms» of the shared "Noxpress" menu (admin_menu priority 390),
+ * Submenu «Forms» of the shared "Noxpress" menu (admin_menu priority 400),
  * slug frm-forms, capability Noxpress_Forms::cap(). Tabs:
  *  - forms     the forms list; ?edit=ID (or new&tpl=…) opens the builder
  *  - messages  stored messages: list, view, state, resend, delete, CSV
@@ -29,7 +29,7 @@ final class FRM_Admin_UI {
 	const PER_PAGE    = 30;
 
 	public static function init(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 390 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 400 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		add_action( 'admin_init', array( __CLASS__, 'privacy' ) );

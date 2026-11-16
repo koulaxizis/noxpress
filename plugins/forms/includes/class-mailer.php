@@ -55,6 +55,7 @@ final class FRM_Mailer {
 		$out = strtr( $tpl, $map );
 		// Placeholders of empty or missing fields go, with the separators they leave.
 		$out = preg_replace( '/\{[a-z0-9_-]+\}/', '', $out );
+		$out = preg_replace( '/"\s*"|«\s*»|“\s*”|\(\s*\)/u', '', (string) $out );
 		$out = preg_replace( '/\s*[:\-–,]\s*$/u', '', (string) $out );
 		return self::header_safe( (string) $out );
 	}
