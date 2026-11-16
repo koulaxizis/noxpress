@@ -99,7 +99,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.8.1 =
-* Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.8.0 =
 * New: `tra_consignment_summary()` and the ability `consignment-summary` (read only): per title and bookstore the copies given (with the first delivery date), sold, returned and still on the shelf (with the settle-by date), and the money collected and still owed, also as of a past date. Revenue Splitter 1.19.0 shows it in the author portal and the monthly statement.

@@ -65,7 +65,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.19.1 =
-* Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.19.0 =
 * New: «On consignment» in the Author Portal (with Trade Accounts 1.8.0+): per bookstore and title, all time, copies given, sold, returned and on the shelf (with the settle-by date), money collected and owed, and the expected share of what is owed. The expected share is not part of the payable balance: money counts only when collected.

@@ -1,0 +1,439 @@
+/**
+ * Ebook Delivery — admin.css (v1.0.0)
+ *
+ * Noxpress standards (Bible §2–§5) — RS (Revenue Splitter admin.css) is
+ * the leading design; base rules mirror Smart Formatter's admin.css:
+ *  - Same palette as RS (dark panel #101218, accent #6d4aff, text
+ *    #eae8fa, muted #b7b2d6, links #beb1ff, warn #f5c97e).
+ *  - Prefixed selectors ebd-* — no clash with WP core or other plugins.
+ *  - Hardening !important on tables/inputs so light-theme rules of WP
+ *    core / other plugins cannot break the dark panel.
+ *  - No max-width: the panel fills the full width like .rs-wrap and
+ *    .sp-wrap (Bible §3).
+ */
+
+/* ===== Palette tokens (ίδιες τιμές με το RS) ===== */
+.ebd-wrap {
+	--ebd-bg: #101218;
+	--ebd-panel: #14161d;
+	--ebd-panel-2: #1d2029;
+	--ebd-input: #1a1d26;
+	--ebd-border: #2e3240;
+	--ebd-border-input: #3a3f52;
+	--ebd-row-border: #23262f;
+	--ebd-stripe: #181b23;
+	--ebd-hover: #1e212c;
+	--ebd-text: #eae8fa;
+	--ebd-heading: #f6f4ff;
+	--ebd-muted: #b7b2d6;
+	--ebd-link: #beb1ff;
+	--ebd-link-hover: #d4c9ff;
+	--ebd-accent: #6d4aff;
+	--ebd-accent-hover: #8263ff;
+	--ebd-warn: #f5c97e;
+	--ebd-danger: #ff9a9a;
+}
+
+/* ===== Page shell (= .rs-wrap) ===== */
+.ebd-wrap {
+	color-scheme: dark;
+	background: var(--ebd-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	padding: 32px 36px 28px;
+	margin: 16px 0 32px;
+	color: var(--ebd-text);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.ebd-wrap h1,
+.ebd-wrap h2 {
+	color: var(--ebd-heading);
+}
+
+.ebd-wrap a { color: var(--ebd-link); }
+.ebd-wrap a:hover { color: var(--ebd-link-hover); }
+
+.ebd-wrap .ebd-h2 {
+	margin: 22px 0 10px;
+	font-size: 15px;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--ebd-muted);
+	border-bottom: 1px solid var(--ebd-border);
+	padding-bottom: 6px;
+}
+
+.ebd-wrap .description,
+.ebd-wrap p.description,
+.ebd-wrap .ebd-hint {
+	color: var(--ebd-muted) !important;
+}
+
+.ebd-zone {
+	background: var(--ebd-panel);
+	border: 1px solid var(--ebd-border);
+	border-radius: 6px;
+	padding: 16px 18px;
+	margin-bottom: 6px;
+}
+
+/* ===== Form controls (hardening) ===== */
+.ebd-wrap input[type="text"],
+.ebd-wrap input[type="email"],
+.ebd-wrap input[type="url"],
+.ebd-wrap input[type="number"],
+.ebd-wrap input[type="time"],
+.ebd-wrap input[type="date"],
+.ebd-wrap textarea,
+.ebd-wrap select {
+	background-color: var(--ebd-input) !important;
+	color: #f0eefc !important;
+	border: 1px solid var(--ebd-border-input) !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+}
+
+.ebd-wrap input::placeholder,
+.ebd-wrap textarea::placeholder {
+	color: #8b87a3 !important;
+}
+
+.ebd-wrap textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.ebd-wrap input[type="file"] {
+	color: var(--ebd-muted);
+}
+
+/* ===== Radio / checkbox rows ===== */
+.ebd-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 18px;
+	margin-bottom: 4px;
+	cursor: pointer;
+}
+
+.ebd-check {
+	display: block;
+	margin: 0 0 8px;
+	cursor: pointer;
+}
+
+.ebd-wrap input[type="checkbox"],
+.ebd-wrap input[type="radio"] {
+	accent-color: var(--ebd-accent);
+}
+
+/* ===== Buttons (= .rs-period-form .button) ===== */
+.ebd-wrap .button {
+	background: #1e2130 !important;
+	color: #eeeafc !important;
+	border: 1px solid #4a4f66 !important;
+	border-radius: 4px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	min-height: 32px;
+}
+
+.ebd-wrap .button:hover:not(:disabled) {
+	border-color: var(--ebd-accent) !important;
+	color: #ffffff !important;
+}
+
+.ebd-wrap .button-primary {
+	background: var(--ebd-accent) !important;
+	border-color: var(--ebd-accent) !important;
+	color: #ffffff !important;
+}
+
+.ebd-wrap .button-primary:hover:not(:disabled) {
+	background: var(--ebd-accent-hover) !important;
+}
+
+.ebd-wrap .button:disabled {
+	opacity: .45 !important;
+	cursor: not-allowed;
+}
+
+/* Layout helpers (instead of inline styles). */
+.ebd-submit { margin-top: 20px; }
+.ebd-inline-form { display: inline; margin-right: 10px; }
+.ebd-mt-8 { margin-top: 8px; }
+
+/* ===== Tables — HARDENED (= .rs-table) ===== */
+.ebd-table,
+table.widefat.ebd-table {
+	background: var(--ebd-panel) !important;
+	border: 1px solid var(--ebd-border) !important;
+	border-radius: 6px;
+	color: var(--ebd-text) !important;
+	margin-top: 14px !important;
+}
+
+.ebd-table thead th,
+.ebd-table thead td {
+	background: var(--ebd-panel-2) !important;
+	color: #e6e1fd !important;
+	border-bottom: 1px solid #2e3242 !important;
+	font-weight: 600 !important;
+	text-shadow: none !important;
+}
+
+.ebd-table tbody td,
+.ebd-table tbody th {
+	background: var(--ebd-panel) !important;
+	color: var(--ebd-text) !important;
+	border-bottom: 1px solid var(--ebd-row-border);
+	box-shadow: none;
+	vertical-align: top;
+}
+
+.ebd-table tbody tr:nth-child(2n) td,
+.ebd-table tbody tr:nth-child(2n) th {
+	background: var(--ebd-stripe) !important;
+}
+
+.ebd-table tbody tr:hover td,
+.ebd-table tbody tr:hover th {
+	background: var(--ebd-hover) !important;
+}
+
+.ebd-table td,
+.ebd-table th {
+	padding: 12px 14px;
+}
+
+.ebd-table td code {
+	background: transparent !important;
+	color: var(--ebd-muted) !important;
+	padding: 0 !important;
+	word-break: break-word;
+	max-width: 380px;
+	display: inline-block;
+}
+
+.ebd-table .ebd-empty {
+	color: var(--ebd-muted) !important;
+	font-style: italic;
+	text-align: center;
+}
+
+.ebd-footer {
+	margin-top: 28px;
+	padding-top: 12px;
+	border-top: 1px solid #23262f;
+	font-size: 13px;
+	color: #a29dc0;
+}
+
+.ebd-footer a { color: #beb1ff; text-decoration: none; }
+.ebd-footer a:hover { text-decoration: underline; }
+
+.ebd-footer-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin: 10px 0 0;
+}
+
+a.ebd-kofi {
+	display: inline-block;
+	background: #6d4aff;
+	color: #ffffff;
+	padding: 6px 18px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+a.ebd-kofi:hover {
+	background: #8263ff;
+	color: #ffffff;
+}
+
+.ebd-footer-dash { font-size: 13px; font-weight: 600; text-decoration: none; }
+
+.ebd-muted { color: var(--ebd-muted) !important; }
+.ebd-warn { color: var(--ebd-warn) !important; font-weight: 600; }
+
+/* ===== Notices inline ===== */
+.ebd-wrap .notice.inline {
+	margin: 0 0 14px !important;
+}
+
+/* ===== Shared additions (Theme Patcher, Shop Filters) ===== */
+.ebd-wrap .ebd-h3 {
+	margin: 18px 0 8px;
+	font-size: 13px;
+	color: var(--ebd-heading);
+}
+
+.ebd-status p { margin: 0 0 8px; }
+.ebd-status p:last-child { margin-bottom: 0; }
+.ebd-status code,
+.ebd-wrap .description code,
+.ebd-wrap .ebd-hint code {
+	background: var(--ebd-panel-2);
+	color: var(--ebd-muted);
+	border: 1px solid var(--ebd-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	font-size: 12px;
+}
+
+.ebd-suspended { margin: 8px 0 0; }
+.ebd-suspended .button { margin-left: 8px; }
+
+/* Badges (detector findings, status). */
+.ebd-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	margin: 0 4px 4px 0;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.7;
+	border: 1px solid var(--ebd-border);
+	background: var(--ebd-panel-2);
+	color: var(--ebd-text);
+	white-space: nowrap;
+}
+.ebd-badge--ok { border-color: #3d6b4f; color: #9fe0b5; }
+.ebd-badge--muted { color: var(--ebd-muted); }
+.ebd-badge--warn { border-color: #6b5a33; color: var(--ebd-warn); }
+.ebd-badge--danger { border-color: #6b3a3a; color: var(--ebd-danger); }
+
+/* Area fieldsets. */
+.ebd-area {
+	background: var(--ebd-panel);
+	border: 1px solid var(--ebd-border);
+	border-radius: 6px;
+	padding: 12px 18px 14px;
+	margin: 0 0 12px;
+}
+.ebd-area legend {
+	padding: 0 6px;
+	font-weight: 600;
+	color: var(--ebd-heading);
+}
+.ebd-row { margin: 4px 0 8px; }
+
+.ebd-details > summary {
+	cursor: pointer;
+	color: var(--ebd-link);
+	margin: 4px 0;
+}
+.ebd-details[open] > summary { margin-bottom: 12px; }
+
+.ebd-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 24px;
+	margin-bottom: 12px;
+}
+
+.ebd-wrap .ebd-label {
+	display: block;
+	font-weight: 600;
+	color: var(--ebd-heading);
+	margin: 8px 0 6px;
+}
+.ebd-grid .ebd-label:first-child { margin-top: 0; }
+
+.ebd-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+}
+.ebd-field > span:first-child {
+	min-width: 150px;
+	color: var(--ebd-text);
+}
+.ebd-wrap .ebd-color { width: 96px; font-family: monospace; }
+.ebd-swatch {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	border: 1px solid var(--ebd-border-input);
+}
+
+.ebd-wrap .ebd-hint { display: block; font-size: 12px; margin-top: 4px; }
+.ebd-wrap td .ebd-hint { display: inline; }
+.ebd-table td.ebd-warn { color: var(--ebd-warn) !important; }
+
+/* Tabs of the main page. */
+.ebd-wrap .ebd-tabs {
+	border-bottom: 1px solid var(--ebd-border);
+	margin: 24px 0 8px;
+	padding: 0;
+}
+.ebd-wrap .ebd-tabs .nav-tab {
+	background: var(--ebd-panel);
+	border-color: var(--ebd-border);
+	color: var(--ebd-muted);
+	margin-left: 0;
+	margin-right: 6px;
+}
+.ebd-wrap .ebd-tabs .nav-tab:hover { color: var(--ebd-link-hover); background: var(--ebd-hover); }
+.ebd-wrap .ebd-tabs .nav-tab-active,
+.ebd-wrap .ebd-tabs .nav-tab-active:hover {
+	background: var(--ebd-bg);
+	border-bottom-color: var(--ebd-bg);
+	color: var(--ebd-heading);
+}
+
+/* One input per line (removal rules). */
+.ebd-wrap .ebd-block { display: block; margin: 0 0 6px; }
+
+/* Long category lists. */
+.ebd-scroll {
+	max-height: 360px;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--ebd-border);
+	border-radius: 6px;
+	background: var(--ebd-panel-2);
+}
+.ebd-scroll .ebd-field { margin-bottom: 4px; }
+
+/* ===== orOS Connect ===== */
+
+.ebd-wrap .ebd-wide { width: 100%; max-width: 640px; }
+.ebd-wrap .ebd-key { width: 100%; max-width: 360px; font-family: monospace; }
+.ebd-wrap textarea.ebd-wide { min-height: 96px; font-family: monospace; font-size: 12px; }
+
+/* Module cards. */
+.ebd-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.ebd-mod { background: var(--ebd-panel); border: 1px solid var(--ebd-border); border-radius: 6px; padding: 14px 16px; }
+.ebd-mod h3 { margin: 0 0 6px; font-size: 14px; color: var(--ebd-heading); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ebd-mod p { margin: 0 0 10px; color: var(--ebd-muted); }
+.ebd-mod.is-soon { opacity: .7; }
+
+/* Two languages side by side. */
+.ebd-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; }
+.ebd-pair input[type="text"] { width: 100%; }
+.ebd-pair .ebd-lang { font-size: 12px; color: var(--ebd-muted); display: block; margin-bottom: 2px; }
+
+/* Send log. */
+.ebd-table td.is-ok { color: #9fe0b5 !important; }
+.ebd-table td.is-retry { color: var(--ebd-warn) !important; }
+.ebd-table td.is-fail { color: var(--ebd-danger) !important; }
+
+@media (max-width: 600px) {
+	.ebd-wrap { padding: 20px 14px 18px; }
+	.ebd-field { flex-wrap: wrap; }
+}
+
+/* ===== Ebook Delivery additions ===== */
+.ebd-wrap input[type="number"].ebd-num { width: 90px; }
+.ebd-wrap input[type="text"].ebd-code { width: 160px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: uppercase; letter-spacing: 0.04em; }
+.ebd-wrap .ebd-table code { white-space: nowrap; }
+.ebd-wrap .ebd-table td { word-break: break-word; }

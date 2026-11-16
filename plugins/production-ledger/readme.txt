@@ -88,7 +88,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.2.1 =
-* Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.2.0 =
 * Gift cards are not sales: lines that answer the suite filter noxpress_is_stored_value_item (Gift Cards) stay out of revenue, product results, the orOS feed lines and Printful matching. Products bought with a gift card count as usual.

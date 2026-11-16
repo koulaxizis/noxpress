@@ -76,7 +76,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 
 == Changelog ==
 = 1.0.2 =
-* Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.0.1 =
 * Fix: the first full index now starts right after activation (and on the next hourly run if it never ran), instead of waiting for the nightly pass.

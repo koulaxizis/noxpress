@@ -77,7 +77,7 @@ What is not in 1.0.0: OAuth sign-in for Gmail and Microsoft 365 (their SMTP with
 == Changelog ==
 
 = 1.0.1 =
-* Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.0.0 =
 * First release (beta): SMTP with presets (Proton Mail, Gmail, Microsoft 365, hosting mail), Brevo, Mailgun, SendGrid, Postmark and Amazon SES, backup connection, sent log with source, sealed content for 7 days (off by default, never for sensitive mails), resend, CSV, privacy exporter and eraser, failure banner and hourly summary, staging guard, SPF / DKIM / DMARC check, import from FluentSMTP, settings backup without secrets, Site Bridge abilities.

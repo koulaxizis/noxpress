@@ -114,7 +114,7 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.2.7 =
-* Noxpress Core 1.4.12: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
+* Noxpress Core 1.4.14: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.
 
 = 1.2.6 =
 * With Back in Stock: when the customer also asked Back in Stock to be notified about the same product (or variation), the daily email leaves out its «back in stock» line, so the customer gets one email, not two. Noxpress Core 1.4.10.
