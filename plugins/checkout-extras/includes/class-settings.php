@@ -31,6 +31,14 @@
  *     (which WooCommerce customer emails carry it), c_remind + c_remind_days
  *   - housekeeping: c_cleanup + c_cleanup_days, c_delete_on_uninstall
  *
+ *  Store vacation (v_*)
+ *   - v_mode, v_kind ('closed' = no orders | 'later' = orders accepted,
+ *     shipped after the vacation)
+ *   - v_start, v_end ('Y-m-d H:i' in the site time zone, '' = none),
+ *     v_warn_days (0–60, a bar before the start)
+ *   - exemptions while closed: v_allow_digital, v_allow_preorders,
+ *     v_roles (role slugs that buy as usual)
+ *
  *  Visitor texts (Bible §14.17): lang ('auto' | 'el' | 'en') and one
  *  { el, en } pair per key of TEXTS. Plain text (sanitize_text_field per
  *  line), placeholders filled on output (fill()).
@@ -76,7 +84,19 @@ final class CKE_Settings {
 		'c_copy'           => array( 30, false, false ),
 		'c_copied'         => array( 30, false, false ),
 		'c_remind_body'    => array( 600, true, false ),
+		'v_bar'            => array( 300, false, false ),
+		'v_bar_later'      => array( 300, false, false ),
+		'v_warn'           => array( 300, false, false ),
+		'v_note'           => array( 300, true, false ),
+		'v_cart_error'     => array( 300, false, false ),
+		'v_ack'            => array( 200, false, false ),
+		'v_ack_required'   => array( 200, false, false ),
+		'v_row'            => array( 50, false, false ),
+		'v_row_value'      => array( 150, false, false ),
 	);
+
+	/** Vacation kinds. */
+	const KINDS = array( 'closed', 'later' );
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -131,6 +151,15 @@ final class CKE_Settings {
 			'c_cleanup'            => true,
 			'c_cleanup_days'       => 30,
 			'c_delete_on_uninstall' => false,
+
+			'v_mode'               => 'off',
+			'v_kind'               => 'closed',
+			'v_start'              => '',
+			'v_end'                => '',
+			'v_warn_days'          => 0,
+			'v_allow_digital'      => false,
+			'v_allow_preorders'    => false,
+			'v_roles'              => array(),
 
 			'g_label'              => array(
 				'el' => 'Είναι δώρο',
@@ -207,6 +236,42 @@ final class CKE_Settings {
 			'c_remind_body'        => array(
 				'el' => 'Το κουπόνι σας {code} ({amount} έκπτωση) λήγει στις {expiry}. Μη το ξεχάσετε!',
 				'en' => 'Your coupon {code} ({amount} off) expires on {expiry}. Do not miss it!',
+			),
+			'v_bar'                => array(
+				'el' => 'Το κατάστημα είναι κλειστό για διακοπές. Οι παραγγελίες ανοίγουν ξανά στις {return_date}.',
+				'en' => 'The shop is closed for the holidays. Orders open again on {return_date}.',
+			),
+			'v_bar_later'          => array(
+				'el' => 'Είμαστε σε διακοπές. Οι παραγγελίες αποστέλλονται από {return_date}.',
+				'en' => 'We are on holiday. Orders ship from {return_date}.',
+			),
+			'v_warn'               => array(
+				'el' => 'Το κατάστημα κλείνει για διακοπές στις {start_date}. Επιστρέφουμε στις {return_date}.',
+				'en' => 'The shop closes for the holidays on {start_date}. We are back on {return_date}.',
+			),
+			'v_note'               => array(
+				'el' => 'Δεν δεχόμαστε παραγγελίες όσο είμαστε σε διακοπές. Επιστρέφουμε στις {return_date}.',
+				'en' => 'We do not take orders while we are on holiday. We are back on {return_date}.',
+			),
+			'v_cart_error'         => array(
+				'el' => 'Το κατάστημα είναι κλειστό για διακοπές και δεν δέχεται παραγγελίες για: {products}. Επιστρέφουμε στις {return_date}.',
+				'en' => 'The shop is closed for the holidays and does not take orders for: {products}. We are back on {return_date}.',
+			),
+			'v_ack'                => array(
+				'el' => 'Κατάλαβα ότι η παραγγελία μου θα αποσταλεί μετά τις διακοπές του καταστήματος.',
+				'en' => 'I understand that my order will ship after the shop\'s holidays.',
+			),
+			'v_ack_required'       => array(
+				'el' => 'Επιβεβαιώστε ότι η αποστολή γίνεται μετά τις διακοπές.',
+				'en' => 'Please confirm that the order ships after the holidays.',
+			),
+			'v_row'                => array(
+				'el' => 'Αποστολή',
+				'en' => 'Shipping',
+			),
+			'v_row_value'          => array(
+				'el' => 'Μετά τις διακοπές του καταστήματος. Από {return_date}.',
+				'en' => 'After the shop\'s holidays. From {return_date}.',
 			),
 		);
 	}
@@ -301,6 +366,16 @@ final class CKE_Settings {
 		$s['c_cleanup_days']        = self::int( $raw, 'c_cleanup_days', 0, 365, $d['c_cleanup_days'] );
 		$s['c_delete_on_uninstall'] = self::flag( $raw, 'c_delete_on_uninstall', $d );
 
+		// Store vacation.
+		$s['v_mode']            = self::pick( $raw, 'v_mode', $modes, $d['v_mode'] );
+		$s['v_kind']            = self::pick( $raw, 'v_kind', self::KINDS, $d['v_kind'] );
+		$s['v_start']           = self::datetime( $raw, 'v_start', $d['v_start'] );
+		$s['v_end']             = self::datetime( $raw, 'v_end', $d['v_end'] );
+		$s['v_warn_days']       = self::int( $raw, 'v_warn_days', 0, 60, $d['v_warn_days'] );
+		$s['v_allow_digital']   = self::flag( $raw, 'v_allow_digital', $d );
+		$s['v_allow_preorders'] = self::flag( $raw, 'v_allow_preorders', $d );
+		$s['v_roles']           = self::roles( $raw, 'v_roles', $d['v_roles'] );
+
 		// Visitor texts.
 		$def = self::defaults();
 		foreach ( self::TEXTS as $key => $spec ) {
@@ -390,6 +465,44 @@ final class CKE_Settings {
 			}
 		}
 		return $out;
+	}
+
+	/**
+	 * A date and time 'Y-m-d H:i' ('' = none). Accepts the browser's
+	 * datetime-local form ('Y-m-d\TH:i', with or without seconds).
+	 * Invalid input = $default.
+	 */
+	private static function datetime( array $raw, string $key, string $default ): string {
+		if ( ! isset( $raw[ $key ] ) || ! is_string( $raw[ $key ] ) ) {
+			return $default;
+		}
+		$v = trim( str_replace( 'T', ' ', $raw[ $key ] ) );
+		if ( '' === $v ) {
+			return '';
+		}
+		if ( 1 !== preg_match( '/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})(:\d{2})?$/', $v, $m ) ) {
+			return $default;
+		}
+		if ( ! checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) || (int) $m[4] > 23 || (int) $m[5] > 59 ) {
+			return $default;
+		}
+		return $m[1] . '-' . $m[2] . '-' . $m[3] . ' ' . $m[4] . ':' . $m[5];
+	}
+
+	/** Role slugs that exist on the site (at most 50), else the default. */
+	private static function roles( array $raw, string $key, array $default ): array {
+		if ( ! isset( $raw[ $key ] ) || ! is_array( $raw[ $key ] ) ) {
+			return $default;
+		}
+		$known = function_exists( 'wp_roles' ) ? array_keys( wp_roles()->get_names() ) : array();
+		$out   = array();
+		foreach ( $raw[ $key ] as $r ) {
+			$r = is_string( $r ) ? sanitize_key( $r ) : '';
+			if ( '' !== $r && in_array( $r, $known, true ) && ! in_array( $r, $out, true ) ) {
+				$out[] = $r;
+			}
+		}
+		return array_slice( $out, 0, 50 );
 	}
 
 	/** One line of plain text, at most $len characters. */
