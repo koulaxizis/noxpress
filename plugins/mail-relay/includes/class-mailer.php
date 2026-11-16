@@ -435,7 +435,7 @@ final class MRL_Mailer {
 			return;
 		}
 
-		$problem = MRL_Settings::host_problem( $c['host'], '' !== $secret );
+		list( $problem, $address ) = MRL_Settings::host_check( $c['host'], '' !== $secret );
 		if ( '' === $problem && '' !== $secret && 'none' === $c['enc'] ) {
 			$problem = 'A password is never sent without encryption.';
 		}
@@ -446,7 +446,7 @@ final class MRL_Mailer {
 		}
 
 		$m->isSMTP();
-		$m->Host          = $c['host'];
+		$m->Host          = $address; // The checked address, never a second lookup.
 		$m->Port          = (int) $c['port'];
 		$m->SMTPSecure    = 'ssl' === $c['enc'] ? 'ssl' : ( 'tls' === $c['enc'] ? 'tls' : '' );
 		$m->SMTPAutoTLS   = false;
@@ -459,6 +459,8 @@ final class MRL_Mailer {
 			'ssl' => array(
 				'verify_peer'       => true,
 				'verify_peer_name'  => true,
+				'peer_name'         => $c['host'],
+				'SNI_enabled'       => true,
 				'allow_self_signed' => false,
 			),
 		);

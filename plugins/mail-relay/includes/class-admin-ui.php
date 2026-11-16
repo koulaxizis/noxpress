@@ -3,7 +3,7 @@
  * MRL_Admin_UI — menu, tabs, forms (Bible §3–§8, §11).
  *
  * Submenu «Mail Relay» of the shared "Noxpress" menu (admin_menu priority
- * 420), slug mrl-settings, capability manage_options. Tabs:
+ * 420), slug mrl-settings, capability mrl_manage (manage_options; manage_network_options on multisite). Tabs:
  *  - log         the sent log: filters, a mail's content when it was kept,
  *                resend, CSV, empty the log
  *  - connection  mode (on / off), sender, primary and backup connections
@@ -495,7 +495,7 @@ final class MRL_Admin_UI {
 						data-smtp="<?php esc_attr_e( 'Κωδικός (για Proton Mail: το SMTP token)', 'mail-relay' ); ?>"
 						data-api="<?php esc_attr_e( 'Κλειδί API', 'mail-relay' ); ?>"
 						data-ses="Secret access key"><?php echo esc_html( 'smtp' === $c['type'] ? __( 'Κωδικός (για Proton Mail: το SMTP token)', 'mail-relay' ) : ( 'ses' === $c['type'] ? 'Secret access key' : __( 'Κλειδί API', 'mail-relay' ) ) ); ?></span>
-						<input type="password" name="<?php echo esc_attr( $p . 'secret' ); ?>" value="" autocomplete="new-password" <?php disabled( 'constant' === $state ); ?> /></label>
+						<input type="password" name="<?php echo esc_attr( $p . 'secret' ); ?>" value="" autocomplete="new-password" <?php disabled( MRL_Crypt::is_constant_state( $state ) ); ?> /></label>
 				</div>
 				<p class="description">
 					<?php
@@ -504,6 +504,14 @@ final class MRL_Admin_UI {
 						case 'constant':
 							/* translators: %s: constant name */
 							echo esc_html( sprintf( __( 'Ο κωδικός έρχεται από τη σταθερά %s στο wp-config.php.', 'mail-relay' ), $c_name ) );
+							break;
+						case 'constant_new':
+							/* translators: %s: constant name */
+							echo esc_html( sprintf( __( 'Η σταθερά %s του wp-config.php δεν έχει δεθεί ακόμη με σύνδεση: πάτα «Αποθήκευση σύνδεσης» μία φορά.', 'mail-relay' ), $c_name ) );
+							break;
+						case 'constant_other':
+							/* translators: %s: constant name */
+							echo '<strong>' . esc_html( sprintf( __( 'Η σταθερά %s του wp-config.php ανήκει σε άλλη σύνδεση (άλλαξε ο server, ο χρήστης ή ο πάροχος) και δεν χρησιμοποιείται εδώ. Μπορεί να τη δέσει με αυτή τη σύνδεση μόνο διαχειριστής που μπορεί να αλλάξει αρχεία του site.', 'mail-relay' ), $c_name ) ) . '</strong>';
 							break;
 						case 'set':
 							esc_html_e( 'Υπάρχει αποθηκευμένος κωδικός (σφραγισμένος). Κενό πεδίο = μένει ο τωρινός.', 'mail-relay' );
@@ -515,7 +523,7 @@ final class MRL_Admin_UI {
 							esc_html_e( 'Δεν υπάρχει αποθηκευμένος κωδικός.', 'mail-relay' );
 					}
 					echo ' ';
-					if ( 'constant' !== $state ) {
+					if ( ! MRL_Crypt::is_constant_state( $state ) ) {
 						if ( ! MRL_Crypt::available() ) {
 							/* translators: %s: constant name */
 							echo '<strong>' . esc_html( sprintf( __( 'Το wp-config.php δεν έχει δικά του salts ή λείπει το OpenSSL, οπότε ο κωδικός δεν μπορεί να σφραγιστεί και δεν αποθηκεύεται στη βάση. Βάλ\' τον ως σταθερά %s στο wp-config.php.', 'mail-relay' ), $c_name ) ) . '</strong>';
@@ -814,8 +822,23 @@ final class MRL_Admin_UI {
 		$secret = isset( $_POST[ $p . 'secret' ] ) && is_string( $_POST[ $p . 'secret' ] ) ? trim( (string) wp_unslash( $_POST[ $p . 'secret' ] ) ) : '';
 		$secret = (string) preg_replace( '/[\x00-\x1F\x7F]/', '', $secret );
 		if ( MRL_Crypt::from_constant( $slot ) ) {
-			// The constant wins; nothing typed is stored.
+			// The constant wins; nothing typed is stored. It is tied to this
+			// connection the first time, later only by someone who could
+			// edit wp-config.php anyway.
 			$secret = '';
+			$cst    = MRL_Crypt::state( $slot, $bind );
+			if ( 'constant_new' === $cst ) {
+				MRL_Crypt::pin( $slot, $bind );
+			} elseif ( 'constant_other' === $cst ) {
+				if ( MRL_Crypt::can_repin() ) {
+					MRL_Crypt::pin( $slot, $bind );
+					/* translators: %s: constant name */
+					$msgs[] = self::msg( 'warning', sprintf( __( 'Η σταθερά %s δέθηκε με τη νέα σύνδεση.', 'mail-relay' ), MRL_Crypt::SLOTS[ $slot ] ) );
+				} else {
+					/* translators: %s: constant name */
+					$msgs[] = self::msg( 'error', sprintf( __( 'Η σταθερά %s ανήκει στην προηγούμενη σύνδεση και δεν θα χρησιμοποιηθεί για αυτή.', 'mail-relay' ), MRL_Crypt::SLOTS[ $slot ] ) );
+				}
+			}
 		}
 		if ( '1' === self::post( 'mrl_forget' ) && '' === $secret ) {
 			MRL_Crypt::put( $slot, '', $bind );

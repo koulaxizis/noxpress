@@ -2,7 +2,8 @@
 /**
  * Mail Relay — uninstall.php (v1.0.0)
  *
- * Always deleted: the sealed secrets mrl_secret_primary / mrl_secret_backup
+ * Always deleted: the sealed secrets mrl_secret_primary / mrl_secret_backup,
+ * the constant pins mrl_const_pin
  * (even with «keep»: a secret never outlives the plugin), the transients
  * mrl_aui_msg_{uid}, mrl_test_{uid}, mrl_dns_*, mrl_alert_sent, the user
  * meta mrl_seen and the daily cron mrl_daily.
@@ -26,6 +27,7 @@ function mrl_uninstall_site(): void {
 	wp_clear_scheduled_hook( 'mrl_daily' );
 	delete_option( 'mrl_secret_primary' );
 	delete_option( 'mrl_secret_backup' );
+	delete_option( 'mrl_const_pin' );
 	delete_transient( 'mrl_alert_sent' );
 	foreach ( array( 'mrl_aui_msg_', 'mrl_test_', 'mrl_dns_' ) as $mrl_prefix ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.

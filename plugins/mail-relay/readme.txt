@@ -28,18 +28,18 @@ Nothing changes after activation: sending through Mail Relay stays off until you
 
 **Passwords and keys**
 
-* A constant in wp-config.php wins: MRL_PRIMARY_SECRET, MRL_BACKUP_SECRET.
+* A constant in wp-config.php wins: MRL_PRIMARY_SECRET, MRL_BACKUP_SECRET. Saving the connection once ties the constant to it; after a change of server, user or provider it is only used again when an administrator who can change the site's files saves the new connection.
 * Otherwise the secret is sealed with AES-256-GCM under a key made from your wp-config.php salts. Without real salts or OpenSSL it is not stored at all and the page asks for the constant.
 * Never shown again (an empty field keeps the current one), never in the settings backup, the log, an error message or PHPMailer's debug output.
 * Deleted by itself when the server, the user or the provider changes, so a password typed for one server never goes to another.
-* A password is only sent over SSL or STARTTLS, with the certificate checked. The SMTP server must be a public address; a local relay needs MRL_ALLOW_LOCAL_SMTP and no password.
+* A password is only sent over SSL or STARTTLS, with the certificate checked. The SMTP server must be a public address, and the connection goes to the very address that was checked; a local relay needs MRL_ALLOW_LOCAL_SMTP and no password.
 
 **Sent log**
 
 * Date, status (sent, failed, held), connection, recipients, subject, source (plugin, theme, WordPress or the WooCommerce email, e.g. woocommerce:customer_processing_order), attachment names and sizes, error.
 * The content of mails is not kept, unless you turn it on. Then it is kept sealed for 7 days, for viewing and resending, and never for sensitive mails: password reset, new user, email change and privacy confirmations, recovery mode, any mail with a key=, token=, nonce= or login link, and whatever the noxpress_mail_sensitive filter marks. Attachments are never kept.
 * Rows are deleted after 30 days (1–90). Tools → Export / Erase Personal Data find and delete the rows of an address.
-* Only administrators (manage_options) see the log and the settings.
+* Only administrators (manage_options) see the log and the settings; on multisite only network administrators (manage_network_options), since whoever sets the connection receives every mail of the site.
 * CSV export of the log (without content).
 
 **When mail fails**

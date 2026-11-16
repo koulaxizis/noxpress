@@ -227,6 +227,10 @@ final class MRL_Settings {
 
 		if ( 'unreadable' === $st ) {
 			$p[] = __( 'Ο αποθηκευμένος κωδικός δεν ανοίγει πια (άλλαξαν τα salts του wp-config.php). Γράψ\' τον ξανά.', 'mail-relay' );
+		} elseif ( 'constant_new' === $st ) {
+			$p[] = __( 'Η σταθερά του wp-config.php δεν έχει δεθεί ακόμη με τη σύνδεση: πάτα «Αποθήκευση σύνδεσης» μία φορά.', 'mail-relay' );
+		} elseif ( 'constant_other' === $st ) {
+			$p[] = __( 'Η σταθερά του wp-config.php ανήκει σε άλλη σύνδεση και δεν χρησιμοποιείται εδώ.', 'mail-relay' );
 		}
 		if ( 'smtp' === $c['type'] ) {
 			if ( '' === $c['host'] ) {
@@ -266,6 +270,18 @@ final class MRL_Settings {
 	 * addresses) only with MRL_ALLOW_LOCAL_SMTP and never with a password.
 	 */
 	public static function host_problem( string $host, bool $with_secret ): string {
+		return self::host_check( $host, $with_secret )[0];
+	}
+
+	/**
+	 * Resolves the SMTP host once and checks every address. Returns
+	 * [problem, address to connect to]. The caller connects to that very
+	 * address (with the hostname kept for the certificate check), so a
+	 * second DNS answer cannot point the connection somewhere else.
+	 *
+	 * @return array{0: string, 1: string}
+	 */
+	public static function host_check( string $host, bool $with_secret ): array {
 		$ips = array();
 		if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
 			$ips[] = $host;
@@ -284,17 +300,18 @@ final class MRL_Settings {
 			}
 		}
 		if ( ! $ips ) {
-			return __( 'Ο SMTP server δεν βρέθηκε (DNS).', 'mail-relay' );
+			return array( __( 'Ο SMTP server δεν βρέθηκε (DNS).', 'mail-relay' ), '' );
 		}
 		foreach ( $ips as $ip ) {
 			if ( ! self::public_ip( $ip ) ) {
 				if ( defined( 'MRL_ALLOW_LOCAL_SMTP' ) && MRL_ALLOW_LOCAL_SMTP && ! $with_secret ) {
 					continue;
 				}
-				return __( 'Ο SMTP server είναι τοπική ή ιδιωτική διεύθυνση. Επιτρέπεται μόνο χωρίς κωδικό και με τη σταθερά MRL_ALLOW_LOCAL_SMTP στο wp-config.php.', 'mail-relay' );
+				return array( __( 'Ο SMTP server είναι τοπική ή ιδιωτική διεύθυνση. Επιτρέπεται μόνο χωρίς κωδικό και με τη σταθερά MRL_ALLOW_LOCAL_SMTP στο wp-config.php.', 'mail-relay' ), '' );
 			}
 		}
-		return '';
+		$ip = (string) $ips[0];
+		return array( '', false !== strpos( $ip, ':' ) ? '[' . $ip . ']' : $ip );
 	}
 
 	public static function public_ip( string $ip ): bool {

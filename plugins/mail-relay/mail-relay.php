@@ -87,11 +87,18 @@ require_once MRL_PATH . 'includes/class-abilities.php';
 
 final class Mail_Relay {
 
-	const CAP  = 'manage_options';
+	/**
+	 * Meta capability: manage_options on a single site, manage_network_options
+	 * on multisite. Whoever controls the mail transport of a site receives
+	 * every mail sent there, password resets of network users included, so
+	 * on a network only a network administrator may hold it.
+	 */
+	const CAP  = 'mrl_manage';
 	const CRON = 'mrl_daily';
 
 	public static function init(): void {
 		MRL_Lang::init();
+		add_filter( 'map_meta_cap', array( __CLASS__, 'map_cap' ), 10, 2 );
 
 		add_action(
 			'init',
@@ -115,6 +122,13 @@ final class Mail_Relay {
 			require_once MRL_PATH . 'includes/class-admin-ui.php';
 			MRL_Admin_UI::init();
 		}
+	}
+
+	public static function map_cap( $caps, $cap ) {
+		if ( self::CAP === $cap ) {
+			return array( is_multisite() ? 'manage_network_options' : 'manage_options' );
+		}
+		return $caps;
 	}
 
 	/** True when MRL_DISABLE is defined and truthy in wp-config.php. */

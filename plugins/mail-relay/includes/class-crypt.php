@@ -33,6 +33,14 @@ final class MRL_Crypt {
 
 	const OPT = 'mrl_secret_';
 
+	/**
+	 * Option: slot => bind of the connection a wp-config.php constant
+	 * belongs to. A constant is only used for that connection, like a
+	 * sealed secret, so changing the server in the settings (or a restored
+	 * settings file) never sends it somewhere else.
+	 */
+	const PIN = 'mrl_const_pin';
+
 	/** Per-request cache of opened secrets: slot => string. */
 	private static $open = array();
 
@@ -129,7 +137,8 @@ final class MRL_Crypt {
 			return '';
 		}
 		if ( self::from_constant( $slot ) ) {
-			return (string) constant( self::SLOTS[ $slot ] );
+			$pin = self::pin_of( $slot );
+			return ( '' !== $pin && hash_equals( $pin, $bind ) ) ? (string) constant( self::SLOTS[ $slot ] ) : '';
 		}
 		$k = $slot . '|' . $bind;
 		if ( isset( self::$open[ $k ] ) ) {
@@ -141,10 +150,18 @@ final class MRL_Crypt {
 		return $v;
 	}
 
-	/** 'none' | 'set' | 'constant' | 'unreadable' (salts changed) | 'other' (another connection). */
+	/**
+	 * 'none' | 'set' | 'unreadable' (salts changed) | 'other' (another
+	 * connection) | 'constant' | 'constant_new' (not yet tied to a
+	 * connection) | 'constant_other' (tied to another connection).
+	 */
 	public static function state( string $slot, string $bind ): string {
 		if ( self::from_constant( $slot ) ) {
-			return 'constant';
+			$pin = self::pin_of( $slot );
+			if ( '' === $pin ) {
+				return 'constant_new';
+			}
+			return hash_equals( $pin, $bind ) ? 'constant' : 'constant_other';
 		}
 		$rec = self::record( $slot );
 		if ( null === $rec ) {
@@ -184,6 +201,39 @@ final class MRL_Crypt {
 		return true;
 	}
 
+	public static function is_constant_state( string $state ): bool {
+		return 0 === strpos( $state, 'constant' );
+	}
+
+	private static function pin_of( string $slot ): string {
+		$p = get_option( self::PIN, array() );
+		return is_array( $p ) && isset( $p[ $slot ] ) && is_string( $p[ $slot ] ) ? $p[ $slot ] : '';
+	}
+
+	/** Ties the constant of a slot to a connection. */
+	public static function pin( string $slot, string $bind ): void {
+		$p = get_option( self::PIN, array() );
+		$p = is_array( $p ) ? $p : array();
+		$p[ $slot ] = $bind;
+		update_option( self::PIN, $p, false );
+		self::$open = array();
+	}
+
+	/**
+	 * Whether the current user may tie a constant to another connection:
+	 * someone who could edit wp-config.php anyway. On multisite the
+	 * plugin already needs a network administrator.
+	 */
+	public static function can_repin(): bool {
+		if ( ! current_user_can( Mail_Relay::CAP ) ) {
+			return false;
+		}
+		if ( is_multisite() ) {
+			return true;
+		}
+		return ! ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) && ! ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT );
+	}
+
 	/** Deletes a stored secret whose bind is not the current one (or that cannot be read any more is kept, so the page can say so). */
 	public static function forget_other( string $slot, string $bind ): void {
 		if ( 'other' === self::state( $slot, $bind ) ) {
@@ -195,7 +245,10 @@ final class MRL_Crypt {
 	/** A short fingerprint of a slot's current secret (for the «tested» mark), never the secret. */
 	public static function fingerprint( string $slot, string $bind ): string {
 		$v = self::get( $slot, $bind );
-		return '' === $v ? '' : substr( hash_hmac( 'sha256', $v, self::key() ), 0, 16 );
+		if ( '' === $v || ! self::available() ) {
+			return ''; // Without real salts the HMAC key would be public: no secret-derived mark at all.
+		}
+		return substr( hash_hmac( 'sha256', $v, self::key() ), 0, 16 );
 	}
 
 	/**
