@@ -35,8 +35,13 @@ final class EBD_Store {
 	const HOOK     = 'ebd_cleanup';
 
 	public static function init(): void {
-		add_action( self::HOOK, array( __CLASS__, 'cleanup' ) );
+		add_action( self::HOOK, array( __CLASS__, 'daily' ) );
 		add_action( 'init', array( __CLASS__, 'schedule' ), 30 );
+	}
+
+	/** The daily task: expired copies and stale temporary files. */
+	public static function daily(): void {
+		self::cleanup( false );
 	}
 
 	/** Daily cleanup through Action Scheduler (group ebook-delivery), else WP-Cron. */
