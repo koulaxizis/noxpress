@@ -88,6 +88,7 @@ SLUGS = {
     'bs': 'back-in-stock',
     'ev': 'events',
     'gc': 'gift-cards',
+    'ed': 'ebook-delivery',
     'mm': 'maintenance-mode',
     'sb': 'site-bridge',
 }
