@@ -3,7 +3,7 @@
  * Plugin Name:          Wish Shelf
  * Plugin URI:           https://noxpress.tech
  * Description:          Λίστα επιθυμιών για το WooCommerce: καρδούλα στις κάρτες και στη σελίδα προϊόντος, λίστα για επισκέπτες χωρίς cookies, λίστες με όνομα, emails για πτώση τιμής και επιστροφή σε απόθεμα, παραλλαγές, καλάθι για όλα με ένα κλικ, κοινοποίηση με σύνδεσμο, καρτέλα στον λογαριασμό, αναφορά για το τι θέλουν οι πελάτες και εισαγωγή από WishSuite, YITH και TI.
- * Version:              1.2.5
+ * Version:              1.2.6
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -56,7 +56,8 @@
  *
  * Cooperation (Bible §6): fires wsh_item_added / wsh_item_removed. Filters
  * for others: wsh_text, wsh_max_items. Public API: wsh_get_items(),
- * wsh_product_count().
+ * wsh_product_count(). Reads bis_covers() (Back in Stock, 1.2.6): no
+ * «back in stock» line when Back in Stock sends its own e-mail.
  *
  * Deviations from the Bible (with reason):
  *  - §14.4 (never in AJAX): the two wc-ajax endpoints of WSH_Ajax are the
@@ -76,7 +77,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WSH_VERSION', '1.2.5' );
+define( 'WSH_VERSION', '1.2.6' );
 define( 'WSH_FILE', __FILE__ );
 define( 'WSH_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WSH_URL', plugin_dir_url( __FILE__ ) );

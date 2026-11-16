@@ -1,6 +1,6 @@
 {
-  "display": 1306,
-  "total": 1306,
+  "display": 1310,
+  "total": 1310,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1586,7 +1586,7 @@
     },
     "754592478": {
       "file": "nox-al-1.0.0/activity-log.zip",
-      "count": 2
+      "count": 3
     },
     "754609797": {
       "file": "nox-mr-1.0.0/mail-relay.zip",
@@ -1594,10 +1594,18 @@
     },
     "754625740": {
       "file": "nox-lg-1.0.0/login-guard.zip",
-      "count": 0
+      "count": 1
     },
     "754642632": {
       "file": "nox-sb-1.13.0/site-bridge.zip",
+      "count": 2
+    },
+    "754697840": {
+      "file": "nox-fm-1.0.0/forms.zip",
+      "count": 0
+    },
+    "754720372": {
+      "file": "nox-lv-1.0.0/live-search.zip",
       "count": 0
     }
   }

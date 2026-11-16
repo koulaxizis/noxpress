@@ -78,11 +78,15 @@ SLUGS = {
     'ss': 'search-signals',
     'pl': 'production-ledger',
     'pt': 'product-tabs',
+    'fm': 'forms',
     'fd': 'product-feed',
     'iv': 'invoice-details',
     'lg': 'login-guard',
+    'lv': 'live-search',
     'al': 'activity-log',
     'mr': 'mail-relay',
+    'bs': 'back-in-stock',
+    'ev': 'events',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

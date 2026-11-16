@@ -235,6 +235,11 @@ final class WSH_Alerts {
 				if ( ! $in && ! (int) $r['was_out'] ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- own table.
 					$wpdb->update( $table, array( 'was_out' => 1 ), array( 'id' => $id ), array( '%d' ), array( '%d' ) );
+				} elseif ( $in && (int) $r['was_out'] && function_exists( 'bis_covers' ) && bis_covers( $user->user_email, (int) $pair[0], (int) $pair[1] ) ) {
+					// 1.2.5: Back in Stock sends (or sent) its own e-mail for this
+					// product to this address: one e-mail, not two (Bible §6).
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- own table.
+					$wpdb->update( $table, array( 'was_out' => 0 ), array( 'id' => $id ), array( '%d' ), array( '%d' ) );
 				} elseif ( $in && (int) $r['was_out'] ) {
 					$lines[]          = self::line( $item, 'stock', null, $now );
 					$after[ $id ]     = isset( $after[ $id ] ) ? $after[ $id ] : array();
