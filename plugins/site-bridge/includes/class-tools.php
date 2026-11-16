@@ -521,7 +521,8 @@ final class SBR_Tools {
 			return null;
 		}
 		$suite = array();
-		foreach ( array_keys( Noxpress_Core::catalog() ) as $slug ) {
+		$known = method_exists( 'Noxpress_Core', 'suite' ) ? Noxpress_Core::suite() : Noxpress_Core::catalog();
+		foreach ( array_keys( $known ) as $slug ) {
 			foreach ( $plugins as $file => $p ) {
 				if ( 0 === strpos( $file, $slug . '/' ) ) {
 					$suite[ $slug ] = array(

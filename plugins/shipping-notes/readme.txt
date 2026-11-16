@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -108,6 +108,9 @@ The free shipping bar does. The parcel names, the "two parcels" message and the 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.1 =
+* Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).
 
 = 1.4.0 =
 * New: an optional line on the product page, under the "Add to cart" button, that tells what this product does for free shipping with the visitor's cart: how much is still left, or that shipping becomes free. Classic themes, Astra and block themes; its own texts (with {threshold}, {remaining} and {price}); follows the free-shipping test mode. Off until you tick it.
