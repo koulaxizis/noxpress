@@ -5,7 +5,7 @@ Tags: seo, schema, sitemap, open graph, llms.txt
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -110,6 +110,9 @@ The options and the temporary data are removed, and the per-page titles, descrip
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.0 =
+* Works with Maintenance Mode: while a site is closed as «Coming soon», visitors and crawlers get no sitemaps, no llms.txt and no Sitemap line in robots.txt, so nothing is indexed before the launch. Administrators still see them. Read through the suite filter noxpress_site_closed.
 
 = 1.0.2 =
 * Core 1.4.0: the Noxpress hub can install suite plugins that were released after this copy of Core (read from the signed version list; a plugin counts as ours only with our Update URI).

@@ -3,7 +3,7 @@
  * Plugin Name:          Search Signals
  * Plugin URI:           https://noxpress.tech
  * Description:          Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD (Organization, WebSite, WebPage, Product, BreadcrumbList), Open Graph και Twitter, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισάγει ρυθμίσεις και meta από το Rank Math, συγκρίνει την έξοδο πριν τη μετάβαση και μένει παθητικό όσο τρέχει άλλο SEO plugin.
- * Version:              1.0.2
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -71,12 +71,14 @@
  * is built by WooCommerce (woocommerce_structured_data_product / _offer),
  * sitemap queries pass the core wp_sitemaps_* filters: plugins that
  * already use those (Hide Catalog, Pre-Orders, Featured Creators) work
- * without a change.
+ * without a change. Reads noxpress_site_closed (Maintenance Mode, 1.1.0):
+ * on a coming-soon site sitemaps, llms.txt and the robots.txt Sitemap line
+ * are left out for visitors.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SSG_VERSION', '1.0.2' );
+define( 'SSG_VERSION', '1.1.0' );
 define( 'SSG_FILE', __FILE__ );
 define( 'SSG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SSG_URL', plugin_dir_url( __FILE__ ) );
@@ -222,6 +224,20 @@ final class Search_Signals {
 			self::$serving = $on;
 		}
 		return $on;
+	}
+
+	/**
+	 * The site is closed as «coming soon» for this request (Maintenance
+	 * Mode, filter noxpress_site_closed, Bible §6): sitemaps, llms.txt and
+	 * the Sitemap line of robots.txt stay out until the launch. A user who
+	 * sees the site (e.g. an administrator) still gets them.
+	 */
+	public static function site_closed(): bool {
+		try {
+			return 'coming_soon' === (string) apply_filters( 'noxpress_site_closed', '' );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 
 	/** A normal page view: not admin, AJAX, REST, feed, embed, cron, CLI or XML-RPC (§14.4). */
