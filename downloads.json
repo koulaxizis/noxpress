@@ -1,6 +1,6 @@
 {
-  "display": 1205,
-  "total": 1205,
+  "display": 1207,
+  "total": 1207,
   "offset": 5,
   "updated": "2026-11-16",
   "assets": {
@@ -1402,7 +1402,7 @@
     },
     "754338264": {
       "file": "nox-fd-1.0.0/product-feed.zip",
-      "count": 2
+      "count": 4
     },
     "754362327": {
       "file": "nox-tp-1.7.0/theme-patcher.zip",
@@ -1414,6 +1414,10 @@
     },
     "754395920": {
       "file": "nox-iv-1.0.1/invoice-details.zip",
+      "count": 0
+    },
+    "754410911": {
+      "file": "nox-gl-1.3.0/greeklish-permalinks.zip",
       "count": 0
     }
   }
