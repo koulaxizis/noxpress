@@ -11,6 +11,7 @@
  *  - bulk      on-demand conversion: scan, dry run, apply in batches,
  *              undo of the last run (AJAX glp_scan, glp_step, glp_undo)
  *  - tools     settings backup, redirect table, filters
+ * File renames with an own name live under Media (GLP_Rename, 1.3.0).
  *
  * Every state change: POST on admin_init (slug + nonce + capability, PRG,
  * message in the transient glp_aui_msg_{uid}) or AJAX (check_ajax_referer
@@ -288,6 +289,7 @@ final class GLP_Admin_UI {
 			</div>
 			<p><strong><?php esc_html_e( 'Αρχεία', 'greeklish-permalinks' ); ?></strong></p>
 			<label class="glp-check"><input type="checkbox" id="glp-files" value="1" /> <?php esc_html_e( 'Ονόματα αρχείων πολυμέσων (μετονομασία στον δίσκο)', 'greeklish-permalinks' ); ?></label>
+			<p class="description"><?php esc_html_e( 'Ένα αρχείο με δικό σου όνομα, και χωρίς ελληνικά:', 'greeklish-permalinks' ); ?> <a href="<?php echo esc_url( admin_url( 'upload.php?page=glp-rename' ) ); ?>"><?php esc_html_e( 'Πολυμέσα → Μετονομασίες', 'greeklish-permalinks' ); ?></a></p>
 			<p class="description glp-hidden" id="glp-files-warn"><span class="glp-warn"><?php esc_html_e( 'Προσοχή:', 'greeklish-permalinks' ); ?></span> <?php esc_html_e( 'ενημερώνονται το κείμενο των άρθρων και τα αρχεία προς λήψη του WooCommerce. Αναφορές σε page builders, sliders, CSS, cache, feeds και emails που στάλθηκαν μένουν στο παλιό URL και βασίζονται στο 301.', 'greeklish-permalinks' ); ?> <span id="glp-probe-out"></span></p>
 			<p class="glp-actions"><button type="button" class="button button-primary" id="glp-scan"><?php esc_html_e( 'Σάρωση', 'greeklish-permalinks' ); ?></button> <span id="glp-scan-msg" class="glp-muted"></span></p>
 		</div>
@@ -588,19 +590,7 @@ final class GLP_Admin_UI {
 	 */
 	public static function ajax_probe(): void {
 		self::ajax_guard();
-		$url = trailingslashit( wp_get_upload_dir()['baseurl'] ) . 'glp-probe-' . wp_generate_password( 8, false ) . '.jpg';
-		$r   = wp_remote_get(
-			$url,
-			array(
-				'timeout'     => 8,
-				'redirection' => 0,
-				'sslverify'   => apply_filters( 'https_local_ssl_verify', false ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- core filter.
-			)
-		);
-		if ( is_wp_error( $r ) ) {
-			wp_send_json_success( array( 'state' => 'unknown' ) );
-		}
-		wp_send_json_success( array( 'state' => '' !== (string) wp_remote_retrieve_header( $r, 'x-glp-probe' ) ? 'yes' : 'no' ) );
+		wp_send_json_success( array( 'state' => GLP_Redirects::probe( true ) ) );
 	}
 
 	/* =====================================================================
@@ -703,7 +693,7 @@ final class GLP_Admin_UI {
 	 * Footer (Bible §7 — identical pattern)
 	 * =================================================================== */
 
-	private static function footer(): void {
+	public static function footer(): void {
 		?>
 		<p class="glp-footer">
 			<?php
