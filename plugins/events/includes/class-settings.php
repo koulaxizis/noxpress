@@ -11,6 +11,10 @@
  *  - on_product  «Επόμενες εκδηλώσεις» box on product pages (default on)
  *  - on_creator  the same box on Featured Creators pages (default on)
  *  - box_count   events in those boxes (1–10, default 3)
+ *  - close_h     ticket sales close this many hours before the start
+ *                (0–168, default 2; 1.1.0)
+ *  - names_days  attendee names are deleted this many days after the
+ *                event (1–365, default 30; 1.1.0)
  *  - ics_feed    the .ics feed of every upcoming event (default off)
  *  - schema      Event JSON-LD (default on)
  *  - delete_all  delete the events and venues on uninstall (default off)
@@ -51,6 +55,19 @@ final class EVT_Settings {
 			'related'     => array( 'Σχετικά', 'Related', 40 ),
 			'with'        => array( 'Με', 'With', 40 ),
 			'ended'       => array( 'Η εκδήλωση έγινε', 'This event has ended', 60 ),
+			'buy'         => array( 'Αγορά εισιτηρίου', 'Buy a ticket', 40 ),
+			'sold_out'    => array( 'Τα εισιτήρια εξαντλήθηκαν.', 'Tickets are sold out.', 120 ),
+			'sales_soon'  => array( 'Τα εισιτήρια δεν κυκλοφορούν ακόμα.', 'Tickets are not on sale yet.', 120 ),
+			'sales_closed' => array( 'Η προπώληση έκλεισε.', 'Ticket sales have closed.', 120 ),
+			'my_tickets'  => array( 'Τα εισιτήριά μου', 'My tickets', 40 ),
+			'ticket_code' => array( 'Κωδικός εισιτηρίου', 'Ticket code', 40 ),
+			'show_tickets' => array( 'Τα εισιτήρια με QR', 'Tickets with QR code', 60 ),
+			'used'        => array( 'Χρησιμοποιήθηκε', 'Used', 40 ),
+			'void'        => array( 'Ακυρώθηκε', 'Cancelled', 40 ),
+			'attendee'    => array( 'Όνομα συμμετέχοντα', 'Attendee name', 40 ),
+			'save_names'  => array( 'Αποθήκευση ονομάτων', 'Save names', 40 ),
+			'no_tickets'  => array( 'Δεν βρέθηκαν εισιτήρια.', 'No tickets found.', 120 ),
+			'at_door'     => array( 'Δείξε τον κωδικό ή το QR στην είσοδο.', 'Show the code or the QR code at the door.', 160 ),
 		);
 	}
 
@@ -63,6 +80,8 @@ final class EVT_Settings {
 			'on_product' => true,
 			'on_creator' => true,
 			'box_count'  => 3,
+			'close_h'    => 2,
+			'names_days' => 30,
 			'ics_feed'   => false,
 			'schema'     => true,
 			'delete_all' => false,
@@ -119,6 +138,8 @@ final class EVT_Settings {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 		$s['box_count']  = self::range( $raw, 'box_count', 1, 10, $d['box_count'] );
+		$s['close_h']    = self::range( $raw, 'close_h', 0, 168, $d['close_h'] );
+		$s['names_days'] = self::range( $raw, 'names_days', 1, 365, $d['names_days'] );
 
 		foreach ( self::texts() as $k => $t ) {
 			foreach ( array( 'el', 'en' ) as $l ) {
