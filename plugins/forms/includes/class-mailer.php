@@ -12,9 +12,10 @@
  *  - Subjects: placeholders {site}, {form} and {field key}, line breaks
  *    removed, at most 200 characters.
  *  - Auto-reply (Chris 2026-11-16, Q7): off by default; fixed text of the
- *    form with {name} and {site} only, never what the visitor wrote, so the
- *    site cannot be used to send someone's text to a stranger. At most one
- *    per address per hour.
+ *    form with {name} and {site} only. {name} is kept only when it looks like a
+ *    name (letters, spaces, hyphens, apostrophes, 40 characters, 4 words), so
+ *    the site cannot be used to send someone's text to a stranger. At most
+ *    one per address per hour.
  *  - No IP is ever written in an e-mail.
  */
 
@@ -138,6 +139,20 @@ final class FRM_Mailer {
 		return (bool) wp_mail( $args['to'], (string) $args['subject'], (string) $args['body'], isset( $args['headers'] ) && is_array( $args['headers'] ) ? $args['headers'] : array() );
 	}
 
+	/**
+	 * The visitor's name as the auto-reply may show it: letters, spaces, hyphens and
+	 * apostrophes only, at most 40 characters and 4 words. Anything else (a link, digits,
+	 * a sentence) gives '', so the auto-reply never carries a stranger's text to the
+	 * address that was typed in.
+	 */
+	public static function reply_name( string $name ): string {
+		$name = trim( preg_replace( '/\s+/u', ' ', $name ) );
+		if ( '' === $name || mb_strlen( $name ) > 40 || substr_count( $name, ' ' ) > 3 ) {
+			return '';
+		}
+		return preg_match( "/^[\\p{L}\\p{M}][\\p{L}\\p{M}' \\-]*$/u", $name ) ? $name : '';
+	}
+
 	/** The auto-reply, when the form has it on and the visitor gave an e-mail. */
 	public static function auto_reply( array $form, array $data ): bool {
 		if ( empty( $form['auto']['on'] ) || '' === $data['email'] || ! is_email( $data['email'] ) ) {
@@ -150,7 +165,7 @@ final class FRM_Mailer {
 		$lang = $data['lang'];
 		$site = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
 		$vars = array(
-			'{name}' => '' !== $data['name'] ? self::header_safe( $data['name'], 80 ) : '',
+			'{name}' => self::reply_name( (string) $data['name'] ),
 			'{site}' => $site,
 		);
 		$subj = self::header_safe( strtr( FRM_Settings::pick( $form['auto']['subject_el'], $form['auto']['subject_en'], $lang ), $vars ) );

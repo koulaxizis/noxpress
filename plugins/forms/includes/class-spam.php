@@ -40,6 +40,7 @@ final class FRM_Spam {
 	const DUP        = 600;
 	const RL_FORM    = 600;
 	const RL_ALL     = 3600;
+	const LOCK       = 60;
 	const STATS      = 'frm_spam_stats';
 	const STATS_CAP  = 20;
 
@@ -277,6 +278,50 @@ final class FRM_Spam {
 	 * =================================================================== */
 
 	/** True when this visitor may send to this form now. */
+	/**
+	 * Take a short lock, atomically (INSERT IGNORE on the options table's unique key), so
+	 * that parallel requests cannot all pass the one-use, duplicate and limit checks
+	 * before any of them records its send. A lock older than LOCK seconds is stale
+	 * (a request that died) and is taken over.
+	 */
+	public static function lock( string $name ): bool {
+		global $wpdb;
+		$key = self::lock_key( $name );
+		for ( $try = 0; $try < 2; $try++ ) {
+			$ok = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $key, (string) time() ) );
+			if ( 1 === (int) $ok ) {
+				return true;
+			}
+			$at = (int) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $key ) );
+			if ( $at && $at > time() - self::LOCK ) {
+				return false;
+			}
+			$wpdb->delete( $wpdb->options, array( 'option_name' => $key ) );
+		}
+		return false;
+	}
+
+	public static function unlock( string $name ): void {
+		global $wpdb;
+		$wpdb->delete( $wpdb->options, array( 'option_name' => self::lock_key( $name ) ) );
+	}
+
+	private static function lock_key( string $name ): string {
+		return 'frm_lock_' . substr( md5( $name ), 0, 24 );
+	}
+
+	/** Whether a token or sealed blob was already used. */
+	public static function is_spent( string $token ): bool {
+		$name = 'frm_used_' . md5( $token );
+		if ( ! wp_using_ext_object_cache() ) {
+			// Read again from the table: an earlier miss in this request is cached.
+			wp_cache_delete( 'notoptions', 'options' );
+			wp_cache_delete( '_transient_' . $name, 'options' );
+			wp_cache_delete( '_transient_timeout_' . $name, 'options' );
+		}
+		return (bool) get_transient( $name );
+	}
+
 	public static function within_limits( int $form_id ): bool {
 		$s  = FRM_Settings::get();
 		$ip = self::ip_hash();

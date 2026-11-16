@@ -254,6 +254,33 @@ final class FRM_Submit {
 			$spend = $blob;
 		}
 
+		// One send at a time per visitor, so parallel requests cannot all pass the
+		// one-use, duplicate and limit checks before any of them is recorded.
+		$lock = 'ip|' . FRM_Spam::ip_hash();
+		if ( ! FRM_Spam::lock( $lock ) ) {
+			return self::drop( $form, 'limit', $lang );
+		}
+		try {
+			if ( '' !== $spend && FRM_Spam::is_spent( $spend ) ) {
+				return self::drop( $form, 'token', $lang );
+			}
+			return self::accept( $form, $raw, $lang, $page, $prod, $spend );
+		} finally {
+			FRM_Spam::unlock( $lock );
+		}
+	}
+
+	/**
+	 * Steps 4 to 8, under the visitor's lock.
+	 *
+	 * @param array      $form  Form.
+	 * @param array      $raw   Posted field values.
+	 * @param string     $lang  el | en.
+	 * @param string     $page  Clean page URL.
+	 * @param array|null $prod  Product of the page.
+	 * @param string     $spend Token or sealed blob to mark as used.
+	 */
+	private static function accept( array $form, array $raw, string $lang, string $page, ?array $prod, string $spend ): array {
 		// 4. Limits.
 		if ( ! FRM_Spam::within_limits( (int) $form['id'] ) ) {
 			FRM_Spam::count( 'limit' );

@@ -10,7 +10,8 @@
  *  - Transients frm_aui_msg_{uid} (PRG notices), frm_rl_ / frm_rla_
  *    (limits), frm_dup_ (double-send guard), frm_used_ (spent tokens),
  *    frm_bl_ (counter cap), frm_ar_ (auto-reply guard), frm_oros_ (orOS
- *    sign-ups waiting to be sent).
+ *    sign-ups waiting to be sent), and the short send locks frm_lock_
+ *    (plain options).
  *  - The daily cleanup event frm_cleanup and the orOS sign-up jobs
  *    frm_oros_send (Action Scheduler and WP-Cron).
  *  - The stored messages (frm_entry posts and their meta) ONLY when
@@ -48,6 +49,8 @@ function frm_uninstall_site(): void {
 	delete_option( 'frm_settings' );
 	delete_option( 'frm_spam_stats' );
 	delete_option( 'frm_cf7_map' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'frm_lock_' ) . '%' ) );
 
 	foreach ( array( 'frm_aui_msg_', 'frm_rl_', 'frm_rla_', 'frm_dup_', 'frm_used_', 'frm_bl_', 'frm_ar_', 'frm_oros_' ) as $prefix ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.

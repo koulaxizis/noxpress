@@ -10,9 +10,9 @@
  *    (ORC_Relay::fields() / ORC_Relay::post()). orOS Connect stays as it
  *    is; nothing is posted when it is missing, killed, or its Newsletter
  *    module is off or has no address.
- *  - The confirmation e-mail (double opt-in) follows orOS Connect's own
- *    setting: with «confirmation for checkout sign-ups too» off and a shop
- *    key, the post is signed so orOS can skip it, as for checkout.
+ *  - The post is never signed with the shop key, so orOS always sends its
+ *    confirmation e-mail (double opt-in): a public form cannot prove that the
+ *    address belongs to the visitor, unlike a paid checkout.
  *  - The queue: Action Scheduler (group forms) when present, else WP-Cron.
  *    The arguments hold only a random key; the e-mail and the name wait in
  *    a transient (1 day) that is deleted after the last try, so no
@@ -104,8 +104,9 @@ final class FRM_Oros {
 			return;
 		}
 		$s    = ORC_Settings::get();
-		$sign = empty( $s['nl_doi'] ) ? (string) ( $s['nl_key'] ?? '' ) : '';
-		$r    = ORC_Relay::post( (string) $s['nl_url'], ORC_Relay::fields( (string) $item['email'], (string) $item['name'], (string) $item['lang'], $sign ) );
+		// Never signed with the shop key: anyone can type any address in a public form,
+		// so orOS always sends its confirmation e-mail (double opt-in).
+		$r = ORC_Relay::post( (string) $s['nl_url'], ORC_Relay::fields( (string) $item['email'], (string) $item['name'], (string) $item['lang'], '' ) );
 		$res  = is_array( $r ) && isset( $r['res'] ) ? (string) $r['res'] : 'error';
 
 		if ( 'ok' !== $res && is_callable( array( 'ORC_Relay', 'retryable' ) ) && ORC_Relay::retryable( $res ) && $try < self::TRIES ) {

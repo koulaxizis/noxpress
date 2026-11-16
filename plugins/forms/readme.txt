@@ -43,7 +43,7 @@ Contact forms with a block and a shortcode, e-mail notifications, and spam prote
 **Product questions and orOS Newsletter**
 
 * With WooCommerce, a hidden field «The product of the page» adds the product's name, SKU and link to the message: put the form on product pages for «Ask about this product».
-* A form can sign up visitors to orOS Newsletter through orOS Connect (module Newsletter) when they tick the consent box, with orOS's double opt-in when it is on there. Sign-ups wait in the background and retry when orOS does not answer.
+* A form can sign up visitors to orOS Newsletter through orOS Connect (module Newsletter) when they tick the consent box. orOS always sends its confirmation e-mail (double opt-in), because a public form cannot prove who owns the address. Sign-ups wait in the background and retry when orOS does not answer.
 
 **Switching from Contact Form 7**
 

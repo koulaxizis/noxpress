@@ -112,7 +112,7 @@ final class FRM_Lang {
 		'Θέμα (αγγλικά)' => 'Subject (English)',
 		'Μόνο {name} και {site}: τίποτα άλλο από όσα έγραψε ο επισκέπτης.' => 'Only {name} and {site}: nothing else of what the visitor wrote.',
 		'Γράψε τον επισκέπτη στο orOS Newsletter όταν τσεκάρει τη συναίνεση' => 'Sign the visitor up to orOS Newsletter when they tick the consent box',
-		'Μέσω του orOS Connect (module Newsletter), με διπλή επιβεβαίωση αν είναι ανοιχτή εκεί. Χρειάζεται πεδίο Email και πεδίο Συναίνεση με κείμενο για newsletter.' => 'Through orOS Connect (module Newsletter), with double opt-in if it is on there. Needs an Email field and a Consent field with a newsletter text.',
+		'Μέσω του orOS Connect (module Newsletter), πάντα με email επιβεβαίωσης από το orOS. Χρειάζεται πεδίο Email και πεδίο Συναίνεση με κείμενο για newsletter.' => 'Through orOS Connect (module Newsletter), always with the orOS confirmation e-mail. Needs an Email field and a Consent field with a newsletter text.',
 		'Το orOS Connect με το module Newsletter δεν είναι ενεργό ή ρυθμισμένο: η επιλογή μένει αποθηκευμένη και δουλεύει όταν ενεργοποιηθεί.' => 'orOS Connect with the Newsletter module is not active or not set up: the choice stays saved and works once it is.',
 		'Αποθήκευση φόρμας' => 'Save form',
 		'Αντίγραφο' => 'Duplicate',

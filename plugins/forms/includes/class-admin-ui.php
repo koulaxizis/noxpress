@@ -509,7 +509,7 @@ final class FRM_Admin_UI {
 				<p class="frm-muted">
 					<?php
 					echo $oros
-						? esc_html__( 'Μέσω του orOS Connect (module Newsletter), με διπλή επιβεβαίωση αν είναι ανοιχτή εκεί. Χρειάζεται πεδίο Email και πεδίο Συναίνεση με κείμενο για newsletter.', 'forms' )
+						? esc_html__( 'Μέσω του orOS Connect (module Newsletter), πάντα με email επιβεβαίωσης από το orOS. Χρειάζεται πεδίο Email και πεδίο Συναίνεση με κείμενο για newsletter.', 'forms' )
 						: esc_html__( 'Το orOS Connect με το module Newsletter δεν είναι ενεργό ή ρυθμισμένο: η επιλογή μένει αποθηκευμένη και δουλεύει όταν ενεργοποιηθεί.', 'forms' );
 					?>
 				</p>
