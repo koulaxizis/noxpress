@@ -331,6 +331,11 @@ final class LVS_Index {
 			)
 		);
 		self::set_state( array( 'hourly' => time() ) );
+		if ( empty( $st['built'] ) ) {
+			// Never built in full (e.g. activated by a tool that skips the
+			// activation hook, or the first pass was lost): start one now.
+			self::start_full();
+		}
 		if ( $ids ) {
 			self::build_many( array_map( 'intval', $ids ) );
 			LVS_File::maybe_build();
