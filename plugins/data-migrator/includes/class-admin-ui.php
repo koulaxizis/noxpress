@@ -463,7 +463,9 @@ final class NM_Admin_UI {
 				self::form_open( 'installer', 'nm-backups' );
 				echo '<input type="hidden" name="id" value="' . esc_attr( $id ) . '"><button class="button" title="' . esc_attr__( 'Για επαναφορά σε άδειο server, χωρίς WordPress', 'data-migrator' ) . '">' . esc_html__( 'Installer', 'data-migrator' ) . '</button></form>';
 			}
-			if ( ! $remote && NM_Dropbox::connected() ) {
+			if ( ! $remote && NM_Dropbox::connected() && ! NM_Remote::push_allowed( $m ) ) {
+				echo '<span class="description" title="' . esc_attr__( 'Τα αντίγραφα στο Dropbox κρυπτογραφούνται. Φτιάξε νέο αντίγραφο με προορισμό το Dropbox.', 'data-migrator' ) . '">' . esc_html__( 'Μη κρυπτογραφημένο: δεν πάει στο Dropbox', 'data-migrator' ) . '</span>';
+			} elseif ( ! $remote && NM_Dropbox::connected() ) {
 				echo '<button type="button" class="button" data-nm-remote="push" data-id="' . esc_attr( $id ) . '">' . esc_html( 'failed' === $rstate || 'uploading' === $rstate ? __( 'Ξανά στο Dropbox', 'data-migrator' ) : __( 'Αποστολή στο Dropbox', 'data-migrator' ) ) . '</button>';
 			}
 		}

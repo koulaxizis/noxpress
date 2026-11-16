@@ -413,6 +413,9 @@ final class NM_Lang {
 		'Ο κωδικός αποθηκεύτηκε.' => 'The password was saved.',
 		'Η κρυπτογράφηση δεν ενεργοποιήθηκε: χρειάζεται κωδικός που διαβάζεται και η επέκταση OpenSSL της PHP.' => 'Encryption was not turned on: it needs a password that can be read and the OpenSSL extension of PHP.',
 		// 1.3.0: Dropbox.
+		'Το αντίγραφο δεν είναι κρυπτογραφημένο και τα αντίγραφα στο Dropbox κρυπτογραφούνται. Φτιάξε νέο αντίγραφο με προορισμό το Dropbox (κρυπτογραφείται μόνο του) ή κλείσε την κρυπτογράφηση του Dropbox στις ρυθμίσεις.' => 'This backup is not encrypted, and the copies in Dropbox are. Make a new backup with Dropbox as its destination (it is encrypted by itself) or turn off the Dropbox encryption in the settings.',
+		'Τα αντίγραφα στο Dropbox κρυπτογραφούνται. Φτιάξε νέο αντίγραφο με προορισμό το Dropbox.' => 'The copies in Dropbox are encrypted. Make a new backup with Dropbox as its destination.',
+		'Μη κρυπτογραφημένο: δεν πάει στο Dropbox' => 'Not encrypted: it does not go to Dropbox',
 		'0: όσα και εδώ.' => '0: as many as here.',
 		'Dropbox: η αποστολή απέτυχε: %s' => 'Dropbox: the upload failed: %s',
 		'Dropbox: η αποστολή δεν ολοκληρώθηκε' => 'Dropbox: the upload did not finish',

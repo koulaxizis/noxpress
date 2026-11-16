@@ -22,7 +22,8 @@
  *    AES-256-GCM by NM_Crypt::seal() with a key from the wp-config.php
  *    salts. Without real salts the connection is refused (we do not
  *    pretend to encrypt) and the page shows the constant instead;
- *  - the access token (four hours) lives in a sealed transient only;
+ *  - the access token (four hours) lives in a sealed transient only, and
+ *    only with real salts (else for the current request only);
  *  - neither ever goes into job files, logs, e-mails or a backup: the
  *    dump skips every row that matches DUMP_SKIP_RE;
  *  - names hold "token" or "key", so Site Bridge shows them as ***.
@@ -296,7 +297,13 @@ final class NM_Dropbox {
 		self::$access = $tok;
 		self::hide( $tok );
 		$ttl = max( 60, min( 14400, $ttl ) - 300 );
-		set_transient( self::ACCESS, NM_Crypt::seal( $tok ), $ttl );
+		if ( self::salts_ok() ) {
+			set_transient( self::ACCESS, NM_Crypt::seal( $tok ), $ttl );
+		} else {
+			// Without real salts the seal key is guessable: keep the token
+			// for this request only (NM_DROPBOX_TOKEN mode).
+			delete_transient( self::ACCESS );
+		}
 	}
 
 	/** A valid access token ('' when the connection does not work). */
@@ -304,7 +311,7 @@ final class NM_Dropbox {
 		if ( ! $fresh && '' !== self::$access ) {
 			return self::$access;
 		}
-		if ( ! $fresh ) {
+		if ( ! $fresh && self::salts_ok() ) {
 			$t = get_transient( self::ACCESS );
 			$t = is_string( $t ) ? NM_Crypt::unseal( $t ) : null;
 			if ( null !== $t && '' !== $t ) {

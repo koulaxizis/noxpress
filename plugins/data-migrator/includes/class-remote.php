@@ -474,10 +474,21 @@ final class NM_Remote {
 	 * ------------------------------------------------------------- */
 
 	/** @return array|WP_Error */
+	/**
+	 * May this backup go to Dropbox as it is? With "encrypt the copies in
+	 * Dropbox" on, only an encrypted backup: never a silent plain upload.
+	 */
+	public static function push_allowed( array $m ): bool {
+		return ! empty( $m['enc'] ) || empty( NM_Dropbox::get()['encrypt'] );
+	}
+
 	public static function push_start( string $id ) {
 		$m = NM_Storage::meta( $id );
 		if ( ! $m || 'done' !== ( $m['status'] ?? '' ) || ! self::has_local( $m ) ) {
 			return new WP_Error( 'gone', NM_Util::t( 'Το αντίγραφο δεν βρέθηκε.' ) );
+		}
+		if ( ! self::push_allowed( $m ) ) {
+			return new WP_Error( 'plain', NM_Util::t( 'Το αντίγραφο δεν είναι κρυπτογραφημένο και τα αντίγραφα στο Dropbox κρυπτογραφούνται. Φτιάξε νέο αντίγραφο με προορισμό το Dropbox (κρυπτογραφείται μόνο του) ή κλείσε την κρυπτογράφηση του Dropbox στις ρυθμίσεις.' ) );
 		}
 		if ( ! NM_Dropbox::connected() ) {
 			return new WP_Error( 'dropbox', NM_Util::t( 'Δεν υπάρχει σύνδεση με το Dropbox.' ) );
