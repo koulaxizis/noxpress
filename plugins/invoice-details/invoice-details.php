@@ -3,7 +3,7 @@
  * Plugin Name:          Invoice Details
  * Plugin URI:           https://noxpress.tech
  * Description:          Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία, στα emails και στον λογαριασμό του πελάτη, και λίστα τιμολογίων με CSV. Δεν κόβει παραστατικά: τα δίνει στον πάροχο τιμολόγησης.
- * Version:              1.0.1
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -68,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'IVD_VERSION', '1.0.1' );
+define( 'IVD_VERSION', '1.1.0' );
 define( 'IVD_FILE', __FILE__ );
 define( 'IVD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'IVD_URL', plugin_dir_url( __FILE__ ) );
@@ -117,6 +117,7 @@ final class Invoice_Details {
 		require_once IVD_PATH . 'includes/class-order.php';
 		require_once IVD_PATH . 'includes/class-abilities.php';
 		require_once IVD_PATH . 'includes/class-privacy.php';
+		require_once IVD_PATH . 'includes/class-aade.php';
 
 		// Orders that already carry invoice details keep showing them.
 		IVD_Order::init();
@@ -126,6 +127,7 @@ final class Invoice_Details {
 		// Emergency switch (Bible §14): no checkout hooks at all.
 		if ( ! self::killed() ) {
 			IVD_Checkout::init();
+			IVD_Aade::init();
 		}
 
 		if ( is_admin() ) {
