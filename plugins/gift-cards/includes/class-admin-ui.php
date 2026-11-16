@@ -686,11 +686,12 @@ final class GFC_Admin_UI {
 				$labels = array(
 					'processing' => __( 'Σε επεξεργασία', 'gift-cards' ),
 					'completed'  => __( 'Ολοκληρωμένη', 'gift-cards' ),
-					'on-hold'    => __( 'Σε αναμονή (π.χ. τραπεζική κατάθεση πριν πληρωθεί: όχι προτεινόμενο)', 'gift-cards' ),
+					'on-hold'    => __( 'Σε αναμονή (όχι προτεινόμενο)', 'gift-cards' ),
 				);
 				foreach ( $labels as $k => $lab ) {
 					echo '<label class="gfc-check"><input type="checkbox" name="gfc_paid_statuses[]" value="' . esc_attr( $k ) . '" ' . checked( in_array( $k, $s['paid_statuses'], true ), true, false ) . ' /> ' . esc_html( $lab ) . '</label>';
 				}
+				echo '<p class="description">' . esc_html__( 'Αντικαταβολή: η κάρτα δημιουργείται μόνο όταν η παραγγελία γίνει «Ολοκληρωμένη», γιατί η αντικαταβολή τη βάζει «Σε επεξεργασία» πριν πληρωθεί. Τραπεζική κατάθεση και επιταγή: μόνο όταν την περάσεις εσύ σε «Σε επεξεργασία» ή «Ολοκληρωμένη».', 'gift-cards' ) . '</p>';
 				self::input( 'gfc_delay_hours', (string) $s['delay_hours'], __( 'Καθυστέρηση αποστολής', 'gift-cards' ), __( 'ώρες μετά την πληρωμή (0 = αμέσως)', 'gift-cards' ), 'number' );
 				self::input( 'gfc_review_over', $s['review_over'] ? self::decimal( $s['review_over'] ) : '', __( 'Έγκριση με το χέρι πάνω από', 'gift-cards' ), __( 'σύνολο δωροκαρτών μιας παραγγελίας· κενό = ποτέ', 'gift-cards' ) );
 				?>

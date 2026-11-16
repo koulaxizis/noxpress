@@ -106,11 +106,27 @@ final class GFC_Emails {
 			$bin  = self::pdf( $card, $code );
 			$dir  = trailingslashit( get_temp_dir() );
 			$name = $dir . 'gift-card-' . bin2hex( random_bytes( 12 ) ) . '.pdf';
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- private temp file, deleted after sending.
-			if ( false === file_put_contents( $name, $bin ) ) {
+			// Created as 0600 from the first byte: the file holds the code.
+			$old = umask( 0077 );
+			try {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- private temp file, deleted after sending.
+				$fh = @fopen( $name, 'xb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			} finally {
+				umask( $old );
+			}
+			if ( false === $fh ) {
 				return null;
 			}
+			// Where umask is not honoured: still 0600 before the first byte.
 			@chmod( $name, 0600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+			$ok = false !== fwrite( $fh, $bin );
+			fclose( $fh );
+			// phpcs:enable
+			if ( ! $ok ) {
+				wp_delete_file( $name );
+				return null;
+			}
 			return $name;
 		} catch ( \Throwable $e ) {
 			return null;

@@ -21,7 +21,7 @@ Digital gift cards sold as a WooCommerce product, sent by email with a printable
 
 **Delivery**
 
-* The card is created when the order becomes paid (processing and completed by default) and is sent at 09:00 site time on the chosen date, or right after payment. Optional delay in hours, and manual approval for orders above an amount, against stolen payment cards.
+* The card is created when the order becomes paid (processing and completed by default; cash on delivery only when completed, bank transfer and cheque only when you set the order to processing or completed) and is sent at 09:00 site time on the chosen date, or right after payment. Optional delay in hours, and manual approval for orders above an amount, against stolen payment cards.
 * The recipient gets an email with the amount, the message, the code, how to use it and the expiry, with a printable PDF card (A5 landscape or A4) attached. The buyer of a gift gets a "sent to …" email without the code.
 * The code is created at the moment of delivery and is stored only as a keyed hash (HMAC): it exists in the email and the PDF, and nowhere else, not even in the admin. A lost code is replaced with "New code and send": the old code stops working, the balance stays.
 * Codes are 16 characters (80 bits) in groups of four, without letters that are easy to confuse.
@@ -31,6 +31,8 @@ Digital gift cards sold as a WooCommerce product, sent by email with a printable
 * A "Have a gift card?" field in the cart and at checkout, classic and block (Cart and Checkout blocks, through the Store API). More than one card per order (limit in settings).
 * The card is a payment, not a discount: the order total, the product prices and the VAT stay exactly as they are; the amount the card pays is taken off what the customer still has to pay, and is shown as its own line in the totals, the emails and My account.
 * The balance is taken when the order is placed, inside a database transaction with the card row locked, so two orders cannot spend the same balance. If the order fails or is cancelled, the amount goes back to the card. Unpaid orders that took a card are cancelled after 48 hours (setting) and the amount goes back.
+* No coupon discounts a gift card, cart coupons included; a gift card line paid below its value waits for approval.
+* A refunded or cancelled purchase voids its unused cards. A card already spent is disabled instead, and money that unpaid orders held on it goes back first.
 * Refunds: WooCommerce refunds reach the part paid by other means; the gift card part is refunded to the same card from the "Gift cards" box on the order. A fully refunded order also gives the card part back (setting).
 * Against code guessing: at most 5 attempts per 15 minutes per IP and per visitor (settings), and when the whole site sees too many wrong codes in an hour the field closes for an hour and the admin gets an email.
 

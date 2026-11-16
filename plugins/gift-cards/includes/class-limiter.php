@@ -9,9 +9,12 @@
  *  - The IP is REMOTE_ADDR, or CF-Connecting-IP only when REMOTE_ADDR is a
  *    Cloudflare address (Bible §11); headers such as X-Forwarded-For are
  *    never read. Only sha256(salt | ip) is stored.
+ *  - IPv6 addresses are counted per /64, since one connection usually
+ *    holds the whole block.
  *  - Failed attempts of the whole site are counted per hour; past
- *    site_fail_hour the field closes for one hour for everyone who is not
- *    a shop manager, and the admin gets one email.
+ *    site_fail_hour the field closes for one hour for visitors who are not
+ *    signed in, and the admin gets one email. Signed-in customers keep
+ *    their own limits, so a stranger cannot shut redemption for them.
  *  - Counters live in gfc_limits (k, n, w). Increments are single UPDATE
  *    statements (atomic); a window that has passed starts again at 0.
  */
@@ -40,10 +43,10 @@ final class GFC_Limiter {
 	public static function attempt(): string {
 		$s      = GFC_Settings::get();
 		$window = (int) $s['limit_min'] * MINUTE_IN_SECONDS;
-		if ( self::site_closed() && ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( self::site_closed() && ! is_user_logged_in() ) {
 			return 'locked';
 		}
-		self::$counted = array( self::key( 'ip|' . self::client_ip() ), self::key( 'sess|' . self::session_id() ) );
+		self::$counted = array( self::key( 'ip|' . self::ip_bucket( self::client_ip() ) ), self::key( 'sess|' . self::session_id() ) );
 		$over          = false;
 		foreach ( self::$counted as $k ) {
 			if ( self::hit( $k, $window ) > (int) $s['limit_n'] ) {
@@ -72,7 +75,7 @@ final class GFC_Limiter {
 			GFC_Emails::admin_alert(
 				__( 'Gift Cards: το πεδίο κωδικού έκλεισε για μία ώρα', 'gift-cards' ),
 				/* translators: %d: number of failed attempts */
-				sprintf( __( 'Έγιναν πάνω από %d λάθος προσπάθειες κωδικού δωροκάρτας μέσα σε μία ώρα. Το πεδίο έκλεισε για μία ώρα για όλους εκτός από τους διαχειριστές του καταστήματος. Μπορεί να είναι κάποιος που δοκιμάζει κωδικούς.', 'gift-cards' ), (int) $s['site_fail_hour'] ),
+				sprintf( __( 'Έγιναν πάνω από %d λάθος προσπάθειες κωδικού δωροκάρτας μέσα σε μία ώρα. Το πεδίο έκλεισε για μία ώρα για τους επισκέπτες χωρίς λογαριασμό· οι πελάτες που έχουν συνδεθεί συνεχίζουν κανονικά. Μπορεί να είναι κάποιος που δοκιμάζει κωδικούς.', 'gift-cards' ), (int) $s['site_fail_hour'] ),
 				admin_url( 'admin.php?page=gfc-cards&tab=summary' )
 			);
 		}
@@ -120,6 +123,15 @@ final class GFC_Limiter {
 			return 's' . (string) WC()->session->get_customer_id();
 		}
 		return 'none';
+	}
+
+	/** The address as counted: IPv4 whole, IPv6 by its /64. */
+	public static function ip_bucket( string $ip ): string {
+		$bin = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- an invalid address is counted as given.
+		if ( false === $bin || 16 !== strlen( $bin ) ) {
+			return $ip;
+		}
+		return 'v6:' . bin2hex( substr( $bin, 0, 8 ) );
 	}
 
 	/**

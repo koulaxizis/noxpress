@@ -38,6 +38,8 @@ final class GFC_Redeem {
 	const SESSION = 'gfc_applied';
 	const META    = '_gfc_cards';
 	const REDUCED = '_gfc_reduced'; // Cents the order total is currently reduced by.
+	// Starts with "woocommerce", so WooCommerce ties a guest's nonce to the guest's session.
+	const NONCE = 'woocommerce-gfc-cart';
 
 	/** @var array<int,int> card id => cents used by the last cart calculation. */
 	private static $uses = array();
@@ -80,19 +82,59 @@ final class GFC_Redeem {
 	 * Session
 	 * =================================================================== */
 
-	/** @return int[] */
+	/**
+	 * The cards of this session. Each one is kept with a fingerprint of the
+	 * card's code at the time it was applied (never the code), so a card
+	 * whose code was replaced since drops out of every cart.
+	 *
+	 * @return int[]
+	 */
 	public static function applied(): array {
+		$out = array();
+		foreach ( self::applied_map() as $id => $fp ) {
+			$card = GFC_Store::get( $id );
+			if ( $card && '' !== $fp && hash_equals( self::fingerprint( $card ), $fp ) ) {
+				$out[] = $id;
+			}
+		}
+		return $out;
+	}
+
+	/** @return array<int,string> card id => fingerprint, as stored. */
+	private static function applied_map(): array {
 		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
 			return array();
 		}
-		$ids = WC()->session->get( self::SESSION, array() );
-		return is_array( $ids ) ? array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) ) : array();
+		$raw = WC()->session->get( self::SESSION, array() );
+		$out = array();
+		if ( is_array( $raw ) ) {
+			foreach ( $raw as $id => $fp ) {
+				if ( is_int( $id ) && $id > 0 && is_string( $fp ) ) {
+					$out[ $id ] = $fp;
+				}
+			}
+		}
+		return $out;
 	}
 
+	/** A short fingerprint of the card's current code (from its HMAC). */
+	private static function fingerprint( array $card ): string {
+		return null === $card['code_hmac'] ? '' : substr( hash_hmac( 'sha256', 'gfc-session|' . $card['id'] . '|' . $card['code_hmac'], wp_salt( 'nonce' ) ), 0, 24 );
+	}
+
+	/** @param int[] $ids Cards to keep, in order. */
 	private static function set_applied( array $ids ): void {
-		if ( function_exists( 'WC' ) && WC()->session ) {
-			WC()->session->set( self::SESSION, $ids ? array_values( $ids ) : null );
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return;
 		}
+		$map = array();
+		foreach ( $ids as $id ) {
+			$card = GFC_Store::get( (int) $id );
+			if ( $card ) {
+				$map[ (int) $id ] = self::fingerprint( $card );
+			}
+		}
+		WC()->session->set( self::SESSION, $map ? $map : null );
 	}
 
 	public static function clear_session(): void {
@@ -466,16 +508,14 @@ final class GFC_Redeem {
 				'status'       => array( 'pending' ),
 				'date_created' => '<' . ( time() - $hours * HOUR_IN_SECONDS ),
 				'limit'        => 100,
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery -- daily job, limited.
-					array(
-						'key'   => '_gfc_has',
-						'value' => '1',
-					),
-				),
+				// meta_key / meta_value work with both order stores (meta_query only with HPOS).
+				'meta_key'     => '_gfc_has', // phpcs:ignore WordPress.DB.SlowDBQuery -- daily job, limited.
+				'meta_value'   => '1', // phpcs:ignore WordPress.DB.SlowDBQuery -- daily job, limited.
 			)
 		);
 		foreach ( $orders as $order ) {
-			if ( $order instanceof WC_Order && 'pending' === $order->get_status() ) {
+			// Checked again on the order itself: never cancel an order that took no card.
+			if ( $order instanceof WC_Order && 'pending' === $order->get_status() && '1' === (string) $order->get_meta( '_gfc_has' ) && array_filter( self::stored( $order ) ) ) {
 				/* translators: %d: hours */
 				$order->update_status( 'cancelled', sprintf( __( 'Gift Cards: απλήρωτη για πάνω από %d ώρες· ακυρώθηκε και το ποσό επέστρεψε στη δωροκάρτα.', 'gift-cards' ), $hours ) );
 			}
@@ -496,7 +536,7 @@ final class GFC_Redeem {
 					continue;
 				}
 				$use = (int) ( $uses[ $id ] ?? 0 );
-				$url = wp_nonce_url( add_query_arg( 'gfc_remove', $id, wc_get_cart_url() ), 'gfc_cart', 'gfc_nonce' );
+				$url = wp_nonce_url( add_query_arg( 'gfc_remove', $id, wc_get_cart_url() ), self::NONCE, 'gfc_nonce' );
 				echo '<tr class="gfc-row"><th>' . GFC_Settings::fill( 'row', array( 'card' => GFC_Codes::mask( $card['last4'] ) ) ) // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in fill().
 					. ' <a href="' . esc_url( $url ) . '" class="gfc-remove" data-card="' . esc_attr( (string) $id ) . '">[' . esc_html( GFC_Settings::text( 'remove' ) ) . ']</a></th>'
 					. '<td data-title="' . esc_attr( wp_strip_all_tags( GFC_Settings::fill( 'row', array( 'card' => GFC_Codes::mask( $card['last4'] ) ) ) ) ) . '">−' . wp_kses_post( wc_price( $use / 100 ) )
@@ -581,7 +621,7 @@ final class GFC_Redeem {
 			if ( 'cart' === $where ) {
 				// A real form (the cart totals are outside the cart form): works without JavaScript.
 				echo '<form method="post" action="' . esc_url( wc_get_cart_url() ) . '" class="gfc-form-apply">';
-				wp_nonce_field( 'gfc_cart', 'gfc_nonce' );
+				wp_nonce_field( self::NONCE, 'gfc_nonce' );
 			}
 			echo '<p class="gfc-title"><strong>' . esc_html( GFC_Settings::text( 'have_card' ) ) . '</strong></p>';
 			echo '<p class="gfc-line"><input type="text" name="gfc_code" class="input-text gfc-code" autocomplete="off" spellcheck="false" maxlength="24" placeholder="' . esc_attr( GFC_Settings::text( 'placeholder' ) ) . '" aria-label="' . esc_attr( GFC_Settings::text( 'placeholder' ) ) . '" /> ';
@@ -600,7 +640,7 @@ final class GFC_Redeem {
 		$cfg = array(
 			'apply'  => WC_AJAX::get_endpoint( 'gfc_apply' ),
 			'remove' => WC_AJAX::get_endpoint( 'gfc_remove' ),
-			'nonce'  => wp_create_nonce( 'gfc_cart' ),
+			'nonce'  => wp_create_nonce( self::NONCE ),
 		);
 		wp_enqueue_script( 'gfc-front', GFC_URL . 'assets/front.js', array( 'jquery' ), GFC_VERSION, true );
 		wp_add_inline_script( 'gfc-front', 'window.gfcCfg = ' . wp_json_encode( $cfg ) . ';', 'before' );
@@ -636,7 +676,7 @@ final class GFC_Redeem {
 	}
 
 	private static function ajax_guard(): void {
-		if ( 'POST' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '' ) || ! check_ajax_referer( 'gfc_cart', 'nonce', false ) ) {
+		if ( 'POST' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '' ) || ! check_ajax_referer( self::NONCE, 'nonce', false ) ) {
 			wp_send_json(
 				array(
 					'ok'      => false,
@@ -655,13 +695,13 @@ final class GFC_Redeem {
 		}
 		// phpcs:disable WordPress.Security.NonceVerification -- verified below.
 		$nonce = isset( $_REQUEST['gfc_nonce'] ) ? sanitize_key( wp_unslash( $_REQUEST['gfc_nonce'] ) ) : '';
-		if ( isset( $_GET['gfc_remove'] ) && wp_verify_nonce( $nonce, 'gfc_cart' ) ) {
+		if ( isset( $_GET['gfc_remove'] ) && wp_verify_nonce( $nonce, self::NONCE ) ) {
 			self::remove_card( absint( $_GET['gfc_remove'] ) );
 			wc_add_notice( GFC_Settings::fill( 'removed' ), 'notice' );
 			wp_safe_redirect( remove_query_arg( array( 'gfc_remove', 'gfc_nonce' ) ) );
 			exit;
 		}
-		if ( isset( $_POST['gfc_apply'], $_POST['gfc_code'] ) && is_string( $_POST['gfc_code'] ) && wp_verify_nonce( $nonce, 'gfc_cart' ) ) {
+		if ( isset( $_POST['gfc_apply'], $_POST['gfc_code'] ) && is_string( $_POST['gfc_code'] ) && wp_verify_nonce( $nonce, self::NONCE ) ) {
 			list( $ok, $msg ) = self::apply_code( sanitize_text_field( wp_unslash( $_POST['gfc_code'] ) ) );
 			wc_add_notice( $msg, $ok ? 'success' : 'error' );
 			wp_safe_redirect( wc_get_cart_url() );

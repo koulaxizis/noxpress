@@ -79,15 +79,19 @@ final class GFC_Account {
 				'orderby'     => 'date',
 				'order'       => 'DESC',
 				'type'        => 'shop_order',
-				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'   => '_gfc_has',
-						'value' => '1',
-					),
-				),
+				// meta_key / meta_value work with both order stores (meta_query only with HPOS).
+				'meta_key'    => '_gfc_has', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'  => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			)
 		);
-		return is_array( $orders ) ? $orders : array();
+		return is_array( $orders ) ? array_values(
+			array_filter(
+				$orders,
+				static function ( $o ) {
+					return $o instanceof WC_Order && '1' === (string) $o->get_meta( '_gfc_has' );
+				}
+			)
+		) : array();
 	}
 
 	private static function status_label( array $card ): string {

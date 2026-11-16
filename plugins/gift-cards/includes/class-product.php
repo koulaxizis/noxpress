@@ -42,6 +42,7 @@ final class GFC_Product {
 		add_filter( 'woocommerce_get_item_data', array( __CLASS__, 'item_data' ), 10, 2 );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( __CLASS__, 'order_line' ), 10, 3 );
 		add_filter( 'woocommerce_coupon_is_valid_for_product', array( __CLASS__, 'no_coupon' ), 99, 2 );
+		add_filter( 'woocommerce_coupon_get_items_to_apply', array( __CLASS__, 'no_coupon_items' ), 99, 2 );
 		add_filter( 'woocommerce_order_item_display_meta_key', array( __CLASS__, 'meta_label' ), 10, 2 );
 		// Suite contract (Bible §6): a gift-card line is stored value, not a product sale.
 		add_filter( 'noxpress_is_stored_value_item', array( __CLASS__, 'stored_value' ), 10, 2 );
@@ -558,6 +559,22 @@ final class GFC_Product {
 
 	public static function no_coupon( $valid, $product ) {
 		return self::is_gift_card( $product ) ? false : $valid;
+	}
+
+	/**
+	 * Cart coupons (fixed_cart) skip the product check above, so gift card
+	 * lines are taken out of every coupon's items here too.
+	 */
+	public static function no_coupon_items( $items, $coupon ) {
+		if ( ! is_array( $items ) ) {
+			return $items;
+		}
+		return array_filter(
+			$items,
+			static function ( $item ) {
+				return ! ( is_object( $item ) && isset( $item->product ) && self::is_gift_card( $item->product ) );
+			}
+		);
 	}
 
 	public static function not_purchasable( $purchasable, $product ) {
