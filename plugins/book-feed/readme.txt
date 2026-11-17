@@ -5,7 +5,7 @@ Tags: woocommerce, books, isbn, bookpoint, product import
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.13.6
+Stable tag: 1.13.7
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -101,6 +101,9 @@ The settings, the history, the password, the scheduled actions and the plugin's 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.13.7 =
+* Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.
 
 = 1.13.6 =
 * Security hardening (internal audit 2026-11, NXS-30): a move of the service address from https to http needs an administrator, like a move to another server.

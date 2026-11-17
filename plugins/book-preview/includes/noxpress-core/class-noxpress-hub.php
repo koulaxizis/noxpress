@@ -47,6 +47,9 @@ final class Noxpress_Hub {
 			return;
 		}
 		wp_enqueue_style( 'noxpress-hub', Noxpress_Core::url( 'assets/hub.css' ), array(), NOXPRESS_CORE );
+		// Search, categories and ★ (Core 1.5.0).
+		wp_enqueue_style( 'noxpress-menu', Noxpress_Core::url( 'assets/menu.css' ), array( 'noxpress-hub' ), NOXPRESS_CORE );
+		wp_enqueue_script( 'noxpress-menu', Noxpress_Core::url( 'assets/menu.js' ), array(), NOXPRESS_CORE, true );
 		add_thickbox(); // Plugin details popup.
 		if ( self::bulk_allowed() ) {
 			wp_enqueue_script( 'noxpress-hub-bulk', Noxpress_Core::url( 'assets/hub-bulk.js' ), array(), NOXPRESS_CORE, true );
@@ -273,7 +276,13 @@ final class Noxpress_Hub {
 				</div>
 			<?php endif; ?>
 
-			<h2 class="nx-h2"><?php esc_html_e( 'Plugins', 'noxpress' ); ?></h2>
+			<h2 class="nx-h2" id="<?php echo esc_attr( Noxpress_Menu::TOOLS ); ?>"><?php esc_html_e( 'Plugins', 'noxpress' ); ?></h2>
+			<div class="nx-menu-bar">
+				<input type="search" id="nx-hub-search" class="nx-search" placeholder="<?php esc_attr_e( 'Αναζήτηση plugin ή σελίδας…', 'noxpress' ); ?>" aria-label="<?php esc_attr_e( 'Αναζήτηση plugin ή σελίδας…', 'noxpress' ); ?>" autocomplete="off">
+				<?php if ( ! is_network_admin() ) : ?>
+					<?php Noxpress_Menu::mode_form(); ?>
+				<?php endif; ?>
+			</div>
 			<?php self::render_bulk( $rows ); ?>
 			<table class="widefat nx-table">
 				<thead>
@@ -285,11 +294,15 @@ final class Noxpress_Hub {
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach ( $rows as $row ) : ?>
-						<?php self::render_row( $row, $file_mods, $auto_ok ); ?>
+					<?php foreach ( self::by_category( $rows ) as $cat_label => $cat_rows ) : ?>
+						<tr class="nx-cat"><th colspan="4" scope="colgroup"><?php echo esc_html( $cat_label ); ?></th></tr>
+						<?php foreach ( $cat_rows as $row ) : ?>
+							<?php self::render_row( $row, $file_mods, $auto_ok ); ?>
+						<?php endforeach; ?>
 					<?php endforeach; ?>
 				</tbody>
 			</table>
+			<p class="nx-muted" id="nx-hub-empty" hidden><?php esc_html_e( 'Κανένα plugin δεν ταιριάζει με την αναζήτηση.', 'noxpress' ); ?></p>
 
 			<p class="nx-muted nx-small nx-disclaimer"><?php esc_html_e( 'Χρήση με δική σου ευθύνη: τα plugins του Noxpress είναι δωρεάν λογισμικό που παρέχεται «ως έχει», χωρίς καμία εγγύηση. Δοκίμασέ τα πρώτα σε αντίγραφο του site και κράτα πλήρες backup του site και της βάσης πριν από κάθε εγκατάσταση, ενημέρωση ή αφαίρεση. Στο μέγιστο βαθμό που επιτρέπει ο νόμος, δεν υπάρχει καμία ευθύνη για απώλεια δεδομένων, παραγγελιών, εσόδων ή οποιαδήποτε άλλη ζημιά.', 'noxpress' ); ?></p>
 
@@ -334,15 +347,58 @@ final class Noxpress_Hub {
 		<?php
 	}
 
+	/**
+	 * Rows grouped by hub category (Noxpress_Core::categories()), in the
+	 * categories' order; catalog order inside each one. Empty ones are left out.
+	 *
+	 * @return array<string, array[]> category label => rows
+	 */
+	private static function by_category( array $rows ): array {
+		$cats   = Noxpress_Core::categories();
+		$groups = array_fill_keys( array_keys( $cats ), array() );
+		foreach ( $rows as $row ) {
+			$cat              = (string) ( $row['info']['cat'] ?? 'other' );
+			$cat              = isset( $groups[ $cat ] ) ? $cat : 'other';
+			$groups[ $cat ][] = $row;
+		}
+		$out = array();
+		foreach ( $groups as $cat => $list ) {
+			if ( $list ) {
+				$out[ $cats[ $cat ] ] = $list;
+			}
+		}
+		return $out;
+	}
+
 	private static function render_row( array $row, bool $file_mods, bool $auto_ok ): void {
-		$slug = $row['slug'];
-		$file = $row['file'];
-		$rel  = $row['release'];
+		$slug   = $row['slug'];
+		$file   = $row['file'];
+		$rel    = $row['release'];
+		$groups = is_network_admin() ? array() : Noxpress_Menu::groups();
+		$pages  = $groups[ $slug ] ?? array();
+		$cats   = Noxpress_Core::categories();
+		$search = array( $row['info']['name'], $row['info']['desc'] ?? '', $cats[ $row['info']['cat'] ?? 'other' ] ?? '' );
+		foreach ( $pages as $item ) {
+			$search[] = Noxpress_Menu::label( $item );
+		}
 		?>
-		<tr data-nx-slug="<?php echo esc_attr( $slug ); ?>">
+		<tr data-nx-slug="<?php echo esc_attr( $slug ); ?>" id="nx-row-<?php echo esc_attr( $slug ); ?>" data-nx-search="<?php echo esc_attr( implode( ' ', $search ) ); ?>">
 			<td>
-				<strong><?php echo esc_html( $row['info']['name'] ); ?></strong>
-				<span class="nx-desc"><?php echo esc_html( $row['info']['desc'] ); ?></span>
+				<span class="nx-name">
+					<?php if ( $pages ) : ?>
+						<?php Noxpress_Menu::pin_form( $slug ); ?>
+					<?php endif; ?>
+					<strong><?php echo esc_html( $row['info']['name'] ); ?></strong>
+				</span>
+				<span class="nx-desc"><?php echo esc_html( $row['info']['desc'] ?? '' ); ?></span>
+				<?php if ( count( $pages ) > 1 ) : ?>
+					<span class="nx-pages">
+						<span class="nx-muted"><?php esc_html_e( 'Σελίδες:', 'noxpress' ); ?></span>
+						<?php foreach ( $pages as $item ) : ?>
+							<a href="<?php echo esc_url( Noxpress_Menu::url( (string) $item[2] ) ); ?>"><?php echo esc_html( Noxpress_Menu::label( $item ) ); ?></a>
+						<?php endforeach; ?>
+					</span>
+				<?php endif; ?>
 			</td>
 			<td>
 				<?php if ( $row['active'] ) : ?>

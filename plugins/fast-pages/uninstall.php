@@ -93,6 +93,7 @@ if ( ! $fpg_suite_left ) {
 	delete_site_option( 'noxpress_trust' ); // Core 1.3.0: newest signed list serial.
 	delete_site_transient( 'noxpress_manifest' );
 	delete_metadata( 'user', 0, 'noxpress_hidden', '', true ); // Core 1.1.0: hidden other-channel notices.
+	delete_metadata( 'user', 0, 'noxpress_menu', '', true ); // Core 1.5.0: menu favourites, recent pages, full menu.
 
 	$fpg_sites = is_multisite() ? get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) : array( 0 );
 	foreach ( $fpg_sites as $fpg_site_id ) {
