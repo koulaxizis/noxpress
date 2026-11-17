@@ -883,7 +883,7 @@ final class DSR_Admin_UI {
 			<div class="dsr-zone">
 				<?php
 				self::checkbox( 'dsr_table', $s['table'], __( 'Πίνακας κλιμάκων στη σελίδα του προϊόντος', 'discount-rules' ) );
-				self::checkbox( 'dsr_loop_label', $s['loop_label'], __( 'Ετικέτα κανόνα ποσότητας κάτω από την τιμή στις λίστες προϊόντων', 'discount-rules' ) );
+				self::checkbox( 'dsr_loop_label', $s['loop_label'], __( 'Κανόνες ποσότητας στις λίστες προϊόντων: ribbon πάνω στην εικόνα, εξήγηση και σύνδεσμος στη σελίδα της προσφοράς', 'discount-rules' ) );
 				self::checkbox( 'dsr_hint', $s['hint'], __( '«Πρόσθεσε ακόμη 1…» στο καλάθι όταν λείπει ένα τεμάχιο για την επόμενη κλίμακα ή το δώρο', 'discount-rules' ) );
 				?>
 				<p class="description"><?php esc_html_e( 'Η υπόδειξη φαίνεται στο κλασικό καλάθι. Στα blocks Καλάθι και Ταμείο οι εκπτώσεις και τα ονόματα των κανόνων φαίνονται κανονικά.', 'discount-rules' ); ?></p>
@@ -926,6 +926,9 @@ final class DSR_Admin_UI {
 			't_until'   => __( 'Λήξη ({date})', 'discount-rules' ),
 			't_hint'    => __( 'Υπόδειξη στο καλάθι ({n}, {rule})', 'discount-rules' ),
 			't_omnibus' => __( 'Χαμηλότερη τιμή 30 ημερών ({price})', 'discount-rules' ),
+			't_xy_help' => __( 'Εξήγηση «πάρε Χ πλήρωσε Υ» στις λίστες, στο προϊόν και στη σελίδα της προσφοράς ({buy}, {pay})', 'discount-rules' ),
+			't_xy_mix'  => __( 'Δεύτερη γραμμή όταν μετράνε μαζί όλα τα προϊόντα του κανόνα', 'discount-rules' ),
+			't_more'    => __( 'Σύνδεσμος στη σελίδα με όλα τα προϊόντα της προσφοράς ({label})', 'discount-rules' ),
 		);
 		?>
 		<form method="post">

@@ -13,7 +13,8 @@
  *                Trade Feed Import), default on
  *  - ex_preorder pre-order products never get a rule, default off
  *  - hint        «Πρόσθεσε 1 ακόμη…» in the classic cart, default on
- *  - loop_label  the rule's label under the price in product lists
+ *  - loop_label  quantity rules in product lists: the ribbon over the
+ *                image, the explanation and the link to the offer page
  *  - table       the tier table on the product page
  *  - omnibus     the lowest 30-day price under a reduced price:
  *                'off' | 'rules' (default: when a rule lowers the price) |
@@ -42,6 +43,9 @@ final class DSR_Settings {
 		't_until'   => 40,
 		't_hint'    => 160,
 		't_omnibus' => 120,
+		't_xy_help' => 120,
+		't_xy_mix'  => 160,
+		't_more'    => 60,
 	);
 
 	/** @var array|null Per-request cache. */
@@ -94,6 +98,18 @@ final class DSR_Settings {
 			't_omnibus'   => array(
 				'el' => 'Χαμηλότερη τιμή των τελευταίων 30 ημερών: {price}',
 				'en' => 'Lowest price in the last 30 days: {price}',
+			),
+			't_xy_help'   => array(
+				'el' => 'Βάλτε {buy} στο καλάθι και πληρώνετε μόνο τα {pay}.',
+				'en' => 'Put {buy} in the cart and pay for only {pay}.',
+			),
+			't_xy_mix'    => array(
+				'el' => 'Μετράνε μαζί όλα τα προϊόντα της προσφοράς, και δώρο είναι πάντα το φθηνότερο.',
+				'en' => 'All products in the offer count together, and the cheapest one is always free.',
+			),
+			't_more'      => array(
+				'el' => 'Όλα τα «{label}» →',
+				'en' => 'All «{label}» products →',
 			),
 		);
 	}
@@ -213,7 +229,7 @@ final class DSR_Settings {
 		 * Filters a visitor text of Discount Rules (e.g. for WPML).
 		 *
 		 * @param string $text Text.
-		 * @param string $key  Text key (t_line, t_cart, t_xy, t_badge, t_tiers, t_tier, t_until, t_hint, t_omnibus).
+		 * @param string $key  Text key (t_line, t_cart, t_xy, t_badge, t_tiers, t_tier, t_until, t_hint, t_omnibus, t_xy_help, t_xy_mix, t_more).
 		 * @param string $lang 'el' | 'en'.
 		 */
 		return (string) apply_filters( 'dsr_text', $text, $key, $lang );
