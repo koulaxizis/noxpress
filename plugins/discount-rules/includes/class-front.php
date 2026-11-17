@@ -47,6 +47,9 @@ final class DSR_Front {
 		add_filter( 'woocommerce_page_title', array( __CLASS__, 'offer_title' ) );
 		add_action( 'woocommerce_archive_description', array( __CLASS__, 'offer_head' ), 5 );
 		add_filter( 'wp_robots', array( __CLASS__, 'offer_robots' ) );
+		add_filter( 'option_woocommerce_shop_page_display', array( __CLASS__, 'offer_display' ) );
+		add_filter( 'rank_math/frontend/robots', array( __CLASS__, 'offer_rm_robots' ) );
+		add_filter( 'rank_math/frontend/title', array( __CLASS__, 'offer_rm_title' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
 	}
 
@@ -613,6 +616,61 @@ final class DSR_Front {
 			return $robots;
 		}
 		return $robots;
+	}
+
+	/** True on the shop page while it shows a valid offer (?dsr_offer=ID). */
+	private static function on_offer_page(): bool {
+		return did_action( 'wp' ) && function_exists( 'is_shop' ) && is_shop() && null !== self::offer_rule();
+	}
+
+	/**
+	 * An offer page lists products even when the shop page is set to show
+	 * categories (WooCommerce → Products → Shop page display).
+	 *
+	 * @param mixed $value Option value.
+	 * @return mixed
+	 */
+	public static function offer_display( $value ) {
+		try {
+			return self::on_offer_page() ? '' : $value;
+		} catch ( \Throwable $e ) {
+			return $value;
+		}
+	}
+
+	/**
+	 * Rank Math prints its own robots meta and ignores wp_robots.
+	 *
+	 * @param mixed $robots Rank Math robots array.
+	 * @return mixed
+	 */
+	public static function offer_rm_robots( $robots ) {
+		try {
+			if ( is_array( $robots ) && self::on_offer_page() ) {
+				$robots['index']  = 'noindex';
+				$robots['follow'] = 'follow';
+			}
+		} catch ( \Throwable $e ) {
+			return $robots;
+		}
+		return $robots;
+	}
+
+	/**
+	 * Rank Math builds the document title itself: name the offer there too.
+	 *
+	 * @param mixed $title Title.
+	 * @return mixed
+	 */
+	public static function offer_rm_title( $title ) {
+		try {
+			if ( ! self::on_offer_page() ) {
+				return $title;
+			}
+			return self::rule_label( self::offer_rule() ) . ' | ' . wp_strip_all_tags( get_bloginfo( 'name' ) );
+		} catch ( \Throwable $e ) {
+			return $title;
+		}
 	}
 
 	/**

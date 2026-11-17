@@ -5,7 +5,7 @@ Tags: woocommerce, discount, quantity discount, buy x get y, bulk pricing
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -97,6 +97,10 @@ The rules, settings, history, price table and scheduled jobs are removed. The ru
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.2 =
+* Offer page fix: it lists the offer's products even when the shop page is set to show categories (WooCommerce → Products → Shop page display).
+* With Rank Math, the offer page now gets noindex and the offer's label in the document title (Rank Math prints its own robots meta and title and ignores wp_robots).
 
 = 1.1.1 =
 * Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.
