@@ -21,10 +21,14 @@
  *    prefilled for confirmation.
  *  - The register starts empty from go-live (card 6): no back-entry.
  *  - Recipients: shown to the creator for media / press; a private person
- *    shows only as «ιδιώτης» (card 5).
+ *    shows only as «ιδιώτης» (card 5). 1.20.0: kind «body» (a public body
+ *    such as the National Library for legal deposit) is shown by name too.
+ *  - 1.20.0 (Chris, 2026-11-17): the portal shows clearly, per title, the
+ *    copies given to the author, to bodies and for promotion / press, and
+ *    their total: they never count in the percentages and leave the stock.
  *
  * Storage: option rs_copies (JSON, autoload off), a list of movements
- * {id, date, pid, qty, type, rcpt, rkind (media | private | ''), ben, unit,
+ * {id, date, pid, qty, type, rcpt, rkind (media | body | private | ''), ben, unit,
  * pay (offset | separate | ''), note, stock (signed change made, 0 = none),
  * ledger (Ledger entry id, 0 = none), req (request id), by, at, undone,
  * undone_at, undone_by}. Abilities: copies-list (read), copies-add (write,
@@ -183,7 +187,7 @@ final class RS_Copies {
 
 	/**
 	 * A movement, checked and normalised. $in: date (default today),
-	 * product, qty, type, recipient, recipient_kind (media | private), ben,
+	 * product, qty, type, recipient, recipient_kind (media | body | private), ben,
 	 * unit_price (author purchase), payment (offset | separate), note, req.
 	 *
 	 * @return array|WP_Error
@@ -211,7 +215,7 @@ final class RS_Copies {
 		$rkind = isset( $in['recipient_kind'] ) ? sanitize_key( (string) $in['recipient_kind'] ) : '';
 		if ( '' === $rcpt ) {
 			$rkind = '';
-		} elseif ( ! in_array( $rkind, array( 'media', 'private' ), true ) ) {
+		} elseif ( ! in_array( $rkind, array_merge( self::named_kinds(), array( 'private' ) ), true ) ) {
 			$rkind = 'private'; // Personal data stays hidden unless said otherwise.
 		}
 		$ben = isset( $in['ben'] ) ? trim( sanitize_text_field( (string) $in['ben'] ) ) : '';
@@ -453,12 +457,28 @@ final class RS_Copies {
 		return $out;
 	}
 
-	/** What the creator sees of a recipient: media names, «ιδιώτης» for a private person. */
+	/** Recipient kinds whose name the creator sees (1.20.0: + body). */
+	public static function named_kinds(): array {
+		return array( 'media', 'body' );
+	}
+
+	/** Admin label of a recipient kind. */
+	private static function kind_label( string $kind ): string {
+		if ( 'media' === $kind ) {
+			return __( 'μέσο', 'revenue-splitter' );
+		}
+		if ( 'body' === $kind ) {
+			return __( 'φορέας', 'revenue-splitter' );
+		}
+		return __( 'ιδιώτης', 'revenue-splitter' );
+	}
+
+	/** What the creator sees of a recipient: names of media and bodies, «ιδιώτης» for a private person. */
 	public static function recipient_shown( array $m ): string {
 		if ( '' === (string) ( $m['rcpt'] ?? '' ) ) {
 			return '';
 		}
-		return 'media' === ( $m['rkind'] ?? '' ) ? (string) $m['rcpt'] : __( 'ιδιώτης', 'revenue-splitter' );
+		return in_array( (string) ( $m['rkind'] ?? '' ), self::named_kinds(), true ) ? (string) $m['rcpt'] : __( 'ιδιώτης', 'revenue-splitter' );
 	}
 
 	/**
@@ -500,31 +520,45 @@ final class RS_Copies {
 				$book_s += (int) $r['sold'];
 				$shelf  += (int) $r['open'];
 			}
-			$t    = $cp[ $pid ] ?? array();
-			$free = array();
-			if ( (int) ( $p['qty_free'] ?? 0 ) > 0 ) {
-				$free[] = __( 'e-shop', 'revenue-splitter' ) . ' ' . number_format_i18n( (int) $p['qty_free'] );
-			}
-			foreach ( array( 'promo', 'review', 'legal' ) as $k ) {
-				if ( ! empty( $t[ $k ] ) ) {
-					$free[] = $short[ $k ] . ' ' . number_format_i18n( (int) $t[ $k ] );
-				}
-			}
-			$auth = array();
+			$t = $cp[ $pid ] ?? array();
+			// 1.20.0: three clear groups, none of them counts in the percentages.
+			$auth_n  = (int) ( $t['author_free'] ?? 0 ) + (int) ( $t['author_buy'] ?? 0 );
+			$auth_by = array();
 			foreach ( array( 'author_free', 'author_buy' ) as $k ) {
 				if ( ! empty( $t[ $k ] ) ) {
-					$auth[] = number_format_i18n( (int) $t[ $k ] ) . ' ' . $short[ $k ];
+					$auth_by[] = number_format_i18n( (int) $t[ $k ] ) . ' ' . $short[ $k ];
+				}
+			}
+			$body_n = (int) ( $t['legal'] ?? 0 );
+			$prom_n = (int) ( $t['promo'] ?? 0 ) + (int) ( $t['review'] ?? 0 ) + (int) ( $p['qty_free'] ?? 0 );
+			$prom_by = array();
+			if ( (int) ( $p['qty_free'] ?? 0 ) > 0 ) {
+				$prom_by[] = __( 'e-shop', 'revenue-splitter' ) . ' ' . number_format_i18n( (int) $p['qty_free'] );
+			}
+			foreach ( array( 'promo', 'review' ) as $k ) {
+				if ( ! empty( $t[ $k ] ) ) {
+					$prom_by[] = $short[ $k ] . ' ' . number_format_i18n( (int) $t[ $k ] );
 				}
 			}
 			$rows[] = array(
-				'title' => wp_strip_all_tags( (string) get_the_title( $pid ) ),
-				'shop'  => max( 0, (int) ( $p['qty'] ?? 0 ) - $tra_q ),
-				'books' => $book_s,
-				'shelf' => $shelf,
-				'free'  => $free,
-				'auth'  => $auth,
-				'stock' => RS_Admin_UI::product_stock( $pid, true ),
+				'title'   => wp_strip_all_tags( (string) get_the_title( $pid ) ),
+				'shop'    => max( 0, (int) ( $p['qty'] ?? 0 ) - $tra_q ),
+				'books'   => $book_s,
+				'shelf'   => $shelf,
+				'auth'    => $auth_n,
+				'auth_by' => count( $auth_by ) > 1 ? $auth_by : array(),
+				'body'    => $body_n,
+				'prom'    => $prom_n,
+				'prom_by' => count( $prom_by ) > 1 ? $prom_by : array(),
+				'out'     => $auth_n + $body_n + $prom_n,
+				'stock'   => RS_Admin_UI::product_stock( $pid, true ),
 			);
+		}
+		$sum = array( 'shop' => 0, 'books' => 0, 'shelf' => 0, 'auth' => 0, 'body' => 0, 'prom' => 0, 'out' => 0 );
+		foreach ( $rows as $r ) {
+			foreach ( array_keys( $sum ) as $k ) {
+				$sum[ $k ] += (int) $r[ $k ];
+			}
 		}
 		$list = array();
 		foreach ( self::all() as $m ) {
@@ -543,8 +577,10 @@ final class RS_Copies {
 					<th class="num"><?php esc_html_e( 'Πουλήθηκαν στο e-shop', 'revenue-splitter' ); ?></th>
 					<th class="num"><?php esc_html_e( 'Πουλήθηκαν σε βιβλιοπωλεία', 'revenue-splitter' ); ?></th>
 					<th class="num"><?php esc_html_e( 'Σε παρακαταθήκη', 'revenue-splitter' ); ?></th>
-					<th><?php esc_html_e( 'Δωρεάν', 'revenue-splitter' ); ?></th>
-					<th><?php esc_html_e( 'Του συγγραφέα', 'revenue-splitter' ); ?></th>
+					<th class="num"><?php esc_html_e( 'Στον συγγραφέα', 'revenue-splitter' ); ?></th>
+					<th class="num"><?php esc_html_e( 'Σε φορείς (νόμιμη κατάθεση)', 'revenue-splitter' ); ?></th>
+					<th class="num"><?php esc_html_e( 'Προώθηση / Τύπος', 'revenue-splitter' ); ?></th>
+					<th class="num"><?php esc_html_e( 'Σύνολο εκτός ποσοστών', 'revenue-splitter' ); ?></th>
 					<th class="num"><?php esc_html_e( 'Στοκ', 'revenue-splitter' ); ?></th>
 				</tr>
 			</thead>
@@ -555,12 +591,25 @@ final class RS_Copies {
 					<td class="num"><?php echo esc_html( number_format_i18n( $r['shop'] ) ); ?></td>
 					<td class="num"><?php echo esc_html( number_format_i18n( $r['books'] ) ); ?></td>
 					<td class="num"><?php echo esc_html( number_format_i18n( $r['shelf'] ) ); ?></td>
-					<td><?php echo $r['free'] ? esc_html( implode( ' · ', $r['free'] ) ) : '<span class="rs-pt-muted">—</span>'; ?></td>
-					<td><?php echo $r['auth'] ? esc_html( implode( ' · ', $r['auth'] ) ) : '<span class="rs-pt-muted">—</span>'; ?></td>
+					<td class="num"><?php echo esc_html( number_format_i18n( $r['auth'] ) ); ?><?php if ( $r['auth_by'] ) : ?><br /><small><?php echo esc_html( implode( ' · ', $r['auth_by'] ) ); ?></small><?php endif; ?></td>
+					<td class="num"><?php echo esc_html( number_format_i18n( $r['body'] ) ); ?></td>
+					<td class="num"><?php echo esc_html( number_format_i18n( $r['prom'] ) ); ?><?php if ( $r['prom_by'] ) : ?><br /><small><?php echo esc_html( implode( ' · ', $r['prom_by'] ) ); ?></small><?php endif; ?></td>
+					<td class="num"><strong><?php echo esc_html( number_format_i18n( $r['out'] ) ); ?></strong></td>
 					<td class="num"><?php echo esc_html( $r['stock'] ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>
+			<?php if ( count( $rows ) > 1 ) : ?>
+			<tfoot>
+				<tr>
+					<th><?php esc_html_e( 'Σύνολο', 'revenue-splitter' ); ?></th>
+					<?php foreach ( $sum as $v ) : ?>
+						<th class="num"><?php echo esc_html( number_format_i18n( $v ) ); ?></th>
+					<?php endforeach; ?>
+					<th class="num"></th>
+				</tr>
+			</tfoot>
+			<?php endif; ?>
 		</table>
 		</div>
 		<?php if ( ! empty( $list ) ) : ?>
@@ -595,7 +644,7 @@ final class RS_Copies {
 				</div>
 			</details>
 		<?php endif; ?>
-		<p class="rs-pt-note"><?php esc_html_e( 'Όλη η ιστορία. «Σε βιβλιοπωλεία» = αντίτυπα που δήλωσε πουλημένα το βιβλιοπωλείο, πληρωμένα ή όχι. Τα δωρεάν αντίτυπα και τα αντίτυπα του συγγραφέα δεν φέρνουν μερίδιο. Οι αγορές του συγγραφέα με συμψηφισμό φαίνονται ως «Κράτηση» στο ιστορικό συναλλαγών.', 'revenue-splitter' ); ?></p>
+		<p class="rs-pt-note"><?php esc_html_e( 'Από την αρχή μέτρησης των πωλήσεων. «Σε βιβλιοπωλεία» = αντίτυπα που δήλωσε πουλημένα το βιβλιοπωλείο, πληρωμένα ή όχι. Τα αντίτυπα στον συγγραφέα, σε φορείς (π.χ. νόμιμη κατάθεση στην Εθνική Βιβλιοθήκη) και για προώθηση / Τύπο δεν μετράνε στα ποσοστά και αφαιρούνται από το στοκ. Οι αγορές του συγγραφέα με συμψηφισμό φαίνονται ως «Κράτηση» στο ιστορικό συναλλαγών.', 'revenue-splitter' ); ?></p>
 		<?php
 	}
 
@@ -776,6 +825,7 @@ final class RS_Copies {
 							<select name="rs_cp_recipient_kind" aria-label="<?php esc_attr_e( 'Είδος παραλήπτη', 'revenue-splitter' ); ?>">
 								<option value="private"><?php esc_html_e( 'Ιδιώτης (ο δημιουργός βλέπει «ιδιώτης»)', 'revenue-splitter' ); ?></option>
 								<option value="media"><?php esc_html_e( 'Μέσο / Τύπος (ο δημιουργός βλέπει το όνομα)', 'revenue-splitter' ); ?></option>
+								<option value="body"><?php esc_html_e( 'Φορέας, π.χ. Εθνική Βιβλιοθήκη (ο δημιουργός βλέπει το όνομα)', 'revenue-splitter' ); ?></option>
 							</select>
 						</td>
 					</tr>
@@ -828,7 +878,7 @@ final class RS_Copies {
 						<td><?php echo esc_html( $types[ (string) $m['type'] ] ); ?></td>
 						<td class="num"><?php echo esc_html( ( self::sign( (string) $m['type'] ) > 0 ? '+' : '−' ) . (int) $m['qty'] ); ?></td>
 						<td><?php echo esc_html( '' !== (string) ( $m['ben'] ?? '' ) ? (string) $m['ben'] : '—' ); ?></td>
-						<td><?php echo esc_html( '' !== (string) ( $m['rcpt'] ?? '' ) ? $m['rcpt'] . ' (' . ( 'media' === $m['rkind'] ? __( 'μέσο', 'revenue-splitter' ) : __( 'ιδιώτης', 'revenue-splitter' ) ) . ')' : '—' ); ?></td>
+						<td><?php echo esc_html( '' !== (string) ( $m['rcpt'] ?? '' ) ? $m['rcpt'] . ' (' . self::kind_label( (string) $m['rkind'] ) . ')' : '—' ); ?></td>
 						<td>
 							<?php
 							if ( 'author_buy' === $m['type'] ) {

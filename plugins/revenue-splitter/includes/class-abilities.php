@@ -281,7 +281,7 @@ final class RS_Abilities {
 			),
 			'copies-list'       => array(
 				'label'       => 'Revenue Splitter: copies register',
-				'description' => 'The movements of the copies register («RS Αντίτυπα», 1.19.0): copies that left or came back to the warehouse without an e-shop sale or consignment (types promo, review, legal, author_free, author_buy, damaged, return), newest first, with recipient (and whether it is media/press or a private person), beneficiary, unit price and payment mode of author purchases, the stock change made and the linked Ledger deduction. Filters: product_id, ben, type, date_start, date_end, include_undone. Changes nothing.',
+				'description' => 'The movements of the copies register («RS Αντίτυπα», 1.19.0): copies that left or came back to the warehouse without an e-shop sale or consignment (types promo, review, legal, author_free, author_buy, damaged, return), newest first, with recipient (and whether it is media/press, a body or a private person), beneficiary, unit price and payment mode of author purchases, the stock change made and the linked Ledger deduction. Filters: product_id, ben, type, date_start, date_end, include_undone. Changes nothing.',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -303,7 +303,7 @@ final class RS_Abilities {
 			),
 			'copies-add'        => array(
 				'label'       => 'Revenue Splitter: record a copies movement',
-				'description' => 'Records copies that leave the warehouse without an e-shop sale or consignment (or come back: type return), as the «RS Αντίτυπα» form does. No order is made. When the product manages stock, the stock changes (undo puts it back). author_free and author_buy need ben (the author); author_buy needs unit_price (VAT included) and payment: offset (a Ledger «Κράτηση» of price × copies for the beneficiary) or separate (no balance change). Warns when the author has an e-shop order of the same title in the last 30 days. recipient_kind media shows the recipient\'s name to the creator; private shows «ιδιώτης». dry_run = true only shows what would happen.',
+				'description' => 'Records copies that leave the warehouse without an e-shop sale or consignment (or come back: type return), as the «RS Αντίτυπα» form does. No order is made. When the product manages stock, the stock changes (undo puts it back). author_free and author_buy need ben (the author); author_buy needs unit_price (VAT included) and payment: offset (a Ledger «Κράτηση» of price × copies for the beneficiary) or separate (no balance change). Warns when the author has an e-shop order of the same title in the last 30 days. recipient_kind media (press) or body (e.g. the National Library for legal deposit) shows the recipient\'s name to the creator; private shows «ιδιώτης». dry_run = true only shows what would happen.',
 				'input'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -327,7 +327,7 @@ final class RS_Abilities {
 						),
 						'recipient_kind' => array(
 							'type' => 'string',
-							'enum' => array( 'media', 'private' ),
+							'enum' => array( 'media', 'body', 'private' ),
 						),
 						'ben'            => $name,
 						'unit_price'     => array( 'type' => 'string' ),
