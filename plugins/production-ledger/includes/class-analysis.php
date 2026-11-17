@@ -328,8 +328,9 @@ final class PL_Analysis {
 				'from'       => $from,
 				'to'         => $to,
 				'limit'      => 5000,
+				'hist'       => null,
 			)
-		);
+		)['rows'];
 		$by    = array();
 		$net   = 0.0;
 		$vat   = 0.0;
@@ -420,7 +421,7 @@ final class PL_Analysis {
 			'events'     => $events,
 			'stores'     => $a['stores'],
 			'free_list'  => $a['free'],
-			'promo'      => self::promo( $pid ),
+			'promo'      => $pid > 0 ? self::promo( $pid ) : array(),
 		);
 	}
 
@@ -477,8 +478,9 @@ final class PL_Analysis {
 			array(
 				'category' => 'promotion',
 				'limit'    => 5000,
+				'hist'     => null,
 			)
-		);
+		)['rows'];
 		$by   = array();
 		foreach ( $rows as $r ) {
 			if ( ! empty( $r['is_test'] ) || '' === $r['item'] ) {
