@@ -146,6 +146,19 @@ final class TRA_Pricing {
 		if ( self::$busy || ! self::applies() || ! TRA_Scope::eligible( $product ) ) {
 			return null;
 		}
+		/**
+		 * Filters whether this product object gets the trade price now.
+		 * Unlike tra_eligible (cached per product id), it runs for every
+		 * object and call, so a plugin can keep one copy of a product at
+		 * its own price (Product Bundles: the lines of a bundle and the
+		 * bundle itself; no wholesale on bundles).
+		 *
+		 * @param bool       $applies True.
+		 * @param WC_Product $product Product or variation object.
+		 */
+		if ( ! apply_filters( 'tra_trade_applies', true, $product ) ) {
+			return null;
+		}
 		self::$busy = true;
 		try {
 			$price = TRA_Scope::trade_price( $product, TRA_Accounts::discount() );

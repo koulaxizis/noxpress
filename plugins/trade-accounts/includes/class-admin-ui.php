@@ -729,6 +729,7 @@ final class TRA_Admin_UI {
 					<tr><td><code>tra_is_eligible( $product )</code></td><td><?php esc_html_e( 'Αν το προϊόν είναι επιλέξιμο για χονδρική και Trade Feed.', 'trade-accounts' ); ?></td></tr>
 					<tr><td><code>tra_trade_price( $product, $user_id )</code></td><td><?php esc_html_e( 'Η τιμή χονδρικής του προϊόντος για τον λογαριασμό, ή null.', 'trade-accounts' ); ?></td></tr>
 					<tr><td><code>tra_eligible</code> <?php esc_html_e( '(φίλτρο)', 'trade-accounts' ); ?></td><td><?php esc_html_e( 'Αλλάζει την επιλεξιμότητα: ( $ok, $product ).', 'trade-accounts' ); ?></td></tr>
+					<tr><td><code>tra_trade_applies</code> <?php esc_html_e( '(φίλτρο)', 'trade-accounts' ); ?></td><td><?php esc_html_e( 'Τιμή χονδρικής για αυτό το αντικείμενο προϊόντος τώρα: ( $applies, $product ), χωρίς cache.', 'trade-accounts' ); ?></td></tr>
 					<tr><td><code>tra_discount</code> <?php esc_html_e( '(φίλτρο)', 'trade-accounts' ); ?></td><td><?php esc_html_e( 'Αλλάζει την έκπτωση ενός λογαριασμού: ( $percent, $user_id ).', 'trade-accounts' ); ?></td></tr>
 					<tr><td><code>tra_feed_item</code> <?php esc_html_e( '(φίλτρο)', 'trade-accounts' ); ?></td><td><?php esc_html_e( 'Αλλάζει ένα προϊόν του Trade Feed: ( $item, $product ).', 'trade-accounts' ); ?></td></tr>
 					<tr><td><code>tra_text</code> <?php esc_html_e( '(φίλτρο)', 'trade-accounts' ); ?></td><td><?php esc_html_e( 'Αλλάζει ένα κείμενο του επισκέπτη: ( $text, $key, $lang ).', 'trade-accounts' ); ?></td></tr>

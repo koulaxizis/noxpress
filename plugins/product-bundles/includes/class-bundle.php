@@ -45,6 +45,9 @@ final class PBN_Bundle {
 	const OPT_INDEX = 'pbn_index';
 	const GROUP     = 'product-bundles';
 	const HOOK      = 'pbn_sync';
+
+	/** @var int Depth of quote(): component prices are read at retail. */
+	private static $retail = 0;
 	const HOOK_ALL  = 'pbn_sync_all';
 	const BATCH     = 50;
 	const MAX_ROWS  = 30;
@@ -283,6 +286,25 @@ final class PBN_Bundle {
 	 * @return array { ok, rows[ { row, product, qty, base, line, share, unit } ], value, price, display_value, display_price }
 	 */
 	public static function quote( WC_Product $bundle, array $choices = array(), string $pick = 'min' ): array {
+		++self::$retail;
+		try {
+			return self::quote_rows( $bundle, $choices, $pick );
+		} finally {
+			--self::$retail;
+		}
+	}
+
+	/**
+	 * True while a bundle price is computed: another plugin's price for a
+	 * customer group (Trade Accounts) stays out of it, so a bundle is sold
+	 * at its own price from the retail prices.
+	 */
+	public static function retail(): bool {
+		return self::$retail > 0;
+	}
+
+	/** quote() itself (inside the retail guard). */
+	private static function quote_rows( WC_Product $bundle, array $choices, string $pick ): array {
 		$rows = self::rows( $bundle );
 		$out  = array(
 			'ok'            => ! empty( $rows ),

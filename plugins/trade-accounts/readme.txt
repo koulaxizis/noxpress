@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.2
+Stable tag: 1.8.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -64,7 +64,7 @@ Every module is off after activation. A module that is off loads no code.
 
 * `tra_is_trade( int $user_id = 0 )`, `tra_is_eligible( $product )`, `tra_trade_price( $product, int $user_id = 0 )`.
 * `tra_consignments( array $args = array() )`, `tra_consignment_lines( array $product_ids = array() )` (copies still at bookstores per product, for an author portal) and `tra_consignment_summary( array $product_ids = array(), string $as_of = '' )` (per title and bookstore: given, sold, returned, on the shelf, collected and owed, also as of a past date); actions `tra_consignment_created`, `tra_consignment_settled`, `tra_consignment_paid`.
-* Filters `tra_eligible` ( bool $ok, WC_Product $product ), `tra_discount` ( float $percent, int $user_id ), `tra_feed_item` ( array $item, WC_Product $product ), `tra_text` ( string $text, string $key, string $lang ).
+* Filters `tra_eligible` ( bool $ok, WC_Product $product ), `tra_trade_applies` ( bool $applies, WC_Product $product; per object and call, not cached), `tra_discount` ( float $percent, int $user_id ), `tra_feed_item` ( array $item, WC_Product $product ), `tra_text` ( string $text, string $key, string $lang ).
 
 == Installation ==
 
@@ -97,6 +97,9 @@ The settings, the call log, the plugin's user and product meta, its Application 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.8.3 =
+* New filter `tra_trade_applies` ( bool, WC_Product ), checked for every product object and call (not cached like `tra_eligible`). Product Bundles 1.1.6 uses it so bundles and the lines of a bundle in the cart never get the trade price: no wholesale on bundles.
 
 = 1.8.2 =
 * Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.

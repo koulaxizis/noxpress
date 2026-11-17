@@ -171,6 +171,7 @@ final class TRA_Lang {
 		'Η τιμή χονδρικής του προϊόντος για τον λογαριασμό, ή null.' => 'The trade price of the product for the account, or null.',
 		'(φίλτρο)' => '(filter)',
 		'Αλλάζει την επιλεξιμότητα: ( $ok, $product ).' => 'Changes eligibility: ( $ok, $product ).',
+		'Τιμή χονδρικής για αυτό το αντικείμενο προϊόντος τώρα: ( $applies, $product ), χωρίς cache.' => 'Trade price for this product object now: ( $applies, $product ), not cached.',
 		'Αλλάζει την έκπτωση ενός λογαριασμού: ( $percent, $user_id ).' => 'Changes the discount of an account: ( $percent, $user_id ).',
 		'Αλλάζει ένα προϊόν του Trade Feed: ( $item, $product ).' => 'Changes a product of the Trade Feed: ( $item, $product ).',
 		'Αλλάζει ένα κείμενο του επισκέπτη: ( $text, $key, $lang ).' => 'Changes a visitor text: ( $text, $key, $lang ).',
