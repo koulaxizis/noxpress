@@ -1,6 +1,6 @@
 {
-  "display": 1655,
-  "total": 1655,
+  "display": 1661,
+  "total": 1661,
   "offset": 5,
   "updated": "2026-11-17",
   "assets": {
@@ -2078,10 +2078,14 @@
     },
     "759999946": {
       "file": "nox-pb-1.1.6/product-bundles.zip",
-      "count": 0
+      "count": 3
     },
     "760000216": {
       "file": "nox-ta-1.8.3/trade-accounts.zip",
+      "count": 3
+    },
+    "760057377": {
+      "file": "nox-pb-1.1.7/product-bundles.zip",
       "count": 0
     }
   }
