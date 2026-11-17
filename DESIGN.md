@@ -70,6 +70,7 @@ Supporting values (Bible §2, used by every plugin through Noxpress Core):
 - Buttons: `.button` dark (`#1e2130`, border `#4a4f66`), `.button-primary` in the accent. Bible §5.
 - Notices inside the page: `.notice.inline`.
 - Unified «Noxpress» menu; the Hub is its root (Bible §8).
+- Since Core 1.5.0 the submenu is short per user (Overview, ★ favourites or the 5 most recent plugins, «All tools»). Plugins with several pages get the Core tab bar `.nx-tabs` above the page: same bg as the wrap, pill tabs with 1px border, the current tab filled with the accent, ★ in `#f5c97e`, «Go to…» with a `Ctrl K` hint. The «Go to…» `<dialog class="nx-go">` uses the panel colours, the active result outlined in the accent (Bible §8).
 - Colours carry `!important` inside the plugin's own scope so core/third-party light styles cannot break the panel; nothing leaks outside `.{p}-wrap` (Bible §4).
 
 ## Footers

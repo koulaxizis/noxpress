@@ -1,0 +1,206 @@
+/**
+ * Noxpress Core — menu.css (Bible §2, §8, Core 1.5.0)
+ *
+ * Tab bar of plugins with several pages, the "Go to…" dialog and the hub's
+ * menu controls. Same palette as hub.css; prefixed nx-*.
+ */
+
+.nx-tabs,
+.nx-go {
+	--nx-bg: #101218;
+	--nx-panel: #14161d;
+	--nx-panel-2: #1d2029;
+	--nx-border: #2e3240;
+	--nx-text: #eae8fa;
+	--nx-muted: #b7b2d6;
+	--nx-link: #beb1ff;
+	--nx-accent: #6d4aff;
+	color-scheme: dark;
+}
+
+/* Tab bar (§8). */
+.nx-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin: 14px 20px 0 0;
+	padding: 8px 10px;
+	background: var(--nx-bg);
+	border: 1px solid #2b2e36;
+	border-radius: 8px;
+	color: var(--nx-text);
+	font-size: 13px;
+}
+
+.nx-tabs-name {
+	font-weight: 600;
+	color: #f6f4ff;
+	margin: 0 6px 0 4px;
+}
+
+.nx-tabs a.nx-tab {
+	display: inline-block;
+	padding: 4px 12px;
+	border: 1px solid var(--nx-border);
+	border-radius: 999px;
+	color: var(--nx-link);
+	text-decoration: none;
+	line-height: 1.6;
+}
+
+.nx-tabs a.nx-tab:hover,
+.nx-tabs a.nx-tab:focus { border-color: var(--nx-accent); color: #ffffff; }
+
+.nx-tabs a.nx-tab.is-current {
+	background: var(--nx-accent);
+	border-color: var(--nx-accent);
+	color: #ffffff;
+}
+
+.nx-tabs .nx-pin-form { margin-left: auto; }
+
+.nx-tabs-go,
+.nx-go-close {
+	background: transparent;
+	border: 1px solid var(--nx-border);
+	border-radius: 4px;
+	color: var(--nx-muted);
+	cursor: pointer;
+	padding: 3px 10px;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.nx-tabs-go:hover,
+.nx-go-close:hover { border-color: var(--nx-accent); color: #ffffff; }
+
+.nx-tabs-go kbd {
+	background: var(--nx-panel-2);
+	color: var(--nx-muted);
+	border-radius: 3px;
+	padding: 0 4px;
+	font-size: 11px;
+	margin-left: 4px;
+}
+
+/* Pin (★) — tab bar and hub rows. */
+.nx-pin-form { display: inline; margin: 0; }
+
+.nx-pin {
+	background: transparent;
+	border: 0;
+	padding: 0 4px;
+	font-size: 18px;
+	line-height: 1;
+	color: #8a85a8;
+	cursor: pointer;
+	vertical-align: middle;
+}
+
+.nx-pin:hover,
+.nx-pin:focus { color: #f5c97e; }
+.nx-pin.is-pinned { color: #f5c97e; }
+
+/* "Go to…" dialog. */
+.nx-go {
+	width: min(560px, calc(100vw - 32px));
+	max-height: calc(100vh - 96px);
+	box-sizing: border-box;
+	padding: 14px 16px 10px;
+	background: var(--nx-panel);
+	color: var(--nx-text);
+	border: 1px solid var(--nx-border);
+	border-radius: 10px;
+	margin-top: 10vh;
+}
+
+.nx-go::backdrop { background: rgba(5, 6, 10, 0.7); }
+
+.nx-go-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 10px;
+	color: #f6f4ff;
+}
+
+.nx-go .nx-go-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 8px 10px;
+	font-size: 15px;
+	background: var(--nx-panel-2);
+	color: var(--nx-text);
+	border: 1px solid var(--nx-border);
+	border-radius: 6px;
+}
+
+.nx-go .nx-go-input:focus { border-color: var(--nx-accent); box-shadow: 0 0 0 1px var(--nx-accent); outline: none; }
+
+.nx-go-list {
+	list-style: none;
+	margin: 10px 0 0;
+	padding: 0;
+	max-height: 60vh;
+	overflow-y: auto;
+}
+
+.nx-go-list li { margin: 0; }
+
+.nx-go a.nx-go-item {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 10px;
+	padding: 7px 10px;
+	border-radius: 6px;
+	color: var(--nx-text);
+	text-decoration: none;
+}
+
+.nx-go a.nx-go-item span { color: var(--nx-muted); font-size: 12px; align-self: center; }
+.nx-go a.nx-go-item:hover,
+.nx-go a.nx-go-item.is-active { background: #262a3a; outline: 1px solid var(--nx-accent); }
+.nx-go-empty { padding: 8px 10px; color: var(--nx-muted); }
+
+/* Hub: search, categories, menu mode, page links. */
+.nx-menu-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 16px;
+	margin: 0 0 12px;
+}
+
+.nx-wrap .nx-search {
+	flex: 1 1 260px;
+	max-width: 420px;
+	padding: 6px 10px;
+	background: var(--nx-panel-2) !important;
+	color: var(--nx-text) !important;
+	border: 1px solid var(--nx-border) !important;
+	border-radius: 6px;
+}
+
+.nx-wrap .nx-search:focus { border-color: var(--nx-accent) !important; box-shadow: 0 0 0 1px var(--nx-accent) !important; }
+
+.nx-mode-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font-size: 12px; }
+
+.nx-table tbody tr.nx-cat th {
+	background: var(--nx-bg) !important;
+	color: #f6f4ff !important;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: .02em;
+	padding: 14px 14px 6px;
+	border-bottom: 1px solid var(--nx-border);
+}
+
+.nx-pages { display: block; margin-top: 6px; font-size: 12px; }
+.nx-pages a { margin-right: 10px; white-space: nowrap; }
+.nx-name { display: inline-flex; align-items: center; gap: 2px; }
+
+@media (max-width: 782px) {
+	.nx-tabs { margin-right: 10px; }
+	.nx-tabs .nx-pin-form { margin-left: 0; }
+}

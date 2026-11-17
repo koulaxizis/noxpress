@@ -5,7 +5,7 @@ Tags: maintenance, coming soon, under construction, 503, launch page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -87,6 +87,9 @@ Create a preview link in «Access» and send it. Customers with an account see t
 No: «Maintenance» answers 503 with Retry-After, which tells search engines the break is temporary. Keep it short (hours or a few days); for a site that is not public yet, use «Coming soon».
 
 == Changelog ==
+
+= 1.0.2 =
+* Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.
 
 = 1.0.1 =
 * Noxpress Core 1.4.16: every text cell of a CSV export is enclosed in quotes, so a spreadsheet that splits on another list separator (such as ';' in Greek Excel) keeps each cell whole.

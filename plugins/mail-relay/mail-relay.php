@@ -3,7 +3,7 @@
  * Plugin Name:          Mail Relay
  * Plugin URI:           https://noxpress.tech
  * Description:          Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών που δείχνει ποιο plugin έστειλε κάθε email, δοκιμαστικό email, έλεγχο SPF / DKIM / DMARC και πάγωμα της αποστολής σε αντίγραφα του site. Οι κωδικοί μένουν σφραγισμένοι ή στο wp-config.php.
- * Version:              1.0.1
+ * Version:              1.0.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -56,7 +56,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MRL_VERSION', '1.0.1' );
+define( 'MRL_VERSION', '1.0.2' );
 define( 'MRL_FILE', __FILE__ );
 define( 'MRL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MRL_URL', plugin_dir_url( __FILE__ ) );

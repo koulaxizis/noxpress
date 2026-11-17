@@ -16,6 +16,7 @@
  *  - Noxpress_Safe     → shared security helpers (public URLs, CSV, salts,
  *                        tag attributes, AI note, client IP), since 1.3.0
  *  - Noxpress_Hub      → the "Noxpress" landing page, channel setting
+ *  - Noxpress_Menu     → short per-user submenu, tab bar, Ctrl+K (1.5.0)
  *
  * Language (Bible §9): Greek msgids in the 'noxpress' domain, English from
  * the dictionary below; rs_lang (user meta) is read only.
@@ -182,6 +183,29 @@ final class Noxpress_Core {
 		'Η ψηφιακή υπογραφή του πακέτου δεν είναι έγκυρη. Η εγκατάσταση ακυρώθηκε.' => 'The digital signature of the package is not valid. The install was cancelled.',
 		'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.' => 'Contact forms with a block and a shortcode, e-mail notifications and spam protection without third-party services. No message is lost when the e-mail fails, and an import from Contact Form 7 that keeps its shortcode.',
 
+		// Menu (Bible §8, Core 1.5.0).
+		'Όλα τα εργαλεία'                                       => 'All tools',
+		'Μετάβαση σε…'                                          => 'Go to…',
+		'Plugin ή σελίδα'                                       => 'Plugin or page',
+		'Δεν βρέθηκε τίποτα.'                                   => 'Nothing found.',
+		'Προσθήκη στα αγαπημένα του μενού'                      => 'Add to menu favourites',
+		'Αφαίρεση από τα αγαπημένα του μενού'                   => 'Remove from menu favourites',
+		'Μενού: πλήρες, με όλες τις σελίδες.'                   => 'Menu: full, with every page.',
+		'Μενού: σύντομο, με τα αγαπημένα (★) ή τα 5 πιο πρόσφατα.' => 'Menu: short, with your favourites (★) or the 5 most recent.',
+		'Σύντομο μενού'                                         => 'Short menu',
+		'Πλήρες μενού'                                          => 'Full menu',
+		'Αναζήτηση plugin ή σελίδας…'                           => 'Search a plugin or page…',
+		'Κανένα plugin δεν ταιριάζει με την αναζήτηση.'          => 'No plugin matches the search.',
+		'Σελίδες:'                                              => 'Pages:',
+		'Κατάστημα & προϊόντα'                                  => 'Shop & products',
+		'Παραγγελίες & πελάτες'                                 => 'Orders & customers',
+		'Χρήματα & αναφορές'                                    => 'Money & reports',
+		'Εκδόσεις & δημιουργοί'                                 => 'Publishing & creators',
+		'Ταχύτητα & SEO'                                        => 'Speed & SEO',
+		'Επικοινωνία'                                           => 'Communication',
+		'Ασφάλεια & σύστημα'                                    => 'Security & system',
+		'Άλλα'                                                  => 'Other',
+
 		// Footer (Bible §7).
 		'Made with ❤ by %s'                                     => 'Made with ❤ by %s',
 		'More plugins at'                                       => 'More plugins at',
@@ -200,6 +224,8 @@ final class Noxpress_Core {
 		if ( is_admin() ) {
 			require_once NOXPRESS_CORE_PATH . '/class-noxpress-hub.php';
 			Noxpress_Hub::init();
+			require_once NOXPRESS_CORE_PATH . '/class-noxpress-menu.php';
+			Noxpress_Menu::init();
 			// Before every suite plugin (RS 9, SP 20, SF 30, TP 40, SHF 50, PFM 60, EWD 70, BPV 80, SHN 90, CRT 100, PKP 110, HIC 120, VPK 130, GLP 140, ORC 150, PBN 160, SBR 170, PBQ 180, POR 190, WSH 200, CKE 210, NM 220).
 			add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
 			add_action( 'network_admin_menu', array( __CLASS__, 'admin_menu' ), 5 );
@@ -209,7 +235,9 @@ final class Noxpress_Core {
 	/**
 	 * Suite plugins the hub and the updater handle, keyed by slug
 	 * (folder and main file name). "unlisted" plugins get updates but
-	 * show in the hub only where they are installed.
+	 * show in the hub only where they are installed. "cat" is the hub
+	 * category (categories(), Core 1.5.0); "more" lists extra submenu slugs
+	 * of the plugin that are not page slugs (e.g. a post type list).
 	 */
 	public static function catalog(): array {
 		return array(
@@ -217,242 +245,309 @@ final class Noxpress_Core {
 				'name' => 'Revenue Splitter',
 				'desc' => __( 'Καταμερισμός εσόδων ανά δικαιούχο, ΦΠΑ, ledger και portal δικαιούχων.', 'noxpress' ),
 				'page' => 'revenue-splitter-dashboard',
+				'cat'  => 'money',
 			),
 			'store-pulse'      => array(
 				'name' => 'Store Pulse',
 				'desc' => __( 'Εικόνα του καταστήματος με μια ματιά: παραγγελίες, επιστροφές, στοκ και οφειλές.', 'noxpress' ),
 				'page' => 'sp-dashboard',
+				'cat'  => 'money',
 			),
 			'smart-formatter'  => array(
 				'name' => 'Smart Formatter',
 				'desc' => __( 'Μαζική μορφοποίηση κειμένων προϊόντων με preview, dry run και undo.', 'noxpress' ),
 				'page' => 'sf-formatter',
+				'cat'  => 'shop',
 			),
 			'theme-patcher'    => array(
 				'name' => 'Theme Patcher',
 				'desc' => __( 'Διορθώνει κλασικά θέματα WooCommerce χωρίς child theme και χωρίς αλλαγή στα αρχεία τους.', 'noxpress' ),
 				'page' => 'tp-theme-patcher',
+				'cat'  => 'shop',
 			),
 			'shop-filters'     => array(
 				'name' => 'Shop Filters',
 				'desc' => __( 'Λιτά φίλτρα προϊόντων για κλασικά θέματα, με ομαδοποίηση τιμών χαρακτηριστικών.', 'noxpress' ),
 				'page' => 'shf-filters',
+				'cat'  => 'shop',
 			),
 			'product-formats'  => array(
 				'name' => 'Product Formats',
 				'desc' => __( 'Συνδέει τις μορφές ενός έργου (έντυπο, ebook, ηχητικό βιβλίο, ταινία) με το μπλοκ «Διαθέσιμες μορφές».', 'noxpress' ),
 				'page' => 'pfm-formats',
+				'cat'  => 'shop',
 			),
 			'easy-withdrawal'  => array(
 				'name' => 'Easy Withdrawal',
 				'desc' => __( 'Φόρμα υπαναχώρησης για πελάτες και επισκέπτες, με απόδειξη και λίστα αιτημάτων.', 'noxpress' ),
 				'page' => 'ewd-requests',
+				'cat'  => 'orders',
 			),
 			'book-preview'     => array(
 				'name' => 'Book Preview',
 				'desc' => __( 'Δείγμα βιβλίου στη σελίδα του προϊόντος: ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις.', 'noxpress' ),
 				'page' => 'bpv-samples',
+				'cat'  => 'publishing',
 			),
 			'shipping-notes'   => array(
 				'name' => 'Shipping Notes',
 				'desc' => __( 'Δωρεάν αποστολή με μπάρα προόδου και χρόνος παράδοσης στη σελίδα προϊόντος.', 'noxpress' ),
 				'page' => 'shn-settings',
+				'cat'  => 'orders',
 			),
 			'featured-creators' => array(
 				'name' => 'Featured Creators',
 				'desc' => __( 'Μία σελίδα για κάθε δημιουργό, με τα έργα του ανά ρόλο, συνδέσμους από τα προϊόντα και ευρετήριο.', 'noxpress' ),
 				'page' => 'crt-settings',
+				'cat'  => 'publishing',
+				'more' => array( 'edit.php?post_type=nox_creator' ),
 			),
 			'store-pickup'      => array(
 				'name' => 'Store Pickup',
 				'desc' => __( 'Παραλαβή από το κατάστημα στο ταμείο, με επιλογή καταστήματος, ώρες και χωρίς μεταφορικά.', 'noxpress' ),
 				'page' => 'pkp-settings',
+				'cat'  => 'orders',
 			),
 			'hide-catalog'      => array(
 				'name' => 'Hide Catalog',
 				'desc' => __( 'Απόκρυψη κατηγοριών και των προϊόντων τους από το shop, την αναζήτηση και τα blocks, χωρίς αλλαγή στα προϊόντα.', 'noxpress' ),
 				'page' => 'hic-settings',
+				'cat'  => 'shop',
 			),
 			'variation-picker'  => array(
 				'name' => 'Variation Picker',
 				'desc' => __( 'Swatches για τις παραλλαγές: χρώματα, εικόνες και κουμπιά, οδηγός μεγεθών και swatches στις κάρτες του καταστήματος.', 'noxpress' ),
 				'page' => 'vpk-settings',
+				'cat'  => 'shop',
 			),
 			'greeklish-permalinks' => array(
 				'name' => 'Greeklish Permalinks',
 				'desc' => __( 'Ελληνικά σε λατινικά στα slugs και στα ονόματα αρχείων, με μαζική μετατροπή των υπαρχόντων.', 'noxpress' ),
 				'page' => 'glp-settings',
+				'cat'  => 'speed',
 			),
 			'oros-connect'      => array(
 				'name' => 'orOS Connect',
 				'desc' => __( 'Σύνδεση με το orOS σε modules: φόρμα εγγραφής και κουτάκι στο ταμείο για τη λίστα σου στο orOS Newsletter.', 'noxpress' ),
 				'page' => 'orc-settings',
+				'cat'  => 'comms',
 			),
 			'product-bundles'   => array(
 				'name' => 'Product Bundles',
 				'desc' => __( 'Πακέτα προϊόντων: κάθε προϊόν με το δικό του απόθεμα και ΦΠΑ, έκπτωση πακέτου και σωστές αναφορές πωλήσεων.', 'noxpress' ),
 				'page' => 'pbn-bundles',
+				'cat'  => 'shop',
 			),
 			'publishing-quote'  => array(
 				'name' => 'Publishing Quote',
 				'desc' => __( 'Κοστολόγηση έκδοσης για υποψήφιους συγγραφείς: ποσό ανά υπηρεσία και σύνολο, με τους συντελεστές κρυφούς στον server και αιτήματα «Ενδιαφέρομαι».', 'noxpress' ),
 				'page' => 'pbq-settings',
+				'cat'  => 'publishing',
 			),
 			'pre-orders'        => array(
 				'name' => 'Pre-Orders',
 				'desc' => __( 'Προπαραγγελίες με ημερομηνία κυκλοφορίας: σήμα και κουμπί στο κατάστημα, η ημερομηνία στο καλάθι και στην παραγγελία, αυτόματη κυκλοφορία και emails.', 'noxpress' ),
 				'page' => 'por-settings',
+				'cat'  => 'orders',
 			),
 			'wish-shelf'        => array(
 				'name' => 'Wish Shelf',
 				'desc' => __( 'Λίστα επιθυμιών: καρδιά στα προϊόντα, λίστα για επισκέπτες χωρίς cookies, κοινοποίηση και αναφορά με τα πιο επιθυμητά προϊόντα.', 'noxpress' ),
 				'page' => 'wsh-settings',
+				'cat'  => 'shop',
 			),
 			'checkout-extras'   => array(
 				'name' => 'Checkout Extras',
 				'desc' => __( 'Δώρο με αφιέρωση στο ταμείο, μήνυμα και προϊόντα στη σελίδα ευχαριστίας, και κουπόνι ευχαριστίας για την επόμενη παραγγελία.', 'noxpress' ),
 				'page' => 'cke-settings',
+				'cat'  => 'orders',
 			),
 			'data-migrator'     => array(
 				'name' => 'Data Migrator',
 				'desc' => __( 'Πλήρες αντίγραφο ασφαλείας και επαναφορά του site, εδώ ή σε άλλον server, με αλλαγή domain χωρίς χειροκίνητες διορθώσεις.', 'noxpress' ),
 				'page' => 'nm-backups',
+				'cat'  => 'system',
 			),
 			'home-sections'     => array(
 				'name' => 'Home Sections',
 				'desc' => __( 'Ενότητες προϊόντων με το shortcode [products]: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και φιλτράρουν με λέξη στον τίτλο.', 'noxpress' ),
 				'page' => 'hms-settings',
+				'cat'  => 'shop',
 			),
 			'book-feed'         => array(
 				'name' => 'Book Feed',
 				'desc' => __( 'Τίτλοι άλλων εκδοτικών από τον κατάλογο Bookpoint (ΟΣΔΕΛ) ως προϊόντα: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη και καθημερινός συγχρονισμός τιμής και διαθεσιμότητας.', 'noxpress' ),
 				'page' => 'bkf-feed',
+				'cat'  => 'publishing',
 			),
 			'live-operator'     => array(
 				'name' => 'Live Operator',
 				'desc' => __( 'Το live chat του PurioChat στο κινητό: διακόπτης online / offline, ειδοποιήσεις για κάθε αίτημα και μήνυμα, και απαντήσεις από την εφαρμογή Android.', 'noxpress' ),
 				'page' => 'lop-settings',
+				'cat'  => 'comms',
 			),
 			'trade-accounts'    => array(
 				'name' => 'Trade Accounts',
 				'desc' => __( 'Λογαριασμοί χονδρικής για βιβλιοπωλεία: προκαθορισμένη έκπτωση στους τίτλους που ορίζεις, και API (Trade Feed) σε JSON ή XML για να περνούν τα βιβλία στα δικά τους e-shops.', 'noxpress' ),
 				'page' => 'tra-settings',
+				'cat'  => 'orders',
 			),
 			'fast-pages'        => array(
 				'name' => 'Fast Pages',
 				'desc' => __( 'Page cache για επισκέπτες με έξυπνο καθάρισμα και preload, minify CSS / JS, lazy load και YouTube με κλικ. Αντικαθιστά το WP Rocket· ο Claude το χειρίζεται μέσω Site Bridge.', 'noxpress' ),
 				'page' => 'fpg-settings',
+				'cat'  => 'speed',
 			),
 			'broadcast'         => array(
 				'name' => 'Broadcast',
 				'desc' => __( 'Ανακοινώνει γεγονότα του site σε ένα Viber Channel: νέα προϊόντα, newsletter που στάλθηκε, νέα βίντεο YouTube και αναρτήσεις που ετοιμάζεις, με ουρά, έγκριση και ιστορικό.', 'noxpress' ),
 				'page' => 'brc-settings',
+				'cat'  => 'comms',
 			),
 			'magic-login'       => array(
 				'name' => 'Magic Login',
 				'desc' => __( 'Σύνδεση πελατών χωρίς κωδικό: σύνδεσμος μίας χρήσης με email από τη φόρμα σύνδεσης και το ταμείο, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης.', 'noxpress' ),
 				'page' => 'mgl-settings',
+				'cat'  => 'system',
 			),
 			'trade-feed-import' => array(
 				'name' => 'Trade Feed Import',
 				'desc' => __( 'Για βιβλιοπωλεία: οι τίτλοι ενός εκδότη με Trade Accounts στο δικό σου κατάστημα, με επικόλληση του email του και ένα κουμπί· καθημερινή ενημέρωση τιμής, διαθεσιμότητας και προπαραγγελιών, χωρίς να χάνονται οι δικές σου αλλαγές.', 'noxpress' ),
 				'page' => 'tfi-settings',
+				'cat'  => 'orders',
 			),
 			'lean-images'       => array(
 				'name' => 'Lean Images',
 				'desc' => __( 'Οι εικόνες JPEG και PNG γίνονται WebP (και προαιρετικά AVIF) στον δικό σου server, σε μικρές παρτίδες στο παρασκήνιο. Τα πρωτότυπα δεν αλλάζουν ποτέ, χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.', 'noxpress' ),
 				'page' => 'lim-settings',
+				'cat'  => 'speed',
 			),
 			'redirects'         => array(
 				'name' => 'Redirects',
 				'desc' => __( 'Ανακατευθύνσεις 301 / 410 για παλιές διευθύνσεις, μόνο εκεί που το site απαντά 404, και log των 404 σε ιδιωτικό αρχείο χωρίς IP και χωρίς bots, με πρόταση στόχου και εισαγωγή από Rank Math, Redirection, Yoast και CSV.', 'noxpress' ),
 				'page' => 'rdr-settings',
+				'cat'  => 'speed',
 			),
 			'search-signals'    => array(
 				'name' => 'Search Signals',
 				'desc' => __( 'Τίτλοι και περιγραφές από templates, robots, canonical, ένα γράφημα JSON-LD, Open Graph, XML sitemaps και llms.txt χωρίς προσωπικά δεδομένα. Εισαγωγή από το Rank Math με δοκιμαστική εκτέλεση, σύγκριση πριν τη μετάβαση και μετάβαση με ένα κλικ.', 'noxpress' ),
 				'page' => 'ssg-settings',
+				'cat'  => 'speed',
 			),
 			'production-ledger' => array(
 				'name' => 'Production Ledger',
 				'desc' => __( 'Κόστη και καθαρό αποτέλεσμα ανά προϊόν: παραγωγή ανά κατηγορία, μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών, γενικά έξοδα, νεκρό σημείο, CSV και ροή για το orOS Budget.', 'noxpress' ),
 				'page' => 'pl-ledger',
+				'cat'  => 'money',
 			),
 			'product-tabs'      => array(
 				'name' => 'Product Tabs',
 				'desc' => __( 'Επιπλέον καρτέλες στη σελίδα προϊόντος, ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce.', 'noxpress' ),
 				'page' => 'ptb-settings',
+				'cat'  => 'shop',
 			),
 			'product-feed'      => array(
 				'name' => 'Product Feed',
 				'desc' => __( 'Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice, τον κατάλογο Meta και CSV: ένα στατικό αρχείο ανά feed με σταθερό URL, ανανέωση στο παρασκήνιο, GTIN / ISBN, εκδότης, προπαραγγελίες, έλεγχος πριν τη δημοσίευση και εισαγωγή από το CTX Feed.', 'noxpress' ),
 				'page' => 'pfd-feeds',
+				'cat'  => 'shop',
 			),
 			'invoice-details'   => array(
 				'name' => 'Invoice Details',
 				'desc' => __( 'Απόδειξη ή τιμολόγιο στο ταμείο (κλασικό και block): επωνυμία, ΑΦΜ, ΔΟΥ και δραστηριότητα, έλεγχος του ελληνικού ΑΦΜ με το ψηφίο ελέγχου και των ΑΦΜ της ΕΕ στο VIES, τα στοιχεία στην παραγγελία και στα emails, και λίστα τιμολογίων με CSV για τον λογιστή.', 'noxpress' ),
 				'page' => 'ivd-invoices',
+				'cat'  => 'orders',
 			),
 			'login-guard'       => array(
 				'name' => 'Login Guard',
 				'desc' => __( 'Όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email σε σύνδεση διαχειριστή από νέα συσκευή.', 'noxpress' ),
 				'page' => 'lgd-settings',
+				'cat'  => 'system',
 			),
 			'activity-log'      => array(
 				'name' => 'Activity Log',
 				'desc' => __( 'Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, παραγγελίες, κουπόνια, σελίδες, χρήστες, plugins και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, email για τις κρίσιμες αλλαγές.', 'noxpress' ),
 				'page' => 'acl-log',
+				'cat'  => 'system',
 			),
 			'mail-relay'        => array(
 				'name' => 'Mail Relay',
 				'desc' => __( 'Όλα τα email του site μέσω SMTP (με έτοιμη ρύθμιση για Proton Mail) ή μέσω Brevo, Mailgun, SendGrid, Postmark και Amazon SES, με εφεδρική σύνδεση, αρχείο αποστολών, δοκιμαστικό email και πάγωμα της αποστολής σε αντίγραφα του site.', 'noxpress' ),
 				'page' => 'mrl-settings',
+				'cat'  => 'comms',
 			),
 			'forms'             => array(
 				'name' => 'Forms',
 				'desc' => __( 'Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων. Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email, και εισαγωγή από το Contact Form 7 με το ίδιο shortcode.', 'noxpress' ),
 				'page' => 'frm-forms',
+				'cat'  => 'comms',
 			),
 			'live-search'       => array(
 				'name' => 'Live Search',
 				'desc' => __( 'Αναζήτηση προϊόντων με προτάσεις καθώς γράφει ο επισκέπτης: τίτλος, ISBN, συγγραφείς, χωρίς τόνους, με greeklish και με ανοχή σε μικρά λάθη. Οι φόρμες του θέματος μένουν ίδιες, ένα ακριβές ISBN ανοίγει κατευθείαν το προϊόν, και εισαγωγή από το FiboSearch.', 'noxpress' ),
 				'page' => 'lvs-settings',
+				'cat'  => 'shop',
 			),
 			'back-in-stock'     => array(
 				'name' => 'Back in Stock',
 				'desc' => __( 'Φόρμα «Ειδοποίησέ με όταν ξαναέρθει» σε εξαντλημένα προϊόντα και παραλλαγές: επιβεβαίωση με email για τους επισκέπτες, ένα email όταν το προϊόν ξαναμπεί σε απόθεμα, αποστολή σε παρτίδες στο παρασκήνιο και ζήτηση ανά προϊόν, χωρίς newsletter.', 'noxpress' ),
 				'page' => 'bis-requests',
+				'cat'  => 'shop',
 			),
 			'events'            => array(
 				'name' => 'Events',
 				'desc' => __( 'Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση και είσοδο, συνδεδεμένες με προϊόντα και δημιουργούς: λίστα επερχόμενων, αρχείο, «Πρόσθεσε στο ημερολόγιο» και Event schema.', 'noxpress' ),
 				'page' => 'evt-settings',
+				'cat'  => 'orders',
+				'more' => array( 'edit.php?post_type=nox_event' ),
 			),
 			'gift-cards'        => array(
 				'name' => 'Gift Cards',
 				'desc' => __( 'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.', 'noxpress' ),
 				'page' => 'gfc-cards',
+				'cat'  => 'orders',
 			),
 			'ebook-delivery'    => array(
 				'name' => 'Ebook Delivery',
 				'desc' => __( 'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.', 'noxpress' ),
 				'page' => 'ebd-settings',
+				'cat'  => 'orders',
 			),
 			'maintenance-mode'  => array(
 				'name' => 'Maintenance Mode',
 				'desc' => __( 'Σελίδα «Σύντομα κοντά σας» ή «Συντήρηση» για τους επισκέπτες, ενώ εσύ, ο πελάτης με σύνδεσμο προεπισκόπησης και οι IP σου βλέπετε κανονικά το site. 503 με Retry-After ή noindex, ώρα έναρξης και λήξης, καθάρισμα της page cache, και πληρωμές, REST και login που δεν κόβονται ποτέ.', 'noxpress' ),
 				'page' => 'mmd-settings',
+				'cat'  => 'system',
 			),
 			'discount-rules'    => array(
 				'name' => 'Discount Rules',
 				'desc' => __( 'Κανόνες εκπτώσεων με ημερομηνίες: προσφορές σε προϊόντα και κατηγορίες, κλιμακωτή έκπτωση ποσότητας, «3 για 2» και έκπτωση καλαθιού, με ανώτατο όριο ανά παραγγελία, δοκιμή καλαθιού και τη χαμηλότερη τιμή 30 ημερών (Omnibus).', 'noxpress' ),
 				'page' => 'dsr-rules',
+				'cat'  => 'orders',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',
 				'desc' => __( 'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.', 'noxpress' ),
 				'page' => 'sbr-settings',
+				'cat'  => 'system',
 			),
+		);
+	}
+
+	/**
+	 * Hub categories, in display order (Bible §8, Core 1.5.0). Plugins
+	 * known only from the version list, or with an unknown key, go to "other".
+	 */
+	public static function categories(): array {
+		return array(
+			'shop'       => __( 'Κατάστημα & προϊόντα', 'noxpress' ),
+			'orders'     => __( 'Παραγγελίες & πελάτες', 'noxpress' ),
+			'money'      => __( 'Χρήματα & αναφορές', 'noxpress' ),
+			'publishing' => __( 'Εκδόσεις & δημιουργοί', 'noxpress' ),
+			'speed'      => __( 'Ταχύτητα & SEO', 'noxpress' ),
+			'comms'      => __( 'Επικοινωνία', 'noxpress' ),
+			'system'     => __( 'Ασφάλεια & σύστημα', 'noxpress' ),
+			'other'      => __( 'Άλλα', 'noxpress' ),
 		);
 	}
 
@@ -490,6 +585,7 @@ final class Noxpress_Core {
 				'name'   => '' !== $name ? $name : ucwords( str_replace( '-', ' ', $slug ) ),
 				'desc'   => $desc,
 				'page'   => isset( $info['page'] ) ? (string) $info['page'] : '',
+				'cat'    => isset( $info['cat'] ) && is_string( $info['cat'] ) ? sanitize_key( $info['cat'] ) : 'other',
 				'remote' => true,
 			);
 		}

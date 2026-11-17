@@ -201,6 +201,9 @@ def display_info(slug):
         info['name'] = php_str(m.group(1))
         info['desc_el'] = php_str(m.group(2))
         info['page'] = php_str(m.group(3))
+        c = re.match(r",\s*'cat'\s*=>\s*'([a-z]+)'", core[m.end():])
+        if c:
+            info['cat'] = c.group(1)  # Hub category (Core 1.5.0).
         t = re.search(r"\n\t\t" + re.escape("'" + m.group(2) + "'") + r"\s*=>\s*" + q + ",", core)
         if t:
             info['desc_en'] = php_str(t.group(1))
