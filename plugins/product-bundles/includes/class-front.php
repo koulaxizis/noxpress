@@ -99,6 +99,17 @@ final class PBN_Front {
 	 * @param PBN_Product $b Bundle.
 	 */
 	public static function html( PBN_Product $b ): string {
+		// The rows show the retail prices the bundle price comes from, for a
+		// trade account too (no wholesale on bundles).
+		return (string) PBN_Bundle::at_retail(
+			static function () use ( $b ) {
+				return self::block( $b );
+			}
+		);
+	}
+
+	/** html() itself (inside the retail guard). */
+	private static function block( PBN_Product $b ): string {
 		$s    = PBN_Settings::get();
 		$rows = PBN_Bundle::rows( $b );
 		if ( empty( $rows ) ) {

@@ -286,9 +286,23 @@ final class PBN_Bundle {
 	 * @return array { ok, rows[ { row, product, qty, base, line, share, unit } ], value, price, display_value, display_price }
 	 */
 	public static function quote( WC_Product $bundle, array $choices = array(), string $pick = 'min' ): array {
+		return self::at_retail(
+			static function () use ( $bundle, $choices, $pick ) {
+				return self::quote_rows( $bundle, $choices, $pick );
+			}
+		);
+	}
+
+	/**
+	 * Runs $fn with component prices read at retail (see retail()).
+	 *
+	 * @param callable $fn Code that reads prices.
+	 * @return mixed What $fn returns.
+	 */
+	public static function at_retail( callable $fn ) {
 		++self::$retail;
 		try {
-			return self::quote_rows( $bundle, $choices, $pick );
+			return $fn();
 		} finally {
 			--self::$retail;
 		}
