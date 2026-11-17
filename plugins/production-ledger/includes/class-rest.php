@@ -42,6 +42,11 @@
  * names (whose Revenue Splitter shares are not a cost) and the general
  * expenses that no product carries.
  *
+ *  GET/POST /wp-json/wc/v3/pl/analysis, /pl/rates, /pl/package,
+ *  /pl/promo-apply, /pl/event-sale                           (1.3.0)
+ *
+ * «Ανάλυση τίτλου»: see analysis_routes().
+ *
  * Authentication: under wc/v3, so WooCommerce authenticates the shop's
  * REST keys (a read key is enough) or an Application Password; the route
  * also checks manage_woocommerce. Deviation from §20 (own namespace
@@ -63,6 +68,7 @@ final class PL_Rest {
 
 	public static function routes(): void {
 		self::report_route();
+		self::analysis_routes();
 		$date = array(
 			'type'    => 'string',
 			'pattern' => '^\d{4}-\d{2}-\d{2}$',
@@ -95,6 +101,142 @@ final class PL_Rest {
 				),
 			)
 		);
+	}
+
+	/**
+	 * 1.3.0 «Ανάλυση τίτλου», the same data the admin tab shows, and the
+	 * writes orOS makes straight into the ledger (no copy is kept in orOS):
+	 *
+	 *  GET  /pl/analysis?from&to&product_id   one title (product_id) or all
+	 *  GET  /pl/rates                         the price list and the package
+	 *  POST /pl/rates                         a new material or a new price
+	 *  POST /pl/package                       the promo package { pkg: { key: qty } }
+	 *  POST /pl/promo-apply                   the package for a title
+	 *  POST /pl/event-sale                    a sale at an event
+	 *
+	 * Writes need a WooCommerce key with Read/Write (WooCommerce refuses a
+	 * read key on POST) and manage_woocommerce; every row they make
+	 * carries source «oros».
+	 */
+	public static function analysis_routes(): void {
+		$date = array(
+			'type'    => 'string',
+			'pattern' => '^\d{4}-\d{2}-\d{2}$',
+		);
+		register_rest_route(
+			self::NS,
+			'/pl/analysis',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'analysis' ),
+				'permission_callback' => array( __CLASS__, 'allowed' ),
+				'args'                => array(
+					'from'       => $date,
+					'to'         => $date,
+					'product_id' => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+						'default' => 0,
+					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/pl/rates',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'rates' ),
+					'permission_callback' => array( __CLASS__, 'allowed' ),
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'rate_add' ),
+					'permission_callback' => array( __CLASS__, 'allowed' ),
+				),
+			)
+		);
+		foreach ( array(
+			'/pl/package'     => 'package',
+			'/pl/promo-apply' => 'promo_apply',
+			'/pl/event-sale'  => 'event_sale',
+		) as $route => $cb ) {
+			register_rest_route(
+				self::NS,
+				$route,
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, $cb ),
+					'permission_callback' => array( __CLASS__, 'allowed' ),
+				)
+			);
+		}
+	}
+
+	/** @param WP_REST_Request $req Request. */
+	public static function analysis( $req ) {
+		$from = (string) $req->get_param( 'from' );
+		$to   = (string) $req->get_param( 'to' );
+		$from = PL_Settings::valid_date( $from ) ? $from : PL_Analysis::default_from();
+		$to   = PL_Settings::valid_date( $to ) ? $to : wp_date( 'Y-m-d' );
+		if ( $from > $to ) {
+			return new WP_Error( 'pl_range', 'from is after to.', array( 'status' => 400 ) );
+		}
+		$pid = (int) $req->get_param( 'product_id' );
+		$out = $pid > 0 ? array( 'title' => PL_Analysis::title( $pid, $from, $to ) ) : PL_Analysis::all( $from, $to );
+		$out = array_merge(
+			array(
+				'source'  => 'production-ledger',
+				'version' => PL_VERSION,
+				'from'    => $from,
+				'to'      => $to,
+			),
+			$out,
+			array( 'rates' => PL_Rates::out() )
+		);
+		return self::nocache( $out );
+	}
+
+	public static function rates() {
+		return self::nocache( PL_Rates::out() );
+	}
+
+	/** A body as an array (JSON or form). */
+	private static function body( $req ): array {
+		$b = $req->get_json_params();
+		return is_array( $b ) ? $b : (array) $req->get_body_params();
+	}
+
+	/** @param WP_REST_Request $req Request. */
+	public static function rate_add( $req ) {
+		$r = PL_Rates::add_price( self::body( $req ) );
+		return is_wp_error( $r ) ? self::bad( $r ) : self::nocache( $r );
+	}
+
+	/** @param WP_REST_Request $req Request. */
+	public static function package( $req ) {
+		$b = self::body( $req );
+		$r = PL_Rates::set_package( isset( $b['pkg'] ) && is_array( $b['pkg'] ) ? $b['pkg'] : array() );
+		return is_wp_error( $r ) ? self::bad( $r ) : self::nocache( $r );
+	}
+
+	/** @param WP_REST_Request $req Request. */
+	public static function promo_apply( $req ) {
+		$b   = self::body( $req );
+		$day = isset( $b['date'] ) ? (string) $b['date'] : wp_date( 'Y-m-d' );
+		$r   = PL_Rates::apply( (int) ( $b['product_id'] ?? 0 ), $day, ! empty( $b['dry_run'] ), 'oros' );
+		return is_wp_error( $r ) ? self::bad( $r ) : self::nocache( $r );
+	}
+
+	/** @param WP_REST_Request $req Request. */
+	public static function event_sale( $req ) {
+		$r = PL_Sales::event_sale( self::body( $req ), 'oros' );
+		return is_wp_error( $r ) ? self::bad( $r ) : self::nocache( $r );
+	}
+
+	private static function bad( WP_Error $e ): WP_Error {
+		return new WP_Error( $e->get_error_code(), $e->get_error_message(), array( 'status' => 400 ) );
 	}
 
 	/** The report route (1.1.0): registered with the records route. */

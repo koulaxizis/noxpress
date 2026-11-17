@@ -122,8 +122,14 @@ final class Production_Ledger {
 		require_once PL_PATH . 'includes/class-entries.php';
 		require_once PL_PATH . 'includes/class-report.php';
 		require_once PL_PATH . 'includes/class-abilities.php';
+		require_once PL_PATH . 'includes/class-rates.php';
+		require_once PL_PATH . 'includes/class-analysis.php';
+		require_once PL_PATH . 'includes/class-sales.php';
 
 		PL_Report::init();
+		if ( ! self::killed() ) {
+			PL_Sales::init();
+		}
 		PL_Abilities::init();
 
 		// Queued Printful look-ups run even when the module was switched

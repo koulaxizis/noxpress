@@ -43,6 +43,8 @@ final class PL_Admin_UI {
 			'overview' => __( 'Επισκόπηση', 'production-ledger' ),
 			'entries'  => __( 'Καταχωρίσεις', 'production-ledger' ),
 			'general'  => __( 'Γενικά έξοδα', 'production-ledger' ),
+			'analysis' => __( 'Ανάλυση τίτλου', 'production-ledger' ),
+			'rates'    => __( 'Τιμοκατάλογος & εκδηλώσεις', 'production-ledger' ),
 			'settings' => __( 'Ρυθμίσεις', 'production-ledger' ),
 			'export'   => __( 'Εξαγωγή', 'production-ledger' ),
 		);
@@ -187,6 +189,12 @@ final class PL_Admin_UI {
 					break;
 				case 'general':
 					self::render_entries( 'general' );
+					break;
+				case 'analysis':
+					self::render_analysis();
+					break;
+				case 'rates':
+					self::render_rates();
 					break;
 				case 'settings':
 					self::render_settings();
@@ -864,12 +872,458 @@ final class PL_Admin_UI {
 			case 'save_settings':
 				self::do_save_settings();
 				break;
+			case 'add_price':
+				self::do_add_price();
+				break;
+			case 'save_package':
+				self::do_save_package();
+				break;
+			case 'promo_apply':
+				self::do_promo_apply();
+				break;
+			case 'event_sale':
+				self::do_event_sale();
+				break;
 			case 'import_settings':
 				self::do_import_settings();
 				break;
 			default:
 				self::redirect( 'overview', array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'production-ledger' ) ) ) );
 		}
+	}
+
+	/* ---------------------------------------------------------------------
+	 * 1.3.0 Ανάλυση τίτλου
+	 * ------------------------------------------------------------------- */
+
+	/** [ from, to ] of the analysis (GET af / at). */
+	private static function analysis_period(): array {
+		$from = self::q( 'af' );
+		$to   = self::q( 'at' );
+		$from = PL_Settings::valid_date( $from ) ? $from : PL_Analysis::default_from();
+		$to   = PL_Settings::valid_date( $to ) ? $to : wp_date( 'Y-m-d' );
+		return $from > $to ? array( $to, $to ) : array( $from, $to );
+	}
+
+	private static function date_label( string $d ): string {
+		return wp_date( get_option( 'date_format' ), strtotime( $d . ' 12:00:00' ) );
+	}
+
+	/** Products a title can be (books, CDs, merch): id => name, newest first. */
+	private static function title_choices(): array {
+		$ids = wc_get_products(
+			array(
+				'status'  => array( 'publish', 'private', 'draft', 'future' ),
+				'type'    => array( 'simple', 'variable' ),
+				'limit'   => 1000,
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'return'  => 'ids',
+			)
+		);
+		$out = array();
+		foreach ( $ids as $id ) {
+			$out[ (int) $id ] = html_entity_decode( wp_strip_all_tags( get_the_title( $id ) ), ENT_QUOTES, 'UTF-8' );
+		}
+		return $out;
+	}
+
+	private static function title_select( string $name, int $sel, bool $any = false ): void {
+		echo '<select name="' . esc_attr( $name ) . '" class="pl-title-select">';
+		if ( $any ) {
+			echo '<option value="0">' . esc_html__( 'Όλοι οι τίτλοι', 'production-ledger' ) . '</option>';
+		}
+		foreach ( self::title_choices() as $id => $t ) {
+			printf( '<option value="%1$d"%2$s>%3$s</option>', (int) $id, selected( $sel, $id, false ), esc_html( $t . ' (#' . $id . ')' ) );
+		}
+		echo '</select>';
+	}
+
+	private static function render_analysis(): void {
+		list( $from, $to ) = self::analysis_period();
+		$pid               = (int) self::q( 'pid' );
+		?>
+		<p class="description"><?php esc_html_e( 'Πού πήγαν τα αντίτυπα κάθε τίτλου, πώς έφτασαν στους αναγνώστες και τι κόστισε η προώθησή του. Μετρούν μόνο πληρωμένες παραγγελίες· οι ακυρωμένες, οι αποτυχημένες και οι επιστροφές μένουν έξω, και κάθε βιβλίο ενός bundle μετρά μία φορά στον δικό του τίτλο. Τα ίδια στοιχεία βλέπει και το orOS.', 'production-ledger' ); ?></p>
+		<form method="get" class="pl-period">
+			<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG ); ?>" />
+			<input type="hidden" name="tab" value="analysis" />
+			<?php self::title_select( 'pid', $pid, true ); ?>
+			<label><?php esc_html_e( 'Από', 'production-ledger' ); ?> <input type="date" name="af" value="<?php echo esc_attr( $from ); ?>" /></label>
+			<label><?php esc_html_e( 'Έως', 'production-ledger' ); ?> <input type="date" name="at" value="<?php echo esc_attr( $to ); ?>" /></label>
+			<button type="submit" class="button"><?php esc_html_e( 'Εμφάνιση', 'production-ledger' ); ?></button>
+		</form>
+		<?php
+		if ( $pid > 0 ) {
+			self::render_title( PL_Analysis::title( $pid, $from, $to ) );
+			return;
+		}
+		$all = PL_Analysis::all( $from, $to );
+		self::render_kpis( $all['total'], null );
+		?>
+		<h2 class="pl-h2"><?php esc_html_e( 'Ανά τίτλο', 'production-ledger' ); ?></h2>
+		<?php if ( ! $all['titles'] ) : ?>
+			<p class="pl-hint"><?php esc_html_e( 'Καμία κίνηση σε αυτή την περίοδο.', 'production-ledger' ); ?></p>
+		<?php else : ?>
+		<p><input type="search" class="pl-search regular-text" placeholder="<?php esc_attr_e( 'Αναζήτηση προϊόντος…', 'production-ledger' ); ?>" data-table="pl-titles" /></p>
+		<div class="pl-scroll">
+		<table class="widefat striped pl-table pl-sortable" id="pl-titles">
+			<thead><tr>
+				<th data-sort="text"><?php esc_html_e( 'Τίτλος', 'production-ledger' ); ?></th>
+				<?php foreach ( PL_Analysis::channels() as $label ) : ?>
+					<th data-sort="num"><?php echo esc_html( $label ); ?></th>
+				<?php endforeach; ?>
+				<th data-sort="num"><?php esc_html_e( 'Πουλήθηκαν', 'production-ledger' ); ?></th>
+				<th data-sort="num"><?php esc_html_e( 'Έσοδα (καθαρά)', 'production-ledger' ); ?></th>
+				<th data-sort="num"><?php esc_html_e( 'Στοκ', 'production-ledger' ); ?></th>
+				<th data-sort="num"><?php esc_html_e( 'Προώθηση', 'production-ledger' ); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php foreach ( $all['titles'] as $t ) : ?>
+				<tr>
+					<td><a href="<?php echo esc_url( self::url( 'analysis', array( 'pid' => $t['product_id'], 'af' => $from, 'at' => $to ) ) ); ?>"><?php echo esc_html( $t['title'] ); ?></a></td>
+					<?php foreach ( $t['channels'] as $c ) : ?>
+						<td data-v="<?php echo esc_attr( (string) $c['qty'] ); ?>"><?php echo $c['qty'] ? esc_html( (string) $c['qty'] ) : '<span class="pl-muted">—</span>'; ?></td>
+					<?php endforeach; ?>
+					<td data-v="<?php echo esc_attr( (string) $t['sold'] ); ?>"><strong><?php echo esc_html( (string) $t['sold'] ); ?></strong></td>
+					<td data-v="<?php echo esc_attr( (string) $t['revenue'] ); ?>"><?php echo esc_html( self::money( $t['revenue'] ) ); ?></td>
+					<td data-v="<?php echo esc_attr( (string) ( $t['stock'] ?? -1 ) ); ?>"><?php echo null === $t['stock'] ? '—' : esc_html( (string) $t['stock'] ); ?></td>
+					<td data-v="<?php echo esc_attr( (string) $t['promo']['gross'] ); ?>"><?php echo $t['promo']['gross'] > 0 ? esc_html( self::money( $t['promo']['gross'] ) ) : '<span class="pl-muted">—</span>'; ?></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		</div>
+		<?php endif; ?>
+		<?php self::render_delivery( $all['total']['delivery'] ); ?>
+		<h2 class="pl-h2"><?php esc_html_e( 'Κόστος προώθησης ανά υλικό και έτος', 'production-ledger' ); ?></h2>
+		<?php if ( ! $all['materials'] ) : ?>
+			<p class="pl-hint"><?php esc_html_e( 'Δεν υπάρχει ακόμη καταχώριση προώθησης με υλικό του τιμοκαταλόγου.', 'production-ledger' ); ?></p>
+		<?php else : ?>
+		<table class="widefat striped pl-table">
+			<thead><tr>
+				<th><?php esc_html_e( 'Υλικό', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Έτος', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Τεμ.', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Καθαρά', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'ΦΠΑ', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Μέσο κόστος τεμαχίου', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Τίτλοι', 'production-ledger' ); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php foreach ( $all['materials'] as $m ) : ?>
+				<?php foreach ( $m['years'] as $y ) : ?>
+				<tr>
+					<td><?php echo esc_html( $m['label'] ); ?></td>
+					<td><?php echo esc_html( $y['year'] ); ?></td>
+					<td><?php echo esc_html( (string) $y['qty'] ); ?></td>
+					<td><?php echo esc_html( self::money( $y['net'] ) ); ?></td>
+					<td><?php echo esc_html( self::money( $y['vat'] ) ); ?></td>
+					<td><?php echo null === $y['unit'] ? '—' : esc_html( wc_format_localized_decimal( (string) $y['unit'] ) ); ?></td>
+					<td><?php echo esc_html( (string) $m['titles'] ); ?></td>
+				</tr>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php endif; ?>
+		<?php
+	}
+
+	/** @param array|null $promo A title's promo block, or null for all titles. */
+	private static function render_kpis( array $t, ?array $promo ): void {
+		?>
+		<div class="pl-kpis">
+			<div class="pl-kpi"><span><?php esc_html_e( 'Πουλήθηκαν', 'production-ledger' ); ?></span><strong><?php echo esc_html( (string) $t['sold'] ); ?></strong><em><?php echo esc_html( sprintf( /* translators: %d: orders */ _n( '%d παραγγελία', '%d παραγγελίες', (int) $t['orders'], 'production-ledger' ), (int) $t['orders'] ) ); ?></em></div>
+			<div class="pl-kpi"><span><?php esc_html_e( 'Έσοδα (καθαρά)', 'production-ledger' ); ?></span><strong><?php echo esc_html( self::money( $t['revenue'] ) ); ?></strong><em>&nbsp;</em></div>
+			<div class="pl-kpi"><span><?php esc_html_e( 'Δωρεάν αντίτυπα', 'production-ledger' ); ?></span><strong><?php echo esc_html( (string) $t['free'] ); ?></strong><em><?php esc_html_e( 'εκτός ποσοστών', 'production-ledger' ); ?></em></div>
+			<?php if ( isset( $t['stock'] ) ) : ?>
+			<div class="pl-kpi"><span><?php esc_html_e( 'Στοκ', 'production-ledger' ); ?></span><strong><?php echo null === $t['stock'] ? '—' : esc_html( (string) $t['stock'] ); ?></strong><em>&nbsp;</em></div>
+			<?php endif; ?>
+			<?php if ( null !== $promo ) : ?>
+			<div class="pl-kpi pl-kpi--main"><span><?php esc_html_e( 'Κόστος προώθησης', 'production-ledger' ); ?></span><strong><?php echo esc_html( self::money( $promo['gross'] ) ); ?></strong><em><?php echo esc_html( sprintf( /* translators: 1: net, 2: VAT */ __( 'καθαρά %1$s + ΦΠΑ %2$s', 'production-ledger' ), self::money( $promo['net'] ), self::money( $promo['vat'] ) ) ); ?></em></div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	private static function render_delivery( array $rows ): void {
+		?>
+		<h2 class="pl-h2"><?php esc_html_e( 'Τρόπος παράδοσης', 'production-ledger' ); ?></h2>
+		<table class="widefat striped pl-table pl-narrow">
+			<thead><tr><th><?php esc_html_e( 'Τρόπος', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Αντίτυπα', 'production-ledger' ); ?></th></tr></thead>
+			<tbody>
+			<?php foreach ( $rows as $d ) : ?>
+				<tr><td><?php echo esc_html( $d['label'] ); ?></td><td><?php echo $d['qty'] ? esc_html( (string) $d['qty'] ) : '<span class="pl-muted">—</span>'; ?></td></tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<p class="pl-hint"><?php esc_html_e( 'Τα αντίτυπα που δίνεις χέρι με χέρι μετρούν όταν η παραγγελία έχει τη μέθοδο «Παράδοση από τον εκδότη» (τη διαλέγεις μέσα στην παραγγελία στο admin) και σε κάθε πώληση σε εκδήλωση. Οι παλιές πωλήσεις από εισαγωγή δεν έχουν στοιχείο παράδοσης.', 'production-ledger' ); ?></p>
+		<?php
+	}
+
+	private static function render_title( array $t ): void {
+		self::render_kpis( $t, $t['promo'] );
+		$kinds = array(
+			'promo'       => __( 'Προώθηση / δώρο', 'production-ledger' ),
+			'review'      => __( 'Κριτική / Τύπος', 'production-ledger' ),
+			'legal'       => __( 'Νόμιμη κατάθεση', 'production-ledger' ),
+			'author_free' => __( 'Αντίτυπα συγγραφέα', 'production-ledger' ),
+		);
+		?>
+		<h2 class="pl-h2"><?php echo esc_html( $t['title'] ); ?> · <?php esc_html_e( 'Κανάλια πώλησης', 'production-ledger' ); ?></h2>
+		<table class="widefat striped pl-table pl-narrow">
+			<thead><tr><th><?php esc_html_e( 'Κανάλι', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Αντίτυπα', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Έσοδα (καθαρά)', 'production-ledger' ); ?></th></tr></thead>
+			<tbody>
+			<?php foreach ( $t['channels'] as $c ) : ?>
+				<tr><td><?php echo esc_html( $c['label'] ); ?></td><td><?php echo $c['qty'] ? esc_html( (string) $c['qty'] ) : '<span class="pl-muted">—</span>'; ?></td><td><?php echo $c['net'] > 0 ? esc_html( self::money( $c['net'] ) ) : '<span class="pl-muted">—</span>'; ?></td></tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php if ( $t['events'] ) : ?>
+			<h2 class="pl-h2"><?php esc_html_e( 'Εκθέσεις και φεστιβάλ', 'production-ledger' ); ?></h2>
+			<ul class="pl-list">
+			<?php foreach ( $t['events'] as $e ) : ?>
+				<li><?php echo esc_html( $e['name'] . ': ' . $e['qty'] ); ?></li>
+			<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+		<?php if ( $t['stores'] ) : ?>
+			<h2 class="pl-h2"><?php esc_html_e( 'Παρακαταθήκες ανά βιβλιοπωλείο', 'production-ledger' ); ?></h2>
+			<table class="widefat striped pl-table">
+				<thead><tr><th><?php esc_html_e( 'Βιβλιοπωλείο', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Δόθηκαν', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Πουλήθηκαν', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Επιστράφηκαν', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Στο ράφι', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Οφείλεται', 'production-ledger' ); ?></th></tr></thead>
+				<tbody>
+				<?php foreach ( $t['stores'] as $r ) : ?>
+					<tr><td><?php echo esc_html( $r['name'] ); ?></td><td><?php echo esc_html( (string) $r['given'] ); ?></td><td><?php echo esc_html( (string) $r['sold'] ); ?></td><td><?php echo esc_html( (string) $r['returned'] ); ?></td><td><?php echo esc_html( (string) $r['shelf'] ); ?></td><td><?php echo esc_html( self::money( $r['owed'] ) ); ?></td></tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+		<?php if ( $t['free_list'] ) : ?>
+			<h2 class="pl-h2"><?php esc_html_e( 'Πού πήγαν τα δωρεάν αντίτυπα', 'production-ledger' ); ?></h2>
+			<table class="widefat striped pl-table">
+				<thead><tr><th><?php esc_html_e( 'Ημερομηνία', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Είδος', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Παραλήπτης', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Αντίτυπα', 'production-ledger' ); ?></th></tr></thead>
+				<tbody>
+				<?php foreach ( $t['free_list'] as $f ) : ?>
+					<tr><td><?php echo esc_html( self::date_label( $f['date'] ) ); ?></td><td><?php echo esc_html( $kinds[ $f['type'] ] ?? $f['type'] ); ?></td><td><?php echo esc_html( '' !== $f['recipient'] ? $f['recipient'] : $f['ben'] ); ?></td><td><?php echo esc_html( (string) $f['qty'] ); ?></td></tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+		<?php self::render_delivery( $t['delivery'] ); ?>
+		<h2 class="pl-h2"><?php esc_html_e( 'Κόστος προώθησης', 'production-ledger' ); ?></h2>
+		<?php if ( ! $t['promo']['lines'] ) : ?>
+			<p class="pl-hint"><?php esc_html_e( 'Δεν έχει περαστεί ακόμη κόστος προώθησης για αυτόν τον τίτλο.', 'production-ledger' ); ?></p>
+		<?php else : ?>
+		<table class="widefat striped pl-table pl-narrow">
+			<thead><tr><th><?php esc_html_e( 'Υλικό', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Τεμ.', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Καθαρά', 'production-ledger' ); ?></th><th><?php esc_html_e( 'ΦΠΑ', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Σύνολο', 'production-ledger' ); ?></th></tr></thead>
+			<tbody>
+			<?php foreach ( $t['promo']['lines'] as $l ) : ?>
+				<tr><td><?php echo esc_html( $l['label'] ); ?></td><td><?php echo esc_html( (string) $l['qty'] ); ?></td><td><?php echo esc_html( self::money( $l['net'] ) ); ?></td><td><?php echo esc_html( self::money( $l['vat'] ) ); ?></td><td><?php echo esc_html( self::money( $l['gross'] ) ); ?></td></tr>
+			<?php endforeach; ?>
+			</tbody>
+			<tfoot><tr><th><?php esc_html_e( 'Σύνολο', 'production-ledger' ); ?></th><th></th><th><?php echo esc_html( self::money( $t['promo']['net'] ) ); ?></th><th><?php echo esc_html( self::money( $t['promo']['vat'] ) ); ?></th><th><?php echo esc_html( self::money( $t['promo']['gross'] ) ); ?></th></tr></tfoot>
+		</table>
+		<?php endif; ?>
+		<form method="post" class="pl-inline-form">
+			<?php self::form_head( 'promo_apply' ); ?>
+			<input type="hidden" name="pl_pid" value="<?php echo esc_attr( (string) $t['product_id'] ); ?>" />
+			<label><?php esc_html_e( 'Ημερομηνία', 'production-ledger' ); ?> <input type="date" name="pl_date" value="<?php echo esc_attr( wp_date( 'Y-m-d' ) ); ?>" /></label>
+			<button type="submit" class="button button-primary"><?php esc_html_e( 'Πέρασε το πακέτο προώθησης', 'production-ledger' ); ?></button>
+		</form>
+		<p class="pl-hint"><?php esc_html_e( 'Γράφει μία καταχώριση «Προώθηση» ανά υλικό του πακέτου, με τις τιμές που ισχύουν εκείνη τη μέρα. Ό,τι έχει ήδη γραφτεί για τον ίδιο τίτλο και την ίδια μέρα δεν γράφεται ξανά.', 'production-ledger' ); ?></p>
+		<?php
+	}
+
+	private static function render_rates(): void {
+		$r = PL_Rates::out();
+		?>
+		<p class="description"><?php esc_html_e( 'Οι τιμές των υλικών που χρησιμοποιείς σε κάθε τίτλο. Μια νέα τιμή δεν σβήνει την παλιά: ξεκινά από μια ημερομηνία, ώστε να φαίνεται πώς αλλάζει το κόστος από χρονιά σε χρονιά.', 'production-ledger' ); ?></p>
+		<h2 class="pl-h2"><?php esc_html_e( 'Τιμοκατάλογος υλικών', 'production-ledger' ); ?></h2>
+		<table class="widefat striped pl-table">
+			<thead><tr>
+				<th><?php esc_html_e( 'Υλικό', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Ισχύει από', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Τιμή τεμαχίου (καθαρή)', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'ΦΠΑ %', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Με ΦΠΑ', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Μεταβολή', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Προμηθευτής', 'production-ledger' ); ?></th>
+				<th><?php esc_html_e( 'Τιμολόγιο', 'production-ledger' ); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php foreach ( $r['items'] as $it ) : ?>
+				<?php foreach ( array_reverse( $it['versions'] ) as $i => $v ) : ?>
+				<tr>
+					<td><?php echo 0 === $i ? '<strong>' . esc_html( $it['label'] ) . '</strong> <code>' . esc_html( $it['key'] ) . '</code>' : ''; ?></td>
+					<td><?php echo esc_html( self::date_label( $v['from'] ) ); ?></td>
+					<td><?php echo esc_html( wc_format_localized_decimal( (string) $v['net'] ) ); ?></td>
+					<td><?php echo esc_html( wc_format_localized_decimal( (string) $v['vat_rate'] ) ); ?></td>
+					<td><?php echo esc_html( wc_format_localized_decimal( (string) round( $v['gross'], 3 ) ) ); ?></td>
+					<td><?php echo null === $v['change'] ? '<span class="pl-muted">—</span>' : esc_html( ( $v['change'] > 0 ? '+' : '' ) . wc_format_localized_decimal( (string) $v['change'] ) . '%' ); ?></td>
+					<td><?php echo esc_html( $v['supplier'] ); ?></td>
+					<td><?php echo esc_html( $v['invoice'] ); ?></td>
+				</tr>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+
+		<h2 class="pl-h2"><?php esc_html_e( 'Νέα τιμή ή νέο υλικό', 'production-ledger' ); ?></h2>
+		<form method="post" class="pl-form">
+			<?php self::form_head( 'add_price' ); ?>
+			<p>
+				<label><?php esc_html_e( 'Υλικό', 'production-ledger' ); ?>
+					<select name="pl_key">
+						<?php foreach ( $r['items'] as $it ) : ?>
+							<option value="<?php echo esc_attr( $it['key'] ); ?>"><?php echo esc_html( $it['label'] ); ?></option>
+						<?php endforeach; ?>
+						<option value="_new"><?php esc_html_e( 'Νέο υλικό…', 'production-ledger' ); ?></option>
+					</select></label>
+				<label><?php esc_html_e( 'Κλειδί νέου υλικού', 'production-ledger' ); ?> <input type="text" name="pl_newkey" class="regular-text" pattern="[a-z0-9_\-]{1,40}" placeholder="ship_island" /></label>
+				<label><?php esc_html_e( 'Όνομα', 'production-ledger' ); ?> <input type="text" name="pl_label" class="regular-text" maxlength="80" /></label>
+			</p>
+			<p>
+				<label><?php esc_html_e( 'Ισχύει από', 'production-ledger' ); ?> <input type="date" name="pl_from" value="<?php echo esc_attr( wp_date( 'Y-m-d' ) ); ?>" required /></label>
+				<label><?php esc_html_e( 'Τιμή τεμαχίου (καθαρή)', 'production-ledger' ); ?> <input type="text" name="pl_net" inputmode="decimal" class="small-text" required /></label>
+				<label><?php esc_html_e( 'ΦΠΑ %', 'production-ledger' ); ?> <input type="number" name="pl_vat" value="24" min="0" max="100" step="0.01" class="small-text" /></label>
+				<label><?php esc_html_e( 'Προμηθευτής', 'production-ledger' ); ?> <input type="text" name="pl_supplier" maxlength="120" /></label>
+				<label><?php esc_html_e( 'Τιμολόγιο', 'production-ledger' ); ?> <input type="text" name="pl_invoice" maxlength="60" /></label>
+			</p>
+			<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση τιμής', 'production-ledger' ); ?></button></p>
+		</form>
+
+		<h2 class="pl-h2"><?php esc_html_e( 'Πακέτο προώθησης', 'production-ledger' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Τι στέλνεις με κάθε νέο τίτλο. Βάλε 0 σε ό,τι δεν μπαίνει.', 'production-ledger' ); ?></p>
+		<form method="post" class="pl-form">
+			<?php self::form_head( 'save_package' ); ?>
+			<table class="widefat striped pl-table pl-narrow">
+				<thead><tr><th><?php esc_html_e( 'Υλικό', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Τεμ. ανά τίτλο', 'production-ledger' ); ?></th></tr></thead>
+				<tbody>
+				<?php foreach ( $r['items'] as $it ) : ?>
+					<tr><td><?php echo esc_html( $it['label'] ); ?></td><td><input type="number" name="pl_pkg[<?php echo esc_attr( $it['key'] ); ?>]" value="<?php echo esc_attr( (string) $it['in_pkg'] ); ?>" min="0" max="1000" class="small-text" /></td></tr>
+				<?php endforeach; ?>
+				</tbody>
+				<tfoot><tr><th><?php esc_html_e( 'Σήμερα κοστίζει', 'production-ledger' ); ?></th><th><?php echo esc_html( sprintf( /* translators: 1: gross, 2: net */ __( '%1$s (καθαρά %2$s)', 'production-ledger' ), self::money( $r['package']['gross'] ), self::money( $r['package']['net'] ) ) ); ?></th></tr></tfoot>
+			</table>
+			<p><button type="submit" class="button"><?php esc_html_e( 'Αποθήκευση πακέτου', 'production-ledger' ); ?></button></p>
+		</form>
+
+		<h2 class="pl-h2"><?php esc_html_e( 'Πώληση σε εκδήλωση', 'production-ledger' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Για εκθέσεις, φεστιβάλ και παρουσιάσεις. Γίνεται κανονική ολοκληρωμένη παραγγελία με παράδοση χέρι με χέρι, οπότε το στοκ και τα μερίδια του Revenue Splitter μετράνε όπως πάντα. Δεν φεύγει κανένα e-mail.', 'production-ledger' ); ?></p>
+		<form method="post" class="pl-form">
+			<?php self::form_head( 'event_sale' ); ?>
+			<p>
+				<label><?php esc_html_e( 'Εκδήλωση', 'production-ledger' ); ?> <input type="text" name="pl_event" class="regular-text" maxlength="120" required /></label>
+				<label><?php esc_html_e( 'Ημερομηνία', 'production-ledger' ); ?> <input type="date" name="pl_date" value="<?php echo esc_attr( wp_date( 'Y-m-d' ) ); ?>" max="<?php echo esc_attr( wp_date( 'Y-m-d' ) ); ?>" required /></label>
+				<label><?php esc_html_e( 'Πληρωμή', 'production-ledger' ); ?>
+					<select name="pl_pay">
+						<?php foreach ( PL_Sales::payments() as $k => $l ) : ?>
+							<option value="<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $l ); ?></option>
+						<?php endforeach; ?>
+					</select></label>
+			</p>
+			<table class="widefat pl-table pl-narrow">
+				<thead><tr><th><?php esc_html_e( 'Τίτλος', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Αντίτυπα', 'production-ledger' ); ?></th><th><?php esc_html_e( 'Τιμή τεμαχίου με ΦΠΑ (κενό = τιμή καταστήματος)', 'production-ledger' ); ?></th></tr></thead>
+				<tbody>
+				<?php for ( $i = 0; $i < 6; $i++ ) : ?>
+					<tr>
+						<td><?php self::title_select( 'pl_lines[' . $i . '][product_id]', 0, true ); ?></td>
+						<td><input type="number" name="pl_lines[<?php echo (int) $i; ?>][qty]" min="0" max="999" class="small-text" /></td>
+						<td><input type="text" name="pl_lines[<?php echo (int) $i; ?>][price]" inputmode="decimal" class="small-text" /></td>
+					</tr>
+				<?php endfor; ?>
+				</tbody>
+			</table>
+			<p><label><?php esc_html_e( 'Σημείωση', 'production-ledger' ); ?> <input type="text" name="pl_note" class="regular-text" maxlength="300" /></label></p>
+			<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Καταγραφή πώλησης', 'production-ledger' ); ?></button></p>
+		</form>
+		<?php
+	}
+
+	private static function do_add_price(): void {
+		$key = sanitize_key( self::post( 'pl_key' ) );
+		if ( '_new' === self::post( 'pl_key' ) ) {
+			$key = sanitize_key( self::post( 'pl_newkey' ) );
+		}
+		$r = PL_Rates::add_price(
+			array(
+				'key'      => $key,
+				'label'    => self::post( 'pl_label' ),
+				'from'     => self::post( 'pl_from' ),
+				'net'      => self::post( 'pl_net' ),
+				'vat_rate' => self::post( 'pl_vat' ),
+				'supplier' => self::post( 'pl_supplier' ),
+				'invoice'  => self::post( 'pl_invoice' ),
+			)
+		);
+		if ( is_wp_error( $r ) ) {
+			self::redirect( 'rates', array( self::msg( 'error', __( 'Η τιμή δεν αποθηκεύτηκε: έλεγξε υλικό, ημερομηνία και ποσό (έως 4 δεκαδικά).', 'production-ledger' ) ) ) );
+		}
+		self::redirect( 'rates', array( self::msg( 'success', __( 'Η τιμή αποθηκεύτηκε. Οι παλιές τιμές μένουν στο ιστορικό.', 'production-ledger' ) ) ) );
+	}
+
+	private static function do_save_package(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked in route().
+		$raw = isset( $_POST['pl_pkg'] ) && is_array( $_POST['pl_pkg'] ) ? wp_unslash( $_POST['pl_pkg'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- keys and ints checked in set_package().
+		$pkg = array();
+		foreach ( $raw as $k => $v ) {
+			$pkg[ sanitize_key( (string) $k ) ] = (int) $v;
+		}
+		$r = PL_Rates::set_package( $pkg );
+		if ( is_wp_error( $r ) ) {
+			self::redirect( 'rates', array( self::msg( 'error', __( 'Το πακέτο δεν αποθηκεύτηκε.', 'production-ledger' ) ) ) );
+		}
+		self::redirect( 'rates', array( self::msg( 'success', __( 'Το πακέτο αποθηκεύτηκε.', 'production-ledger' ) ) ) );
+	}
+
+	private static function do_promo_apply(): void {
+		$pid = (int) self::post( 'pl_pid' );
+		$day = self::post( 'pl_date' );
+		$r   = PL_Rates::apply( $pid, PL_Settings::valid_date( $day ) ? $day : wp_date( 'Y-m-d' ), false, 'manual' );
+		$arg = array( 'pid' => $pid );
+		if ( is_wp_error( $r ) ) {
+			self::redirect( 'analysis', array( self::msg( 'error', __( 'Το πακέτο δεν περάστηκε: έλεγξε την ημερομηνία (όχι πριν την έναρξη της καταγραφής) και ότι κάθε υλικό έχει τιμή εκείνη τη μέρα.', 'production-ledger' ) ) ), $arg );
+		}
+		if ( ! $r['ids'] ) {
+			self::redirect( 'analysis', array( self::msg( 'warning', __( 'Το πακέτο είχε ήδη περαστεί για αυτόν τον τίτλο εκείνη τη μέρα: δεν γράφτηκε τίποτα.', 'production-ledger' ) ) ), $arg );
+		}
+		/* translators: 1: entries, 2: amount */
+		self::redirect( 'analysis', array( self::msg( 'success', sprintf( __( 'Γράφτηκαν %1$d καταχωρίσεις προώθησης, σύνολο %2$s.', 'production-ledger' ), count( $r['ids'] ), self::money( $r['package']['gross'] ) ) ) ), $arg );
+	}
+
+	private static function do_event_sale(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked in route().
+		$raw   = isset( $_POST['pl_lines'] ) && is_array( $_POST['pl_lines'] ) ? wp_unslash( $_POST['pl_lines'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- every field checked in event_sale().
+		$lines = array();
+		foreach ( $raw as $l ) {
+			if ( ! is_array( $l ) || (int) ( $l['product_id'] ?? 0 ) <= 0 || (int) ( $l['qty'] ?? 0 ) <= 0 ) {
+				continue;
+			}
+			$row = array(
+				'product_id' => (int) $l['product_id'],
+				'qty'        => (int) $l['qty'],
+			);
+			if ( '' !== trim( (string) ( $l['price'] ?? '' ) ) ) {
+				$row['price'] = sanitize_text_field( (string) $l['price'] );
+			}
+			$lines[] = $row;
+		}
+		$r = PL_Sales::event_sale(
+			array(
+				'date'    => self::post( 'pl_date' ),
+				'event'   => self::post( 'pl_event' ),
+				'payment' => self::post( 'pl_pay' ),
+				'note'    => self::post( 'pl_note' ),
+				'lines'   => $lines,
+			),
+			'manual'
+		);
+		if ( is_wp_error( $r ) ) {
+			/* translators: %s: reason (English) */
+			self::redirect( 'rates', array( self::msg( 'error', sprintf( __( 'Η πώληση δεν καταγράφηκε: %s', 'production-ledger' ), $r->get_error_message() ) ) ) );
+		}
+		/* translators: 1: order number, 2: amount */
+		self::redirect( 'rates', array( self::msg( 'success', sprintf( __( 'Η πώληση καταγράφηκε ως παραγγελία #%1$d, σύνολο %2$s.', 'production-ledger' ), (int) $r['order'], self::money( (float) $r['total'] ) ) ) ) );
 	}
 
 	private static function do_save_entry( string $tab ): void {

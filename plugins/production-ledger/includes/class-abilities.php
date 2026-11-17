@@ -9,6 +9,12 @@
  *  production-ledger/export-csv    a month as CSV text (read)
  *  production-ledger/add-entry     1–100 entries from invoices (write)
  *  production-ledger/update-entry  changes one entry (write)
+ *  production-ledger/analysis      title analysis: channels, delivery, promo (read, 1.3.0)
+ *  production-ledger/rates         price list + promo package (read, 1.3.0)
+ *  production-ledger/rate-add      a material or a new price (write, 1.3.0)
+ *  production-ledger/package-set   the promo package (write, 1.3.0)
+ *  production-ledger/promo-apply   the package as entries of a title (write, 1.3.0)
+ *  production-ledger/event-sale    a sale at an event as an order (write, 1.3.0)
  *  production-ledger/delete-entry  soft delete or restore (write; not
  *                                  destructive: the row stays and comes
  *                                  back with restore, Bible §21)
@@ -97,6 +103,11 @@ final class PL_Abilities {
 				'type'        => 'integer',
 				'minimum'     => 0,
 				'description' => 'Optional count behind the amount, e.g. parcels on a carrier invoice.',
+			),
+			'item'           => array(
+				'type'        => 'string',
+				'maxLength'   => 40,
+				'description' => 'The key of a material of the price list (production-ledger/rates), e.g. bookmark or ship_island; groups promotion costs by material.',
 			),
 			'attachment_url' => array(
 				'type'        => 'string',
@@ -292,6 +303,7 @@ final class PL_Abilities {
 				'run'         => array( __CLASS__, 'delete' ),
 			),
 		);
+		$defs = array_merge( $defs, self::analysis_defs( $date ) );
 		foreach ( $defs as $name => $d ) {
 			wp_register_ability(
 				'production-ledger/' . $name,
@@ -313,6 +325,204 @@ final class PL_Abilities {
 				)
 			);
 		}
+	}
+
+	/** 1.3.0: the title analysis, the price list, the promo package and event sales. */
+	private static function analysis_defs( array $date ): array {
+		$obj = static function ( array $props, array $req = array() ): array {
+			$o = array(
+				'type'                 => 'object',
+				'properties'           => $props,
+				'additionalProperties' => false,
+			);
+			if ( $req ) {
+				$o['required'] = $req;
+			}
+			return $o;
+		};
+		return array(
+			'analysis'    => array(
+				'label'       => 'Production Ledger: title analysis',
+				'description' => 'Where the copies went and what promotion cost, for one title (product_id) or every title in a period (default: from Revenue Splitter\'s «sales since» to today). Channels (copies and net revenue ex VAT): e-shop full price, discount (coupon, discount rule or sale price), bundle, free order, old imported sales, events and festivals, bookstore purchase (Trade Accounts), consignment (sold; plus per bookstore given, sold, returned, on the shelf, owed), author purchase and free copies from the copies register with their recipients. Delivery (copies): Allover, BOX NOW, warehouse pick-up, GrafoExMachina pick-up, other pick-up, by hand from the publisher, no record. Only paid orders; cancelled, failed and refunded orders and refunded copies are left out; a bundle\'s books count once each under their own title. Promotion: the title\'s promotion entries by material; for all titles also the cost per material and year. Changes nothing.',
+				'input'       => $obj(
+					array(
+						'product_id' => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+						),
+						'from'       => $date,
+						'to'         => $date,
+					)
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'analysis' ),
+			),
+			'rates'       => array(
+				'label'       => 'Production Ledger: price list',
+				'description' => 'The materials of the price list (carrier zones, bookmarks, note cards, envelopes, business cards…) with every price they have had (valid from, unit net, VAT rate, supplier, invoice, change % against the previous price), the current price, and the promo package priced today. Changes nothing.',
+				'input'       => $obj( array() ),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'rates' ),
+			),
+			'rate-add'    => array(
+				'label'       => 'Production Ledger: add a price',
+				'description' => 'Adds a material (key + label) or a new price of one (a new version valid from a date; older prices stay for the history; a second price on the same date replaces that day\'s). net = unit price ex VAT, up to 4 decimals.',
+				'input'       => $obj(
+					array(
+						'key'      => array(
+							'type'      => 'string',
+							'maxLength' => 40,
+						),
+						'label'    => array(
+							'type'      => 'string',
+							'maxLength' => 80,
+						),
+						'from'     => $date,
+						'net'      => array(
+							'type'    => 'number',
+							'minimum' => 0,
+						),
+						'vat_rate' => array(
+							'type'    => 'number',
+							'minimum' => 0,
+							'maximum' => 100,
+						),
+						'supplier' => array(
+							'type'      => 'string',
+							'maxLength' => 120,
+						),
+						'invoice'  => array(
+							'type'      => 'string',
+							'maxLength' => 60,
+						),
+						'note'     => array(
+							'type'      => 'string',
+							'maxLength' => 200,
+						),
+					),
+					array( 'key', 'from', 'net' )
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'rate_add' ),
+			),
+			'package-set' => array(
+				'label'       => 'Production Ledger: set the promo package',
+				'description' => 'Sets the promo package that goes with every title: material key => quantity (0 or left out removes it). Returns the package priced today.',
+				'input'       => $obj(
+					array(
+						'pkg' => array(
+							'type'                 => 'object',
+							'additionalProperties' => array(
+								'type'    => 'integer',
+								'minimum' => 0,
+								'maximum' => 1000,
+							),
+						),
+					),
+					array( 'pkg' )
+				),
+				'ann'         => array( false, false, true ),
+				'run'         => array( __CLASS__, 'package_set' ),
+			),
+			'promo-apply' => array(
+				'label'       => 'Production Ledger: write the promo package for a title',
+				'description' => 'Writes one «promotion» entry per material of the promo package for a title, with the prices valid on the date. A material already written for the same title and date is skipped (never twice). dry_run = true only shows the lines.',
+				'input'       => $obj(
+					array(
+						'product_id' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+						'date'       => $date,
+						'dry_run'    => array( 'type' => 'boolean' ),
+					),
+					array( 'product_id' )
+				),
+				'ann'         => array( false, false, true ),
+				'run'         => array( __CLASS__, 'promo_apply' ),
+			),
+			'event-sale'  => array(
+				'label'       => 'Production Ledger: record a sale at an event',
+				'description' => 'Records copies sold at a book fair or festival as a completed WooCommerce order (channel «event», the event\'s name, delivery by hand, payment cash or card, no e-mails), so stock and Revenue Splitter count it like any sale. price = unit price with VAT (default the product\'s price). dry_run = true only shows it.',
+				'input'       => $obj(
+					array(
+						'date'    => $date,
+						'event'   => array(
+							'type'      => 'string',
+							'maxLength' => 120,
+						),
+						'payment' => array(
+							'type' => 'string',
+							'enum' => array( 'cash', 'card' ),
+						),
+						'note'    => array(
+							'type'      => 'string',
+							'maxLength' => 300,
+						),
+						'lines'   => array(
+							'type'     => 'array',
+							'minItems' => 1,
+							'maxItems' => PL_Sales::MAX_ROWS,
+							'items'    => $obj(
+								array(
+									'product_id' => array(
+										'type'    => 'integer',
+										'minimum' => 1,
+									),
+									'qty'        => array(
+										'type'    => 'integer',
+										'minimum' => 1,
+										'maximum' => 999,
+									),
+									'price'      => array(
+										'type'    => 'number',
+										'minimum' => 0,
+									),
+								),
+								array( 'product_id', 'qty' )
+							),
+						),
+						'dry_run' => array( 'type' => 'boolean' ),
+					),
+					array( 'event', 'lines' )
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'event_sale' ),
+			),
+		);
+	}
+
+	public static function analysis( $in = null ) {
+		$in   = is_array( $in ) ? $in : array();
+		$from = isset( $in['from'] ) && PL_Settings::valid_date( (string) $in['from'] ) ? (string) $in['from'] : PL_Analysis::default_from();
+		$to   = isset( $in['to'] ) && PL_Settings::valid_date( (string) $in['to'] ) ? (string) $in['to'] : wp_date( 'Y-m-d' );
+		if ( $from > $to ) {
+			return new WP_Error( 'pl_range', 'from is after to.' );
+		}
+		$pid = (int) ( $in['product_id'] ?? 0 );
+		return $pid > 0 ? PL_Analysis::title( $pid, $from, $to ) : PL_Analysis::all( $from, $to );
+	}
+
+	public static function rates( $in = null ): array {
+		return PL_Rates::out();
+	}
+
+	public static function rate_add( $in = null ) {
+		return PL_Rates::add_price( is_array( $in ) ? $in : array() );
+	}
+
+	public static function package_set( $in = null ) {
+		$in = is_array( $in ) ? $in : array();
+		return PL_Rates::set_package( isset( $in['pkg'] ) && is_array( $in['pkg'] ) ? $in['pkg'] : array() );
+	}
+
+	public static function promo_apply( $in = null ) {
+		$in = is_array( $in ) ? $in : array();
+		return PL_Rates::apply( (int) ( $in['product_id'] ?? 0 ), isset( $in['date'] ) ? (string) $in['date'] : wp_date( 'Y-m-d' ), ! empty( $in['dry_run'] ), 'ability' );
+	}
+
+	public static function event_sale( $in = null ) {
+		return PL_Sales::event_sale( is_array( $in ) ? $in : array(), 'ability' );
 	}
 
 	public static function allowed(): bool {
