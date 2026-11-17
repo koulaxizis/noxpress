@@ -5,7 +5,7 @@ Tags: costs, profit, bookkeeping, woocommerce, publishers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -86,6 +86,9 @@ Settings, the stored Printful key, caches and queued look-ups are always removed
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). It is not accounting or tax software and does not replace your accountant. Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.1 =
+* Fix: the title analysis (tab, REST /pl/analysis and the analysis ability) stopped with an error while reading a title's promotion entries; historical entries now count in the promotion cost too.
 
 = 1.3.0 =
 * New «Title analysis» tab: per title, copies sold per sales channel (e-shop full price, discounted, in a bundle, free order, old imported sales, events, bookstores direct, consignment sold from Trade Accounts, bought by the author), per delivery method (Allover, BOX NOW, warehouse, GrafoExMachina, other pickup, hand to hand, none), free copies from the Revenue Splitter copies register with their recipients, and promotion cost per material. Only paid orders count; cancelled, failed and refunded quantities stay out, and each book of a bundle counts once under its own title.
