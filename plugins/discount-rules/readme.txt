@@ -5,7 +5,7 @@ Tags: woocommerce, discount, quantity discount, buy x get y, bulk pricing
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -97,6 +97,12 @@ The rules, settings, history, price table and scheduled jobs are removed. The ru
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.0 =
+* Quantity rules (tiers, buy X pay Y) show a ribbon with the rule's label over the product image, in product lists and on the product page, instead of a small label under the price.
+* An explanation under the price («Put 3 in the cart and pay for only 2.», plus «All products in the offer count together…» when they do) and a link to the offer page.
+* Offer page: the shop with ?dsr_offer=<rule id> lists only the products of that rule, with its label as title and the explanation on top (noindex). Nothing is stored on visitor requests.
+* New visitor texts t_xy_help, t_xy_mix and t_more (Texts tab). The stylesheet loads on every front page while a rule is active, so lists from shortcodes on ordinary pages get the ribbon too.
 
 = 1.0.0 =
 * Initial release (beta).

@@ -12,9 +12,13 @@
  *    when it runs, else woocommerce_sale_flash.
  *  - the lowest 30-day price under a reduced price (DSR_History), for
  *    rules and, when so set, WooCommerce's own sale prices
+ *  - quantity rules (tiers Β, buy-X-pay-Y Γ): a ribbon with the rule's
+ *    label over the product image (lists and product page), an
+ *    explanation and a link to the offer page
  *  - the product page: «έως 23/4» for a sale rule with an end, the tier
- *    table (Β) and the label of a buy-X-pay-Y rule (Γ)
- *  - product lists: the label of a tiers / buy-X-pay-Y rule under the price
+ *    table (Β) and the offer box of a quantity rule
+ *  - the offer page: the shop with ?dsr_offer=<rule id> lists only the
+ *    products of that rule, with its label and explanation on top
  *
  * Same request gate as the cart (front-end pages, wc-ajax, Store API;
  * never admin, other REST, feeds, cron or CLI), same mode and test mode,
@@ -36,7 +40,13 @@ final class DSR_Front {
 		add_filter( 'tp_sale_badge_text', array( __CLASS__, 'tp_badge' ), 20, 4 );
 		add_filter( 'woocommerce_sale_flash', array( __CLASS__, 'sale_flash' ), 5, 3 );
 		add_action( 'woocommerce_single_product_summary', array( __CLASS__, 'single' ), 11 );
-		add_action( 'woocommerce_after_shop_loop_item_title', array( __CLASS__, 'loop' ), 11 );
+		add_action( 'woocommerce_before_single_product_summary', array( __CLASS__, 'single_ribbon' ), 19 );
+		add_action( 'woocommerce_before_shop_loop_item_title', array( __CLASS__, 'loop_ribbon' ), 9 );
+		add_action( 'woocommerce_after_shop_loop_item', array( __CLASS__, 'loop' ), 7 );
+		add_action( 'woocommerce_product_query', array( __CLASS__, 'offer_query' ) );
+		add_filter( 'woocommerce_page_title', array( __CLASS__, 'offer_title' ) );
+		add_action( 'woocommerce_archive_description', array( __CLASS__, 'offer_head' ), 5 );
+		add_filter( 'wp_robots', array( __CLASS__, 'offer_robots' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
 	}
 
@@ -279,9 +289,9 @@ final class DSR_Front {
 			}
 			foreach ( DSR_Engine::qty_rules_for( $product ) as $r ) {
 				if ( 'xy' === $r['type'] ) {
-					$out .= self::label_html( $r, 'p' );
+					$out .= self::offer_box( $r, 'div' );
 				} elseif ( 'yes' === DSR_Settings::get()['table'] ) {
-					$out .= self::tier_table( $r, $product );
+					$out .= self::tier_table( $r, $product ) . self::more_link( $r );
 				}
 			}
 			echo $out; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
@@ -290,10 +300,46 @@ final class DSR_Front {
 		}
 	}
 
-	/** Product lists: the label of a quantity rule under the price. */
-	public static function loop(): void {
+	/** The first quantity rule of a product in a list, or null (setting, mode). */
+	private static function loop_rule(): ?array {
 		global $product;
-		if ( ! $product instanceof WC_Product || 'yes' !== DSR_Settings::get()['loop_label'] ) {
+		if ( ! $product instanceof WC_Product || 'yes' !== DSR_Settings::get()['loop_label'] || ! self::on() ) {
+			return null;
+		}
+		foreach ( DSR_Engine::qty_rules_for( $product ) as $r ) {
+			return $r;
+		}
+		return null;
+	}
+
+	/** Product lists: the ribbon over the image (inside the product link, so no link of its own). */
+	public static function loop_ribbon(): void {
+		try {
+			$r = self::loop_rule();
+			if ( null !== $r ) {
+				echo self::ribbon( $r ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in ribbon().
+			}
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/** Product lists: the explanation and the link to the offer page, after the product link. */
+	public static function loop(): void {
+		try {
+			$r = self::loop_rule();
+			if ( null !== $r ) {
+				echo self::offer_box( $r, 'span' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in offer_box().
+			}
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/** Product page: the ribbon over the gallery (the first quantity rule). */
+	public static function single_ribbon(): void {
+		global $product;
+		if ( ! $product instanceof WC_Product ) {
 			return;
 		}
 		try {
@@ -301,7 +347,7 @@ final class DSR_Front {
 				return;
 			}
 			foreach ( DSR_Engine::qty_rules_for( $product ) as $r ) {
-				echo self::label_html( $r, 'span' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in label_html().
+				echo self::ribbon( $r, 'single' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in ribbon().
 				break;
 			}
 		} catch ( \Throwable $e ) {
@@ -310,22 +356,263 @@ final class DSR_Front {
 	}
 
 	/**
-	 * A rule's label, with its end date when it has one.
+	 * The ribbon of a quantity rule: its label, with the explanation as title.
 	 *
-	 * @param array  $r   Rule.
-	 * @param string $tag p | span.
+	 * @param array  $r     Rule.
+	 * @param string $where loop | single.
 	 */
-	private static function label_html( array $r, string $tag ): string {
-		$label = DSR_Rules::label( $r );
-		if ( 'tiers' === $r['type'] && '' === $r['label']['el'] ) {
-			$label = DSR_Settings::text( 't_tiers' );
-		}
+	private static function ribbon( array $r, string $where = 'loop' ): string {
+		$label = self::rule_label( $r );
 		if ( '' === $label ) {
 			return '';
 		}
+		$help = self::help( $r );
+		$cls  = 'single' === $where ? 'dsr-ribbon dsr-ribbon--single' : 'dsr-ribbon';
+		return '<span class="' . $cls . '"' . ( '' !== $help ? ' title="' . esc_attr( $help ) . '"' : '' ) . '>' . esc_html( $label ) . '</span>';
+	}
+
+	/** A quantity rule's visitor label (tiers without their own: «Έκπτωση ποσότητας»). */
+	private static function rule_label( array $r ): string {
+		if ( 'tiers' === $r['type'] && '' === $r['label']['el'] ) {
+			return DSR_Settings::text( 't_tiers' );
+		}
+		return DSR_Rules::label( $r );
+	}
+
+	/**
+	 * The explanation of a buy-X-pay-Y rule (empty for tiers: the table
+	 * explains them). Lists get the short sentence, the product page and
+	 * the offer page also the «count together» one.
+	 *
+	 * @param array $r    Rule.
+	 * @param bool  $full With the second sentence.
+	 */
+	private static function help( array $r, bool $full = true ): string {
+		if ( 'xy' !== $r['type'] ) {
+			return '';
+		}
+		$text = DSR_Settings::fill(
+			't_xy_help',
+			array(
+				'buy' => (int) $r['buy'],
+				'pay' => (int) $r['pay'],
+			)
+		);
+		if ( $full && 'set' === $r['count'] ) {
+			$mix  = DSR_Settings::text( 't_xy_mix' );
+			$text = trim( $text . ' ' . $mix );
+		}
+		return $text;
+	}
+
+	/**
+	 * The explanation, the end date and the link to the offer page.
+	 *
+	 * @param array  $r   Rule.
+	 * @param string $tag div (product page) | span (lists).
+	 */
+	private static function offer_box( array $r, string $tag ): string {
+		$tag   = 'div' === $tag ? 'div' : 'span';
+		$label = self::rule_label( $r );
+		$help  = self::help( $r, 'div' === $tag );
 		$until = '' !== $r['to'] ? ' <span class="dsr-until">' . esc_html( DSR_Settings::fill( 't_until', array( 'date' => self::date( $r['to'] ) ) ) ) . '</span>' : '';
-		$tag   = 'p' === $tag ? 'p' : 'span';
-		return '<' . $tag . ' class="dsr-label"><span class="dsr-pill">' . esc_html( $label ) . '</span>' . $until . '</' . $tag . '>';
+		$head  = 'div' === $tag && '' !== $label ? '<span class="dsr-pill">' . esc_html( $label ) . '</span>' . $until . ' ' : '';
+		$body  = '' !== $help ? '<span class="dsr-help">' . esc_html( $help ) . '</span>' : '';
+		if ( 'span' === $tag ) {
+			$body .= $until;
+		}
+		$more  = self::more_link( $r );
+		if ( '' === $head . $body . $more ) {
+			return '';
+		}
+		return '<' . $tag . ' class="dsr-offer dsr-offer--' . ( 'div' === $tag ? 'single' : 'loop' ) . '">' . $head . $body . $more . '</' . $tag . '>';
+	}
+
+	/** The link to the offer page of a rule. */
+	private static function more_link( array $r ): string {
+		$text = DSR_Settings::fill( 't_more', array( 'label' => self::rule_label( $r ) ) );
+		$url  = self::offer_url( (int) $r['id'] );
+		if ( '' === $text || '' === $url ) {
+			return '';
+		}
+		return ' <a class="dsr-more" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
+	}
+
+	/** The offer page of a rule: the shop with ?dsr_offer=<id>. */
+	public static function offer_url( int $id ): string {
+		$shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '';
+		return ( $id > 0 && '' !== $shop ) ? add_query_arg( 'dsr_offer', $id, $shop ) : '';
+	}
+
+	/* =====================================================================
+	 * Offer page (?dsr_offer=<rule id> on the shop)
+	 * =================================================================== */
+
+	/** @var array|null|false The rule of this request's offer page (false = not looked up yet). */
+	private static $offer = false;
+
+	/** The active quantity rule named by ?dsr_offer on the shop page, or null. */
+	private static function offer_rule(): ?array {
+		if ( false !== self::$offer ) {
+			return self::$offer;
+		}
+		self::$offer = null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter of a public list.
+		$id = isset( $_GET['dsr_offer'] ) ? absint( wp_unslash( $_GET['dsr_offer'] ) ) : 0;
+		if ( $id <= 0 || ! self::on() ) {
+			return null;
+		}
+		$rules = DSR_Engine::active( array( 'tiers', 'xy' ), DSR_Engine::context() );
+		if ( isset( $rules[ $id ] ) ) {
+			self::$offer = $rules[ $id ];
+		}
+		return self::$offer;
+	}
+
+	/**
+	 * The ids of the published products a rule covers now (per request,
+	 * nothing is stored: Bible §14.5).
+	 *
+	 * @param array $r Rule.
+	 * @return int[]
+	 */
+	private static function offer_ids( array $r ): array {
+		$args = array(
+			'post_type'      => 'product',
+			'post_status'    => 'publish',
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+			'no_found_rows'  => true,
+		);
+		if ( 'yes' !== $r['all'] ) {
+			$or = array( 'relation' => 'OR' );
+			foreach ( array( 'cats' => 'product_cat', 'tags' => 'product_tag', 'brands' => 'product_brand' ) as $key => $tax ) {
+				if ( ! empty( $r[ $key ] ) && taxonomy_exists( $tax ) ) {
+					$or[] = array(
+						'taxonomy'         => $tax,
+						'terms'            => array_map( 'intval', $r[ $key ] ),
+						'include_children' => true,
+					);
+				}
+			}
+			$ids = array();
+			if ( count( $or ) > 1 ) {
+				$ids = get_posts( $args + array( 'tax_query' => $or ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- offer page only.
+			}
+			foreach ( $r['products'] as $pid ) {
+				$p = wc_get_product( (int) $pid );
+				if ( $p instanceof WC_Product ) {
+					$ids[] = DSR_Engine::main_id( $p );
+				}
+			}
+			$ids = array_unique( array_map( 'intval', $ids ) );
+		} else {
+			$ids = array_map( 'intval', get_posts( $args ) );
+		}
+		$out = array();
+		foreach ( $ids as $id ) {
+			$p = wc_get_product( $id );
+			if ( $p instanceof WC_Product && 'publish' === $p->get_status() && self::covers( $r, $p ) ) {
+				$out[] = $id;
+			}
+		}
+		return $out;
+	}
+
+	/** True when a rule covers a product or, for a variable product, one of its variations. */
+	private static function covers( array $r, WC_Product $p ): bool {
+		if ( DSR_Engine::in_scope( $r, $p ) ) {
+			return true;
+		}
+		if ( $p->is_type( 'variable' ) ) {
+			foreach ( $p->get_children() as $vid ) {
+				$v = wc_get_product( (int) $vid );
+				if ( $v instanceof WC_Product && DSR_Engine::in_scope( $r, $v ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The shop's main query on an offer page: only the rule's products.
+	 *
+	 * @param mixed $q WP_Query.
+	 */
+	public static function offer_query( $q ): void {
+		try {
+			if ( ! $q instanceof WP_Query || ! $q->is_main_query() || ! function_exists( 'is_shop' ) || ! is_shop() ) {
+				return;
+			}
+			$r = self::offer_rule();
+			if ( null === $r ) {
+				return;
+			}
+			$ids  = self::offer_ids( $r );
+			$prev = array_filter( array_map( 'intval', (array) $q->get( 'post__in' ) ) );
+			if ( ! empty( $prev ) ) {
+				$ids = array_values( array_intersect( $ids, $prev ) ); // Another filter (e.g. Shop Filters) narrows it further.
+			}
+			$q->set( 'post__in', empty( $ids ) ? array( 0 ) : $ids );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/**
+	 * The shop title on an offer page: the rule's label.
+	 *
+	 * @param mixed $title Title.
+	 */
+	public static function offer_title( $title ) {
+		try {
+			if ( ! function_exists( 'is_shop' ) || ! is_shop() ) {
+				return $title;
+			}
+			$r = self::offer_rule();
+			return null !== $r ? self::rule_label( $r ) : $title;
+		} catch ( \Throwable $e ) {
+			return $title;
+		}
+	}
+
+	/** The explanation on top of an offer page. */
+	public static function offer_head(): void {
+		try {
+			if ( ! function_exists( 'is_shop' ) || ! is_shop() ) {
+				return;
+			}
+			$r = self::offer_rule();
+			if ( null === $r ) {
+				return;
+			}
+			$help  = self::help( $r );
+			$until = '' !== $r['to'] ? ' <span class="dsr-until">' . esc_html( DSR_Settings::fill( 't_until', array( 'date' => self::date( $r['to'] ) ) ) ) . '</span>' : '';
+			if ( '' === $help && '' === $until ) {
+				return;
+			}
+			echo '<div class="dsr-offer dsr-offer--page"><span class="dsr-help">' . esc_html( $help ) . '</span>' . $until . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped parts.
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/**
+	 * Offer pages stay out of search results (a filtered copy of the shop).
+	 *
+	 * @param mixed $robots Robots directives.
+	 */
+	public static function offer_robots( $robots ) {
+		try {
+			if ( is_array( $robots ) && function_exists( 'is_shop' ) && is_shop() && null !== self::offer_rule() ) {
+				$robots['noindex'] = true;
+				$robots['follow']  = true;
+			}
+		} catch ( \Throwable $e ) {
+			return $robots;
+		}
+		return $robots;
 	}
 
 	/**
@@ -374,10 +661,10 @@ final class DSR_Front {
 	 * Assets
 	 * =================================================================== */
 
-	/** The small stylesheet, on shop pages, while a rule is active. */
+	/** The small stylesheet, while a rule is active (product lists also appear on ordinary pages through shortcodes). */
 	public static function assets(): void {
 		try {
-			if ( ! self::on() || ! ( is_woocommerce() || is_cart() || is_checkout() || is_front_page() ) ) {
+			if ( ! self::on() || is_feed() ) {
 				return;
 			}
 			if ( empty( DSR_Engine::active( array( 'sale', 'tiers', 'xy', 'cart' ), DSR_Engine::context() ) ) ) {
