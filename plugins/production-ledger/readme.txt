@@ -5,7 +5,7 @@ Tags: costs, profit, bookkeeping, woocommerce, publishers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -86,6 +86,13 @@ Settings, the stored Printful key, caches and queued look-ups are always removed
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). It is not accounting or tax software and does not replace your accountant. Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* New «Title analysis» tab: per title, copies sold per sales channel (e-shop full price, discounted, in a bundle, free order, old imported sales, events, bookstores direct, consignment sold from Trade Accounts, bought by the author), per delivery method (Allover, BOX NOW, warehouse, GrafoExMachina, other pickup, hand to hand, none), free copies from the Revenue Splitter copies register with their recipients, and promotion cost per material. Only paid orders count; cancelled, failed and refunded quantities stay out, and each book of a bundle counts once under its own title.
+* New «Price list & events» tab: a price list of promotion materials with dated versions (a new price never erases the old one, so cost changes show year by year), a promotion package per title applied in one step (one entry per material at the prices of that day, never twice), and an event sale form that creates a normal completed order with hand delivery, cash or card, no e-mails.
+* New shipping method «Delivered by the publisher» (pl_hand): never offered at checkout, picked only on an order in the admin.
+* Entries get an optional «item» field that links them to a price-list material (database version 2, added on the next write).
+* REST for orOS: GET /pl/analysis, GET/POST /pl/rates, POST /pl/package, /pl/promo-apply, /pl/event-sale; matching abilities for Site Bridge (analysis, rates, rate-add, package-set, promo-apply, event-sale), each with dry_run where it writes.
 
 = 1.2.2 =
 * Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.

@@ -3,7 +3,7 @@
  * Plugin Name:          Production Ledger
  * Plugin URI:           https://noxpress.tech
  * Description:          Κόστη και καθαρό αποτέλεσμα ανά προϊόν: καταχωρίσεις κόστους παραγωγής ανά κατηγορία (εκτύπωση, επιμέλεια, σχέδιο, ήχος, μεταφορικά, προώθηση…), μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών από το Revenue Splitter, γενικά έξοδα σε χωριστό βιβλίο, νεκρό σημείο, εξαγωγή CSV και ροή εγγραφών για το orOS Budget. Όλα τα ποσά καθαρά, με τον ΦΠΑ σε δική του στήλη.
- * Version:              1.2.2
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -76,7 +76,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PL_VERSION', '1.2.2' );
+define( 'PL_VERSION', '1.3.0' );
 define( 'PL_FILE', __FILE__ );
 define( 'PL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PL_URL', plugin_dir_url( __FILE__ ) );
@@ -122,8 +122,14 @@ final class Production_Ledger {
 		require_once PL_PATH . 'includes/class-entries.php';
 		require_once PL_PATH . 'includes/class-report.php';
 		require_once PL_PATH . 'includes/class-abilities.php';
+		require_once PL_PATH . 'includes/class-rates.php';
+		require_once PL_PATH . 'includes/class-analysis.php';
+		require_once PL_PATH . 'includes/class-sales.php';
 
 		PL_Report::init();
+		if ( ! self::killed() ) {
+			PL_Sales::init();
+		}
 		PL_Abilities::init();
 
 		// Queued Printful look-ups run even when the module was switched

@@ -17,6 +17,10 @@
  * rows» tool. Rows made by a module carry ext_ref (unique among live
  * rows): the same source updates its row and never makes a second one.
  *
+ * item (1.3.0, schema 2): the key of a material of the price list
+ * (PL_Rates), e.g. ship_island or bookmark, so the title analysis groups
+ * costs by material without reading descriptions ('' = none).
+ *
  * Schema version in option pl_db; dbDelta on activation and on admin_init
  * when the version changes (Bible §12).
  */
@@ -25,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class PL_Entries {
 
-	const DB_VERSION = '1';
+	const DB_VERSION = '2';
 	const MAX_BATCH  = 100;
 
 	/** Category slug => [ Greek label (msgid), kind cost|income, allowed for product|pool|general ]. */
@@ -97,6 +101,7 @@ final class PL_Entries {
   vat_rate decimal(5,2) NOT NULL DEFAULT 0,
   currency char(3) NOT NULL DEFAULT 'EUR',
   qty_basis int(10) unsigned DEFAULT NULL,
+  item varchar(40) NOT NULL DEFAULT '',
   attachment_url varchar(500) NOT NULL DEFAULT '',
   source varchar(10) NOT NULL DEFAULT 'manual',
   ext_ref varchar(80) NOT NULL DEFAULT '',
@@ -111,6 +116,7 @@ final class PL_Entries {
   KEY product_id (product_id),
   KEY category (category),
   KEY ext_ref (ext_ref),
+  KEY item (item),
   KEY updated_at (updated_at)
 ) {$charset};"
 		);
@@ -224,6 +230,11 @@ final class PL_Entries {
 			}
 		}
 
+		$item = sanitize_key( (string) $get( 'item', '' ) );
+		if ( '' !== $item && ( strlen( $item ) > 40 || ! class_exists( 'PL_Rates' ) || ! PL_Rates::exists( $item ) ) ) {
+			return new WP_Error( 'pl_item', 'item must be the key of a material in the price list (see production-ledger/rates).' );
+		}
+
 		return array(
 			'entry_date'     => $date,
 			'product_id'     => $pid,
@@ -237,6 +248,7 @@ final class PL_Entries {
 			'vat_rate'       => (float) $rate,
 			'currency'       => self::currency(),
 			'qty_basis'      => $qty,
+			'item'           => $item,
 			'attachment_url' => $url,
 			'is_test'        => ! empty( $get( 'test', ! empty( $old['is_test'] ) ) ) ? 1 : 0,
 			'is_hist'        => $hist ? 1 : 0,
@@ -281,13 +293,14 @@ final class PL_Entries {
 	 * @return int|WP_Error Row id.
 	 */
 	public static function add( array $in, string $source = 'manual', string $ext_ref = '' ) {
+		self::install(); // Writes may come from REST or an ability before any admin page ran the upgrade.
 		$row = self::validate( $in );
 		if ( is_wp_error( $row ) ) {
 			return $row;
 		}
 		global $wpdb;
 		$now                = current_time( 'mysql', true );
-		$row['source']      = in_array( $source, array( 'manual', 'ability', 'auto' ), true ) ? $source : 'manual';
+		$row['source']      = in_array( $source, array( 'manual', 'ability', 'auto', 'oros' ), true ) ? $source : 'manual';
 		$row['ext_ref']     = substr( preg_replace( '/[^A-Za-z0-9:_\-.]/', '', $ext_ref ), 0, 80 );
 		$row['created_by']  = get_current_user_id();
 		$row['created_at']  = $now;
@@ -308,6 +321,7 @@ final class PL_Entries {
 	 * @return array|WP_Error The row after the change.
 	 */
 	public static function update( int $id, array $in ) {
+		self::install();
 		$old = self::get( $id );
 		if ( ! $old || null !== $old['deleted_at'] ) {
 			return new WP_Error( 'pl_missing', 'No live entry with this id.' );
@@ -323,6 +337,7 @@ final class PL_Entries {
 			'net'            => $old['net_amount'],
 			'vat_rate'       => $old['vat_rate'],
 			'qty_basis'      => $old['qty_basis'],
+			'item'           => $old['item'],
 			'attachment_url' => $old['attachment_url'],
 			'test'           => $old['is_test'],
 			'historical'     => $old['is_hist'],
@@ -428,6 +443,7 @@ final class PL_Entries {
 			'vat_rate'       => round( (float) $r['vat_rate'], 2 ),
 			'currency'       => (string) $r['currency'],
 			'qty_basis'      => null === $r['qty_basis'] ? null : (int) $r['qty_basis'],
+			'item'           => isset( $r['item'] ) ? (string) $r['item'] : '',
 			'attachment_url' => (string) $r['attachment_url'],
 			'source'         => (string) $r['source'],
 			'ext_ref'        => (string) $r['ext_ref'],
@@ -578,6 +594,7 @@ final class PL_Entries {
 			'vat_rate'       => $r['vat_rate'],
 			'currency'       => $r['currency'],
 			'qty_basis'      => $r['qty_basis'],
+			'item'           => $r['item'],
 			'attachment_url' => $r['attachment_url'],
 			'source'         => $r['source'],
 			'test'           => (bool) $r['is_test'],
