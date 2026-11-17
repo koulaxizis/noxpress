@@ -1,6 +1,6 @@
 {
-  "display": 1661,
-  "total": 1661,
+  "display": 1664,
+  "total": 1664,
   "offset": 5,
   "updated": "2026-11-17",
   "assets": {
@@ -2086,6 +2086,10 @@
     },
     "760057377": {
       "file": "nox-pb-1.1.7/product-bundles.zip",
+      "count": 3
+    },
+    "760219165": {
+      "file": "nox-rs-1.20.0/revenue-splitter.zip",
       "count": 0
     }
   }
