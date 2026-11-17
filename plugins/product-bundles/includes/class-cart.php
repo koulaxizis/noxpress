@@ -37,7 +37,11 @@ final class PBN_Cart {
 	/** @var array Groups already reported in this request. */
 	private static $told = array();
 
+	/** @var SplObjectStorage|null Product objects of bundle lines in this request. */
+	private static $lines = null;
+
 	public static function init(): void {
+		add_filter( 'tra_trade_applies', array( __CLASS__, 'no_trade' ), 10, 2 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'validate' ), 20, 6 );
 		add_filter( 'woocommerce_add_cart_item_data', array( __CLASS__, 'cart_item_data' ), 20, 4 );
 		add_action( 'woocommerce_add_to_cart', array( __CLASS__, 'expand' ), 20, 6 );
@@ -514,6 +518,7 @@ final class PBN_Cart {
 					if ( ! isset( $by_row[ $r ] ) || ! $contents[ $k ]['data'] instanceof WC_Product ) {
 						continue;
 					}
+					self::lines()->attach( $cart->cart_contents[ $k ]['data'] );
 					$cart->cart_contents[ $k ]['data']->set_price( $by_row[ $r ]['unit'] );
 					$cart->cart_contents[ $k ][ self::KEY ]['base'] = $by_row[ $r ]['base'];
 					$cart->cart_contents[ $k ][ self::KEY ]['unit'] = $by_row[ $r ]['unit'];
@@ -523,6 +528,32 @@ final class PBN_Cart {
 		} catch ( \Throwable $e ) {
 			return;
 		}
+	}
+
+	private static function lines(): SplObjectStorage {
+		if ( null === self::$lines ) {
+			self::$lines = new SplObjectStorage();
+		}
+		return self::$lines;
+	}
+
+	/**
+	 * tra_trade_applies (Trade Accounts 1.8.3+): no wholesale on bundles.
+	 * A bundle, its price while it is computed and the lines of a bundle in
+	 * the cart stay at the bundle's own price; the same products bought
+	 * separately keep their trade price.
+	 *
+	 * @param mixed $applies Trade price applies.
+	 * @param mixed $product Product object.
+	 */
+	public static function no_trade( $applies, $product ): bool {
+		if ( ! $applies || ! $product instanceof WC_Product ) {
+			return (bool) $applies;
+		}
+		if ( $product->is_type( 'nox_bundle' ) || PBN_Bundle::retail() ) {
+			return false;
+		}
+		return ! ( null !== self::$lines && self::$lines->contains( $product ) );
 	}
 
 	/* =====================================================================
