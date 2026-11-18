@@ -21,6 +21,9 @@ object Installer {
         "com.machiav3lli.fdroid",
         "dev.imranr.obtainium",
         "dev.imranr.obtainium.fdroid",
+        // Koulaxizis Apps, the app manager for every project's Android apps: it reads the
+        // Noxpress F-Droid repository and announces the updates itself (orOS Bible APPS-M2).
+        "gr.koulaxizis.apps",
     )
 
     fun isStore(installer: String?): Boolean = installer != null && installer in STORES

@@ -1,5 +1,9 @@
 # Live Operator app — changelog
 
+## 2.0.2
+
+* Change: when Koulaxizis Apps (the app manager for all our Android apps) installed or updated the app, its own new-version notification and the page's line stay quiet, since the manager already tells about new versions. Installed from the APK, the app tells as before.
+
 ## 2.0.1
 
 * Fix: the app closed as soon as a site was connected, and then on every start. The connect screen started the site's page in its own task, so the web-app launcher restarted itself, saw its first copy still open and closed. It now starts in a new task.

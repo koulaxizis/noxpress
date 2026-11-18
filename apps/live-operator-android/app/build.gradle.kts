@@ -20,8 +20,8 @@ android {
         minSdk = 28
         targetSdk = 35
         // The release workflow tags nox-loa-<versionName>.
-        versionCode = 8
-        versionName = "2.0.1"
+        versionCode = 9
+        versionName = "2.0.2"
     }
 
     signingConfigs {
