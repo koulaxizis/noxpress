@@ -3,7 +3,7 @@
  * Plugin Name:          orOS Connect
  * Plugin URI:           https://noxpress.tech
  * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget, popup) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter· και οι Προσφορές: τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.3.4
+ * Version:              1.4.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -40,6 +40,10 @@
  *  - ORC_Offers     → module "offers": REST orc/v1/offers that orOS pulls
  *                     (Publishing Quote requests → draft offers), with the
  *                     shop's WooCommerce REST keys or an Application Password
+ *  - ORC_Data       → module "data" (1.4.0): read-only REST wc/v3/oros/*
+ *                     that hands orOS the shop's figures (sales, titles,
+ *                     stock, splits, costs, bookstores) from the suite's
+ *                     own read-only abilities; no customer data
  *  - ORC_Admin_UI   → menu, modules, Newsletter and Offers settings, tools
  *
  * Deviations from the Bible (with reason):
@@ -56,7 +60,8 @@
  *    meta: it is the shop's record of the customer's consent (as Easy
  *    Withdrawal's statements). Settings, the log and queued sends go.
  *  - §14.4 (no REST): the offers routes are the purpose of the Offers
- *    module; they answer only to authenticated managers.
+ *    module; they answer only to authenticated managers. The same for the
+ *    data routes (1.4.0), read only, under wc/v3 (see ORC_Data).
  *
  * Front end (Bible §14): off until a module is switched on; test mode by
  * default (only managers see the form and the checkbox); ORC_DISABLE in
@@ -69,7 +74,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ORC_VERSION', '1.3.4' );
+define( 'ORC_VERSION', '1.4.0' );
 define( 'ORC_FILE', __FILE__ );
 define( 'ORC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ORC_URL', plugin_dir_url( __FILE__ ) );
@@ -118,6 +123,11 @@ final class Oros_Connect {
 		if ( ORC_Settings::module( 'offers' ) ) {
 			require_once ORC_PATH . 'includes/class-offers.php';
 			ORC_Offers::init();
+		}
+
+		if ( ORC_Settings::module( 'data' ) ) {
+			require_once ORC_PATH . 'includes/class-data.php';
+			ORC_Data::init();
 		}
 
 		if ( is_admin() ) {

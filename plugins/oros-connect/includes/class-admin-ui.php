@@ -42,6 +42,7 @@ final class ORC_Admin_UI {
 			'modules'    => __( 'Modules', 'oros-connect' ),
 			'newsletter' => __( 'Newsletter', 'oros-connect' ),
 			'offers'     => __( 'Προσφορές', 'oros-connect' ),
+			'data'       => __( 'Δεδομένα για orOS', 'oros-connect' ),
 			'tools'      => __( 'Εργαλεία', 'oros-connect' ),
 		);
 	}
@@ -147,6 +148,9 @@ final class ORC_Admin_UI {
 				case 'offers':
 					self::render_offers();
 					break;
+				case 'data':
+					self::render_data();
+					break;
 				case 'tools':
 					self::render_tools();
 					break;
@@ -206,6 +210,14 @@ final class ORC_Admin_UI {
 					</h3>
 					<p><?php esc_html_e( 'Τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Το orOS τα παίρνει όταν είναι ανοιχτό, και η προσφορά φεύγει μόνο όταν τη στείλεις εσύ.', 'oros-connect' ); ?></p>
 					<?php self::checkbox( 'orc_mod_offers', $s['mods']['offers'], __( 'Ενεργοποίηση', 'oros-connect' ) ); ?>
+				</div>
+				<div class="orc-mod">
+					<h3>
+						<?php esc_html_e( 'Δεδομένα για orOS', 'oros-connect' ); ?>
+						<?php echo $s['mods']['data'] ? self::badge( __( 'Ενεργό', 'oros-connect' ), 'ok' ) : self::badge( __( 'Κλειστό', 'oros-connect' ), 'muted' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in badge(). ?>
+					</h3>
+					<p><?php esc_html_e( 'Πωλήσεις, απόθεμα, μερίσματα, κόστη και παρακαταθήκες στο app «Κατάστημα» του orOS. Μόνο ανάγνωση, με το κλειδί WooCommerce που ήδη έχει το orOS, χωρίς στοιχεία πελατών.', 'oros-connect' ); ?></p>
+					<?php self::checkbox( 'orc_mod_data', $s['mods']['data'], __( 'Ενεργοποίηση', 'oros-connect' ) ); ?>
 				</div>
 				<?php
 				$soon = array(
@@ -454,6 +466,82 @@ final class ORC_Admin_UI {
 		<?php
 	}
 
+	private static function render_data(): void {
+		$s   = ORC_Settings::get();
+		$fmt = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+		if ( ! $s['mods']['data'] ) {
+			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Το module Δεδομένα για orOS είναι κλειστό: το orOS δεν μπορεί να διαβάσει τίποτα μέχρι να το ενεργοποιήσεις στα Modules.', 'oros-connect' ) . '</p></div>';
+		}
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Αυτό το site δεν έχει Abilities API (WordPress 6.9+). Το module χρειάζεται τις ικανότητες ανάγνωσης των plugins.', 'oros-connect' ) . '</p></div>';
+		}
+		$labels  = self::data_labels();
+		$sources = array(
+			'sales'      => 'store-pulse/overview',
+			'titles'     => 'store-pulse/sales',
+			'stock'      => 'store-pulse/stock',
+			'splits'     => 'revenue-splitter/balances',
+			'costs'      => 'production-ledger/report',
+			'bookstores' => 'trade-accounts/consignment-summary',
+		);
+		?>
+		<h2 class="orc-h2"><?php esc_html_e( 'Πώς δουλεύει', 'oros-connect' ); ?></h2>
+		<div class="orc-zone">
+			<ol>
+				<li><?php esc_html_e( 'Όταν ανοίγεις το orOS, και κάθε 15 λεπτά όσο είναι ανοιχτό, ζητά από το site τα σύνολα των περιοχών που επιτρέπεις εδώ.', 'oros-connect' ); ?></li>
+				<li><?php esc_html_e( 'Το site απαντά με τις ικανότητες ανάγνωσης των ίδιων των plugins (Store Pulse, Revenue Splitter, Production Ledger, Trade Accounts). Τίποτα δεν αλλάζει στο site.', 'oros-connect' ); ?></li>
+				<li><?php esc_html_e( 'Ονόματα, email, τηλέφωνα και διευθύνσεις πελατών δεν φεύγουν ποτέ από εδώ. Κάθε απάντηση φυλάγεται 5 λεπτά.', 'oros-connect' ); ?></li>
+			</ol>
+		</div>
+
+		<form method="post">
+			<?php wp_nonce_field( self::NONCE, self::NONCE_FIELD ); ?>
+			<input type="hidden" name="orc_action" value="save_data" />
+			<h2 class="orc-h2"><?php esc_html_e( 'Τι μπορεί να διαβάσει το orOS', 'oros-connect' ); ?></h2>
+			<div class="orc-zone">
+				<?php
+				foreach ( ORC_Settings::AREAS as $a ) {
+					$ok   = function_exists( 'wp_get_ability' ) && wp_get_ability( $sources[ $a ] );
+					$lab  = $labels[ $a ];
+					$lab .= $ok ? '' : ' — ' . __( 'το plugin που το δίνει δεν είναι ενεργό', 'oros-connect' );
+					self::checkbox( 'orc_od_' . $a, ! empty( $s['od_areas'][ $a ] ), $lab );
+				}
+				?>
+			</div>
+			<p class="orc-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'oros-connect' ); ?></button></p>
+		</form>
+
+		<h2 class="orc-h2"><?php esc_html_e( 'Σύνδεση με το orOS', 'oros-connect' ); ?></h2>
+		<div class="orc-zone">
+			<span class="orc-label"><?php esc_html_e( 'Διεύθυνση του site', 'oros-connect' ); ?></span>
+			<code class="orc-wide"><?php echo esc_html( rest_url( 'wc/v3/oros/digest' ) ); ?></code>
+			<p class="description orc-mt-8"><?php esc_html_e( 'Το orOS χρησιμοποιεί το κλειδί WooCommerce REST «Ανάγνωση» που ήδη έχει για το κατάστημα (Ρυθμίσεις › Συνδεδεμένες υπηρεσίες). Δεν χρειάζεται κλειδί με εγγραφή.', 'oros-connect' ); ?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ); ?>"><?php esc_html_e( 'Κλειδιά REST', 'oros-connect' ); ?></a></p>
+			<?php
+			$seen = class_exists( 'ORC_Data' ) ? ORC_Data::last_seen() : (array) get_option( 'orc_od_seen', array() );
+			echo '<p>' . esc_html(
+				isset( $seen['t'] )
+					/* translators: %s: date and time */
+					? sprintf( __( 'Τελευταία ανάγνωση από το orOS: %s', 'oros-connect' ), wp_date( $fmt, (int) $seen['t'] ) )
+					: __( 'Το orOS δεν έχει διαβάσει ακόμα.', 'oros-connect' )
+			) . '</p>';
+			?>
+		</div>
+		<?php
+	}
+
+	/** Area labels, also when the module (and so ORC_Data) is not loaded. */
+	private static function data_labels(): array {
+		return array(
+			'sales'      => __( 'Πωλήσεις (σήμερα, μήνας, χρονιά)', 'oros-connect' ),
+			'titles'     => __( 'Πωλήσεις ανά τίτλο', 'oros-connect' ),
+			'stock'      => __( 'Απόθεμα', 'oros-connect' ),
+			'splits'     => __( 'Μερίσματα δημιουργών', 'oros-connect' ),
+			'costs'      => __( 'Κόστη και αποτέλεσμα', 'oros-connect' ),
+			'bookstores' => __( 'Βιβλιοπωλεία και παρακαταθήκες', 'oros-connect' ),
+		);
+	}
+
 	private static function render_tools(): void {
 		?>
 		<h2 class="orc-h2"><?php esc_html_e( 'Backup ρυθμίσεων', 'oros-connect' ); ?></h2>
@@ -486,7 +574,9 @@ final class ORC_Admin_UI {
 					<tr><td><code>orc_newsletter_sent</code> <?php esc_html_e( '(action)', 'oros-connect' ); ?></td><td><?php esc_html_e( 'Μετά από κάθε αποστολή από το ταμείο: ( $order_id, $result ).', 'oros-connect' ); ?></td></tr>
 					<tr><td><code>GET /wp-json/orc/v1/offers</code></td><td><?php esc_html_e( 'Τα αιτήματα του Publishing Quote για το orOS (state=new|contact|oros|closed|all, limit, page). Μόνο για διαχειριστές.', 'oros-connect' ); ?></td></tr>
 					<tr><td><code>POST /wp-json/orc/v1/offers/&lt;id&gt;</code></td><td><?php esc_html_e( 'Αλλάζει την κατάσταση ενός αιτήματος: { state, note }.', 'oros-connect' ); ?></td></tr>
-					<tr><td><code>ORC_DISABLE</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά τις φόρμες, το κουτάκι στο ταμείο, τις αποστολές και τις Προσφορές.', 'oros-connect' ); ?></td></tr>
+					<tr><td><code>GET /wp-json/wc/v3/oros/digest</code></td><td><?php esc_html_e( 'Τα σύνολα του καταστήματος για το orOS (areas=sales,titles,stock,splits,costs,bookstores, fresh=1). Μόνο ανάγνωση, μόνο για διαχειριστές.', 'oros-connect' ); ?></td></tr>
+					<tr><td><code>GET /wp-json/wc/v3/oros/status</code></td><td><?php esc_html_e( 'Ποιες περιοχές είναι ανοιχτές και ποια plugins τις δίνουν.', 'oros-connect' ); ?></td></tr>
+					<tr><td><code>ORC_DISABLE</code></td><td><?php esc_html_e( 'Στο wp-config.php: σταματά τις φόρμες, το κουτάκι στο ταμείο, τις αποστολές, τις Προσφορές και τα Δεδομένα για orOS.', 'oros-connect' ); ?></td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -524,6 +614,7 @@ final class ORC_Admin_UI {
 				$s                       = ORC_Settings::get();
 				$s['mods']['newsletter'] = '1' === self::post( 'orc_mod_newsletter' );
 				$s['mods']['offers']     = '1' === self::post( 'orc_mod_offers' );
+				$s['mods']['data']       = '1' === self::post( 'orc_mod_data' );
 				$s['mode']               = sanitize_key( self::post( 'orc_mode' ) );
 				$s['lang']               = sanitize_key( self::post( 'orc_lang' ) );
 				ORC_Settings::save( $s );
@@ -544,6 +635,18 @@ final class ORC_Admin_UI {
 				ORC_Settings::save( $s );
 				$msgs[] = self::msg( 'warning', __( 'Νέο κλειδί καταστήματος: βάλε το ίδιο και στο orOS. Το παλιό δεν ισχύει πια.', 'oros-connect' ) );
 				self::redirect( 'newsletter', $msgs );
+				break;
+			case 'save_data':
+				$s             = ORC_Settings::get();
+				$s['od_areas'] = array();
+				foreach ( ORC_Settings::AREAS as $a ) {
+					$s['od_areas'][ $a ] = '1' === self::post( 'orc_od_' . $a );
+				}
+				ORC_Settings::save( $s );
+				if ( class_exists( 'ORC_Data' ) ) {
+					ORC_Data::flush();
+				}
+				self::redirect( 'data', $saved );
 				break;
 			case 'clear_log':
 				ORC_Relay::clear_log();
