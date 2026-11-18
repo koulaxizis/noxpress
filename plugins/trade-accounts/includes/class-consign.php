@@ -1134,6 +1134,129 @@ final class TRA_Consign {
 		return true;
 	}
 
+	/**
+	 * A quantity correction (1.10.0): the record was wrong, nothing moved.
+	 * Sets the copies given and/or takes back copies recorded as returned
+	 * on one title, with a reason in the history. It is not a return: the
+	 * corrected copies never count as returned. Returns can only go down
+	 * here (a real return is a settlement). Given copies stay at least
+	 * sold + returned; 0 removes a title that was never settled. Stock
+	 * (when WooCommerce manages it) moves by the change of copies that left
+	 * the shop: (given − returned) before minus after.
+	 *
+	 * @param int      $pid      Product id of the line.
+	 * @param int|null $given    New copies given, or null to keep.
+	 * @param int|null $returned New copies returned (≤ the recorded), or null.
+	 * @param string   $reason   Why (3–500 characters), shown in the history.
+	 * @return array|WP_Error The consignment as get() answers it.
+	 */
+	public static function correct( int $id, int $pid, ?int $given, ?int $returned, string $reason ) {
+		$r = self::raw( $id );
+		if ( null === $r ) {
+			return new WP_Error( 'trc_none', __( 'Η παρακαταθήκη δεν βρέθηκε.', 'trade-accounts' ) );
+		}
+		$reason = trim( sanitize_textarea_field( $reason ) );
+		if ( mb_strlen( $reason ) < 3 ) {
+			return new WP_Error( 'trc_reason', __( 'Γράψε τον λόγο της διόρθωσης.', 'trade-accounts' ) );
+		}
+		$reason = mb_substr( $reason, 0, 500 );
+		$i      = null;
+		foreach ( $r['lines'] as $k => $l ) {
+			if ( (int) $l['p'] === $pid ) {
+				$i = $k;
+				break;
+			}
+		}
+		if ( null === $i ) {
+			return new WP_Error( 'trc_product', __( 'Ο τίτλος δεν υπάρχει σε αυτή την παρακαταθήκη.', 'trade-accounts' ) );
+		}
+		$l     = $r['lines'][ $i ];
+		$old_q = (int) $l['q'];
+		$old_r = (int) $l['ret'];
+		$sold  = (int) $l['sold'];
+		$new_q = null === $given ? $old_q : $given;
+		$new_r = null === $returned ? $old_r : $returned;
+		if ( $new_r < 0 || $new_r > $old_r ) {
+			/* translators: %d: copies recorded as returned */
+			return new WP_Error( 'trc_ret', sprintf( __( 'Οι επιστροφές διορθώνονται μόνο προς τα κάτω (από 0 έως %d). Μια πραγματική επιστροφή καταχωρείται με εκκαθάριση.', 'trade-accounts' ), $old_r ) );
+		}
+		if ( $new_q < 0 || $new_q > self::MAX_QTY || $new_q < $sold + $new_r ) {
+			/* translators: %d: the smallest number of copies given */
+			return new WP_Error( 'trc_qty', sprintf( __( 'Τα τεμάχια που δόθηκαν δεν μπορούν να είναι λιγότερα από πουλημένα και επιστροφές (%d).', 'trade-accounts' ), $sold + $new_r ) );
+		}
+		if ( $new_q === $old_q && $new_r === $old_r ) {
+			return new WP_Error( 'trc_same', __( 'Δεν άλλαξε τίποτα.', 'trade-accounts' ) );
+		}
+		if ( 0 === $new_q && count( $r['lines'] ) < 2 ) {
+			return new WP_Error( 'trc_lines', __( 'Ο μόνος τίτλος της παρακαταθήκης δεν αφαιρείται.', 'trade-accounts' ) );
+		}
+
+		// Returns taken back: from the latest dated returns first.
+		$take = $old_r - $new_r;
+		if ( $take > 0 && ! empty( $r['rets'] ) && is_array( $r['rets'] ) ) {
+			for ( $k = count( $r['rets'] ) - 1; $k >= 0 && $take > 0; $k-- ) {
+				$have = isset( $r['rets'][ $k ]['lines'][ $pid ] ) ? (int) $r['rets'][ $k ]['lines'][ $pid ] : 0;
+				if ( $have <= 0 ) {
+					continue;
+				}
+				$cut                                = min( $have, $take );
+				$take                              -= $cut;
+				$r['rets'][ $k ]['lines'][ $pid ] = $have - $cut;
+				if ( 0 === $r['rets'][ $k ]['lines'][ $pid ] ) {
+					unset( $r['rets'][ $k ]['lines'][ $pid ] );
+				}
+				if ( empty( $r['rets'][ $k ]['lines'] ) ) {
+					unset( $r['rets'][ $k ] );
+				}
+			}
+			$r['rets'] = array_values( $r['rets'] );
+		}
+
+		// Stock: copies out of the shop were old_q − old_r, now new_q − new_r.
+		$delta   = ( $old_q - $old_r ) - ( $new_q - $new_r );
+		$moved   = '';
+		$product = wc_get_product( $pid );
+		if ( 0 !== $delta && $product instanceof WC_Product && $product->managing_stock() ) {
+			wc_update_product_stock( $product, abs( $delta ), $delta > 0 ? 'increase' : 'decrease' );
+			$moved = ( $delta > 0 ? '+' : '−' ) . abs( $delta );
+		}
+
+		$name = (string) $l['name'];
+		if ( 0 === $new_q ) {
+			unset( $r['lines'][ $i ] );
+			$r['lines'] = array_values( $r['lines'] );
+		} else {
+			$r['lines'][ $i ]['q']   = $new_q;
+			$r['lines'][ $i ]['ret'] = $new_r;
+		}
+		$text = sprintf(
+			/* translators: 1: title, 2: old given, 3: new given, 4: old returned, 5: new returned, 6: reason */
+			__( 'Διόρθωση ποσότητας «%1$s»: δόθηκαν %2$d → %3$d, επιστροφές %4$d → %5$d. Λόγος: %6$s', 'trade-accounts' ),
+			$name,
+			$old_q,
+			$new_q,
+			$old_r,
+			$new_r,
+			$reason
+		);
+		if ( '' !== $moved ) {
+			/* translators: %s: stock change, e.g. +2 */
+			$text .= ' ' . sprintf( __( 'Απόθεμα %s.', 'trade-accounts' ), $moved );
+		}
+		self::log( $r, 'correct', $text );
+		self::store( $id, $r );
+
+		/**
+		 * After a quantity correction.
+		 *
+		 * @param int   $id  Consignment id.
+		 * @param array $c   The consignment as get() answers it.
+		 * @param int   $pid Product id.
+		 */
+		do_action( 'tra_consignment_corrected', $id, self::get( $id ), $pid );
+		return self::get( $id );
+	}
+
 	private static function order_index( array $r, int $order_id ): int {
 		foreach ( $r['orders'] as $i => $o ) {
 			if ( (int) $o['id'] === $order_id ) {
@@ -2306,6 +2429,38 @@ final class TRA_Consign {
 				'ann'         => array( false, false, true ),
 				'run'         => array( __CLASS__, 'ab_meta_fix' ),
 			),
+			'consignment-correct' => array(
+				'label'       => 'Trade Accounts: correct a quantity',
+				'description' => 'Fixes a wrong record on one title of a consignment (nothing physically moved): sets the copies given and/or lowers the copies recorded as returned, with a reason kept in the history. Corrected copies never count as returned; a real return is a settlement. given ≥ sold + returned; given 0 removes a title never settled. Stock (if managed) moves by the change of copies out of the shop.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'       => $id,
+						'product'  => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+						'given'    => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'maximum' => self::MAX_QTY,
+						),
+						'returned' => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+						),
+						'reason'   => array(
+							'type'      => 'string',
+							'minLength' => 3,
+							'maxLength' => 500,
+						),
+					),
+					'required'             => array( 'id', 'product', 'reason' ),
+					'additionalProperties' => false,
+				),
+				'ann'         => array( false, false, false ),
+				'run'         => array( __CLASS__, 'ab_correct' ),
+			),
 			'consignment-extend' => array(
 				'label'       => 'Trade Accounts: new settle-by date',
 				'description' => 'Moves the settle-by date of a consignment and/or adds a note to its history (doc = delivery note number).',
@@ -2397,6 +2552,17 @@ final class TRA_Consign {
 			isset( $in['orders'] ) && is_array( $in['orders'] ) ? $in['orders'] : array(),
 			! isset( $in['dry_run'] ) || ! empty( $in['dry_run'] ),
 			! empty( $in['restore'] )
+		);
+	}
+
+	public static function ab_correct( $in = null ) {
+		$in = is_array( $in ) ? $in : array();
+		return self::correct(
+			isset( $in['id'] ) ? (int) $in['id'] : 0,
+			isset( $in['product'] ) ? (int) $in['product'] : 0,
+			isset( $in['given'] ) && is_numeric( $in['given'] ) ? (int) $in['given'] : null,
+			isset( $in['returned'] ) && is_numeric( $in['returned'] ) ? (int) $in['returned'] : null,
+			isset( $in['reason'] ) ? (string) $in['reason'] : ''
 		);
 	}
 

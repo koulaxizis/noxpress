@@ -700,6 +700,32 @@ final class TRA_Consign_UI {
 			</table>
 		<?php endif; ?>
 
+		<h3 class="tra-h3"><?php esc_html_e( 'Διόρθωση ποσότητας', 'trade-accounts' ); ?></h3>
+		<div class="tra-zone">
+			<p class="description"><?php esc_html_e( 'Για λάθος καταχώριση, όταν δεν μετακινήθηκε τίποτα: διορθώνει τα τεμάχια που δόθηκαν ή αφαιρεί επιστροφές που δεν έγιναν. Δεν μετράει ως επιστροφή. Μια πραγματική επιστροφή καταχωρείται με «Εκκαθάριση».', 'trade-accounts' ); ?></p>
+			<form method="post">
+				<?php wp_nonce_field( TRA_Admin_UI::NONCE, TRA_Admin_UI::NONCE_FIELD ); ?>
+				<input type="hidden" name="tra_action" value="consign" />
+				<input type="hidden" name="tra_c_do" value="correct" />
+				<input type="hidden" name="tra_c_id" value="<?php echo (int) $id; ?>" />
+				<div class="tra-grid">
+					<label><span class="tra-label"><?php esc_html_e( 'Τίτλος', 'trade-accounts' ); ?></span>
+						<select name="tra_c_fix_p">
+							<?php foreach ( $c['lines'] as $l ) : ?>
+								<option value="<?php echo (int) $l['product']; ?>"><?php echo esc_html( sprintf( /* translators: 1: title, 2: given, 3: returned */ __( '%1$s (δόθηκαν %2$d, επιστροφές %3$d)', 'trade-accounts' ), $l['name'], $l['given'], $l['returned'] ) ); ?></option>
+							<?php endforeach; ?>
+						</select></label>
+					<label><span class="tra-label"><?php esc_html_e( 'Σωστά τεμάχια που δόθηκαν', 'trade-accounts' ); ?></span>
+						<input type="number" name="tra_c_fix_q" min="0" max="9999" placeholder="<?php esc_attr_e( 'χωρίς αλλαγή', 'trade-accounts' ); ?>" /></label>
+					<label><span class="tra-label"><?php esc_html_e( 'Σωστές επιστροφές', 'trade-accounts' ); ?></span>
+						<input type="number" name="tra_c_fix_r" min="0" max="9999" placeholder="<?php esc_attr_e( 'χωρίς αλλαγή', 'trade-accounts' ); ?>" /></label>
+				</div>
+				<label><span class="tra-label"><?php esc_html_e( 'Λόγος (μένει στο ιστορικό)', 'trade-accounts' ); ?></span>
+					<textarea name="tra_c_fix_why" rows="2" class="large-text" maxlength="500" required></textarea></label>
+				<p class="tra-submit"><button type="submit" class="button" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Η διόρθωση αλλάζει την καταχώριση του τίτλου (και το απόθεμα, αν το διαχειρίζεται το WooCommerce). Συνέχεια;', 'trade-accounts' ) ) ); ?>);"><?php esc_html_e( 'Διόρθωση', 'trade-accounts' ); ?></button></p>
+			</form>
+		</div>
+
 		<h3 class="tra-h3"><?php esc_html_e( 'Προθεσμία και σημειώσεις', 'trade-accounts' ); ?></h3>
 		<div class="tra-zone">
 			<form method="post">
@@ -817,6 +843,21 @@ final class TRA_Consign_UI {
 					),
 					array(),
 				);
+
+			case 'correct':
+				$fq  = self::post( 'tra_c_fix_q' );
+				$fr  = self::post( 'tra_c_fix_r' );
+				$res = TRA_Consign::correct(
+					$id,
+					(int) self::post( 'tra_c_fix_p' ),
+					'' !== $fq && ctype_digit( $fq ) ? (int) $fq : null,
+					'' !== $fr && ctype_digit( $fr ) ? (int) $fr : null,
+					self::post( 'tra_c_fix_why' )
+				);
+				if ( is_wp_error( $res ) ) {
+					return array( array( self::msg( 'error', $res->get_error_message() ) ), array( 'id' => $id ) );
+				}
+				return array( array( self::msg( 'success', __( 'Η διόρθωση καταχωρήθηκε.', 'trade-accounts' ) ) ), array( 'id' => $id ) );
 
 			case 'extend':
 				$c = TRA_Consign::get( $id );
