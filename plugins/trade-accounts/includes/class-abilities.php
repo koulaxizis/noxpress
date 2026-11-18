@@ -29,6 +29,7 @@
  *                consignment-overview (1.9.0, read only),
  *                consignment-create, consignment-settle, consignment-paid,
  *                consignment-payment, consignment-extend,
+ *                consignment-correct (1.10.0),
  *                consignment-meta-fix (1.8.0, dry run by default)
  *                                books on consignment (module "consign",
  *                                definitions in TRA_Consign::ability_defs())
