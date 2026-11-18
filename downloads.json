@@ -1,6 +1,6 @@
 {
-  "display": 1686,
-  "total": 1686,
+  "display": 1691,
+  "total": 1691,
   "offset": 5,
   "updated": "2026-11-18",
   "assets": {
@@ -2118,10 +2118,14 @@
     },
     "763180608": {
       "file": "nox-oc-1.4.0/oros-connect.zip",
-      "count": 1
+      "count": 3
     },
     "763219048": {
       "file": "nox-ta-1.9.0/trade-accounts.zip",
+      "count": 3
+    },
+    "763969213": {
+      "file": "nox-ta-1.10.0/trade-accounts.zip",
       "count": 0
     }
   }
