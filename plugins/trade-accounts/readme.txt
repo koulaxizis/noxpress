@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.3
+Stable tag: 1.9.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -48,7 +48,7 @@ Every module is off after activation. A module that is off loads no code.
 * Settlement orders never reduce stock again and send no e-mails (an optional «completed» e-mail to the bookstore when collected).
 * Open, overdue and closed consignments with copies and value at bookstores and money to collect; a check date every 30 days (setting) while copies are out; «On consignment» in the product's Inventory tab; a printable delivery note (print or save as PDF) with signatures.
 * REST (read, WooCommerce REST keys): `GET /wc/v3/tra/consignments` (filters state, account, product) and `/wc/v3/tra/consignments/<id>`, for orOS.
-* Abilities: `consignments-list`, `consignment-summary`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-payment`, `consignment-extend`, `consignment-meta-fix`.
+* Abilities: `consignments-list`, `consignment-summary`, `consignment-overview`, `consignment-create`, `consignment-settle`, `consignment-paid`, `consignment-payment`, `consignment-extend`, `consignment-meta-fix`.
 * Settlement and payment orders carry Revenue Splitter's channel «Παρακαταθήκες» and the bookstore's name, so the author portal shows the money as a receipt from that bookstore (labels only, no amount changes).
 
 **Safe by design**
@@ -97,6 +97,13 @@ The settings, the call log, the plugin's user and product meta, its Application 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.9.0 =
+* New: the publisher's overview at the top of the «Παρακαταθήκες» tab. Six totals (copies given, sold with their value, collected, balance to collect, on the shelf with its value, overdue), a table per bookstore (given, sold, returned, on the shelf, sales value, collected, balance, last payment, next check) and a table per title with its bookstores. Collected per title is marked as the pro rata share of the bookstore's payments.
+* A bookstore's name in the overview filters the list to its consignments.
+* CSV export of both tables (Excel Greek and Standard, UTF-8 with BOM, Bible §5).
+* New `TRA_Consign::overview()` and the read-only ability `consignment-overview` with the same numbers: business name and city only, no e-mail addresses or contact persons (for orOS through orOS Connect).
+* The consignments summary (REST `/wc/v3/tra/consignments` and the tab) also gives `sold_value` and `collected`.
 
 = 1.8.3 =
 * New filter `tra_trade_applies` ( bool, WC_Product ), checked for every product object and call (not cached like `tra_eligible`). Product Bundles 1.1.6 uses it so bundles and the lines of a bundle in the cart never get the trade price: no wholesale on bundles.

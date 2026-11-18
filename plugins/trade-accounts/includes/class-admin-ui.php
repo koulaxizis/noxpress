@@ -38,6 +38,7 @@ final class TRA_Admin_UI {
 		add_action( 'admin_init', array( __CLASS__, 'route_export' ) );
 		if ( class_exists( 'TRA_Consign_UI' ) ) {
 			add_action( 'admin_init', array( 'TRA_Consign_UI', 'print_note' ) );
+			add_action( 'admin_init', array( 'TRA_Consign_UI', 'export_csv' ) );
 		}
 		add_action( 'admin_init', array( __CLASS__, 'privacy' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
