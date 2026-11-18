@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.4
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -34,6 +34,12 @@ Every module is off after activation. A module that is off loads no code.
 * orOS connects with the WooCommerce REST keys it already has for the shop (a read key reads; marking needs read/write), or, without WooCommerce, with an Application Password of an administrator. Only managers can read the requests.
 * Until orOS imports them, the requests stay in Publishing Quote → Requests and arrive by email: nothing is lost if orOS is closed.
 
+**Data for orOS module** (1.4.0)
+
+* orOS reads the shop's figures for its «Shop» app, Today, Calendar and CRM: sales today, this month and this year, sales per title, stock, creators' shares (Revenue Splitter), costs and result (Production Ledger), bookstores and consignments (Trade Accounts).
+* Read only, with the WooCommerce Read key orOS already has. The site answers from the plugins' own read-only abilities, from a fixed list; an ability not marked read-only is never run.
+* No customer's name, email, phone or address ever leaves the site through this module. You switch each area on or off; answers are kept for 5 minutes.
+
 **Coming next**
 
 * Stock ledger: every stock change of the shop in orOS Stock, and changes from orOS as differences.
@@ -55,6 +61,7 @@ Every module is off after activation. A module that is off loads no code.
 * `orc_text` filter ( string $text, string $key, string $lang ): change a visitor text (keys title, intro, email, name, button, note, checkbox, pop_title, pop_intro, close).
 * `orc_popup_show` filter ( bool $show ): hide the popup on a page.
 * REST `GET /wp-json/orc/v1/offers` (state=new|contact|oros|closed|all, limit, page), `GET /wp-json/orc/v1/offers/<id>` and `POST /wp-json/orc/v1/offers/<id>` ( { state, note } ), managers only.
+* REST `GET /wp-json/wc/v3/oros/digest` (areas=sales,titles,stock,splits,costs,bookstores; fresh=1) and `GET /wp-json/wc/v3/oros/status`, managers only, read only.
 * `orc_newsletter_sent` action ( int $order_id, string $result ): after each checkout sign-up attempt (`ok`, `bad`, `gone`, `busy`, `off`, `error`, `network`).
 
 == Installation ==
@@ -85,6 +92,9 @@ The settings, the send log, queued sends, the last offers import and the transie
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.0 =
+* New module «Δεδομένα για orOS» (Data for orOS), off by default: read-only routes GET /wp-json/wc/v3/oros/digest and /oros/status that give orOS the shop's sales, sales per title, stock, creator shares, costs and consignments, from the suite's own read-only abilities (Store Pulse, Revenue Splitter, Production Ledger, Trade Accounts). Each area can be switched off; secret-looking and personal keys are removed from every answer; answers are kept for 5 minutes.
 
 = 1.3.4 =
 * Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.

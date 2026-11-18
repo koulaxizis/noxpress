@@ -22,6 +22,9 @@
  *                       10–100 (50)
  *  - nl_pop_days   int  at most once in this many days per browser,
  *                       1–365 (30)
+ *  - od_areas    array  area => bool for the module «Δεδομένα για orOS»
+ *                       (1.4.0): which areas orOS may read (ORC_Data::areas());
+ *                       all on by default, the module itself is off
  *  - t_<key>_el / t_<key>_en  visitor texts (Bible §14.17), keys in texts()
  *
  * Autoloaded: the front end reads it on every request where a form or the
@@ -35,7 +38,10 @@ final class ORC_Settings {
 	const OPT = 'orc_settings';
 
 	/** Modules of this version. Future ones (stock, receipt, inbox) join here. */
-	const MODULES = array( 'newsletter', 'offers' );
+	const MODULES = array( 'newsletter', 'offers', 'data' );
+
+	/** Areas of the module «Δεδομένα για orOS» (= ORC_Data::areas() keys). */
+	const AREAS = array( 'sales', 'titles', 'stock', 'splits', 'costs', 'bookstores' );
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -74,6 +80,7 @@ final class ORC_Settings {
 			'nl_pop_delay'  => 20,
 			'nl_pop_scroll' => 50,
 			'nl_pop_days'   => 30,
+			'od_areas'      => array_fill_keys( self::AREAS, true ),
 		);
 		foreach ( self::texts() as $k => $t ) {
 			$d[ 't_' . $k . '_el' ] = $t[0];
@@ -122,6 +129,12 @@ final class ORC_Settings {
 			$s['nl_pop_scroll'] = 10;
 		}
 		$s['nl_pop_days'] = self::int_in( $raw, 'nl_pop_days', 1, 365, $d['nl_pop_days'] );
+
+		$s['od_areas'] = array();
+		$areas         = isset( $raw['od_areas'] ) && is_array( $raw['od_areas'] ) ? $raw['od_areas'] : null;
+		foreach ( self::AREAS as $a ) {
+			$s['od_areas'][ $a ] = null === $areas ? true : ! empty( $areas[ $a ] );
+		}
 
 		$key         = isset( $raw['nl_key'] ) && is_string( $raw['nl_key'] ) ? trim( $raw['nl_key'] ) : '';
 		$s['nl_key'] = preg_match( '/^[A-Za-z0-9]{32}$/', $key ) ? $key : '';

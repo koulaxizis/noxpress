@@ -1,11 +1,12 @@
 <?php
 /**
- * orOS Connect — uninstall.php (v1.1.0)
+ * orOS Connect — uninstall.php (v1.4.0)
  *
  * Deleted:
  *  - Options orc_settings, orc_nl_log (send log), orc_of_seen (last pull
- *    of the Offers module).
- *  - Transients orc_aui_msg_{uid} (PRG notices).
+ *    of the Offers module), orc_od_seen (last read of the Data module).
+ *  - Transients orc_aui_msg_{uid} (PRG notices) and orc_od_c_* (the
+ *    Data module's 5-minute answers).
  *  - Queued checkout sign-ups (Action Scheduler group oros-connect, and
  *    the WP-Cron fallback hook orc_nl_send).
  *  - Multisite: every site ONCE (the main site included in the loop).
@@ -28,13 +29,16 @@ function orc_uninstall_site(): void {
 	delete_option( 'orc_settings' );
 	delete_option( 'orc_nl_log' );
 	delete_option( 'orc_of_seen' );
+	delete_option( 'orc_od_seen' );
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 			$wpdb->esc_like( '_transient_orc_aui_msg_' ) . '%',
-			$wpdb->esc_like( '_transient_timeout_orc_aui_msg_' ) . '%'
+			$wpdb->esc_like( '_transient_timeout_orc_aui_msg_' ) . '%',
+			$wpdb->esc_like( '_transient_orc_od_c_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_orc_od_c_' ) . '%'
 		)
 	);
 
