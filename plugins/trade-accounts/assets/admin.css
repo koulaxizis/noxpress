@@ -460,3 +460,21 @@ a.tra-kofi:hover {
 	width: 100%;
 	max-width: 100%;
 }
+
+/* ===== 1.9.0: consignments overview (per bookstore, per title) ===== */
+.tra-wrap .tra-kpis { margin: 14px 0 18px; }
+.tra-wrap .tra-kpis .tra-mod p strong { font-size: 18px; color: var(--tra-heading); }
+.tra-wrap .tra-ov { margin: 0 0 16px; }
+.tra-wrap .tra-ov > summary { cursor: pointer; margin: 0; }
+.tra-wrap .tra-ov-table td.n,
+.tra-wrap .tra-ov-table th.n { text-align: right; white-space: nowrap; }
+.tra-wrap .tra-ov-table tfoot th {
+	background: var(--tra-panel-2) !important;
+	color: var(--tra-heading) !important;
+	border-top: 1px solid var(--tra-border) !important;
+	font-weight: 600 !important;
+	padding: 12px 14px;
+}
+.tra-wrap .tra-ov-rows > summary { cursor: pointer; }
+.tra-wrap .tra-ov-rows ul { margin: 8px 0 0 18px; list-style: disc; color: var(--tra-muted); }
+.tra-wrap .tra-filter-note { color: var(--tra-muted); margin: 6px 0 0; }

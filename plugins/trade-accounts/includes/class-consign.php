@@ -1768,15 +1768,223 @@ final class TRA_Consign {
 			$value  += (int) self::cents( $c['totals']['open_value'] );
 			$overdue += 'overdue' === $c['state'] ? 1 : 0;
 		}
+		$sold      = 0;
+		$collected = 0;
 		foreach ( self::query( array( 'state' => 'all' ) ) as $c ) {
-			$pending += (int) self::cents( $c['totals']['to_collect'] );
+			$pending   += (int) self::cents( $c['totals']['to_collect'] );
+			$collected += (int) self::cents( $c['totals']['collected'] );
 		}
+		$sold = $pending + $collected;
 		return array(
 			'consignments' => count( $open ),
 			'copies'       => $copies,
 			'open_value'   => self::money( $value ),
 			'overdue'      => $overdue,
 			'to_collect'   => self::money( $pending ),
+			// 1.9.0: settled value and the part of it already collected.
+			'sold_value'   => self::money( $sold ),
+			'collected'    => self::money( $collected ),
+		);
+	}
+
+	/* =====================================================================
+	 * 1.9.0: the publisher's overview (totals, per bookstore, per title)
+	 * =================================================================== */
+
+	/**
+	 * The whole consignment picture as of today, read only: totals, one row
+	 * per bookstore (trade account) and one row per title, each title with
+	 * its bookstores. Money in VAT-included strings plus _c cents.
+	 * Collected per title is the pro rata share of the bookstore's payments
+	 * («Είσπραξη ποσού»), not money paid for that title as such.
+	 * No e-mail addresses or contact persons: business name and city only.
+	 */
+	public static function overview(): array {
+		$by_pid = self::summary_by_product();
+		$all    = self::query(
+			array(
+				'state' => 'all',
+				'limit' => 500,
+			)
+		);
+
+		$blank = array(
+			'given'    => 0,
+			'sold'     => 0,
+			'returned' => 0,
+			'open'     => 0,
+			'open_c'   => 0,
+			'sold_c'   => 0,
+			'coll_c'   => 0,
+			'owed_c'   => 0,
+		);
+		$tot   = $blank + array(
+			'consignments' => 0,
+			'open_cons'    => 0,
+			'overdue'      => 0,
+		);
+		$acc   = array(); // uid => row.
+		$names = array(); // pid => {name, isbn}.
+		$prod  = array(); // pid => row.
+
+		foreach ( $all as $c ) {
+			$uid = (int) $c['account']['id'];
+			if ( ! isset( $acc[ $uid ] ) ) {
+				$acc[ $uid ] = $blank + array(
+					'account'      => $uid,
+					'name'         => (string) $c['account']['name'],
+					'city'         => (string) $c['account']['city'],
+					'consignments' => 0,
+					'open_cons'    => 0,
+					'overdue'      => 0,
+					'last_payment' => '',
+					'next_check'   => '',
+					'first'        => (string) $c['given'],
+				);
+			}
+			$a                  = &$acc[ $uid ];
+			$a['consignments'] += 1;
+			$a['first']         = min( $a['first'], (string) $c['given'] );
+			$tot['consignments'] += 1;
+			if ( 'closed' !== $c['state'] ) {
+				$a['open_cons']   += 1;
+				$tot['open_cons'] += 1;
+				if ( '' !== $c['next_check'] && ( '' === $a['next_check'] || $c['next_check'] < $a['next_check'] ) ) {
+					$a['next_check'] = (string) $c['next_check'];
+				}
+			}
+			if ( 'overdue' === $c['state'] ) {
+				$a['overdue']   += 1;
+				$tot['overdue'] += 1;
+			}
+			foreach ( $c['payments'] as $py ) {
+				$d = (string) ( $py['date'] ?? '' );
+				if ( $d > $a['last_payment'] ) {
+					$a['last_payment'] = $d;
+				}
+			}
+			foreach ( $c['lines'] as $l ) {
+				$pid = (int) $l['product'];
+				if ( ! isset( $names[ $pid ] ) ) {
+					$names[ $pid ] = array(
+						'name' => (string) $l['name'],
+						'isbn' => (string) $l['isbn'],
+					);
+				}
+				$oc                     = (int) self::cents( $l['open_value'] );
+				$a['open_c']           += $oc;
+				$prod[ $pid ]['open_c'] = ( $prod[ $pid ]['open_c'] ?? 0 ) + $oc;
+			}
+			unset( $a );
+		}
+
+		foreach ( $by_pid as $pid => $rows ) {
+			$p = $blank + array(
+				'product'  => (int) $pid,
+				'name'     => $names[ $pid ]['name'] ?? '',
+				'isbn'     => $names[ $pid ]['isbn'] ?? '',
+				'accounts' => 0,
+				'rows'     => array(),
+			);
+			$p['open_c'] = (int) ( $prod[ $pid ]['open_c'] ?? 0 );
+			foreach ( $rows as $r ) {
+				$uid           = (int) $r['account'];
+				$p['accounts'] += 1;
+				foreach ( array( 'given', 'sold', 'returned', 'open' ) as $k ) {
+					$p[ $k ] += (int) $r[ $k ];
+					if ( isset( $acc[ $uid ] ) ) {
+						$acc[ $uid ][ $k ] += (int) $r[ $k ];
+					}
+				}
+				$map = array(
+					'sold_c' => 'sold_value_c',
+					'coll_c' => 'collected_c',
+					'owed_c' => 'owed_c',
+				);
+				foreach ( $map as $k => $src ) {
+					$p[ $k ] += (int) $r[ $src ];
+					if ( isset( $acc[ $uid ] ) ) {
+						$acc[ $uid ][ $k ] += (int) $r[ $src ];
+					}
+				}
+				$p['rows'][] = array(
+					'account'   => $uid,
+					'name'      => (string) $r['name'],
+					'city'      => (string) $r['city'],
+					'given'     => (int) $r['given'],
+					'sold'      => (int) $r['sold'],
+					'returned'  => (int) $r['returned'],
+					'open'      => (int) $r['open'],
+					'due'       => (string) $r['due'],
+					'overdue'   => (bool) $r['overdue'],
+					'sold_c'    => (int) $r['sold_value_c'],
+					'coll_c'    => (int) $r['collected_c'],
+					'owed_c'    => (int) $r['owed_c'],
+				);
+			}
+			if ( '' === $p['name'] ) {
+				$wp        = wc_get_product( (int) $pid );
+				$p['name'] = $wp instanceof WC_Product ? $wp->get_name() : '#' . (int) $pid;
+			}
+			$prod[ $pid ] = $p;
+		}
+		$prod = array_filter(
+			$prod,
+			static function ( $p ) {
+				return isset( $p['product'] );
+			}
+		);
+
+		foreach ( $acc as $a ) {
+			foreach ( array_keys( $blank ) as $k ) {
+				$tot[ $k ] += (int) $a[ $k ];
+			}
+		}
+
+		$money = static function ( array $r ): array {
+			foreach ( array( 'open', 'sold', 'coll', 'owed' ) as $k ) {
+				$c                                                = (int) $r[ $k . '_c' ];
+				$r[ 'open' === $k ? 'open_value' : ( 'sold' === $k ? 'sold_value' : ( 'coll' === $k ? 'collected' : 'owed' ) ) ] = self::money( $c );
+			}
+			$r['collected_c']  = (int) $r['coll_c'];
+			$r['sold_value_c'] = (int) $r['sold_c'];
+			$r['open_value_c'] = (int) $r['open_c'];
+			unset( $r['coll_c'], $r['sold_c'], $r['open_c'] );
+			return $r;
+		};
+
+		$accounts = array_map( $money, array_values( $acc ) );
+		usort(
+			$accounts,
+			static function ( $a, $b ) {
+				return $b['owed_c'] <=> $a['owed_c'] ?: strcmp( $a['name'], $b['name'] );
+			}
+		);
+		$products = array();
+		foreach ( $prod as $p ) {
+			$p['rows']  = array_map(
+				static function ( $r ) use ( $money ) {
+					$r['open_c'] = 0;
+					$r           = $money( $r );
+					unset( $r['open_value'], $r['open_value_c'] );
+					return $r;
+				},
+				$p['rows']
+			);
+			$products[] = $money( $p );
+		}
+		usort(
+			$products,
+			static function ( $a, $b ) {
+				return $b['owed_c'] <=> $a['owed_c'] ?: ( $b['open'] <=> $a['open'] ?: strcmp( $a['name'], $b['name'] ) );
+			}
+		);
+
+		return array(
+			'as_of'    => self::today(),
+			'totals'   => $money( $tot ) + array( 'accounts' => count( $accounts ) ),
+			'accounts' => $accounts,
+			'products' => $products,
 		);
 	}
 
@@ -2058,6 +2266,18 @@ final class TRA_Consign {
 				'ann'         => array( true, false, true ),
 				'run'         => array( __CLASS__, 'ab_summary' ),
 			),
+			'consignment-overview' => array(
+				'label'       => 'Trade Accounts: consignments overview',
+				'description' => 'The publisher\'s whole consignment picture as of today: totals (consignments, open, overdue, copies given / sold / returned / on the shelf, shelf value, sold value, collected, still owed), one row per bookstore (business name and city only, with last payment date and next check) and one row per title with its bookstores. Money VAT included, as strings plus _c cents. Collected per title is the pro rata share of the bookstore\'s payments. No e-mail addresses or contact persons. Changes nothing.',
+				'input'       => array(
+					'type'                 => 'object',
+					'properties'           => array(),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'ann'         => array( true, false, true ),
+				'run'         => array( __CLASS__, 'ab_overview' ),
+			),
 			'consignment-meta-fix' => array(
 				'label'       => 'Trade Accounts: label older consignment orders',
 				'description' => 'Sets the Revenue Splitter channel «Παρακαταθήκες» (order meta _rs_channel) and the bookstore\'s name (order meta _tra_store) on an account\'s settlement and payment orders made before Trade Accounts 1.8.0, so the author portal shows them as receipts from that bookstore. Meta only: never amounts, statuses or stock; no share changes. dry_run (default true) only lists the orders with their values before and after. The old values are kept in a backup first; restore = true puts them back. Optional orders limits it to these order ids of the account.',
@@ -2163,6 +2383,11 @@ final class TRA_Consign {
 			'as_of'    => '' !== $date ? $date : self::today(),
 			'products' => self::summary_by_product( array_filter( $ids ), $date ),
 		);
+	}
+
+	public static function ab_overview( $in = null ): array {
+		unset( $in );
+		return self::overview();
 	}
 
 	public static function ab_meta_fix( $in = null ) {

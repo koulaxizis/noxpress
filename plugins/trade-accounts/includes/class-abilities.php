@@ -26,6 +26,7 @@
  *  trade-accounts/guide-set      the guide page for trade accounts (My
  *                                Account menu and dashboard, feed e-mail)
  *  trade-accounts/consignments-list, consignment-summary (1.8.0),
+ *                consignment-overview (1.9.0, read only),
  *                consignment-create, consignment-settle, consignment-paid,
  *                consignment-payment, consignment-extend,
  *                consignment-meta-fix (1.8.0, dry run by default)

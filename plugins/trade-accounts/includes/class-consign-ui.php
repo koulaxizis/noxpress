@@ -15,6 +15,7 @@ final class TRA_Consign_UI {
 
 	const ROWS        = 12;
 	const NONCE_PRINT = 'tra_consign_print';
+	const NONCE_CSV   = 'tra_consign_csv';
 
 	/* =====================================================================
 	 * Helpers
@@ -109,33 +110,53 @@ final class TRA_Consign_UI {
 	}
 
 	private static function render_list(): void {
-		$state = self::q( 'state' );
-		$state = in_array( $state, array( 'open', 'overdue', 'closed', 'all' ), true ) ? $state : 'open';
-		$sum   = TRA_Consign::summary();
-		$list  = TRA_Consign::query( array( 'state' => $state ) );
+		$state   = self::q( 'state' );
+		$state   = in_array( $state, array( 'open', 'overdue', 'closed', 'all' ), true ) ? $state : 'open';
+		$account = absint( self::q( 'account' ) );
+		$ov      = TRA_Consign::overview();
+		$t       = $ov['totals'];
+		$list    = TRA_Consign::query(
+			array(
+				'state'   => $state,
+				'account' => $account,
+			)
+		);
 		?>
 		<h2 class="tra-h2"><?php esc_html_e( 'Παρακαταθήκες σε βιβλιοπωλεία', 'trade-accounts' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Η παράδοση δεν είναι πώληση: τα τεμάχια φεύγουν από το απόθεμα, αλλά τίποτα δεν μετράει στις πωλήσεις ή στο Revenue Splitter. Στην εκκαθάριση γίνεται παραγγελία μόνο για όσα πουλήθηκαν, σε αναμονή, και μετράει όταν σημειώσεις την είσπραξη.', 'trade-accounts' ); ?></p>
 
-		<div class="tra-mods">
+		<div class="tra-mods tra-kpis">
 			<div class="tra-mod">
-				<h3><?php esc_html_e( 'Ανοιχτές', 'trade-accounts' ); ?></h3>
-				<p><strong><?php echo (int) $sum['consignments']; ?></strong> · <?php echo esc_html( sprintf( /* translators: %d: copies */ __( '%d τεμάχια σε βιβλιοπωλεία', 'trade-accounts' ), (int) $sum['copies'] ) ); ?></p>
+				<h3><?php esc_html_e( 'Δόθηκαν', 'trade-accounts' ); ?></h3>
+				<p><strong><?php echo (int) $t['given']; ?></strong> <?php esc_html_e( 'τεμάχια', 'trade-accounts' ); ?><br /><span class="tra-muted"><?php echo esc_html( sprintf( /* translators: 1: consignments, 2: bookstores, 3: copies returned */ __( '%1$d παρακαταθήκες σε %2$d βιβλιοπωλεία · επιστράφηκαν %3$d', 'trade-accounts' ), (int) $t['consignments'], (int) $t['accounts'], (int) $t['returned'] ) ); ?></span></p>
 			</div>
 			<div class="tra-mod">
-				<h3><?php esc_html_e( 'Αξία στα βιβλιοπωλεία', 'trade-accounts' ); ?></h3>
-				<p><strong><?php echo esc_html( self::eur( $sum['open_value'] ) ); ?></strong></p>
+				<h3><?php esc_html_e( 'Πουλήθηκαν', 'trade-accounts' ); ?></h3>
+				<p><strong><?php echo esc_html( self::eur( $t['sold_value'] ) ); ?></strong><br /><span class="tra-muted"><?php echo esc_html( sprintf( /* translators: %d: copies */ __( '%d τεμάχια (εκκαθαρισμένα)', 'trade-accounts' ), (int) $t['sold'] ) ); ?></span></p>
 			</div>
 			<div class="tra-mod">
-				<h3><?php esc_html_e( 'Προς είσπραξη', 'trade-accounts' ); ?></h3>
-				<p><strong><?php echo esc_html( self::eur( $sum['to_collect'] ) ); ?></strong> <span class="tra-muted"><?php esc_html_e( '(εκκαθαρισμένα, όχι ακόμα πληρωμένα)', 'trade-accounts' ); ?></span></p>
+				<h3><?php esc_html_e( 'Εισπράχθηκαν', 'trade-accounts' ); ?></h3>
+				<p><strong><?php echo esc_html( self::eur( $t['collected'] ) ); ?></strong></p>
+			</div>
+			<div class="tra-mod">
+				<h3><?php esc_html_e( 'Υπόλοιπο προς είσπραξη', 'trade-accounts' ); ?></h3>
+				<p><strong><?php echo esc_html( self::eur( $t['owed'] ) ); ?></strong><br /><span class="tra-muted"><?php esc_html_e( '(εκκαθαρισμένα, όχι ακόμα πληρωμένα)', 'trade-accounts' ); ?></span></p>
+			</div>
+			<div class="tra-mod">
+				<h3><?php esc_html_e( 'Στο ράφι', 'trade-accounts' ); ?></h3>
+				<p><strong><?php echo esc_html( self::eur( $t['open_value'] ) ); ?></strong><br /><span class="tra-muted"><?php echo esc_html( sprintf( /* translators: %d: copies */ __( '%d τεμάχια σε βιβλιοπωλεία', 'trade-accounts' ), (int) $t['open'] ) ); ?></span></p>
 			</div>
 			<div class="tra-mod">
 				<h3><?php esc_html_e( 'Ληξιπρόθεσμες', 'trade-accounts' ); ?></h3>
-				<p><strong><?php echo (int) $sum['overdue']; ?></strong></p>
+				<p><strong><?php echo (int) $t['overdue']; ?></strong><br /><span class="tra-muted"><?php echo esc_html( sprintf( /* translators: %d: consignments */ __( 'από %d ανοιχτές', 'trade-accounts' ), (int) $t['open_cons'] ) ); ?></span></p>
 			</div>
 		</div>
 
+		<?php self::render_overview( $ov ); ?>
+
+		<?php if ( $account > 0 ) : ?>
+			<p class="tra-filter-note"><?php echo esc_html( sprintf( /* translators: %s: bookstore */ __( 'Μόνο οι παρακαταθήκες του: %s', 'trade-accounts' ), TRA_Consign::account_name( $account ) ) ); ?> · <a href="<?php echo esc_url( self::url( array( 'state' => $state ) ) ); ?>"><?php esc_html_e( 'Όλα τα βιβλιοπωλεία', 'trade-accounts' ); ?></a></p>
+		<?php endif; ?>
 		<p>
 			<a class="button button-primary" href="<?php echo esc_url( self::url( array( 'view' => 'new' ) ) ); ?>"><?php esc_html_e( 'Νέα παρακαταθήκη', 'trade-accounts' ); ?></a>
 			<?php
@@ -149,7 +170,7 @@ final class TRA_Consign_UI {
 				printf(
 					' <a class="button%1$s" href="%2$s">%3$s</a>',
 					$k === $state ? ' button-primary' : '',
-					esc_url( self::url( array( 'state' => $k ) ) ),
+					esc_url( self::url( array_filter( array( 'state' => $k, 'account' => $account ) ) ) ),
 					esc_html( $label )
 				);
 			}
@@ -189,6 +210,221 @@ final class TRA_Consign_UI {
 
 		<?php self::render_settings(); ?>
 		<?php
+	}
+
+	/** CSV download link (privileged GET, own nonce). */
+	private static function csv_url( string $what, string $fmt ): string {
+		return wp_nonce_url(
+			add_query_arg(
+				array(
+					'page'      => TRA_Admin_UI::SLUG,
+					'tab'       => 'consign',
+					'tra_c_csv' => $what,
+					'fmt'       => $fmt,
+				),
+				admin_url( 'admin.php' )
+			),
+			self::NONCE_CSV
+		);
+	}
+
+	private static function csv_links( string $what ): void {
+		$first = 'el' === TRA_Lang::lang() ? array( 'el', 'std' ) : array( 'std', 'el' );
+		$label = array(
+			'el'  => __( 'CSV (Excel ελληνικά)', 'trade-accounts' ),
+			'std' => __( 'CSV (Τυπικό)', 'trade-accounts' ),
+		);
+		foreach ( $first as $f ) {
+			printf( ' <a class="button" href="%1$s">%2$s</a>', esc_url( self::csv_url( $what, $f ) ), esc_html( $label[ $f ] ) );
+		}
+	}
+
+	/** 1.9.0: per bookstore and per title, from TRA_Consign::overview(). */
+	private static function render_overview( array $ov ): void {
+		if ( ! $ov['accounts'] ) {
+			return;
+		}
+		$t = $ov['totals'];
+		?>
+		<details class="tra-zone tra-ov" open>
+			<summary class="tra-h3"><?php esc_html_e( 'Ανά βιβλιοπωλείο', 'trade-accounts' ); ?></summary>
+			<table class="widefat tra-table tra-ov-table">
+				<thead><tr>
+					<th><?php esc_html_e( 'Βιβλιοπωλείο', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Δόθηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Πουλήθηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Επιστράφηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Στο ράφι', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Αξία πωλήσεων', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Εισπράχθηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Υπόλοιπο', 'trade-accounts' ); ?></th>
+					<th><?php esc_html_e( 'Τελευταία είσπραξη', 'trade-accounts' ); ?></th>
+					<th><?php esc_html_e( 'Επόμενος έλεγχος', 'trade-accounts' ); ?></th>
+				</tr></thead>
+				<tbody>
+				<?php foreach ( $ov['accounts'] as $a ) : ?>
+					<tr>
+						<td><a href="<?php echo esc_url( self::url( array( 'state' => 'all', 'account' => $a['account'] ) ) ); ?>"><strong><?php echo esc_html( $a['name'] ); ?></strong></a>
+							<?php if ( '' !== $a['city'] ) : ?><br /><span class="tra-muted"><?php echo esc_html( $a['city'] ); ?></span><?php endif; ?>
+							<br /><span class="tra-muted"><?php echo esc_html( sprintf( /* translators: 1: consignments, 2: overdue */ __( '%1$d παρακαταθήκες · %2$d ληξιπρόθεσμες', 'trade-accounts' ), (int) $a['consignments'], (int) $a['overdue'] ) ); ?></span></td>
+						<td class="n"><?php echo (int) $a['given']; ?></td>
+						<td class="n"><?php echo (int) $a['sold']; ?></td>
+						<td class="n"><?php echo (int) $a['returned']; ?></td>
+						<td class="n"><?php echo (int) $a['open']; ?><br /><span class="tra-muted"><?php echo esc_html( self::eur( $a['open_value'] ) ); ?></span></td>
+						<td class="n"><?php echo esc_html( self::eur( $a['sold_value'] ) ); ?></td>
+						<td class="n"><?php echo esc_html( self::eur( $a['collected'] ) ); ?></td>
+						<td class="n"><strong><?php echo esc_html( self::eur( $a['owed'] ) ); ?></strong></td>
+						<td><?php echo esc_html( self::day( $a['last_payment'] ) ); ?></td>
+						<td><?php echo esc_html( self::day( $a['next_check'] ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+				<tfoot><tr>
+					<th><?php esc_html_e( 'Σύνολο', 'trade-accounts' ); ?></th>
+					<th class="n"><?php echo (int) $t['given']; ?></th>
+					<th class="n"><?php echo (int) $t['sold']; ?></th>
+					<th class="n"><?php echo (int) $t['returned']; ?></th>
+					<th class="n"><?php echo (int) $t['open']; ?><br /><?php echo esc_html( self::eur( $t['open_value'] ) ); ?></th>
+					<th class="n"><?php echo esc_html( self::eur( $t['sold_value'] ) ); ?></th>
+					<th class="n"><?php echo esc_html( self::eur( $t['collected'] ) ); ?></th>
+					<th class="n"><?php echo esc_html( self::eur( $t['owed'] ) ); ?></th>
+					<th></th><th></th>
+				</tr></tfoot>
+			</table>
+			<p><?php self::csv_links( 'accounts' ); ?></p>
+		</details>
+
+		<details class="tra-zone tra-ov" open>
+			<summary class="tra-h3"><?php esc_html_e( 'Ανά τίτλο', 'trade-accounts' ); ?></summary>
+			<p class="description"><?php esc_html_e( 'Τα «Εισπράχθηκαν» ανά τίτλο είναι το αναλογικό μερίδιο των πληρωμών του βιβλιοπωλείου (Είσπραξη ποσού), όχι πληρωμή για τον συγκεκριμένο τίτλο. Πάτησε έναν τίτλο για τα βιβλιοπωλεία του.', 'trade-accounts' ); ?></p>
+			<table class="widefat tra-table tra-ov-table">
+				<thead><tr>
+					<th><?php esc_html_e( 'Τίτλος', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Βιβλιοπωλεία', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Δόθηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Πουλήθηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Επιστράφηκαν', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Στο ράφι', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Αξία πωλήσεων', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Εισπράχθηκαν (αναλογικά)', 'trade-accounts' ); ?></th>
+					<th class="n"><?php esc_html_e( 'Υπόλοιπο', 'trade-accounts' ); ?></th>
+				</tr></thead>
+				<tbody>
+				<?php foreach ( $ov['products'] as $p ) : ?>
+					<tr>
+						<td><details class="tra-ov-rows"><summary><strong><?php echo esc_html( $p['name'] ); ?></strong><?php if ( '' !== $p['isbn'] ) : ?> <span class="tra-muted"><?php echo esc_html( $p['isbn'] ); ?></span><?php endif; ?></summary>
+							<ul>
+							<?php foreach ( $p['rows'] as $r ) : ?>
+								<li><?php echo esc_html( sprintf( /* translators: 1: bookstore, 2: given, 3: sold, 4: on the shelf, 5: owed */ __( '%1$s: δόθηκαν %2$d, πουλήθηκαν %3$d, στο ράφι %4$d, υπόλοιπο %5$s', 'trade-accounts' ), $r['name'], (int) $r['given'], (int) $r['sold'], (int) $r['open'], self::eur( $r['owed'] ) ) ); ?></li>
+							<?php endforeach; ?>
+							</ul></details></td>
+						<td class="n"><?php echo (int) $p['accounts']; ?></td>
+						<td class="n"><?php echo (int) $p['given']; ?></td>
+						<td class="n"><?php echo (int) $p['sold']; ?></td>
+						<td class="n"><?php echo (int) $p['returned']; ?></td>
+						<td class="n"><?php echo (int) $p['open']; ?><br /><span class="tra-muted"><?php echo esc_html( self::eur( $p['open_value'] ) ); ?></span></td>
+						<td class="n"><?php echo esc_html( self::eur( $p['sold_value'] ) ); ?></td>
+						<td class="n"><?php echo esc_html( self::eur( $p['collected'] ) ); ?></td>
+						<td class="n"><strong><?php echo esc_html( self::eur( $p['owed'] ) ); ?></strong></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p><?php self::csv_links( 'products' ); ?></p>
+		</details>
+		<?php
+	}
+
+	/* =====================================================================
+	 * 1.9.0: CSV of the overview (admin_init, GET with nonce, Bible §5)
+	 * =================================================================== */
+
+	public static function export_csv(): void {
+		$what = self::q( 'tra_c_csv' );
+		if ( '' === $what || TRA_Admin_UI::SLUG !== self::q( 'page' ) ) {
+			return;
+		}
+		if ( ! wp_verify_nonce( self::q( '_wpnonce' ), self::NONCE_CSV ) || ! current_user_can( Trade_Accounts::cap() ) ) {
+			wp_die( esc_html__( 'Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.', 'trade-accounts' ) );
+		}
+		$what = 'products' === $what ? 'products' : 'accounts';
+		$fmt  = 'el' === self::q( 'fmt' ) ? 'el' : 'std';
+		$sep  = 'el' === $fmt ? ';' : ',';
+		$dec  = 'el' === $fmt ? ',' : '.';
+		$ov   = TRA_Consign::overview();
+		$num  = static function ( int $cents ) use ( $dec ): string {
+			return number_format( $cents / 100, 2, $dec, '' );
+		};
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=UTF-8' );
+		header( 'Content-Disposition: attachment; filename="trade-accounts-consignments-' . $what . '-' . $ov['as_of'] . '.csv"' );
+		$fh = fopen( 'php://output', 'w' );
+		fwrite( $fh, "\xEF\xBB\xBF" ); // UTF-8 BOM for Excel.
+
+		if ( 'accounts' === $what ) {
+			Noxpress_Safe::csv_row(
+				$fh,
+				array(
+					__( 'Βιβλιοπωλείο', 'trade-accounts' ),
+					__( 'Πόλη', 'trade-accounts' ),
+					__( 'Παρακαταθήκες', 'trade-accounts' ),
+					__( 'Ληξιπρόθεσμες', 'trade-accounts' ),
+					__( 'Δόθηκαν', 'trade-accounts' ),
+					__( 'Πουλήθηκαν', 'trade-accounts' ),
+					__( 'Επιστράφηκαν', 'trade-accounts' ),
+					__( 'Στο ράφι', 'trade-accounts' ),
+					__( 'Αξία στο ράφι', 'trade-accounts' ),
+					__( 'Αξία πωλήσεων', 'trade-accounts' ),
+					__( 'Εισπράχθηκαν', 'trade-accounts' ),
+					__( 'Υπόλοιπο', 'trade-accounts' ),
+					__( 'Τελευταία είσπραξη', 'trade-accounts' ),
+					__( 'Επόμενος έλεγχος', 'trade-accounts' ),
+				),
+				$sep
+			);
+			foreach ( $ov['accounts'] as $a ) {
+				Noxpress_Safe::csv_row(
+					$fh,
+					array( $a['name'], $a['city'], (int) $a['consignments'], (int) $a['overdue'], (int) $a['given'], (int) $a['sold'], (int) $a['returned'], (int) $a['open'], $num( (int) $a['open_value_c'] ), $num( (int) $a['sold_value_c'] ), $num( (int) $a['collected_c'] ), $num( (int) $a['owed_c'] ), $a['last_payment'], $a['next_check'] ),
+					$sep
+				);
+			}
+			$t = $ov['totals'];
+			Noxpress_Safe::csv_row(
+				$fh,
+				array( __( 'Σύνολο', 'trade-accounts' ), '', (int) $t['consignments'], (int) $t['overdue'], (int) $t['given'], (int) $t['sold'], (int) $t['returned'], (int) $t['open'], $num( (int) $t['open_value_c'] ), $num( (int) $t['sold_value_c'] ), $num( (int) $t['collected_c'] ), $num( (int) $t['owed_c'] ), '', '' ),
+				$sep
+			);
+		} else {
+			Noxpress_Safe::csv_row(
+				$fh,
+				array(
+					__( 'Τίτλος', 'trade-accounts' ),
+					__( 'ISBN', 'trade-accounts' ),
+					__( 'Βιβλιοπωλείο', 'trade-accounts' ),
+					__( 'Δόθηκαν', 'trade-accounts' ),
+					__( 'Πουλήθηκαν', 'trade-accounts' ),
+					__( 'Επιστράφηκαν', 'trade-accounts' ),
+					__( 'Στο ράφι', 'trade-accounts' ),
+					__( 'Αξία πωλήσεων', 'trade-accounts' ),
+					__( 'Εισπράχθηκαν (αναλογικά)', 'trade-accounts' ),
+					__( 'Υπόλοιπο', 'trade-accounts' ),
+				),
+				$sep
+			);
+			foreach ( $ov['products'] as $p ) {
+				foreach ( $p['rows'] as $r ) {
+					Noxpress_Safe::csv_row(
+						$fh,
+						array( $p['name'], $p['isbn'], $r['name'], (int) $r['given'], (int) $r['sold'], (int) $r['returned'], (int) $r['open'], $num( (int) $r['sold_value_c'] ), $num( (int) $r['collected_c'] ), $num( (int) $r['owed_c'] ) ),
+						$sep
+					);
+				}
+			}
+		}
+		fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output.
+		exit;
 	}
 
 	/** «Είσπραξη ποσού»: a round sum from a bookstore, shared among its sold, unpaid copies. */
