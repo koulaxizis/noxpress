@@ -11,6 +11,7 @@ class InstallerTest {
         assertTrue(Installer.isStore("org.fdroid.fdroid"))
         assertTrue(Installer.isStore("com.looker.droidify"))
         assertTrue(Installer.isStore("dev.imranr.obtainium"))
+        assertTrue(Installer.isStore("gr.koulaxizis.apps"))
     }
 
     @Test

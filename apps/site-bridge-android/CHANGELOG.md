@@ -1,5 +1,9 @@
 # Site Bridge app — changelog
 
+## 1.8.1
+
+* Change: when Koulaxizis Apps (the app manager for all our Android apps) installed or updated the app, its own "New version" bar and notification stay quiet, since the manager already tells about new versions. Installed from the APK, the app tells as before.
+
 ## 1.8.0
 
 * New: a notification for every change of a site's write window, without Firebase: opened or closed (from WP admin, the Hub, Claude or the schedule), its end moved, paused, the automatic schedule turned on, off or edited. The phone checks the Hub every 15 minutes (Android's shortest) and once more right after the next planned change, so the schedule's own openings and closings are told on time. Own channel "Write window", which can be silenced in Android's settings. Changes made from the app itself are not told back.
