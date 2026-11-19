@@ -1,6 +1,6 @@
 {
-  "display": 1707,
-  "total": 1707,
+  "display": 1814,
+  "total": 1814,
   "offset": 5,
   "updated": "2026-11-19",
   "assets": {
@@ -2102,7 +2102,7 @@
     },
     "763059284": {
       "file": "nox-sba-1.8.1/site-bridge.apk",
-      "count": 6
+      "count": 8
     },
     "763059286": {
       "file": "nox-sba-1.8.1/site-bridge.apk.sha256",
@@ -2114,7 +2114,7 @@
     },
     "763092733": {
       "file": "nox-loa-2.0.2/live-operator.apk",
-      "count": 6
+      "count": 8
     },
     "763180608": {
       "file": "nox-oc-1.4.0/oros-connect.zip",
@@ -2134,198 +2134,202 @@
     },
     "768690557": {
       "file": "nox-rs-1.20.1/revenue-splitter.zip",
-      "count": 0
+      "count": 2
     },
     "768690809": {
       "file": "nox-sp-1.9.3/store-pulse.zip",
-      "count": 0
+      "count": 2
     },
     "768690974": {
       "file": "nox-sf-1.5.6/smart-formatter.zip",
-      "count": 0
+      "count": 2
     },
     "768691172": {
       "file": "nox-tp-1.7.4/theme-patcher.zip",
-      "count": 0
+      "count": 2
     },
     "768691354": {
       "file": "nox-sh-1.3.7/shop-filters.zip",
-      "count": 0
+      "count": 2
     },
     "768691558": {
       "file": "nox-pf-1.3.4/product-formats.zip",
-      "count": 0
+      "count": 2
     },
     "768691784": {
       "file": "nox-ew-1.2.9/easy-withdrawal.zip",
-      "count": 0
+      "count": 2
     },
     "768691988": {
       "file": "nox-sn-1.4.4/shipping-notes.zip",
-      "count": 0
+      "count": 3
     },
     "768692227": {
       "file": "nox-bp-1.3.4/book-preview.zip",
-      "count": 0
+      "count": 2
     },
     "768692466": {
       "file": "nox-cr-1.3.7/featured-creators.zip",
-      "count": 0
+      "count": 2
     },
     "768692599": {
       "file": "nox-pk-1.2.6/store-pickup.zip",
-      "count": 0
+      "count": 2
     },
     "768692753": {
       "file": "nox-hc-1.1.7/hide-catalog.zip",
-      "count": 0
+      "count": 2
     },
     "768692964": {
       "file": "nox-vp-1.1.6/variation-picker.zip",
-      "count": 0
+      "count": 2
     },
     "768693199": {
       "file": "nox-gl-1.3.4/greeklish-permalinks.zip",
-      "count": 0
+      "count": 2
     },
     "768693352": {
       "file": "nox-oc-1.4.1/oros-connect.zip",
-      "count": 0
+      "count": 2
     },
     "768693547": {
       "file": "nox-pb-1.1.8/product-bundles.zip",
-      "count": 0
+      "count": 2
     },
     "768693744": {
       "file": "nox-sb-1.13.4/site-bridge.zip",
-      "count": 0
+      "count": 2
     },
     "768693929": {
       "file": "nox-pq-1.1.8/publishing-quote.zip",
-      "count": 0
+      "count": 2
     },
     "768694111": {
       "file": "nox-po-1.1.8/pre-orders.zip",
-      "count": 0
+      "count": 2
     },
     "768694431": {
       "file": "nox-ws-1.2.9/wish-shelf.zip",
-      "count": 0
+      "count": 2
     },
     "768694624": {
       "file": "nox-ce-1.2.4/checkout-extras.zip",
-      "count": 0
+      "count": 2
     },
     "768694803": {
       "file": "nox-nm-1.3.4/data-migrator.zip",
-      "count": 0
+      "count": 2
     },
     "768695074": {
       "file": "nox-hs-1.4.9/home-sections.zip",
-      "count": 0
+      "count": 2
     },
     "768695360": {
       "file": "nox-bf-1.13.8/book-feed.zip",
-      "count": 0
+      "count": 2
     },
     "768695630": {
       "file": "nox-lo-1.6.1/live-operator.zip",
-      "count": 0
+      "count": 2
     },
     "768695891": {
       "file": "nox-ta-1.10.1/trade-accounts.zip",
-      "count": 0
+      "count": 2
     },
     "768696134": {
       "file": "nox-fp-1.0.11/fast-pages.zip",
-      "count": 0
+      "count": 2
     },
     "768696411": {
       "file": "nox-br-1.4.6/broadcast.zip",
-      "count": 0
+      "count": 2
     },
     "768696689": {
       "file": "nox-ml-1.0.9/magic-login.zip",
-      "count": 0
+      "count": 2
     },
     "768696942": {
       "file": "nox-ti-1.0.8/trade-feed-import.zip",
-      "count": 0
+      "count": 2
     },
     "768697200": {
       "file": "nox-li-1.0.6/lean-images.zip",
-      "count": 0
+      "count": 2
     },
     "768697429": {
       "file": "nox-rd-1.0.10/redirects.zip",
-      "count": 0
+      "count": 2
     },
     "768697689": {
       "file": "nox-ss-1.1.3/search-signals.zip",
-      "count": 0
+      "count": 2
     },
     "768697924": {
       "file": "nox-pl-1.3.2/production-ledger.zip",
-      "count": 0
+      "count": 2
     },
     "768698145": {
       "file": "nox-pt-1.0.4/product-tabs.zip",
-      "count": 0
+      "count": 2
     },
     "768698345": {
       "file": "nox-fd-1.0.4/product-feed.zip",
-      "count": 0
+      "count": 2
     },
     "768698554": {
       "file": "nox-iv-1.1.3/invoice-details.zip",
-      "count": 0
+      "count": 2
     },
     "768698774": {
       "file": "nox-al-1.0.3/activity-log.zip",
-      "count": 0
+      "count": 2
     },
     "768699007": {
       "file": "nox-mr-1.0.3/mail-relay.zip",
-      "count": 0
+      "count": 2
     },
     "768699198": {
       "file": "nox-lg-1.1.3/login-guard.zip",
-      "count": 0
+      "count": 2
     },
     "768699448": {
       "file": "nox-fm-1.0.3/forms.zip",
-      "count": 0
+      "count": 2
     },
     "768699628": {
       "file": "nox-lv-1.0.4/live-search.zip",
-      "count": 0
+      "count": 2
     },
     "768699867": {
       "file": "nox-bs-1.0.3/back-in-stock.zip",
-      "count": 0
+      "count": 2
     },
     "768700093": {
       "file": "nox-ev-1.1.3/events.zip",
-      "count": 0
+      "count": 2
     },
     "768700375": {
       "file": "nox-gc-1.0.4/gift-cards.zip",
-      "count": 0
+      "count": 2
     },
     "768700680": {
       "file": "nox-ed-1.0.3/ebook-delivery.zip",
-      "count": 0
+      "count": 2
     },
     "768700942": {
       "file": "nox-mm-1.0.3/maintenance-mode.zip",
-      "count": 0
+      "count": 2
     },
     "768701174": {
       "file": "nox-dr-1.1.3/discount-rules.zip",
-      "count": 0
+      "count": 2
     },
     "768701371": {
       "file": "nox-vl-1.0.0/visitor-language.zip",
+      "count": 6
+    },
+    "769023116": {
+      "file": "nox-vl-1.0.1/visitor-language.zip",
       "count": 0
     }
   },
@@ -2516,11 +2520,11 @@
     },
     "tech.noxpress.liveoperator": {
       "estimate": 10,
-      "github": 42
+      "github": 44
     },
     "tech.noxpress.sitebridge": {
       "estimate": 14,
-      "github": 59
+      "github": 61
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
