@@ -3,7 +3,7 @@
  * Plugin Name:          Product Formats
  * Plugin URI:           https://noxpress.tech
  * Description:          Ομαδοποιεί τα προϊόντα που είναι το ίδιο έργο σε άλλη μορφή (έντυπο, ebook, ηχητικό βιβλίο, ταινία, μουσική ή δικές σου μορφές) και δείχνει στη σελίδα κάθε προϊόντος το μπλοκ «Διαθέσιμες μορφές» με ετικέτα, τιμή και σύνδεσμο. Προτείνει ομάδες από τίτλους, slugs και upsells, και καθαρίζει με ασφάλεια τα upsells που έκαναν αυτή τη δουλειά.
- * Version:              1.3.3
+ * Version:              1.3.4
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/product-formats
  * Text Domain:          product-formats
  * Domain Path:          /languages
@@ -60,7 +60,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PFM_VERSION', '1.3.3' );
+define( 'PFM_VERSION', '1.3.4' );
 define( 'PFM_FILE', __FILE__ );
 define( 'PFM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PFM_URL', plugin_dir_url( __FILE__ ) );

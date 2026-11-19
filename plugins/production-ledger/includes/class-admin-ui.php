@@ -1519,7 +1519,7 @@ final class PL_Admin_UI {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="pl-footer-cta">
-			<a class="pl-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer"><?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'production-ledger' ); ?></a>
+			<a class="pl-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( '♡ Στήριξε το Noxpress', 'production-ledger' ); ?></a>
 			<a class="pl-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>"><?php esc_html_e( 'Noxpress Dashboard', 'production-ledger' ); ?></a>
 		</p>
 		<?php

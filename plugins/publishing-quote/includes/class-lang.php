@@ -245,7 +245,7 @@ final class PBQ_Lang {
 		'Τα είδη επιμέλειας, τα μεγέθη, τα χαρτιά και τα δεσίματα χρειάζονται τουλάχιστον μία γραμμή: όπου τις αφαίρεσες όλες, έμειναν οι προηγούμενες.' => 'Editing kinds, sizes, papers and bindings need at least one row: where you removed them all, the previous ones stayed.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 
 		// Requests: states, owner email, privacy.

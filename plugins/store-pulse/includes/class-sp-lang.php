@@ -285,10 +285,10 @@ final class SP_Lang {
 		// --- Footer / widget / branding ---
 		'Made with ❤ by %s'                                => 'Made with ❤ by %s',
 		'More plugins at'                                  => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                   => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                   => '♡ Support Noxpress',
 		'🤓 Dashboard'                                     => '🤓 Dashboard',
 		'Noxpress Dashboard'                               => 'Noxpress Dashboard',
-		'☕ Ko-fi'                                          => '☕ Ko-fi',
+		'♡ Στήριξε'                                          => '♡ Support',
 
 	);
 

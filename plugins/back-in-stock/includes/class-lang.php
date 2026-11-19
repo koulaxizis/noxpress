@@ -149,7 +149,7 @@ final class BIS_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.' => 'Import complete.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		'Back in Stock: επιβεβαίωση' => 'Back in Stock: confirmation',
 		'Στέλνεται στον επισκέπτη χωρίς λογαριασμό που ζήτησε ειδοποίηση, για να επιβεβαιώσει ότι το email είναι δικό του. Αν το απενεργοποιήσεις, τη φόρμα τη βλέπουν μόνο οι συνδεδεμένοι πελάτες.' => 'Sent to a guest without an account who asked for a notification, to confirm that the email is theirs. If you switch it off, only logged-in customers see the form.',

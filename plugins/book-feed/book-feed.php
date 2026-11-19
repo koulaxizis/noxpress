@@ -3,7 +3,7 @@
  * Plugin Name:          Book Feed
  * Plugin URI:           https://noxpress.tech
  * Description:          Τίτλοι άλλων εκδοτικών από κατάλογο βιβλίων (Bookpoint / ΟΣΔΕΛ) ως προϊόντα WooCommerce: αναζήτηση και εισαγωγή, κανόνες ανά εκδότη, καθημερινός συγχρονισμός τιμής και διαθεσιμότητας, κλείδωμα όσων διορθώνεις με το χέρι.
- * Version:              1.13.7
+ * Version:              1.13.8
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/book-feed
  * Text Domain:          book-feed
  * Domain Path:          /languages
@@ -71,7 +71,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BKF_VERSION', '1.13.7' );
+define( 'BKF_VERSION', '1.13.8' );
 define( 'BKF_FILE', __FILE__ );
 define( 'BKF_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BKF_URL', plugin_dir_url( __FILE__ ) );

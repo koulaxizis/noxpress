@@ -145,7 +145,7 @@ final class MGL_Lang {
 		// Footer (Bible §7).
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		// Bootstrap.
 		'Το Magic Login χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Magic Login needs WooCommerce to be active — the plugin stays inactive until it is activated.',

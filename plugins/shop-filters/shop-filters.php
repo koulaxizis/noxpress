@@ -3,7 +3,7 @@
  * Plugin Name:          Shop Filters
  * Plugin URI:           https://noxpress.tech
  * Description:          Λιτά φίλτρα προϊόντων για κλασικά θέματα WooCommerce: κατηγορίες με πραγματική ιεραρχία, χαρακτηριστικά με μετρητές, τιμή με slider. Ομαδοποίηση τιμών χαρακτηριστικών (π.χ. 88 ηλικίες σε 6 εύρη) χωρίς αλλαγή στα προϊόντα. Καθαροί σύνδεσμοι που δουλεύουν χωρίς JavaScript, εμφάνιση που αντέχει τους κανόνες του θέματος, χωρίς εξωτερικές βιβλιοθήκες.
- * Version:              1.3.6
+ * Version:              1.3.7
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/shop-filters
  * Text Domain:          shop-filters
  * Domain Path:          /languages
@@ -60,7 +60,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SHF_VERSION', '1.3.6' );
+define( 'SHF_VERSION', '1.3.7' );
 define( 'SHF_FILE', __FILE__ );
 define( 'SHF_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SHF_URL', plugin_dir_url( __FILE__ ) );

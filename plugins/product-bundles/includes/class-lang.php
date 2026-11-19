@@ -183,7 +183,7 @@ final class PBN_Lang {
 		'Η εισαγωγή ολοκληρώθηκε: ρυθμίσεις και %d πακέτα.'           => 'Import completed: settings and %d bundles.',
 		'Made with ❤ by %s'                                           => 'Made with ❤ by %s',
 		'More plugins at'                                             => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                              => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                              => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                          => 'Noxpress Dashboard',
 		'Διάλεξε τουλάχιστον ένα προϊόν για το πακέτο.'               => 'Pick at least one product for the bundle.',
 		'Το αντίγραφο δεν γράφτηκε: δεν άλλαξε τίποτα.'               => 'The backup was not written: nothing changed.',

@@ -3,7 +3,7 @@
  * Plugin Name:          Ebook Delivery
  * Plugin URI:           https://noxpress.tech
  * Description:          Υδατογράφημα του αγοραστή σε κάθε PDF και EPUB τη στιγμή της λήψης (social DRM), με κρυφό κωδικό που δείχνει ποια παραγγελία μοιράστηκε ένα αρχείο, καθαρά ονόματα αρχείων και σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό. Πάνω στις λήψεις του WooCommerce: τα όρια, η λήξη και το ιστορικό μένουν δικά του.
- * Version:              1.0.2
+ * Version:              1.0.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/ebook-delivery
  * Text Domain:          ebook-delivery
  * Domain Path:          /languages
@@ -83,7 +83,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'EBD_VERSION', '1.0.2' );
+define( 'EBD_VERSION', '1.0.3' );
 define( 'EBD_FILE', __FILE__ );
 define( 'EBD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EBD_URL', plugin_dir_url( __FILE__ ) );

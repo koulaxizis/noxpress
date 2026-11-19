@@ -250,7 +250,7 @@ final class ACL_Lang {
 		'και άλλες αλλαγές' => 'and more changes',
 		'πολλές αλλαγές: δεν χωρούν' => 'too many changes to fit',
 		'προϊόν, ρύθμιση, χρήστης…' => 'product, setting, user…',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

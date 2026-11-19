@@ -3,7 +3,7 @@
  * Plugin Name:          Production Ledger
  * Plugin URI:           https://noxpress.tech
  * Description:          Κόστη και καθαρό αποτέλεσμα ανά προϊόν: καταχωρίσεις κόστους παραγωγής ανά κατηγορία (εκτύπωση, επιμέλεια, σχέδιο, ήχος, μεταφορικά, προώθηση…), μεταφορικά, αναλώσιμα και προμήθειες πληρωμών μοιρασμένα στις παραγγελίες του μήνα, αμοιβές δημιουργών από το Revenue Splitter, γενικά έξοδα σε χωριστό βιβλίο, νεκρό σημείο, εξαγωγή CSV και ροή εγγραφών για το orOS Budget. Όλα τα ποσά καθαρά, με τον ΦΠΑ σε δική του στήλη.
- * Version:              1.3.1
+ * Version:              1.3.2
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/production-ledger
  * Text Domain:          production-ledger
  * Domain Path:          /languages
@@ -76,7 +76,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PL_VERSION', '1.3.1' );
+define( 'PL_VERSION', '1.3.2' );
 define( 'PL_FILE', __FILE__ );
 define( 'PL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PL_URL', plugin_dir_url( __FILE__ ) );

@@ -1503,8 +1503,8 @@ final class BKF_Admin_UI {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="bkf-footer-cta">
-			<a class="bkf-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'book-feed' ); ?>
+			<a class="bkf-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'book-feed' ); ?>
 			</a>
 			<a class="bkf-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'book-feed' ); ?>

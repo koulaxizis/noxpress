@@ -143,7 +143,7 @@ final class LOP_Lang {
 		'Το πακέτο δεν είναι έγκυρο όνομα Android· έμεινε το προεπιλεγμένο.' => 'The package is not a valid Android name; the default was kept.',
 		'Made with ❤ by %s'                                => 'Made with ❤ by %s',
 		'More plugins at'                                  => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                   => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                   => '♡ Support Noxpress',
 		'Noxpress Dashboard'                               => 'Noxpress Dashboard',
 
 		// Notifications.

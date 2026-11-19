@@ -3,14 +3,14 @@
  * Plugin Name:          Login Guard
  * Plugin URI:           https://noxpress.tech
  * Description:          Επαλήθευση σε δύο βήματα με εφαρμογή (TOTP) και κωδικούς ανάκτησης, όριο αποτυχημένων συνδέσεων ανά IP και ανά λογαριασμό με κλείδωμα που κλιμακώνεται και ξεκλείδωμα με email, κλείσιμο των συνδέσεων μέσω XML-RPC, προστασία από απαρίθμηση χρηστών και email όταν ένας διαχειριστής συνδέεται από νέα συσκευή. Σωστή IP πίσω από Cloudflare, λειτουργία δοκιμής και πολλοί τρόποι ανάκτησης.
- * Version:              1.1.2
+ * Version:              1.1.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/login-guard
  * Text Domain:          login-guard
  * Domain Path:          /languages
@@ -81,7 +81,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LGD_VERSION', '1.1.2' );
+define( 'LGD_VERSION', '1.1.3' );
 define( 'LGD_FILE', __FILE__ );
 define( 'LGD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LGD_URL', plugin_dir_url( __FILE__ ) );

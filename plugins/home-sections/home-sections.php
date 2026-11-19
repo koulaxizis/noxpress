@@ -3,7 +3,7 @@
  * Plugin Name:          Home Sections
  * Plugin URI:           https://noxpress.tech
  * Description:          Έξυπνα shortcodes [products] για την αρχική και κάθε σελίδα: marker classes που εξαιρούν προϊόντα, κατηγορίες ή προπαραγγελίες και κρατούν μόνο προϊόντα με μια λέξη στον τίτλο, έτοιμα ή ως δικά σου presets, το [hs_video] με το νεότερο book trailer ή παρουσίαση από τις καρτέλες βίντεο των προϊόντων, και το [hs_stats] με ζωντανούς μετρητές για διαθέσιμα προϊόντα, ολοκληρωμένες παραγγελίες, αγοραστές και προϊόντα ανά ομάδα κατηγοριών. Τα προϊόντα δεν αλλάζουν.
- * Version:              1.4.8
+ * Version:              1.4.9
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/home-sections
  * Text Domain:          home-sections
  * Domain Path:          /languages
@@ -87,7 +87,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HMS_VERSION', '1.4.8' );
+define( 'HMS_VERSION', '1.4.9' );
 define( 'HMS_FILE', __FILE__ );
 define( 'HMS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HMS_URL', plugin_dir_url( __FILE__ ) );

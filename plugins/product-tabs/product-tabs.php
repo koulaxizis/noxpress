@@ -3,7 +3,7 @@
  * Plugin Name:          Product Tabs
  * Plugin URI:           https://noxpress.tech
  * Description:          Επιπλέον καρτέλες στη σελίδα προϊόντος: ανά προϊόν και κοινές ανά κατηγορία, ετικέτα ή είδος, βίντεο που φορτώνουν μόνο με κλικ, μία σειρά για όλες τις καρτέλες και εισαγωγή από το Custom Product Tabs for WooCommerce χωρίς να αλλάξουν τα δεδομένα του.
- * Version:              1.0.3
+ * Version:              1.0.4
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/product-tabs
  * Text Domain:          product-tabs
  * Domain Path:          /languages
@@ -75,7 +75,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PTB_VERSION', '1.0.3' );
+define( 'PTB_VERSION', '1.0.4' );
 define( 'PTB_FILE', __FILE__ );
 define( 'PTB_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PTB_URL', plugin_dir_url( __FILE__ ) );

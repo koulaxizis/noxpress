@@ -3,7 +3,7 @@
  * Plugin Name:          Store Pickup
  * Plugin URI:           https://noxpress.tech
  * Description:          Παραλαβή από το κατάστημα ως μέθοδος αποστολής του WooCommerce, χωρίς μεταφορικά (ή με δικό σου κόστος), με επιλογή καταστήματος στο ταμείο. Για κάθε κατάστημα γράφεις όνομα, διεύθυνση, ώρες και διευκρινίσεις· το κατάστημα που διάλεξε ο πελάτης φαίνεται στην παραγγελία, στα emails και στον λογαριασμό του.
- * Version:              1.2.5
+ * Version:              1.2.6
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/store-pickup
  * Text Domain:          store-pickup
  * Domain Path:          /languages
@@ -63,7 +63,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PKP_VERSION', '1.2.5' );
+define( 'PKP_VERSION', '1.2.6' );
 define( 'PKP_FILE', __FILE__ );
 define( 'PKP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PKP_URL', plugin_dir_url( __FILE__ ) );

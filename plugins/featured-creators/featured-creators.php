@@ -3,7 +3,7 @@
  * Plugin Name:          Featured Creators
  * Plugin URI:           https://noxpress.tech
  * Description:          Μία σελίδα για κάθε δημιουργό του καταλόγου (συγγραφέα, εικονογράφο, μουσικό, σκηνοθέτη…) που συγκεντρώνει αυτόματα τα προϊόντα του ανά ρόλο από τα χαρακτηριστικά του WooCommerce. Σύνδεσμοι από τα «Επιπλέον πληροφορίες», πλαίσιο δημιουργού στο προϊόν, ευρετήριο με φίλτρο ρόλου και schema Person / ProfilePage.
- * Version:              1.3.6
+ * Version:              1.3.7
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/featured-creators
  * Text Domain:          featured-creators
  * Domain Path:          /languages
@@ -68,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CRT_VERSION', '1.3.6' );
+define( 'CRT_VERSION', '1.3.7' );
 define( 'CRT_FILE', __FILE__ );
 define( 'CRT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CRT_URL', plugin_dir_url( __FILE__ ) );

@@ -139,7 +139,7 @@ final class LVS_Lang {
 		'προϊόντα' => 'products',
 		'σημαίνει…' => 'means…',
 		'στο τέλος' => 'last',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

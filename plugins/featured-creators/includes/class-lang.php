@@ -209,7 +209,7 @@ final class CRT_Lang {
 		'Το αρχείο δεν είναι έγκυρο JSON.' => 'The file is not valid JSON.',
 		'Μη έγκυρο αρχείο backup (λείπουν οι ρυθμίσεις του Featured Creators).' => 'Invalid backup file (the Featured Creators settings are missing).',
 		'Η εισαγωγή ολοκληρώθηκε.' => 'Import complete.',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Το Featured Creators χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Featured Creators needs WooCommerce active; the plugin stays inactive until it is activated.',
 		'Προβολή σελίδας' => 'View page',
 		'Ο δημιουργός ενημερώθηκε.' => 'Creator updated.',

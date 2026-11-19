@@ -195,7 +195,7 @@ final class EBD_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.' => 'The import is complete.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 	);
 

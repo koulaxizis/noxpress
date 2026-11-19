@@ -3,7 +3,7 @@
  * Plugin Name:          Variation Picker
  * Plugin URI:           https://noxpress.tech
  * Description:          Swatches για τις παραλλαγές του WooCommerce: κουμπιά, χρώματα (και δίχρωμα), εικόνες, εικόνα της παραλλαγής, λίστα ή dropdown ανά χαρακτηριστικό. Δείχνει ποιοι συνδυασμοί λείπουν, «Χρώμα: Μαύρο», τιμή και απόθεμα στο tooltip, οδηγό μεγεθών, swatches στις κάρτες του καταστήματος και εισαγωγή από άλλα swatches plugins.
- * Version:              1.1.5
+ * Version:              1.1.6
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/variation-picker
  * Text Domain:          variation-picker
  * Domain Path:          /languages
@@ -70,7 +70,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'VPK_VERSION', '1.1.5' );
+define( 'VPK_VERSION', '1.1.6' );
 define( 'VPK_FILE', __FILE__ );
 define( 'VPK_PATH', plugin_dir_path( __FILE__ ) );
 define( 'VPK_URL', plugin_dir_url( __FILE__ ) );

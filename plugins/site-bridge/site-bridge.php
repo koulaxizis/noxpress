@@ -3,14 +3,14 @@
  * Plugin Name:          Site Bridge
  * Plugin URI:           https://noxpress.tech
  * Description:          Το Claude διαχειρίζεται τα WordPress / WooCommerce sites σου μέσω MCP, από τους δικούς σου servers. Ένα Hub δέχεται τη σύνδεση του Claude (OAuth 2.1) και προωθεί κάθε κλήση, υπογεγραμμένη, στα sites. Κάθε site αποφασίζει μόνο του: ανάγνωση, εγγραφή ή διαχείριση, με παράθυρο εγγραφής που ανοίγεις εσύ. Ιστορικό κάθε κλήσης. Δουλεύει με το Claude, δεν σχετίζεται με την Anthropic.
- * Version:              1.13.3
+ * Version:              1.13.4
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/site-bridge
  * Text Domain:          site-bridge
  * Domain Path:          /languages
@@ -62,7 +62,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SBR_VERSION', '1.13.3' );
+define( 'SBR_VERSION', '1.13.4' );
 define( 'SBR_FILE', __FILE__ );
 define( 'SBR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SBR_URL', plugin_dir_url( __FILE__ ) );

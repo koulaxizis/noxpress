@@ -141,7 +141,7 @@ final class IVD_Lang {
 		'ΦΠΑ' => 'VAT',
 		'Χωρίς έλεγχο' => 'Not checked',
 		'Χώρα' => 'Country',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	/** Plurals: Greek singular => [ English singular, English plural ]. */

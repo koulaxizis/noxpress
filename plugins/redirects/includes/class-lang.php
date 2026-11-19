@@ -235,7 +235,7 @@ final class RDR_Lang {
 		'το site σου (%s)' => 'your site (%s)',
 		'υπάρχει' => 'exists',
 		'όρος άλλαξε διεύθυνση' => 'term changed its address',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

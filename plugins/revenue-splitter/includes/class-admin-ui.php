@@ -2947,8 +2947,8 @@ final class RS_Admin_UI {
 					<?php esc_html_e( '🤓 Dashboard', 'revenue-splitter' ); ?>
 				</a>
 				<span class="rs-muted"> · </span>
-				<a class="rs-strong-link" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-					<?php esc_html_e( '☕ Ko-fi', 'revenue-splitter' ); ?>
+				<a class="rs-strong-link" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+					<?php esc_html_e( '♡ Στήριξε', 'revenue-splitter' ); ?>
 				</a>
 			</p>
 		</div>
@@ -3021,8 +3021,8 @@ final class RS_Admin_UI {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="rs-footer-cta">
-			<a class="rs-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
+			<a class="rs-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'revenue-splitter' ); ?>
 			</a>
 			<a class="rs-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SLUG_MENU ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'revenue-splitter' ); ?>

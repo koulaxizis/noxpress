@@ -3,14 +3,14 @@
  * Plugin Name:          Lean Images
  * Plugin URI:           https://noxpress.tech
  * Description:          Τοπική μετατροπή των εικόνων σε WebP (και προαιρετικά AVIF) με το GD ή το Imagick του server, σε μικρές παρτίδες στο παρασκήνιο, και σερβίρισμα με <picture>. Τα πρωτότυπα δεν αλλάζουν ποτέ. Χωρίς λογαριασμό, όριο ή εξωτερική υπηρεσία.
- * Version:              1.0.5
+ * Version:              1.0.6
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/lean-images
  * Text Domain:          lean-images
  * Domain Path:          /languages
@@ -60,7 +60,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LIM_VERSION', '1.0.5' );
+define( 'LIM_VERSION', '1.0.6' );
 define( 'LIM_FILE', __FILE__ );
 define( 'LIM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LIM_URL', plugin_dir_url( __FILE__ ) );

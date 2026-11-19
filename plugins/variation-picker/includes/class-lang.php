@@ -182,7 +182,7 @@ final class VPK_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.'                                  => 'Import completed.',
 		'Made with ❤ by %s'                                         => 'Made with ❤ by %s',
 		'More plugins at'                                           => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                            => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                            => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                        => 'Noxpress Dashboard',
 		'Το Variation Picker χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Variation Picker requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 	);

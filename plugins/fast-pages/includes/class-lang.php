@@ -171,7 +171,7 @@ final class FPG_Lang {
 		'Πρόσθεσε με το χέρι, κάτω από το <?php:'          => 'Add by hand, below <?php:',
 		'Made with ❤ by %s'                                => 'Made with ❤ by %s',
 		'More plugins at'                                  => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                   => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                   => '♡ Support Noxpress',
 		'Noxpress Dashboard'                               => 'Noxpress Dashboard',
 		'Καθάρισμα αυτής της σελίδας'                      => 'Purge this page',
 		'Η σελίδα όπως στην cache'                         => 'This page as cached',

@@ -483,7 +483,8 @@ class RS_Lang {
 		'Απενεργοποίηση αναφοράς' => 'Disable report',
 		'Ενεργοποίηση αναφοράς' => 'Enable report',
 		'Η αναφορά είναι ενεργή — στέλνεται τις πρώτες μέρες κάθε μήνα και καλύπτει τον προηγούμενο.' => 'The report is active — it is sent in the first days of each month and covers the previous one.',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
+		'♡ Στήριξε' => '♡ Support',
 
 		'Μηνιαία αναφορά πωλήσεων — %s' => 'Monthly sales report — %s',
 		'Μηνιαία αναφορά πωλήσεων' => 'Monthly sales report',

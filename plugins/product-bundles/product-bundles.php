@@ -3,7 +3,7 @@
  * Plugin Name:          Product Bundles
  * Plugin URI:           https://noxpress.tech
  * Description:          Πακέτα προϊόντων για το WooCommerce: νέος τύπος προϊόντος «Πακέτο» με προϊόντα (και επιλογή μεγέθους από τον πελάτη), έκπτωση % ή τελική τιμή, τιμή και διαθεσιμότητα από τα προϊόντα. Στην παραγγελία μπαίνει κάθε προϊόν με το δικό του απόθεμα, ΦΠΑ και ποσοστά, και η έκπτωση φαίνεται ως έκπτωση στα Revenue Splitter, Store Pulse και WooCommerce.
- * Version:              1.1.7
+ * Version:              1.1.8
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/product-bundles
  * Text Domain:          product-bundles
  * Domain Path:          /languages
@@ -75,7 +75,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PBN_VERSION', '1.1.7' );
+define( 'PBN_VERSION', '1.1.8' );
 define( 'PBN_FILE', __FILE__ );
 define( 'PBN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PBN_URL', plugin_dir_url( __FILE__ ) );

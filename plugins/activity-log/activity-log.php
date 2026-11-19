@@ -3,14 +3,14 @@
  * Plugin Name:          Activity Log
  * Plugin URI:           https://noxpress.tech
  * Description:          Ποιος άλλαξε τι και πότε: προϊόντα, τιμές, απόθεμα, παραγγελίες, κουπόνια, σελίδες, χρήστες και συνδέσεις, plugins, θέματα και ρυθμίσεις, με την πηγή κάθε αλλαγής (admin, REST, WP-CLI, cron, Site Bridge). Χωρίς μυστικά και χωρίς στοιχεία πελατών, IP με μάσκα, αυτόματη διαγραφή μετά από 90 μέρες και email για τις κρίσιμες αλλαγές.
- * Version:              1.0.2
+ * Version:              1.0.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/activity-log
  * Text Domain:          activity-log
  * Domain Path:          /languages
@@ -59,7 +59,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ACL_VERSION', '1.0.2' );
+define( 'ACL_VERSION', '1.0.3' );
 define( 'ACL_FILE', __FILE__ );
 define( 'ACL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ACL_URL', plugin_dir_url( __FILE__ ) );

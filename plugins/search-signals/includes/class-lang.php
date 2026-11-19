@@ -226,7 +226,7 @@ final class SSG_Lang {
 		'κανείς' => 'nobody',
 		'σφάλμα αιτήματος' => 'request error',
 		'το Search Signals' => 'Search Signals',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

@@ -1277,8 +1277,8 @@ final class SHF_Admin_UI {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="shf-footer-cta">
-			<a class="shf-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'shop-filters' ); ?>
+			<a class="shf-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'shop-filters' ); ?>
 			</a>
 			<a class="shf-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'shop-filters' ); ?>

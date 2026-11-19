@@ -3,7 +3,7 @@
  * Plugin Name:          Pre-Orders
  * Plugin URI:           https://noxpress.tech
  * Description:          Προπαραγγελίες για προϊόντα του WooCommerce που δεν έχουν κυκλοφορήσει ακόμα: ημερομηνία κυκλοφορίας (ή «Σύντομα διαθέσιμο»), σήμα και κουμπί «Προπαραγγελία», η ημερομηνία στο καλάθι, στην παραγγελία και στα emails. Την ημέρα της κυκλοφορίας το προϊόν γίνεται αυτόματα κανονικό και οι πελάτες μπορούν να ενημερωθούν.
- * Version:              1.1.7
+ * Version:              1.1.8
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/pre-orders
  * Text Domain:          pre-orders
  * Domain Path:          /languages
@@ -71,7 +71,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'POR_VERSION', '1.1.7' );
+define( 'POR_VERSION', '1.1.8' );
 define( 'POR_FILE', __FILE__ );
 define( 'POR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'POR_URL', plugin_dir_url( __FILE__ ) );

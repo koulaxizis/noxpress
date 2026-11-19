@@ -3,7 +3,7 @@
  * Plugin Name:          Product Feed
  * Plugin URI:           https://noxpress.tech
  * Description:          Feeds προϊόντων για Google Merchant Center, Skroutz, BestPrice και κατάλογο Meta (Facebook/Instagram), και γενικό CSV: στατικό αρχείο με σταθερό URL, ανανέωση στο παρασκήνιο, ISBN/GTIN, εκδότης, προπαραγγελίες και έλεγχος πριν δημοσιευτεί.
- * Version:              1.0.3
+ * Version:              1.0.4
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/product-feed
  * Text Domain:          product-feed
  * Domain Path:          /languages
@@ -69,7 +69,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PFD_VERSION', '1.0.3' );
+define( 'PFD_VERSION', '1.0.4' );
 define( 'PFD_FILE', __FILE__ );
 define( 'PFD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PFD_URL', plugin_dir_url( __FILE__ ) );

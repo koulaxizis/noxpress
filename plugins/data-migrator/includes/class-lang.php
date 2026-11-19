@@ -313,7 +313,7 @@ final class NM_Lang {
 		'Το κομμάτι δεν έφτασε στον server.' => 'The chunk did not reach the server.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		'Data Migrator: το site επαναφέρθηκε από αντίγραφο. Έλεγξέ το και μετά πάτα «Οριστικοποίηση» (ή «Αναίρεση» αν κάτι δεν πάει καλά).' => 'Data Migrator: the site was restored from a backup. Check it, then press "Finalize" (or "Undo" if something is wrong).',
 		'Άνοιγμα' => 'Open',

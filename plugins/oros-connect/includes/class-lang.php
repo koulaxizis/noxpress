@@ -129,7 +129,7 @@ final class ORC_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.' => 'Import completed.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		'Λειτουργία δοκιμής: μόνο οι διαχειριστές βλέπουν τη φόρμα.' => 'Test mode: only managers see the form.',
 		'orOS Connect: η φόρμα newsletter δεν έχει ακόμα τη διεύθυνση εγγραφής του orOS (Noxpress → orOS Connect → Newsletter).' => 'orOS Connect: the newsletter form does not have the orOS sign-up address yet (Noxpress → orOS Connect → Newsletter).',

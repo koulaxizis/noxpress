@@ -1,11 +1,11 @@
 === Maintenance Mode ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: maintenance, coming soon, under construction, 503, launch page
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -87,6 +87,9 @@ Create a preview link in «Access» and send it. Customers with an account see t
 No: «Maintenance» answers 503 with Retry-After, which tells search engines the break is temporary. Keep it short (hours or a few days); for a site that is not public yet, use «Coming soon».
 
 == Changelog ==
+
+= 1.0.3 =
+* Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.
 
 = 1.0.2 =
 * Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.

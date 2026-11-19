@@ -3,14 +3,14 @@
  * Plugin Name:          Maintenance Mode
  * Plugin URI:           https://noxpress.tech
  * Description:          Σελίδα «Σύντομα κοντά σας» ή «Συντήρηση» για τους επισκέπτες, ενώ οι διαχειριστές, όσοι έχουν σύνδεσμο προεπισκόπησης και οι IP που ορίζεις βλέπουν κανονικά το site. 503 με Retry-After για τη συντήρηση, noindex για νέο site, ώρα έναρξης και λήξης, καθάρισμα της page cache, και πληρωμές, REST και login που δεν κόβονται ποτέ.
- * Version:              1.0.2
+ * Version:              1.0.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/maintenance-mode
  * Text Domain:          maintenance-mode
  * Domain Path:          /languages
@@ -63,7 +63,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MMD_VERSION', '1.0.2' );
+define( 'MMD_VERSION', '1.0.3' );
 define( 'MMD_FILE', __FILE__ );
 define( 'MMD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MMD_URL', plugin_dir_url( __FILE__ ) );

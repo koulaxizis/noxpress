@@ -85,6 +85,7 @@ final class Noxpress_Core {
 		'Ψηφιακές δωροκάρτες ως προϊόν, με αποστολή σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.' => 'Digital gift cards as a product, delivered on a date by email with a printable PDF, redeemed as a payment in the classic and block checkout, with the balance kept for the next order and a ledger of every movement.',
 		'Υδατογράφημα με τα στοιχεία του αγοραστή στα PDF και EPUB που πουλάς, σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό του πελάτη και εργαλείο που βρίσκει από ποια παραγγελία βγήκε ένα αρχείο που διέρρευσε.' => 'Buyer watermarks in the PDF and EPUB files you sell, a «My library» page in the customer\'s account and a tool that finds which order a leaked file came from.',
 
+		'Μια αγγλική εκδοχή του site στο /en/ για επισκέπτες από το εξωτερικό: WordPress, WooCommerce, καλάθι και checkout στα αγγλικά, και αγγλικά κείμενα μόνο για όσα προϊόντα και σελίδες θέλεις.' => 'An English version of the site at /en/ for visitors from abroad: WordPress, WooCommerce, cart and checkout in English, and English texts only for the products and pages you want.',
 		'Το Claude διαχειρίζεται τα sites σου μέσω MCP, από τους δικούς σου servers, με επίπεδο πρόσβασης ανά site και ιστορικό κάθε κλήσης.' => 'Claude manages your sites over MCP, from your own servers, with an access level per site and a log of every call.',
 
 		// Hub.
@@ -209,7 +210,7 @@ final class Noxpress_Core {
 		// Footer (Bible §7).
 		'Made with ❤ by %s'                                     => 'Made with ❤ by %s',
 		'More plugins at'                                       => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                       => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                       => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                    => 'Noxpress Dashboard',
 	);
 
@@ -524,6 +525,12 @@ final class Noxpress_Core {
 				'desc' => __( 'Κανόνες εκπτώσεων με ημερομηνίες: προσφορές σε προϊόντα και κατηγορίες, κλιμακωτή έκπτωση ποσότητας, «3 για 2» και έκπτωση καλαθιού, με ανώτατο όριο ανά παραγγελία, δοκιμή καλαθιού και τη χαμηλότερη τιμή 30 ημερών (Omnibus).', 'noxpress' ),
 				'page' => 'dsr-rules',
 				'cat'  => 'orders',
+			),
+			'visitor-language'  => array(
+				'name' => 'Visitor Language',
+				'desc' => __( 'Μια αγγλική εκδοχή του site στο /en/ για επισκέπτες από το εξωτερικό: WordPress, WooCommerce, καλάθι και checkout στα αγγλικά, και αγγλικά κείμενα μόνο για όσα προϊόντα και σελίδες θέλεις.', 'noxpress' ),
+				'page' => 'vlg-settings',
+				'cat'  => 'shop',
 			),
 			'site-bridge'       => array(
 				'name' => 'Site Bridge',

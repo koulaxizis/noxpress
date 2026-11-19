@@ -3,14 +3,14 @@
  * Plugin Name:          orOS Connect
  * Plugin URI:           https://noxpress.tech
  * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget, popup) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter· και οι Προσφορές: τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.4.0
+ * Version:              1.4.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/oros-connect
  * Text Domain:          oros-connect
  * Domain Path:          /languages
@@ -74,7 +74,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ORC_VERSION', '1.4.0' );
+define( 'ORC_VERSION', '1.4.1' );
 define( 'ORC_FILE', __FILE__ );
 define( 'ORC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ORC_URL', plugin_dir_url( __FILE__ ) );

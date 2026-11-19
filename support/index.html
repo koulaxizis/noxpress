@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support noxpress</title>
+<meta name="description" content="Three ways to support noxpress, the free WordPress and WooCommerce plugins: a t-shirt, mug or sticker, a one-time donation, or hiring me. Nothing is unlocked.">
+<link rel="canonical" href="https://noxpress.tech/support/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Support noxpress">
+<meta property="og:description" content="Three ways to support noxpress, the free WordPress and WooCommerce plugins: a t-shirt, mug or sticker, a one-time donation, or hiring me. Nothing is unlocked.">
+<meta property="og:url" content="https://noxpress.tech/support/">
+<meta property="og:site_name" content="noxpress">
+<meta name="theme-color" content="#0d0f14">
+<link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+	font-family: "Inter";
+	src: url("/fonts/inter.woff2") format("woff2");
+	font-weight: 400 800;
+	font-style: normal;
+	font-display: swap;
+}
+:root {
+	--bg: #0d0f14;
+	--surface: #14161d;
+	--border: #262a35;
+	--text: #e4e2f5;
+	--muted: #9b97b8;
+	--heading: #f2f0fe;
+	--accent: #6d4aff;
+	--link: #b3a4ff;
+	--on-accent: #ffffff;
+	--font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+	background: var(--bg);
+	color: var(--text);
+	font: 16px/1.65 var(--font);
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 0 24px;
+}
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+header { padding: 64px 0 36px; }
+.header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.wordmark { font-size: clamp(1.9rem, 5vw, 2.8rem); font-weight: 700; letter-spacing: -0.02em; color: var(--heading); text-decoration: none; }
+.wordmark .dot { color: var(--accent); }
+h1 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 650; color: var(--heading); margin-top: 18px; letter-spacing: -0.01em; }
+.intro { color: var(--muted); margin-top: 10px; font-size: 1.05rem; max-width: 38em; }
+.lang-toggle {
+	flex-shrink: 0; margin-top: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+	color: var(--link); font: 600 0.8rem/1 var(--font); letter-spacing: 0.08em; text-transform: uppercase;
+	padding: 9px 14px; cursor: pointer; min-height: 36px;
+}
+.lang-toggle:hover { border-color: var(--accent); }
+section { padding: 28px 0; border-top: 1px solid var(--border); }
+h2 { font-size: 1.3rem; font-weight: 600; color: var(--heading); margin-bottom: 6px; }
+h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 22px 0 10px; font-weight: 600; }
+section > p { max-width: 42em; }
+.note { color: var(--muted); font-size: 0.92rem; margin-top: 14px; }
+.products { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.product-link {
+	display: flex; flex-direction: column; gap: 4px; height: 100%; text-decoration: none; color: var(--text);
+	background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; transition: border-color .15s ease;
+}
+.product-link:hover { border-color: var(--accent); }
+.product-link img { width: 100%; height: auto; aspect-ratio: 1; border-radius: 6px; background: #ece8e1; display: block; margin-bottom: 8px; }
+.product-name { font-weight: 600; color: var(--heading); }
+.product-price { color: var(--muted); font-size: 0.92rem; }
+.actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+	display: inline-flex; align-items: center; min-height: 40px; padding: 8px 16px; border-radius: 6px; text-decoration: none;
+	font-size: 0.92rem; font-weight: 500; border: 1px solid var(--border); color: var(--text);
+}
+.btn:hover { border-color: var(--accent); color: var(--link); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.1); color: var(--on-accent); }
+.services { list-style: none; margin-top: 12px; max-width: 34em; }
+.services li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.services .price { color: var(--muted); white-space: nowrap; }
+.free { margin-top: 4px; padding: 18px 20px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--surface); }
+footer { margin-top: 24px; padding: 24px 0 48px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; text-align: center; }
+footer a { color: var(--link); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer p + p { margin-top: 6px; }
+@media (max-width: 640px) {
+	body { padding: 0 16px; }
+	header { padding: 40px 0 28px; }
+	.products { gap: 8px; }
+	.product-link { padding: 7px; font-size: 0.85rem; }
+	.product-link img { margin-bottom: 4px; }
+	.product-price { font-size: 0.8rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+	<div class="header-row">
+		<div>
+			<a class="wordmark" href="/">noxpress<span class="dot">.</span></a>
+			<h1 data-en="Support noxpress" data-el="Στήριξε το noxpress">Support noxpress</h1>
+			<p class="intro" data-en="noxpress is free and open source, and it stays that way. If it saves you time, here are three ways to give something back. None of them is needed to use any plugin." data-el="Το noxpress είναι δωρεάν και ανοιχτού κώδικα, και έτσι θα μείνει. Αν σου γλιτώνει χρόνο, να τρεις τρόποι να δώσεις κάτι πίσω. Κανένας δεν χρειάζεται για να χρησιμοποιήσεις οποιοδήποτε plugin.">noxpress is free and open source, and it stays that way. If it saves you time, here are three ways to give something back. None of them is needed to use any plugin.</p>
+		</div>
+		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
+	</div>
+</header>
+
+<main>
+	<section id="buy" aria-labelledby="buyTitle">
+		<h2 id="buyTitle" data-en="Buy something" data-el="Αγόρασε κάτι">Buy something</h2>
+		<p data-en="A noxpress t-shirt, mug or sticker from the Glarolykoi shop." data-el="Ένα t-shirt, μια κούπα ή ένα αυτοκόλλητο του noxpress από το κατάστημα των Γλαρόλυκων.">A noxpress t-shirt, mug or sticker from the Glarolykoi shop.</p>
+		<ul class="products">
+			<li class="product">
+				<a class="product-link" href="https://glarolykoi.net/en/product/unisex-t-shirt-noxpress/" data-href-en="https://glarolykoi.net/en/product/unisex-t-shirt-noxpress/" data-href-el="https://glarolykoi.net/product/unisex-t-shirt-noxpress/" rel="noopener">
+					<img src="/media/merch/noxpress-tshirt.jpg" width="300" height="300" loading="lazy" alt="Black t-shirt with the noxpress logo" data-alt-el="Μαύρο t-shirt με το λογότυπο του noxpress">
+					<span class="product-name" data-en="noxpress t-shirt" data-el="T-shirt noxpress">noxpress t-shirt</span>
+					<span class="product-price" data-en="from €25" data-el="από 25 €">from €25</span>
+				</a>
+			</li>
+			<li class="product">
+				<a class="product-link" href="https://glarolykoi.net/en/product/koypa-noxpress/" data-href-en="https://glarolykoi.net/en/product/koypa-noxpress/" data-href-el="https://glarolykoi.net/product/koypa-noxpress/" rel="noopener">
+					<img src="/media/merch/noxpress-mug.jpg" width="300" height="300" loading="lazy" alt="Black mug with the noxpress logo" data-alt-el="Μαύρη κούπα με το λογότυπο του noxpress">
+					<span class="product-name" data-en="noxpress mug" data-el="Κούπα noxpress">noxpress mug</span>
+					<span class="product-price" data-en="€18" data-el="18 €">€18</span>
+				</a>
+			</li>
+			<li class="product">
+				<a class="product-link" href="https://glarolykoi.net/en/product/aytokollito-noxpress/" data-href-en="https://glarolykoi.net/en/product/aytokollito-noxpress/" data-href-el="https://glarolykoi.net/product/aytokollito-noxpress/" rel="noopener">
+					<img src="/media/merch/noxpress-sticker.jpg" width="300" height="300" loading="lazy" alt="noxpress sticker" data-alt-el="Αυτοκόλλητο του noxpress">
+					<span class="product-name" data-en="noxpress sticker" data-el="Αυτοκόλλητο noxpress">noxpress sticker</span>
+					<span class="product-price" data-en="€5" data-el="5 €">€5</span>
+				</a>
+			</li>
+		</ul>
+		<div class="actions"><a class="btn" href="https://koulaxizis.gr/support/#buy" rel="noopener" data-en="All the merch of NULL JSFX, orOS and noxpress" data-el="Όλα τα προϊόντα των NULL JSFX, orOS και noxpress">All the merch of NULL JSFX, orOS and noxpress</a></div>
+		<p class="note" data-en="Printed to order and shipped from the shop of Glarolykoi, in Greece, the EU and the rest of the world. Prices include VAT; shipping is shown at checkout." data-el="Τυπώνονται κατά παραγγελία και αποστέλλονται από το κατάστημα των Γλαρόλυκων, στην Ελλάδα, στην ΕΕ και στον υπόλοιπο κόσμο. Οι τιμές περιλαμβάνουν ΦΠΑ· τα μεταφορικά φαίνονται στο ταμείο.">Printed to order and shipped from the shop of Glarolykoi, in Greece, the EU and the rest of the world. Prices include VAT; shipping is shown at checkout.</p>
+	</section>
+
+	<section id="donate" aria-labelledby="donTitle">
+		<h2 id="donTitle" data-en="One-time donation" data-el="Εφάπαξ δωρεά">One-time donation</h2>
+		<p data-en="Any amount, once, on the secure payment page of Viva. There is no subscription and nothing to cancel." data-el="Όποιο ποσό θέλεις, μία φορά, στη σελίδα ασφαλούς πληρωμής της Viva. Δεν υπάρχει συνδρομή και τίποτα να ακυρώσεις.">Any amount, once, on the secure payment page of Viva. There is no subscription and nothing to cancel.</p>
+		<div class="actions"><a class="btn primary" href="https://pay.vivawallet.com/koulaxizis" rel="noopener" data-en="Donate once" data-el="Κάνε μια δωρεά">Donate once</a></div>
+	</section>
+
+	<section id="hire" aria-labelledby="hireTitle">
+		<h2 id="hireTitle" data-en="Hire me" data-el="Δούλεψε μαζί μου">Hire me</h2>
+		<p data-en="The plugins are free; my time can be booked, for your shop." data-el="Τα plugins είναι δωρεάν· τον χρόνο μου μπορείς να τον κλείσεις, για το κατάστημά σου.">The plugins are free; my time can be booked, for your shop.</p>
+		<ul class="services">
+			<li><span data-en="Custom plugin" data-el="Plugin κατά παραγγελία">Custom plugin</span> <span class="price" data-en="from €250" data-el="από 250 €">from €250</span></li>
+			<li><span data-en="WooCommerce setup" data-el="Εγκατάσταση WooCommerce">WooCommerce setup</span> <span class="price" data-en="€60" data-el="60 €">€60</span></li>
+			<li><span data-en="Theme fit" data-el="Ταίριασμα με το θέμα">Theme fit</span> <span class="price" data-en="from €90" data-el="από 90 €">from €90</span></li>
+			<li><span data-en="Priority support, 30 days" data-el="Υποστήριξη με προτεραιότητα, 30 ημέρες">Priority support, 30 days</span> <span class="price" data-en="€25" data-el="25 €">€25</span></li>
+		</ul>
+		<div class="actions"><a class="btn primary" href="https://koulaxizis.gr/work-with-me/?lang=en#noxpress" data-href-en="https://koulaxizis.gr/work-with-me/?lang=en#noxpress" data-href-el="https://koulaxizis.gr/work-with-me/?lang=el#noxpress" rel="noopener" data-en="Work with me" data-el="Συνεργάσου μαζί μου">Work with me</a></div>
+		<p class="note" data-en="Write to me first; you pay only after we agree on the work." data-el="Γράψε μου πρώτα· πληρώνεις μόνο αφού συμφωνήσουμε τη δουλειά.">Write to me first; you pay only after we agree on the work.</p>
+	</section>
+
+	<section id="free" aria-label="Free forever">
+		<p class="free" data-en="Everything stays free and open source. Buying or donating unlocks nothing and changes nothing in the software; it only helps keep the work going." data-el="Όλα μένουν δωρεάν και ανοιχτού κώδικα. Μια αγορά ή μια δωρεά δεν ξεκλειδώνει τίποτα και δεν αλλάζει τίποτα στο λογισμικό· απλώς βοηθά να συνεχιστεί η δουλειά.">Everything stays free and open source. Buying or donating unlocks nothing and changes nothing in the software; it only helps keep the work going.</p>
+	</section>
+</main>
+
+<footer>
+	<p><strong>noxpress</strong> · <a href="/" data-en="All plugins" data-el="Όλα τα plugins">All plugins</a> · <a href="https://koulaxizis.gr/work-with-me/?lang=en" data-href-en="https://koulaxizis.gr/work-with-me/?lang=en" data-href-el="https://koulaxizis.gr/work-with-me/?lang=el" rel="noopener" data-en="Work with me" data-el="Συνεργάσου μαζί μου">Work with me</a> · <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a></p>
+	<p data-en="Made by Christos Koulaxizis." data-el="Από τον Christos Koulaxizis.">Made by Christos Koulaxizis.</p>
+</footer>
+
+<script>
+(function () {
+	'use strict';
+	/* EN / EL: every [data-en][data-el] node swaps its text; product links and
+	 * alt texts swap too. Text only (textContent), never HTML. */
+	var KEY = "nx_lang";
+	var toggle = document.getElementById('langToggle');
+	var current = 'en';
+	function apply(lang) {
+		current = lang;
+		document.documentElement.lang = lang;
+		document.title = ('el' === lang) ? "\u03a3\u03c4\u03ae\u03c1\u03b9\u03be\u03b5 \u03c4\u03bf noxpress" : "Support noxpress";
+		toggle.textContent = ('el' === lang) ? 'EN' : 'ΕΛ';
+		var nodes = document.querySelectorAll('[data-en][data-el]');
+		for (var i = 0; i < nodes.length; i++) {
+			nodes[i].textContent = nodes[i].getAttribute('data-' + lang);
+		}
+		var links = document.querySelectorAll('[data-href-en]');
+		for (var j = 0; j < links.length; j++) {
+			links[j].setAttribute('href', links[j].getAttribute('data-href-' + lang));
+		}
+		var imgs = document.querySelectorAll('img[data-alt-el]');
+		for (var k = 0; k < imgs.length; k++) {
+			if (!imgs[k].hasAttribute('data-alt-en')) { imgs[k].setAttribute('data-alt-en', imgs[k].getAttribute('alt')); }
+			imgs[k].setAttribute('alt', imgs[k].getAttribute('data-alt-' + lang));
+		}
+		try { localStorage.setItem(KEY, lang); } catch (e) { /* blocked storage */ }
+	}
+	toggle.addEventListener('click', function () { apply('en' === current ? 'el' : 'en'); });
+	// ?lang=en|el (links from the other sites) wins over the saved choice.
+	var start = "en";
+	try {
+		var saved = localStorage.getItem(KEY);
+		if ('el' === saved || 'en' === saved) { start = saved; }
+	} catch (e) { /* blocked storage */ }
+	var m = /[?&]lang=(en|el)\b/.exec(location.search);
+	if (m) { start = m[1]; }
+	if (start !== 'en') { apply(start); }
+})();
+</script>
+</body>
+</html>

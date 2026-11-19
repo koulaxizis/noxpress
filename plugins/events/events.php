@@ -3,14 +3,14 @@
  * Plugin Name:          Events
  * Plugin URI:           https://noxpress.tech
  * Description:          Εκδηλώσεις (παρουσιάσεις, βραδιές, υπογραφές, συναυλίες, εργαστήρια, online) με ημερομηνία, χώρο, κατάσταση, είσοδο και σύνδεση με προϊόντα και δημιουργούς: λίστα επερχόμενων με shortcode και block, αρχείο, «Πρόσθεσε στο ημερολόγιο» (.ics και Google Calendar) και Event JSON-LD. Με το WooCommerce: εισιτήρια με θέσεις, κωδικούς και QR, είσοδος από κινητό και λίστα συμμετεχόντων.
- * Version:              1.1.2
+ * Version:              1.1.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/events
  * Text Domain:          events
  * Domain Path:          /languages
@@ -68,7 +68,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'EVT_VERSION', '1.1.2' );
+define( 'EVT_VERSION', '1.1.3' );
 define( 'EVT_FILE', __FILE__ );
 define( 'EVT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EVT_URL', plugin_dir_url( __FILE__ ) );

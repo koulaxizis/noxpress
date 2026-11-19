@@ -207,7 +207,7 @@ final class TFI_Lang {
 		'Κλειστό από προεπιλογή: τα προϊόντα μένουν στο κατάστημα. Τα δικά σου προϊόντα που απλώς συνδέθηκαν δεν σβήνονται ποτέ.' => 'Off by default: the products stay in the shop. Your own products that were only linked are never deleted.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 	);
 
