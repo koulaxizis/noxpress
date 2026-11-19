@@ -339,14 +339,29 @@ final class VLG_Content {
 
 	public static function assets(): void {
 		wp_register_style( 'vlg-front', VLG_URL . 'assets/front.css', array(), VLG_VERSION );
-		if ( self::active() && ( 'float' === VLG_Settings::get()['switch'] || VLG_Router::is_en() ) ) {
+		if ( self::active() && ( self::show_float() || VLG_Router::is_en() ) ) {
 			wp_enqueue_style( 'vlg-front' );
 		}
 	}
 
+	/**
+	 * True when the floating switch shows on this request: every page
+	 * ('float'), or only a single product with English texts ('products').
+	 * Filter vlg_show_switch( bool $show, int $post_id ) has the last word.
+	 */
+	private static function show_float(): bool {
+		$mode = VLG_Settings::get()['switch'];
+		$id   = is_singular() ? (int) get_queried_object_id() : 0;
+		$show = 'float' === $mode;
+		if ( 'products' === $mode ) {
+			$show = $id > 0 && function_exists( 'is_product' ) && is_product() && self::has_any( $id );
+		}
+		return (bool) apply_filters( 'vlg_show_switch', $show, $id );
+	}
+
 	public static function float_switch(): void {
 		try {
-			if ( self::active() && 'float' === VLG_Settings::get()['switch'] ) {
+			if ( self::active() && self::show_float() ) {
 				echo self::switch_html( 'vlg-float' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in switch_html().
 			}
 		} catch ( \Throwable $e ) {

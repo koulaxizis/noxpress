@@ -5,7 +5,7 @@ Tags: english, language switcher, multilingual, woocommerce, hreflang
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,10 @@ No. With WooCommerce the product texts, attributes, shipping and payment labels 
 The settings and every English text are deleted.
 
 == Changelog ==
+
+= 1.0.2 =
+* New choice for the EL / EN switch: only on products with English texts (e.g. the ones shipped abroad). Filter vlg_show_switch( $show, $post_id ).
+* The floating switch no longer sits on the theme's back-to-top button (Astra, bottom left).
 
 = 1.0.1 =
 * English pages also get an English <title>, meta description and social (og / twitter) texts from the English box: without an SEO plugin, with Rank Math and with Yoast SEO. The shop page and a static front page count too.

@@ -202,6 +202,7 @@ final class VLG_Admin_UI {
 				<h2 class="vlg-h2"><?php esc_html_e( 'Επιλογή γλώσσας', 'visitor-language' ); ?></h2>
 				<?php
 				self::radio( 'vlg_switch', 'float', $s['switch'], __( 'Μικρό κουμπί EL / EN κάτω αριστερά σε κάθε σελίδα', 'visitor-language' ) );
+				self::radio( 'vlg_switch', 'products', $s['switch'], __( 'Το ίδιο κουμπί μόνο στα προϊόντα με αγγλικά κείμενα (π.χ. όσα στέλνονται στο εξωτερικό)', 'visitor-language' ) );
 				self::radio( 'vlg_switch', 'none', $s['switch'], __( 'Μόνο όπου βάζω το shortcode [vlg_switch]', 'visitor-language' ) );
 				?>
 				<h2 class="vlg-h2"><?php esc_html_e( 'Σελίδες χωρίς αγγλικά', 'visitor-language' ); ?></h2>

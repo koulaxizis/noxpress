@@ -4,7 +4,8 @@
  *
  *  on        bool    the English version answers under /en/ (default off, §14.1)
  *  locale    string  en_US | en_GB (WordPress and WooCommerce speak it natively)
- *  switch    string  none | float (the shortcode [vlg_switch] always works)
+ *  switch    string  none | float | products (float only on the product pages
+ *                    that have English texts; the shortcode [vlg_switch] always works)
  *  note      bool    "This page is only in Greek" on pages without English texts
  *  hreflang  bool    <link rel="alternate" hreflang> on pages with English texts
  *  menus     array   theme menu location => menu id shown in English (0 = same)
@@ -61,7 +62,7 @@ final class VLG_Settings {
 		$out = array(
 			'on'       => ! empty( $s['on'] ),
 			'locale'   => isset( $s['locale'] ) && in_array( $s['locale'], array( 'en_US', 'en_GB' ), true ) ? (string) $s['locale'] : $d['locale'],
-			'switch'   => isset( $s['switch'] ) && in_array( $s['switch'], array( 'none', 'float' ), true ) ? (string) $s['switch'] : $d['switch'],
+			'switch'   => isset( $s['switch'] ) && in_array( $s['switch'], array( 'none', 'float', 'products' ), true ) ? (string) $s['switch'] : $d['switch'],
 			'note'     => isset( $s['note'] ) ? (bool) $s['note'] : $d['note'],
 			'hreflang' => isset( $s['hreflang'] ) ? (bool) $s['hreflang'] : $d['hreflang'],
 			'menus'    => array(),
