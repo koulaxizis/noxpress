@@ -144,6 +144,26 @@ section.plugins { padding-bottom: 40px; }
 	margin-bottom: 20px;
 }
 
+.apps-banner {
+	display: flex;
+	align-items: center;
+	gap: 24px;
+	margin-bottom: 40px;
+	padding: 26px 28px;
+	border: 2px solid var(--accent);
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(109, 74, 255, 0.22) 0%, rgba(109, 74, 255, 0.04) 70%), var(--surface);
+	box-shadow: 0 0 0 4px rgba(109, 74, 255, 0.14);
+}
+.apps-banner-icon { flex-shrink: 0; width: 88px; height: 88px; border-radius: 20px; }
+.apps-banner-body { min-width: 0; }
+.apps-banner-kicker { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-bright); font-weight: 600; }
+.apps-banner h2 { font-size: 1.6rem; font-weight: 600; color: #f2f0fe; margin: 4px 0 8px; }
+.apps-banner p { margin-bottom: 16px; }
+@media (max-width: 600px) {
+	.apps-banner { flex-direction: column; align-items: flex-start; padding: 20px 16px; }
+	.apps-banner-icon { width: 64px; height: 64px; border-radius: 15px; }
+}
 .card {
 	background: var(--surface);
 	border: 1px solid var(--border);
@@ -515,6 +535,19 @@ footer .heart { color: var(--accent-bright); }
 		<button type="button" class="lang-toggle" id="langToggle" aria-label="ΕΛ: Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
 	</div>
 </header>
+
+<section class="apps-banner" id="koulaxizis-apps" aria-labelledby="apps-banner-title">
+	<img class="apps-banner-icon" src="media/apps/koulaxizis-apps.png" width="88" height="88" alt="">
+	<div class="apps-banner-body">
+		<div class="apps-banner-kicker" data-i18n="kab_kicker">Free app · Android 8+ · no Google</div>
+		<h2 id="apps-banner-title" data-i18n="kab_title">Koulaxizis Apps</h2>
+		<p data-i18n="kab_desc">All our Android apps in one place: Site Bridge, Live Operator and the apps of orOS, NULL JSFX and Glarolykoi. Install with one tap; updates come by themselves, all signed by us.</p>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/oros/releases/download/koulaxizis-apps/koulaxizis-apps.apk" rel="noopener" data-i18n="fdr_add">Download Koulaxizis Apps</a>
+			<a class="btn" href="https://useoros.online/download/#koulaxizis-apps" rel="noopener" data-i18n="kab_how">How to install</a>
+		</div>
+	</div>
+</section>
 
 <section class="plugins" id="plugins">
 	<div class="section-title" data-i18n="plugins">Plugins</div>
@@ -2291,6 +2324,10 @@ footer .heart { color: var(--accent-bright); }
 		fdr_li2: 'It offers the stable versions; a new version ships as beta first on the releases here',
 		fdr_add: 'Download Koulaxizis Apps',
 		fdr_page: 'More about it',
+		kab_kicker: 'Free app · Android 8+ · no Google',
+		kab_title: 'Koulaxizis Apps',
+		kab_desc: 'All our Android apps in one place: Site Bridge, Live Operator and the apps of orOS, NULL JSFX and Glarolykoi. Install with one tap; updates come by themselves, all signed by us.',
+		kab_how: 'How to install',
 		sba_desc: 'The Site Bridge Hub in your pocket: open the write window of your sites with your fingerprint only while you work, and handle Book Feed and Broadcast from your phone. It talks only to your own Hub; no account, no Firebase, no analytics.',
 		sba_li1: 'Open, renew or close the write window per site, with a fingerprint for every opening, a notification for every change (schedule included) and the Hub’s log on the phone',
 		sba_li2: 'Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+)',
@@ -2790,6 +2827,10 @@ footer .heart { color: var(--accent-bright); }
 		fdr_li2: 'Προσφέρει τις σταθερές εκδόσεις· μια νέα έκδοση βγαίνει πρώτα ως beta στα releases εδώ',
 		fdr_add: 'Κατέβασε τις Εφαρμογές Koulaxizis',
 		fdr_page: 'Περισσότερα',
+		kab_kicker: 'Δωρεάν εφαρμογή · Android 8+ · χωρίς Google',
+		kab_title: 'Εφαρμογές Koulaxizis',
+		kab_desc: 'Όλες οι εφαρμογές μας για Android σε ένα μέρος: Site Bridge, Live Operator και οι εφαρμογές των orOS, NULL JSFX και Γλαρόλυκοι. Εγκατάσταση με ένα πάτημα· οι ενημερώσεις έρχονται μόνες τους, όλες υπογεγραμμένες από εμάς.',
+		kab_how: 'Πώς εγκαθίσταται',
 		sba_desc: 'Το Hub του Site Bridge στην τσέπη σου: ανοίγεις το παράθυρο εγγραφής των sites σου με το δαχτυλικό σου μόνο όσο δουλεύεις, και χειρίζεσαι Book Feed και Broadcast από το κινητό. Μιλά μόνο με το δικό σου Hub· χωρίς λογαριασμό, χωρίς Firebase, χωρίς analytics.',
 		sba_li1: 'Άνοιγμα, ανανέωση ή κλείσιμο του παραθύρου εγγραφής ανά site, με δαχτυλικό σε κάθε άνοιγμα, ειδοποίηση για κάθε αλλαγή (και του ωραρίου) και το ιστορικό του Hub στο κινητό',
 		sba_li2: 'Καρτέλα Book Feed: συγχρονισμός, κανόνες, σάρωση ISBN και εισαγωγή ως πρόχειρο, με ειδοποιήσεις (Book Feed 1.11.0+)',
