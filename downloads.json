@@ -1,6 +1,6 @@
 {
-  "display": 1705,
-  "total": 1705,
+  "display": 1706,
+  "total": 1706,
   "offset": 5,
   "updated": "2026-11-19",
   "assets": {
@@ -2130,7 +2130,7 @@
     },
     "766845238": {
       "file": "nox-lo-1.6.0/live-operator.zip",
-      "count": 2
+      "count": 3
     }
   },
   "android": {
