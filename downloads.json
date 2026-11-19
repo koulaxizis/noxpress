@@ -1,6 +1,6 @@
 {
-  "display": 1706,
-  "total": 1706,
+  "display": 1707,
+  "total": 1707,
   "offset": 5,
   "updated": "2026-11-19",
   "assets": {
@@ -2130,13 +2130,13 @@
     },
     "766845238": {
       "file": "nox-lo-1.6.0/live-operator.zip",
-      "count": 3
+      "count": 4
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 5
+      "github": 7
     },
     "net.glarolykoi.android": {
       "github": 3,
@@ -2328,7 +2328,7 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 52
+      "github": 53
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
