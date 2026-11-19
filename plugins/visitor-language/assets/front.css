@@ -7,4 +7,6 @@
 .vlg-float .is-current{background:#eae8fa}
 .vlg-float .is-current b{color:#101218;mix-blend-mode:normal}
 .vlg-note{margin:0 0 16px;padding:10px 14px;border-left:3px solid #6d4aff;background:rgba(109,74,255,.08);font-size:14px}
+/* Never on top of the theme's back-to-top button (Astra: bottom left or right, 30px). */
+body:has(#ast-scroll-top.ast-scroll-to-top-left) .vlg-float{bottom:84px}
 @media print{.vlg-float{display:none}}

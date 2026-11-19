@@ -56,6 +56,7 @@ final class VLG_Lang {
 		'Μια αγγλική εκδοχή του site στο /en/, για επισκέπτες από το εξωτερικό. Το WordPress, το WooCommerce, το θέμα και τα plugins Noxpress μιλούν αγγλικά μόνα τους· εσύ γράφεις στα αγγλικά μόνο όσα προϊόντα και σελίδες θέλεις. Το ελληνικό site δεν αλλάζει.' => 'An English version of the site at /en/, for visitors from abroad. WordPress, WooCommerce, the theme and the Noxpress plugins speak English on their own; you write English only for the products and pages you want. The Greek site does not change.',
 		'Μικρό κουμπί EL / EN κάτω αριστερά σε κάθε σελίδα' => 'A small EL / EN button at the bottom left of every page',
 		'Μόνο όπου βάζω το shortcode [vlg_switch]' => 'Only where I put the [vlg_switch] shortcode',
+		'Το ίδιο κουμπί μόνο στα προϊόντα με αγγλικά κείμενα (π.χ. όσα στέλνονται στο εξωτερικό)' => 'The same button only on products with English texts (e.g. those shipped abroad)',
 		'Οι ρυθμίσεις αποθηκεύτηκαν.' => 'Settings saved.',
 		'Περιγραφή' => 'Description',
 		'Περιεχόμενο' => 'Content',
