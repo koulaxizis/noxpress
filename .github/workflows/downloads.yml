@@ -8,6 +8,9 @@
 # Γράφει το downloads.json στη ρίζα του main μόνο όταν αλλάζει ο αριθμός
 # που δείχνει το site (ο ακριβής, από 14/11/2026) ή όταν εμφανίζεται νέο zip.
 #
+# Android (Bible §17, 1.158): αντιγράφει και τις λήψεις των εφαρμογών Android
+# ανά κανάλι από τον μετρητή του Koulaxizis Apps στο «android».
+#
 # OFFSET: λήψεις που έκανε το δικό μας job «manifest» πριν σταματήσει να
 # κατεβάζει τα zip που δεν άλλαξαν (μία εκτέλεση, 9/10/2026: 5 λήψεις).
 name: Count downloads
@@ -48,7 +51,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-[a-z]+-' --offset "$OFFSET")"
+          result="$(python3 .github/scripts/count-downloads.py downloads.json --tags '^nox-[a-z]+-' --offset "$OFFSET" \
+            --android https://apps.koulaxizis.workers.dev/stats.json \
+            --android-pkgs 'tech.noxpress.,online.useoros.,gr.koulaxizis.apps,tech.nulljsfx.,net.glarolykoi.')"
           echo "downloads.json: $result"
           if [ "$result" != changed ]; then
             exit 0
