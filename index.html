@@ -459,6 +459,18 @@ footer .heart { color: var(--accent-bright); }
 	cursor: pointer;
 }
 .dl-dialog .dl-skip:hover { color: var(--accent-bright); }
+.dl-dialog .dl-never {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 10px;
+	color: var(--muted);
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+.dl-dialog .dl-never input { accent-color: var(--accent); width: 16px; height: 16px; }
+.updates-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .dl-dialog .dl-close {
 	position: absolute;
 	top: 12px;
@@ -536,11 +548,11 @@ footer .heart { color: var(--accent-bright); }
 			<p class="download-count" id="download-count" hidden></p>
 			<p class="download-count dl-android" data-dl="tech.noxpress." data-dl-say="android" hidden></p>
 			<div class="support-row">
-				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener">
+				<a class="support-cta" href="/support/">
 					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
-						<path fill="currentColor" d="M4 9h12v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9zm13 .5h1a2.5 2.5 0 0 1 0 5h-1.1a6.5 6.5 0 0 0 .1-1v-4zM6.5 2.8a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7zm4.5 0a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7zm4.5 0a.7.7 0 0 1 .7.7v1.7a.7.7 0 0 1-1.4 0V3.5a.7.7 0 0 1 .7-.7z"/>
+						<path fill="currentColor" d="M12 20.5s-7.3-4.4-9.3-8.8C1.3 8.5 3.2 5 6.6 5c2 0 3.5 1.1 4.4 2.5h2C13.9 6.1 15.4 5 17.4 5c3.4 0 5.3 3.5 3.9 6.7-2 4.4-9.3 8.8-9.3 8.8z"/>
 					</svg>
-					<span data-i18n="sup_cta">Buy me a coffee ☕</span>
+					<span data-i18n="sup_cta">Support noxpress</span>
 				</a>
 				<a class="video-cta" href="media/videos/hub.mp4" data-video="hub" data-video-title="Noxpress Hub" data-i18n="video_hub">▶ Tour of the Noxpress hub</a>
 			</div>
@@ -1691,6 +1703,27 @@ footer .heart { color: var(--accent-bright); }
 		</div>
 	</article>
 
+	<article class="card" id="visitor-language">
+		<h2><a href="#visitor-language">Visitor Language</a></h2>
+		<div class="meta">v1.0.0 · WordPress · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<p data-i18n="vl_desc">An English version of a Greek site at /en/, for visitors from abroad: WordPress, WooCommerce, the cart, the checkout, the theme and the noxpress plugins speak English on their own, and you translate only the products and pages you choose. No copies of pages, no translation service, and the Greek site stays exactly as it is.</p>
+		<details class="more">
+			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
+		<ul>
+			<li data-i18n="vl_li1">An «English» box on every product, page and post (name, short description, description); empty fields stay Greek, with a small «only in Greek» note</li>
+			<li data-i18n="vl_li2">One list for the short texts («Μέγεθος = Size»): attribute names and values, categories, tags, menu items, shipping and payment labels; an English menu per theme location</li>
+			<li data-i18n="vl_li3">Every link stays under /en/: products, cart, account, AJAX, REST, the classic and the block checkout; hreflang el / en / x-default and an EL / EN switch or the [vlg_switch] shortcode</li>
+			<li data-i18n="vl_li4">Orders placed in English stay English: customer e-mails in English, also when sent later from a payment webhook or the admin; admin e-mails in Greek; the payment return moves to the English thank-you page</li>
+			<li data-i18n="vl_li5">English pages never enter a page cache, /en/ gives 404 until you turn it on, VLG_DISABLE, uninstall removes everything, bilingual UI and shared «Noxpress» menu</li>
+		</ul>
+		</details>
+		<div class="actions">
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-vl-1.0.0/visitor-language.zip" rel="nofollow noopener" data-i18n="vl_download">Download v1.0.0 (.zip)</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/visitor-language" rel="noopener" data-i18n="rs_source">Source</a>
+			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
+		</div>
+	</article>
+
 </section>
 
 <section class="plugins" id="apps">
@@ -1782,24 +1815,24 @@ footer .heart { color: var(--accent-bright); }
 
 	<article class="card" id="services">
 		<h2><a href="#services" data-i18n="sv_title">Need a hand?</a></h2>
-		<p data-i18n="sv_desc">The plugins are free; my time can be booked. Pick a service on Ko-fi and describe your shop.</p>
+		<p data-i18n="sv_desc">The plugins are free; my time can be booked. Write to me about your shop; you pay only after we agree on the work.</p>
 		<ul>
-			<li data-i18n="sv_li1"><strong>Setup:</strong> install and configure the plugins you need on your shop</li>
-			<li data-i18n="sv_li2"><strong>Theme fit:</strong> make a plugin look and work right with your theme</li>
-			<li data-i18n="sv_li3"><strong>Priority support:</strong> your questions and bugs answered first</li>
+			<li data-i18n="sv_li1"><strong>Custom plugin, from €250:</strong> a plugin made for your shop, in the noxpress way</li>
+			<li data-i18n="sv_li2"><strong>Setup, €60:</strong> WooCommerce installed and set up, with up to 3 noxpress plugins configured</li>
+			<li data-i18n="sv_li3"><strong>Theme fit, from €90:</strong> make a plugin look and work right with your theme</li>
+			<li data-i18n="sv_li4"><strong>Priority support, €25 for 30 days:</strong> your questions and bugs answered first</li>
 		</ul>
 		<div class="actions">
-			<a class="btn primary" href="https://ko-fi.com/koulaxizis/commissions" target="_blank" rel="noopener" data-i18n="sv_btn">Book a service on Ko-fi</a>
+			<a class="btn primary" href="https://koulaxizis.gr/work-with-me/?lang=en#noxpress" rel="noopener" data-i18n="sv_btn">Work with me</a>
 		</div>
 	</article>
 
-	<article class="card" id="supporters">
-		<h2><a href="#supporters" data-i18n="ms_title">Monthly supporters</a></h2>
-		<p data-i18n="ms_desc">A monthly membership from €3 covers hosting, domains and tools, and keeps the updates coming; cancel any time, and nothing is unlocked. Supporters can be thanked by name on the Supporters page, if they wish, and vote on the next plugin.</p>
+	<article class="card" id="ways-to-support">
+		<h2><a href="#ways-to-support" data-i18n="sw_title">Support noxpress</a></h2>
+		<p data-i18n="sw_desc">If noxpress saves you time, you can give something back: a noxpress t-shirt, mug or sticker, or a one-time donation. Nothing is unlocked, and nothing changes if you don’t.</p>
 		<div class="actions">
-			<a class="btn primary" href="https://ko-fi.com/koulaxizis/tiers" target="_blank" rel="noopener" data-i18n="ms_btn">Become a supporter</a>
-			<a class="btn" href="/supporters/" data-i18n="ms_list">See the supporters</a>
-			<a class="btn" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="ms_once">One-off coffee ☕</a>
+			<a class="btn primary" href="/support/" data-i18n="sw_btn">Ways to support</a>
+			<a class="btn" href="/support/#buy" data-i18n="sw_shop">The noxpress merch</a>
 		</div>
 	</article>
 </section>
@@ -1837,14 +1870,17 @@ footer .heart { color: var(--accent-bright); }
 
 <section class="updates-box" id="updates" aria-labelledby="updates-title">
 	<div class="updates-title" id="updates-title" data-i18n="up_title">Stay in the loop ✦</div>
-	<p data-i18n="up_text">Every new plugin, release and fix is announced on Ko-fi. Follow noxpress there to see them first.</p>
-	<a class="btn-updates" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="up_btn">Follow on Ko-fi</a>
-	<p class="updates-note" data-i18n="up_note">Following is free. Ko-fi is the only place for noxpress news.</p>
+	<p data-i18n="up_text">Every release comes with its notes on GitHub, and the news of noxpress, NULL JSFX and orOS is gathered in the Updates feed on koulaxizis.gr.</p>
+	<div class="updates-actions">
+		<a class="btn-updates" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="up_btn">Release notes</a>
+		<a class="btn-updates" href="https://koulaxizis.gr/#updates" rel="noopener" data-i18n="up_feed">Updates on koulaxizis.gr</a>
+	</div>
+	<p class="updates-note" data-i18n="up_note">No account and no sign-up needed.</p>
 </section>
 
 <footer>
 	<p data-i18n="footer"><strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.</p>
-	<p class="footer-links"><a href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener">Ko-fi</a> · <a href="/supporters/" data-i18n="ft_supporters">Supporters</a></p>
+	<p class="footer-links"><a href="/support/" data-i18n="ft_support">Support noxpress</a> · <a href="https://koulaxizis.gr/work-with-me/?lang=en" rel="noopener" data-i18n="ft_work">Work with me</a></p>
 	<p class="disclaimer" id="disclaimer" data-i18n="disclaimer"><strong>Use at your own risk.</strong> noxpress plugins are free software, provided “as is”, without warranty of any kind. Test them on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from their use.</p>
 	<p class="credits" data-i18n="credits">Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.</p>
 </footer>
@@ -1852,14 +1888,13 @@ footer .heart { color: var(--accent-bright); }
 <dialog class="dl-dialog" id="dlDialog" aria-labelledby="dlTitle">
 	<button type="button" class="dl-close" id="dlClose" aria-label="Close">×</button>
 	<h2 id="dlTitle"><span data-i18n="dl_title">Your download is ready</span></h2>
-	<p data-i18n="dl_text">noxpress plugins are free, open source and made by one person, and Ko-fi is the only way they are funded. If this one saves you time, a €5 coffee pays for about a day of the tools they are built with, and a membership from €3 a month keeps the updates coming. Following noxpress there tells you when they land.</p>
+	<p data-i18n="dl_text">noxpress plugins are free and open source, made by one person, and they stay that way. If this one saves you time, you can support it with a noxpress t-shirt, mug or sticker, or a one-time donation. Nothing is unlocked.</p>
 	<p class="dl-disclaimer" data-i18n="dl_disclaimer">Use at your own risk: keep a full backup of your site before you install it (<a href="#disclaimer">disclaimer</a>).</p>
 	<div class="dl-actions">
-		<a class="btn primary" id="dlKofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="dl_kofi">☕ Support on Ko-fi &amp; download</a>
-		<a class="btn" id="dlTiers" href="https://ko-fi.com/koulaxizis/tiers" target="_blank" rel="noopener" data-i18n="dl_tiers">♡ Monthly, from €3 &amp; download</a>
-		<a class="btn" id="dlFollow" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener" data-i18n="dl_follow">✦ Follow on Ko-fi for updates &amp; download</a>
+		<a class="btn primary" id="dlSupport" href="/support/" target="_blank" rel="noopener" data-i18n="dl_support">♡ Ways to support &amp; download</a>
 	</div>
 	<button type="button" class="dl-skip" id="dlSkip" data-i18n="dl_skip">Skip to download</button>
+	<label class="dl-never"><input type="checkbox" id="dlNever"> <span data-i18n="dl_never">Don’t show this again</span></label>
 </dialog>
 
 <dialog class="vid-dialog" id="vidDialog" aria-labelledby="vidTitle">
@@ -1882,7 +1917,7 @@ footer .heart { color: var(--accent-bright); }
 
 	var EN = {
 		tagline: 'Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.',
-		sup_cta: 'Buy me a coffee ☕',
+		sup_cta: 'Support noxpress',
 		plugins: 'Plugins',
 		rs_desc: 'Sales reporting with automatic per-product VAT extraction and dynamic revenue distribution among beneficiaries — authors, publishers, collaborators. Configure global defaults once, override per product, and let every beneficiary track their own net earnings through a private, key-protected portal with full transparency: sales breakdown, non-sales income, payments and outstanding balances.',
 		rs_li1: 'Per-product VAT override with global default (gross × rate ÷ (100 + rate)), aggregated per VAT rate',
@@ -2285,6 +2320,13 @@ footer .heart { color: var(--accent-bright); }
 		ev_li4: '«Add to calendar» with Google Calendar and an .ics file per event, and an optional .ics feed of every upcoming event',
 		ev_li5: 'Event / LiteraryEvent / MusicEvent JSON-LD inside the Search Signals or Rank Math graph, page cache purges after each event; test mode, EVT_DISABLE, abilities for Site Bridge, bilingual UI and shared «Noxpress» menu',
 		ev_download: 'Download v1.1.3 (.zip)',
+		vl_desc: 'An English version of a Greek site at /en/, for visitors from abroad: WordPress, WooCommerce, the cart, the checkout, the theme and the noxpress plugins speak English on their own, and you translate only the products and pages you choose. No copies of pages, no translation service, and the Greek site stays exactly as it is.',
+		vl_li1: 'An «English» box on every product, page and post (name, short description, description); empty fields stay Greek, with a small «only in Greek» note',
+		vl_li2: 'One list for the short texts («Μέγεθος = Size»): attribute names and values, categories, tags, menu items, shipping and payment labels; an English menu per theme location',
+		vl_li3: 'Every link stays under /en/: products, cart, account, AJAX, REST, the classic and the block checkout; hreflang el / en / x-default and an EL / EN switch or the [vlg_switch] shortcode',
+		vl_li4: 'Orders placed in English stay English: customer e-mails in English, also when sent later from a payment webhook or the admin; admin e-mails in Greek; the payment return moves to the English thank-you page',
+		vl_li5: 'English pages never enter a page cache, /en/ gives 404 until you turn it on, VLG_DISABLE, uninstall removes everything, bilingual UI and shared «Noxpress» menu',
+		vl_download: 'Download v1.0.0 (.zip)',
 		gc_desc: 'Digital gift cards as a product: fixed or own amounts, for yourself or as a gift on a chosen date, delivered by email with a printable PDF. Redeemed as a payment in the classic checkout and the Checkout block, so prices and VAT stay as they are, with the balance kept for the next order and a ledger of every movement.',
 		gc_li1: 'Gift card product type with fixed amounts and an optional own amount; «For me» or «As a gift» with name, message and delivery date up to 12 months ahead',
 		gc_li2: '16-character codes stored only as a hash, created at delivery and sent only to the holder; the buyer of a gift gets a «sent» email without the code',
@@ -2311,11 +2353,10 @@ footer .heart { color: var(--accent-bright); }
 		more_hide: 'Fewer details',
 		dl_title: 'Your download is ready',
 		dl_disclaimer: 'Use at your own risk: keep a full backup of your site before you install it (<a href="#disclaimer">disclaimer</a>).',
-		dl_text: 'noxpress plugins are free, open source and made by one person, and Ko-fi is the only way they are funded. If this one saves you time, a €5 coffee pays for about a day of the tools they are built with, and a membership from €3 a month keeps the updates coming. Following noxpress there tells you when they land.',
-		dl_kofi: '☕ Support on Ko-fi &amp; download',
-		dl_tiers: '♡ Monthly, from €3 &amp; download',
-		dl_follow: '✦ Follow on Ko-fi for updates &amp; download',
+		dl_text: 'noxpress plugins are free and open source, made by one person, and they stay that way. If this one saves you time, you can support it with a noxpress t-shirt, mug or sticker, or a one-time donation. Nothing is unlocked.',
 		dl_skip: 'Skip to download',
+		dl_support: '♡ Ways to support &amp; download',
+		dl_never: 'Don’t show this again',
 		dl_close: 'Close',
 		video_btn: '▶ Video',
 		video_hub: '▶ Tour of the Noxpress hub',
@@ -2328,16 +2369,16 @@ footer .heart { color: var(--accent-bright); }
 		ff_li2: 'Easy Withdrawal, compatibility and security fixes, updates and the Noxpress hub are always free',
 		ff_li3: 'No license keys, nags or ads inside the free plugins',
 		sv_title: 'Need a hand?',
-		sv_desc: 'The plugins are free; my time can be booked. Pick a service on Ko-fi and describe your shop.',
-		sv_li1: '<strong>Setup:</strong> install and configure the plugins you need on your shop',
-		sv_li2: '<strong>Theme fit:</strong> make a plugin look and work right with your theme',
-		sv_li3: '<strong>Priority support:</strong> your questions and bugs answered first',
-		sv_btn: 'Book a service on Ko-fi',
-		ms_title: 'Monthly supporters',
-		ms_desc: 'A monthly membership from €3 covers hosting, domains and tools, and keeps the updates coming; cancel any time, and nothing is unlocked. Supporters can be thanked by name on the Supporters page, if they wish, and vote on the next plugin.',
-		ms_btn: 'Become a supporter',
-		ms_list: 'See the supporters',
-		ms_once: 'One-off coffee ☕',
+		sv_desc: 'The plugins are free; my time can be booked. Write to me about your shop; you pay only after we agree on the work.',
+		sv_li1: '<strong>Custom plugin, from €250:</strong> a plugin made for your shop, in the noxpress way',
+		sv_li2: '<strong>Setup, €60:</strong> WooCommerce installed and set up, with up to 3 noxpress plugins configured',
+		sv_li3: '<strong>Theme fit, from €90:</strong> make a plugin look and work right with your theme',
+		sv_li4: '<strong>Priority support, €25 for 30 days:</strong> your questions and bugs answered first',
+		sv_btn: 'Work with me',
+		sw_title: 'Support noxpress',
+		sw_desc: 'If noxpress saves you time, you can give something back: a noxpress t-shirt, mug or sticker, or a one-time donation. Nothing is unlocked, and nothing changes if you don’t.',
+		sw_btn: 'Ways to support',
+		sw_shop: 'The noxpress merch',
 		mk_title: 'Media kit',
 		mk_nox_desc: 'Wallpapers for desktop, phone and tablet (4K, 5K, 16:10, ultrawide, Android, iPhone), logos and icons, banners for social profiles, print files for t-shirts, mugs and stickers, the colour palette, the Inter font, brand guidelines and the press release in English and Greek.',
 		mk_nox_btn: 'Download the kit (.zip, 16 MB)',
@@ -2347,10 +2388,12 @@ footer .heart { color: var(--accent-bright); }
 		mk_all_btn: 'Download the combined kit (.zip, 63 MB)',
 		mk_terms: 'Free to use to present, review or write about the projects, and to show your support. Please don’t change the marks, their colours or proportions, and don’t sell the kit or products made from it. The fonts are under the SIL Open Font License. Press and interviews: <a href="mailto:koulaxizis@glarolykoi.net">koulaxizis@glarolykoi.net</a>',
 		up_title: 'Stay in the loop ✦',
-		up_text: 'Every new plugin, release and fix is announced on Ko-fi. Follow noxpress there to see them first.',
-		up_btn: 'Follow on Ko-fi',
-		up_note: 'Following is free. Ko-fi is the only place for noxpress news.',
-		ft_supporters: 'Supporters',
+		up_text: 'Every release comes with its notes on GitHub, and the news of noxpress, NULL JSFX and orOS is gathered in the Updates feed on koulaxizis.gr.',
+		up_btn: 'Release notes',
+		up_feed: 'Updates on koulaxizis.gr',
+		up_note: 'No account and no sign-up needed.',
+		ft_support: 'Support noxpress',
+		ft_work: 'Work with me',
 		apps_title: 'Android apps',
 		apps_guide: 'Install guide',
 		apps_build: 'Build guide',
@@ -2393,7 +2436,7 @@ footer .heart { color: var(--accent-bright); }
 
 	var EL = {
 		tagline: 'Δωρεάν, ανοιχτού κώδικα WordPress &amp; WooCommerce plugins — σκούρα αισθητική, μινιμαλιστικά, privacy-first.',
-		sup_cta: 'Κέρασέ μου έναν καφέ ☕',
+		sup_cta: 'Στήριξε το noxpress',
 		plugins: 'Plugins',
 		rs_desc: 'Αναφορές πωλήσεων με αυτόματη αφαίρεση ΦΠΑ ανά προϊόν και δυναμικό καταμερισμό εσόδων σε δικαιούχους — συγγραφείς, εκδότες, συνεργάτες. Ρυθμίζεις τα global defaults μία φορά, κάνεις override ανά προϊόν, και κάθε δικαιούχος παρακολουθεί τα καθαρά του κέρδη μέσα από ένα ιδιωτικό, κλειδωμένο portal με πλήρη διαφάνεια: ανάλυση πωλήσεων, έσοδα εκτός πωλήσεων, πληρωμές και υπόλοιπα.',
 		rs_li1: 'Override ΦΠΑ ανά προϊόν με global default (gross × rate ÷ (100 + rate)), συγκεντρωτικά ανά συντελεστή ΦΠΑ',
@@ -2796,6 +2839,13 @@ footer .heart { color: var(--accent-bright); }
 		ev_li4: '«Πρόσθεσε στο ημερολόγιο» με Google Calendar και αρχείο .ics για κάθε εκδήλωση, και προαιρετικό feed .ics με όλες τις επερχόμενες',
 		ev_li5: 'Event / LiteraryEvent / MusicEvent JSON-LD μέσα στο graph του Search Signals ή του Rank Math, καθαρισμός της page cache μετά από κάθε εκδήλωση· λειτουργία δοκιμής, EVT_DISABLE, abilities για το Site Bridge, δίγλωσσο UI και κοινό μενού «Noxpress»',
 		ev_download: 'Λήψη v1.1.3 (.zip)',
+		vl_desc: 'Αγγλική έκδοση ενός ελληνικού site στο /en/, για επισκέπτες από το εξωτερικό: το WordPress, το WooCommerce, το καλάθι, το ταμείο, το θέμα και τα plugins του noxpress μιλούν αγγλικά μόνα τους, κι εσύ μεταφράζεις μόνο τα προϊόντα και τις σελίδες που διαλέγεις. Χωρίς αντίγραφα σελίδων, χωρίς υπηρεσία μετάφρασης, και το ελληνικό site μένει ακριβώς όπως είναι.',
+		vl_li1: 'Κουτί «English» σε κάθε προϊόν, σελίδα και άρθρο (όνομα, σύντομη περιγραφή, περιγραφή)· τα κενά πεδία μένουν ελληνικά, με ένα μικρό σημείωμα «μόνο στα ελληνικά»',
+		vl_li2: 'Μία λίστα για τα σύντομα κείμενα («Μέγεθος = Size»): ονόματα και τιμές χαρακτηριστικών, κατηγορίες, ετικέτες, στοιχεία μενού, ονόματα αποστολής και πληρωμής· αγγλικό μενού ανά θέση του θέματος',
+		vl_li3: 'Κάθε σύνδεσμος μένει στο /en/: προϊόντα, καλάθι, λογαριασμός, AJAX, REST, το κλασικό και το block ταμείο· hreflang el / en / x-default και διακόπτης EL / EN ή το shortcode [vlg_switch]',
+		vl_li4: 'Οι παραγγελίες στα αγγλικά μένουν αγγλικές: τα e-mail του πελάτη στα αγγλικά, και όταν φεύγουν αργότερα από webhook πληρωμής ή από το admin· τα e-mail του διαχειριστή στα ελληνικά· η επιστροφή από την πληρωμή περνά στην αγγλική σελίδα ευχαριστίας',
+		vl_li5: 'Οι αγγλικές σελίδες δεν μπαίνουν ποτέ σε page cache, το /en/ δίνει 404 μέχρι να το ανοίξεις, VLG_DISABLE, η απεγκατάσταση σβήνει τα πάντα, δίγλωσσο UI και κοινό μενού «Noxpress»',
+		vl_download: 'Λήψη v1.0.0 (.zip)',
 		gc_desc: 'Ψηφιακές δωροκάρτες ως προϊόν: σταθερά ή δικά σου ποσά, για σένα ή ως δώρο σε ημερομηνία που διαλέγεις, με email και εκτυπώσιμο PDF. Εξαργύρωση ως πληρωμή στο κλασικό και στο block ταμείο, ώστε τιμές και ΦΠΑ να μένουν ίδια, με το υπόλοιπο για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.',
 		gc_li1: 'Τύπος προϊόντος δωροκάρτα με σταθερά ποσά και προαιρετικά δικό σου ποσό· «Για μένα» ή «Ως δώρο» με όνομα, μήνυμα και ημερομηνία αποστολής έως 12 μήνες μπροστά',
 		gc_li2: 'Κωδικοί 16 χαρακτήρων αποθηκευμένοι μόνο ως hash, που φτιάχνονται την ημέρα αποστολής και πάνε μόνο στον κάτοχο· ο αγοραστής δώρου παίρνει email «στάλθηκε» χωρίς κωδικό',
@@ -2822,11 +2872,10 @@ footer .heart { color: var(--accent-bright); }
 		more_hide: 'Λιγότερα',
 		dl_title: 'Η λήψη σου είναι έτοιμη',
 		dl_disclaimer: 'Χρήση με δική σου ευθύνη: κράτα πλήρες backup του site πριν το εγκαταστήσεις (<a href="#disclaimer">αποποίηση ευθύνης</a>).',
-		dl_text: 'Τα plugins του noxpress είναι δωρεάν, ανοιχτού κώδικα και τα φτιάχνει ένας άνθρωπος· το Ko-fi είναι ο μόνος τρόπος που χρηματοδοτούνται. Αν αυτό σου γλιτώνει χρόνο, ένας καφές των 5 € πληρώνει περίπου μια μέρα από τα εργαλεία με τα οποία φτιάχνονται, και μια συνδρομή από 3 € τον μήνα κρατά τις ενημερώσεις να έρχονται. Αν ακολουθείς το noxpress εκεί, μαθαίνεις πότε βγαίνουν.',
-		dl_kofi: '☕ Στήριξε στο Ko-fi &amp; κατέβασε',
-		dl_tiers: '♡ Μηνιαία, από 3 € &amp; κατέβασε',
-		dl_follow: '✦ Ακολούθησε στο Ko-fi για ενημερώσεις &amp; κατέβασε',
+		dl_text: 'Τα plugins του noxpress είναι δωρεάν και ανοιχτού κώδικα, τα φτιάχνει ένας άνθρωπος και έτσι θα μείνουν. Αν αυτό σου γλιτώνει χρόνο, μπορείς να το στηρίξεις με ένα t-shirt, μια κούπα ή ένα αυτοκόλλητο του noxpress, ή με μια εφάπαξ δωρεά. Δεν ξεκλειδώνει τίποτα.',
 		dl_skip: 'Παράλειψη, κατέβασέ το',
+		dl_support: '♡ Τρόποι στήριξης &amp; κατέβασε',
+		dl_never: 'Να μην εμφανιστεί ξανά',
 		dl_close: 'Κλείσιμο',
 		video_btn: '▶ Βίντεο',
 		video_hub: '▶ Ξενάγηση στο hub του Noxpress',
@@ -2839,16 +2888,16 @@ footer .heart { color: var(--accent-bright); }
 		ff_li2: 'Το Easy Withdrawal, οι διορθώσεις συμβατότητας και ασφαλείας, οι ενημερώσεις και το Noxpress hub είναι πάντα δωρεάν',
 		ff_li3: 'Χωρίς κλειδιά άδειας, ενοχλητικά μηνύματα ή διαφημίσεις μέσα στα δωρεάν plugins',
 		sv_title: 'Χρειάζεσαι βοήθεια;',
-		sv_desc: 'Τα plugins είναι δωρεάν· τον χρόνο μου μπορείς να τον κλείσεις. Διάλεξε υπηρεσία στο Ko-fi και περίγραψε το κατάστημά σου.',
-		sv_li1: '<strong>Εγκατάσταση:</strong> εγκατάσταση και ρύθμιση των plugins που χρειάζεσαι στο κατάστημά σου',
-		sv_li2: '<strong>Ταίριασμα με το θέμα:</strong> ένα plugin να δείχνει και να δουλεύει σωστά με το θέμα σου',
-		sv_li3: '<strong>Υποστήριξη με προτεραιότητα:</strong> οι ερωτήσεις και τα σφάλματά σου απαντώνται πρώτα',
-		sv_btn: 'Κλείσε υπηρεσία στο Ko-fi',
-		ms_title: 'Μηνιαίοι υποστηρικτές',
-		ms_desc: 'Μια μηνιαία συνδρομή από 3 € καλύπτει hosting, domains και εργαλεία, και κρατά τις ενημερώσεις να έρχονται· ακυρώνεται όποτε θες και δεν ξεκλειδώνει τίποτα. Οι υποστηρικτές, αν θέλουν, ευχαριστούνται ονομαστικά στη σελίδα Υποστηρικτές και ψηφίζουν το επόμενο plugin.',
-		ms_btn: 'Γίνε υποστηρικτής',
-		ms_list: 'Δες τους υποστηρικτές',
-		ms_once: 'Ένας καφές, μία φορά ☕',
+		sv_desc: 'Τα plugins είναι δωρεάν· τον χρόνο μου μπορείς να τον κλείσεις. Γράψε μου για το κατάστημά σου· πληρώνεις μόνο αφού συμφωνήσουμε τη δουλειά.',
+		sv_li1: '<strong>Plugin κατά παραγγελία, από 250 €:</strong> ένα plugin φτιαγμένο για το κατάστημά σου, με τον τρόπο του noxpress',
+		sv_li2: '<strong>Εγκατάσταση, 60 €:</strong> εγκατάσταση και ρύθμιση του WooCommerce, με έως 3 plugins του noxpress',
+		sv_li3: '<strong>Ταίριασμα με το θέμα, από 90 €:</strong> ένα plugin να δείχνει και να δουλεύει σωστά με το θέμα σου',
+		sv_li4: '<strong>Υποστήριξη με προτεραιότητα, 25 € για 30 ημέρες:</strong> οι ερωτήσεις και τα σφάλματά σου απαντώνται πρώτα',
+		sv_btn: 'Συνεργάσου μαζί μου',
+		sw_title: 'Στήριξε το noxpress',
+		sw_desc: 'Αν το noxpress σου γλιτώνει χρόνο, μπορείς να δώσεις κάτι πίσω: ένα t-shirt, μια κούπα ή ένα αυτοκόλλητο του noxpress, ή μια εφάπαξ δωρεά. Δεν ξεκλειδώνει τίποτα, και τίποτα δεν αλλάζει αν δεν το κάνεις.',
+		sw_btn: 'Τρόποι στήριξης',
+		sw_shop: 'Τα προϊόντα του noxpress',
 		mk_title: 'Media kit',
 		mk_nox_desc: 'Wallpapers για υπολογιστή, κινητό και tablet (4K, 5K, 16:10, ultrawide, Android, iPhone), λογότυπα και εικονίδια, banners για προφίλ στα social, αρχεία εκτύπωσης για μπλουζάκια, κούπες και αυτοκόλλητα, η χρωματική παλέτα, η γραμματοσειρά Inter, ο οδηγός ταυτότητας και το δελτίο τύπου στα αγγλικά και στα ελληνικά.',
 		mk_nox_btn: 'Λήψη του πακέτου (.zip, 16 MB)',
@@ -2858,10 +2907,12 @@ footer .heart { color: var(--accent-bright); }
 		mk_all_btn: 'Λήψη του ενιαίου πακέτου (.zip, 63 MB)',
 		mk_terms: 'Ελεύθερο για να παρουσιάσεις, να κάνεις κριτική ή να γράψεις για τα projects, και για να δείξεις τη στήριξή σου. Μην αλλάζεις τα σήματα, τα χρώματα ή τις αναλογίες τους και μην πουλάς το πακέτο ή προϊόντα που φτιάχνονται από αυτό. Οι γραμματοσειρές έχουν την άδεια SIL Open Font License. Για τον Τύπο και συνεντεύξεις: <a href="mailto:koulaxizis@glarolykoi.net">koulaxizis@glarolykoi.net</a>',
 		up_title: 'Μείνε ενήμερος ✦',
-		up_text: 'Κάθε νέο plugin, έκδοση και διόρθωση ανακοινώνεται στο Ko-fi. Ακολούθησε το noxpress εκεί για να τα βλέπεις πρώτος.',
-		up_btn: 'Ακολούθησε στο Ko-fi',
-		up_note: 'Το follow είναι δωρεάν. Το Ko-fi είναι η μόνη πηγή νέων του noxpress.',
-		ft_supporters: 'Υποστηρικτές',
+		up_text: 'Κάθε έκδοση έχει τις σημειώσεις της στο GitHub, και τα νέα των noxpress, NULL JSFX και orOS συγκεντρώνονται στις Ενημερώσεις του koulaxizis.gr.',
+		up_btn: 'Σημειώσεις εκδόσεων',
+		up_feed: 'Ενημερώσεις στο koulaxizis.gr',
+		up_note: 'Χωρίς λογαριασμό και χωρίς εγγραφή.',
+		ft_support: 'Στήριξε το noxpress',
+		ft_work: 'Συνεργάσου μαζί μου',
 		apps_title: 'Εφαρμογές Android',
 		apps_guide: 'Οδηγός εγκατάστασης',
 		apps_build: 'Οδηγός build',
@@ -2955,13 +3006,36 @@ footer .heart { color: var(--accent-bright); }
 (function () {
 	'use strict';
 	/* ------------------------------------------------------------------
-	 * Download popup — πριν από κάθε λήψη: στήριξη ή follow στο Ko-fi, ή απλή λήψη.
-	 * Χωρίς JS / χωρίς <dialog> το link κατεβάζει κανονικά.
+	 * Download popup (Bible §18): before a download, at most once every
+	 * 30 days, the ways to support noxpress (/support/) or a plain download.
+	 * «Don’t show this again» turns it off for good in this browser.
+	 * Without JS, <dialog> or storage the link downloads as usual or the
+	 * popup simply shows again.
 	 * ------------------------------------------------------------------ */
 	var dlg = document.getElementById('dlDialog');
 	if (!dlg || typeof dlg.showModal !== 'function') { return; }
+	var KEY_SEEN = 'nx_dl_support_seen';
+	var KEY_OFF = 'nx_dl_support_off';
+	var GAP = 30 * 24 * 60 * 60 * 1000;
+	var never = document.getElementById('dlNever');
 	var pending = '';
+	function store(key, value) {
+		try { localStorage.setItem(key, value); } catch (e) { /* blocked storage */ }
+	}
+	function due() {
+		try {
+			if ('1' === localStorage.getItem(KEY_OFF)) { return false; }
+			var seen = parseInt(localStorage.getItem(KEY_SEEN) || '0', 10);
+			return !(seen > 0 && Date.now() - seen < GAP);
+		} catch (e) {
+			return true;
+		}
+	}
+	function remember() {
+		if (never && never.checked) { store(KEY_OFF, '1'); }
+	}
 	function startDownload() {
+		remember();
 		if (!pending) { return; }
 		var url = pending;
 		pending = '';
@@ -2972,21 +3046,21 @@ footer .heart { color: var(--accent-bright); }
 	for (var i = 0; i < links.length; i++) {
 		links[i].addEventListener('click', function (e) {
 			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { return; }
+			if (!due()) { return; }
 			e.preventDefault();
 			pending = this.getAttribute('href');
+			store(KEY_SEEN, String(Date.now()));
 			dlg.showModal();
 		});
 	}
-	// Στήριξη / follow στο Ko-fi ανοίγουν σε νέα καρτέλα (target=_blank)· η λήψη ξεκινά εδώ.
-	document.getElementById('dlKofi').addEventListener('click', startDownload);
-	document.getElementById('dlTiers').addEventListener('click', startDownload);
-	document.getElementById('dlFollow').addEventListener('click', startDownload);
+	// /support/ opens in a new tab (target=_blank); the download starts here.
+	document.getElementById('dlSupport').addEventListener('click', startDownload);
 	document.getElementById('dlSkip').addEventListener('click', startDownload);
-	document.getElementById('dlClose').addEventListener('click', function () { pending = ''; dlg.close(); });
+	document.getElementById('dlClose').addEventListener('click', function () { remember(); pending = ''; dlg.close(); });
 	dlg.addEventListener('click', function (e) {
-		if (e.target === dlg) { pending = ''; dlg.close(); }
+		if (e.target === dlg) { remember(); pending = ''; dlg.close(); }
 	});
-	dlg.addEventListener('cancel', function () { pending = ''; });
+	dlg.addEventListener('cancel', function () { remember(); pending = ''; });
 })();
 (function () {
 	'use strict';

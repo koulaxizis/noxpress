@@ -9,7 +9,7 @@ The source of truth is [Noxpress_bible.md](Noxpress_bible.md) (§2 palette, §3 
 - Free, MIT WordPress/WooCommerce plugins that replace third-party plugins. Calm, professional, dark.
 - Accent colour: violet `#6d4aff`. Purple is Noxpress's colour; Christos's other projects (e.g. NULL JSFX) do not use it.
 - No ads, upsells, licence keys, nags or tracking anywhere in the UI.
-- Support inside the plugins: only the Ko-fi pill in the footer (Bible §7, §18). On the site: the `#support` section and the Ko-fi follow box (`#updates`); Ko-fi is the only news channel.
+- Support inside the plugins: only the «♡ Support Noxpress» pill in the footer, to `https://noxpress.tech/support/` (Bible §7, §18). On the site: the `#support` section, the `/support/` page (merch, one-time donation, services) and the `#updates` box (GitHub releases and the koulaxizis.gr Updates feed). No Ko-fi anywhere (Bible 1.162).
 
 ## Admin palette (dark, same in every plugin)
 
@@ -30,7 +30,7 @@ Tokens are CSS custom properties with the plugin's prefix (`--rs-*`, `--sp-*`, `
 | heading | `#f6f4ff` | h1/h2 |
 | muted | `#b7b2d6` | descriptions, hints |
 | link / link-hover | `#beb1ff` / `#d4c9ff` | links |
-| accent / accent-hover | `#6d4aff` / `#8263ff` | primary buttons, checked states, Ko-fi |
+| accent / accent-hover | `#6d4aff` / `#8263ff` | primary buttons, checked states, the support pill |
 | warn | `#f5c97e` | warnings |
 | danger | `#ff9a9a` | errors |
 
@@ -43,7 +43,7 @@ Supporting values (Bible §2, used by every plugin through Noxpress Core):
 | `#8b87a3` | placeholders |
 | `#e6e1fd` | table header text |
 | `#eeeafc` | text of dark `.button` |
-| `#ffffff` | text of `.button-primary` and the Ko-fi pill, emphasised numbers in tables |
+| `#ffffff` | text of `.button-primary` and the support pill, emphasised numbers in tables |
 | `#a29dc0` | footer text |
 | `#9fe0b5` | success / "ok" text and badges |
 | `#3d6b4f` / `#6b5a33` / `#6b3a3a` | badge borders: ok / warn / danger |
@@ -76,7 +76,7 @@ Supporting values (Bible §2, used by every plugin through Noxpress Core):
 ## Footers
 
 - Admin footer, identical on every plugin page, at the end of `.{p}-wrap` (Bible §7):
-  `Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpress.tech`, then the Ko-fi pill in the accent (`https://ko-fi.com/koulaxizis`) and the «Noxpress Dashboard» link (`admin.php?page=noxpress`). External links open with `target="_blank" rel="noopener noreferrer"`.
+  `Made with ❤ by Christos Koulaxizis · glarolykoi.net · More plugins at noxpress.tech`, then the «♡ Support Noxpress» pill in the accent (`https://noxpress.tech/support/`) and the «Noxpress Dashboard» link (`admin.php?page=noxpress`). External links open with `target="_blank" rel="noopener noreferrer"`.
 - Site credits, verbatim: "Designed with <3 by Christos Koulaxizis (koulaxizis.gr). Assisted by Lumo. Audited by Claude."
 
 ## Frontend (what shoppers see)

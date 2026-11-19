@@ -280,7 +280,7 @@ jobs:
             (cd plugins && zip -qrX "../$slug.zip" "$slug" -x '*.DS_Store')
 
             {
-              echo "Free forever, made by one person and funded only on Ko-fi: [buy a coffee](https://ko-fi.com/koulaxizis) or [support it monthly](https://ko-fi.com/koulaxizis/tiers). Follow noxpress there for every release."
+              echo "Free forever, made by one person. If it saves you time, you can [support noxpress](https://noxpress.tech/support/) with a t-shirt, mug or sticker, or a one-time donation; nothing is unlocked."
               echo
               echo "**Beta**: under testing before it is marked stable."
               echo

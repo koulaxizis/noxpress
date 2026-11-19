@@ -46,7 +46,7 @@ REPO = os.environ.get("GITHUB_REPOSITORY", "koulaxizis/noxpress")
 API = "https://api.github.com/repos/" + REPO
 SOURCE = "https://github.com/" + REPO
 SITE = "https://noxpress.tech/"
-DONATE = "https://ko-fi.com/koulaxizis"
+DONATE = "https://noxpress.tech/support/"
 LOCALES = ("en-US", "el")
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
@@ -337,7 +337,7 @@ a { color: var(--accent-bright); }
 {rows}
 </ul>
 </section>
-<p class="muted">Noxpress: <a href="https://noxpress.tech/">noxpress.tech</a> · source: <a href="{source}">github.com/{name}</a> · support: <a href="https://ko-fi.com/koulaxizis">Ko-fi</a></p>
+<p class="muted">Noxpress: <a href="https://noxpress.tech/">noxpress.tech</a> · source: <a href="{source}">github.com/{name}</a> · support: <a href="https://noxpress.tech/support/">noxpress.tech/support</a></p>
 <p class="muted">Designed with &lt;3 by Christos Koulaxizis (<a href="https://koulaxizis.gr/">koulaxizis.gr</a>). Assisted by Lumo. Audited by Claude.</p>
 </main>
 </body>
