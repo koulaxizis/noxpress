@@ -1,6 +1,6 @@
 <?php
 /**
- * Visitor Language — uninstall.php (v1.0.0)
+ * Visitor Language — uninstall.php (v1.0.1)
  *
  * Deleted: the option vlg_settings, the transients vlg_aui_msg_{uid} and
  * the English texts of every post (post meta _vlg_title, _vlg_excerpt,
