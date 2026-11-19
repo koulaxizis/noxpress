@@ -160,10 +160,14 @@ section.plugins { padding-bottom: 40px; }
 .apps-banner-kicker { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-bright); font-weight: 600; }
 .apps-banner h2 { font-size: 1.6rem; font-weight: 600; color: #f2f0fe; margin: 4px 0 8px; }
 .apps-banner p { margin-bottom: 16px; }
+.apps-banner p.apps-banner-alt { margin: 12px 0 0; font-size: 0.85rem; }
 @media (max-width: 600px) {
 	.apps-banner { flex-direction: column; align-items: flex-start; padding: 20px 16px; }
 	.apps-banner-icon { width: 64px; height: 64px; border-radius: 15px; }
 }
+.alt-ways { padding: 18px 28px; border-left-color: var(--border); }
+.alt-ways summary { cursor: pointer; color: var(--muted); font-size: 0.95rem; }
+.alt-ways[open] summary { margin-bottom: 12px; }
 .card {
 	background: var(--surface);
 	border: 1px solid var(--border);
@@ -546,6 +550,7 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn primary" href="https://github.com/koulaxizis/oros/releases/download/koulaxizis-apps/koulaxizis-apps.apk" rel="noopener" data-i18n="fdr_add">Download Koulaxizis Apps</a>
 			<a class="btn" href="https://useoros.online/download/#koulaxizis-apps" rel="noopener" data-i18n="kab_how">How to install</a>
 		</div>
+		<p class="apps-banner-alt"><a href="#other-ways" data-i18n="kab_alt">Prefer F-Droid, Droid-ify or Obtainium?</a></p>
 	</div>
 </section>
 
@@ -1688,7 +1693,7 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="sba_li2">Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+)</li>
 			<li data-i18n="sba_li3">Broadcast tab: the posts waiting in the queue, to send, edit or reject, with a notification for each new one (Broadcast 1.1.0+, Site Bridge 1.11.0+)</li>
 			<li data-i18n="sba_li4">Pair with a QR code from the Hub; device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak</li>
-			<li data-i18n="sba_li5">Updates: Koulaxizis Apps, or a notice in the app</li>
+			<li data-i18n="sba_li5">Updates: Koulaxizis Apps; or F-Droid, Droid-ify or Obtainium (<a href="#other-ways">other ways</a>, title filter <code>^Site Bridge app</code>); or a notice in the app</li>
 		</ul>
 		<div class="actions">
 			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sba-1.8.1/site-bridge.apk" rel="nofollow noopener" data-i18n="sba_download">Download v1.8.1 (.apk)</a>
@@ -1706,7 +1711,7 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="loa_li1">Trusted Web Activity of the plugin’s /live-operator/ page; Live Operator 1.4.0+ lists the app by itself, so there is no address bar. Change the site from the icon’s «Change site»</li>
 			<li data-i18n="loa_li2">Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb</li>
 			<li data-i18n="loa_li3">Little code of its own (Google’s androidbrowserhelper); no Firebase, no analytics</li>
-			<li data-i18n="loa_li4">Updates: Koulaxizis Apps, or a notice on the page</li>
+			<li data-i18n="loa_li4">Updates: Koulaxizis Apps; or F-Droid, Droid-ify or Obtainium (<a href="#other-ways">other ways</a>, title filter <code>^Live Operator app</code>); or a notice on the page</li>
 		</ul>
 		<div class="actions">
 			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-loa-2.0.2/live-operator.apk" rel="nofollow noopener" data-i18n="loa_download">Download v2.0.2 (.apk)</a>
@@ -1729,6 +1734,19 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn" href="https://useoros.online/download/#koulaxizis-apps" rel="noopener" data-i18n="fdr_page">More about it</a>
 		</div>
 	</article>
+
+	<details class="card alt-ways" id="other-ways">
+		<summary data-i18n="alt_title">Other ways: F-Droid, Droid-ify, Obtainium</summary>
+		<p data-i18n="alt_desc">The same signed APKs are also in the Noxpress repository: add it once to F-Droid or Droid-ify and their updates come by themselves. Obtainium follows this GitHub repository («Include prereleases», with the title filter of each app).</p>
+		<ul>
+			<li><span data-i18n="fdr_addr">Address:</span> <code class="fp">https://koulaxizis.github.io/noxpress-fdroid/repo</code></li>
+			<li><span data-i18n="fdr_fp">Fingerprint (SHA-256):</span> <code class="fp">21441E31A60A89708C6CECE649390C1863EC8CA147F08DA7399AE7646E02EE4E</code></li>
+		</ul>
+		<div class="actions">
+			<a class="btn" href="https://fdroid.link/#https://koulaxizis.github.io/noxpress-fdroid/repo?fingerprint=21441E31A60A89708C6CECE649390C1863EC8CA147F08DA7399AE7646E02EE4E" rel="nofollow noopener" data-i18n="alt_add">Add the repository</a>
+			<a class="btn" href="https://koulaxizis.github.io/noxpress-fdroid/" rel="noopener" data-i18n="alt_page">Repository page</a>
+		</div>
+	</details>
 </section>
 
 <section class="plugins" id="support">
@@ -2328,19 +2346,26 @@ footer .heart { color: var(--accent-bright); }
 		kab_title: 'Koulaxizis Apps',
 		kab_desc: 'All our Android apps in one place: Site Bridge, Live Operator and the apps of orOS, NULL JSFX and Glarolykoi. Install with one tap; updates come by themselves, all signed by us.',
 		kab_how: 'How to install',
+		kab_alt: 'Prefer F-Droid, Droid-ify or Obtainium?',
+		alt_title: 'Other ways: F-Droid, Droid-ify, Obtainium',
+		alt_desc: 'The same signed APKs are also in the Noxpress repository: add it once to F-Droid or Droid-ify and their updates come by themselves. Obtainium follows this GitHub repository («Include prereleases», with the title filter of each app).',
+		fdr_addr: 'Address:',
+		fdr_fp: 'Fingerprint (SHA-256):',
+		alt_add: 'Add the repository',
+		alt_page: 'Repository page',
 		sba_desc: 'The Site Bridge Hub in your pocket: open the write window of your sites with your fingerprint only while you work, and handle Book Feed and Broadcast from your phone. It talks only to your own Hub; no account, no Firebase, no analytics.',
 		sba_li1: 'Open, renew or close the write window per site, with a fingerprint for every opening, a notification for every change (schedule included) and the Hub’s log on the phone',
 		sba_li2: 'Book Feed tab: sync, rules, ISBN scan and import as a draft, with notifications (Book Feed 1.11.0+)',
 		sba_li3: 'Broadcast tab: the posts waiting in the queue, to send, edit or reject, with a notification for each new one (Broadcast 1.1.0+, Site Bridge 1.11.0+)',
 		sba_li4: 'Pair with a QR code from the Hub; device keys stay in the Android Keystore and every request is signed, so there is no password to type or leak',
-		sba_li5: 'Updates: Koulaxizis Apps, or a notice in the app',
+		sba_li5: 'Updates: Koulaxizis Apps; or F-Droid, Droid-ify or Obtainium (<a href="#other-ways">other ways</a>, title filter <code>^Site Bridge app</code>); or a notice in the app',
 		sba_download: 'Download v1.8.1 (.apk)',
 		loa_download: 'Download v2.0.2 (.apk)',
 		loa_desc: 'The Live Operator page as an Android app: full screen, its own icon, and chat notifications that light the screen. One app for every site with the Live Operator plugin: connect it with «Connect the app» in the plugin’s settings, or type your site’s address.',
 		loa_li1: 'Trusted Web Activity of the plugin’s /live-operator/ page; Live Operator 1.4.0+ lists the app by itself, so there is no address bar. Change the site from the icon’s «Change site»',
 		loa_li2: 'Heads-up chat notifications with sound on their own channel, private on the lock screen, never through Do Not Disturb',
 		loa_li3: 'Little code of its own (Google’s androidbrowserhelper); no Firebase, no analytics',
-		loa_li4: 'Updates: Koulaxizis Apps, or a notice on the page',
+		loa_li4: 'Updates: Koulaxizis Apps; or F-Droid, Droid-ify or Obtainium (<a href="#other-ways">other ways</a>, title filter <code>^Live Operator app</code>); or a notice on the page',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Free &amp; Open Source · Part of <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		disclaimer: '<strong>Use at your own risk.</strong> noxpress plugins are free software, provided “as is”, without warranty of any kind. Test them on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from their use.',
 		credits: 'Designed with <span class="heart">♥</span> by <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Assisted by <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Audited by <a href="https://claude.ai" rel="noopener">Claude</a>.'
@@ -2831,19 +2856,26 @@ footer .heart { color: var(--accent-bright); }
 		kab_title: 'Εφαρμογές Koulaxizis',
 		kab_desc: 'Όλες οι εφαρμογές μας για Android σε ένα μέρος: Site Bridge, Live Operator και οι εφαρμογές των orOS, NULL JSFX και Γλαρόλυκοι. Εγκατάσταση με ένα πάτημα· οι ενημερώσεις έρχονται μόνες τους, όλες υπογεγραμμένες από εμάς.',
 		kab_how: 'Πώς εγκαθίσταται',
+		kab_alt: 'Προτιμάς F-Droid, Droid-ify ή Obtainium;',
+		alt_title: 'Άλλοι τρόποι: F-Droid, Droid-ify, Obtainium',
+		alt_desc: 'Τα ίδια υπογεγραμμένα APK υπάρχουν και στο αποθετήριο του Noxpress: πρόσθεσέ το μία φορά στο F-Droid ή στο Droid-ify και οι ενημερώσεις έρχονται μόνες τους. Το Obtainium ακολουθεί αυτό το GitHub repository («Include prereleases», με το φίλτρο τίτλου κάθε εφαρμογής).',
+		fdr_addr: 'Διεύθυνση:',
+		fdr_fp: 'Fingerprint (SHA-256):',
+		alt_add: 'Προσθήκη αποθετηρίου',
+		alt_page: 'Σελίδα αποθετηρίου',
 		sba_desc: 'Το Hub του Site Bridge στην τσέπη σου: ανοίγεις το παράθυρο εγγραφής των sites σου με το δαχτυλικό σου μόνο όσο δουλεύεις, και χειρίζεσαι Book Feed και Broadcast από το κινητό. Μιλά μόνο με το δικό σου Hub· χωρίς λογαριασμό, χωρίς Firebase, χωρίς analytics.',
 		sba_li1: 'Άνοιγμα, ανανέωση ή κλείσιμο του παραθύρου εγγραφής ανά site, με δαχτυλικό σε κάθε άνοιγμα, ειδοποίηση για κάθε αλλαγή (και του ωραρίου) και το ιστορικό του Hub στο κινητό',
 		sba_li2: 'Καρτέλα Book Feed: συγχρονισμός, κανόνες, σάρωση ISBN και εισαγωγή ως πρόχειρο, με ειδοποιήσεις (Book Feed 1.11.0+)',
 		sba_li3: 'Καρτέλα Broadcast: οι αναρτήσεις που περιμένουν στην ουρά, για αποστολή, διόρθωση ή απόρριψη, με ειδοποίηση για κάθε νέα (Broadcast 1.1.0+, Site Bridge 1.11.0+)',
 		sba_li4: 'Σύνδεση με QR από το Hub· τα κλειδιά της συσκευής μένουν στο Android Keystore και κάθε αίτημα υπογράφεται, οπότε δεν υπάρχει κωδικός να πληκτρολογηθεί ή να διαρρεύσει',
-		sba_li5: 'Ενημερώσεις: οι Εφαρμογές Koulaxizis ή μια ειδοποίηση στην εφαρμογή',
+		sba_li5: 'Ενημερώσεις: οι Εφαρμογές Koulaxizis· ή το F-Droid, το Droid-ify ή το Obtainium (<a href="#other-ways">άλλοι τρόποι</a>, φίλτρο τίτλου <code>^Site Bridge app</code>)· ή μια ειδοποίηση στην εφαρμογή',
 		sba_download: 'Λήψη v1.8.1 (.apk)',
 		loa_download: 'Λήψη v2.0.2 (.apk)',
 		loa_desc: 'Η σελίδα του Live Operator ως εφαρμογή Android: πλήρης οθόνη, δικό της εικονίδιο και ειδοποιήσεις συνομιλίας που ανάβουν την οθόνη. Μία εφαρμογή για κάθε site με το plugin Live Operator: τη συνδέεις με «Σύνδεση της εφαρμογής» στις ρυθμίσεις του plugin ή γράφοντας τη διεύθυνση του site σου.',
 		loa_li1: 'Trusted Web Activity της σελίδας /live-operator/ του plugin· το Live Operator 1.4.0+ δηλώνει μόνο του την εφαρμογή, χωρίς γραμμή διεύθυνσης. Αλλαγή site από τη «Αλλαγή site» του εικονιδίου',
 		loa_li2: 'Ειδοποιήσεις συνομιλίας heads-up με ήχο σε δικό τους κανάλι, ιδιωτικές στην κλειδωμένη οθόνη, ποτέ μέσα από το «Μην ενοχλείτε»',
 		loa_li3: 'Ελάχιστος δικός της κώδικας (το androidbrowserhelper της Google)· χωρίς Firebase, χωρίς analytics',
-		loa_li4: 'Ενημερώσεις: οι Εφαρμογές Koulaxizis ή μια ειδοποίηση στη σελίδα',
+		loa_li4: 'Ενημερώσεις: οι Εφαρμογές Koulaxizis· ή το F-Droid, το Droid-ify ή το Obtainium (<a href="#other-ways">άλλοι τρόποι</a>, φίλτρο τίτλου <code>^Live Operator app</code>)· ή μια ειδοποίηση στη σελίδα',
 		footer: '<strong>noxpress</strong> — WordPress &amp; WooCommerce plugins · Ελεύθερα &amp; Ανοιχτού Κώδικα · Μέρος του <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a>.',
 		disclaimer: '<strong>Χρήση με δική σου ευθύνη.</strong> Τα plugins του noxpress είναι δωρεάν λογισμικό που παρέχεται «ως έχει», χωρίς καμία εγγύηση. Δοκίμασέ τα πρώτα σε αντίγραφο του site και κράτα πλήρες backup του site και της βάσης πριν εγκαταστήσεις, ενημερώσεις ή αφαιρέσεις οποιοδήποτε plugin. Στο μέγιστο βαθμό που επιτρέπει ο νόμος, δεν υπάρχει καμία ευθύνη για απώλεια δεδομένων, παραγγελιών, εσόδων ή οποιαδήποτε άλλη ζημιά από τη χρήση τους.',
 		credits: 'Σχεδιάστηκε με <span class="heart">♥</span> από τον <a href="https://koulaxizis.gr" rel="noopener">Christos Koulaxizis</a>. Με τη βοήθεια του <a href="https://lumo.proton.me" rel="noopener">Lumo</a>. Ελέγχθηκε από το <a href="https://claude.ai" rel="noopener">Claude</a>.'
