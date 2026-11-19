@@ -170,9 +170,8 @@ final class LOP_App {
 	}
 
 	private static function serve_assetlinks(): void {
-		$s   = LOP_Settings::get();
-		$fps = LOP_Settings::served_fingerprints();
-		if ( ! $fps ) {
+		$body = self::assetlinks();
+		if ( ! $body ) {
 			status_header( 404 );
 			self::no_store();
 			return;
@@ -180,19 +179,38 @@ final class LOP_App {
 		status_header( 200 );
 		header( 'Content-Type: application/json; charset=utf-8' );
 		header( 'Cache-Control: public, max-age=3600' );
-		echo wp_json_encode(
-			array(
-				array(
-					'relation' => array( 'delegate_permission/common.handle_all_urls' ),
-					'target'   => array(
-						'namespace'                => 'android_app',
-						'package_name'             => $s['package'],
-						'sha256_cert_fingerprints' => $fps,
-					),
+		echo wp_json_encode( $body, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
+	 * The statements of assetlinks.json: Live Operator's app first (when it
+	 * has a fingerprint), then the site's other apps (1.6.0). Every app may
+	 * open all the site's links; the list is empty when nothing is set.
+	 */
+	public static function assetlinks(): array {
+		$s    = LOP_Settings::get();
+		$apps = array();
+		$fps  = LOP_Settings::served_fingerprints();
+		if ( $fps ) {
+			$apps[] = array( 'package' => $s['package'], 'fingerprints' => $fps );
+		}
+		foreach ( $s['other_apps'] as $app ) {
+			if ( $app['package'] !== $s['package'] ) {
+				$apps[] = $app;
+			}
+		}
+		$out = array();
+		foreach ( $apps as $app ) {
+			$out[] = array(
+				'relation' => array( 'delegate_permission/common.handle_all_urls' ),
+				'target'   => array(
+					'namespace'                => 'android_app',
+					'package_name'             => $app['package'],
+					'sha256_cert_fingerprints' => array_values( $app['fingerprints'] ),
 				),
-			),
-			JSON_UNESCAPED_SLASHES
-		);
+			);
+		}
+		return $out;
 	}
 
 	private static function serve_page(): void {

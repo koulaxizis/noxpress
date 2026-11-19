@@ -125,6 +125,8 @@ final class LOP_Lang {
 		'Το site δηλώνει την επίσημη εφαρμογή στο assetlinks.json μόνο του, ώστε να μη φαίνεται γραμμή διεύθυνσης. Τα πεδία παρακάτω χρειάζονται μόνο για δική σου build της εφαρμογής.' => 'The site declares the official app in assetlinks.json by itself, so there is no address bar. The fields below are only needed for your own build of the app.',
 		'Επιπλέον αποτυπώματα SHA-256 πιστοποιητικού (ένα ανά γραμμή)' => 'Extra SHA-256 certificate fingerprints (one per line)',
 		'Πακέτο εφαρμογής'                                 => 'App package',
+		'Άλλες εφαρμογές του site που ανοίγουν τους συνδέσμους του (πακέτο και αποτύπωμα SHA-256, ένα ζεύγος ανά γραμμή)' => 'Other apps of this site that open its links (package and SHA-256 fingerprint, one pair per line)',
+		'%d γραμμές άλλων εφαρμογών αγνοήθηκαν: θέλουν πακέτο Android, κενό και αποτύπωμα (όχι το πακέτο του Live Operator, έως 5 εφαρμογές).' => '%d lines of other apps were ignored: each needs an Android package, a space and a fingerprint (not Live Operator\'s package, up to 5 apps).',
 		'Το site δίνει:'                                   => 'The site serves:',
 		'(αν ανοίγει 404, ο server δεν στέλνει το /.well-known/ στο WordPress: ανέβασε το αρχείο με το χέρι).' => '(if it gives a 404, the server does not pass /.well-known/ to WordPress: upload the file by hand).',
 		'Κενό: η εφαρμογή δουλεύει, με μια λεπτή γραμμή διεύθυνσης στο πάνω μέρος.' => 'Empty: the app works, with a thin address bar at the top.',
