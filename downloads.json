@@ -1,6 +1,6 @@
 {
-  "display": 1814,
-  "total": 1814,
+  "display": 1816,
+  "total": 1816,
   "offset": 5,
   "updated": "2026-11-19",
   "assets": {
@@ -2330,6 +2330,10 @@
     },
     "769023116": {
       "file": "nox-vl-1.0.1/visitor-language.zip",
+      "count": 2
+    },
+    "769144293": {
+      "file": "nox-vl-1.0.2/visitor-language.zip",
       "count": 0
     }
   },
