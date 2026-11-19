@@ -5,7 +5,7 @@ Tags: english, language switcher, multilingual, woocommerce, hreflang
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -23,7 +23,7 @@ Visitor Language puts the same site under /en/ in English:
 * **Menus per language.** Every menu location of the theme can show another menu in English.
 * **The links stay English.** Every link WordPress builds under /en/ keeps /en/: products, cart, checkout, account, AJAX, REST, and the classic and block checkout.
 * **The switch.** A small EL / EN button at the bottom left, or the [vlg_switch] shortcode where you want it.
-* **Search engines.** hreflang el / en / x-default on the pages that have English texts.
+* **Search engines.** hreflang el / en / x-default on the pages that have English texts, and an English <title>, meta description and og / twitter texts (also with Rank Math or Yoast SEO).
 
 Nothing changes after activation: the switch starts off and /en/ gives 404 until you turn it on.
 
@@ -75,6 +75,9 @@ No. With WooCommerce the product texts, attributes, shipping and payment labels 
 The settings and every English text are deleted.
 
 == Changelog ==
+
+= 1.0.1 =
+* English pages also get an English <title>, meta description and social (og / twitter) texts from the English box: without an SEO plugin, with Rank Math and with Yoast SEO. The shop page and a static front page count too.
 
 = 1.0.0 =
 * First release (beta): /en/ prefix with en_US or en_GB, English texts per product, page and post, short-text list, menus per location, «only in Greek» note, EL / EN switch and shortcode, hreflang, no page cache for English answers.

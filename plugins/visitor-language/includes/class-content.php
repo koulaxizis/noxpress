@@ -45,6 +45,15 @@ final class VLG_Content {
 		add_action( 'woocommerce_before_single_product', array( __CLASS__, 'product_note' ), 5 );
 		add_filter( 'the_content', array( __CLASS__, 'page_note' ), 20 );
 
+		// The <title>, meta description and social texts (no SEO plugin, Rank Math, Yoast).
+		add_filter( 'document_title_parts', array( __CLASS__, 'doc_title_parts' ), 20 );
+		foreach ( array( 'rank_math/frontend/title', 'rank_math/opengraph/facebook/og_title', 'rank_math/opengraph/twitter/title', 'wpseo_title', 'wpseo_opengraph_title', 'wpseo_twitter_title' ) as $hook ) {
+			add_filter( $hook, array( __CLASS__, 'seo_title' ), 20 );
+		}
+		foreach ( array( 'rank_math/frontend/description', 'rank_math/opengraph/facebook/og_description', 'rank_math/opengraph/twitter/description', 'wpseo_metadesc', 'wpseo_opengraph_desc', 'wpseo_twitter_description' ) as $hook ) {
+			add_filter( $hook, array( __CLASS__, 'seo_description' ), 20 );
+		}
+
 		// Short texts.
 		add_filter( 'woocommerce_attribute_label', array( __CLASS__, 'phrase' ), 20 );
 		add_filter( 'woocommerce_variation_option_name', array( __CLASS__, 'phrase' ), 20 );
@@ -176,6 +185,68 @@ final class VLG_Content {
 			return $content;
 		}
 		return self::has_any( (int) get_the_ID() ) ? $content : self::note_html() . $content;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Search engines and sharing: the <title>, the meta description, og/twitter
+	 * ------------------------------------------------------------------- */
+
+	/** The post the head of this request describes: a single post, the shop page or the front page. */
+	private static function head_post_id(): int {
+		if ( function_exists( 'is_shop' ) && is_shop() ) {
+			return (int) wc_get_page_id( 'shop' );
+		}
+		if ( is_front_page() && 'page' === get_option( 'show_on_front' ) ) {
+			return (int) get_option( 'page_on_front' );
+		}
+		return is_singular() ? (int) get_queried_object_id() : 0;
+	}
+
+	/** Without an SEO plugin: the title part of <title>. */
+	public static function doc_title_parts( $parts ) {
+		if ( ! is_array( $parts ) || ! isset( $parts['title'] ) ) {
+			return $parts;
+		}
+		$parts['title'] = self::seo_title( (string) $parts['title'] );
+		return $parts;
+	}
+
+	/** «Κούπα orOS | ΓΛΑΡΟΛΥΚΟΙ» → «orOS Mug | ΓΛΑΡΟΛΥΚΟΙ»: the Greek title inside it becomes the English one. */
+	public static function seo_title( $title ) {
+		$id = self::head_post_id();
+		$en = self::get( $id, '_vlg_title' );
+		if ( '' === $en || ! is_string( $title ) || '' === $title ) {
+			return $title;
+		}
+		$el = trim( (string) get_post_field( 'post_title', $id, 'raw' ) );
+		if ( '' === $el ) {
+			return $title;
+		}
+		foreach ( array( $el, esc_html( $el ), wptexturize( $el ) ) as $form ) {
+			if ( false !== strpos( $title, $form ) ) {
+				return str_replace( $form, $en, $title );
+			}
+		}
+		return $title;
+	}
+
+	/** The English short description (else the description) as plain text of at most 160 characters. */
+	public static function seo_description( $description ) {
+		$id = self::head_post_id();
+		$en = self::get( $id, '_vlg_excerpt' );
+		if ( '' === $en ) {
+			$en = self::get( $id, '_vlg_content' );
+		}
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( strip_shortcodes( $en ) ) ) );
+		if ( '' === $text ) {
+			return $description;
+		}
+		if ( mb_strlen( $text ) > 160 ) {
+			$cut  = mb_substr( $text, 0, 159 );
+			$sp   = mb_strrpos( $cut, ' ' );
+			$text = rtrim( false !== $sp && $sp > 100 ? mb_substr( $cut, 0, $sp ) : $cut, ' ,;:.' ) . '…';
+		}
+		return $text;
 	}
 
 	/* ---------------------------------------------------------------------
