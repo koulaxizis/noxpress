@@ -85,6 +85,13 @@ header { padding: 72px 0 48px; text-align: left; }
 	font-size: 13px;
 }
 .download-count strong { color: var(--text); font-weight: 600; }
+.download-count.dl-android { margin-top: -6px; }
+.dl-line, .apps-banner-body p.dl-line { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.dl-line strong { color: var(--text); font-size: 17px; }
+.dl-line.sub, .apps-banner-body p.dl-line.sub { margin-top: 2px; }
+.dl-line.sub strong { font-size: 15px; }
+.dl-break, .dl-chans { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.dl-line[hidden], .dl-break[hidden], .dl-chans[hidden] { display: none; }
 .support-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -525,6 +532,7 @@ footer .heart { color: var(--accent-bright); }
 			<div class="wordmark">noxpress<span class="dot">.</span></div>
 			<p class="tagline" data-i18n="tagline">Free, open-source WordPress &amp; WooCommerce plugins — dark, minimal, privacy-first.</p>
 			<p class="download-count" id="download-count" hidden></p>
+			<p class="download-count dl-android" data-dl="tech.noxpress." data-dl-say="android" hidden></p>
 			<div class="support-row">
 				<a class="support-cta" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener">
 					<svg class="support-cta-icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
@@ -550,6 +558,8 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn primary" href="https://github.com/koulaxizis/oros/releases/download/koulaxizis-apps/koulaxizis-apps.apk" rel="noopener" data-i18n="fdr_add">Download Koulaxizis Apps</a>
 			<a class="btn" href="https://useoros.online/download/#koulaxizis-apps" rel="noopener" data-i18n="kab_how">How to install</a>
 		</div>
+		<p class="dl-line" data-dl="gr.koulaxizis.apps" data-dl-say="mgr" hidden></p>
+		<p class="dl-line sub" data-dl="tech.noxpress.,online.useoros.,gr.koulaxizis.apps,tech.nulljsfx.,net.glarolykoi." data-dl-say="all" hidden></p>
 		<p class="apps-banner-alt"><a href="#other-ways" data-i18n="kab_alt">Prefer F-Droid, Droid-ify or Obtainium?</a></p>
 	</div>
 </section>
@@ -1701,6 +1711,8 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/site-bridge-android#readme" rel="noopener" data-i18n="apps_guide">Install guide</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
+		<p class="dl-line app" data-dl="tech.noxpress.sitebridge" data-dl-say="app" hidden></p>
+		<p class="dl-break" data-dl-break="tech.noxpress.sitebridge" hidden></p>
 	</article>
 
 	<article class="card" id="live-operator-app">
@@ -1719,6 +1731,8 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/apps/live-operator-android#readme" rel="noopener" data-i18n="apps_guide">Install guide</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
+		<p class="dl-line app" data-dl="tech.noxpress.liveoperator" data-dl-say="app" hidden></p>
+		<p class="dl-break" data-dl-break="tech.noxpress.liveoperator" hidden></p>
 	</article>
 
 	<article class="card" id="fdroid">
@@ -1733,10 +1747,12 @@ footer .heart { color: var(--accent-bright); }
 			<a class="btn primary" href="https://github.com/koulaxizis/oros/releases/download/koulaxizis-apps/koulaxizis-apps.apk" rel="noopener" data-i18n="fdr_add">Download Koulaxizis Apps</a>
 			<a class="btn" href="https://useoros.online/download/#koulaxizis-apps" rel="noopener" data-i18n="fdr_page">More about it</a>
 		</div>
+		<p class="dl-line" data-dl="gr.koulaxizis.apps" data-dl-say="mgr" hidden></p>
+		<p class="dl-line sub" data-dl="tech.noxpress." data-dl-ch="manager" data-dl-say="via" hidden></p>
 	</article>
 
 	<details class="card alt-ways" id="other-ways">
-		<summary data-i18n="alt_title">Other ways: F-Droid, Droid-ify, Obtainium</summary>
+		<summary><span data-i18n="alt_title">Other ways: F-Droid, Droid-ify, Obtainium</span> <span class="dl-chans" data-dl-chans="tech.noxpress." hidden></span></summary>
 		<p data-i18n="alt_desc">The same signed APKs are also in the Noxpress repository: add it once to F-Droid or Droid-ify and their updates come by themselves. Obtainium follows this GitHub repository («Include prereleases», with the title filter of each app).</p>
 		<ul>
 			<li><span data-i18n="fdr_addr">Address:</span> <code class="fp">https://koulaxizis.github.io/noxpress-fdroid/repo</code></li>
@@ -3039,10 +3055,10 @@ footer .heart { color: var(--accent-bright); }
 	 * downloads». Χωρίς αρχείο ή με 0, η γραμμή μένει κρυφή.
 	 * ------------------------------------------------------------------ */
 	var el = document.getElementById('download-count');
-	if (!el || typeof fetch !== 'function') { return; }
+	if (typeof fetch !== 'function') { return; }
 	var shown = 0;
 	function render() {
-		if (!shown) { return; }
+		if (!shown || !el) { return; }
 		var isEl = 'el' === document.documentElement.lang;
 		var n = shown.toLocaleString(isEl ? 'el-GR' : 'en-US');
 		var one = 1 === shown;
@@ -3051,15 +3067,79 @@ footer .heart { color: var(--accent-bright); }
 			: '<strong>' + n + '</strong> ' + (one ? 'download' : 'downloads');
 		el.hidden = false;
 	}
+	/* Android (APPS-DL): το downloads.json «android» ({πακέτο: {κανάλι: n}})
+	 * γράφεται από το ίδιο bot με τους αριθμούς του μετρητή των Εφαρμογών
+	 * Koulaxizis. Το site δεν ρωτά άλλον server. data-dl="πακέτα,πρόθεμα."
+	 * (+ data-dl-ch) δίνει άθροισμα, data-dl-break="πακέτο" τα κανάλια του,
+	 * data-dl-chans="πρόθεμα." τα F-Droid / Droid-ify / Obtainium. */
+	var droid = null;
+	var CH = {
+		en: { manager: 'Koulaxizis Apps', github: 'Direct APK', fdroid: 'F-Droid', droidify: 'Droid-ify', obtainium: 'Obtainium', fdroid_org: 'f-droid.org', other: 'Other' },
+		el: { manager: 'Εφαρμογές Koulaxizis', github: 'Απευθείας APK', fdroid: 'F-Droid', droidify: 'Droid-ify', obtainium: 'Obtainium', fdroid_org: 'f-droid.org', other: 'Άλλο' }
+	};
+	var SAY = {
+		en: { android: 'downloads of the Android apps', mgr: 'downloads of Koulaxizis Apps', all: 'downloads of our Android apps, from every channel', via: 'installs and updates through Koulaxizis Apps', app: 'downloads' },
+		el: { android: 'λήψεις των εφαρμογών Android', mgr: 'λήψεις των Εφαρμογών Koulaxizis', all: 'λήψεις των εφαρμογών μας για Android, από όλα τα κανάλια', via: 'εγκαταστάσεις και ενημερώσεις μέσα από τις Εφαρμογές Koulaxizis', app: 'λήψεις' }
+	};
+	var ORDER = ['manager', 'github', 'fdroid', 'droidify', 'obtainium', 'fdroid_org', 'other'];
+	function list(v) { return String(v || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
+	function fits(want, pkg) { return want.some(function (p) { return p === pkg || ('.' === p.slice(-1) && 0 === pkg.indexOf(p)); }); }
+	function sum(want, chs) {
+		var n = 0;
+		Object.keys(droid).forEach(function (pkg) {
+			if (!fits(want, pkg)) { return; }
+			Object.keys(droid[pkg]).forEach(function (ch) {
+				var v = droid[pkg][ch];
+				if ('number' === typeof v && (!chs.length || chs.indexOf(ch) >= 0)) { n += v; }
+			});
+		});
+		return n;
+	}
+	function renderAndroid() {
+		if (!droid) { return; }
+		var l = ('el' === document.documentElement.lang) ? 'el' : 'en';
+		var loc = ('el' === l) ? 'el-GR' : 'en-US';
+		function fmt(n) { return n.toLocaleString(loc); }
+		document.querySelectorAll('[data-dl]').forEach(function (box) {
+			var n = sum(list(box.getAttribute('data-dl')), list(box.getAttribute('data-dl-ch')));
+			if (!(n > 0)) { return; }
+			box.textContent = '';
+			var b = document.createElement('strong');
+			b.textContent = fmt(n);
+			box.appendChild(b);
+			box.appendChild(document.createTextNode(' ' + (SAY[l][box.getAttribute('data-dl-say')] || '')));
+			box.hidden = false;
+		});
+		function chans(rowOf, chs) {
+			return chs.map(function (ch) { return [ch, rowOf(ch)]; })
+				.filter(function (x) { return x[1] > 0; })
+				.map(function (x) { return CH[l][x[0]] + ' ' + fmt(x[1]); }).join(' · ');
+		}
+		document.querySelectorAll('[data-dl-break]').forEach(function (box) {
+			var row = droid[box.getAttribute('data-dl-break')];
+			if (!row) { return; }
+			var extra = Object.keys(row).filter(function (c) { return ORDER.indexOf(c) < 0; });
+			var t = chans(function (c) { return 'number' === typeof row[c] ? row[c] : 0; }, ORDER.concat(extra));
+			if (t) { box.textContent = t; box.hidden = false; }
+		});
+		document.querySelectorAll('[data-dl-chans]').forEach(function (box) {
+			var want = list(box.getAttribute('data-dl-chans'));
+			var t = chans(function (c) { return sum(want, 'fdroid' === c ? ['fdroid', 'fdroid_org'] : [c]); }, ['fdroid', 'droidify', 'obtainium']);
+			if (t) { box.textContent = '(' + t + ')'; box.hidden = false; }
+		});
+	}
+	function both() { render(); renderAndroid(); }
 	fetch('downloads.json', { cache: 'no-cache' }).then(function (r) {
 		if (!r.ok) { throw new Error(r.status); }
 		return r.json();
 	}).then(function (d) {
+		if (d && d.android && 'object' === typeof d.android) { droid = d.android; }
 		var n = parseInt(d && d.display, 10);
-		if (n > 0) { shown = n; render(); }
+		if (n > 0) { shown = n; }
+		both();
 	}).catch(function () { /* η γραμμή μένει κρυφή */ });
 	if (typeof MutationObserver === 'function') {
-		new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+		new MutationObserver(both).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 	}
 })();
 </script>
