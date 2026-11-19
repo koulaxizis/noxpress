@@ -2134,16 +2134,155 @@
     }
   },
   "android": {
+    "gr.koulaxizis.apps": {
+      "estimate": 10
+    },
+    "online.useoros.base": {
+      "estimate": 2
+    },
+    "online.useoros.bookmarks": {
+      "estimate": 6
+    },
+    "online.useoros.budget": {
+      "estimate": 6
+    },
+    "online.useoros.calculator": {
+      "estimate": 6
+    },
+    "online.useoros.calendar": {
+      "estimate": 6
+    },
+    "online.useoros.contacts": {
+      "estimate": 6
+    },
+    "online.useoros.crm": {
+      "estimate": 6
+    },
+    "online.useoros.cycle": {
+      "estimate": 6
+    },
+    "online.useoros.diary": {
+      "estimate": 6
+    },
+    "online.useoros.drive": {
+      "estimate": 25
+    },
+    "online.useoros.files": {
+      "estimate": 6
+    },
+    "online.useoros.forms": {
+      "estimate": 6
+    },
+    "online.useoros.games": {
+      "estimate": 6
+    },
+    "online.useoros.habits": {
+      "estimate": 6
+    },
+    "online.useoros.health": {
+      "estimate": 6
+    },
+    "online.useoros.invoices": {
+      "estimate": 6
+    },
+    "online.useoros.kanban": {
+      "estimate": 6
+    },
+    "online.useoros.library": {
+      "estimate": 2
+    },
+    "online.useoros.mail": {
+      "estimate": 6
+    },
+    "online.useoros.maps": {
+      "estimate": 6
+    },
+    "online.useoros.mindmap": {
+      "estimate": 6
+    },
+    "online.useoros.mood": {
+      "estimate": 6
+    },
+    "online.useoros.music": {
+      "estimate": 6
+    },
+    "online.useoros.notes": {
+      "estimate": 6
+    },
+    "online.useoros.passwords": {
+      "estimate": 6
+    },
+    "online.useoros.photolab": {
+      "estimate": 6
+    },
+    "online.useoros.podcasts": {
+      "estimate": 6
+    },
+    "online.useoros.radio": {
+      "estimate": 6
+    },
+    "online.useoros.reader": {
+      "estimate": 6
+    },
+    "online.useoros.scanner": {
+      "estimate": 6
+    },
+    "online.useoros.slides": {
+      "estimate": 6
+    },
+    "online.useoros.spreadsheet": {
+      "estimate": 6
+    },
+    "online.useoros.stock": {
+      "estimate": 6
+    },
+    "online.useoros.studioremote": {
+      "estimate": 15
+    },
+    "online.useoros.time": {
+      "estimate": 6
+    },
+    "online.useoros.timesheet": {
+      "estimate": 6
+    },
+    "online.useoros.todo": {
+      "estimate": 6
+    },
+    "online.useoros.transfer": {
+      "estimate": 6
+    },
+    "online.useoros.twa": {
+      "estimate": 120
+    },
+    "online.useoros.water": {
+      "estimate": 6
+    },
+    "online.useoros.weather": {
+      "estimate": 6
+    },
+    "online.useoros.wiki": {
+      "estimate": 6
+    },
+    "online.useoros.workouts": {
+      "estimate": 6
+    },
+    "online.useoros.writer": {
+      "estimate": 6
+    },
     "tech.noxpress.liveoperator": {
+      "estimate": 10,
       "github": 39
     },
     "tech.noxpress.sitebridge": {
+      "estimate": 14,
       "github": 57
     },
     "tech.nulljsfx.remote.daws": {
+      "estimate": 12,
       "github": 49
     },
     "tech.nulljsfx.remote.mixers": {
+      "estimate": 11,
       "github": 43
     }
   }
