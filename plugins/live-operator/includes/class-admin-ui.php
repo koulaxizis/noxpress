@@ -297,9 +297,11 @@ final class LOP_Admin_UI {
 				<input type="text" class="regular-text code" id="lop_package" name="lop_package" value="<?php echo esc_attr( $s['package'] ); ?>" />
 				<label class="lop-label" for="lop_fingerprints"><?php esc_html_e( 'Επιπλέον αποτυπώματα SHA-256 πιστοποιητικού (ένα ανά γραμμή)', 'live-operator' ); ?></label>
 				<textarea class="large-text code" rows="3" id="lop_fingerprints" name="lop_fingerprints" placeholder="AB:CD:…"><?php echo esc_textarea( implode( "\n", $s['fingerprints'] ) ); ?></textarea>
+				<label class="lop-label" for="lop_other_apps"><?php esc_html_e( 'Άλλες εφαρμογές του site που ανοίγουν τους συνδέσμους του (πακέτο και αποτύπωμα SHA-256, ένα ζεύγος ανά γραμμή)', 'live-operator' ); ?></label>
+				<textarea class="large-text code" rows="2" id="lop_other_apps" name="lop_other_apps" placeholder="com.example.shop AB:CD:…"><?php echo esc_textarea( LOP_Settings::other_apps_text( $s['other_apps'] ) ); ?></textarea>
 				<p class="lop-hint lop-hint--under">
 					<?php
-					if ( LOP_Settings::served_fingerprints() ) {
+					if ( LOP_App::assetlinks() ) {
 						esc_html_e( 'Το site δίνει:', 'live-operator' );
 						echo ' <a href="' . esc_url( LOP_App::assetlinks_url() ) . '" target="_blank" rel="noopener">' . esc_html( LOP_App::assetlinks_url() ) . '</a> ';
 						esc_html_e( '(αν ανοίγει 404, ο server δεν στέλνει το /.well-known/ στο WordPress: ανέβασε το αρχείο με το χέρι).', 'live-operator' );
@@ -456,6 +458,7 @@ final class LOP_Admin_UI {
 	private static function do_save(): array {
 		$was = LOP_Settings::get();
 		$fp  = self::post( 'lop_fingerprints' );
+		$oth = self::post( 'lop_other_apps' );
 		LOP_Settings::save(
 			array(
 				'enabled'      => '1' === self::post( 'lop_enabled' ),
@@ -467,6 +470,7 @@ final class LOP_Admin_UI {
 				'app_name'     => self::post( 'lop_app_name' ),
 				'package'      => self::post( 'lop_package' ),
 				'fingerprints' => $fp,
+				'other_apps'   => $oth,
 			)
 		);
 		$now = LOP_Settings::get();
@@ -492,6 +496,11 @@ final class LOP_Admin_UI {
 		if ( $bad > 0 ) {
 			/* translators: %d: number of lines */
 			$msgs[] = self::msg( 'warning', sprintf( __( '%d γραμμές αποτυπωμάτων αγνοήθηκαν: θέλουν 32 ζεύγη δεκαεξαδικών, π.χ. AB:CD:…', 'live-operator' ), $bad ) );
+		}
+		$bad = LOP_Settings::count_invalid_other_apps( $oth );
+		if ( $bad > 0 ) {
+			/* translators: %d: number of lines */
+			$msgs[] = self::msg( 'warning', sprintf( __( '%d γραμμές άλλων εφαρμογών αγνοήθηκαν: θέλουν πακέτο Android, κενό και αποτύπωμα (όχι το πακέτο του Live Operator, έως 5 εφαρμογές).', 'live-operator' ), $bad ) );
 		}
 		if ( '' !== trim( self::post( 'lop_package' ) ) && $now['package'] !== trim( self::post( 'lop_package' ) ) ) {
 			$msgs[] = self::msg( 'warning', __( 'Το πακέτο δεν είναι έγκυρο όνομα Android· έμεινε το προεπιλεγμένο.', 'live-operator' ) );

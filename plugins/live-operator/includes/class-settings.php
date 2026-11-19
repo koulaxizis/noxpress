@@ -18,6 +18,9 @@
  *  fingerprints SHA-256 signing certificate fingerprints of other builds of
  *               that app; the official app's (OFFICIAL_FP) is always served
  *               for the default package (1.4.0)
+ *  other_apps   other Android apps of the same site that open its links
+ *               (a shop's own app): up to 5 { package, fingerprints },
+ *               served as their own statements in assetlinks.json (1.6.0)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -55,6 +58,7 @@ final class LOP_Settings {
 			'app_name'     => '',
 			'package'      => self::PACKAGE,
 			'fingerprints' => array(),
+			'other_apps'   => array(),
 		);
 	}
 
@@ -86,10 +90,11 @@ final class LOP_Settings {
 		$name            = isset( $raw['app_name'] ) && is_scalar( $raw['app_name'] ) ? sanitize_text_field( (string) $raw['app_name'] ) : '';
 		$out['app_name'] = function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 40 ) : substr( $name, 0, 40 );
 
-		$pkg            = isset( $raw['package'] ) && is_scalar( $raw['package'] ) ? trim( (string) $raw['package'] ) : '';
-		$out['package'] = preg_match( '/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/', $pkg ) && strlen( $pkg ) <= 120 ? $pkg : $d['package'];
+		$pkg            = self::package_name( isset( $raw['package'] ) ? $raw['package'] : '' );
+		$out['package'] = '' !== $pkg ? $pkg : $d['package'];
 
 		$out['fingerprints'] = self::fingerprints( isset( $raw['fingerprints'] ) ? $raw['fingerprints'] : array() );
+		$out['other_apps']   = self::other_apps( isset( $raw['other_apps'] ) ? $raw['other_apps'] : array() );
 
 		// The structured data comes from the public hours (1.5.0).
 		if ( ! $out['public_hours'] ) {
@@ -128,6 +133,83 @@ final class LOP_Settings {
 		$s   = self::get();
 		$out = self::PACKAGE === $s['package'] ? array( self::OFFICIAL_FP ) : array();
 		return array_values( array_unique( array_merge( $out, $s['fingerprints'] ) ) );
+	}
+
+	/** A valid Android package name, or ''. */
+	public static function package_name( $value ): string {
+		$pkg = is_scalar( $value ) ? trim( (string) $value ) : '';
+		return preg_match( '/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/', $pkg ) && strlen( $pkg ) <= 120 ? $pkg : '';
+	}
+
+	/**
+	 * Other apps of this site (1.6.0): from a list of { package,
+	 * fingerprints } or from text with «package fingerprint» per line (one
+	 * line per fingerprint; lines of the same package are merged). An entry
+	 * without a valid package or fingerprint is dropped; Live Operator's own
+	 * package cannot be listed here (it has its own fields). At most 5 apps.
+	 *
+	 * @param mixed $value Array or text.
+	 */
+	public static function other_apps( $value ): array {
+		$pairs = array();
+		if ( is_array( $value ) ) {
+			foreach ( $value as $app ) {
+				if ( is_array( $app ) && isset( $app['package'] ) ) {
+					foreach ( (array) ( $app['fingerprints'] ?? array() ) as $fp ) {
+						$pairs[] = array( $app['package'], $fp );
+					}
+				}
+			}
+		} else {
+			foreach ( preg_split( '/[\r\n]+/', is_scalar( $value ) ? (string) $value : '' ) as $line ) {
+				$parts = preg_split( '/\s+/', trim( $line ), 2 );
+				if ( 2 === count( $parts ) ) {
+					$pairs[] = $parts;
+				}
+			}
+		}
+		$apps = array();
+		foreach ( $pairs as $pair ) {
+			$pkg = self::package_name( $pair[0] );
+			$fps = self::fingerprints( array( $pair[1] ) );
+			if ( '' === $pkg || self::PACKAGE === $pkg || ! $fps ) {
+				continue;
+			}
+			if ( ! isset( $apps[ $pkg ] ) ) {
+				if ( count( $apps ) >= 5 ) {
+					continue;
+				}
+				$apps[ $pkg ] = array();
+			}
+			$apps[ $pkg ] = array_slice( array_values( array_unique( array_merge( $apps[ $pkg ], $fps ) ) ), 0, 5 );
+		}
+		$out = array();
+		foreach ( $apps as $pkg => $fps ) {
+			$out[] = array( 'package' => $pkg, 'fingerprints' => $fps );
+		}
+		return $out;
+	}
+
+	/** The other apps as text for the settings field, one «package fingerprint» per line. */
+	public static function other_apps_text( array $apps ): string {
+		$lines = array();
+		foreach ( $apps as $app ) {
+			foreach ( $app['fingerprints'] as $fp ) {
+				$lines[] = $app['package'] . ' ' . $fp;
+			}
+		}
+		return implode( "\n", $lines );
+	}
+
+	/** Lines of the other apps field that are not «package fingerprint». */
+	public static function count_invalid_other_apps( string $text ): int {
+		$bad = 0;
+		foreach ( preg_split( '/[\r\n]+/', $text ) as $line ) {
+			if ( '' !== trim( $line ) && array() === self::other_apps( $line ) ) {
+				++$bad;
+			}
+		}
+		return $bad;
 	}
 
 	/** Lines of the fingerprints field that are not a valid fingerprint. */
