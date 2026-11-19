@@ -204,6 +204,7 @@ final class VLG_Admin_UI {
 				self::radio( 'vlg_switch', 'float', $s['switch'], __( 'Μικρό κουμπί EL / EN κάτω αριστερά σε κάθε σελίδα', 'visitor-language' ) );
 				self::radio( 'vlg_switch', 'products', $s['switch'], __( 'Το ίδιο κουμπί μόνο στα προϊόντα με αγγλικά κείμενα (π.χ. όσα στέλνονται στο εξωτερικό)', 'visitor-language' ) );
 				self::radio( 'vlg_switch', 'none', $s['switch'], __( 'Μόνο όπου βάζω το shortcode [vlg_switch]', 'visitor-language' ) );
+				self::checkbox( 'vlg_abroad', $s['abroad'], __( 'Και σε κάθε σελίδα για επισκέπτες εκτός Ελλάδας (η χώρα έρχεται από το Cloudflare του site, χωρίς υπηρεσία τρίτων)', 'visitor-language' ) );
 				?>
 				<h2 class="vlg-h2"><?php esc_html_e( 'Σελίδες χωρίς αγγλικά', 'visitor-language' ); ?></h2>
 				<?php self::checkbox( 'vlg_note', $s['note'], __( 'Σημείωση «This page is only available in Greek» στην αρχή τους', 'visitor-language' ) ); ?>
@@ -334,6 +335,7 @@ final class VLG_Admin_UI {
 				$s['on']       = '1' === self::post( 'vlg_on' );
 				$s['locale']   = sanitize_text_field( self::post( 'vlg_locale' ) );
 				$s['switch']   = sanitize_key( self::post( 'vlg_switch' ) );
+				$s['abroad']   = '1' === self::post( 'vlg_abroad' );
 				$s['note']     = '1' === self::post( 'vlg_note' );
 				$s['hreflang'] = '1' === self::post( 'vlg_hreflang' );
 				VLG_Settings::save( $s );

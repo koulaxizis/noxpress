@@ -3,7 +3,7 @@
  * Plugin Name:          Visitor Language
  * Plugin URI:           https://noxpress.tech
  * Description:          Μια αγγλική εκδοχή του site στο /en/, για επισκέπτες από το εξωτερικό: το WordPress, το WooCommerce, το καλάθι, το checkout, το θέμα και τα plugins Noxpress στα αγγλικά, και αγγλικά κείμενα μόνο για όσα προϊόντα και σελίδες θέλεις. Χωρίς αντίγραφα σελίδων, χωρίς υπηρεσία μετάφρασης, και το ελληνικό site μένει όπως είναι.
- * Version:              1.0.2
+ * Version:              1.0.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -58,7 +58,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'VLG_VERSION', '1.0.2' );
+define( 'VLG_VERSION', '1.0.3' );
 define( 'VLG_FILE', __FILE__ );
 define( 'VLG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'VLG_URL', plugin_dir_url( __FILE__ ) );

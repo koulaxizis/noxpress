@@ -5,7 +5,7 @@ Tags: english, language switcher, multilingual, woocommerce, hreflang
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,9 @@ No. With WooCommerce the product texts, attributes, shipping and payment labels 
 The settings and every English text are deleted.
 
 == Changelog ==
+
+= 1.0.3 =
+* New option: also show the EL / EN switch on every page to visitors outside Greece. The country comes from the site's own Cloudflare (/cdn-cgi/trace, same origin), so no third-party service is used and page caches stay correct.
 
 = 1.0.2 =
 * New choice for the EL / EN switch: only on products with English texts (e.g. the ones shipped abroad). Filter vlg_show_switch( $show, $post_id ).

@@ -339,9 +339,27 @@ final class VLG_Content {
 
 	public static function assets(): void {
 		wp_register_style( 'vlg-front', VLG_URL . 'assets/front.css', array(), VLG_VERSION );
-		if ( self::active() && ( self::show_float() || VLG_Router::is_en() ) ) {
+		if ( ! self::active() ) {
+			return;
+		}
+		$float = self::show_float();
+		$geo   = ! $float && self::show_geo();
+		if ( $float || $geo || VLG_Router::is_en() ) {
 			wp_enqueue_style( 'vlg-front' );
 		}
+		if ( $geo ) {
+			wp_enqueue_script( 'vlg-geo', VLG_URL . 'assets/geo.js', array(), VLG_VERSION, array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		}
+	}
+
+	/**
+	 * True when the switch goes out hidden, for assets/geo.js to show it to
+	 * a visitor outside Greece (setting 'abroad'). The page HTML is the same
+	 * for every visitor, so page caches stay correct.
+	 */
+	private static function show_geo(): bool {
+		$s = VLG_Settings::get();
+		return $s['abroad'] && 'float' !== $s['switch'];
 	}
 
 	/**
@@ -361,8 +379,13 @@ final class VLG_Content {
 
 	public static function float_switch(): void {
 		try {
-			if ( self::active() && self::show_float() ) {
+			if ( ! self::active() ) {
+				return;
+			}
+			if ( self::show_float() ) {
 				echo self::switch_html( 'vlg-float' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in switch_html().
+			} elseif ( self::show_geo() ) {
+				echo str_replace( '<nav ', '<nav hidden data-vlg-geo ', self::switch_html( 'vlg-float' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in switch_html().
 			}
 		} catch ( \Throwable $e ) {
 			return;
