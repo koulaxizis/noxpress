@@ -4,7 +4,8 @@
  *
  * Deleted: the option vlg_settings, the transients vlg_aui_msg_{uid} and
  * the English texts of every post (post meta _vlg_title, _vlg_excerpt,
- * _vlg_content). Multisite: every site once. Nothing else is touched: the
+ * _vlg_content) and the language mark of orders (order meta _vlg_lang, in
+ * postmeta and, with HPOS, in wc_orders_meta). Multisite: every site once. Nothing else is touched: the
  * rs_lang user meta belongs to Revenue Splitter (and to the whole suite).
  */
 
@@ -23,8 +24,14 @@ function vlg_uninstall_site(): void {
 		)
 	);
 	delete_option( 'vlg_settings' );
-	foreach ( array( '_vlg_title', '_vlg_excerpt', '_vlg_content' ) as $vlg_key ) {
+	foreach ( array( '_vlg_title', '_vlg_excerpt', '_vlg_content', '_vlg_lang' ) as $vlg_key ) {
 		delete_post_meta_by_key( $vlg_key );
+	}
+	$vlg_orders_meta = $wpdb->prefix . 'wc_orders_meta';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one-off uninstall cleanup; the table name is ours to build.
+	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $vlg_orders_meta ) ) ) === $vlg_orders_meta ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$vlg_orders_meta} WHERE meta_key = %s", '_vlg_lang' ) );
 	}
 }
 

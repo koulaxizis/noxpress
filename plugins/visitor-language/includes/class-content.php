@@ -39,6 +39,7 @@ final class VLG_Content {
 		add_filter( 'woocommerce_short_description', array( __CLASS__, 'short_description' ), 0 );
 		add_filter( 'woocommerce_product_get_name', array( __CLASS__, 'product_name' ), 1, 2 );
 		add_filter( 'woocommerce_product_variation_get_name', array( __CLASS__, 'variation_name' ), 1, 2 );
+		add_filter( 'woocommerce_product_title', array( __CLASS__, 'product_title' ), 1, 2 );
 		add_filter( 'woocommerce_product_get_short_description', array( __CLASS__, 'product_short' ), 1, 2 );
 		add_filter( 'woocommerce_product_get_description', array( __CLASS__, 'product_long' ), 1, 2 );
 		add_action( 'woocommerce_before_single_product', array( __CLASS__, 'product_note' ), 5 );
@@ -47,6 +48,7 @@ final class VLG_Content {
 		// Short texts.
 		add_filter( 'woocommerce_attribute_label', array( __CLASS__, 'phrase' ), 20 );
 		add_filter( 'woocommerce_variation_option_name', array( __CLASS__, 'phrase' ), 20 );
+		add_filter( 'woocommerce_attribute', array( __CLASS__, 'phrase_in' ), 20 );
 		add_filter( 'nav_menu_item_title', array( __CLASS__, 'phrase' ), 20 );
 		add_filter( 'woocommerce_gateway_title', array( __CLASS__, 'phrase' ), 20 );
 		add_filter( 'woocommerce_gateway_description', array( __CLASS__, 'phrase' ), 20 );
@@ -127,6 +129,16 @@ final class VLG_Content {
 			$name = '' !== $el ? str_replace( $el, $en, (string) $name ) : $name;
 		}
 		return self::phrase_in( $name );
+	}
+
+	/** A variation's title (the block cart and the Store API use it): the parent's English name. */
+	public static function product_title( $title, $product = null ) {
+		$id = is_object( $product ) && method_exists( $product, 'get_parent_id' ) ? (int) $product->get_parent_id() : 0;
+		if ( $id <= 0 && is_object( $product ) && method_exists( $product, 'get_id' ) ) {
+			$id = (int) $product->get_id();
+		}
+		$en = self::get( $id, '_vlg_title' );
+		return '' !== $en ? $en : $title;
 	}
 
 	public static function product_short( $text, $product ) {
@@ -234,9 +246,13 @@ final class VLG_Content {
 	}
 
 	public static function switch_html( string $class = '' ): string {
-		$v    = VLG_Router::versions();
-		$en   = VLG_Router::is_en();
-		$out  = '<nav class="vlg-switch' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-label="Language / Γλώσσα">';
+		$v  = VLG_Router::versions();
+		$en = VLG_Router::is_en();
+		// The thank-you page of an English order moves to /en/ (VLG_Orders); the Greek link says it stays.
+		if ( $en && function_exists( 'is_order_received_page' ) && ( is_order_received_page() || is_checkout_pay_page() ) ) {
+			$v['el'] = add_query_arg( 'vlg', 'el', $v['el'] );
+		}
+		$out = '<nav class="vlg-switch' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-label="Language / Γλώσσα">';
 		$out .= $en ? '<a href="' . esc_url( $v['el'] ) . '" hreflang="el" lang="el">EL</a>' : '<span class="is-current" aria-current="true"><b>EL</b></span>';
 		$out .= $en ? '<span class="is-current" aria-current="true"><b>EN</b></span>' : '<a href="' . esc_url( $v['en'] ) . '" hreflang="en" lang="en">EN</a>';
 		return $out . '</nav>';

@@ -3,7 +3,7 @@
  * Plugin Name:          Back in Stock
  * Plugin URI:           https://noxpress.tech
  * Description:          Φόρμα «Ειδοποίησέ με όταν ξαναέρθει» σε εξαντλημένα προϊόντα και παραλλαγές: επιβεβαίωση με email για τους επισκέπτες, ένα email όταν το προϊόν ξαναμπεί σε απόθεμα, αποστολή σε παρτίδες στο παρασκήνιο και ζήτηση ανά προϊόν. Χωρίς newsletter και χωρίς εξωτερική υπηρεσία.
- * Version:              1.0.2
+ * Version:              1.0.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -72,7 +72,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BIS_VERSION', '1.0.2' );
+define( 'BIS_VERSION', '1.0.3' );
 define( 'BIS_DB_VERSION', '1' );
 define( 'BIS_FILE', __FILE__ );
 define( 'BIS_PATH', plugin_dir_path( __FILE__ ) );

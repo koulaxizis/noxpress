@@ -21,7 +21,7 @@ Visitor Language puts the same site under /en/ in English:
 * **You translate only what you want.** Every product, page and post gets an «English» box: name or title, short description, description. Empty fields stay Greek. Products without English show a small «This page is only available in Greek» note.
 * **Short texts in one list.** Attribute names and values (Size, Colour), categories and tags, menu items, shipping and payment labels: one line each, «Ελληνικά = English».
 * **Menus per language.** Every menu location of the theme can show another menu in English.
-* **The links stay English.** Every link WordPress builds under /en/ keeps /en/: products, cart, checkout, account, AJAX, REST.
+* **The links stay English.** Every link WordPress builds under /en/ keeps /en/: products, cart, checkout, account, AJAX, REST, and the classic and block checkout.
 * **The switch.** A small EL / EN button at the bottom left, or the [vlg_switch] shortcode where you want it.
 * **Search engines.** hreflang el / en / x-default on the pages that have English texts.
 
@@ -31,11 +31,18 @@ Nothing changes after activation: the switch starts off and /en/ gives 404 until
 
 English answers are never stored by a page cache (DONOTCACHEPAGE and no-cache headers), so a cache that keys on the path can never serve the English page for the Greek URL or the other way round. Greek pages stay cached; saving the settings purges them, because they carry the switch.
 
+**Orders placed in English**
+
+* The order remembers that it was placed under /en/, and the admin order screen says so.
+* Every customer e-mail of that order goes out in English, also when it is sent later: a payment confirmation from the provider, a status change in the admin, a resend.
+* Admin e-mails always go out in the site language, also when an English checkout sends them.
+* A payment provider that returns the buyer to a fixed URL set in its own dashboard lands on the Greek thank-you page; the buyer of an English order is moved on to the English one (only with that order's key).
+
 **Known limits (beta)**
 
-* E-mails sent later from the admin (order status changes) go out in the site language.
-* A payment provider that returns the buyer to a fixed URL set in its own dashboard returns them to the Greek page.
-* Theme texts typed in the Customizer (for example the footer line) stay as typed.
+* Theme texts typed in the Customizer (for example the footer line) and texts of other plugins that are typed in Greek in their settings stay as typed.
+* Plugins that load before this one and translate texts at load time may keep Greek texts in English pages.
+* Product names are saved in the order in the language of the checkout, so the admin sees the English name of an English order.
 
 **For developers**
 
@@ -71,3 +78,4 @@ The settings and every English text are deleted.
 
 = 1.0.0 =
 * First release (beta): /en/ prefix with en_US or en_GB, English texts per product, page and post, short-text list, menus per location, «only in Greek» note, EL / EN switch and shortcode, hreflang, no page cache for English answers.
+* Orders placed in English: customer e-mails in English also when sent later, admin e-mails in the site language, the thank-you page of an English order moves to /en/ after a payment provider's fixed return URL, and the order screen shows the language.

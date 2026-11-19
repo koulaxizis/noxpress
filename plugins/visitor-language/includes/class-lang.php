@@ -36,6 +36,7 @@ final class VLG_Lang {
 		'Αποθήκευση' => 'Save',
 		'Απόσπασμα' => 'Excerpt',
 		'Για developers' => 'For developers',
+		'Γλώσσα παραγγελίας' => 'Order language',
 		'Για κάθε θέση μενού του θέματος, το μενού που βλέπει ο επισκέπτης στα αγγλικά. «Ίδιο» = το ελληνικό, με τα σύντομα κείμενα μεταφρασμένα.' => 'For every menu location of the theme, the menu an English visitor sees. «Same» = the Greek one, with the short texts translated.',
 		'Γλώσσα και developers' => 'Language and developers',
 		'Γλώσσα των σελίδων Noxpress' => 'Language of the Noxpress pages',

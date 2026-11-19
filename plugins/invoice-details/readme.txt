@@ -5,7 +5,7 @@ Tags: woocommerce, invoice, vat number, vies, greece
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -89,6 +89,9 @@ The details on the orders (they are store records) and, unless you tick the opti
 The plugin helps collect invoice details; checking that an invoice is issued correctly and on time stays with the store and its accountant.
 
 == Changelog ==
+
+= 1.1.3 =
+* Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.
 
 = 1.1.2 =
 * Noxpress Core 1.5.0: a short «Noxpress» menu with your favourites (★) or your 5 most recent plugins, one row per plugin with tabs for its other pages, hub categories and search, every suite page in the command palette (Ctrl/Cmd+K) and a «Full menu» switch per user.

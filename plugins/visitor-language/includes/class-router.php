@@ -18,7 +18,9 @@
  *    the English page must never be served for the Greek URL.
  *
  * Never: wp-admin, wp-login.php, cron, CLI, XML-RPC (Bible §14.4); an
- * admin-ajax call counts as English only when its referer is an /en/ page.
+ * admin-ajax or wc-ajax call without the prefix counts as English only
+ * when its referer is an /en/ page. Root-relative links (home_url( ...,
+ * 'relative' ), WooCommerce's wc-ajax endpoint) get the prefix too.
  * VLG_DISABLE in wp-config.php stops all of it (§14.3).
  */
 
@@ -54,7 +56,7 @@ final class VLG_Router {
 				self::$lang              = 'en';
 				$_SERVER['REQUEST_URI']  = $cut;
 				$_SERVER['VLG_LANG']     = 'en';
-			} elseif ( wp_doing_ajax() && self::referer_is_en() ) {
+			} elseif ( ( wp_doing_ajax() || isset( $_GET['wc-ajax'] ) ) && self::referer_is_en() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- presence only.
 				self::$lang = 'en';
 			}
 			if ( 'en' === self::$lang ) {
@@ -115,8 +117,11 @@ final class VLG_Router {
 
 	private static function hooks(): void {
 		$locale = VLG_Settings::get()['locale'];
-		$fn     = static function () use ( $locale ) {
-			return $locale;
+		// A switched locale (switch_to_locale(), e.g. an admin e-mail in the
+		// site language, VLG_Orders) wins over the /en/ locale.
+		$fn = static function ( $current ) use ( $locale ) {
+			// The switcher exists only from wp-settings.php on (not while plugins load).
+			return isset( $GLOBALS['wp_locale_switcher'] ) && is_object( $GLOBALS['wp_locale_switcher'] ) && is_locale_switched() ? $current : $locale;
 		};
 		add_filter( 'locale', $fn, 99 );
 		add_filter( 'determine_locale', $fn, 99 );
@@ -149,6 +154,9 @@ final class VLG_Router {
 
 	/** A URL of this site with the prefix (unchanged when it has it, is outside, or is skipped). */
 	public static function add_prefix( string $url ): string {
+		if ( self::is_relative( $url ) ) {
+			return self::add_prefix_path( $url );
+		}
 		$home = untrailingslashit( self::raw_home( $url ) );
 		if ( '' === $home || strpos( $url, $home ) !== 0 ) {
 			return $url;
@@ -167,8 +175,34 @@ final class VLG_Router {
 		return $home . '/' . VLG_Settings::PREFIX . ( '/' === $rest[0] ? '' : '/' ) . $rest;
 	}
 
+	/** A root-relative URL ("/x", not "//host/x"): home_url( ..., 'relative' ), e.g. WooCommerce's wc-ajax endpoint. */
+	private static function is_relative( string $url ): bool {
+		return '' !== $url && '/' === $url[0] && ( 1 === strlen( $url ) || '/' !== $url[1] );
+	}
+
+	/** add_prefix() for a root-relative URL. */
+	private static function add_prefix_path( string $url ): string {
+		if ( '' !== self::$base && strpos( $url, self::$base ) !== 0 ) {
+			return $url;
+		}
+		$rest = substr( $url, strlen( self::$base ) );
+		$rest = '' === $rest ? '/' : $rest;
+		if ( ! in_array( $rest[0], array( '/', '?', '#' ), true ) ) {
+			return $url;
+		}
+		$rel = ltrim( $rest, '/' );
+		if ( self::is_skipped( $rel ) || null !== self::strip( self::$base . '/' . $rel ) ) {
+			return $url;
+		}
+		return self::$base . '/' . VLG_Settings::PREFIX . ( '/' === $rest[0] ? '' : '/' ) . $rest;
+	}
+
 	/** A URL of this site without the prefix. */
 	public static function remove_prefix( string $url ): string {
+		if ( self::is_relative( $url ) ) {
+			$cut = self::strip( $url );
+			return null === $cut ? $url : $cut;
+		}
 		$home = untrailingslashit( self::raw_home( $url ) );
 		if ( '' === $home || strpos( $url, $home ) !== 0 ) {
 			return $url;

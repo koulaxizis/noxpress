@@ -3,7 +3,7 @@
  * Plugin Name:          Discount Rules
  * Plugin URI:           https://noxpress.tech
  * Description:          Κανόνες εκπτώσεων για το WooCommerce με ημερομηνίες έναρξης και λήξης: προσφορά σε προϊόντα και κατηγορίες, κλιμακωτή έκπτωση ποσότητας, «πάρε Χ πλήρωσε Υ» και έκπτωση στο σύνολο του καλαθιού. Ένας κανόνας ανά γραμμή, ανώτατο όριο ανά παραγγελία, χαμηλότερη τιμή 30 ημερών και ιστορικό αλλαγών.
- * Version:              1.1.2
+ * Version:              1.1.3
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -90,7 +90,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DSR_VERSION', '1.1.2' );
+define( 'DSR_VERSION', '1.1.3' );
 define( 'DSR_FILE', __FILE__ );
 define( 'DSR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DSR_URL', plugin_dir_url( __FILE__ ) );

@@ -29,6 +29,9 @@
  *  - VLG_Content   → English texts of posts / products (post meta), phrase
  *                    list, menus per location, "only in Greek" note,
  *                    EL / EN switch, hreflang
+ *  - VLG_Orders    → the order's language: customer e-mails in English,
+ *                    admin e-mails in the site language, return from a
+ *                    payment provider to the /en/ thank-you page
  *  - VLG_Meta_Box  → the «English» box in the editor
  *  - VLG_Admin_UI  → menu, settings page
  *
@@ -99,6 +102,10 @@ final class Visitor_Language {
 		if ( ! self::killed() ) {
 			require_once VLG_PATH . 'includes/class-content.php';
 			VLG_Content::init();
+			if ( class_exists( 'WooCommerce' ) ) {
+				require_once VLG_PATH . 'includes/class-orders.php';
+				VLG_Orders::init();
+			}
 		}
 
 		if ( is_admin() ) {

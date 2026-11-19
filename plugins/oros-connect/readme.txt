@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -92,6 +92,9 @@ The settings, the send log, queued sends, the last offers import and the transie
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.1 =
+* Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.
 
 = 1.4.0 =
 * New module «Δεδομένα για orOS» (Data for orOS), off by default: read-only routes GET /wp-json/wc/v3/oros/digest and /oros/status that give orOS the shop's sales, sales per title, stock, creator shares, costs and consignments, from the suite's own read-only abilities (Store Pulse, Revenue Splitter, Production Ledger, Trade Accounts). Each area can be switched off; secret-looking and personal keys are removed from every answer; answers are kept for 5 minutes.
