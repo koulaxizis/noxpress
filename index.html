@@ -3074,14 +3074,14 @@ footer .heart { color: var(--accent-bright); }
 	 * data-dl-chans="πρόθεμα." τα F-Droid / Droid-ify / Obtainium. */
 	var droid = null;
 	var CH = {
-		en: { manager: 'Koulaxizis Apps', github: 'Direct APK', fdroid: 'F-Droid', droidify: 'Droid-ify', obtainium: 'Obtainium', fdroid_org: 'f-droid.org', other: 'Other' },
-		el: { manager: 'Εφαρμογές Koulaxizis', github: 'Απευθείας APK', fdroid: 'F-Droid', droidify: 'Droid-ify', obtainium: 'Obtainium', fdroid_org: 'f-droid.org', other: 'Άλλο' }
+		en: { manager: 'Koulaxizis Apps', github: 'Direct APK', fdroid: 'F-Droid', droidify: 'Droid-ify', obtainium: 'Obtainium', fdroid_org: 'f-droid.org', other: 'Other', estimate: 'before 19/11 (estimate)' },
+		el: { manager: 'Εφαρμογές Koulaxizis', github: 'Απευθείας APK', fdroid: 'F-Droid', droidify: 'Droid-ify', obtainium: 'Obtainium', fdroid_org: 'f-droid.org', other: 'Άλλο', estimate: 'πριν τις 19/11 (εκτίμηση)' }
 	};
 	var SAY = {
 		en: { android: 'downloads of the Android apps', mgr: 'downloads of Koulaxizis Apps', all: 'downloads of our Android apps, from every channel', via: 'installs and updates through Koulaxizis Apps', app: 'downloads' },
 		el: { android: 'λήψεις των εφαρμογών Android', mgr: 'λήψεις των Εφαρμογών Koulaxizis', all: 'λήψεις των εφαρμογών μας για Android, από όλα τα κανάλια', via: 'εγκαταστάσεις και ενημερώσεις μέσα από τις Εφαρμογές Koulaxizis', app: 'λήψεις' }
 	};
-	var ORDER = ['manager', 'github', 'fdroid', 'droidify', 'obtainium', 'fdroid_org', 'other'];
+	var ORDER = ['manager', 'github', 'fdroid', 'droidify', 'obtainium', 'fdroid_org', 'other', 'estimate'];
 	function list(v) { return String(v || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
 	function fits(want, pkg) { return want.some(function (p) { return p === pkg || ('.' === p.slice(-1) && 0 === pkg.indexOf(p)); }); }
 	function sum(want, chs) {
