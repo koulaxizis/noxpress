@@ -1,6 +1,6 @@
 === Shipping Notes ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1

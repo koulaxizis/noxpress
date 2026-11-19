@@ -990,8 +990,8 @@ final class EBD_Admin_UI {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="ebd-footer-cta">
-			<a class="ebd-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'ebook-delivery' ); ?>
+			<a class="ebd-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'ebook-delivery' ); ?>
 			</a>
 			<a class="ebd-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'ebook-delivery' ); ?>

@@ -141,7 +141,7 @@ final class GLP_Lang {
 		'Η εφαρμογή φορτώθηκε. Αναίρεσέ τη από τη Μαζική μετατροπή.' => 'The run was loaded. Undo it from Bulk conversion.',
 		'Made with ❤ by %s'                                       => 'Made with ❤ by %s',
 		'More plugins at'                                         => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                          => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                          => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                      => 'Noxpress Dashboard',
 		// File renames (1.3.0)
 		'#%d: δεν ανήκει σε προϊόν ή άρθρο.' => '#%d: not attached to a product or post.',

@@ -104,7 +104,7 @@ final class EVT_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.' => 'Import complete.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		'Λίστα επερχόμενων ή περασμένων εκδηλώσεων.' => 'A list of upcoming or past events.',
 		'Πλήθος' => 'Count',

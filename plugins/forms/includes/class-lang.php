@@ -222,7 +222,7 @@ final class FRM_Lang {
 		'Οι ρυθμίσεις του αρχείου δεν είναι έγκυρες· οι τωρινές έμειναν ίδιες.' => 'The settings in the file are not valid; the current ones stayed the same.',
 		'Φόρμες που προστέθηκαν (ανενεργές): %d.' => 'Forms added (inactive): %d.',
 		'Η εισαγωγή ολοκληρώθηκε ΜΕΡΙΚΩΣ.' => 'The import completed PARTIALLY.',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Η συναίνεση «%s» ήταν προαιρετική στο Contact Form 7· στο Forms είναι πάντα υποχρεωτική.' => 'The consent «%s» was optional in Contact Form 7; in Forms it is always required.',
 		'Το «%s» είναι ένα μόνο κουτάκι: έγινε «Πολλές επιλογές» με μία επιλογή.' => '«%s» is a single box: it became «Many choices» with one choice.',
 		'Ο παραλήπτης του Contact Form 7 είχε πεδίο της φόρμας: μπήκε η διεύθυνση του site.' => 'The Contact Form 7 recipient used a form field: the site address was used.',

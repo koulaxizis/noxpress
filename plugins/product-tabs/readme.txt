@@ -1,6 +1,6 @@
 === Product Tabs ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, product tabs, custom tabs, size guide, product video
 Requires at least: 6.0
 Tested up to: 7.1

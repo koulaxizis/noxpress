@@ -1,6 +1,6 @@
 === Checkout Extras ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, gift, thank you page, coupon, vacation mode
 Requires at least: 6.0
 Tested up to: 7.1

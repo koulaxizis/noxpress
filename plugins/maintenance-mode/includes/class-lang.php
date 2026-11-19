@@ -138,7 +138,7 @@ final class MMD_Lang {
 		'Τόνος (γραμμή, links)' => 'Accent (line, links)',
 		'Υπάρχει αρχείο robots.txt στη ρίζα του site: ο server το δίνει χωρίς το WordPress, οπότε το «Disallow: /» δεν μπαίνει. Η σελίδα έχει πάντως noindex.' => 'There is a robots.txt file in the site root: the server sends it without WordPress, so «Disallow: /» is not added. The page has noindex anyway.',
 		'Φόντο' => 'Background',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

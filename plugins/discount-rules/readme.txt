@@ -1,6 +1,6 @@
 === Discount Rules ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, discount, quantity discount, buy x get y, bulk pricing
 Requires at least: 6.0
 Tested up to: 7.1

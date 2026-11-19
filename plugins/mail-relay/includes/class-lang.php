@@ -211,7 +211,7 @@ final class MRL_Lang {
 		'ευαίσθητο: χωρίς περιεχόμενο' => 'sensitive: no content',
 		'εφεδρική' => 'backup',
 		'κύρια' => 'primary',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

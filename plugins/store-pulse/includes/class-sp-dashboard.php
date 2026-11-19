@@ -467,8 +467,8 @@ final class SP_Dashboard {
 		echo ' <span class="sp-muted"> · </span> ';
 		printf(
 			'<a class="sp-widget-kofi" href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-			'https://ko-fi.com/koulaxizis',
-			esc_html__( '☕ Ko-fi', 'store-pulse' )
+			'https://noxpress.tech/support/',
+			esc_html__( '♡ Στήριξε', 'store-pulse' )
 		);
 		echo '</p>';
 
@@ -497,8 +497,8 @@ final class SP_Dashboard {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="sp-footer-cta">
-			<a class="sp-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'store-pulse' ); ?>
+			<a class="sp-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'store-pulse' ); ?>
 			</a>
 			<a class="sp-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=' . SP_Admin::SLUG_MENU ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'store-pulse' ); ?>

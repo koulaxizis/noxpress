@@ -169,7 +169,7 @@ final class POR_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.'                                    => 'Import complete.',
 		'Made with ❤ by %s'                                           => 'Made with ❤ by %s',
 		'More plugins at'                                             => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                              => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                              => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                          => 'Noxpress Dashboard',
 		'Προπαραγγελία: κυκλοφόρησε'                                  => 'Pre-order: released',
 		'Στέλνεται στον πελάτη την ημέρα κυκλοφορίας ενός προϊόντος που προπαρήγγειλε, για τις παραγγελίες σε επεξεργασία ή σε αναμονή. Μία φορά ανά παραγγελία και προϊόν.' => 'Sent to the customer on the release day of a product they pre-ordered, for orders that are processing or on hold. Once per order and product.',

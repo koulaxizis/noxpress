@@ -1,6 +1,6 @@
 === Forms ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: contact form, forms, anti-spam, contact form 7, gdpr
 Requires at least: 6.0
 Tested up to: 7.1

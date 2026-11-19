@@ -1,6 +1,6 @@
 === Product Bundles ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, product bundles, bundle discount, kits, gift sets
 Requires at least: 6.0
 Tested up to: 7.1

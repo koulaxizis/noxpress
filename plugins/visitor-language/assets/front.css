@@ -1,0 +1,10 @@
+/* Visitor Language — the language switch and the "only in Greek" note (Bible §14). */
+.vlg-switch{display:inline-flex;gap:2px;font:600 13px/1 system-ui,-apple-system,"Segoe UI",sans-serif;border:1px solid currentColor;border-radius:999px;padding:2px;opacity:.9}
+.vlg-switch a,.vlg-switch span{padding:5px 10px;border-radius:999px;text-decoration:none;color:inherit}
+.vlg-switch .is-current{background:currentColor}
+.vlg-switch .is-current b{color:#fff;mix-blend-mode:difference}
+.vlg-float{position:fixed;left:16px;bottom:16px;z-index:99990;background:#101218;color:#eae8fa;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.vlg-float .is-current{background:#eae8fa}
+.vlg-float .is-current b{color:#101218;mix-blend-mode:normal}
+.vlg-note{margin:0 0 16px;padding:10px 14px;border-left:3px solid #6d4aff;background:rgba(109,74,255,.08);font-size:14px}
+@media print{.vlg-float{display:none}}

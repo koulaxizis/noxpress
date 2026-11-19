@@ -513,7 +513,7 @@ final class TP_Lang {
 		'Made with ❤ by %s'                                       => 'Made with ❤ by %s',
 		'Noxpress Dashboard'                                      => 'Noxpress Dashboard',
 		'More plugins at'                                         => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                          => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                          => '♡ Support Noxpress',
 	);
 
 	public static function init(): void {

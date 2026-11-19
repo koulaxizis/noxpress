@@ -242,7 +242,7 @@ final class DSR_Lang {
 		'Η λειτουργία έγινε «Ανενεργό»: έλεγξε τους κανόνες και άλλαξέ τη στις Ρυθμίσεις.' => 'The mode became «Off»: check the rules and change it in Settings.',
 		'Made with ❤ by %s' => 'Made with ❤ by %s',
 		'More plugins at' => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		'Το Discount Rules χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Discount Rules requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 	);

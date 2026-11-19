@@ -1,6 +1,6 @@
 === Easy Withdrawal ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, withdrawal, right of withdrawal, eu directive 2023/2673, returns
 Requires at least: 6.0
 Tested up to: 7.1

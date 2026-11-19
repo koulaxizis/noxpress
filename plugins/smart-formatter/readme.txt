@@ -1,6 +1,6 @@
 === Smart Formatter ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, formatting, bulk edit, product description, typography
 Requires at least: 6.0
 Tested up to: 7.1

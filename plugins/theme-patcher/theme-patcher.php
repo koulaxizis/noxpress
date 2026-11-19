@@ -13,7 +13,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/theme-patcher
  * Text Domain:          theme-patcher
  * Domain Path:          /languages

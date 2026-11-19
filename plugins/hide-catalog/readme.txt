@@ -1,6 +1,6 @@
 === Hide Catalog ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, hide category, hide products, shop page, catalog visibility
 Requires at least: 6.0
 Tested up to: 7.1

@@ -1,6 +1,6 @@
 === Featured Creators ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: woocommerce, authors, creators, contributors, author page
 Requires at least: 6.0
 Tested up to: 7.1

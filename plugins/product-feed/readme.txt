@@ -1,6 +1,6 @@
 === Product Feed ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: product feed, google merchant center, skroutz, bestprice, facebook catalog
 Requires at least: 6.0
 Tested up to: 7.1

@@ -637,8 +637,8 @@ final class Noxpress_Hub {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="nx-footer-cta">
-			<a class="nx-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'noxpress' ); ?>
+			<a class="nx-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'noxpress' ); ?>
 			</a>
 			<a class="nx-footer-dash" href="<?php echo esc_url( self_admin_url( 'admin.php?page=' . Noxpress_Core::MENU ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'noxpress' ); ?>

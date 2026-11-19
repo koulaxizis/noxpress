@@ -1,6 +1,6 @@
 === Site Bridge ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: mcp, claude, ai, remote management, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1

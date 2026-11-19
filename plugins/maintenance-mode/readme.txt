@@ -1,6 +1,6 @@
 === Maintenance Mode ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: maintenance, coming soon, under construction, 503, launch page
 Requires at least: 6.0
 Tested up to: 7.1

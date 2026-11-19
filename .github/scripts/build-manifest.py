@@ -91,6 +91,7 @@ SLUGS = {
     'ed': 'ebook-delivery',
     'mm': 'maintenance-mode',
     'dr': 'discount-rules',
+    'vl': 'visitor-language',
     'sb': 'site-bridge',
 }
 UPDATER = 'plugins/revenue-splitter/includes/noxpress-core/class-noxpress-updater.php'

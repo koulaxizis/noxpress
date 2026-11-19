@@ -181,7 +181,7 @@ final class BPV_Lang {
 		'Το αρχείο είναι πολύ μεγάλο.'                              => 'The file is too large.',
 		'Made with ❤ by %s'                                         => 'Made with ❤ by %s',
 		'More plugins at'                                           => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                            => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                            => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                        => 'Noxpress Dashboard',
 		'Ανοίγματα δείγματος: %1$s τις τελευταίες 30 ημέρες, %2$s συνολικά.' => 'Sample opens: %1$s in the last 30 days, %2$s in total.',
 	);

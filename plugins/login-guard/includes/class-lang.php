@@ -238,7 +238,7 @@ final class LGD_Lang {
 		'Δεν επιλέχθηκε αρχείο.' => 'No file was chosen.',
 		'Μη έγκυρο αρχείο backup (λείπουν οι ρυθμίσεις του Login Guard).' => 'Invalid backup file (the Login Guard settings are missing).',
 		'Οι ρυθμίσεις επανήλθαν. Η λειτουργία έμεινε όπως ήταν.' => 'Settings restored. The mode stayed as it was.',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Ο ρόλος σου χρειάζεται επαλήθευση σε δύο βήματα. Ρύθμισέ την εδώ για να συνεχίσεις στο admin.' => 'Your role requires two-step verification. Set it up here to go on in the admin.',
 		'Ο ρόλος σου χρειάζεται επαλήθευση σε δύο βήματα. Ρύθμισέ την στο προφίλ σου πριν λήξει η περίοδος χάριτος.' => 'Your role requires two-step verification. Set it up in your profile before the grace period ends.',
 		'Ρύθμιση τώρα' => 'Set up now',

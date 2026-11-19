@@ -1674,8 +1674,8 @@ document.addEventListener('input', function (e) {
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="rs-footer-cta">
-			<a class="rs-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'revenue-splitter' ); ?>
+			<a class="rs-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'revenue-splitter' ); ?>
 			</a>
 		</p>
 		<?php

@@ -1,6 +1,6 @@
 === Login Guard ===
 Contributors: koulaxizis
-Donate link: https://ko-fi.com/koulaxizis
+Donate link: https://noxpress.tech/support/
 Tags: login, security, two-factor, brute force, xml-rpc
 Requires at least: 6.0
 Tested up to: 7.1

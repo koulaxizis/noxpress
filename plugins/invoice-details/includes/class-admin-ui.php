@@ -683,8 +683,8 @@ define( 'IVD_AADE_PASS', '…' );</pre>
 			<a href="https://noxpress.tech" target="_blank" rel="noopener noreferrer">noxpress.tech</a>
 		</p>
 		<p class="ivd-footer-cta">
-			<a class="ivd-kofi" href="https://ko-fi.com/koulaxizis" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( '☕ Στήριξε το project στο Ko-fi', 'invoice-details' ); ?>
+			<a class="ivd-kofi" href="https://noxpress.tech/support/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( '♡ Στήριξε το Noxpress', 'invoice-details' ); ?>
 			</a>
 			<a class="ivd-footer-dash" href="<?php echo esc_url( admin_url( 'admin.php?page=noxpress' ) ); ?>">
 				<?php esc_html_e( 'Noxpress Dashboard', 'invoice-details' ); ?>

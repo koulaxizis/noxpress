@@ -10,7 +10,7 @@
  * Author URI:           https://koulaxizis.gr
  * License:              MIT
  * License URI:          https://opensource.org/licenses/MIT
- * Donate URI:           https://ko-fi.com/koulaxizis
+ * Donate URI:           https://noxpress.tech/support/
  * Update URI:           https://noxpress.tech/updates/oros-connect
  * Text Domain:          oros-connect
  * Domain Path:          /languages

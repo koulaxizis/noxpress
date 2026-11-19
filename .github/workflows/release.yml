@@ -50,6 +50,7 @@
 #   ed → ebook-delivery
 #   mm → maintenance-mode
 #   dr → discount-rules
+#   vl → visitor-language
 #
 # Το zip περιέχει τον φάκελο του plugin στη ρίζα (<slug>/...) και
 # ανεβαίνει ως <slug>.zip — αυτό το URL χρησιμοποιεί το noxpress.tech.
@@ -87,7 +88,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs bf lo ta fp br ml ti li rd ss pl pt fd iv al mr lg fm lv bs ev gc ed mm dr'
+  AUTO: 'rs sp sf tp sh pf ew sn bp cr pk hc vp gl oc pb sb pq po ws ce nm hs bf lo ta fp br ml ti li rd ss pl pt fd iv al mr lg fm lv bs ev gc ed mm dr vl'
   # Plugins για προσωπική χρήση (Bible §21): βγαίνουν ως release αλλά δεν
   # μπαίνουν στο updates.json, άρα κανένα site δεν τα βλέπει στο hub.
   # Σήμερα κανένα (το Site Bridge βγήκε από τη λίστα στο 1.3.0).
@@ -116,7 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           ref=plugins/revenue-splitter/includes/noxpress-core
-          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge publishing-quote pre-orders wish-shelf checkout-extras data-migrator home-sections book-feed live-operator trade-accounts fast-pages broadcast magic-login trade-feed-import lean-images redirects search-signals production-ledger product-tabs product-feed invoice-details activity-log mail-relay login-guard forms live-search back-in-stock events gift-cards ebook-delivery maintenance-mode discount-rules; do
+          for slug in store-pulse smart-formatter theme-patcher shop-filters product-formats easy-withdrawal shipping-notes book-preview featured-creators store-pickup hide-catalog variation-picker greeklish-permalinks oros-connect product-bundles site-bridge publishing-quote pre-orders wish-shelf checkout-extras data-migrator home-sections book-feed live-operator trade-accounts fast-pages broadcast magic-login trade-feed-import lean-images redirects search-signals production-ledger product-tabs product-feed invoice-details activity-log mail-relay login-guard forms live-search back-in-stock events gift-cards ebook-delivery maintenance-mode discount-rules visitor-language; do
             if ! diff -r "$ref" "plugins/$slug/includes/noxpress-core" > /dev/null; then
               echo "::error::plugins/$slug/includes/noxpress-core differs from Revenue Splitter's copy: run .github/scripts/sync-core.sh"
               exit 1
@@ -179,6 +180,7 @@ jobs:
               ed) echo ebook-delivery ;;
               mm) echo maintenance-mode ;;
               dr) echo discount-rules ;;
+              vl) echo visitor-language ;;
               *) return 1 ;;
             esac
           }
@@ -232,6 +234,7 @@ jobs:
               ed) echo "Ebook Delivery" ;;
               mm) echo "Maintenance Mode" ;;
               dr) echo "Discount Rules" ;;
+              vl) echo "Visitor Language" ;;
             esac
           }
           header_field() {

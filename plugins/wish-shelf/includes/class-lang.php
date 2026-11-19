@@ -180,7 +180,7 @@ final class WSH_Lang {
 		'Η εισαγωγή ολοκληρώθηκε.'                                    => 'Import completed.',
 		'Made with ❤ by %s'                                           => 'Made with ❤ by %s',
 		'More plugins at'                                             => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                              => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                              => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                          => 'Noxpress Dashboard',
 		'Σε λίστες επιθυμιών'                                         => 'In wishlists',
 		'ID'                                                          => 'ID',

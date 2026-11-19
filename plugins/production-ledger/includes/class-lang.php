@@ -223,7 +223,7 @@ final class PL_Lang {
 		'μοιρασμένο' => 'shared',
 		'ροή εγγραφών μόνο για ανάγνωση στο /wp-json/wc/v3/pl/records, που τραβά το orOS Budget με τα κλειδιά REST του καταστήματος.' => 'a read-only records feed at /wp-json/wc/v3/pl/records, which orOS Budget pulls with the shop\'s REST keys.',
 		'το κόστος κάθε ολοκληρωμένης παραγγελίας από το Printful γίνεται καταχώριση «Εκτύπωση» των προϊόντων της.' => 'the Printful cost of every completed order becomes a «Printing» entry of its products.',
-		'☕ Στήριξε το project στο Ko-fi' => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		// 1.3.0 — title analysis, rates, event sales.
 		'%1$s (καθαρά %2$s)' => '%1$s (net %2$s)',
 		'Άλλη παραλαβή' => 'Other pickup',

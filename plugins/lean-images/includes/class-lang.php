@@ -136,7 +136,7 @@ final class LIM_Lang {
 		'Η δοκιμή σταμάτησε στα 20 δευτερόλεπτα.'                   => 'The test stopped at 20 seconds.',
 		'Made with ❤ by %s'                                         => 'Made with ❤ by %s',
 		'More plugins at'                                           => 'More plugins at',
-		'☕ Στήριξε το project στο Ko-fi'                            => '☕ Support the project on Ko-fi',
+		'♡ Στήριξε το Noxpress'                            => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                        => 'Noxpress Dashboard',
 		'περίπου %d νύχτα'                                          => 'about %d night',
 		'περίπου %d νύχτες'                                         => 'about %d nights',
