@@ -5,7 +5,7 @@ Tags: english, language switcher, multilingual, woocommerce, hreflang
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,10 @@ No. With WooCommerce the product texts, attributes, shipping and payment labels 
 The settings and every English text are deleted.
 
 == Changelog ==
+
+= 1.0.4 =
+* The short-texts list now also reaches texts other plugins write in Greek: gettext strings whose source is Greek (exact phrase) and the texts kept in known options (WooCommerce privacy texts, gateway settings, cart-abandonment note, gift checkbox, MailerLite checkout line). Filter vlg_phrase_options( $names ).
+* An English buyer sent back to the Greek checkout by a payment page (e.g. Viva cancel) returns to the English checkout. The language is kept in the existing WooCommerce session only; the EL link of the switch on the checkout carries vlg=el.
 
 = 1.0.3 =
 * New option: also show the EL / EN switch on every page to visitors outside Greece. The country comes from the site's own Cloudflare (/cdn-cgi/trace, same origin), so no third-party service is used and page caches stay correct.
