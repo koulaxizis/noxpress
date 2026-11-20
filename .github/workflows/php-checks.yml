@@ -2,7 +2,7 @@
 # (Bible §2, έλεγχος 2026-10-31 #8· push στο main και bootstrap PHPStan από
 # τον έλεγχο 2026-11).
 #
-#  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας), 8.4 και 8.5 (η νεότερη),
+#  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας), 8.4, 8.5 και 8.6 (η νεότερη),
 #             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
 #  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη), ενημερωτικό
 #             (continue-on-error), και PHPStan (level 1, stubs WordPress,
@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.4', '8.5']
+        php: ['7.4', '8.4', '8.5', '8.6']
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
