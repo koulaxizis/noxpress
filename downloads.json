@@ -2339,12 +2339,17 @@
     "769313112": {
       "file": "nox-vl-1.0.3/visitor-language.zip",
       "count": 3
+    },
+    "773110268": {
+      "file": "nox-vl-1.0.4/visitor-language.zip",
+      "count": 0
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 25
+      "github": 33,
+      "manager": 1
     },
     "net.glarolykoi.android": {
       "github": 4,
@@ -2365,7 +2370,8 @@
     },
     "online.useoros.calculator": {
       "estimate": 6,
-      "github": 1
+      "github": 1,
+      "manager": 1
     },
     "online.useoros.calendar": {
       "estimate": 6,
@@ -2441,7 +2447,8 @@
     },
     "online.useoros.music": {
       "estimate": 6,
-      "github": 1
+      "github": 1,
+      "manager": 1
     },
     "online.useoros.notes": {
       "estimate": 6,
@@ -2497,7 +2504,8 @@
     },
     "online.useoros.todo": {
       "estimate": 6,
-      "github": 1
+      "github": 1,
+      "manager": 1
     },
     "online.useoros.transfer": {
       "estimate": 6,
@@ -2538,11 +2546,11 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 58
+      "github": 61
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
-      "github": 46
+      "github": 49
     }
   }
 }
