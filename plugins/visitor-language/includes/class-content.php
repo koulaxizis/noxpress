@@ -65,6 +65,56 @@ final class VLG_Content {
 		add_filter( 'woocommerce_cart_shipping_method_full_label', array( __CLASS__, 'phrase_in' ), 20 );
 		add_filter( 'get_term', array( __CLASS__, 'term' ), 20, 2 );
 		add_filter( 'theme_mod_nav_menu_locations', array( __CLASS__, 'menus' ), 20 );
+
+		// Texts other plugins write in Greek: Greek gettext sources (exact
+		// phrase) and texts kept in their options (every phrase inside).
+		add_filter( 'gettext', array( __CLASS__, 'gettext' ), 20, 3 );
+		foreach ( self::phrase_options() as $name ) {
+			add_filter( 'option_' . $name, array( __CLASS__, 'phrase_deep' ), 20 );
+		}
+	}
+
+	/**
+	 * Options whose Greek texts reach the English checkout: the privacy
+	 * texts of WooCommerce, the gateway settings (title, description), the
+	 * cart-abandonment note, the gift checkbox and the newsletter line.
+	 * Filter vlg_phrase_options( string[] $names ) adds more.
+	 */
+	public static function phrase_options(): array {
+		$names = array(
+			'woocommerce_checkout_privacy_policy_text',
+			'woocommerce_registration_privacy_policy_text',
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			'woocommerce_vivacom_smart_settings',
+			'wcf_ca_gdpr_message',
+			'tgpc_gift_wrapper_checkbox_label',
+			'woo_mailerlite_options',
+			'woocommerce_mailerlite_settings',
+		);
+		$names = (array) apply_filters( 'vlg_phrase_options', $names );
+		return array_values( array_unique( array_filter( array_map( 'sanitize_key', $names ) ) ) );
+	}
+
+	/** A gettext result that is exactly a phrase of the list. */
+	public static function gettext( $translation, $text = '', $domain = '' ) {
+		if ( ! is_string( $translation ) || '' === $translation ) {
+			return $translation;
+		}
+		$map = VLG_Settings::get()['phrases'];
+		return isset( $map[ $translation ] ) ? $map[ $translation ] : $translation;
+	}
+
+	/** phrase_in() on a string, or on every string inside an array. */
+	public static function phrase_deep( $value ) {
+		if ( is_string( $value ) ) {
+			return self::phrase_in( $value );
+		}
+		if ( is_array( $value ) ) {
+			foreach ( $value as $k => $v ) {
+				$value[ $k ] = self::phrase_deep( $v );
+			}
+		}
+		return $value;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -320,7 +370,7 @@ final class VLG_Content {
 		$v  = VLG_Router::versions();
 		$en = VLG_Router::is_en();
 		// The thank-you page of an English order moves to /en/ (VLG_Orders); the Greek link says it stays.
-		if ( $en && function_exists( 'is_order_received_page' ) && ( is_order_received_page() || is_checkout_pay_page() ) ) {
+		if ( $en && function_exists( 'is_checkout' ) && is_checkout() ) {
 			$v['el'] = add_query_arg( 'vlg', 'el', $v['el'] );
 		}
 		$out = '<nav class="vlg-switch' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-label="Language / Γλώσσα">';

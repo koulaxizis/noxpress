@@ -50,6 +50,7 @@ final class VLG_Orders {
 		add_filter( 'woocommerce_order_item_display_meta_value', array( __CLASS__, 'phrase_in' ), 20 );
 
 		add_action( 'template_redirect', array( __CLASS__, 'return_redirect' ), 1 );
+		add_action( 'template_redirect', array( __CLASS__, 'remember' ), 0 );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( __CLASS__, 'admin_note' ), 20, 1 );
 	}
 
@@ -226,9 +227,38 @@ final class VLG_Orders {
 	 * Return from a payment provider
 	 * ------------------------------------------------------------------- */
 
+	/**
+	 * The language of the visitor's last page, in the WooCommerce session
+	 * (only when a session already exists, never a new cookie). A payment
+	 * page that sends the buyer back to the Greek checkout (Viva cancel or
+	 * failure) then returns them to the English one.
+	 */
+	public static function remember(): void {
+		try {
+			if ( ! function_exists( 'WC' ) || ! WC()->session || ! WC()->session->has_session() ) {
+				return;
+			}
+			if ( VLG_Router::is_en() ) {
+				WC()->session->set( 'vlg_lang', 'en' );
+			} elseif ( ! is_checkout() || ( isset( $_GET['vlg'] ) && 'el' === $_GET['vlg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- compared only.
+				WC()->session->set( 'vlg_lang', 'el' );
+			}
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
 	public static function return_redirect(): void {
 		try {
 			if ( VLG_Router::is_en() || ! function_exists( 'is_order_received_page' ) ) {
+				return;
+			}
+			// Back from a payment page to the Greek checkout of an English buyer.
+			if ( is_checkout() && ! is_order_received_page() && ! is_checkout_pay_page() && ! isset( $_GET['vlg'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- compared only.
+				&& WC()->session && WC()->session->has_session() && 'en' === WC()->session->get( 'vlg_lang' ) ) {
+				if ( wp_safe_redirect( VLG_Router::versions()['en'], 302, 'Visitor Language' ) ) {
+					exit;
+				}
 				return;
 			}
 			$var = '';
