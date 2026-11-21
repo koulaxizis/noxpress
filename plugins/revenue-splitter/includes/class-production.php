@@ -431,7 +431,11 @@ final class RS_Production {
 		);
 	}
 
-	/** The works a creator sees: their own, released ones only for DONE_DAYS. */
+	/**
+	 * The works a creator sees: their own that are still in production.
+	 * 1.21.0 (Chris 2026-11-21): a work at the last step (v1: phase 7,
+	 * released) is no longer shown; it is on sale and in the analyses.
+	 */
 	public static function for_ben( string $ben ): array {
 		$today = RS_Contracts::today();
 		$flows = self::flows();
@@ -443,7 +447,7 @@ final class RS_Production {
 			if ( self::is_v2( $w ) && self::step_index( $w, $flows ) < 0 ) {
 				continue;
 			}
-			if ( self::is_last( $w, $flows ) && self::days_between( (string) $w['since'], $today ) > self::DONE_DAYS ) {
+			if ( self::is_last( $w, $flows ) ) {
 				continue;
 			}
 			$out[] = $w;
@@ -479,7 +483,6 @@ final class RS_Production {
 		$today = RS_Contracts::today();
 		self::print_css();
 		?>
-		<hr class="rs-pt-sep" />
 		<h3 id="rs-production"><?php esc_html_e( 'Το έργο σου σε παραγωγή', 'revenue-splitter' ); ?></h3>
 		<?php foreach ( $works as $w ) : ?>
 			<?php
@@ -664,13 +667,30 @@ final class RS_Production {
 .rs-portal .rs-pd-about { margin: 0 0 0.6em; color: #b7b2d6 !important; }
 .rs-portal .rs-pd-note { padding: 8px 10px; border-left: 3px solid #beb1ff; background: rgba(190, 177, 255, 0.08) !important; }
 .rs-portal .rs-pd-note p { margin: 0.3em 0 0; }
-.rs-portal .rs-pd-flow li { position: relative; padding: 0; }
-.rs-portal .rs-pd-btn { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 6px 8px; cursor: pointer; color: inherit !important; font: inherit; }
-.rs-portal .rs-pd-btn:focus-visible { outline: 2px solid #beb1ff; outline-offset: 1px; }
-.rs-portal .rs-pd-tip { display: none; position: absolute; z-index: 20; left: 0; top: calc(100% + 4px); width: max-content; max-width: min(320px, 80vw); padding: 8px 10px; border-radius: 4px; border: 1px solid #3a3f52; font-size: 0.95em; line-height: 1.4; color: #eae8fa !important; background: #1d2029 !important; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); white-space: normal; }
+.rs-portal .rs-pd-steps.rs-pd-flow { flex-wrap: nowrap; gap: 0; margin: 0 0 1em; }
+.rs-portal .rs-pd-steps.rs-pd-flow li { position: relative; flex: 1 1 0; min-width: 0; padding: 0; border: 0 !important; background: none !important; text-align: center; font-size: 0.85em; }
+.rs-portal .rs-pd-steps.rs-pd-flow li::before { content: ""; position: absolute; top: 13px; left: -50%; width: 100%; height: 3px; background: #2e3240; }
+.rs-portal .rs-pd-steps.rs-pd-flow li:first-child::before { display: none; }
+.rs-portal .rs-pd-steps.rs-pd-flow li.rs-pd-done::before, .rs-portal .rs-pd-steps.rs-pd-flow li.rs-pd-now::before { background: #beb1ff; }
+.rs-portal .rs-pd-btn { all: unset; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; padding: 0 4px 4px; cursor: pointer; color: inherit !important; font: inherit; }
+.rs-portal .rs-pd-btn:focus-visible { outline: 2px solid #beb1ff; outline-offset: 2px; border-radius: 4px; }
+.rs-portal .rs-pd-flow .rs-pd-dot { position: relative; z-index: 1; box-sizing: border-box; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9em; border: 2px solid #3a3f52; color: #8a86a6 !important; background: #14161d !important; }
+.rs-portal .rs-pd-flow .rs-pd-done .rs-pd-dot { border-color: #beb1ff; color: #14161d !important; background: #beb1ff !important; }
+.rs-portal .rs-pd-flow .rs-pd-now .rs-pd-dot { border-color: #beb1ff; color: #f0eefc !important; background: #6d4aff !important; box-shadow: 0 0 0 4px rgba(190, 177, 255, 0.25); }
+.rs-portal .rs-pd-flow .rs-pd-label { overflow-wrap: anywhere; hyphens: auto; line-height: 1.25; }
+.rs-portal .rs-pd-flow .rs-pd-now .rs-pd-label { font-weight: 700; color: #f0eefc !important; }
+.rs-portal .rs-pd-tip { display: none; position: absolute; z-index: 20; left: 50%; top: calc(100% + 2px); transform: translateX(-50%); width: max-content; max-width: min(300px, 80vw); padding: 8px 10px; border-radius: 4px; border: 1px solid #3a3f52; font-size: 1.05em; line-height: 1.4; text-align: left; color: #eae8fa !important; background: #1d2029 !important; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); white-space: normal; }
+.rs-portal .rs-pd-flow li:first-child .rs-pd-tip { left: 0; transform: none; }
+.rs-portal .rs-pd-flow li:last-child .rs-pd-tip { left: auto; right: 0; transform: none; }
 .rs-portal .rs-pd-flow li:hover .rs-pd-tip, .rs-portal .rs-pd-flow li:focus-within .rs-pd-tip { display: block; }
 .rs-portal .rs-pd-products { margin: 0 0 0.6em; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-@media (max-width: 600px) { .rs-portal .rs-pd-tip { position: static; width: auto; max-width: none; margin: 0 6px 6px; box-shadow: none; } }
+@media (max-width: 600px) {
+	.rs-portal .rs-pd-steps.rs-pd-flow { flex-direction: column; }
+	.rs-portal .rs-pd-steps.rs-pd-flow li { text-align: left; }
+	.rs-portal .rs-pd-steps.rs-pd-flow li::before { top: -50%; left: 13px; width: 3px; height: 100%; }
+	.rs-portal .rs-pd-btn { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 4px 0; }
+	.rs-portal .rs-pd-tip, .rs-portal .rs-pd-flow li:first-child .rs-pd-tip, .rs-portal .rs-pd-flow li:last-child .rs-pd-tip { position: static; transform: none; width: auto; max-width: none; margin: 0 0 6px 38px; box-shadow: none; }
+}
 </style>
 		<?php
 	}

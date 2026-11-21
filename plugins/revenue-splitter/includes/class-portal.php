@@ -948,6 +948,57 @@ final class RS_Portal {
 
 	/* ---------- Dashboard (συνδεδεμένος δικαιούχος) ---------- */
 
+	/**
+	 * 1.21.0: «Με μια ματιά»: all-time copies sold (full price and
+	 * discounted, not free copies), current stock of the creator's titles
+	 * (those that track stock) and the balance to receive. Uses the same
+	 * cached all-time report as the lifetime balance.
+	 */
+	private static function render_glance( string $who, float $remain, string $today ): void {
+		$life  = RS_Reports::run(
+			array(
+				'date_start' => '2000-01-01',
+				'date_end'   => $today,
+			)
+		);
+		$sold  = 0;
+		$stock = null;
+		foreach ( (array) ( $life['products'] ?? array() ) as $p ) {
+			$mine = false;
+			foreach ( (array) ( $p['splits'] ?? array() ) as $s ) {
+				$mine = $mine || ( (string) ( $s['name'] ?? '' ) === $who );
+			}
+			if ( ! $mine ) {
+				continue;
+			}
+			$sold   += (int) ( $p['qty_full'] ?? 0 ) + (int) ( $p['qty_disc'] ?? 0 );
+			$product = wc_get_product( (int) $p['product_id'] );
+			if ( $product instanceof WC_Product && $product->get_manage_stock() ) {
+				$stock = (int) $stock + max( 0, (int) $product->get_stock_quantity() );
+			}
+		}
+		$cur = self::currency_fmt();
+		?>
+		<h3 class="rs-pt-glance-h"><?php esc_html_e( 'Με μια ματιά', 'revenue-splitter' ); ?></h3>
+		<table class="rs-pt-glance">
+			<tbody>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Αντίτυπα που πουλήθηκαν (συνολικά)', 'revenue-splitter' ); ?></th>
+					<td><?php echo esc_html( number_format_i18n( $sold ) ); ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Τρέχον απόθεμα', 'revenue-splitter' ); ?></th>
+					<td><?php echo esc_html( null === $stock ? '—' : number_format_i18n( $stock ) ); ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Υπόλοιπο προς είσπραξη', 'revenue-splitter' ); ?></th>
+					<td><strong><?php echo esc_html( $cur( $remain ) ); ?></strong></td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+	}
+
 	private static function render_dashboard( string $who ): void {
 
 		self::print_css();
@@ -1115,6 +1166,12 @@ final class RS_Portal {
 			</div>
 
 			<?php
+			// 1.21.0 (Chris 2026-11-21): at a glance, before everything
+			// else: the work in production (the stops come from the orOS
+			// Kanban) and a small table with copies sold, stock and the
+			// balance to receive. The analyses follow as before.
+			RS_Production::render_portal( $who );
+			self::render_glance( $who, $remain, $today );
 			// 1.16.0: «Η σελίδα σου» and the change request (RS_Profile).
 			RS_Profile::render_card( $who );
 			?>
@@ -1169,8 +1226,6 @@ final class RS_Portal {
 			<?php
 			// 1.14.0: «Τα συμφωνητικά σου» — only the signed-in beneficiary's own (RS_Contracts).
 			RS_Contracts::render_portal( $who );
-			// 1.18.0: «Το έργο σου σε παραγωγή» (RS_Production, pushed by orOS).
-			RS_Production::render_portal( $who );
 			// 1.19.0: «Σε παρακαταθήκη» (Trade Accounts, all time) and «Πορεία αντιτύπων».
 			RS_Consignment::render_portal( $who );
 			RS_Copies::render_portal( $who );
@@ -1536,6 +1591,14 @@ final class RS_Portal {
 .rs-pt-btn:hover { background: #8263ff; }
 
 .rs-pt-error { color: #ff9a9a; font-weight: 600; margin: 0; }
+
+/* 1.21.0: «Με μια ματιά» under the work in production, before the analyses. */
+.rs-portal .rs-pt-glance-h { margin: 0.2em 0 0.5em; }
+.rs-portal .rs-pt-glance { width: 100%; max-width: 520px; border-collapse: collapse; margin: 0 0 1.4em; }
+.rs-portal .rs-pt-glance th, .rs-portal .rs-pt-glance td { border: 1px solid #2e3240 !important; padding: 8px 12px; font-size: 0.95em; background: #14161d !important; color: #eae8fa !important; }
+.rs-portal .rs-pt-glance th { text-align: left; font-weight: 500; color: #b7b2d6 !important; }
+.rs-portal .rs-pt-glance td { text-align: right; font-variant-numeric: tabular-nums; }
+.rs-portal .rs-pt-glance td strong { color: #f6f4ff !important; }
 
 .rs-pt-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .rs-pt-table { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
