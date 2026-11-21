@@ -624,19 +624,20 @@ final class RS_Production {
 				<p class="rs-pd-about"><?php echo esc_html( $text ); ?></p>
 			<?php endif; ?>
 			<?php
+			// Only published products without a password, by their post.
 			$links = array();
 			foreach ( (array) ( $w['products'] ?? array() ) as $pid ) {
-				$p = function_exists( 'wc_get_product' ) ? wc_get_product( (int) $pid ) : null;
-				if ( $p && 'publish' === $p->get_status() && '' === (string) $p->get_post_password() ) {
-					$links[] = $p;
+				$pid = (int) $pid;
+				if ( $pid > 0 && 'product' === get_post_type( $pid ) && 'publish' === get_post_status( $pid ) && '' === (string) get_post_field( 'post_password', $pid ) ) {
+					$links[ $pid ] = (string) get_the_title( $pid );
 				}
 			}
-			?>
-			<?php if ( ! empty( $links ) ) : ?>
+			if ( count( $links ) > 0 ) :
+				?>
 				<p class="rs-pd-products">
-					<?php foreach ( $links as $p ) : ?>
+					<?php foreach ( $links as $pid => $name ) : ?>
 						<?php /* translators: %s: product name */ ?>
-						<a href="<?php echo esc_url( (string) get_permalink( $p->get_id() ) ); ?>"><?php echo esc_html( sprintf( __( 'Στο κατάστημα: %s', 'revenue-splitter' ), $p->get_name() ) ); ?></a>
+						<a href="<?php echo esc_url( (string) get_permalink( $pid ) ); ?>"><?php echo esc_html( sprintf( __( 'Στο κατάστημα: %s', 'revenue-splitter' ), $name ) ); ?></a>
 					<?php endforeach; ?>
 				</p>
 			<?php endif; ?>
