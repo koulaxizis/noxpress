@@ -81,6 +81,7 @@ $rs_uninstall_options = array(
 	'rs_production_meta',
 	'rs_production_hist',
 	'rs_production_texts',
+	'rs_production_flows',   // 1.21.0: v2 steps per board (from orOS).
 	'rs_copies',             // 1.19.0: copies register («RS Αντίτυπα»).
 );
 

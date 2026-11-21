@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.20.1
+Stable tag: 1.21.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -63,6 +63,10 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.21.0 =
+* New: the production flow in the Author Portal can use the publisher's own steps. In the orOS Kanban the publisher marks which columns of a board are steps for the creator, with a name and an explanation (Greek, optional English); orOS sends them with the works (POST rs/v1/production with v 2: flows with their steps in the order of the columns, and each work's flow, step and shop products). The portal shows the steps in order with the current one marked, each step's explanation on hover, keyboard focus or tap (in the portal's language; English falls back to Greek), the date each step was reached, and a link to the work's published shop products. A step or flow that is not in the list skips the work with a reason (bad_flow, bad_step).
+* The v1 format (seven fixed phases) still works; the last push is the list. Noxpress → RS Production lists the steps orOS sent.
 
 = 1.20.1 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

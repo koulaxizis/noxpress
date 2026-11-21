@@ -15,6 +15,21 @@
  * for the creator. The site keeps the date each phase was first seen, so the
  * portal can show the path so far.
  *
+ * 1.21.0 (v2, asked by Chris on 2026-11-21): the steps are the publisher's
+ * own. On each Kanban board the publisher marks which columns are steps of
+ * the creator's production flow and writes, per step, an explanation for
+ * the creator (EL, optional EN). orOS sends the flows with the works:
+ *  POST { v:2, sent, flows:[{id, steps:[{id, name, name_en, about,
+ *         about_en}]}], works:[{id, ben, title, flow, step, since, release,
+ *         note, products:[product ids]}] }
+ * The order of the steps is the order of the columns. Only the columns the
+ * publisher marked as steps and the texts written for the creator reach
+ * the site (Bible 1.105 still holds: no internal column, card notes or
+ * comments). The portal shows the steps in order, the current one marked,
+ * and each step's explanation on hover, focus or tap. A v1 push still
+ * works and replaces a v2 list (and the other way round): the last push is
+ * the list.
+ *
  * @package RevenueSplitter
  */
 
@@ -26,6 +41,7 @@ final class RS_Production {
 	const OPT_META = 'rs_production_meta';
 	const OPT_HIST = 'rs_production_hist';
 	const OPT_TXT  = 'rs_production_texts';
+	const OPT_FLOW = 'rs_production_flows'; // 1.21.0: v2 flows (steps per board).
 	const SLUG     = 'revenue-splitter-production';
 
 	const MAX       = 500;     // Works per push.
@@ -36,6 +52,11 @@ final class RS_Production {
 	const PHASES    = 7;
 	const DONE_DAYS = 30;      // A released work stays this many days.
 	const NEW_DAYS  = 14;      // «νέο» while the phase is this recent.
+	const FLOWS_MAX = 50;      // v2: flows per push.
+	const STEPS_MAX = 60;      // v2: steps per flow.
+	const NAME_MAX  = 80;      // v2: a step's name.
+	const ABOUT_MAX = 600;     // v2: a step's explanation.
+	const PROD_MAX  = 5;       // v2: shop products per work.
 
 	/** @var array[]|null */
 	private static $cache = null;
@@ -84,6 +105,51 @@ final class RS_Production {
 		return self::read_json( self::OPT_HIST );
 	}
 
+	/** @return array<string,array> v2 flows: flow id => [ steps ] in order. */
+	public static function flows(): array {
+		$out = array();
+		foreach ( self::read_json( self::OPT_FLOW ) as $id => $steps ) {
+			if ( is_string( $id ) && is_array( $steps ) ) {
+				$out[ $id ] = array_values( array_filter( $steps, 'is_array' ) );
+			}
+		}
+		return $out;
+	}
+
+	/** v2 row (flow and step) or v1 row (phase). */
+	private static function is_v2( array $w ): bool {
+		return isset( $w['flow'], $w['step'] );
+	}
+
+	/** Index of a v2 row's step in its flow, or -1. */
+	private static function step_index( array $w, array $flows ): int {
+		foreach ( (array) ( $flows[ (string) $w['flow'] ] ?? array() ) as $i => $st ) {
+			if ( (string) ( $st['id'] ?? '' ) === (string) $w['step'] ) {
+				return (int) $i;
+			}
+		}
+		return -1;
+	}
+
+	/** True when a work is at the end of its flow (released). */
+	private static function is_last( array $w, array $flows ): bool {
+		if ( ! self::is_v2( $w ) ) {
+			return self::PHASES === (int) ( $w['phase'] ?? 0 );
+		}
+		$i = self::step_index( $w, $flows );
+		return $i >= 0 && count( (array) $flows[ (string) $w['flow'] ] ) - 1 === $i;
+	}
+
+	/** The step's text in the visitor's language (EN falls back to EL). */
+	private static function pick( array $st, string $key ): string {
+		$el = (string) ( $st[ $key ] ?? '' );
+		if ( class_exists( 'RS_Lang' ) && 'en' === RS_Lang::get_lang() ) {
+			$en = (string) ( $st[ $key . '_en' ] ?? '' );
+			return '' !== $en ? $en : $el;
+		}
+		return $el;
+	}
+
 	public static function phase_names(): array {
 		return array(
 			1 => __( 'Αξιολόγηση και συμφωνία', 'revenue-splitter' ),
@@ -128,8 +194,16 @@ final class RS_Production {
 		if ( ! is_array( $body ) ) {
 			return new WP_Error( 'rs_production_body', 'The body must be a JSON object.', array( 'status' => 400 ) );
 		}
-		if ( ! isset( $body['v'] ) || 1 !== $body['v'] ) {
-			return new WP_Error( 'rs_production_v', 'Unsupported format: v must be 1.', array( 'status' => 400 ) );
+		if ( ! isset( $body['v'] ) || ( 1 !== $body['v'] && 2 !== $body['v'] ) ) {
+			return new WP_Error( 'rs_production_v', 'Unsupported format: v must be 1 or 2.', array( 'status' => 400 ) );
+		}
+		$v2    = 2 === $body['v'];
+		$flows = array();
+		if ( $v2 ) {
+			$flows = self::clean_flows( $body['flows'] ?? null );
+			if ( is_wp_error( $flows ) ) {
+				return $flows;
+			}
 		}
 		$sent = isset( $body['sent'] ) && is_string( $body['sent'] ) ? $body['sent'] : '';
 		if ( ! RS_Contracts::is_date( $sent ) ) {
@@ -148,7 +222,7 @@ final class RS_Production {
 		$keep    = array();
 		$skipped = array();
 		foreach ( $works as $row ) {
-			$r = self::clean( $row, $names, $sent );
+			$r = $v2 ? self::clean_v2( $row, $names, $sent, $flows ) : self::clean( $row, $names, $sent );
 			if ( is_string( $r ) ) {
 				$skipped[] = array(
 					'id'  => is_array( $row ) && isset( $row['id'] ) && is_scalar( $row['id'] ) ? substr( preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $row['id'] ), 0, 64 ) : '',
@@ -167,26 +241,28 @@ final class RS_Production {
 			$keep[]           = $r;
 		}
 
-		// History: a phase is recorded the first time it is seen for a work.
+		// History: a phase (v1) or a step (v2) is recorded the first time
+		// it is seen for a work. A v2 step is kept as "s" with its flow.
 		$hist = self::history();
 		$out  = array();
 		foreach ( $keep as $r ) {
 			$h    = isset( $hist[ $r['id'] ] ) && is_array( $hist[ $r['id'] ] ) ? $hist[ $r['id'] ] : array();
-			$last = empty( $h ) ? 0 : (int) end( $h )['phase'];
-			if ( $last !== $r['phase'] ) {
-				$h[] = array(
-					'phase' => $r['phase'],
-					'at'    => $r['since'],
-				);
+			$last = empty( $h ) ? array() : (array) end( $h );
+			$now  = $v2 ? array( 's' => $r['flow'] . '/' . $r['step'] ) : array( 'phase' => $r['phase'] );
+			$same = $v2 ? ( ( $last['s'] ?? '' ) === $now['s'] ) : ( (int) ( $last['phase'] ?? 0 ) === $now['phase'] && ! isset( $last['s'] ) );
+			if ( ! $same ) {
+				$h[] = $now + array( 'at' => $r['since'] );
 			}
 			$out[ $r['id'] ] = array_slice( $h, -30 );
 		}
 		self::write_json( self::OPT, $keep );
+		self::write_json( self::OPT_FLOW, $flows );
 		self::write_json( self::OPT_HIST, $out );
 		self::write_json(
 			self::OPT_META,
 			array(
 				'received' => gmdate( 'c' ),
+				'v'        => $v2 ? 2 : 1,
 				'sent'     => $sent,
 				'saved'    => count( $keep ),
 				'skipped'  => array_slice( $skipped, 0, 200 ),
@@ -245,6 +321,100 @@ final class RS_Production {
 		);
 	}
 
+	/** One-line text without tags or control characters. */
+	private static function line( $v, int $max ): string {
+		if ( ! is_string( $v ) ) {
+			return '';
+		}
+		return mb_substr( trim( sanitize_text_field( $v ) ), 0, $max );
+	}
+
+	/**
+	 * v2 flows: [{ id, steps:[{ id, name, name_en, about, about_en }] }].
+	 *
+	 * @param mixed $list
+	 * @return array|WP_Error flow id => [ steps ].
+	 */
+	private static function clean_flows( $list ) {
+		if ( ! is_array( $list ) || ( array() !== $list && array_keys( $list ) !== range( 0, count( $list ) - 1 ) ) ) {
+			return new WP_Error( 'rs_production_flows', 'flows must be a list.', array( 'status' => 400 ) );
+		}
+		if ( count( $list ) > self::FLOWS_MAX ) {
+			return new WP_Error( 'rs_production_flows', sprintf( 'At most %d flows per request; nothing was saved.', self::FLOWS_MAX ), array( 'status' => 400 ) );
+		}
+		$out = array();
+		foreach ( $list as $f ) {
+			$id = is_array( $f ) && isset( $f['id'] ) && is_string( $f['id'] ) ? $f['id'] : '';
+			if ( ! preg_match( '/^[A-Za-z0-9_-]{1,64}$/', $id ) || isset( $out[ $id ] ) ) {
+				return new WP_Error( 'rs_production_flows', 'Each flow needs its own id (A-Z a-z 0-9 _ -, at most 64).', array( 'status' => 400 ) );
+			}
+			$steps = $f['steps'] ?? null;
+			if ( ! is_array( $steps ) || array() === $steps || array_keys( $steps ) !== range( 0, count( $steps ) - 1 ) || count( $steps ) > self::STEPS_MAX ) {
+				return new WP_Error( 'rs_production_flows', sprintf( 'Each flow needs 1 to %d steps.', self::STEPS_MAX ), array( 'status' => 400 ) );
+			}
+			$seen = array();
+			$rows = array();
+			foreach ( $steps as $st ) {
+				$sid  = is_array( $st ) && isset( $st['id'] ) && is_string( $st['id'] ) ? $st['id'] : '';
+				$name = is_array( $st ) ? self::line( $st['name'] ?? '', self::NAME_MAX ) : '';
+				if ( ! preg_match( '/^[A-Za-z0-9_-]{1,64}$/', $sid ) || isset( $seen[ $sid ] ) || '' === $name ) {
+					return new WP_Error( 'rs_production_flows', 'Each step needs its own id and a name.', array( 'status' => 400 ) );
+				}
+				$seen[ $sid ] = true;
+				$rows[]       = array(
+					'id'       => $sid,
+					'name'     => $name,
+					'name_en'  => self::line( $st['name_en'] ?? '', self::NAME_MAX ),
+					'about'    => mb_substr( trim( sanitize_textarea_field( is_string( $st['about'] ?? null ) ? $st['about'] : '' ) ), 0, self::ABOUT_MAX ),
+					'about_en' => mb_substr( trim( sanitize_textarea_field( is_string( $st['about_en'] ?? null ) ? $st['about_en'] : '' ) ), 0, self::ABOUT_MAX ),
+				);
+			}
+			$out[ $id ] = $rows;
+		}
+		return $out;
+	}
+
+	/**
+	 * A v2 row: v1's checks with flow and step in place of phase.
+	 *
+	 * @param mixed $row
+	 * @return array|string The cleaned row, or why it was skipped.
+	 */
+	private static function clean_v2( $row, array $names, string $sent, array $flows ) {
+		if ( ! is_array( $row ) ) {
+			return 'not_an_object';
+		}
+		$flow = isset( $row['flow'] ) && is_string( $row['flow'] ) ? $row['flow'] : '';
+		if ( ! isset( $flows[ $flow ] ) ) {
+			return 'bad_flow';
+		}
+		$step = isset( $row['step'] ) && is_string( $row['step'] ) ? $row['step'] : '';
+		$hit  = false;
+		foreach ( $flows[ $flow ] as $st ) {
+			$hit = $hit || $st['id'] === $step;
+		}
+		if ( ! $hit ) {
+			return 'bad_step';
+		}
+		// v1's checks for the rest, with a placeholder phase.
+		$r = self::clean( array( 'phase' => 1 ) + $row, $names, $sent );
+		if ( is_string( $r ) ) {
+			return $r;
+		}
+		unset( $r['phase'] );
+		$products = array();
+		foreach ( (array) ( $row['products'] ?? array() ) as $p ) {
+			if ( is_int( $p ) && $p > 0 && ! in_array( $p, $products, true ) && count( $products ) < self::PROD_MAX ) {
+				$products[] = $p;
+			}
+		}
+		return $r + array(
+			'flow'     => $flow,
+			'step'     => $step,
+			'products' => $products,
+		);
+	}
+
 	public static function export( string $ben = '' ): array {
 		$works = '' === $ben ? self::all() : array_values(
 			array_filter(
@@ -256,6 +426,7 @@ final class RS_Production {
 		);
 		return array(
 			'meta'  => self::meta(),
+			'flows' => (object) self::flows(),
 			'works' => $works,
 		);
 	}
@@ -263,12 +434,16 @@ final class RS_Production {
 	/** The works a creator sees: their own, released ones only for DONE_DAYS. */
 	public static function for_ben( string $ben ): array {
 		$today = RS_Contracts::today();
+		$flows = self::flows();
 		$out   = array();
 		foreach ( self::all() as $w ) {
 			if ( $w['ben'] !== $ben ) {
 				continue;
 			}
-			if ( self::PHASES === (int) $w['phase'] && self::days_between( (string) $w['since'], $today ) > self::DONE_DAYS ) {
+			if ( self::is_v2( $w ) && self::step_index( $w, $flows ) < 0 ) {
+				continue;
+			}
+			if ( self::is_last( $w, $flows ) && self::days_between( (string) $w['since'], $today ) > self::DONE_DAYS ) {
 				continue;
 			}
 			$out[] = $w;
@@ -300,6 +475,7 @@ final class RS_Production {
 		$names = self::phase_names();
 		$texts = self::texts();
 		$hist  = self::history();
+		$flows = self::flows();
 		$today = RS_Contracts::today();
 		self::print_css();
 		?>
@@ -307,6 +483,10 @@ final class RS_Production {
 		<h3 id="rs-production"><?php esc_html_e( 'Το έργο σου σε παραγωγή', 'revenue-splitter' ); ?></h3>
 		<?php foreach ( $works as $w ) : ?>
 			<?php
+			if ( self::is_v2( $w ) ) {
+				self::render_work_v2( $w, $flows, (array) ( $hist[ $w['id'] ] ?? array() ), $today );
+				continue;
+			}
 			$ph    = (int) $w['phase'];
 			$fresh = self::days_between( (string) $w['since'], $today ) <= self::NEW_DAYS;
 			$past  = array();
@@ -365,6 +545,108 @@ final class RS_Production {
 		<?php
 	}
 
+	/**
+	 * v2: the publisher's own steps, in the order of the board's columns.
+	 * Each step's explanation shows on hover, keyboard focus or tap (the
+	 * step is a button; the tip is its accessible description), and the
+	 * current step's explanation is also written out under the steps.
+	 */
+	private static function render_work_v2( array $w, array $flows, array $hist, string $today ): void {
+		$steps = (array) ( $flows[ (string) $w['flow'] ] ?? array() );
+		$cur   = self::step_index( $w, $flows );
+		if ( $cur < 0 ) {
+			return;
+		}
+		$fresh = self::days_between( (string) $w['since'], $today ) <= self::NEW_DAYS;
+		$past  = array();
+		foreach ( $hist as $h ) {
+			if ( is_array( $h ) && isset( $h['s'] ) ) {
+				$past[ (string) $h['s'] ] = (string) ( $h['at'] ?? '' );
+			}
+		}
+		$uid  = 'rs-pd-' . substr( md5( (string) $w['id'] ), 0, 8 );
+		$now  = $steps[ $cur ];
+		$text = self::pick( $now, 'about' );
+		?>
+		<div class="rs-pd-work">
+			<h4><?php echo esc_html( (string) $w['title'] ); ?>
+				<?php if ( $fresh ) : ?>
+					<span class="rs-pd-new"><?php esc_html_e( 'νέο', 'revenue-splitter' ); ?></span>
+				<?php endif; ?>
+			</h4>
+			<ol class="rs-pd-steps rs-pd-flow" aria-label="<?php esc_attr_e( 'Φάσεις παραγωγής', 'revenue-splitter' ); ?>">
+				<?php foreach ( $steps as $i => $st ) : ?>
+					<?php
+					$cls   = $i < $cur ? 'rs-pd-done' : ( $i === $cur ? 'rs-pd-now' : 'rs-pd-next' );
+					$about = self::pick( $st, 'about' );
+					$key   = (string) $w['flow'] . '/' . (string) $st['id'];
+					$tip   = $uid . '-' . $i;
+					?>
+					<li class="<?php echo esc_attr( $cls ); ?>"<?php echo $i === $cur ? ' aria-current="step"' : ''; ?>>
+						<button type="button" class="rs-pd-btn"<?php echo '' !== $about ? ' aria-describedby="' . esc_attr( $tip ) . '"' : ''; ?>>
+							<span class="rs-pd-dot" aria-hidden="true"><?php echo esc_html( (string) ( $i + 1 ) ); ?></span>
+							<span class="rs-pd-label"><?php echo esc_html( self::pick( $st, 'name' ) ); ?></span>
+							<?php if ( isset( $past[ $key ] ) && $i <= $cur && '' !== $past[ $key ] ) : ?>
+								<small><?php echo esc_html( RS_Contracts::dmy( $past[ $key ] ) ); ?></small>
+							<?php endif; ?>
+						</button>
+						<?php if ( '' !== $about ) : ?>
+							<span class="rs-pd-tip" role="tooltip" id="<?php echo esc_attr( $tip ); ?>"><?php echo esc_html( $about ); ?></span>
+						<?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ol>
+			<p class="rs-pd-where">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: 1: phase name, 2: date */
+						__( 'Τώρα: %1$s, από %2$s.', 'revenue-splitter' ),
+						self::pick( $now, 'name' ),
+						RS_Contracts::dmy( (string) $w['since'] )
+					)
+				);
+				if ( '' !== (string) $w['release'] ) {
+					echo ' ' . esc_html(
+						sprintf(
+							/* translators: %s: date */
+							__( 'Αναμενόμενη κυκλοφορία: %s.', 'revenue-splitter' ),
+							RS_Contracts::dmy( (string) $w['release'] )
+						)
+					);
+				}
+				?>
+			</p>
+			<?php if ( '' !== $text ) : ?>
+				<p class="rs-pd-about"><?php echo esc_html( $text ); ?></p>
+			<?php endif; ?>
+			<?php
+			$links = array();
+			foreach ( (array) ( $w['products'] ?? array() ) as $pid ) {
+				$p = function_exists( 'wc_get_product' ) ? wc_get_product( (int) $pid ) : null;
+				if ( $p && 'publish' === $p->get_status() && '' === (string) $p->get_post_password() ) {
+					$links[] = $p;
+				}
+			}
+			?>
+			<?php if ( ! empty( $links ) ) : ?>
+				<p class="rs-pd-products">
+					<?php foreach ( $links as $p ) : ?>
+						<?php /* translators: %s: product name */ ?>
+						<a href="<?php echo esc_url( (string) get_permalink( $p->get_id() ) ); ?>"><?php echo esc_html( sprintf( __( 'Στο κατάστημα: %s', 'revenue-splitter' ), $p->get_name() ) ); ?></a>
+					<?php endforeach; ?>
+				</p>
+			<?php endif; ?>
+			<?php if ( '' !== (string) $w['note'] ) : ?>
+				<div class="rs-pd-note">
+					<strong><?php esc_html_e( 'Σημείωση από τον εκδότη', 'revenue-splitter' ); ?></strong>
+					<p><?php echo nl2br( esc_html( (string) $w['note'] ) ); ?></p>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
 	private static function print_css(): void {
 		?>
 <style>
@@ -382,6 +664,13 @@ final class RS_Production {
 .rs-portal .rs-pd-about { margin: 0 0 0.6em; color: #b7b2d6 !important; }
 .rs-portal .rs-pd-note { padding: 8px 10px; border-left: 3px solid #beb1ff; background: rgba(190, 177, 255, 0.08) !important; }
 .rs-portal .rs-pd-note p { margin: 0.3em 0 0; }
+.rs-portal .rs-pd-flow li { position: relative; padding: 0; }
+.rs-portal .rs-pd-btn { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 6px 8px; cursor: pointer; color: inherit !important; font: inherit; }
+.rs-portal .rs-pd-btn:focus-visible { outline: 2px solid #beb1ff; outline-offset: 1px; }
+.rs-portal .rs-pd-tip { display: none; position: absolute; z-index: 20; left: 0; top: calc(100% + 4px); width: max-content; max-width: min(320px, 80vw); padding: 8px 10px; border-radius: 4px; border: 1px solid #3a3f52; font-size: 0.95em; line-height: 1.4; color: #eae8fa !important; background: #1d2029 !important; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); white-space: normal; }
+.rs-portal .rs-pd-flow li:hover .rs-pd-tip, .rs-portal .rs-pd-flow li:focus-within .rs-pd-tip { display: block; }
+.rs-portal .rs-pd-products { margin: 0 0 0.6em; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+@media (max-width: 600px) { .rs-portal .rs-pd-tip { position: static; width: auto; max-width: none; margin: 0 6px 6px; box-shadow: none; } }
 </style>
 		<?php
 	}
@@ -389,6 +678,19 @@ final class RS_Production {
 	/* =====================================================================
 	 * Admin: «RS Παραγωγή» (read-only list + phase texts)
 	 * =================================================================== */
+
+	/** The stage of a row for the admin list: «3. Name» (v1) or «3/9 Name» (v2). */
+	private static function admin_stage( array $w, array $names, array $flows ): string {
+		if ( ! self::is_v2( $w ) ) {
+			return (int) $w['phase'] . '. ' . ( $names[ (int) $w['phase'] ] ?? '' );
+		}
+		$i = self::step_index( $w, $flows );
+		if ( $i < 0 ) {
+			return '—';
+		}
+		$steps = (array) $flows[ (string) $w['flow'] ];
+		return ( $i + 1 ) . '/' . count( $steps ) . ' ' . (string) $steps[ $i ]['name'];
+	}
 
 	public static function admin_menu(): void {
 		add_submenu_page(
@@ -433,6 +735,7 @@ final class RS_Production {
 		$works = self::all();
 		$names = self::phase_names();
 		$texts = self::texts();
+		$flows = self::flows();
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only message flag.
 		$done = isset( $_GET['rs_pd_done'] ) ? sanitize_key( wp_unslash( $_GET['rs_pd_done'] ) ) : '';
 		?>
@@ -444,6 +747,7 @@ final class RS_Production {
 			<p class="description"><?php esc_html_e( 'Η φάση κάθε έργου έρχεται από το orOS (πίνακας Kanban «Βιβλία»). Εδώ τη βλέπεις μόνο· την αλλάζεις στο orOS.', 'revenue-splitter' ); ?></p>
 			<ul>
 				<li><code><?php echo esc_html( 'POST ' . rest_url( 'rs/v1/production' ) ); ?></code> <code>{"v":1,"sent":"YYYY-MM-DD","works":[{"id","ben","title","phase":1-7,"since","release","note"}]}</code></li>
+				<li><code>{"v":2,"sent","flows":[{"id","steps":[{"id","name","name_en","about","about_en"}]}],"works":[{"id","ben","title","flow","step","since","release","note","products"}]}</code></li>
 				<li><code><?php echo esc_html( 'GET ' . rest_url( 'rs/v1/production' ) ); ?></code></li>
 			</ul>
 			<p>
@@ -480,7 +784,7 @@ final class RS_Production {
 						<tr>
 							<td><?php echo esc_html( (string) $w['title'] ); ?></td>
 							<td><?php echo esc_html( (string) $w['ben'] ); ?></td>
-							<td><?php echo esc_html( (int) $w['phase'] . '. ' . ( $names[ (int) $w['phase'] ] ?? '' ) ); ?></td>
+							<td><?php echo esc_html( self::admin_stage( $w, $names, $flows ) ); ?></td>
 							<td><?php echo esc_html( RS_Contracts::dmy( (string) $w['since'] ) ); ?></td>
 							<td><?php echo esc_html( '' !== (string) $w['release'] ? RS_Contracts::dmy( (string) $w['release'] ) : '—' ); ?></td>
 							<td><?php echo esc_html( (string) $w['note'] ); ?></td>
@@ -488,6 +792,18 @@ final class RS_Production {
 					<?php endforeach; ?>
 					</tbody>
 				</table>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $flows ) ) : ?>
+				<h2 class="rs-h2"><?php esc_html_e( 'Βήματα από το orOS', 'revenue-splitter' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Οι στήλες που σημείωσες στο Kanban του orOS ως βήματα, με τη σειρά τους και την επεξήγηση που βλέπει ο δημιουργός. Τα αλλάζεις στο orOS.', 'revenue-splitter' ); ?></p>
+				<?php foreach ( $flows as $steps ) : ?>
+					<ol>
+						<?php foreach ( $steps as $st ) : ?>
+							<li><strong><?php echo esc_html( (string) $st['name'] ); ?></strong><?php echo '' !== (string) $st['about'] ? ' — ' . esc_html( (string) $st['about'] ) : ''; ?></li>
+						<?php endforeach; ?>
+					</ol>
+				<?php endforeach; ?>
 			<?php endif; ?>
 
 			<h2 class="rs-h2"><?php esc_html_e( 'Τι γίνεται σε κάθε φάση', 'revenue-splitter' ); ?></h2>
