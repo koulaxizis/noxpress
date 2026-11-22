@@ -1,6 +1,10 @@
 # Publishes the public Noxpress Android apps as a self-hosted F-Droid
 # repository, so F-Droid, Droid-ify and Obtainium keep them up to date:
-#   https://koulaxizis.github.io/noxpress-fdroid/repo
+#   https://apps.koulaxizis.workers.dev/noxpress-fdroid/repo
+# (our download counter, koulaxizis/oros tools/apps-counter, which serves
+# the GitHub Pages files below unchanged and counts the APK downloads;
+# https://koulaxizis.github.io/noxpress-fdroid/repo keeps working for
+# phones that added it before 2026-11-22)
 # (front page with the add button and QR code: https://koulaxizis.github.io/noxpress-fdroid/)
 #
 # What goes in: every app with apps/<app>/fdroid/store.json (public apps
@@ -68,6 +72,7 @@ jobs:
     timeout-minutes: 20
     env:
       SITE: https://koulaxizis.github.io/noxpress-fdroid
+      REPO_URL: https://apps.koulaxizis.workers.dev/noxpress-fdroid/repo
       DEST: koulaxizis/noxpress-fdroid
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -126,7 +131,7 @@ jobs:
           echo "$KS_B64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/repo.keystore"
           apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
           cat > "$fd/config.yml" <<EOF
-          repo_url: $SITE/repo
+          repo_url: $REPO_URL
           repo_name: Noxpress
           repo_description: "The public Android apps of Noxpress, the free WordPress / WooCommerce plugin suite. New versions ship as beta first. Free and open source (MIT), free forever."
           repo_icon: icon.png
@@ -143,7 +148,7 @@ jobs:
           # page (the same as the APKs' signing certificate)
           fp=$(keytool -exportcert -alias "$KEY_ALIAS" -keystore "$RUNNER_TEMP/repo.keystore" -storepass "$KS_PASS" | sha256sum | cut -d' ' -f1 | tr 'a-f' 'A-F')
           rm -f "$RUNNER_TEMP/repo.keystore" "$fd/config.yml"
-          python3 .github/scripts/fdroid-repo.py site "$fd" "$SITE/repo" "$fp"
+          python3 .github/scripts/fdroid-repo.py site "$fd" "$REPO_URL" "$fp"
           python3 - "$fd/repo/index-v2.json" <<'PY'
           import json, sys
           idx = json.load(open(sys.argv[1]))
@@ -153,7 +158,7 @@ jobs:
           {
             echo "### F-Droid repository"
             echo
-            echo "$SITE/repo"
+            echo "$REPO_URL"
             echo
             echo "Fingerprint (SHA-256): \`$fp\`"
           } >> "$GITHUB_STEP_SUMMARY"
