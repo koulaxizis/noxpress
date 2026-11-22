@@ -785,7 +785,7 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="shipping-notes">
 		<h2><a href="#shipping-notes">Shipping Notes</a></h2>
 		<a class="card-video" href="media/videos/shipping-notes.mp4" data-video="shipping-notes" data-video-title="Shipping Notes" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.4.4 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
+		<div class="meta">v1.5.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
 		<p data-i18n="sn_desc">Two messages for your customers, without third-party plugins: how much is left for free shipping, with a progress bar, in the cart, mini-cart and checkout, and how many business days delivery takes on the product page.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
@@ -797,11 +797,12 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="sn_li5">Optional dates and “order within” countdown computed in the browser, so page caches stay correct; shortcodes and blocks for any page</li>
 			<li data-i18n="sn_li8">A line under the product page's add-to-cart button: how much is still left for free shipping with this product in the cart, or that shipping becomes free</li>
 			<li data-i18n="sn_li7">Mixed carts with print on demand (e.g. Printful): clear parcel names, one note that the order comes in two parcels, partner delivery labels and dates in Greek, and the parcel list on the order, in My account and in emails</li>
+			<li data-i18n="sn_li9">Shipping rules for print on demand: a flat fee per order for made-to-order products (a higher one for large items) in place of the partner’s live rates, and free shipping counted only on the categories you choose</li>
 			<li data-i18n="sn_li6">Safe by design: off by default, test mode for shop managers, SHN_DISABLE emergency switch; no cookies, no external calls; Greek and English texts</li>
 		</ul>
 		</details>
 		<div class="actions">
-			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.4.4/shipping-notes.zip" rel="nofollow noopener" data-i18n="sn_download">Download v1.4.4 (.zip)</a>
+			<a class="btn primary" href="https://github.com/koulaxizis/noxpress/releases/download/nox-sn-1.5.0/shipping-notes.zip" rel="nofollow noopener" data-i18n="sn_download">Download v1.5.0 (.zip)</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/tree/main/plugins/shipping-notes" rel="noopener" data-i18n="rs_source">Source</a>
 			<a class="btn" href="https://github.com/koulaxizis/noxpress/releases" rel="noopener" data-i18n="rs_releases">Releases</a>
 		</div>
@@ -2024,8 +2025,9 @@ footer .heart { color: var(--accent-bright); }
 		sn_li5: 'Optional dates and “order within” countdown computed in the browser, so page caches stay correct; shortcodes and blocks for any page',
 		sn_li8: 'A line under the product page\'s add-to-cart button: how much is still left for free shipping with this product in the cart, or that shipping becomes free',
 		sn_li7: 'Mixed carts with print on demand (e.g. Printful): clear parcel names, one note that the order comes in two parcels, partner delivery labels and dates in Greek, and the parcel list on the order, in My account and in emails',
+		sn_li9: 'Shipping rules for print on demand: a flat fee per order for made-to-order products (a higher one for large items) in place of the partner’s live rates, and free shipping counted only on the categories you choose',
 		sn_li6: 'Safe by design: off by default, test mode for shop managers, SHN_DISABLE emergency switch; no cookies, no external calls; Greek and English texts',
-		sn_download: 'Download v1.4.4 (.zip)',
+		sn_download: 'Download v1.5.0 (.zip)',
 		bp_desc: 'A book sample on the product page: the server builds a separate PDF with only the pages you choose, and visitors read it in a full-screen viewer. The full PDF never reaches the browser.',
 		bp_li1: 'Per product: the PDF from the downloadable files or the media library and a page list such as 1-12, 20, 35-40; clear messages for every error',
 		bp_li2: 'Own pure-PHP PDF engine for files from any layout app (PDF 1.5+ compressed cross-references, repair of damaged files); unused images and fonts left out; qpdf and Ghostscript as automatic fallbacks',
@@ -2543,8 +2545,9 @@ footer .heart { color: var(--accent-bright); }
 		sn_li5: 'Προαιρετικά ημερομηνίες και αντίστροφη μέτρηση «παραγγείλτε μέσα σε», υπολογισμένες στον browser, ώστε να είναι σωστές και με page cache· shortcodes και blocks για κάθε σελίδα',
 		sn_li8: 'Μια γραμμή κάτω από το κουμπί της σελίδας προϊόντος: πόσα λείπουν για δωρεάν αποστολή με αυτό το προϊόν στο καλάθι, ή ότι η αποστολή γίνεται δωρεάν',
 		sn_li7: 'Μικτά καλάθια με εκτύπωση κατά παραγγελία (π.χ. Printful): καθαρά ονόματα δεμάτων, μία σημείωση ότι η παραγγελία έρχεται σε δύο δέματα, ετικέτες και ημερομηνίες παράδοσης του συνεργάτη στα ελληνικά, και η λίστα δεμάτων στην παραγγελία, στον λογαριασμό και στα emails',
+		sn_li9: 'Κανόνες αποστολής για εκτύπωση κατά παραγγελία: σταθερή χρέωση ανά παραγγελία για τα προϊόντα κατά παραγγελία (μεγαλύτερη για μεγάλα προϊόντα) αντί για τις τιμές του συνεργάτη, και δωρεάν αποστολή μόνο για τις κατηγορίες που διαλέγεις',
 		sn_li6: 'Ασφαλές εκ σχεδιασμού: ανενεργό από προεπιλογή, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης SHN_DISABLE· χωρίς cookies και εξωτερικές κλήσεις· κείμενα σε ελληνικά και αγγλικά',
-		sn_download: 'Λήψη v1.4.4 (.zip)',
+		sn_download: 'Λήψη v1.5.0 (.zip)',
 		bp_desc: 'Δείγμα βιβλίου στη σελίδα του προϊόντος: ο server φτιάχνει ξεχωριστό PDF μόνο με τις σελίδες που διαλέγεις, και ο επισκέπτης το διαβάζει σε viewer πλήρους οθόνης. Το πλήρες PDF δεν φτάνει ποτέ στον browser.',
 		bp_li1: 'Ανά προϊόν: το PDF από τα αρχεία για λήψη ή τη βιβλιοθήκη πολυμέσων και λίστα σελίδων όπως 1-12, 20, 35-40· καθαρά μηνύματα για κάθε σφάλμα',
 		bp_li2: 'Δική του μηχανή PDF σε καθαρή PHP για αρχεία από κάθε πρόγραμμα σελιδοποίησης (συμπιεσμένα cross-reference PDF 1.5+, επισκευή κατεστραμμένων αρχείων)· χωρίς τις εικόνες και τις γραμματοσειρές που δεν χρειάζονται· qpdf και Ghostscript ως αυτόματη εναλλακτική',

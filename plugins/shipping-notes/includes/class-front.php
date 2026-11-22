@@ -407,6 +407,9 @@ final class SHN_Front {
 		if ( ! $product instanceof WC_Product ) {
 			return '';
 		}
+		if ( $product->needs_shipping() && SHN_Rules::on() && ! SHN_Rules::counts( $product ) ) {
+			return self::rules_product_html( $product );
+		}
 		$st = SHN_Threshold::for_product( $product );
 		if ( null === $st ) {
 			return '';
@@ -427,6 +430,23 @@ final class SHN_Front {
 		$s     = SHN_Settings::get();
 		$style = '' !== $s['fs_color'] ? ' style="--shn-color:' . esc_attr( $s['fs_color'] ) . '"' : '';
 		return '<p class="shn-fsp shn-fsp--' . ( $won ? 'won' : 'left' ) . '"' . $style . '>' . $text . '</p>';
+	}
+
+	/**
+	 * The line of a product that does not count toward free shipping
+	 * (shipping rules, 1.5.0): a made-to-order product with its fee, or
+	 * any other product outside the chosen categories.
+	 */
+	private static function rules_product_html( WC_Product $product ): string {
+		$partner = SHN_Rules::is_partner_product( $product );
+		$fee     = $partner ? SHN_Rules::fee( array( $product ) ) : 0.0;
+		$tpl     = SHN_Settings::text( $partner && $fee > 0 ? 'sr_t_p_partner' : 'sr_t_p_none' );
+		$text    = strtr( esc_html( $tpl ), array( '{fee}' => wc_price( $fee ) ) );
+		if ( '' === trim( wp_strip_all_tags( $text ) ) ) {
+			return '';
+		}
+		self::css();
+		return '<p class="shn-fsp shn-fsp--none">' . $text . '</p>';
 	}
 
 	/** Action callback: the line of the viewed product, once. */

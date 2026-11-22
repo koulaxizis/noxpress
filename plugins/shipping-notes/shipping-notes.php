@@ -2,8 +2,8 @@
 /**
  * Plugin Name:          Shipping Notes
  * Plugin URI:           https://noxpress.tech
- * Description:          Μηνύματα αποστολής για τον πελάτη, χωρίς plugins τρίτων: «Απομένουν Χ € για δωρεάν αποστολή» με μπάρα προόδου σε καλάθι, mini-cart και ταμείο και μια γραμμή κάτω από το κουμπί του προϊόντος (όριο από τις ζώνες αποστολής του WooCommerce, κλασικό και block καλάθι), και «Παράδοση σε Χ–Ψ εργάσιμες» στη σελίδα προϊόντος, ανά μέθοδο αποστολής, κατηγορία και προϊόν, με cut-off, εργάσιμες και αργίες. Για καλάθια σε δύο δέματα (π.χ. Printful): ονόματα δεμάτων, μήνυμα, ελληνικές ετικέτες και τα δέματα στην παραγγελία.
- * Version:              1.4.4
+ * Description:          Μηνύματα αποστολής για τον πελάτη, χωρίς plugins τρίτων: «Απομένουν Χ € για δωρεάν αποστολή» με μπάρα προόδου σε καλάθι, mini-cart και ταμείο και μια γραμμή κάτω από το κουμπί του προϊόντος (όριο από τις ζώνες αποστολής του WooCommerce, κλασικό και block καλάθι), και «Παράδοση σε Χ–Ψ εργάσιμες» στη σελίδα προϊόντος, ανά μέθοδο αποστολής, κατηγορία και προϊόν, με cut-off, εργάσιμες και αργίες. Για καλάθια σε δύο δέματα (π.χ. Printful): ονόματα δεμάτων, μήνυμα, ελληνικές ετικέτες και τα δέματα στην παραγγελία. Κανόνες αποστολής: σταθερή χρέωση για τα προϊόντα κατά παραγγελία και δωρεάν αποστολή μόνο για τις κατηγορίες που διαλέγεις.
+ * Version:              1.5.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -38,6 +38,9 @@
  *  - SHN_Parcels   → carts in several shipping packages (e.g. Printful):
  *                    parcel names, notice, partner rate labels, the
  *                    parcels in the order, product-page hint (1.1.0)
+ *  - SHN_Rules     → shipping rules (1.5.0): a flat fee for made-to-order
+ *                    (partner) products in place of the partner's rates,
+ *                    and only chosen products count toward free shipping
  *  - SHN_Fields    → preparation days and release date on products and
  *                    product categories
  *  - SHN_Admin_UI  → menu, settings page with tabs, preview, backup, footer
@@ -47,11 +50,13 @@
  * stops every front-end hook; no theme or plugin file is changed; no
  * cookie, no external request, no database write on a visitor request
  * (the parcels part adds a meta to the shipping lines of the order that
- * WooCommerce is creating at checkout).
+ * WooCommerce is creating at checkout). The shipping rules change rates,
+ * so they also run in the Store API (Cart / Checkout blocks, place order).
  *
  * Cooperation (Bible §6): fires nothing. Filters for others: shn_text,
  * shn_threshold, shn_carrier_threshold, shn_available_from (pre-order plugins), shn_partner_package,
- * shn_partner_rate, shn_partner_product. Reads the $package['printful']
+ * shn_partner_rate, shn_partner_product, shn_rules_partner_product,
+ * shn_rules_counts, shn_rules_fee. Reads the $package['printful']
  * flag the Printful plugin sets on its package (no option of another plugin).
  *
  * Deviations from the Bible (with reason):
@@ -64,7 +69,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SHN_VERSION', '1.4.4' );
+define( 'SHN_VERSION', '1.5.0' );
 define( 'SHN_FILE', __FILE__ );
 define( 'SHN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SHN_URL', plugin_dir_url( __FILE__ ) );
@@ -113,6 +118,7 @@ final class Shipping_Notes {
 		require_once SHN_PATH . 'includes/class-delivery.php';
 		require_once SHN_PATH . 'includes/class-front.php';
 		require_once SHN_PATH . 'includes/class-parcels.php';
+		require_once SHN_PATH . 'includes/class-rules.php';
 
 		// Emergency switch (Bible §14): no front-end hook at all. The blocks
 		// stay registered (empty output) so the editor keeps them valid.
@@ -121,6 +127,7 @@ final class Shipping_Notes {
 		} else {
 			SHN_Front::init();
 			SHN_Parcels::init();
+			SHN_Rules::init();
 		}
 
 		if ( is_admin() ) {

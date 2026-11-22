@@ -61,6 +61,23 @@
  *                      account, customer emails)
  *  - mx_hint           product-page line under the price (off)
  *  - mx_t_* texts      partner, own, notice, order, hint, eta — each { el, en }
+ *
+ * Shipping rules (sr_*, 1.5.0): made-to-order (partner) products always pay
+ * shipping, and only some products count toward free shipping:
+ *  - sr_mode           'off' (default) | 'test' | 'live'
+ *  - sr_classes        shipping class slugs of partner products (with the
+ *                      products of the package the Printful plugin made)
+ *  - sr_fee            flat fee per order with partner products, as the
+ *                      customer pays it (0 = keep the partner's rates)
+ *  - sr_large_classes  shipping class slugs that use sr_fee_large instead
+ *  - sr_fee_large      fee when the cart holds a large product (0 = sr_fee)
+ *  - sr_tax            'incl' (the fee includes the shipping tax) | 'none'
+ *  - sr_cats           product category ids that count toward free
+ *                      shipping, with their sub-categories (empty = every
+ *                      product except the partner's)
+ *  - sr_t_label        name of the fee in cart, checkout and order
+ *  - sr_t_p_partner    product-page line of a partner product ({fee})
+ *  - sr_t_p_none       product-page line of a product that does not count
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -108,11 +125,17 @@ final class SHN_Settings {
 		'mx_t_order'      => 150,
 		'mx_t_hint'       => 200,
 		'mx_t_eta'        => 60,
+		'sr_t_label'      => 100,
+		'sr_t_p_partner'  => 300,
+		'sr_t_p_none'     => 300,
 	);
 
 	/** Most shipping classes and label map rows of the parcels part. */
 	const MAX_CLASSES = 20;
 	const MAX_MAP     = 20;
+
+	/** Most product categories that count toward free shipping. */
+	const MAX_CATS = 200;
 
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
@@ -271,6 +294,26 @@ final class SHN_Settings {
 				'el' => 'Εκτιμώμενη παράδοση',
 				'en' => 'Estimated delivery',
 			),
+
+			'sr_mode'           => 'off',
+			'sr_classes'        => array(),
+			'sr_fee'            => 0.0,
+			'sr_large_classes'  => array(),
+			'sr_fee_large'      => 0.0,
+			'sr_tax'            => 'incl',
+			'sr_cats'           => array(),
+			'sr_t_label'        => array(
+				'el' => 'Αποστολή προϊόντων κατά παραγγελία',
+				'en' => 'Shipping of made-to-order products',
+			),
+			'sr_t_p_partner'    => array(
+				'el' => 'Τυπώνεται κατά παραγγελία και έρχεται σε χωριστό δέμα, με μεταφορικά {fee} ανά παραγγελία. Δεν μετράει για τη δωρεάν αποστολή.',
+				'en' => 'Printed to order and sent in a separate parcel, with {fee} shipping per order. It does not count toward free shipping.',
+			),
+			'sr_t_p_none'       => array(
+				'el' => 'Αυτό το προϊόν δεν μετράει για τη δωρεάν αποστολή.',
+				'en' => 'This product does not count toward free shipping.',
+			),
 		);
 	}
 
@@ -286,6 +329,10 @@ final class SHN_Settings {
 		$s           = self::sanitize( $s );
 		self::$cache = $s;
 		update_option( self::OPT, $s, true );
+		// Package rates are cached per session: new shipping rules apply at once.
+		if ( class_exists( 'WC_Cache_Helper' ) ) {
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+		}
 	}
 
 	/** Drops the per-request cache (tests, imports). */
@@ -417,6 +464,23 @@ final class SHN_Settings {
 			}
 		}
 
+		// Shipping rules.
+		$s['sr_mode']          = self::pick( $raw, 'sr_mode', array( 'off', 'test', 'live' ), $d['sr_mode'] );
+		$s['sr_tax']           = self::pick( $raw, 'sr_tax', array( 'incl', 'none' ), $d['sr_tax'] );
+		$s['sr_fee']           = self::amount( $raw['sr_fee'] ?? 0 );
+		$s['sr_fee_large']     = self::amount( $raw['sr_fee_large'] ?? 0 );
+		$s['sr_classes']       = self::slugs( $raw['sr_classes'] ?? array() );
+		$s['sr_large_classes'] = self::slugs( $raw['sr_large_classes'] ?? array() );
+		$s['sr_cats']          = array();
+		if ( isset( $raw['sr_cats'] ) && is_array( $raw['sr_cats'] ) ) {
+			foreach ( $raw['sr_cats'] as $id ) {
+				$id = is_scalar( $id ) && is_numeric( $id ) ? (int) $id : 0;
+				if ( $id > 0 && ! in_array( $id, $s['sr_cats'], true ) && count( $s['sr_cats'] ) < self::MAX_CATS ) {
+					$s['sr_cats'][] = $id;
+				}
+			}
+		}
+
 		// Texts (Bible §14.17): plain text, length limit, empty English → Greek.
 		foreach ( self::TEXTS as $k => $len ) {
 			$s[ $k ] = array();
@@ -430,6 +494,18 @@ final class SHN_Settings {
 		}
 
 		return $s;
+	}
+
+	/** Shipping class slugs: unique, at most MAX_CLASSES. */
+	private static function slugs( $raw ): array {
+		$out = array();
+		foreach ( is_array( $raw ) ? $raw : array() as $slug ) {
+			$slug = is_string( $slug ) ? sanitize_title( $slug ) : '';
+			if ( '' !== $slug && strlen( $slug ) <= 200 && ! in_array( $slug, $out, true ) && count( $out ) < self::MAX_CLASSES ) {
+				$out[] = $slug;
+			}
+		}
+		return $out;
 	}
 
 	/** One of the allowed string values, else the default. */
