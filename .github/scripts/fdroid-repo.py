@@ -3,7 +3,10 @@
 
 The public Android apps of this repository are published as a
 self-hosted F-Droid repository, read by F-Droid, Droid-ify and Obtainium:
-    https://koulaxizis.github.io/noxpress-fdroid/repo
+    https://apps.koulaxizis.workers.dev/noxpress-fdroid/repo
+(the download counter of koulaxizis/oros tools/apps-counter, which serves
+the GitHub Pages files of https://koulaxizis.github.io/noxpress-fdroid/
+unchanged; that address keeps working for phones that added it before)
 .github/workflows/fdroid.yml runs it; the APKs are the signed ones of the
 GitHub releases, copied as they are (never rebuilt or signed again).
 
