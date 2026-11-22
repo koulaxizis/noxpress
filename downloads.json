@@ -2347,12 +2347,16 @@
     "776683556": {
       "file": "nox-rs-1.21.0/revenue-splitter.zip",
       "count": 3
+    },
+    "780691934": {
+      "file": "nox-sn-1.5.0/shipping-notes.zip",
+      "count": 0
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 92,
+      "github": 116,
       "manager": 3
     },
     "net.glarolykoi.android": {
@@ -2362,7 +2366,8 @@
     },
     "online.useoros.base": {
       "estimate": 2,
-      "github": 2
+      "github": 2,
+      "manager": 1
     },
     "online.useoros.bookmarks": {
       "estimate": 6,
@@ -2375,12 +2380,12 @@
     "online.useoros.calculator": {
       "estimate": 6,
       "github": 2,
-      "manager": 3
+      "manager": 4
     },
     "online.useoros.calendar": {
       "estimate": 6,
       "github": 2,
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.contacts": {
       "estimate": 6,
@@ -2413,7 +2418,7 @@
     "online.useoros.games": {
       "estimate": 6,
       "github": 2,
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.habits": {
       "estimate": 6,
@@ -2454,12 +2459,12 @@
     "online.useoros.music": {
       "estimate": 6,
       "github": 2,
-      "manager": 3
+      "manager": 4
     },
     "online.useoros.notes": {
       "estimate": 6,
       "github": 2,
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.passwords": {
       "estimate": 6,
@@ -2472,12 +2477,12 @@
     "online.useoros.podcasts": {
       "estimate": 6,
       "github": 2,
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.radio": {
       "estimate": 6,
       "github": 2,
-      "manager": 2
+      "manager": 3
     },
     "online.useoros.reader": {
       "estimate": 6,
@@ -2514,7 +2519,7 @@
     "online.useoros.todo": {
       "estimate": 6,
       "github": 2,
-      "manager": 3
+      "manager": 4
     },
     "online.useoros.transfer": {
       "estimate": 6,
@@ -2523,7 +2528,7 @@
     "online.useoros.twa": {
       "estimate": 120,
       "github": 2,
-      "manager": 4
+      "manager": 5
     },
     "online.useoros.water": {
       "estimate": 6,
@@ -2555,11 +2560,11 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 89
+      "github": 95
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
-      "github": 55
+      "github": 61
     }
   }
 }
