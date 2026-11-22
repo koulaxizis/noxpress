@@ -2352,7 +2352,7 @@
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 89,
+      "github": 92,
       "manager": 3
     },
     "net.glarolykoi.android": {
@@ -2501,7 +2501,7 @@
     },
     "online.useoros.studioremote": {
       "estimate": 15,
-      "github": 5
+      "github": 6
     },
     "online.useoros.time": {
       "estimate": 6,
@@ -2547,19 +2547,19 @@
     },
     "tech.noxpress.liveoperator": {
       "estimate": 10,
-      "github": 47
+      "github": 49
     },
     "tech.noxpress.sitebridge": {
       "estimate": 14,
-      "github": 64
+      "github": 66
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 88
+      "github": 89
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
-      "github": 54
+      "github": 55
     }
   }
 }
