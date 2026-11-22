@@ -22,7 +22,10 @@
  *  - "Won" is confirmed by the methods' own is_available(), so filters of
  *    other plugins count and the bar never promises what checkout denies.
  *  - Hidden when the cart needs no shipping (virtual items only). Mixed
- *    carts count every item, as WooCommerce does.
+ *    carts count every item, as WooCommerce does — unless the shipping
+ *    rules (SHN_Rules, 1.5.0) are on: then only the products that count
+ *    are summed, and the bar hides when the cart holds only made-to-order
+ *    (partner) products.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -41,6 +44,9 @@ final class SHN_Threshold {
 		$cart = WC()->cart;
 		if ( ! $cart->is_empty() && ! $cart->needs_shipping() ) {
 			return null;
+		}
+		if ( ! $cart->is_empty() && SHN_Rules::on() && ! SHN_Rules::has_own_shipping( $cart ) ) {
+			return null; // Made-to-order products only: they never ship free.
 		}
 		$packages = $cart->get_shipping_packages();
 		$package  = is_array( $packages ) && $packages ? reset( $packages ) : array();
@@ -65,7 +71,7 @@ final class SHN_Threshold {
 		if ( $rule['methods'] ) {
 			$available = false;
 			foreach ( $rule['methods'] as $method ) {
-				if ( $method->is_available( $package ) ) {
+				if ( $method->is_available( $package ) && ( ! SHN_Rules::on() || SHN_Rules::free_method_ok( $method, $cart ) ) ) {
 					$available = true;
 					break;
 				}
@@ -98,6 +104,9 @@ final class SHN_Threshold {
 	public static function for_product( WC_Product $product ): ?array {
 		if ( ! function_exists( 'WC' ) || ! WC()->cart instanceof WC_Cart || ! $product->needs_shipping() ) {
 			return null;
+		}
+		if ( SHN_Rules::on() && ! SHN_Rules::counts( $product ) ) {
+			return null; // SHN_Front shows the rules' own line instead.
 		}
 		$cart = WC()->cart;
 		$now  = self::for_cart();
@@ -247,8 +256,14 @@ final class SHN_Threshold {
 		return $over > 0 ? $over : 0.0;
 	}
 
-	/** Copy of the amount WC_Shipping_Free_Shipping::is_available() compares. */
+	/**
+	 * Copy of the amount WC_Shipping_Free_Shipping::is_available() compares;
+	 * with the shipping rules on, the same amount over the products that count.
+	 */
 	public static function counted_total( WC_Cart $cart, string $ignore_discounts ): float {
+		if ( SHN_Rules::on() ) {
+			return SHN_Rules::counted_total( $cart, $ignore_discounts );
+		}
 		$total = (float) $cart->get_displayed_subtotal();
 		if ( 'no' === $ignore_discounts ) {
 			$total = $total - (float) $cart->get_discount_total();

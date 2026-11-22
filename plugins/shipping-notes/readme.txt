@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.4
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -108,6 +108,11 @@ The free shipping bar does. The parcel names, the "two parcels" message and the 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.5.0 =
+* New module «Κανόνες αποστολής» (Shipping rules, tab of its own, off by default, test mode for shop managers). Made-to-order (partner) products, from chosen shipping classes and the Printful parcel, always pay one flat fee per order whatever the quantity, with a higher fee when the cart holds a large product (classes of their own). The fee replaces the partner's live rates on the partner's package and keeps the cheapest partner rate's id, so the partner's order import reads the order as before; tax included in the fee or none. When the cart is not split (partner API outage), the fee is added to every rate.
+* Free shipping counts only products that need shipping, are not the partner's and, when categories are chosen, belong to them (sub-categories included). Carriers' own «free over X» (BOX NOW Delivery) get their cost back when the counted amount is below X; WooCommerce Free shipping with a minimum amount is removed by the same rule. The free-shipping bar and product-page line use the same amount; the bar hides for carts of made-to-order products only, and the product page of a product that does not count shows a line of its own ({fee} for made-to-order products).
+* The rules also run in the Store API (Cart and Checkout blocks, place order), since they decide what an order costs. Saving the settings bumps WooCommerce's shipping cache version. Filters shn_rules_partner_product, shn_rules_counts, shn_rules_fee.
 
 = 1.4.4 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

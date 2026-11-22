@@ -11,6 +11,8 @@
  *              texts; "add Greek public holidays"
  *  - parcels   carts in several packages (1.1.0): partner signals, parcel
  *              names, notice, partner rate labels, order list, product hint
+ *  - rules     shipping rules (1.5.0): partner products, flat fee, large
+ *              fee, tax, categories that count toward free shipping
  *  - preview   what a cart of X in zone Y shows; the estimate of a product
  *              with today's dates (read-only GET)
  *  - tools     settings export / import, shortcodes and blocks
@@ -47,6 +49,7 @@ final class SHN_Admin_UI {
 			'free'     => __( 'Δωρεάν αποστολή', 'shipping-notes' ),
 			'delivery' => __( 'Χρόνος παράδοσης', 'shipping-notes' ),
 			'parcels'  => __( 'Δέματα', 'shipping-notes' ),
+			'rules'    => __( 'Κανόνες αποστολής', 'shipping-notes' ),
 			'preview'  => __( 'Προεπισκόπηση', 'shipping-notes' ),
 			'tools'    => __( 'Εργαλεία', 'shipping-notes' ),
 		);
@@ -140,6 +143,9 @@ final class SHN_Admin_UI {
 					break;
 				case 'parcels':
 					self::render_parcels();
+					break;
+				case 'rules':
+					self::render_rules();
 					break;
 				case 'preview':
 					self::render_preview();
@@ -744,6 +750,137 @@ final class SHN_Admin_UI {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Tab: rules (1.5.0)
+	 * ------------------------------------------------------------------- */
+
+	/** Shipping classes of the store: slug => name. */
+	private static function shipping_classes(): array {
+		$classes = array();
+		foreach ( (array) WC()->shipping()->get_shipping_classes() as $term ) {
+			if ( is_object( $term ) && isset( $term->slug, $term->name ) ) {
+				$classes[ (string) $term->slug ] = (string) $term->name;
+			}
+		}
+		return $classes;
+	}
+
+	/** Checkboxes of shipping classes, with chosen classes that no longer exist kept. */
+	private static function class_boxes( string $name, array $classes, array $chosen ): void {
+		if ( ! $classes ) {
+			echo '<p class="shn-warn">' . esc_html__( 'Το κατάστημα δεν έχει κλάσεις αποστολής.', 'shipping-notes' ) . '</p>';
+		}
+		foreach ( $classes as $slug => $label ) {
+			echo '<label class="shn-check"><input type="checkbox" name="' . esc_attr( $name ) . '[]" value="' . esc_attr( $slug ) . '" ' . checked( in_array( $slug, $chosen, true ), true, false ) . ' /> ' . esc_html( $label ) . ' <code>' . esc_html( $slug ) . '</code></label>';
+		}
+		foreach ( $chosen as $slug ) {
+			if ( ! isset( $classes[ $slug ] ) ) {
+				echo '<input type="hidden" name="' . esc_attr( $name ) . '[]" value="' . esc_attr( $slug ) . '" />';
+				/* translators: %s: shipping class slug */
+				echo '<p class="shn-warn">' . esc_html( sprintf( __( 'Η κλάση αποστολής «%s» δεν υπάρχει πια.', 'shipping-notes' ), $slug ) ) . '</p>';
+			}
+		}
+	}
+
+	private static function render_rules(): void {
+		$s       = SHN_Settings::get();
+		$classes = self::shipping_classes();
+		$terms   = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'parent'     => 0,
+				'orderby'    => 'name',
+			)
+		);
+		$terms   = is_array( $terms ) ? $terms : array();
+		?>
+		<p class="description shn-mt-8"><?php esc_html_e( 'Δύο κανόνες που το WooCommerce δεν κάνει μόνο του: τα προϊόντα κατά παραγγελία (π.χ. Printful) πληρώνουν πάντα μια σταθερή χρέωση αποστολής ανά παραγγελία, και για τη δωρεάν αποστολή μετράνε μόνο τα προϊόντα που διαλέγεις. Ισχύουν στο καλάθι, στο ταμείο και στην παραγγελία, και η μπάρα «δωρεάν αποστολή» μετρά με τον ίδιο τρόπο.', 'shipping-notes' ); ?></p>
+		<form method="post">
+			<?php self::nonce_field(); ?>
+			<input type="hidden" name="shn_action" value="save_rules" />
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Λειτουργία', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<?php self::mode_field( 'shn_sr_mode', $s['sr_mode'] ); ?>
+				<p class="description"><?php esc_html_e( 'Σε δοκιμή οι κανόνες ισχύουν μόνο για τους διαχειριστές του καταστήματος: οι πελάτες πληρώνουν ό,τι πριν.', 'shipping-notes' ); ?></p>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Προϊόντα κατά παραγγελία', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<p class="description"><?php esc_html_e( 'Τα προϊόντα αυτών των κλάσεων αποστολής, και κάθε προϊόν του δέματος της Printful (ρύθμιση στην καρτέλα «Δέματα»).', 'shipping-notes' ); ?></p>
+				<?php self::class_boxes( 'shn_sr_classes', $classes, $s['sr_classes'] ); ?>
+				<p class="shn-mt-8"><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Κλάσεις αποστολής του WooCommerce', 'shipping-notes' ); ?></a></p>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Χρέωση αποστολής', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<p class="shn-field"><span><?php esc_html_e( 'Χρέωση ανά παραγγελία', 'shipping-notes' ); ?></span>
+					<input type="text" name="shn_sr_fee" value="<?php echo esc_attr( $s['sr_fee'] > 0 ? wc_format_localized_price( (string) $s['sr_fee'] ) : '' ); ?>" size="8" /> <?php echo esc_html( get_woocommerce_currency_symbol() ); ?>
+					<span class="shn-hint"><?php esc_html_e( 'Ίδια όσα τεμάχια κι αν έχει η παραγγελία. Κενό = οι τιμές του συνεργάτη, όπως τις στέλνει.', 'shipping-notes' ); ?></span>
+				</p>
+				<p class="shn-field"><span><?php esc_html_e( 'Χρέωση με μεγάλο προϊόν', 'shipping-notes' ); ?></span>
+					<input type="text" name="shn_sr_fee_large" value="<?php echo esc_attr( $s['sr_fee_large'] > 0 ? wc_format_localized_price( (string) $s['sr_fee_large'] ) : '' ); ?>" size="8" /> <?php echo esc_html( get_woocommerce_currency_symbol() ); ?>
+					<span class="shn-hint"><?php esc_html_e( 'Όταν το καλάθι έχει προϊόν από τις κλάσεις παρακάτω (π.χ. σακίδιο). Κενό = η απλή χρέωση.', 'shipping-notes' ); ?></span>
+				</p>
+				<?php self::class_boxes( 'shn_sr_large_classes', $classes, $s['sr_large_classes'] ); ?>
+				<p class="shn-field shn-mt-8"><span><?php esc_html_e( 'Φόρος', 'shipping-notes' ); ?></span>
+					<select name="shn_sr_tax">
+						<option value="incl" <?php selected( $s['sr_tax'], 'incl' ); ?>><?php esc_html_e( 'η χρέωση περιλαμβάνει τον φόρο αποστολής', 'shipping-notes' ); ?></option>
+						<option value="none" <?php selected( $s['sr_tax'], 'none' ); ?>><?php esc_html_e( 'χωρίς φόρο', 'shipping-notes' ); ?></option>
+					</select>
+				</p>
+				<p class="description"><?php esc_html_e( 'Η χρέωση μπαίνει στη φθηνότερη τιμή του συνεργάτη, που κρατά το αναγνωριστικό της: ο συνεργάτης διαβάζει την παραγγελία όπως πριν. Αν το καλάθι δεν χωριστεί σε δέματα (π.χ. ο συνεργάτης δεν απαντά), η χρέωση προστίθεται σε κάθε τρόπο αποστολής.', 'shipping-notes' ); ?></p>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Τι μετράει για τη δωρεάν αποστολή', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<p class="description"><?php esc_html_e( 'Τα προϊόντα κατά παραγγελία και τα ψηφιακά (εικονικά ή για λήψη) δεν μετράνε ποτέ. Αν διαλέξεις κατηγορίες, μετράνε μόνο τα προϊόντα τους (και των υποκατηγοριών τους). Καμία επιλογή = μετράνε όλα τα υπόλοιπα.', 'shipping-notes' ); ?></p>
+				<?php
+				foreach ( $terms as $term ) {
+					if ( ! $term instanceof WP_Term ) {
+						continue;
+					}
+					/* translators: %d: number of products */
+					$count = sprintf( __( 'προϊόντα: %d', 'shipping-notes' ), (int) $term->count );
+					echo '<label class="shn-check"><input type="checkbox" name="shn_sr_cats[]" value="' . (int) $term->term_id . '" ' . checked( in_array( (int) $term->term_id, $s['sr_cats'], true ), true, false ) . ' /> ' . esc_html( $term->name ) . ' <span class="shn-hint">' . esc_html( $count ) . '</span></label>';
+				}
+				foreach ( $s['sr_cats'] as $id ) {
+					$term = get_term( $id, 'product_cat' );
+					if ( ! $term instanceof WP_Term ) {
+						/* translators: %d: category id */
+						echo '<p class="shn-warn">' . esc_html( sprintf( __( 'Η κατηγορία #%d δεν υπάρχει πια.', 'shipping-notes' ), $id ) ) . '</p>';
+					} elseif ( 0 !== (int) $term->parent ) {
+						echo '<input type="hidden" name="shn_sr_cats[]" value="' . (int) $id . '" />';
+						/* translators: %s: category name */
+						echo '<p class="description">' . esc_html( sprintf( __( 'Και η υποκατηγορία «%s».', 'shipping-notes' ), $term->name ) ) . '</p>';
+					}
+				}
+				?>
+				<p class="description shn-mt-8"><?php esc_html_e( 'Για όρια «δωρεάν πάνω από Χ» μεταφορικών εταιρειών (π.χ. BOX NOW): όταν τα προϊόντα που μετράνε δεν φτάνουν το ποσό, η μέθοδος παίρνει πίσω το κόστος της. Η «Δωρεάν αποστολή» του WooCommerce με ελάχιστο ποσό κρύβεται με τον ίδιο κανόνα.', 'shipping-notes' ); ?></p>
+			</div>
+
+			<h2 class="shn-h2"><?php esc_html_e( 'Κείμενα', 'shipping-notes' ); ?></h2>
+			<div class="shn-zone">
+				<?php
+				self::lang_field( $s['lang'] );
+				self::texts_table(
+					$s,
+					array(
+						'sr_t_label'     => __( 'Όνομα της χρέωσης (καλάθι, ταμείο, παραγγελία)', 'shipping-notes' ),
+						'sr_t_p_partner' => __( 'Σελίδα προϊόντος κατά παραγγελία', 'shipping-notes' ),
+						'sr_t_p_none'    => __( 'Σελίδα προϊόντος που δεν μετράει', 'shipping-notes' ),
+					)
+				);
+				?>
+				<p class="description"><?php esc_html_e( 'Placeholder: {fee} η χρέωση. Οι γραμμές της σελίδας προϊόντος εμφανίζονται στη θέση της γραμμής «δωρεάν αποστολή» (καρτέλα «Δωρεάν αποστολή»), όταν είναι ενεργή.', 'shipping-notes' ); ?></p>
+			</div>
+
+			<p class="shn-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση ρυθμίσεων', 'shipping-notes' ); ?></button></p>
+		</form>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Tab: tools
 	 * ------------------------------------------------------------------- */
 
@@ -816,6 +953,9 @@ final class SHN_Admin_UI {
 				break;
 			case 'save_parcels':
 				self::redirect( 'parcels', self::do_save_parcels() );
+				break;
+			case 'save_rules':
+				self::redirect( 'rules', self::do_save_rules() );
 				break;
 			default:
 				self::redirect( 'free', array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'shipping-notes' ) ) ) );
@@ -983,6 +1123,30 @@ final class SHN_Admin_UI {
 		}
 		if ( 'off' !== $s['mx_mode'] && $s['mx_hint'] && ! $s['mx_classes'] ) {
 			$msgs[] = self::msg( 'warning', __( 'Η ένδειξη στη σελίδα προϊόντος θέλει κλάση αποστολής: δεν εμφανίζεται.', 'shipping-notes' ) );
+		}
+		return $msgs;
+	}
+
+	private static function do_save_rules(): array {
+		$raw                     = SHN_Settings::get();
+		$raw['lang']             = sanitize_key( self::post( 'shn_lang' ) );
+		$raw['sr_mode']          = sanitize_key( self::post( 'shn_sr_mode' ) );
+		$raw['sr_tax']           = sanitize_key( self::post( 'shn_sr_tax' ) );
+		$raw['sr_fee']           = self::local_amount( self::post( 'shn_sr_fee' ) );
+		$raw['sr_fee_large']     = self::local_amount( self::post( 'shn_sr_fee_large' ) );
+		$raw['sr_classes']       = self::post_array( 'shn_sr_classes' );
+		$raw['sr_large_classes'] = self::post_array( 'shn_sr_large_classes' );
+		$raw['sr_cats']          = self::post_array( 'shn_sr_cats' );
+		$raw                     = self::posted_texts( $raw, array( 'sr_t_label', 'sr_t_p_partner', 'sr_t_p_none' ) );
+
+		SHN_Settings::save( $raw );
+		$s    = SHN_Settings::get();
+		$msgs = array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'shipping-notes' ) ) );
+		if ( 'off' !== $s['sr_mode'] && ! $s['sr_classes'] && ! $s['mx_printful'] ) {
+			$msgs[] = self::msg( 'warning', __( 'Δεν διάλεξες κλάση αποστολής και το δέμα της Printful είναι κλειστό στα «Δέματα»: κανένα προϊόν δεν θεωρείται κατά παραγγελία.', 'shipping-notes' ) );
+		}
+		if ( 'off' !== $s['sr_mode'] && $s['sr_large_classes'] && $s['sr_fee_large'] <= 0 ) {
+			$msgs[] = self::msg( 'warning', __( 'Διάλεξες κλάσεις για μεγάλα προϊόντα χωρίς χρέωση: ισχύει η απλή χρέωση.', 'shipping-notes' ) );
 		}
 		return $msgs;
 	}
