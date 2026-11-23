@@ -435,6 +435,9 @@ final class GFC_Issue {
 			}
 		}
 
+		// Retention: names and message of finished cards (GFC_Privacy).
+		GFC_Privacy::retention();
+
 		// Reminders before expiry.
 		$days = (int) GFC_Settings::get()['remind_days'];
 		if ( $days > 0 ) {

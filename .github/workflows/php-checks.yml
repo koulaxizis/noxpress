@@ -4,6 +4,9 @@
 #
 #  - lint:    php -l σε PHP 7.4 (το ελάχιστο της σουίτας), 8.4, 8.5 και 8.6 (η νεότερη),
 #             headers εκδόσεων και ίδια αντίγραφα του Noxpress Core. Μπλοκάρει.
+#             Κανόνας προσωπικών δεδομένων (Bible §12, check-privacy.py):
+#             exporter / eraser / κείμενο πολιτικής. Μπλοκάρει για όσα λείπουν
+#             από plugin του πίνακα, προειδοποιεί για όσα δεν έχουν ταξινομηθεί.
 #  - static:  PHPCS (PHPCompatibilityWP, PHP 7.4 και νεότερη), ενημερωτικό
 #             (continue-on-error), και PHPStan (level 1, stubs WordPress,
 #             WooCommerce, WP-CLI, Action Scheduler, bootstrap σταθερών στο
@@ -13,10 +16,10 @@ name: PHP checks
 
 on:
   pull_request:
-    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/phpstan/**']
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/scripts/check-privacy.py', '.github/phpstan/**']
   push:
     branches: [main]
-    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/phpstan/**']
+    paths: ['plugins/**', '.github/workflows/php-checks.yml', '.github/scripts/check-plugin-headers.py', '.github/scripts/check-privacy.py', '.github/phpstan/**']
   workflow_dispatch:
 
 permissions:
@@ -53,6 +56,9 @@ jobs:
       - name: Headers and Core copies
         if: matrix.php == '8.4'
         run: python3 .github/scripts/check-plugin-headers.py
+      - name: Personal data (Bible §12)
+        if: matrix.php == '8.4'
+        run: python3 .github/scripts/check-privacy.py
 
   static:
     runs-on: ubuntu-latest

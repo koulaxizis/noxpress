@@ -73,6 +73,7 @@ final class EVT_Tickets {
 
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'exporters' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'erasers' ) );
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
 	}
 
 	/* =====================================================================
@@ -892,5 +893,15 @@ final class EVT_Tickets {
 			'messages'       => array(),
 			'done'           => true,
 		);
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy → Policy guide). */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Όταν αγοράζεις εισιτήριο για εκδήλωση, κάθε εισιτήριο συνδέεται με την παραγγελία και τον λογαριασμό σου. Αν γράψεις το όνομα κάθε συμμετέχοντα, το κρατάμε για τον έλεγχο στην είσοδο και το σβήνουμε μερικές ημέρες μετά το τέλος της εκδήλωσης. Κρατάμε επίσης την ώρα που χρησιμοποιήθηκε το εισιτήριο στην είσοδο.', 'events' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Ο κωδικός του εισιτηρίου δεν αποθηκεύεται ως κείμενο: φτιάχνεται κάθε φορά από ένα κρυπτογραφικό κλειδί του site. Τα εισιτήρια μένουν με την παραγγελία όσο την κρατάμε.', 'events' ) . '</p>';
+		wp_add_privacy_policy_content( 'Events', wp_kses_post( $text ) );
 	}
 }

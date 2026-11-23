@@ -212,6 +212,9 @@ final class MRL_Lang {
 		'εφεδρική' => 'backup',
 		'κύρια' => 'primary',
 		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
+		// 1.0.4: privacy policy text.
+		'Τα email που στέλνει το site (παραγγελίες, λογαριασμός, φόρμες) φεύγουν μέσω του παρόχου email που έχουμε ορίσει. Για κάθε email κρατάμε σε ημερολόγιο τον παραλήπτη, το θέμα, την ώρα και αν στάλθηκε, για όσες ημέρες ορίζει ο διαχειριστής (30 από προεπιλογή), ώστε να ελέγχουμε ότι τα μηνύματα φτάνουν.' => 'The emails the site sends (orders, account, forms) go out through the email provider we have set up. For each email we keep a log of the recipient, the subject, the time and whether it was sent, for as many days as the administrator sets (30 by default), so we can check that messages arrive.',
+		'Αν ο διαχειριστής το ενεργοποιήσει, κρατάμε και το περιεχόμενο των email για 7 ημέρες, κρυπτογραφημένο, για επανάληψη αποστολής. Email με κωδικούς ή συνδέσμους σύνδεσης δεν αποθηκεύονται ποτέ με το περιεχόμενό τους.' => 'If the administrator turns it on, we also keep the content of the emails for 7 days, encrypted, to resend them. Emails with passwords or sign-in links are never stored with their content.',
 	);
 
 	public static function init(): void {
