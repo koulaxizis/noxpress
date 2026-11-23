@@ -5,7 +5,7 @@ Tags: woocommerce, gift, thank you page, coupon, vacation mode
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.3.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -111,6 +111,9 @@ The settings, the transients and the background jobs are removed. The gift and t
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: cart retention for Cart Abandonment Recovery for WooCommerce (Tools → «Εγκαταλελειμμένα καλάθια», off by default). A daily Action Scheduler job deletes the carts older than the days set, with their e-mail history, because that plugin keeps them forever.
 
 = 1.2.4 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

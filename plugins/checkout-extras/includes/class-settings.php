@@ -31,6 +31,9 @@
  *     (which WooCommerce customer emails carry it), c_remind + c_remind_days
  *   - housekeeping: c_cleanup + c_cleanup_days, c_delete_on_uninstall
  *
+ *  Cart retention (1.3.0): ca_days (0 = off, 1–365) deletes the carts of
+ *  Cart Abandonment Recovery for WooCommerce older than that (CKE_Carts)
+ *
  *  Store vacation (v_*)
  *   - v_mode, v_kind ('closed' = no orders | 'later' = orders accepted,
  *     shipped after the vacation)
@@ -151,6 +154,7 @@ final class CKE_Settings {
 			'c_cleanup'            => true,
 			'c_cleanup_days'       => 30,
 			'c_delete_on_uninstall' => false,
+			'ca_days'              => 0,
 
 			'v_mode'               => 'off',
 			'v_kind'               => 'closed',
@@ -365,6 +369,7 @@ final class CKE_Settings {
 		$s['c_cleanup']             = self::flag( $raw, 'c_cleanup', $d );
 		$s['c_cleanup_days']        = self::int( $raw, 'c_cleanup_days', 0, 365, $d['c_cleanup_days'] );
 		$s['c_delete_on_uninstall'] = self::flag( $raw, 'c_delete_on_uninstall', $d );
+		$s['ca_days']               = self::int( $raw, 'ca_days', 0, 365, $d['ca_days'] );
 
 		// Store vacation.
 		$s['v_mode']            = self::pick( $raw, 'v_mode', $modes, $d['v_mode'] );

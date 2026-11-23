@@ -37,6 +37,7 @@ function cke_uninstall_site(): void {
 		// By hook only and by group only (Bible §12): an args array would
 		// match only the jobs without args.
 		as_unschedule_all_actions( 'cke_cleanup' );
+		as_unschedule_all_actions( 'cke_carts_cleanup' );
 		as_unschedule_all_actions( 'cke_coupon_reminder' );
 		as_unschedule_all_actions( 'cke_vacation_flip' );
 		as_unschedule_all_actions( '', array(), 'checkout-extras' );
