@@ -358,6 +358,14 @@ final class GFC_Lang {
 		'Νέος κωδικός: ο %1$s ακυρώθηκε, νέος %2$s.' => 'New code: %1$s was cancelled, new %2$s.',
 		'Gift Cards: μια δωροκάρτα κλείδωσε' => 'Gift Cards: a gift card was locked',
 		'Η δωροκάρτα #%d κλείδωσε γιατί το υπόλοιπό της δεν συμφωνεί με το ημερολόγιο κινήσεων. Δεν μπορεί να χρησιμοποιηθεί μέχρι να τη δεις.' => 'Gift card #%d was locked because its balance does not match its ledger. It cannot be used until you check it.',
+		// 1.2.0: retention, policy text.
+		'Όταν αγοράζεις δωροκάρτα κρατάμε το email σου, το όνομα και το email του παραλήπτη, το όνομα αποστολέα και το μήνυμα που γράφεις, για να στείλουμε την κάρτα, να σου πούμε πότε στάλθηκε και να θυμίσουμε τη λήξη. Ο κωδικός δεν αποθηκεύεται ποτέ ως κείμενο, μόνο ως κρυπτογραφημένο αποτύπωμα.' => 'When you buy a gift card we keep your email, the recipient\'s name and email, the sender name and the message you write, to send the card, tell you when it was sent and remind about its expiry. The code is never stored as text, only as an encrypted fingerprint.',
+		'Απόρρητο' => 'Privacy',
+		'Για να εμποδίσουμε τις δοκιμές κωδικών μετράμε τις αποτυχημένες προσπάθειες ανά διεύθυνση IP για λίγα λεπτά· η διεύθυνση κρατιέται μόνο ως κρυπτογραφημένο αποτύπωμα.' => 'To stop code guessing we count failed attempts per IP address for a few minutes; the address is kept only as an encrypted fingerprint.',
+		'Ονόματα και μήνυμα' => 'Names and message',
+		'Τα ποσά και οι κινήσεις μένουν ως λογιστικό αρχείο. Τα email σβήνονται όταν ο πελάτης ζητήσει διαγραφή από τα Εργαλεία → Διαγραφή προσωπικών δεδομένων.' => 'Amounts and movements stay as the accounting record. The emails are cleared when the customer asks for erasure through Tools → Erase Personal Data.',
+		'Το ποσό, το υπόλοιπο και κάθε κίνηση της κάρτας μένουν ως λογιστικό αρχείο. Όσο η κάρτα έχει υπόλοιπο κρατάμε και τα στοιχεία επικοινωνίας της. Όταν εξαντληθεί, λήξει ή ακυρωθεί, τα ονόματα και το μήνυμα σβήνονται μετά από τον χρόνο που ορίζει το κατάστημα, και τα email σβήνονται όταν ζητήσεις διαγραφή των δεδομένων σου.' => 'The amount, the balance and every movement of the card stay as the accounting record. While the card has a balance we also keep its contact details. Once it is used up, expires or is voided, the names and the message are cleared after the time the store sets, and the emails are cleared when you ask for your data to be erased.',
+		'σβήνονται τόσες ημέρες αφού η κάρτα εξαντληθεί, λήξει ή ακυρωθεί (0 = ποτέ)' => 'cleared this many days after the card is used up, expires or is voided (0 = never)',
 	);
 
 	public static function init(): void {

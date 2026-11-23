@@ -18,6 +18,16 @@
  * money the store owes, and blanking the recipient would lose it; the
  * eraser says how many were kept. Amounts, the ledger and the order link
  * always stay (accounting records).
+ *
+ * 1.2.0:
+ *  - Retention (setting keep_days, 0 = never): the daily job clears the
+ *    recipient and sender names and the message of cards finished for
+ *    longer than keep_days. The e-mails stay for the eraser.
+ *  - When WooCommerce removes an order's personal data, the gift card
+ *    lines of that order (the _gfc data, «Προς» and «Από») are cleaned
+ *    too, and so are their finished cards; lines of cards that can still
+ *    be spent keep their data.
+ *  - Suggested privacy policy text.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +40,8 @@ final class GFC_Privacy {
 	public static function init(): void {
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'exporters' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'erasers' ) );
+		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'order_lines' ) );
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
 	}
 
 	public static function exporters( $list ): array {
@@ -201,5 +213,98 @@ final class GFC_Privacy {
 			'messages'       => $messages,
 			'done'           => true,
 		);
+	}
+
+	/** Daily (GFC_Issue::daily): names and message of cards finished longer than keep_days. */
+	public static function retention(): int {
+		global $wpdb;
+		$days = (int) GFC_Settings::get()['keep_days'];
+		if ( $days <= 0 ) {
+			return 0;
+		}
+		$t      = GFC_Schema::cards();
+		$before = gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- own table.
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE updated_at <= %s AND ( status IN ('void','expired') OR ( status IN ('active','disabled','locked') AND balance <= 0 ) ) AND ( recipient_name <> '' OR sender_name <> '' OR ( message IS NOT NULL AND message <> '' ) ) LIMIT 500", $before ) );
+		$n   = 0;
+		foreach ( $ids as $id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- own table.
+			$n += (int) (bool) $wpdb->update(
+				$t,
+				array(
+					'recipient_name' => '',
+					'sender_name'    => '',
+					'message'        => null,
+					'updated_at'     => gmdate( 'Y-m-d H:i:s' ),
+				),
+				array( 'id' => (int) $id )
+			);
+		}
+		return $n;
+	}
+
+	/**
+	 * WooCommerce removes an order's personal data: clean the gift card
+	 * lines whose cards are all finished, and those cards.
+	 *
+	 * @param WC_Order $order Order.
+	 */
+	public static function order_lines( $order ): void {
+		global $wpdb;
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+		$cards = GFC_Store::by_order( $order->get_id() );
+		$open  = array();
+		foreach ( $cards as $c ) {
+			if ( ! self::finished( $c ) ) {
+				$open[ (int) $c['item_id'] ] = true;
+			}
+		}
+		foreach ( $order->get_items() as $item_id => $line ) {
+			if ( ! $line->get_meta( '_gfc' ) || isset( $open[ (int) $item_id ] ) ) {
+				continue;
+			}
+			$g = json_decode( (string) $line->get_meta( '_gfc' ), true );
+			if ( is_array( $g ) ) {
+				foreach ( array( 'name', 'email', 'sender', 'message' ) as $k ) {
+					if ( isset( $g[ $k ] ) ) {
+						$g[ $k ] = '';
+					}
+				}
+				$line->update_meta_data( '_gfc', wp_json_encode( $g ) );
+			}
+			$line->delete_meta_data( 'gfc_to' );
+			$line->delete_meta_data( 'gfc_from' );
+			$line->save();
+		}
+		foreach ( $cards as $c ) {
+			if ( self::finished( $c ) ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- own table.
+				$wpdb->update(
+					GFC_Schema::cards(),
+					array(
+						'buyer_email'     => '',
+						'recipient_name'  => '',
+						'recipient_email' => '',
+						'sender_name'     => '',
+						'message'         => null,
+						'updated_at'      => gmdate( 'Y-m-d H:i:s' ),
+					),
+					array( 'id' => (int) $c['id'] )
+				);
+			}
+		}
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy → Policy guide). */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Όταν αγοράζεις δωροκάρτα κρατάμε το email σου, το όνομα και το email του παραλήπτη, το όνομα αποστολέα και το μήνυμα που γράφεις, για να στείλουμε την κάρτα, να σου πούμε πότε στάλθηκε και να θυμίσουμε τη λήξη. Ο κωδικός δεν αποθηκεύεται ποτέ ως κείμενο, μόνο ως κρυπτογραφημένο αποτύπωμα.', 'gift-cards' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Το ποσό, το υπόλοιπο και κάθε κίνηση της κάρτας μένουν ως λογιστικό αρχείο. Όσο η κάρτα έχει υπόλοιπο κρατάμε και τα στοιχεία επικοινωνίας της. Όταν εξαντληθεί, λήξει ή ακυρωθεί, τα ονόματα και το μήνυμα σβήνονται μετά από τον χρόνο που ορίζει το κατάστημα, και τα email σβήνονται όταν ζητήσεις διαγραφή των δεδομένων σου.', 'gift-cards' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Για να εμποδίσουμε τις δοκιμές κωδικών μετράμε τις αποτυχημένες προσπάθειες ανά διεύθυνση IP για λίγα λεπτά· η διεύθυνση κρατιέται μόνο ως κρυπτογραφημένο αποτύπωμα.', 'gift-cards' ) . '</p>';
+		wp_add_privacy_policy_content( 'Gift Cards', wp_kses_post( $text ) );
 	}
 }

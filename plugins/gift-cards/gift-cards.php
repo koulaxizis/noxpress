@@ -3,7 +3,7 @@
  * Plugin Name:          Gift Cards
  * Plugin URI:           https://noxpress.tech
  * Description:          Ψηφιακές δωροκάρτες ως προϊόν: σταθερά ή ελεύθερα ποσά, αποστολή στον παραλήπτη σε ημερομηνία με email και εκτυπώσιμο PDF, εξαργύρωση ως πληρωμή στο καλάθι και στο ταμείο (κλασικό και block), υπόλοιπο που μένει για την επόμενη αγορά και ημερολόγιο κάθε κίνησης.
- * Version:              1.1.0
+ * Version:              1.2.0
  * Requires at least:    6.2
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -83,7 +83,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GFC_VERSION', '1.1.0' );
+define( 'GFC_VERSION', '1.2.0' );
 define( 'GFC_FILE', __FILE__ );
 define( 'GFC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'GFC_URL', plugin_dir_url( __FILE__ ) );

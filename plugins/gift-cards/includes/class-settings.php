@@ -26,6 +26,7 @@ final class GFC_Settings {
 			'review_over'    => 0,        // E10: manual approval above this amount (cents), 0 = off.
 			'expiry_months'  => 0,        // E6: 0 = no expiry.
 			'remind_days'    => 30,
+			'keep_days'      => 365,      // Names and message of finished cards are cleared after this (0 = never).
 			'no_card_for_gc' => true,     // E11: no gift card bought with a gift card.
 			'restore_refund' => true,     // Fully refunded order: the card part goes back too.
 			'pending_hours'  => 48,       // Unpaid orders that took a card are cancelled after this.
@@ -141,6 +142,7 @@ final class GFC_Settings {
 			'review_over'    => array( 0, 100000000 ),
 			'expiry_months'  => array( 0, 120 ),
 			'remind_days'    => array( 0, 90 ),
+			'keep_days'      => array( 0, 3650 ),
 			'pending_hours'  => array( 1, 720 ),
 			'max_cards'      => array( 1, 10 ),
 			'limit_n'        => array( 1, 50 ),
