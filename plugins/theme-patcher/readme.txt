@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, price labels, product bad
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.1
+Stable tag: 1.9.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -152,6 +152,11 @@ Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.9.0 =
+* Care & Safety (GPSR art. 19): the store-wide EU responsible person gets a postal address, shown between the name and the e-mail.
+* Care & Safety: new line «Κωδικός προϊόντος» with the product's SKU and, when it differs, its GTIN / EAN / ISBN (WooCommerce 9.2+), so the product can be identified. On for new installs; stores that already saved Care & Safety settings switch it on in the tab's settings. The label is a visitor text (Greek and English).
+* Admin warnings: profiles without a manufacturer, manufacturers without a postal or electronic address, an EU responsible person without an address or e-mail, and, in the product's side box and the preview, a product whose tab shows no manufacturer.
 
 = 1.8.1 =
 * Fix: settings (tp_settings) and Care & Safety (tp_care) stored as an array, as an option tool such as Site Bridge writes them, are now read instead of falling back to the defaults. The next save from the admin stores JSON again.

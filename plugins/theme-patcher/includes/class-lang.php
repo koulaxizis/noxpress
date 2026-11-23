@@ -524,6 +524,17 @@ final class TP_Lang {
 		'Noxpress Dashboard'                                      => 'Noxpress Dashboard',
 		'More plugins at'                                         => 'More plugins at',
 		'♡ Στήριξε το Noxpress'                          => '♡ Support Noxpress',
+		// 1.9.0 GPSR.
+		'Εμφάνιση του κωδικού προϊόντος (SKU και GTIN / EAN / ISBN) στην καρτέλα' => 'Show the product code (SKU and GTIN / EAN / ISBN) in the tab',
+		'Εμφανίζεται σε κάθε προϊόν, εκτός αν ο κατασκευαστής του έχει δικό του υπεύθυνο στην ΕΕ. Κενό όνομα = η ενότητα δεν εμφανίζεται. Ο GPSR (άρθρο 19) ζητά όνομα, ταχυδρομική και ηλεκτρονική διεύθυνση.' => 'Shown on every product, unless its manufacturer has its own EU responsible person. Empty name = the section is not shown. GPSR (art. 19) asks for the name, postal and electronic address.',
+		'Ετικέτα κωδικού προϊόντος' => 'Product code label',
+		'Η καρτέλα δεν δείχνει κατασκευαστή. Ο GPSR ζητά όνομα και διεύθυνση του κατασκευαστή: διάλεξε έναν παραπάνω ή όρισέ τον στο προφίλ.' => 'The tab shows no manufacturer. GPSR asks for the manufacturer\'s name and address: pick one above or set it in the profile.',
+		'Κωδικός προϊόντος' => 'Product code',
+		'Λείπει η ταχυδρομική διεύθυνση ή το email του υπευθύνου στην ΕΕ.' => 'The EU responsible person\'s postal address or e-mail is missing.',
+		'Λείπει ταχυδρομική ή ηλεκτρονική διεύθυνση (email ή ιστότοπος) από: %s. Ο GPSR (άρθρο 19) τις ζητά και τις δύο.' => 'A postal or electronic address (e-mail or website) is missing for: %s. GPSR (art. 19) asks for both.',
+		'Ο GPSR ζητά στοιχεία που επιτρέπουν την αναγνώριση του προϊόντος. Χωρίς SKU και GTIN η γραμμή δεν εμφανίζεται.' => 'GPSR asks for information that identifies the product. Without a SKU and GTIN the line is not shown.',
+		'Προφίλ χωρίς κατασκευαστή: %s. Τα προϊόντα τους δείχνουν κατασκευαστή μόνο από την κλάση αποστολής ή τη ρύθμιση του προϊόντος· ο GPSR ζητά πάντα τον κατασκευαστή.' => 'Profiles without a manufacturer: %s. Their products show a manufacturer only from the shipping class or the product\'s own setting; GPSR always asks for the manufacturer.',
+		'Χωρίς κατασκευαστή: ο GPSR ζητά όνομα και διεύθυνση του κατασκευαστή.' => 'No manufacturer: GPSR asks for the manufacturer\'s name and address.',
 	);
 
 	public static function init(): void {
