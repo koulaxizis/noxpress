@@ -644,7 +644,7 @@ final class GFC_Redeem {
 		);
 		wp_enqueue_script( 'gfc-front', GFC_URL . 'assets/front.js', array( 'jquery' ), GFC_VERSION, true );
 		wp_add_inline_script( 'gfc-front', 'window.gfcCfg = ' . wp_json_encode( $cfg ) . ';', 'before' );
-		echo '<style id="gfc-field-css">.gfc-field{margin:0 0 1.2em}.gfc-field .gfc-line{display:flex;gap:.5em;flex-wrap:wrap;margin:0}.gfc-field .gfc-code{flex:1 1 14em;text-transform:uppercase;letter-spacing:.06em}.gfc-field .gfc-msg{margin:.4em 0 0;font-size:.92em}.gfc-field .gfc-msg.is-error{color:#b32d2e}.gfc-row small{opacity:.75}</style>';
+		echo '<style id="gfc-field-css">.gfc-field{margin:0 0 1.2em}.gfc-field .gfc-line{display:flex;gap:.5em;flex-wrap:wrap;margin:0}.gfc-field .gfc-code{flex:1 1 14em;text-transform:uppercase;letter-spacing:.06em}.gfc-field .gfc-msg{margin:.4em 0 0;font-size:.92em}.gfc-field .gfc-msg.is-error{color:#b32d2e}</style>';
 	}
 
 	/** wc-ajax gfc_apply (POST + nonce). */

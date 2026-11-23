@@ -5,7 +5,7 @@ Tags: passwordless, magic link, login, email, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -82,6 +82,9 @@ The settings, the log, the email's WooCommerce settings, pending links and rate-
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.1 =
+* Accessibility (WCAG 2.1 AA, 1.4.3): secondary visitor text no longer uses opacity, which brought it under the 4.5:1 contrast ratio on light themes; it keeps its smaller size and the theme's text colour.
 
 = 1.1.0 =
 * Personal data: WordPress's exporter and eraser (Tools → Export / Erase Personal Data). The export lists the account's log events and a pending link; the eraser deletes them.

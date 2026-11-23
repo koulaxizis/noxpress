@@ -328,7 +328,7 @@ final class GFC_Product {
 			.gfc-form .gfc-for label{display:inline-block;margin-right:1.2em;cursor:pointer}
 			.gfc-form .gfc-gift p label{display:block;font-weight:600}
 			.gfc-form .gfc-gift p input,.gfc-form .gfc-gift p textarea{width:100%;max-width:28em}
-			.gfc-form .gfc-gift small{display:block;opacity:.75}
+			.gfc-form .gfc-gift small{display:block}
 			.gfc-form .gfc-gift[hidden]{display:none}
 			</style>
 			<script>

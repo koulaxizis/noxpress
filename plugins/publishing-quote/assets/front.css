@@ -41,7 +41,7 @@
 .pbq .pbq-radios { display: flex !important; flex-wrap: wrap; gap: 0 1.25em; }
 .pbq .pbq-sub { margin: 0 0 0 1.6em !important; }
 .pbq .pbq-extra { margin: .2em 0 !important; }
-.pbq .pbq-desc { display: block; margin: .1em 0 0 1.6em !important; opacity: .8; }
+.pbq .pbq-desc { display: block; margin: .1em 0 0 1.6em !important; font-size: .95em; }
 .pbq .pbq-actions { margin: .5em 0 0 !important; }
 .pbq button, .pbq .button { float: none !important; }
 .pbq [hidden] { display: none !important; }
@@ -52,9 +52,9 @@
 .pbq .pbq-table th, .pbq .pbq-table td { padding: .45em .25em !important; border: 0 !important; border-bottom: 1px solid rgba(127, 127, 127, .25) !important; text-align: left; font-weight: normal; vertical-align: top; }
 .pbq .pbq-table td { text-align: right; white-space: nowrap; }
 .pbq .pbq-table tr.is-included td { font-style: italic; }
-.pbq .pbq-table tr.is-sub th, .pbq .pbq-table tr.is-sub td { opacity: .8; font-size: .92em; }
+.pbq .pbq-table tr.is-sub th, .pbq .pbq-table tr.is-sub td { font-size: .92em; }
 .pbq .pbq-table tr.is-total th, .pbq .pbq-table tr.is-total td { font-weight: 700; font-size: 1.1em; border-bottom-width: 2px !important; }
-.pbq .pbq-note { margin: .25em 0 0 !important; opacity: .85; }
+.pbq .pbq-note { margin: .25em 0 0 !important; }
 .pbq .pbq-msg { margin: .5em 0 !important; padding: .6em .8em !important; border-left: 4px solid rgba(127, 127, 127, .5) !important; }
 .pbq .pbq-msg--err { border-left-color: #b32d2e !important; }
 .pbq .pbq-msg--ok { border-left-color: #2e7d32 !important; }

@@ -3,7 +3,7 @@
  * Plugin Name:          Forms
  * Plugin URI:           https://noxpress.tech
  * Description:          Φόρμες επικοινωνίας με block και shortcode, ειδοποίηση με email και προστασία από spam χωρίς υπηρεσίες τρίτων (honeypot, υπογεγραμμένος χρόνος, αόρατο proof of work, κανόνες περιεχομένου, όριο ανά επισκέπτη). Κανένα μήνυμα δεν χάνεται όταν αποτύχει το email. Εισαγωγή από Contact Form 7 με το ίδιο shortcode, ερώτηση για προϊόν, εγγραφή στο orOS Newsletter. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.0.3
+ * Version:              1.0.4
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -69,7 +69,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FRM_VERSION', '1.0.3' );
+define( 'FRM_VERSION', '1.0.4' );
 define( 'FRM_FILE', __FILE__ );
 define( 'FRM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FRM_URL', plugin_dir_url( __FILE__ ) );

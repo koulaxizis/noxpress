@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -93,6 +93,9 @@ The settings, the send log, queued sends, the last offers import and the transie
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.5.1 =
+* Accessibility (WCAG 2.1 AA, 1.4.3): secondary visitor text no longer uses opacity, which brought it under the 4.5:1 contrast ratio on light themes; it keeps its smaller size and the theme's text colour.
 
 = 1.5.0 =
 * Privacy: personal data exporter and eraser for the newsletter consent kept with orders (kept as proof of consent unless WooCommerce removes order personal data; the eraser reminds you to remove the address from the orOS Newsletter list).
