@@ -248,6 +248,44 @@ final class EWD_Requests {
 		return $hit;
 	}
 
+	/**
+	 * Anonymise the personal data of every request of an order (name,
+	 * email, reason, the free-text notes of the log), keeping the request
+	 * id, date and time, items and status. Used by the privacy eraser when
+	 * the store removes personal data from orders on request.
+	 *
+	 * @return int Number of requests changed.
+	 */
+	public static function anonymize( WC_Order $order ): int {
+		$all = self::for_order( $order );
+		$n   = 0;
+		foreach ( $all as $i => $r ) {
+			$changed = false;
+			foreach ( array( 'name', 'email', 'reason' ) as $k ) {
+				if ( isset( $r[ $k ] ) && '' !== (string) $r[ $k ] ) {
+					$r[ $k ] = 'reason' === $k ? '' : wp_privacy_anonymize_data( 'name' === $k ? 'text' : 'email', (string) $r[ $k ] );
+					$changed = true;
+				}
+			}
+			if ( isset( $r['log'] ) && is_array( $r['log'] ) ) {
+				foreach ( $r['log'] as $j => $entry ) {
+					if ( is_array( $entry ) && isset( $entry['note'] ) && '' !== (string) $entry['note'] ) {
+						$r['log'][ $j ]['note'] = '';
+						$changed                = true;
+					}
+				}
+			}
+			if ( $changed ) {
+				$all[ $i ] = $r;
+				++$n;
+			}
+		}
+		if ( $n > 0 ) {
+			self::store( $order, $all );
+		}
+		return $n;
+	}
+
 	/** Write the list and the lookup keys. */
 	private static function store( WC_Order $order, array $all ): void {
 		$state = '';

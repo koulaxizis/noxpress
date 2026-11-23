@@ -13,10 +13,11 @@ The online withdrawal function for WooCommerce (EU Directive 2023/2673): a form 
 
 == Description ==
 
-From 19 June 2026, online shops that sell to EU consumers must offer a withdrawal function: clearly labelled, easy to find, available for the whole withdrawal period, with a confirmation step and an acknowledgement of receipt on a durable medium. Easy Withdrawal adds it to any WooCommerce store.
+From 19 June 2026, online shops that sell to EU consumers must offer a withdrawal function (art. 11a of Directive 2011/83/EU, added by Directive 2023/2673; in Greece art. 3ζα of law 2251/1994, added by law 5317/2026): clearly labelled, easy to find, available for the whole withdrawal period, with a confirmation step and an acknowledgement of receipt on a durable medium. Easy Withdrawal adds it to any WooCommerce store.
 
 **For customers and guests**
 
+* A link on every page (automatic, at the end of the page; on by default) with the wording of the Greek law, «Πατήστε εδώ για υπαναχώρηση», or «Withdraw from contract here» in English. Both texts can be changed. If the shop is live and no menu links to the form while the automatic link is off, the admin shows a warning.
 * A form on any page with the shortcode `[nox_withdrawal]`, in four steps: find the order (order number + billing email, or a list of the customer's own orders), choose products and quantities, review the statement and press "Confirm withdrawal", read the receipt.
 * The statement is recorded the moment it is confirmed, with date and time, and the receipt goes at once to the order's billing email. No email verification step that could push a last-day statement past the deadline, and no way to send email to third parties.
 * Links that skip the lookup: in the customer's order emails, on the thank-you page (both with the order key) and in My Account (orders list and order view, with the status of earlier requests).
@@ -43,6 +44,11 @@ From 19 June 2026, online shops that sell to EU consumers must offer a withdrawa
 * Order notes on every statement and status change, and a metabox on the order screen.
 * Three WooCommerce emails (receipt, store notice, status change) in WooCommerce → Settings → Emails, with the store's template; theme overrides in `woocommerce/emails/`.
 * No custom order statuses: revenue reports (WooCommerce, Revenue Splitter, Store Pulse) stay correct.
+
+**Privacy**
+
+* WordPress's personal data tools (Tools → Export / Erase Personal Data) include the withdrawal statements of an address. The eraser keeps them as the store's record of the consumer's statement (GDPR art. 17(3)(e)) and says so, unless the store removes personal data from orders on request in the WooCommerce settings: then it anonymises the name, email, reason and notes and keeps the rest.
+* Suggested text for the privacy policy (Settings → Privacy).
 
 **Safe by design**
 
@@ -89,7 +95,10 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 == Changelog ==
 
 = 1.3.0 =
-* Personal data: WordPress's exporter and eraser (Tools → Export / Erase Personal Data). The export lists the address's withdrawal requests (by request or billing e-mail); the eraser keeps them and says why: they are the store's record of the consumer's withdrawal statement and the refund.
+* Art. 3ζα of law 2251/1994 (Greek transposition of the EU withdrawal button, law 5317/2026): the default Greek label is now «Πατήστε εδώ για υπαναχώρηση», the wording of the law. A label you never changed («Υπαναχώρηση από τη σύμβαση εδώ») switches by itself; a label you wrote stays.
+* The automatic link at the end of every page is on by default, so the function stays easy to find for the whole withdrawal period. Shops that saved it off keep it off.
+* New warning in the admin (dashboard, plugins screen, plugin pages) when the shop is live, the automatic link is off and no menu links to the form page; it can be hidden by a user who added a link elsewhere.
+* WordPress personal data exporter and eraser for the withdrawal statements, and suggested privacy policy text.
 
 = 1.2.9 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

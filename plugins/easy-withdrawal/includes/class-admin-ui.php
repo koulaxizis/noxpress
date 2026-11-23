@@ -32,6 +32,9 @@ final class EWD_Admin_UI {
 	const NONCE_CSV   = 'ewd_csv';
 	const PER_PAGE    = 20;
 
+	/** User meta: the "no visible entry point" notice was hidden ('1'). */
+	const META_ENTRY_HIDDEN = 'ewd_entry_notice_hidden';
+
 	public static function init(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 70 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
@@ -40,6 +43,7 @@ final class EWD_Admin_UI {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'metabox' ), 30, 2 );
 		add_filter( 'plugin_action_links_' . plugin_basename( EWD_FILE ), array( __CLASS__, 'action_links' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'setup_notice' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'entry_notice' ) );
 	}
 
 	/* =====================================================================
@@ -161,6 +165,92 @@ final class EWD_Admin_UI {
 			return;
 		}
 		echo '<div class="notice notice-warning"><p>' . esc_html__( 'Easy Withdrawal: δεν έχει οριστεί ακόμα η σελίδα της φόρμας υπαναχώρησης.', 'easy-withdrawal' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG_SET ) ) . '">' . esc_html__( 'Ρυθμίσεις', 'easy-withdrawal' ) . '</a></p></div>';
+	}
+
+	/**
+	 * Live mode without a visible, permanent entry point: the automatic
+	 * footer link is off and no navigation menu links to the form page.
+	 * Art. 3ζα ν. 2251/1994 (art. 11a Directive 2011/83/EU) wants the
+	 * function easy to find for the whole withdrawal period. Shown on the
+	 * dashboard, the plugins screen and the plugin's own pages; a user can
+	 * hide it once they have added a link the plugin cannot see (a footer
+	 * block or widget).
+	 */
+	public static function entry_notice(): void {
+		if ( ! current_user_can( self::CAP ) ) {
+			return;
+		}
+		$s = EWD_Settings::get();
+		if ( 'live' !== $s['mode'] || $s['footer_link'] || '' === EWD_Settings::page_url() ) {
+			return;
+		}
+		if ( '1' === (string) get_user_meta( get_current_user_id(), self::META_ENTRY_HIDDEN, true ) ) {
+			return;
+		}
+		global $pagenow;
+		$page = self::current_page();
+		if ( ! in_array( $pagenow, array( 'index.php', 'plugins.php' ), true ) && self::SLUG_MAIN !== $page && self::SLUG_SET !== $page ) {
+			return;
+		}
+		if ( self::menu_links_form() ) {
+			return;
+		}
+		echo '<div class="notice notice-warning"><p>' . esc_html__( 'Easy Withdrawal: η λειτουργία υπαναχώρησης πρέπει να είναι εύκολα προσβάσιμη σε όλη την προθεσμία. Δεν βρέθηκε σύνδεσμος προς τη σελίδα της φόρμας σε κανένα μενού και ο αυτόματος σύνδεσμος στο footer είναι κλειστός.', 'easy-withdrawal' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG_SET ) ) . '">' . esc_html__( 'Ρυθμίσεις', 'easy-withdrawal' ) . '</a></p>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG_SET ) ) . '" style="margin:0 0 8px;">';
+		self::nonce_field();
+		echo '<input type="hidden" name="ewd_action" value="hide_entry_notice" /><button type="submit" class="button-link">' . esc_html__( 'Έχω βάλει σύνδεσμο αλλού (π.χ. σε block του footer): απόκρυψη', 'easy-withdrawal' ) . '</button></form></div>';
+	}
+
+	/** True when a navigation menu item points to the form page. */
+	private static function menu_links_form(): bool {
+		$id = (int) EWD_Settings::get()['page_id'];
+		if ( $id <= 0 ) {
+			return false;
+		}
+		$items = get_posts(
+			array(
+				'post_type'        => 'nav_menu_item',
+				'post_status'      => 'publish',
+				'numberposts'      => 1,
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- admin only, one row.
+					array(
+						'key'   => '_menu_item_object_id',
+						'value' => (string) $id,
+					),
+					array(
+						'key'   => '_menu_item_object',
+						'value' => 'page',
+					),
+				),
+			)
+		);
+		if ( $items ) {
+			return true;
+		}
+		// A custom link with the page's address.
+		$url = untrailingslashit( EWD_Settings::page_url() );
+		if ( '' === $url ) {
+			return false;
+		}
+		$custom = get_posts(
+			array(
+				'post_type'        => 'nav_menu_item',
+				'post_status'      => 'publish',
+				'numberposts'      => 1,
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- admin only, one row.
+					array(
+						'key'     => '_menu_item_url',
+						'value'   => array( $url, $url . '/' ),
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+		return (bool) $custom;
 	}
 
 	/* =====================================================================
@@ -562,6 +652,7 @@ final class EWD_Admin_UI {
 				<div class="ewd-zone">
 					<label class="ewd-check"><input type="checkbox" name="ewd_email_links" value="1" <?php checked( $s['email_links'] ); ?> /> <?php esc_html_e( 'Σύνδεσμος υπαναχώρησης στα emails παραγγελίας του πελάτη και στη σελίδα ευχαριστίας', 'easy-withdrawal' ); ?></label>
 					<label class="ewd-check"><input type="checkbox" name="ewd_footer_link" value="1" <?php checked( $s['footer_link'] ); ?> /> <?php esc_html_e( 'Αυτόματος σύνδεσμος στο τέλος κάθε σελίδας (wp_footer)', 'easy-withdrawal' ); ?></label>
+					<p class="description"><?php esc_html_e( 'Ο νόμος (άρθρο 3ζα ν. 2251/1994) θέλει τη λειτουργία υπαναχώρησης εύκολα προσβάσιμη σε όλη την προθεσμία. Άφησέ τον ανοιχτό, εκτός αν έχεις ήδη σύνδεσμο στο μενού ή στο footer.', 'easy-withdrawal' ); ?></p>
 					<p class="description"><?php esc_html_e( 'Ο αυτόματος σύνδεσμος βγαίνει όπου το θέμα τυπώνει το wp_footer, σε κάποια θέματα κάτω από το footer. Ένας σύνδεσμος στο μενού του footer είναι συνήθως καλύτερος.', 'easy-withdrawal' ); ?></p>
 				</div>
 
@@ -646,6 +737,10 @@ final class EWD_Admin_UI {
 				break;
 			case 'set_status':
 				list( $msgs, $back ) = self::do_set_status();
+				break;
+			case 'hide_entry_notice':
+				update_user_meta( get_current_user_id(), self::META_ENTRY_HIDDEN, '1' );
+				$msgs = array();
 				break;
 			default:
 				$msgs = array( self::msg( 'error', __( 'Άγνωστη ενέργεια.', 'easy-withdrawal' ) ) );

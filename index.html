@@ -218,6 +218,11 @@ section.plugins { padding-bottom: 40px; }
 	color: #f5c97e;
 	background: rgba(224, 168, 79, 0.14);
 }
+.card .meta .badge.compliance {
+	border-color: #4fbf8a;
+	color: #8fe0b8;
+	background: rgba(79, 191, 138, 0.14);
+}
 .card p { color: var(--text); max-width: 46em; }
 .mk-shots { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; margin: 10px 0 12px; align-items: start; }
 .mk-shots img { width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
@@ -761,8 +766,8 @@ footer .heart { color: var(--accent-bright); }
 	<article class="card" id="easy-withdrawal">
 		<h2><a href="#easy-withdrawal">Easy Withdrawal</a></h2>
 		<a class="card-video" href="media/videos/easy-withdrawal.mp4" data-video="easy-withdrawal" data-video-title="Easy Withdrawal" data-i18n="video_btn">▶ Video</a>
-		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span></div>
-		<p data-i18n="ew_desc">The online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673): a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.</p>
+		<div class="meta">v1.3.0 · WooCommerce · MIT<span class="badge beta" data-i18n="badge_beta">beta</span><span class="badge compliance" data-i18n="badge_compliance">compliance</span></div>
+		<p data-i18n="ew_desc">A compliance plugin for any WooCommerce shop: the online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673; in Greece art. 3ζα of law 2251/1994). A link on every page, a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.</p>
 		<details class="more">
 			<summary><span class="more-show" data-i18n="more_show">All features</span><span class="more-hide" data-i18n="more_hide">Fewer details</span></summary>
 		<ul>
@@ -773,6 +778,7 @@ footer .heart { color: var(--accent-bright); }
 			<li data-i18n="ew_li5">Request list with filters, search and CSV; statuses New, In progress, Completed, Disputed; refund form pre-filled in WooCommerce</li>
 			<li data-i18n="ew_li6">Three WooCommerce emails with the store’s template; no custom order statuses, so revenue reports stay correct; HPOS compatible</li>
 			<li data-i18n="ew_li7">Safe by design: test mode for shop managers, EWD_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu</li>
+			<li data-i18n="ew_li8">«Withdraw from contract here» link on every page by default, a warning when the form has no visible link; WordPress privacy export and erase, suggested privacy policy text</li>
 		</ul>
 		</details>
 		<div class="actions">
@@ -2008,7 +2014,7 @@ footer .heart { color: var(--accent-bright); }
 		pf_li7: 'Safe by design: off until enabled, test mode for shop managers, PFM_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
 		pf_li8: 'Book details (1.3.0): pages, year, language, edition, series and ISBN in the product\'s schema (no second node) and a «Publication details» table; a tool that finds page counts in descriptions and fills a pages attribute, with preview and undo',
 		pf_download: 'Download v1.3.4 (.zip)',
-		ew_desc: 'The online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673): a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.',
+		ew_desc: 'A compliance plugin for any WooCommerce shop: the online withdrawal function the EU requires from 19 June 2026 (Directive 2023/2673; in Greece art. 3ζα of law 2251/1994). A link on every page, a form for customers and guests, a two-step «Confirm withdrawal», an email receipt with date and time, and a request list for the store.',
 		ew_li1: 'Form by shortcode in four steps: find the order, choose products and quantities, confirm, receipt; links in order emails, on the thank-you page and in My Account',
 		ew_li2: 'Recorded the moment it is confirmed, receipt to the order’s billing email in the customer’s language; signed tokens between steps, rate limit, no page cache',
 		ew_li3: 'Withdrawal period from order to completion plus delivery and withdrawal days; virtual items from payment',
@@ -2016,6 +2022,7 @@ footer .heart { color: var(--accent-bright); }
 		ew_li5: 'Request list with filters, search and CSV; statuses New, In progress, Completed, Disputed; refund form pre-filled in WooCommerce',
 		ew_li6: 'Three WooCommerce emails with the store’s template; no custom order statuses, so revenue reports stay correct; HPOS compatible',
 		ew_li7: 'Safe by design: test mode for shop managers, EWD_DISABLE emergency switch; bilingual UI and shared «Noxpress» menu',
+		ew_li8: '«Withdraw from contract here» link on every page by default, a warning when the form has no visible link; WordPress privacy export and erase, suggested privacy policy text',
 		ew_download: 'Download v1.3.0 (.zip)',
 		sn_desc: 'Two messages for your customers, without third-party plugins: how much is left for free shipping, with a progress bar, in the cart, mini-cart and checkout, and how many business days delivery takes on the product page.',
 		sn_li1: 'Free shipping threshold read from your WooCommerce shipping zones (or a fixed amount), counted like WooCommerce counts it: coupons, tax display, “won” confirmed by the method itself',
@@ -2351,6 +2358,7 @@ footer .heart { color: var(--accent-bright); }
 		dr_li5: 'Rules list with orders and discount given, a test cart for any date, history of the last 200 changes, JSON backup, test mode, DSR_DISABLE, read-only Abilities, bilingual UI and shared «Noxpress» menu',
 		dr_download: 'Download v1.1.3 (.zip)',
 		badge_beta: 'beta',
+		badge_compliance: 'compliance',
 		more_show: 'All features',
 		more_hide: 'Fewer details',
 		dl_title: 'Your download is ready',
@@ -2528,7 +2536,7 @@ footer .heart { color: var(--accent-bright); }
 		pf_li7: 'Ασφαλές εκ σχεδιασμού: ανενεργό μέχρι να το ενεργοποιήσεις, λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης PFM_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
 		pf_li8: 'Στοιχεία βιβλίου (1.3.0): σελίδες, έτος, γλώσσα, έκδοση, σειρά και ISBN στο schema του προϊόντος (χωρίς δεύτερο κόμβο) και πίνακας «Στοιχεία έκδοσης»· εργαλείο που βρίσκει τις σελίδες στις περιγραφές και γεμίζει ιδιότητα σελίδων, με προεπισκόπηση και αναίρεση',
 		pf_download: 'Λήψη v1.3.4 (.zip)',
-		ew_desc: 'Η λειτουργία υπαναχώρησης που ζητά η ΕΕ από τις 19 Ιουνίου 2026 (Οδηγία 2023/2673): φόρμα για πελάτες και επισκέπτες, «Επιβεβαίωση υπαναχώρησης» σε δύο βήματα, απόδειξη με email με ημερομηνία και ώρα, και λίστα αιτημάτων για το κατάστημα.',
+		ew_desc: 'Plugin συμμόρφωσης για κάθε κατάστημα WooCommerce: η λειτουργία υπαναχώρησης που ζητά η ΕΕ από τις 19 Ιουνίου 2026 (Οδηγία 2023/2673· στην Ελλάδα άρθρο 3ζα ν. 2251/1994). Σύνδεσμος σε κάθε σελίδα, φόρμα για πελάτες και επισκέπτες, «Επιβεβαίωση υπαναχώρησης» σε δύο βήματα, απόδειξη με email με ημερομηνία και ώρα, και λίστα αιτημάτων για το κατάστημα.',
 		ew_li1: 'Φόρμα με shortcode σε τέσσερα βήματα: εύρεση παραγγελίας, προϊόντα και ποσότητες, επιβεβαίωση, απόδειξη· σύνδεσμοι στα email παραγγελίας, στη σελίδα ευχαριστιών και στον λογαριασμό μου',
 		ew_li2: 'Καταγράφεται τη στιγμή της επιβεβαίωσης, απόδειξη στο email χρέωσης στη γλώσσα του πελάτη· υπογεγραμμένα tokens ανάμεσα στα βήματα, όριο προσπαθειών, χωρίς cache σελίδας',
 		ew_li3: 'Προθεσμία από την παραγγελία έως την ολοκλήρωση συν τις ημέρες παράδοσης και υπαναχώρησης· τα εικονικά προϊόντα από την πληρωμή',
@@ -2536,6 +2544,7 @@ footer .heart { color: var(--accent-bright); }
 		ew_li5: 'Λίστα αιτημάτων με φίλτρα, αναζήτηση και CSV· καταστάσεις Νέα, Σε εξέλιξη, Ολοκληρώθηκε, Αμφισβητείται· φόρμα επιστροφής χρημάτων του WooCommerce συμπληρωμένη',
 		ew_li6: 'Τρία email του WooCommerce με το πρότυπο του καταστήματος· χωρίς δικές του καταστάσεις παραγγελίας, ώστε οι αναφορές εσόδων να μένουν σωστές· συμβατό με HPOS',
 		ew_li7: 'Ασφαλές εκ σχεδιασμού: λειτουργία δοκιμής για τους διαχειριστές, διακόπτης έκτακτης ανάγκης EWD_DISABLE· δίγλωσσο UI και κοινό μενού «Noxpress»',
+		ew_li8: 'Σύνδεσμος «Πατήστε εδώ για υπαναχώρηση» σε κάθε σελίδα από προεπιλογή, προειδοποίηση όταν η φόρμα δεν έχει ορατό σύνδεσμο· εξαγωγή και διαγραφή δεδομένων του WordPress, προτεινόμενο κείμενο πολιτικής απορρήτου',
 		ew_download: 'Λήψη v1.3.0 (.zip)',
 		sn_desc: 'Δύο μηνύματα για τον πελάτη, χωρίς plugins τρίτων: πόσα απομένουν για δωρεάν αποστολή, με μπάρα προόδου, σε καλάθι, mini-cart και ταμείο, και σε πόσες εργάσιμες γίνεται η παράδοση στη σελίδα προϊόντος.',
 		sn_li1: 'Όριο δωρεάν αποστολής από τις ζώνες αποστολής του WooCommerce (ή σταθερό ποσό), μετρημένο όπως το μετράει το WooCommerce: κουπόνια, εμφάνιση ΦΠΑ, το «κερδίσατε» επιβεβαιώνεται από την ίδια τη μέθοδο',
@@ -2871,6 +2880,7 @@ footer .heart { color: var(--accent-bright); }
 		dr_li5: 'Λίστα κανόνων με παραγγελίες και έκπτωση που δόθηκε, δοκιμή καλαθιού για οποιαδήποτε ημερομηνία, ιστορικό των τελευταίων 200 αλλαγών, αντίγραφο JSON, λειτουργία δοκιμής, DSR_DISABLE, Abilities μόνο ανάγνωσης, δίγλωσσο περιβάλλον και κοινό μενού «Noxpress»',
 		dr_download: 'Λήψη v1.1.3 (.zip)',
 		badge_beta: 'beta',
+		badge_compliance: 'συμμόρφωση',
 		more_show: 'Όλα τα χαρακτηριστικά',
 		more_hide: 'Λιγότερα',
 		dl_title: 'Η λήψη σου είναι έτοιμη',

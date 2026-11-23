@@ -8,7 +8,8 @@
  *  - page_id         page holding [nox_withdrawal] (0 = none yet)
  *  - days            withdrawal period in days (14–365, default 14)
  *  - grace           days added for delivery after "Completed" (0–60, default 7)
- *  - label_el/_en    text of the buttons and links
+ *  - label_el/_en    text of the buttons and links (default: the wording of
+ *                    art. 3ζα ν. 2251/1994, «Πατήστε εδώ για υπαναχώρηση»)
  *  - instr_el/_en    return instructions in the receipt email and page
  *  - recipients      admin notice recipients (validated emails)
  *  - excl_cats       product_cat term ids excluded from withdrawal
@@ -16,7 +17,9 @@
  *  - consent         consent checkbox for digital items at checkout
  *  - consent_el/_en  its text
  *  - email_links     link in customer order emails and on the thank-you page
- *  - footer_link     automatic link in wp_footer (off by default)
+ *  - footer_link     automatic link in wp_footer (on by default since 1.3.0:
+ *                    the function must stay easy to find for the whole
+ *                    withdrawal period; sites that saved it off keep it off)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,6 +31,9 @@ final class EWD_Settings {
 	/** Product meta of the "personalised" flag ('yes' | absent). */
 	const META_PERSONAL = '_ewd_personalized';
 
+	/** Default Greek label before 1.3.0: replaced by the new default when it was never changed. */
+	const LEGACY_LABEL_EL = 'Υπαναχώρηση από τη σύμβαση εδώ';
+
 	/** @var array|null Per-request cache. */
 	private static $cache = null;
 
@@ -37,7 +43,7 @@ final class EWD_Settings {
 			'page_id'       => 0,
 			'days'          => 14,
 			'grace'         => 7,
-			'label_el'      => 'Υπαναχώρηση από τη σύμβαση εδώ',
+			'label_el'      => 'Πατήστε εδώ για υπαναχώρηση',
 			'label_en'      => 'Withdraw from contract here',
 			'instr_el'      => '',
 			'instr_en'      => '',
@@ -48,7 +54,7 @@ final class EWD_Settings {
 			'consent_el'    => 'Ζητώ να λάβω αμέσως το ψηφιακό περιεχόμενο και γνωρίζω ότι έτσι χάνω το δικαίωμα υπαναχώρησης για αυτό.',
 			'consent_en'    => 'I ask to receive the digital content immediately and I acknowledge that I thereby lose my right of withdrawal for it.',
 			'email_links'   => true,
-			'footer_link'   => false,
+			'footer_link'   => true,
 		);
 	}
 
@@ -79,6 +85,9 @@ final class EWD_Settings {
 		foreach ( array( 'label_el', 'label_en', 'consent_el', 'consent_en' ) as $k ) {
 			$v       = isset( $raw[ $k ] ) && is_string( $raw[ $k ] ) ? trim( sanitize_text_field( $raw[ $k ] ) ) : '';
 			$s[ $k ] = '' !== $v ? mb_substr( $v, 0, 300 ) : $d[ $k ];
+		}
+		if ( self::LEGACY_LABEL_EL === $s['label_el'] ) {
+			$s['label_el'] = $d['label_el'];
 		}
 		foreach ( array( 'instr_el', 'instr_en' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) && is_string( $raw[ $k ] ) ? mb_substr( trim( sanitize_textarea_field( $raw[ $k ] ) ), 0, 3000 ) : '';

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          Easy Withdrawal
  * Plugin URI:           https://noxpress.tech
- * Description:          Λειτουργία υπαναχώρησης για WooCommerce (Οδηγία ΕΕ 2023/2673): φόρμα για πελάτες και επισκέπτες, επιλογή προϊόντων και ποσοτήτων, επιβεβαίωση σε δύο βήματα, απόδειξη με email, εξαιρέσεις (εξατομικευμένα, ψηφιακά με συναίνεση), καταγραφή στην παραγγελία και λίστα αιτημάτων στο admin.
+ * Description:          Λειτουργία υπαναχώρησης για WooCommerce (Οδηγία ΕΕ 2023/2673, άρθρο 3ζα ν. 2251/1994): φόρμα για πελάτες και επισκέπτες, επιλογή προϊόντων και ποσοτήτων, επιβεβαίωση σε δύο βήματα, απόδειξη με email, εξαιρέσεις (εξατομικευμένα, ψηφιακά με συναίνεση), καταγραφή στην παραγγελία και λίστα αιτημάτων στο admin.
  * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
@@ -38,6 +38,7 @@
  *  - EWD_Checkout   → consent checkbox for digital items (classic and block
  *                     checkout), "personalised" flag on products
  *  - EWD_Emails     → WC_Email classes: receipt, admin notice, status change
+ *  - EWD_Privacy    → personal data exporter / eraser, privacy policy text
  *  - EWD_Admin_UI   → menu, requests list and detail, CSV, settings, order
  *                     metabox, refund pre-fill, footer
  *
@@ -110,15 +111,13 @@ final class Easy_Withdrawal {
 		require_once EWD_PATH . 'includes/class-requests.php';
 		require_once EWD_PATH . 'includes/class-emails.php';
 		require_once EWD_PATH . 'includes/class-checkout.php';
+		require_once EWD_PATH . 'includes/class-privacy.php';
 
 		// Emails, the product flag and the checkout consent work in every
 		// context: they record data, they do not change what visitors see
 		// of the theme.
 		EWD_Emails::init();
 		EWD_Checkout::init();
-
-		// Personal data exporter / eraser (Tools → Export / Erase Personal Data).
-		require_once EWD_PATH . 'includes/class-privacy.php';
 		EWD_Privacy::init();
 
 		// Emergency switch (Bible §14): no front-end hook at all.

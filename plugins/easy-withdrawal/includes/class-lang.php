@@ -33,12 +33,6 @@ final class EWD_Lang {
 	private static $force = '';
 
 	private static $dict = array(
-		// Privacy exporter / eraser.
-		'Easy Withdrawal: αιτήματα υπαναχώρησης' => 'Easy Withdrawal: withdrawal requests',
-		'Αιτήματα υπαναχώρησης' => 'Withdrawal requests',
-		'Ημερομηνία' => 'Date',
-		'Λόγος' => 'Reason',
-		'Κρατήθηκαν %d αιτήματα υπαναχώρησης: είναι το αρχείο του καταστήματος για τη δήλωση υπαναχώρησης και την επιστροφή χρημάτων, και μένουν με την παραγγελία.' => '%d withdrawal requests were kept: they are the store\'s record of the withdrawal statement and the refund, and stay with the order.',
 		'Το Easy Withdrawal χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Easy Withdrawal requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 		'Easy Withdrawal'                                         => 'Easy Withdrawal',
 		'Easy Withdrawal:'                                        => 'Easy Withdrawal:',
@@ -222,6 +216,15 @@ final class EWD_Lang {
 		'More plugins at'                                         => 'More plugins at',
 		'♡ Στήριξε το Noxpress'                          => '♡ Support Noxpress',
 		'Noxpress Dashboard'                                      => 'Noxpress Dashboard',
+		// 1.3.0: entry point, privacy tools.
+		'Ο νόμος (άρθρο 3ζα ν. 2251/1994) θέλει τη λειτουργία υπαναχώρησης εύκολα προσβάσιμη σε όλη την προθεσμία. Άφησέ τον ανοιχτό, εκτός αν έχεις ήδη σύνδεσμο στο μενού ή στο footer.' => 'The law (art. 11a of Directive 2011/83/EU; in Greece art. 3ζα of law 2251/1994) wants the withdrawal function easy to find for the whole withdrawal period. Leave it on unless you already have a link in the menu or the footer.',
+		'Easy Withdrawal: η λειτουργία υπαναχώρησης πρέπει να είναι εύκολα προσβάσιμη σε όλη την προθεσμία. Δεν βρέθηκε σύνδεσμος προς τη σελίδα της φόρμας σε κανένα μενού και ο αυτόματος σύνδεσμος στο footer είναι κλειστός.' => 'Easy Withdrawal: the withdrawal function must be easy to find for the whole withdrawal period. No menu links to the form page and the automatic footer link is off.',
+		'Έχω βάλει σύνδεσμο αλλού (π.χ. σε block του footer): απόκρυψη' => 'I have added a link elsewhere (e.g. in a footer block): hide',
+		'Easy Withdrawal: δηλώσεις υπαναχώρησης'                  => 'Easy Withdrawal: withdrawal statements',
+		'Δηλώσεις υπαναχώρησης'                                   => 'Withdrawal statements',
+		'Easy Withdrawal: κρατήθηκαν %d δηλώσεις υπαναχώρησης. Είναι το αρχείο του καταστήματος για τη δήλωση του καταναλωτή και μπορεί να χρειαστούν για νομικές αξιώσεις (ΓΚΠΔ άρθρο 17 παρ. 3 στοιχ. ε). Σβήνονται μαζί με την παραγγελία, ή ανωνυμοποιούνται αν ενεργοποιήσεις τη διαγραφή προσωπικών δεδομένων από τις παραγγελίες στις ρυθμίσεις του WooCommerce.' => 'Easy Withdrawal: %d withdrawal statements were kept. They are the store\'s record of the consumer\'s statement and may be needed for legal claims (GDPR art. 17(3)(e)). They are deleted with the order, or anonymised if you turn on removing personal data from orders in the WooCommerce settings.',
+		'Αν υπαναχωρήσεις από μια αγορά μέσα από τη φόρμα υπαναχώρησης, κρατάμε μαζί με την παραγγελία τη δήλωσή σου: το όνομα και το email σου, τα προϊόντα και τις ποσότητες, την προαιρετική αιτιολογία, την ημερομηνία και την ώρα, τη γλώσσα και την πορεία της επιστροφής. Σου στέλνουμε αμέσως απόδειξη παραλαβής με email. Η δήλωση είναι το αρχείο μας για την υπαναχώρησή σου και την κρατάμε όσο κρατάμε και την παραγγελία. Για να εμποδίσουμε την κατάχρηση μετράμε τις αποτυχημένες αναζητήσεις παραγγελίας ανά διεύθυνση IP για 15 λεπτά· η διεύθυνση κρατιέται μόνο ως κρυπτογραφημένο αποτύπωμα.' => 'If you withdraw from a purchase through the withdrawal form, we keep your statement with the order: your name and email, the products and quantities, the optional reason, the date and time, the language and the progress of the return. We email you an acknowledgement of receipt at once. The statement is our record of your withdrawal and we keep it as long as we keep the order. To prevent abuse we count failed order lookups per IP address for 15 minutes; the address is kept only as a hash.',
+		'Αν το κατάστημα ζητά συναίνεση για την άμεση παράδοση ψηφιακού περιεχομένου, κρατάμε με την παραγγελία την ημερομηνία και το κείμενο της συναίνεσης.' => 'If the store asks for consent to the immediate supply of digital content, we keep the date and the text of the consent with the order.',
 	);
 
 	public static function init(): void {
