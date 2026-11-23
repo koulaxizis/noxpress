@@ -1,6 +1,6 @@
 {
-  "display": 1914,
-  "total": 1914,
+  "display": 1919,
+  "total": 1919,
   "offset": 5,
   "updated": "2026-11-23",
   "assets": {
@@ -2362,7 +2362,7 @@
     },
     "781948369": {
       "file": "nox-ew-1.3.0/easy-withdrawal.zip",
-      "count": 1
+      "count": 2
     },
     "781971994": {
       "file": "nox-ta-1.11.0/trade-accounts.zip",
@@ -2390,18 +2390,46 @@
     },
     "781991283": {
       "file": "nox-mr-1.0.4/mail-relay.zip",
-      "count": 0
+      "count": 1
     },
     "781991513": {
       "file": "nox-ev-1.1.4/events.zip",
-      "count": 0
+      "count": 1
     },
     "781991754": {
       "file": "nox-gc-1.2.0/gift-cards.zip",
-      "count": 0
+      "count": 1
     },
     "782005720": {
       "file": "nox-dr-1.2.0/discount-rules.zip",
+      "count": 1
+    },
+    "782047042": {
+      "file": "nox-rs-1.22.0/revenue-splitter.zip",
+      "count": 0
+    },
+    "782047441": {
+      "file": "nox-oc-1.5.0/oros-connect.zip",
+      "count": 0
+    },
+    "782047659": {
+      "file": "nox-sb-1.13.5/site-bridge.zip",
+      "count": 0
+    },
+    "782047834": {
+      "file": "nox-ce-1.4.0/checkout-extras.zip",
+      "count": 0
+    },
+    "782047970": {
+      "file": "nox-lo-1.6.2/live-operator.zip",
+      "count": 0
+    },
+    "782048370": {
+      "file": "nox-mm-1.0.4/maintenance-mode.zip",
+      "count": 0
+    },
+    "782048603": {
+      "file": "nox-vl-1.0.5/visitor-language.zip",
       "count": 0
     }
   },
