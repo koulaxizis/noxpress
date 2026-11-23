@@ -73,6 +73,9 @@ foreach ( array( 'revenue-splitter', 'store-pulse', 'smart-formatter', 'theme-pa
 	}
 }
 
+// 1.3.0: the hidden "no entry point" notice (user meta is network-wide).
+delete_metadata( 'user', 0, 'ewd_entry_notice_hidden', '', true );
+
 if ( ! $ewd_suite_left ) {
 	global $wpdb;
 
