@@ -3,7 +3,7 @@
  * Plugin Name:          Checkout Extras
  * Plugin URI:           https://noxpress.tech
  * Description:          Τέσσερα μικρά πράγματα γύρω από το ταμείο, σε ένα plugin: «Είναι δώρο» με αφιέρωση και προαιρετική χρέωση συσκευασίας, μήνυμα και προτεινόμενα προϊόντα στη σελίδα ευχαριστίας, κουπόνι ευχαριστίας για την επόμενη παραγγελία, μόνο σε πληρωμένες παραγγελίες, με μέτρηση χρήσης και καθαρισμό των ληγμένων, και διακοπές καταστήματος: το site μένει ανοιχτό, οι αγορές κλείνουν (ή γίνονται δεκτές για αποστολή μετά), με ημερομηνίες που ανοίγουν και κλείνουν μόνες τους.
- * Version:              1.2.4
+ * Version:              1.3.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -57,6 +57,11 @@
  * Noxpress_Core::purge_page_cache().
  *
  * Deviations from the Bible (with reason):
+ *  - §1.1 / §12 (never touch other plugins' data): the cart retention
+ *    (CKE_Carts, off by default) deletes old rows of Cart Abandonment
+ *    Recovery for WooCommerce, because that plugin keeps personal data
+ *    forever and has no retention setting or API (GDPR art. 5(1)(e)). Only
+ *    when the owner sets the days; only its cart and child tables.
  *  - §14.4 (never in AJAX or REST): the gift option and its fee live in
  *    WooCommerce's checkout AJAX (update_order_review, the §14.4 exception),
  *    and the block checkout gets two additional checkout fields plus a
@@ -78,7 +83,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CKE_VERSION', '1.2.4' );
+define( 'CKE_VERSION', '1.3.0' );
 define( 'CKE_FILE', __FILE__ );
 define( 'CKE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CKE_URL', plugin_dir_url( __FILE__ ) );
@@ -123,6 +128,7 @@ final class Checkout_Extras {
 		require_once CKE_PATH . 'includes/class-settings.php';
 		require_once CKE_PATH . 'includes/class-gift.php';
 		require_once CKE_PATH . 'includes/class-coupon.php';
+		require_once CKE_PATH . 'includes/class-carts.php';
 		require_once CKE_PATH . 'includes/class-thankyou.php';
 		require_once CKE_PATH . 'includes/class-emails.php';
 		require_once CKE_PATH . 'includes/class-vacation.php';
@@ -132,6 +138,7 @@ final class Checkout_Extras {
 		// (admin screens, emails, the background jobs), whatever the mode.
 		CKE_Gift::init_display();
 		CKE_Coupon::init();
+		CKE_Carts::init();
 		CKE_Emails::init();
 		CKE_Vacation::init_display();
 		CKE_Abilities::init();

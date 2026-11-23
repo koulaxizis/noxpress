@@ -808,6 +808,14 @@ final class CKE_Admin_UI {
 				?>
 				<p class="description"><?php esc_html_e( 'Χωρίς αυτή την επιλογή τα κουπόνια μένουν, γιατί οι πελάτες κρατούν τους κωδικούς. Το «δώρο» και ο κωδικός πάνω στις παραγγελίες μένουν πάντα: είναι μέρος της παραγγελίας.', 'checkout-extras' ); ?></p>
 			</div>
+			<h2 class="cke-h2"><?php esc_html_e( 'Εγκαταλελειμμένα καλάθια', 'checkout-extras' ); ?></h2>
+			<div class="cke-zone">
+				<?php self::input( 'cke_ca_days', (string) $s['ca_days'], __( 'Διαγραφή καλαθιών μετά από', 'checkout-extras' ), __( 'ημέρες (0 = ποτέ)', 'checkout-extras' ), 'number' ); ?>
+				<p class="description"><?php esc_html_e( 'Για το Cart Abandonment Recovery for WooCommerce, που κρατά κάθε καλάθι (email, προϊόντα, στοιχεία ταμείου) για πάντα. Μία φορά τη μέρα σβήνονται τα καλάθια που είναι παλαιότερα από αυτές τις ημέρες, μαζί με το ιστορικό των email τους (GDPR, ελαχιστοποίηση δεδομένων).', 'checkout-extras' ); ?></p>
+				<?php if ( ! CKE_Carts::available() ) : ?>
+					<p class="description"><?php esc_html_e( 'Το Cart Abandonment Recovery δεν βρέθηκε σε αυτό το site: η ρύθμιση δεν κάνει τίποτα.', 'checkout-extras' ); ?></p>
+				<?php endif; ?>
+			</div>
 			<p class="cke-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'checkout-extras' ); ?></button></p>
 		</form>
 
@@ -1111,8 +1119,9 @@ final class CKE_Admin_UI {
 	}
 
 	private static function do_save_tools(): array {
-		$raw = self::collect( CKE_Settings::get(), array( 'lang' ), array( 'c_delete_on_uninstall' ), array(), array() );
+		$raw = self::collect( CKE_Settings::get(), array( 'lang', 'ca_days' ), array( 'c_delete_on_uninstall' ), array(), array() );
 		CKE_Settings::save( $raw );
+		CKE_Carts::schedule();
 		return array( self::msg( 'success', __( 'Οι ρυθμίσεις αποθηκεύτηκαν.', 'checkout-extras' ) ) );
 	}
 

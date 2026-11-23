@@ -26,6 +26,12 @@ final class CKE_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		// 1.3.0: cart retention.
+		'Εγκαταλελειμμένα καλάθια' => 'Abandoned carts',
+		'Διαγραφή καλαθιών μετά από' => 'Delete carts after',
+		'ημέρες (0 = ποτέ)' => 'days (0 = never)',
+		'Για το Cart Abandonment Recovery for WooCommerce, που κρατά κάθε καλάθι (email, προϊόντα, στοιχεία ταμείου) για πάντα. Μία φορά τη μέρα σβήνονται τα καλάθια που είναι παλαιότερα από αυτές τις ημέρες, μαζί με το ιστορικό των email τους (GDPR, ελαχιστοποίηση δεδομένων).' => 'For Cart Abandonment Recovery for WooCommerce, which keeps every cart (e-mail, products, checkout details) forever. Once a day the carts older than these days are deleted, with their e-mail history (GDPR, data minimisation).',
+		'Το Cart Abandonment Recovery δεν βρέθηκε σε αυτό το site: η ρύθμιση δεν κάνει τίποτα.' => 'Cart Abandonment Recovery was not found on this site: the setting does nothing.',
 		'Το Checkout Extras χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Checkout Extras requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 		'Κουπόνι ευχαριστίας' => 'Thank-you coupon',
 		'Στέλνεται στον πελάτη όταν δημιουργείται το κουπόνι ευχαριστίας, μόνο αν στο Checkout Extras έχεις διαλέξει «Χωριστό email». Αλλιώς το κουπόνι μπαίνει στο email της παραγγελίας.' => 'Sent to the customer when the thank-you coupon is created, only if "Separate email" is chosen in Checkout Extras. Otherwise the coupon goes into the order email.',
