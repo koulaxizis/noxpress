@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · noxpress</title>
+<meta name="description" content="Privacy at noxpress: who is responsible, what noxpress.tech, the plugins and the Android apps do with data. No cookies, no tracking.">
+<link rel="canonical" href="https://noxpress.tech/privacy/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Privacy · noxpress">
+<meta property="og:description" content="Privacy at noxpress: who is responsible, what noxpress.tech, the plugins and the Android apps do with data. No cookies, no tracking.">
+<meta property="og:url" content="https://noxpress.tech/privacy/">
+<meta property="og:site_name" content="noxpress">
+<meta name="theme-color" content="#0d0f14">
+<link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+	font-family: "Inter";
+	src: url("/fonts/inter.woff2") format("woff2");
+	font-weight: 400 800;
+	font-style: normal;
+	font-display: swap;
+}
+:root {
+	--bg: #0d0f14;
+	--surface: #14161d;
+	--border: #262a35;
+	--text: #e4e2f5;
+	--muted: #9b97b8;
+	--heading: #f2f0fe;
+	--accent: #6d4aff;
+	--link: #b3a4ff;
+	--on-accent: #ffffff;
+	--font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+	background: var(--bg);
+	color: var(--text);
+	font: 16px/1.65 var(--font);
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 0 24px;
+}
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+header { padding: 64px 0 36px; }
+.header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.wordmark { font-size: clamp(1.9rem, 5vw, 2.8rem); font-weight: 700; letter-spacing: -0.02em; color: var(--heading); text-decoration: none; }
+.wordmark .dot { color: var(--accent); }
+h1 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 650; color: var(--heading); margin-top: 18px; letter-spacing: -0.01em; }
+.intro { color: var(--muted); margin-top: 10px; font-size: 1.05rem; max-width: 38em; }
+.lang-toggle {
+	flex-shrink: 0; margin-top: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+	color: var(--link); font: 600 0.8rem/1 var(--font); letter-spacing: 0.08em; text-transform: uppercase;
+	padding: 9px 14px; cursor: pointer; min-height: 36px;
+}
+.lang-toggle:hover { border-color: var(--accent); }
+section { padding: 28px 0; border-top: 1px solid var(--border); }
+h2 { font-size: 1.3rem; font-weight: 600; color: var(--heading); margin-bottom: 6px; }
+h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 22px 0 10px; font-weight: 600; }
+section > p { max-width: 42em; }
+.note { color: var(--muted); font-size: 0.92rem; margin-top: 14px; }
+.products { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.product-link {
+	display: flex; flex-direction: column; gap: 4px; height: 100%; text-decoration: none; color: var(--text);
+	background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; transition: border-color .15s ease;
+}
+.product-link:hover { border-color: var(--accent); }
+.product-link img { width: 100%; height: auto; aspect-ratio: 1; border-radius: 6px; background: #ece8e1; display: block; margin-bottom: 8px; }
+.product-name { font-weight: 600; color: var(--heading); }
+.product-price { color: var(--muted); font-size: 0.92rem; }
+.actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+	display: inline-flex; align-items: center; min-height: 40px; padding: 8px 16px; border-radius: 6px; text-decoration: none;
+	font-size: 0.92rem; font-weight: 500; border: 1px solid var(--border); color: var(--text);
+}
+.btn:hover { border-color: var(--accent); color: var(--link); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.1); color: var(--on-accent); }
+.services { list-style: none; margin-top: 12px; max-width: 34em; }
+.services li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.services .price { color: var(--muted); white-space: nowrap; }
+.free { margin-top: 4px; padding: 18px 20px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--surface); }
+footer { margin-top: 24px; padding: 24px 0 48px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; text-align: center; }
+footer a { color: var(--link); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer p + p { margin-top: 6px; }
+@media (max-width: 640px) {
+	body { padding: 0 16px; }
+	header { padding: 40px 0 28px; }
+	.products { gap: 8px; }
+	.product-link { padding: 7px; font-size: 0.85rem; }
+	.product-link img { margin-bottom: 4px; }
+	.product-price { font-size: 0.8rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.plist { margin: 10px 0 0 1.2em; max-width: 42em; }
+.plist li + li { margin-top: 8px; }
+.facts { list-style: none; margin-top: 12px; max-width: 34em; }
+.facts li { padding: 7px 0; border-bottom: 1px solid var(--border); }
+code { font-size: 0.9em; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+
+<header>
+	<div class="header-row">
+		<div>
+			<a class="wordmark" href="/">noxpress<span class="dot">.</span></a>
+			<h1 data-en="Privacy" data-el="Απόρρητο">Privacy</h1>
+			<p class="intro" data-en="What noxpress.tech, the noxpress plugins and the Android apps do with personal data. In short: no cookies, no tracking, nothing sent to us." data-el="Τι κάνουν με τα προσωπικά δεδομένα το noxpress.tech, τα plugins noxpress και οι εφαρμογές Android. Με λίγα λόγια: κανένα cookie, κανένα tracking, τίποτα δεν στέλνεται σε εμάς.">What noxpress.tech, the noxpress plugins and the Android apps do with personal data. In short: no cookies, no tracking, nothing sent to us.</p>
+		</div>
+		<button type="button" class="lang-toggle" id="langToggle" aria-label="Εναλλαγή γλώσσας / Switch language">ΕΛ</button>
+	</div>
+</header>
+
+<main>
+	<section id="who" aria-labelledby="whoT">
+		<h2 id="whoT" data-en="Who is responsible" data-el="Ποιος είναι υπεύθυνος">Who is responsible</h2>
+		<p data-en="noxpress.tech, the noxpress plugins and the Android apps are the work of:" data-el="Το noxpress.tech, τα plugins noxpress και οι εφαρμογές Android είναι έργο του:">noxpress.tech, the noxpress plugins and the Android apps are the work of:</p>
+		<ul class="facts"><li data-en="Christos Koulaxizis (Κουλαξίζης Χρήστος)" data-el="Κουλαξίζης Χρήστος">Christos Koulaxizis (Κουλαξίζης Χρήστος)</li><li data-en="Neas Dexamenis 3, 13341 Ano Liosia, Greece" data-el="Νέας Δεξαμενής 3, 13341 Άνω Λιόσια">Neas Dexamenis 3, 13341 Ano Liosia, Greece</li><li data-en="Phone: +30 210 2480250" data-el="Τηλέφωνο: 210 2480250">Phone: +30 210 2480250</li><li><span data-en="E-mail: " data-el="Email: ">E-mail: </span><a href="mailto:hub@glarolykoi.net">hub@glarolykoi.net</a></li><li data-en="VAT number (ΑΦΜ): 122245588, tax office ΚΕΦΟΔΕ Αττικής" data-el="ΑΦΜ: 122245588, ΔΟΥ ΚΕΦΟΔΕ Αττικής">VAT number (ΑΦΜ): 122245588, tax office ΚΕΦΟΔΕ Αττικής</li><li data-en="General Commercial Registry (ΓΕΜΗ): 159901103000" data-el="ΓΕΜΗ: 159901103000">General Commercial Registry (ΓΕΜΗ): 159901103000</li></ul>
+		<p class="note" data-en="For anything about your data, write to hub@glarolykoi.net." data-el="Για οτιδήποτε αφορά τα δεδομένα σας, γράψτε στο hub@glarolykoi.net.">For anything about your data, write to hub@glarolykoi.net.</p>
+	</section>
+	<section id="site" aria-labelledby="siteT">
+		<h2 id="siteT" data-en="This website" data-el="Ο ιστότοπος">This website</h2>
+		<p data-en="noxpress.tech has no cookies, no analytics, no ads and no other tracking. Fonts and images load from the site itself." data-el="Το noxpress.tech δεν έχει cookies, analytics, διαφημίσεις ή άλλο tracking. Οι γραμματοσειρές και οι εικόνες φορτώνουν από τον ίδιο τον ιστότοπο.">noxpress.tech has no cookies, no analytics, no ads and no other tracking. Fonts and images load from the site itself.</p>
+		<ul class="plist"><li data-en="Hosting: the site is hosted on GitHub Pages (GitHub, Inc.). Like every web server, GitHub logs visitors’ IP addresses to keep the service secure. We have no access to those logs." data-el="Φιλοξενία: ο ιστότοπος φιλοξενείται στο GitHub Pages (GitHub, Inc.). Όπως κάθε web server, το GitHub καταγράφει τη διεύθυνση IP των επισκεπτών για την ασφάλεια της υπηρεσίας. Εμείς δεν έχουμε πρόσβαση σε αυτά τα αρχεία.">Hosting: the site is hosted on GitHub Pages (GitHub, Inc.). Like every web server, GitHub logs visitors’ IP addresses to keep the service secure. We have no access to those logs.</li><li data-en="Storage in your browser: the site keeps the language you chose (nx_lang) in localStorage, and when you last saw the support note in the download window (nx_dl_support_seen, nx_dl_support_off), so it does not show again for 30 days. These stay on your device and are never sent anywhere. Clear them at any time from your browser settings." data-el="Αποθήκευση στον browser σας: ο ιστότοπος κρατά στο localStorage τη γλώσσα που διαλέξατε (nx_lang) και πότε είδατε τελευταία φορά το μήνυμα υποστήριξης στο παράθυρο λήψης (nx_dl_support_seen, nx_dl_support_off), ώστε να μην το ξαναδείτε πριν περάσουν 30 ημέρες. Αυτά μένουν στη συσκευή σας και δεν στέλνονται πουθενά. Τα σβήνετε όποτε θέλετε από τις ρυθμίσεις του browser.">Storage in your browser: the site keeps the language you chose (nx_lang) in localStorage, and when you last saw the support note in the download window (nx_dl_support_seen, nx_dl_support_off), so it does not show again for 30 days. These stay on your device and are never sent anywhere. Clear them at any time from your browser settings.</li><li data-en="Download counter: the number of downloads adds up the totals GitHub gives for each file. It is not about people and does not record who downloaded what." data-el="Μετρητής λήψεων: ο αριθμός λήψεων αθροίζει τα σύνολα που δίνει το GitHub για κάθε αρχείο. Δεν αφορά πρόσωπα και δεν καταγράφει ποιος κατέβασε τι.">Download counter: the number of downloads adds up the totals GitHub gives for each file. It is not about people and does not record who downloaded what.</li></ul>
+		<p class="note"><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener" data-en="GitHub privacy statement" data-el="Δήλωση απορρήτου του GitHub">GitHub privacy statement</a></p>
+	</section>
+	<section id="others" aria-labelledby="othersT">
+		<h2 id="othersT" data-en="Downloads and links to others" data-el="Λήψεις και σύνδεσμοι σε άλλους">Downloads and links to others</h2>
+		<p data-en="Downloads and some links send you to other services, under their own terms:" data-el="Οι λήψεις και κάποιοι σύνδεσμοι σας στέλνουν σε άλλες υπηρεσίες, με δικούς τους όρους:">Downloads and some links send you to other services, under their own terms:</p>
+		<ul class="plist"><li data-en="Plugin and app files download from GitHub Releases, so GitHub sees your IP address." data-el="Τα αρχεία των plugins και των εφαρμογών κατεβαίνουν από τα GitHub Releases, άρα το GitHub βλέπει τη διεύθυνση IP σας.">Plugin and app files download from GitHub Releases, so GitHub sees your IP address.</li><li data-en="The F-Droid repository address apps.koulaxizis.workers.dev passes through Cloudflare on its way to GitHub Pages. We keep nothing from it about you." data-el="Η διεύθυνση του αποθετηρίου F-Droid apps.koulaxizis.workers.dev περνά από το Cloudflare προς το GitHub Pages. Εμείς δεν κρατάμε από εκεί τίποτα για εσάς.">The F-Droid repository address apps.koulaxizis.workers.dev passes through Cloudflare on its way to GitHub Pages. We keep nothing from it about you.</li><li data-en="Merch is sold by the glarolykoi.net shop, under its own privacy policy. Donations are paid on Viva’s payment page; from a donation we receive only what Viva passes on for the transaction, and we keep it as long as tax law requires." data-el="Τα αντικείμενα πουλιούνται στο κατάστημα glarolykoi.net, με τον δικό του όρο απορρήτου. Οι δωρεές πληρώνονται στη σελίδα πληρωμής της Viva· από μια δωρεά λαμβάνουμε μόνο όσα δίνει η Viva για τη συναλλαγή και τα κρατάμε όσο ορίζει η φορολογική νομοθεσία.">Merch is sold by the glarolykoi.net shop, under its own privacy policy. Donations are paid on Viva’s payment page; from a donation we receive only what Viva passes on for the transaction, and we keep it as long as tax law requires.</li><li data-en="koulaxizis.gr, useoros.online, nulljsfx.tech and fdroid.link have their own terms." data-el="Τα koulaxizis.gr, useoros.online, nulljsfx.tech και fdroid.link έχουν τους δικούς τους όρους.">koulaxizis.gr, useoros.online, nulljsfx.tech and fdroid.link have their own terms.</li></ul>
+	</section>
+	<section id="plugins" aria-labelledby="pluginsT">
+		<h2 id="pluginsT" data-en="The plugins on your site" data-el="Τα plugins στο δικό σας site">The plugins on your site</h2>
+		<p data-en="noxpress plugins run on your own WordPress. Your customers’ data stays on your server and you are responsible for it. We never see or receive it." data-el="Τα plugins noxpress τρέχουν στο δικό σας WordPress. Τα δεδομένα των πελατών σας μένουν στον δικό σας server και υπεύθυνος για αυτά είστε εσείς. Εμείς δεν τα βλέπουμε και δεν τα λαμβάνουμε.">noxpress plugins run on your own WordPress. Your customers’ data stays on your server and you are responsible for it. We never see or receive it.</p>
+		<ul class="plist"><li data-en="Update check: every 12 hours the noxpress Hub reads noxpress.tech/updates.json and downloads updates from GitHub. Like every WordPress request, it carries the WordPress version and your site’s address in the User-Agent. We do not record or see them. A coming Hub release will send only “Noxpress-Hub/version”." data-el="Έλεγχος ενημερώσεων: το noxpress Hub διαβάζει κάθε 12 ώρες το noxpress.tech/updates.json και κατεβάζει τις ενημερώσεις από το GitHub. Όπως κάθε αίτημα του WordPress, φέρνει στο User-Agent την έκδοση του WordPress και τη διεύθυνση του site σας. Δεν τα καταγράφουμε και δεν τα βλέπουμε. Σε επόμενη έκδοση του Hub θα στέλνει μόνο «Noxpress-Hub/έκδοση».">Update check: every 12 hours the noxpress Hub reads noxpress.tech/updates.json and downloads updates from GitHub. Like every WordPress request, it carries the WordPress version and your site’s address in the User-Agent. We do not record or see them. A coming Hub release will send only “Noxpress-Hub/version”.</li><li data-en="No other contact with us: the plugins have no telemetry, never “phone home” and have no licence checks. The ones that connect to other services (for example Viber, Dropbox, orOS) do so only after you set them up, directly to those services." data-el="Καμία άλλη επικοινωνία μαζί μας: τα plugins δεν έχουν telemetry, δεν «τηλεφωνούν σπίτι» και δεν έχουν άδειες χρήσης. Όσα συνδέονται με άλλες υπηρεσίες (για παράδειγμα Viber, Dropbox, orOS) το κάνουν μόνο αφού τα ρυθμίσετε εσείς, απευθείας προς αυτές.">No other contact with us: the plugins have no telemetry, never “phone home” and have no licence checks. The ones that connect to other services (for example Viber, Dropbox, orOS) do so only after you set them up, directly to those services.</li><li data-en="Privacy tools: every plugin that keeps personal data works with WordPress’s “Export / Erase Personal Data” tools, and adds its text to the privacy policy guide, so you can complete your own page." data-el="Εργαλεία απορρήτου: κάθε plugin που κρατά προσωπικά δεδομένα συνδέεται με τα εργαλεία του WordPress «Εξαγωγή / Διαγραφή προσωπικών δεδομένων» και προσθέτει το κείμενό του στον οδηγό πολιτικής απορρήτου, για να συμπληρώσετε τη δική σας σελίδα.">Privacy tools: every plugin that keeps personal data works with WordPress’s “Export / Erase Personal Data” tools, and adds its text to the privacy policy guide, so you can complete your own page.</li></ul>
+		<p class="note"><a href="https://github.com/koulaxizis/noxpress/blob/main/SECURITY.md" rel="noopener" data-en="Security fixes and personal data breaches: SECURITY.md" data-el="Διορθώσεις ασφαλείας και παραβιάσεις δεδομένων: SECURITY.md">Security fixes and personal data breaches: SECURITY.md</a></p>
+	</section>
+	<section id="apps" aria-labelledby="appsT">
+		<h2 id="appsT" data-en="Android apps" data-el="Εφαρμογές Android">Android apps</h2>
+		<p data-en="The apps have no account, no analytics, no ads and no third-party libraries that send data." data-el="Οι εφαρμογές δεν έχουν λογαριασμό, analytics, διαφημίσεις ή βιβλιοθήκες τρίτων που στέλνουν δεδομένα.">The apps have no account, no analytics, no ads and no third-party libraries that send data.</p>
+		<ul class="plist"><li data-en="Site Bridge app: talks only to the noxpress Hub of your own site. The device keys stay in the Android Keystore and never leave the phone. The camera is used only to scan ISBNs, on the phone. Every 12 hours it checks GitHub Releases for a new version, unless you installed it from F-Droid or Obtainium." data-el="Site Bridge app: μιλά μόνο με το noxpress Hub του δικού σας site. Τα κλειδιά της συσκευής μένουν στο Android Keystore και δεν βγαίνουν από το κινητό. Η κάμερα χρησιμοποιείται μόνο για σάρωση ISBN, τοπικά. Κάθε 12 ώρες ελέγχει τα GitHub Releases για νέα έκδοση, εκτός αν την εγκαταστήσατε από F-Droid ή Obtainium.">Site Bridge app: talks only to the noxpress Hub of your own site. The device keys stay in the Android Keystore and never leave the phone. The camera is used only to scan ISBNs, on the phone. Every 12 hours it checks GitHub Releases for a new version, unless you installed it from F-Droid or Obtainium.</li><li data-en="Live Operator app: opens only the site you connected. What it shows comes from there, under that site’s privacy policy." data-el="Live Operator app: ανοίγει μόνο το site που συνδέσατε. Ό,τι δείχνει έρχεται από εκεί και ισχύει η πολιτική απορρήτου εκείνου του site.">Live Operator app: opens only the site you connected. What it shows comes from there, under that site’s privacy policy.</li></ul>
+	</section>
+	<section id="rights" aria-labelledby="rightsT">
+		<h2 id="rightsT" data-en="E-mail and your rights" data-el="Email και τα δικαιώματά σας">E-mail and your rights</h2>
+		<p data-en="If you write to us (support, a bug or security report, work), we keep the message and your address only to answer. We do not add you to lists and send no newsletter. Messages are deleted when no longer needed, unless they relate to a contract or an invoice." data-el="Αν μας γράψετε (υποστήριξη, αναφορά σφάλματος ή κενού ασφαλείας, συνεργασία), κρατάμε το μήνυμα και τη διεύθυνσή σας μόνο για να απαντήσουμε. Δεν σας βάζουμε σε λίστες και δεν στέλνουμε newsletter. Τα μηνύματα σβήνονται όταν δεν χρειάζονται πια, εκτός αν συνδέονται με σύμβαση ή τιμολόγιο.">If you write to us (support, a bug or security report, work), we keep the message and your address only to answer. We do not add you to lists and send no newsletter. Messages are deleted when no longer needed, unless they relate to a contract or an invoice.</p>
+		<p data-en="You have the right of access, correction, erasure, restriction, portability and objection (GDPR articles 15 to 21). Write to hub@glarolykoi.net and we will answer within one month." data-el="Έχετε δικαίωμα πρόσβασης, διόρθωσης, διαγραφής, περιορισμού, φορητότητας και εναντίωσης (ΓΚΠΔ άρθρα 15 έως 21). Γράψτε στο hub@glarolykoi.net και θα απαντήσουμε μέσα σε έναν μήνα.">You have the right of access, correction, erasure, restriction, portability and objection (GDPR articles 15 to 21). Write to hub@glarolykoi.net and we will answer within one month.</p>
+		<p data-en="If you think your data was not respected, you can complain to the Hellenic Data Protection Authority, Kifisias 1-3, 11523 Athens:" data-el="Αν θεωρείτε ότι δεν σεβαστήκαμε τα δεδομένα σας, μπορείτε να καταθέσετε καταγγελία στην Αρχή Προστασίας Δεδομένων Προσωπικού Χαρακτήρα, Κηφισίας 1-3, 11523 Αθήνα:">If you think your data was not respected, you can complain to the Hellenic Data Protection Authority, Kifisias 1-3, 11523 Athens:</p>
+		<p><a href="https://www.dpa.gr" rel="noopener">dpa.gr</a></p>
+		<p class="note" data-en="Last change: 23 November 2026." data-el="Τελευταία αλλαγή: 23 Νοεμβρίου 2026.">Last change: 23 November 2026.</p>
+	</section>
+</main>
+
+<footer>
+	<p><strong>noxpress</strong> · <a href="/" data-en="All plugins" data-el="Όλα τα plugins">All plugins</a> · <a href="https://koulaxizis.gr/work-with-me/?lang=en" data-href-en="https://koulaxizis.gr/work-with-me/?lang=en" data-href-el="https://koulaxizis.gr/work-with-me/?lang=el" rel="noopener" data-en="Work with me" data-el="Συνεργάσου μαζί μου">Work with me</a> · <a href="/support/" data-en="Support noxpress" data-el="Στήριξε το noxpress">Support noxpress</a> · <a href="/privacy/" aria-current="page" data-en="Privacy" data-el="Απόρρητο">Privacy</a> · <a href="https://glarolykoi.net" rel="noopener">glarolykoi.net</a></p>
+	<p data-en="Made by Christos Koulaxizis." data-el="Από τον Christos Koulaxizis.">Made by Christos Koulaxizis.</p>
+</footer>
+
+<script>
+(function () {
+	'use strict';
+	/* EN / EL: every [data-en][data-el] node swaps its text; product links and
+	 * alt texts swap too. Text only (textContent), never HTML. */
+	var KEY = "nx_lang";
+	var toggle = document.getElementById('langToggle');
+	var current = 'en';
+	function apply(lang) {
+		current = lang;
+		document.documentElement.lang = lang;
+		document.title = ('el' === lang) ? "\u0391\u03c0\u03cc\u03c1\u03c1\u03b7\u03c4\u03bf \u00b7 noxpress" : "Privacy \u00b7 noxpress";
+		toggle.textContent = ('el' === lang) ? 'EN' : 'ΕΛ';
+		var nodes = document.querySelectorAll('[data-en][data-el]');
+		for (var i = 0; i < nodes.length; i++) {
+			nodes[i].textContent = nodes[i].getAttribute('data-' + lang);
+		}
+		var links = document.querySelectorAll('[data-href-en]');
+		for (var j = 0; j < links.length; j++) {
+			links[j].setAttribute('href', links[j].getAttribute('data-href-' + lang));
+		}
+		var imgs = document.querySelectorAll('img[data-alt-el]');
+		for (var k = 0; k < imgs.length; k++) {
+			if (!imgs[k].hasAttribute('data-alt-en')) { imgs[k].setAttribute('data-alt-en', imgs[k].getAttribute('alt')); }
+			imgs[k].setAttribute('alt', imgs[k].getAttribute('data-alt-' + lang));
+		}
+		try { localStorage.setItem(KEY, lang); } catch (e) { /* blocked storage */ }
+	}
+	toggle.addEventListener('click', function () { apply('en' === current ? 'el' : 'en'); });
+	// ?lang=en|el (links from the other sites) wins over the saved choice.
+	var start = "en";
+	try {
+		var saved = localStorage.getItem(KEY);
+		if ('el' === saved || 'en' === saved) { start = saved; }
+	} catch (e) { /* blocked storage */ }
+	var m = /[?&]lang=(en|el)\b/.exec(location.search);
+	if (m) { start = m[1]; }
+	if (start !== 'en') { apply(start); }
+})();
+</script>
+</body>
+</html>

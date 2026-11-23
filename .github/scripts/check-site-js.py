@@ -17,7 +17,7 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PAGES = ['index.html', 'supporters/index.html']
+PAGES = ['index.html', 'supporters/index.html', 'support/index.html', 'privacy/index.html']
 
 
 def main():
