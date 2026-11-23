@@ -19,6 +19,17 @@
  * started (the rule's start, or WooCommerce's sale start date, or the day
  * the current price began). With no rows yet (a new install), null: the
  * page then shows nothing rather than a guess.
+ *
+ * Greek law, art. 9ι ν. 2251/1994 (added by ν. 5111/2024, art. 6a of
+ * Directive 98/6/EC as amended by 2019/2161), two special cases:
+ *  - A product on the market for less than 30 days: the reference is the
+ *    lowest price since it was launched. The rows start on the day the
+ *    product was first recorded, so lowest() already reads only those.
+ *  - Progressive reductions in one uninterrupted period of at most 60
+ *    days: the reference is the price before the first reduction.
+ *    run_start() walks back from the current reduction while each earlier
+ *    price change was itself a reduction that started within 60 days of
+ *    the current one, and returns when the first of them started.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -228,6 +239,43 @@ final class DSR_History {
 			}
 		}
 		return $low;
+	}
+
+	/**
+	 * Start of a run of progressive reductions (art. 9ι par. 3): from the
+	 * start of the current reduction, steps back to the previous price
+	 * change while that change lowered the price and started at most
+	 * $max days before the current reduction. Without such a run, $start.
+	 *
+	 * @param int $id    Product or variation id.
+	 * @param int $start Timestamp the current reduction started.
+	 * @param int $max   Days (60).
+	 */
+	public static function run_start( int $id, int $start, int $max = 60 ): int {
+		global $wpdb;
+		if ( $start <= 0 ) {
+			return $start;
+		}
+		$limit = wp_date( 'Y-m-d', $start - $max * DAY_IN_SECONDS );
+		$t     = self::table();
+		// The rows before the reduction, newest first (one more than the run, for the price before it).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- own table, a few rows.
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT since, price FROM {$t} WHERE product_id = %d AND since < %s ORDER BY since DESC LIMIT 120", $id, wp_date( 'Y-m-d', $start ) ), ARRAY_A );
+		$rows = array_values( (array) $rows );
+		$run  = $start;
+		for ( $i = 0; $i + 1 < count( $rows ); $i++ ) {
+			$cur  = $rows[ $i ];
+			$prev = $rows[ $i + 1 ];
+			if ( (string) $cur['since'] < $limit || (float) $cur['price'] >= (float) $prev['price'] ) {
+				break;
+			}
+			$dt = date_create_immutable( $cur['since'] . ' 00:00:00', wp_timezone() );
+			if ( ! $dt ) {
+				break;
+			}
+			$run = $dt->getTimestamp();
+		}
+		return $run;
 	}
 
 	/**
