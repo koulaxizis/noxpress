@@ -703,8 +703,8 @@ final class CKE_Gift {
 	/** Scoped CSS that survives theme rules (Bible §14.13); form fields keep the theme's look. */
 	private static function css(): string {
 		return '.cke-gift{display:block!important;margin:0 0 1.2em!important;padding:0!important;border:0!important;background:none!important;float:none!important;clear:both}'
-			. '.cke-gift .cke-gift__help{margin:-.4em 0 .8em!important;font-size:.9em!important;opacity:.85;text-transform:none!important;letter-spacing:normal!important}'
-			. '.cke-gift .cke-gift__count{margin:-.6em 0 0!important;font-size:.85em!important;opacity:.7;text-align:end!important}'
+			. '.cke-gift .cke-gift__help{margin:-.4em 0 .8em!important;font-size:.9em!important;text-transform:none!important;letter-spacing:normal!important}'
+			. '.cke-gift .cke-gift__count{margin:-.6em 0 0!important;font-size:.85em!important;text-align:end!important}'
 			. '.cke-gift.cke-js .cke-gift__more[hidden]{display:none!important}'
 			// Id rules of the theme (e.g. #content p{display:flex}) beat classes: the layout of our rows goes through the id.
 			. '#cke-gift p{display:block!important;float:none!important;width:auto!important}'

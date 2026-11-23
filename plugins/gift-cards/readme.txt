@@ -5,7 +5,7 @@ Tags: woocommerce, gift card, store credit, voucher, pdf
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -84,6 +84,9 @@ The settings, the attempt counters, the transients and the background jobs are r
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use. Ask your accountant how gift cards are recorded and taxed in your country.
 
 == Changelog ==
+
+= 1.2.1 =
+* Accessibility (WCAG 2.1 AA, 1.4.3): secondary visitor text no longer uses opacity, which brought it under the 4.5:1 contrast ratio on light themes; it keeps its smaller size and the theme's text colour.
 
 = 1.2.0 =
 * Privacy: retention setting for the names and message of finished cards (365 days by default, 0 = never), clean-up of gift card order lines and their finished cards when WooCommerce removes an order's personal data, and suggested privacy policy text (Settings → Privacy → Policy guide).

@@ -169,7 +169,7 @@ final class MGL_Front {
 				'mgl-front',
 				'.mgl-box{margin:1.25em 0 0;padding-top:1em;border-top:1px solid rgba(127,127,127,.25)}'
 				. '.mgl-box .mgl-button{margin:0}'
-				. '.mgl-box .mgl-hint{margin:.5em 0 0;font-size:.9em;opacity:.8}'
+				. '.mgl-box .mgl-hint{margin:.5em 0 0;font-size:.9em}'
 				. '.mgl-confirm{max-width:480px;margin:0 auto 2em;padding:1.5em;border:1px solid rgba(127,127,127,.3);border-radius:6px;text-align:center}'
 				. '.mgl-confirm h2{margin-top:0}'
 				. '.mgl-confirming #customer_login,.mgl-confirming .woocommerce-form-login,.mgl-confirming .woocommerce-form-register{display:none!important}'

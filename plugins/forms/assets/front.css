@@ -40,14 +40,14 @@
 /* Choices: real inputs (screen readers), hidden under a CSS box. */
 .frm-root .frm-choice { position: relative; display: flex !important; width: auto !important; gap: .55em; align-items: flex-start; margin: .35em 0 0 !important; padding: 0 !important; font-weight: normal; cursor: pointer; line-height: 1.45; }
 .frm-root .frm-choice input { position: absolute !important; opacity: 0 !important; width: 1.15em !important; height: 1.15em !important; margin: .15em 0 0 !important; }
-.frm-root .frm-box { flex: 0 0 auto; display: inline-block !important; width: 1.15em; height: 1.15em; margin-top: .15em !important; border: 2px solid currentColor !important; border-radius: 3px; opacity: .75; box-sizing: border-box; position: relative; }
+.frm-root .frm-box { flex: 0 0 auto; display: inline-block !important; width: 1.15em; height: 1.15em; margin-top: .15em !important; border: 2px solid currentColor !important; border-radius: 3px; box-sizing: border-box; position: relative; }
 .frm-root .frm-field--radio .frm-box { border-radius: 50%; }
 .frm-root .frm-choice input:checked + .frm-box { opacity: 1; background: currentColor !important; }
 .frm-root .frm-choice input:checked + .frm-box::after { content: ""; position: absolute; left: 30%; top: 8%; width: 30%; height: 60%; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
 .frm-root .frm-field--radio .frm-choice input:checked + .frm-box::after { left: 25%; top: 25%; width: 50%; height: 50%; border: 0; border-radius: 50%; background: #fff; transform: none; }
 .frm-root .frm-choice input:focus-visible + .frm-box { outline: 2px solid currentColor; outline-offset: 2px; }
 .frm-root .frm-consent a { text-decoration: underline; }
-.frm-root .frm-help { margin: .3em 0 0 !important; font-size: .9em; opacity: .8; }
+.frm-root .frm-help { margin: .3em 0 0 !important; font-size: .9em; }
 .frm-root .frm-error { margin: .3em 0 0 !important; color: #b32d2e; font-size: .92em; }
 .frm-root .is-error .frm-label, .frm-root .is-error legend { color: #b32d2e; }
 .frm-root [aria-invalid="true"] { outline: 2px solid #b32d2e; outline-offset: 1px; }
@@ -61,7 +61,7 @@
 .frm-root .frm-msg--error { border-left-color: #b32d2e !important; }
 .frm-root .frm-msg--ok { border-left-color: #2e7d32 !important; }
 .frm-root .frm-confirm-title { margin: 0 0 .4em !important; }
-.frm-root .frm-note-admin { margin: .5em 0 0 !important; opacity: .8; }
+.frm-root .frm-note-admin { margin: .5em 0 0 !important; font-size: .9em; }
 /* Themes that do not style inputs (e.g. block themes): no specificity, so
    any input rule of the theme wins. */
 :where(.frm-root .frm-field) input:not([type="checkbox"]):not([type="radio"]), :where(.frm-root .frm-field) select, :where(.frm-root .frm-field) textarea { font: inherit; padding: .5em .65em; }

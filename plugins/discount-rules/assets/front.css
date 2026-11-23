@@ -11,9 +11,9 @@
 	font-weight: 600;
 }
 .dsr-pill { background: var(--dsr-pill-bg, rgba(109, 74, 255, .12)); color: var(--dsr-pill-fg, inherit); }
-.dsr-until { opacity: .8; font-size: .9em; margin-left: .4em; }
+.dsr-until { font-size: .9em; margin-left: .4em; }
 p.dsr-until { margin: .2em 0 .8em; }
-.dsr-omnibus { display: block; font-size: .8em; opacity: .8; font-weight: normal; line-height: 1.4; margin-top: .2em; }
+.dsr-omnibus { display: block; font-size: .8em; font-weight: normal; line-height: 1.4; margin-top: .2em; }
 .dsr-tiers { margin: .5em 0 1em; padding: .6em .9em; border: 1px solid rgba(128, 128, 128, .35); border-radius: 6px; }
 .dsr-tiers .dsr-tiers-title { margin: 0 0 .3em; font-weight: 600; }
 .dsr-tiers ul { margin: 0; padding: 0 0 0 1.1em; }
