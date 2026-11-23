@@ -32,6 +32,10 @@
  *      "rules": [ { "tax": "product_tag"|"product_cat", "term": term id, "el", "en" } ],
  *      "rule_color": "#rrggbb", "fg": "#rrggbb"
  *    },
+ *    "consent": {                       scripts after cookie consent (1.8.0), store-wide
+ *      "on": bool, "handles": [ script handle, … ] (max 10),
+ *      "cats": [ "functional"|"analytics"|"performance"|"advertisement", … ]  any one unlocks
+ *    },
  *    "themes": {
  *      "<stylesheet>": {
  *        "areas":  { "<area id>": { area config } },
@@ -91,6 +95,9 @@ final class TP_Settings {
 	const BADGE_POS       = array( 'left', 'right', 'inline' );
 	const BADGE_TAX       = array( 'product_tag', 'product_cat' );
 
+	const CONSENT_CATS        = array( 'functional', 'analytics', 'performance', 'advertisement' );
+	const MAX_CONSENT_HANDLES = 10;
+
 	/** Per-request cache of the decoded option. */
 	private static $cache = null;
 
@@ -105,7 +112,17 @@ final class TP_Settings {
 			'prices'    => self::prices_defaults(),
 			'sale'      => self::sale_defaults(),
 			'badges'    => self::badges_defaults(),
+			'consent'   => self::consent_defaults(),
 			'themes'    => array(),
+		);
+	}
+
+	/** Scripts after cookie consent (1.8.0): off; MailerLite for WooCommerce listed. */
+	public static function consent_defaults(): array {
+		return array(
+			'on'      => false,
+			'handles' => array( 'mailerlite-rewrite-universal', 'mailerlite-classic-universal' ),
+			'cats'    => array( 'functional', 'analytics' ),
 		);
 	}
 
@@ -282,6 +299,11 @@ final class TP_Settings {
 		return self::get()['badges'];
 	}
 
+	/** Scripts after cookie consent (store-wide). */
+	public static function consent(): array {
+		return self::get()['consent'];
+	}
+
 	/** Active theme key (child theme stylesheet when a child is active). */
 	public static function theme_key(): string {
 		return (string) get_stylesheet();
@@ -421,6 +443,9 @@ final class TP_Settings {
 		if ( isset( $raw['badges'] ) && is_array( $raw['badges'] ) ) {
 			$out['badges'] = self::sanitize_badges( $raw['badges'] );
 		}
+		if ( isset( $raw['consent'] ) && is_array( $raw['consent'] ) ) {
+			$out['consent'] = self::sanitize_consent( $raw['consent'] );
+		}
 
 		if ( isset( $raw['themes'] ) && is_array( $raw['themes'] ) ) {
 			foreach ( $raw['themes'] as $key => $theme ) {
@@ -554,6 +579,37 @@ final class TP_Settings {
 			$idx = is_numeric( $idx ) ? (int) $idx : -1;
 			if ( $tid > 0 && $idx >= 0 && $idx < $n ) {
 				$out['map'][ $tid ] = $idx;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Scripts after consent: handles as WordPress registers them (letters,
+	 * digits, - _ .), unique, at most MAX_CONSENT_HANDLES; categories from
+	 * the whitelist. A missing list (older data) keeps its default.
+	 */
+	public static function sanitize_consent( array $raw ): array {
+		$def = self::consent_defaults();
+		$out = array(
+			'on'      => ! empty( $raw['on'] ),
+			'handles' => array(),
+			'cats'    => array(),
+		);
+		$handles = isset( $raw['handles'] ) && is_array( $raw['handles'] ) ? $raw['handles'] : $def['handles'];
+		foreach ( $handles as $h ) {
+			$h = is_string( $h ) ? trim( $h ) : '';
+			if ( 1 === preg_match( '/^[A-Za-z0-9._-]{1,80}$/', $h ) && ! in_array( $h, $out['handles'], true ) ) {
+				$out['handles'][] = $h;
+			}
+			if ( count( $out['handles'] ) >= self::MAX_CONSENT_HANDLES ) {
+				break;
+			}
+		}
+		$cats = isset( $raw['cats'] ) && is_array( $raw['cats'] ) ? $raw['cats'] : $def['cats'];
+		foreach ( self::CONSENT_CATS as $c ) {
+			if ( in_array( $c, $cats, true ) ) {
+				$out['cats'][] = $c;
 			}
 		}
 		return $out;

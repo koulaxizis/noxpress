@@ -5,7 +5,7 @@ Tags: woocommerce, theme compatibility, product cards, price labels, product bad
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.4
+Stable tag: 1.8.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -152,6 +152,9 @@ Check that the tab is on (Care tab), Theme Patcher is enabled and test mode is o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.8.0 =
+* New: «Scripts μετά τη συγκατάθεση cookies» (Settings). Listed script handles (default: MailerLite for WooCommerce, mailerlite-rewrite-universal / mailerlite-classic-universal) are printed inert and load only after the visitor accepts one of the chosen CookieYes categories (default functional or analytics), on page load from the cookieyes-consent cookie or right after the banner choice. Client side, so it works on cached pages. Off by default; follows the master switch and test mode.
 
 = 1.7.4 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

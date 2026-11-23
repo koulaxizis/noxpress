@@ -1657,6 +1657,8 @@ final class TP_Admin_UI {
 					<?php endif; ?>
 				</div>
 
+				<?php self::render_consent_fields( $s['consent'] ); ?>
+
 				<h2 class="tp-h2"><?php esc_html_e( 'Δεδομένα', 'theme-patcher' ); ?></h2>
 				<div class="tp-zone">
 					<label class="tp-check">
@@ -1697,6 +1699,40 @@ final class TP_Admin_UI {
 			</p>
 
 			<?php self::footer(); ?>
+		</div>
+		<?php
+	}
+
+	/** Settings page: scripts after cookie consent (1.8.0, TP_Consent). */
+	private static function render_consent_fields( array $c ): void {
+		$labels = array(
+			'functional'    => __( 'Λειτουργικά', 'theme-patcher' ),
+			'analytics'     => __( 'Αναλυτικά', 'theme-patcher' ),
+			'performance'   => __( 'Απόδοσης', 'theme-patcher' ),
+			'advertisement' => __( 'Διαφήμισης', 'theme-patcher' ),
+		);
+		?>
+		<h2 class="tp-h2"><?php esc_html_e( 'Scripts μετά τη συγκατάθεση cookies', 'theme-patcher' ); ?></h2>
+		<div class="tp-zone">
+			<label class="tp-check">
+				<input type="checkbox" name="tp_consent[on]" value="1" <?php checked( $c['on'] ); ?> />
+				<?php esc_html_e( 'Φόρτωση των παρακάτω scripts μόνο αφού ο επισκέπτης δεχτεί cookies στο CookieYes', 'theme-patcher' ); ?>
+			</label>
+			<p>
+				<label for="tp-consent-handles"><?php esc_html_e( 'Scripts (ένα handle ανά γραμμή)', 'theme-patcher' ); ?></label><br />
+				<textarea id="tp-consent-handles" name="tp_consent[handles]" rows="3" cols="50" class="code"><?php echo esc_textarea( implode( "\n", $c['handles'] ) ); ?></textarea>
+			</p>
+			<p><?php esc_html_e( 'Φορτώνουν όταν ο επισκέπτης δεχτεί μία από τις κατηγορίες:', 'theme-patcher' ); ?></p>
+			<?php foreach ( $labels as $key => $label ) : ?>
+				<label class="tp-check">
+					<input type="checkbox" name="tp_consent[cats][]" value="<?php echo esc_attr( $key ); ?>" <?php checked( in_array( $key, $c['cats'], true ) ); ?> />
+					<?php echo esc_html( $label ); ?>
+				</label>
+			<?php endforeach; ?>
+			<span class="tp-hint"><?php esc_html_e( 'Προεπιλογή: τα scripts του MailerLite for WooCommerce (mailerlite-rewrite-universal, mailerlite-classic-universal), που αλλιώς φορτώνουν το universal.js της MailerLite πριν από τη συγκατάθεση. Δουλεύει και σε σελίδες από cache. Ισχύει μόνο με τον Theme Patcher ενεργό (και, σε λειτουργία δοκιμής, μόνο για διαχειριστές).', 'theme-patcher' ); ?></span>
+			<?php if ( $c['on'] && ! TP_Consent::cookieyes_active() ) : ?>
+				<p class="tp-warn"><?php esc_html_e( 'Το CookieYes δεν είναι ενεργό: τα scripts αυτά δεν θα φορτώνουν για κανέναν επισκέπτη.', 'theme-patcher' ); ?></p>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -1814,6 +1850,13 @@ final class TP_Admin_UI {
 		$s              = TP_Settings::get();
 		$s['enabled']   = ! empty( $_POST['tp_enabled'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in route().
 		$s['test_mode'] = ! empty( $_POST['tp_test_mode'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- verified in route(); whitelisted in TP_Settings::sanitize_consent().
+		$c            = isset( $_POST['tp_consent'] ) && is_array( $_POST['tp_consent'] ) ? wp_unslash( $_POST['tp_consent'] ) : array();
+		$s['consent'] = array(
+			'on'      => ! empty( $c['on'] ),
+			'handles' => isset( $c['handles'] ) && is_string( $c['handles'] ) ? preg_split( '/[\s,]+/', $c['handles'], -1, PREG_SPLIT_NO_EMPTY ) : array(),
+			'cats'    => isset( $c['cats'] ) && is_array( $c['cats'] ) ? array_map( 'strval', $c['cats'] ) : array(),
+		);
 		TP_Settings::save( $s );
 		$care                = TP_Care::get();
 		$care['delete_meta'] = ! empty( $_POST['tp_care_delete_meta'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
