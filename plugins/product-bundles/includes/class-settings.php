@@ -10,6 +10,11 @@
  *                  coupon always applies) | 'yes'
  *  - show_contents list of contents on the bundle page
  *  - show_savings  "Separately … · You save …" line on the bundle page
+ *  - show_sale     sale display (default on): the value of the contents
+ *                  struck through and the bundle "on sale" (theme sale
+ *                  badge). Off: the bundle price alone, is_on_sale() false,
+ *                  _regular_price = bundle price (single book price law,
+ *                  GR ν. 4549/2018). The savings line is independent.
  *  - lang, t_*     visitor texts (el / en)
  *  - delete_data   delete the bundle definitions (_pbn_* product meta) on uninstall
  */
@@ -46,6 +51,7 @@ final class PBN_Settings {
 			'coupons'       => 'no',
 			'show_contents' => true,
 			'show_savings'  => true,
+			'show_sale'     => true,
 			'lang'          => 'auto',
 			't_contains'    => array(
 				'el' => 'Το πακέτο περιέχει',
@@ -96,9 +102,19 @@ final class PBN_Settings {
 	}
 
 	public static function save( array $s ): void {
+		$old         = self::get();
 		$s           = self::sanitize( $s );
 		self::$cache = $s;
 		update_option( self::OPT, $s, true );
+		// The sale display lives in the derived prices: rebuild every bundle.
+		if ( $old['show_sale'] !== $s['show_sale'] ) {
+			PBN_Bundle::rebuild_all();
+		}
+	}
+
+	/** True when bundles show as on sale (struck value, sale badge). */
+	public static function show_sale(): bool {
+		return (bool) self::get()['show_sale'];
 	}
 
 	/** Drops the per-request cache (tests, imports). */
@@ -115,7 +131,7 @@ final class PBN_Settings {
 		$s['discount'] = self::int( $raw, 'discount', 0, 90, $d['discount'] );
 		$s['coupons']  = self::pick( $raw, 'coupons', array( 'no', 'yes' ), $d['coupons'] );
 		$s['lang']     = self::pick( $raw, 'lang', array( 'auto', 'el', 'en' ), $d['lang'] );
-		foreach ( array( 'show_contents', 'show_savings', 'delete_data' ) as $k ) {
+		foreach ( array( 'show_contents', 'show_savings', 'show_sale', 'delete_data' ) as $k ) {
 			$s[ $k ] = isset( $raw[ $k ] ) ? (bool) $raw[ $k ] : $d[ $k ];
 		}
 

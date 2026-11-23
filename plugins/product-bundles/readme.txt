@@ -5,7 +5,7 @@ Tags: woocommerce, product bundles, bundle discount, kits, gift sets
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.8
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -78,6 +78,9 @@ The settings, the derived data on bundles and the background jobs are removed. T
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.0 =
+* New setting «Ένδειξη έκπτωσης» (Settings → Bundle page, on by default). Off: a bundle shows only its own price everywhere (product page, shop lists, cart), with no struck-through value and no theme "Sale" badge, is_on_sale() is false and _regular_price = _price, for fixed book price laws (Greek law 4549/2018). The bundle price and the «Χωριστά … · Εξοικονομείς …» line stay as they are. Changing it rebuilds every bundle.
 
 = 1.1.8 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

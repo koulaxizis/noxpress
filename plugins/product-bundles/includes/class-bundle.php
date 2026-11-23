@@ -19,7 +19,8 @@
  *    so the shares always add up to P exactly; a free product stays 0.
  *
  * Derived data (Bible §14.10, §14.23): the bundle's _regular_price (V),
- * _sale_price / _price (P), _stock_status and _pbn_* are written when the
+ * _sale_price / _price (P) — with the setting show_sale off, _regular_price
+ * = _price = P and no _sale_price, so the bundle is never "on sale" —, _stock_status and _pbn_* are written when the
  * bundle is saved (woocommerce_before_product_object_save) and rebuilt
  * when a product inside changes (price, stock, status): at shutdown in
  * admin, REST, cron and CLI requests, through one Action Scheduler job
@@ -600,8 +601,14 @@ final class PBN_Bundle {
 				$product->delete_meta_data( self::META_PMAX );
 			} else {
 				$dp = wc_get_price_decimals();
-				$product->set_regular_price( wc_format_decimal( $min['value'], $dp ) );
-				$product->set_sale_price( $min['price'] < $min['value'] - 0.004 ? wc_format_decimal( $min['price'], $dp ) : '' );
+				if ( PBN_Settings::show_sale() ) {
+					$product->set_regular_price( wc_format_decimal( $min['value'], $dp ) );
+					$product->set_sale_price( $min['price'] < $min['value'] - 0.004 ? wc_format_decimal( $min['price'], $dp ) : '' );
+				} else {
+					// No sale display: the bundle price is its only price.
+					$product->set_regular_price( wc_format_decimal( $min['price'], $dp ) );
+					$product->set_sale_price( '' );
+				}
 				$product->set_price( wc_format_decimal( $min['price'], $dp ) );
 				if ( $max['ok'] && $max['price'] > $min['price'] + 0.004 ) {
 					$product->update_meta_data( self::META_VMAX, wc_format_decimal( $max['value'], $dp ) );
@@ -768,6 +775,19 @@ final class PBN_Bundle {
 			return;
 		}
 		as_enqueue_async_action( self::HOOK, $args, self::GROUP );
+	}
+
+	/**
+	 * Rebuilds every bundle: now when there are up to 200, else in the
+	 * background. Returns false when neither is possible.
+	 */
+	public static function rebuild_all(): bool {
+		$ids = self::bundle_ids();
+		if ( count( $ids ) <= 200 ) {
+			self::sync_many( $ids );
+			return true;
+		}
+		return self::enqueue_all();
 	}
 
 	/** Rebuilds every bundle in the background, in batches. */
