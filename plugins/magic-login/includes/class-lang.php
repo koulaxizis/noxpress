@@ -28,6 +28,12 @@ final class MGL_Lang {
 	private static $force = '';
 
 	private static $dict = array(
+		// Privacy exporter / eraser.
+		'Magic Login: σύνδεση με σύνδεσμο' => 'Magic Login: login by link',
+		'Ημερομηνία' => 'Date',
+		'Συμβάν' => 'Event',
+		'Σύνδεσμος σε αναμονή' => 'Pending link',
+		'Ναι (κρατάμε μόνο ένα αποτύπωμα του συνδέσμου, όχι τον ίδιο)' => 'Yes (only a fingerprint of the link is kept, not the link)',
 		// E-mail.
 		'Γεια σου %s,' => 'Hello %s,',
 		'Γεια σου,' => 'Hello,',

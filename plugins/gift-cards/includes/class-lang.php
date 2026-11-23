@@ -27,6 +27,12 @@ final class GFC_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		// Privacy exporter / eraser.
+		'Gift Cards: δωροκάρτες' => 'Gift Cards: gift cards',
+		'Αρχικό ποσό' => 'Initial amount',
+		'Δημιουργία' => 'Created',
+		'Όνομα αποστολέα' => 'Sender name',
+		'Κρατήθηκαν %d δωροκάρτες που μπορούν ακόμη να χρησιμοποιηθούν ή περιμένουν αποστολή: είναι χρήματα που οφείλει το κατάστημα. Τα στοιχεία τους σβήνονται όταν τελειώσουν, με νέο αίτημα διαγραφής.' => '%d gift cards that can still be used or wait for delivery were kept: they are money the store owes. Their details are erased once they are finished, with a new erasure request.',
 		'Το Gift Cards χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Gift Cards requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 		'Κάρτες' => 'Cards',
 		'Νέα κάρτα' => 'New card',

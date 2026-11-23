@@ -5,7 +5,7 @@ Tags: ebook, watermark, pdf, epub, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -103,6 +103,9 @@ Use at your own risk. This plugin is free software, provided "as is", without wa
 Noto Sans (subset), SIL Open Font License 1.1. See LICENSES.md.
 
 == Changelog ==
+
+= 1.1.0 =
+* Personal data: WordPress's exporter and eraser (Tools → Export / Erase Personal Data). The export lists the stamped copies kept for the address; the eraser deletes them (a later download makes a new one).
 
 = 1.0.3 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.
