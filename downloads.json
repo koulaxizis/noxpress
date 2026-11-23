@@ -1,6 +1,6 @@
 {
-  "display": 1958,
-  "total": 1958,
+  "display": 1974,
+  "total": 1974,
   "offset": 5,
   "updated": "2026-11-23",
   "assets": {
@@ -2442,35 +2442,35 @@
     },
     "782367136": {
       "file": "nox-ew-1.3.1/easy-withdrawal.zip",
-      "count": 0
+      "count": 2
     },
     "782367484": {
       "file": "nox-oc-1.5.1/oros-connect.zip",
-      "count": 0
+      "count": 2
     },
     "782367891": {
       "file": "nox-pq-1.1.9/publishing-quote.zip",
-      "count": 0
+      "count": 2
     },
     "782368150": {
       "file": "nox-ce-1.4.1/checkout-extras.zip",
-      "count": 0
+      "count": 2
     },
     "782368484": {
       "file": "nox-ml-1.1.1/magic-login.zip",
-      "count": 0
+      "count": 2
     },
     "782368887": {
       "file": "nox-fm-1.0.4/forms.zip",
-      "count": 0
+      "count": 2
     },
     "782369156": {
       "file": "nox-gc-1.2.1/gift-cards.zip",
-      "count": 0
+      "count": 2
     },
     "782369405": {
       "file": "nox-dr-1.2.1/discount-rules.zip",
-      "count": 0
+      "count": 2
     }
   },
   "android": {
