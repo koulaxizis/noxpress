@@ -248,7 +248,8 @@ final class DSR_Front {
 		if ( ! DSR_History::enabled() ) {
 			return '';
 		}
-		$low = DSR_History::lowest( (int) $p->get_id(), $start > 0 ? $start : time() );
+		$id  = (int) $p->get_id();
+		$low = DSR_History::lowest( $id, DSR_History::run_start( $id, $start > 0 ? $start : time() ) );
 		if ( null === $low ) {
 			return '';
 		}

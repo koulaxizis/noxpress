@@ -5,7 +5,7 @@ Tags: woocommerce, discount, quantity discount, buy x get y, bulk pricing
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -38,7 +38,8 @@ Dated discount rules for WooCommerce: product sales, quantity tiers, "buy 3 pay 
 
 **Lowest price of 30 days (Omnibus)**
 
-* Under every price a "Product sale" rule lowers, and optionally under WooCommerce's own sale prices: "Lowest price of the last 30 days: …" (EU Directive 2019/2161).
+* Under every price a "Product sale" rule lowers and, by default on new installs, under WooCommerce's own sale prices too: "Lowest price of the last 30 days: …" (EU Directive 2019/2161, art. 9ι of Greek law 2251/1994).
+* The two special cases of art. 9ι: a product on the market for less than 30 days shows its lowest price since launch, and progressive reductions within 60 days show the price before the first reduction.
 * The plugin keeps its own price history from the day it is activated, in one small table: a job every night (Action Scheduler, in batches) and on every product save, never on a visitor request. While a product has no history, the line does not show.
 
 **Plugin page**
@@ -97,6 +98,9 @@ The rules, settings, history, price table and scheduled jobs are removed. The ru
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.0 =
+* Lowest price of 30 days, art. 9ι of Greek law 2251/1994: progressive reductions within 60 days now show the price before the first reduction, and a product on the market for less than 30 days its lowest price since launch. New installs show the line under WooCommerce's own sale prices too; existing settings stay as they are.
 
 = 1.1.3 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

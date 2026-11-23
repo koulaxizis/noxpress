@@ -245,6 +245,8 @@ final class DSR_Lang {
 		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		'Το Discount Rules χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Discount Rules requires WooCommerce to be active — the plugin stays inactive until it is activated.',
+		// 1.2.0: art. 9ι.
+		'Άρθρο 9ι ν. 2251/1994: για προϊόν που κυκλοφορεί λιγότερο από 30 ημέρες η αναφορά είναι η χαμηλότερη τιμή από την κυκλοφορία του, και σε σταδιακές μειώσεις μέσα σε 60 ημέρες είναι η τιμή πριν από την πρώτη μείωση. Το plugin τα εφαρμόζει και τα δύο αυτόματα από το ιστορικό τιμών. Ο νόμος αφορά κάθε ανακοίνωση μείωσης, οπότε η επιλογή «Και κάτω από τις τιμές προσφοράς του ίδιου του WooCommerce» είναι η ασφαλέστερη.' => 'Art. 9ι of Greek law 2251/1994: for a product on the market for less than 30 days the reference is its lowest price since launch, and for progressive reductions within 60 days it is the price before the first reduction. The plugin applies both automatically from the price history. The law covers every announced reduction, so «Also under WooCommerce\'s own sale prices» is the safest choice.',
 	);
 
 	public static function init(): void {

@@ -17,8 +17,10 @@
  *                image, the explanation and the link to the offer page
  *  - table       the tier table on the product page
  *  - omnibus     the lowest 30-day price under a reduced price:
- *                'off' | 'rules' (default: when a rule lowers the price) |
- *                'all' (also WooCommerce's own sale prices)
+ *                'off' | 'rules' (when a rule lowers the price) |
+ *                'all' (also WooCommerce's own sale prices; default for
+ *                new installs since 1.2.0, art. 9ι ν. 2251/1994 covers
+ *                every announced reduction)
  *  - lang        visitor text language 'auto' | 'el' | 'en'
  *  - t_*         { el, en } visitor texts (Bible §14.17)
  */
@@ -61,7 +63,7 @@ final class DSR_Settings {
 			'hint'        => 'yes',
 			'loop_label'  => 'yes',
 			'table'       => 'yes',
-			'omnibus'     => 'rules',
+			'omnibus'     => 'all',
 			'lang'        => 'auto',
 			't_line'      => array(
 				'el' => 'Προσφορά',
@@ -139,7 +141,8 @@ final class DSR_Settings {
 		$s = array();
 
 		$s['mode']    = self::pick( $raw, 'mode', array( 'off', 'test', 'live' ), $d['mode'] );
-		$s['omnibus'] = self::pick( $raw, 'omnibus', array( 'off', 'rules', 'all' ), $d['omnibus'] );
+		// A store that saved its settings before 1.2.0 without this key keeps the old default.
+		$s['omnibus'] = self::pick( $raw, 'omnibus', array( 'off', 'rules', 'all' ), $raw ? 'rules' : $d['omnibus'] );
 		$s['lang']    = self::pick( $raw, 'lang', array( 'auto', 'el', 'en' ), $d['lang'] );
 		foreach ( array( 'ex_others', 'ex_preorder', 'hint', 'loop_label', 'table' ) as $k ) {
 			$s[ $k ] = self::pick( $raw, $k, array( 'yes', 'no' ), $d[ $k ] );
