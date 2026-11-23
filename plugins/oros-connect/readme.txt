@@ -5,7 +5,7 @@ Tags: oros, newsletter, signup form, woocommerce, offers
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -53,6 +53,7 @@ Every module is off after activation. A module that is off loads no code.
 * `define( 'ORC_DISABLE', true );` in wp-config.php stops the forms, the checkbox, every send and the offers routes.
 * Server requests only with `wp_safe_remote_post`, no redirects followed. No cookies, no tracking.
 * Suggested text for your privacy policy (Settings → Privacy).
+* Tools → Export / Erase Personal Data: the newsletter consent kept with an address's orders (time, text, language, sent to orOS). The eraser keeps it as proof of consent unless WooCommerce is set to remove personal data from orders, and reminds you to remove the address from the orOS Newsletter list.
 * Settings export / import (without the shop key).
 * Part of the Noxpress ecosystem: shares the "Noxpress" admin menu and the Noxpress hub; updates come from noxpress.tech (GitHub releases) through WordPress's own update screens, checked with sha256 and an Ed25519 signature.
 
@@ -92,6 +93,9 @@ The settings, the send log, queued sends, the last offers import and the transie
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.5.0 =
+* Privacy: personal data exporter and eraser for the newsletter consent kept with orders (kept as proof of consent unless WooCommerce removes order personal data; the eraser reminds you to remove the address from the orOS Newsletter list).
 
 = 1.4.1 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

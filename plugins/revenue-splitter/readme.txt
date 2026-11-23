@@ -5,7 +5,7 @@ Tags: woocommerce, revenue split, royalties, vat, reports
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.21.0
+Stable tag: 1.22.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -63,6 +63,10 @@ Only this plugin's own options, transients, cron event, product/order meta and o
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.22.0 =
+* Privacy (Bible §12 «Προσωπικά δεδομένα»): Tools → Export / Erase Personal Data now find a beneficiary by the e-mail in the Revenue Splitter map. The export holds the name, e-mail, creator page, whether a portal key exists (never the key), contracts, ledger entries, monthly statements, profile requests and renewal requests. The eraser deletes closed profile requests (with their photos) and closed renewal requests; contracts, ledger, statements and the e-mail stay as contract and accounting records (GDPR art. 17(3)(b), (e)), and the message says so. An address that is not in the map is never touched.
+* Suggested privacy policy text (Settings → Privacy): what is kept for beneficiaries, how long, and that the plugin keeps no customer data of its own.
 
 = 1.21.0 =
 * New: the production flow in the Author Portal can use the publisher's own steps. In the orOS Kanban the publisher marks which columns of a board are steps for the creator, with a name and an explanation (Greek, optional English); orOS sends them with the works (POST rs/v1/production with v 2: flows with their steps in the order of the columns, and each work's flow, step and shop products). The portal shows the steps in order with the current one marked, each step's explanation on hover, keyboard focus or tap (in the portal's language; English falls back to Greek), the date each step was reached, and a link to the work's published shop products. A step or flow that is not in the list skips the work with a reason (bad_flow, bad_step).

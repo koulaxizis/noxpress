@@ -294,6 +294,21 @@ final class CKE_Lang {
 		'More plugins at' => 'More plugins at',
 		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
+		// 1.4.0 privacy.
+		'Checkout Extras: δώρα, κουπόνια, καλάθια' => 'Checkout Extras: gifts, coupons, carts',
+		'Checkout Extras: κουπόνια ευχαριστίας' => 'Checkout Extras: thank-you coupons',
+		'Checkout Extras: παραγγελίες' => 'Checkout Extras: orders',
+		'Checkout Extras: το μήνυμα δώρου κρατήθηκε σε %d ανοιχτές παραγγελίες, γιατί χρειάζεται για τη συσκευασία. Ξανατρέξε τη διαγραφή όταν ολοκληρωθούν.' => 'Checkout Extras: the gift message was kept on %d open orders, because it is needed for packing. Run the erasure again once they are completed.',
+		'Όχι' => 'No',
+		'Ναι' => 'Yes',
+		'Ώρα' => 'Time',
+		'Αν σημειώσεις ότι η παραγγελία είναι δώρο, το μήνυμα που γράφεις αποθηκεύεται με την παραγγελία για να μπει στο δέμα. Σβήνεται όταν ζητήσεις διαγραφή των δεδομένων σου, αφού ολοκληρωθεί η παραγγελία.' => 'If you mark the order as a gift, the message you write is stored with the order so it can go in the parcel. It is deleted when you ask for your data to be erased, once the order is completed.',
+		'Αν το κατάστημα χρησιμοποιεί ανάκτηση εγκαταλελειμμένων καλαθιών, τα καλάθια σβήνονται μετά από τις ημέρες που ορίζει το κατάστημα, και αμέσως όταν ζητήσεις διαγραφή των δεδομένων σου.' => 'If the shop uses abandoned cart recovery, carts are deleted after the number of days the shop sets, and at once when you ask for your data to be erased.',
+		'Μήνυμα δώρου' => 'Gift message',
+		'Παραγγελία' => 'Order',
+		'Σύνολο' => 'Total',
+		'Το κουπόνι ευχαριστίας που μπορεί να πάρεις μετά από μια αγορά ισχύει μόνο για το email σου, που κρατιέται με το κουπόνι. Τα κουπόνια που λήγουν χωρίς χρήση σβήνονται λίγες ημέρες μετά τη λήξη τους, και όλα σβήνονται όταν ζητήσεις διαγραφή των δεδομένων σου.' => 'The thank-you coupon you may get after a purchase is valid only for your e-mail, which is kept with the coupon. Coupons that expire unused are deleted a few days after they expire, and all of them are deleted when you ask for your data to be erased.',
+		'Χρησιμοποιήθηκε' => 'Used',
 	);
 
 	public static function init(): void {

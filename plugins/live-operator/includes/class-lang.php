@@ -214,6 +214,9 @@ final class LOP_Lang {
 		'Κυριακή' => 'Sunday',
 		'και' => 'and',
 		'Κλειστά: %s' => 'Closed: %s',
+		// privacy policy text.
+		'Όταν ζητάς ζωντανή συνομιλία ή στέλνεις μήνυμα σε αυτήν, ο χειριστής του καταστήματος ειδοποιείται στο κινητό του. Αν το κατάστημα έχει ανοιχτή την προεπισκόπηση, το κείμενο του μηνύματός σου μπαίνει στην ειδοποίηση κρυπτογραφημένο από άκρο σε άκρο: η υπηρεσία ειδοποιήσεων του κινητού (π.χ. Google, Apple ή Mozilla) βλέπει μόνο κρυπτογραφημένα δεδομένα.' => 'When you ask for a live chat or send a message in it, the shop\'s operator is notified on their phone. If the shop has the preview on, the text of your message goes in the notification, encrypted end to end: the phone\'s push service (e.g. Google, Apple or Mozilla) sees only encrypted data.',
+		'Η ίδια η συνομιλία αποθηκεύεται από το plugin συνομιλίας του καταστήματος, όχι από το Live Operator, που δεν κρατά δικά του δεδομένα για τους επισκέπτες.' => 'The chat itself is stored by the shop\'s chat plugin, not by Live Operator, which keeps no data of its own about visitors.',
 	);
 
 	public static function init(): void {

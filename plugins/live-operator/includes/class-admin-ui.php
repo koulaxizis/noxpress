@@ -25,6 +25,7 @@ final class LOP_Admin_UI {
 	const NONCE_FIELD = 'lop_nonce';
 
 	public static function init(): void {
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 250 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_init', array( 'LOP_Schedule', 'ensure' ) );
@@ -601,5 +602,15 @@ final class LOP_Admin_UI {
 			</a>
 		</p>
 		<?php
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy), Bible §12. */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Όταν ζητάς ζωντανή συνομιλία ή στέλνεις μήνυμα σε αυτήν, ο χειριστής του καταστήματος ειδοποιείται στο κινητό του. Αν το κατάστημα έχει ανοιχτή την προεπισκόπηση, το κείμενο του μηνύματός σου μπαίνει στην ειδοποίηση κρυπτογραφημένο από άκρο σε άκρο: η υπηρεσία ειδοποιήσεων του κινητού (π.χ. Google, Apple ή Mozilla) βλέπει μόνο κρυπτογραφημένα δεδομένα.', 'live-operator' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Η ίδια η συνομιλία αποθηκεύεται από το plugin συνομιλίας του καταστήματος, όχι από το Live Operator, που δεν κρατά δικά του δεδομένα για τους επισκέπτες.', 'live-operator' ) . '</p>';
+		wp_add_privacy_policy_content( 'Live Operator', wp_kses_post( $text ) );
 	}
 }
