@@ -129,6 +129,16 @@ final class TP_Lang {
 
 		// Settings page.
 		'Ενεργοποίηση του Theme Patcher στο front end'               => 'Enable Theme Patcher on the front end',
+		'Scripts μετά τη συγκατάθεση cookies'                         => 'Scripts after cookie consent',
+		'Φόρτωση των παρακάτω scripts μόνο αφού ο επισκέπτης δεχτεί cookies στο CookieYes' => 'Load the scripts below only after the visitor accepts cookies in CookieYes',
+		'Scripts (ένα handle ανά γραμμή)'                             => 'Scripts (one handle per line)',
+		'Φορτώνουν όταν ο επισκέπτης δεχτεί μία από τις κατηγορίες:'  => 'They load when the visitor accepts one of the categories:',
+		'Λειτουργικά'                                                 => 'Functional',
+		'Αναλυτικά'                                                   => 'Analytics',
+		'Απόδοσης'                                                    => 'Performance',
+		'Διαφήμισης'                                                  => 'Advertisement',
+		'Προεπιλογή: τα scripts του MailerLite for WooCommerce (mailerlite-rewrite-universal, mailerlite-classic-universal), που αλλιώς φορτώνουν το universal.js της MailerLite πριν από τη συγκατάθεση. Δουλεύει και σε σελίδες από cache. Ισχύει μόνο με τον Theme Patcher ενεργό (και, σε λειτουργία δοκιμής, μόνο για διαχειριστές).' => 'Default: the scripts of MailerLite for WooCommerce (mailerlite-rewrite-universal, mailerlite-classic-universal), which otherwise load MailerLite\'s universal.js before consent. Works on cached pages too. Applies only while Theme Patcher is enabled (and, in test mode, only for managers).',
+		'Το CookieYes δεν είναι ενεργό: τα scripts αυτά δεν θα φορτώνουν για κανέναν επισκέπτη.' => 'CookieYes is not active: these scripts will not load for any visitor.',
 		'Λειτουργία δοκιμής: οι αλλαγές φαίνονται μόνο σε όσους διαχειρίζονται το κατάστημα' => 'Test mode: changes are visible only to users who manage the shop',
 		'Έκτακτη απενεργοποίηση χωρίς πρόσβαση στο admin: πρόσθεσε στο wp-config.php τη γραμμή' => 'Emergency switch without admin access: add this line to wp-config.php',
 		'Το TP_DISABLE είναι ενεργό: καμία αλλαγή δεν εφαρμόζεται στο front end.' => 'TP_DISABLE is active: no change is applied on the front end.',
