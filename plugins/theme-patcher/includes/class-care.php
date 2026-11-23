@@ -250,8 +250,10 @@ final class TP_Care {
 		if ( null !== self::$cache ) {
 			return self::$cache;
 		}
-		$raw         = get_option( self::OPT, '' );
-		$decoded     = is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null;
+		$raw = get_option( self::OPT, '' );
+		// JSON string (own writes); an array is accepted too (written by an
+		// option tool such as Site Bridge). The next save stores JSON again.
+		$decoded     = is_array( $raw ) ? $raw : ( is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null );
 		self::$cache = is_array( $decoded ) ? self::sanitize( $decoded ) : self::defaults();
 		return self::$cache;
 	}
