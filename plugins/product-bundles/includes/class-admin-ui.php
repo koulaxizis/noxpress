@@ -485,8 +485,10 @@ final class PBN_Admin_UI {
 				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in check().
 				echo self::check( 'pbn_show_contents', $s['show_contents'], __( 'Λίστα με τα προϊόντα του πακέτου (εικόνα, όνομα, τιμή)', 'product-bundles' ) );
 				echo self::check( 'pbn_show_savings', $s['show_savings'], __( 'Γραμμή «Χωριστά … · Εξοικονομείς …»', 'product-bundles' ) );
+				echo self::check( 'pbn_show_sale', $s['show_sale'], __( 'Ένδειξη έκπτωσης: η αξία των προϊόντων διαγραμμένη και το πακέτο «σε προσφορά» (σήμα «Έκπτωση» του θέματος)', 'product-bundles' ) );
 				// phpcs:enable
 				?>
+				<p class="description"><?php esc_html_e( 'Χωρίς ένδειξη έκπτωσης το πακέτο δείχνει παντού μόνο την τιμή του, χωρίς διαγραμμένη τιμή και χωρίς σήμα «Έκπτωση», και δεν μετρά ως προσφορά (π.χ. για την ενιαία τιμή βιβλίου, ν. 4549/2018). Η τιμή του πακέτου δεν αλλάζει. Η αλλαγή ξαναϋπολογίζει όλα τα πακέτα.', 'product-bundles' ); ?></p>
 			</div>
 
 			<p class="pbn-submit"><button type="submit" class="button button-primary"><?php esc_html_e( 'Αποθήκευση', 'product-bundles' ); ?></button></p>
@@ -657,6 +659,7 @@ final class PBN_Admin_UI {
 				$s['coupons']       = sanitize_key( self::post( 'pbn_coupons' ) );
 				$s['show_contents'] = '1' === self::post( 'pbn_show_contents' );
 				$s['show_savings']  = '1' === self::post( 'pbn_show_savings' );
+				$s['show_sale']     = '1' === self::post( 'pbn_show_sale' );
 				PBN_Settings::save( $s );
 				self::redirect( self::SLUG, 'general', $saved );
 				break;

@@ -15,6 +15,7 @@
  *  - derived: _regular_price (value of the contents), _sale_price /
  *    _price (bundle price), _stock_status, _pbn_value_max, _pbn_price_max
  *    (when a choice changes the price), _pbn_avail.
+ *  - with the setting show_sale off: _regular_price = _price, no sale.
  *
  * The type name is nox_bundle, not bundle: WooCommerce Product Bundles
  * uses "bundle".
@@ -125,8 +126,23 @@ class PBN_Product extends WC_Product {
 	}
 
 	/**
+	 * On sale only with the sale display on (PBN_Settings show_sale). Off,
+	 * a bundle is never "on sale", even before the rebuild of its prices.
+	 *
+	 * @param string $context What the value is for.
+	 * @return bool
+	 */
+	public function is_on_sale( $context = 'view' ) {
+		if ( ! PBN_Settings::show_sale() ) {
+			return 'view' === $context ? (bool) apply_filters( 'woocommerce_product_is_on_sale', false, $this ) : false;
+		}
+		return parent::is_on_sale( $context );
+	}
+
+	/**
 	 * Price HTML: the value of the contents struck through and the bundle
-	 * price, "From …" when a choice changes the price. Shown with the tax
+	 * price (only the bundle price with the sale display off), "From …"
+	 * when a choice changes the price. Shown with the tax
 	 * of each product inside (a bundle can mix VAT rates).
 	 *
 	 * @param string $deprecated Unused.
@@ -145,7 +161,7 @@ class PBN_Product extends WC_Product {
 			$html = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 			return apply_filters( 'woocommerce_get_price_html', $html, $this );
 		}
-		if ( $q['display_price'] < $q['display_value'] - 0.004 ) {
+		if ( PBN_Settings::show_sale() && $q['display_price'] < $q['display_value'] - 0.004 ) {
 			$html = wc_format_sale_price( $q['display_value'], $q['display_price'] );
 		} else {
 			$html = wc_price( $q['display_price'] );

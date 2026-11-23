@@ -703,7 +703,8 @@ final class PBN_Cart {
 	}
 
 	/**
-	 * Classic cart price column: the separate price struck through.
+	 * Classic cart price column: the separate price struck through (not
+	 * with the sale display off).
 	 *
 	 * @param mixed $html Price HTML.
 	 * @param mixed $item Cart item.
@@ -715,7 +716,7 @@ final class PBN_Cart {
 		}
 		$base = (float) $item[ self::KEY ]['base'];
 		$unit = (float) $item[ self::KEY ]['unit'];
-		if ( $unit >= $base - 0.004 ) {
+		if ( $unit >= $base - 0.004 || ! PBN_Settings::show_sale() ) {
 			return $html;
 		}
 		$p    = $item['data'];
