@@ -36,6 +36,7 @@ final class SBR_Admin_UI {
 	const PER_PAGE    = 50;
 
 	public static function init(): void {
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 170 );
 		add_action( 'admin_init', array( __CLASS__, 'consent' ), 1 );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
@@ -1358,5 +1359,15 @@ button.ok{background:#6d4aff;border-color:#6d4aff;color:#fff}code{color:#beb1ff;
 			</a>
 		</p>
 		<?php
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy), Bible §12. */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Το κατάστημα χρησιμοποιεί το Site Bridge για να διαχειρίζεται το site με τη βοήθεια του Claude (Anthropic). Όταν ο διαχειριστής το ζητήσει, το Claude μπορεί να διαβάσει δεδομένα του καταστήματος, όπως παραγγελίες. Με την απόκρυψη προσωπικών δεδομένων ανοιχτή (η προεπιλογή), τα email, τα τηλέφωνα, οι διευθύνσεις και οι διευθύνσεις IP φτάνουν κρυμμένα.', 'site-bridge' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Κάθε κλήση καταγράφεται στο αρχείο ελέγχου του site (εργαλείο, ώρα, διεύθυνση IP του αιτήματος) και σβήνεται μετά από τις ημέρες που ορίζει το κατάστημα (προεπιλογή 90). Από τους επισκέπτες το plugin δεν κρατά τίποτα.', 'site-bridge' ) . '</p>';
+		wp_add_privacy_policy_content( 'Site Bridge', wp_kses_post( $text ) );
 	}
 }

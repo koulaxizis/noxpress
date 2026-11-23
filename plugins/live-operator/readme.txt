@@ -5,7 +5,7 @@ Tags: live chat, operator, push notifications, pwa, android
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -90,6 +90,9 @@ The settings, the switch state, the push keys, the devices and the transients ar
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.6.2 =
+* Privacy (Bible §12 «Προσωπικά δεδομένα»): suggested privacy policy text (Settings → Privacy): the operator's push notifications, the end-to-end encrypted message preview, and that the chat itself is the chat plugin's.
 
 = 1.6.1 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

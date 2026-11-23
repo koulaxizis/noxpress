@@ -284,6 +284,9 @@ final class SBR_Lang {
 		'Να ανακληθεί η συσκευή; Θα χρειαστεί νέα σύνδεση με QR.'     => 'Revoke this device? It will need a new QR connection.',
 		'Η συσκευή ανακλήθηκε.'                                       => 'The device was revoked.',
 		'Άγνωστη συσκευή.'                                            => 'Unknown device.',
+		// privacy policy text.
+		'Κάθε κλήση καταγράφεται στο αρχείο ελέγχου του site (εργαλείο, ώρα, διεύθυνση IP του αιτήματος) και σβήνεται μετά από τις ημέρες που ορίζει το κατάστημα (προεπιλογή 90). Από τους επισκέπτες το plugin δεν κρατά τίποτα.' => 'Every call is recorded in the site\'s audit log (tool, time, IP address of the request) and deleted after the number of days the shop sets (default 90). The plugin keeps nothing about visitors.',
+		'Το κατάστημα χρησιμοποιεί το Site Bridge για να διαχειρίζεται το site με τη βοήθεια του Claude (Anthropic). Όταν ο διαχειριστής το ζητήσει, το Claude μπορεί να διαβάσει δεδομένα του καταστήματος, όπως παραγγελίες. Με την απόκρυψη προσωπικών δεδομένων ανοιχτή (η προεπιλογή), τα email, τα τηλέφωνα, οι διευθύνσεις και οι διευθύνσεις IP φτάνουν κρυμμένα.' => 'The shop uses Site Bridge to manage the site with the help of Claude (Anthropic). When an administrator asks, Claude can read the shop\'s data, such as orders. With personal data masking on (the default), e-mails, phone numbers, addresses and IP addresses arrive masked.',
 	);
 
 	public static function init(): void {

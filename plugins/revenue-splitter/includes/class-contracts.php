@@ -580,6 +580,42 @@ final class RS_Contracts {
 		return 'sent';
 	}
 
+	/**
+	 * 1.22.0: removes a beneficiary's closed renewal requests (personal
+	 * data eraser, RS_Privacy). Open requests stay until orOS closes them.
+	 *
+	 * @return int Requests removed.
+	 */
+	public static function erase_closed_requests( string $ben ): int {
+		if ( '' === $ben ) {
+			return 0;
+		}
+		$keep = array();
+		$gone = 0;
+		foreach ( self::all_requests() as $r ) {
+			if ( ( $r['ben'] ?? '' ) === $ben && 'closed' === ( $r['state'] ?? '' ) ) {
+				++$gone;
+				continue;
+			}
+			$keep[] = $r;
+		}
+		if ( $gone > 0 ) {
+			self::write_json( self::OPT_REQ, $keep );
+		}
+		return $gone;
+	}
+
+	/** Every renewal request of a beneficiary (any state), for the exporter. */
+	public static function requests_of( string $ben ): array {
+		$out = array();
+		foreach ( self::all_requests() as $r ) {
+			if ( ( $r['ben'] ?? '' ) === $ben ) {
+				$out[] = $r;
+			}
+		}
+		return $out;
+	}
+
 	/** Sets a request's state; false when the id is unknown. */
 	public static function set_request_state( string $id, string $state ): bool {
 		if ( ! in_array( $state, self::RQ_STATE, true ) ) {

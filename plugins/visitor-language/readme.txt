@@ -5,7 +5,7 @@ Tags: english, language switcher, multilingual, woocommerce, hreflang
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,9 @@ No. With WooCommerce the product texts, attributes, shipping and payment labels 
 The settings and every English text are deleted.
 
 == Changelog ==
+
+= 1.0.5 =
+* Privacy (Bible §12 «Προσωπικά δεδομένα»): suggested privacy policy text (Settings → Privacy): an order remembers only that it was placed in English; no language cookie.
 
 = 1.0.4 =
 * The short-texts list now also reaches texts other plugins write in Greek: gettext strings whose source is Greek (exact phrase) and the texts kept in known options (WooCommerce privacy texts, gateway settings, cart-abandonment note, gift checkbox, MailerLite checkout line). Filter vlg_phrase_options( $names ).
