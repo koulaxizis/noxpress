@@ -139,6 +139,9 @@ final class MMD_Lang {
 		'Υπάρχει αρχείο robots.txt στη ρίζα του site: ο server το δίνει χωρίς το WordPress, οπότε το «Disallow: /» δεν μπαίνει. Η σελίδα έχει πάντως noindex.' => 'There is a robots.txt file in the site root: the server sends it without WordPress, so «Disallow: /» is not added. The page has noindex anyway.',
 		'Φόντο' => 'Background',
 		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
+		// privacy policy text.
+		'Όσο το site είναι κλειστό για συντήρηση, όποιος ανοίξει σύνδεσμο προεπισκόπησης παίρνει ένα απαραίτητο cookie (mmd_preview) μέχρι να λήξει ο σύνδεσμος. Δεν περιέχει προσωπικά δεδομένα.' => 'While the site is closed for maintenance, whoever opens a preview link gets a necessary cookie (mmd_preview) until the link expires. It holds no personal data.',
+		'Η διεύθυνση IP σου ελέγχεται σε κάθε επίσκεψη απέναντι στη λίστα επιτρεπόμενων διευθύνσεων του καταστήματος και δεν αποθηκεύεται.' => 'Your IP address is checked on each visit against the shop\'s list of allowed addresses and is not stored.',
 	);
 
 	public static function init(): void {

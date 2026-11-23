@@ -3,7 +3,7 @@
  * Plugin Name:          Checkout Extras
  * Plugin URI:           https://noxpress.tech
  * Description:          Τέσσερα μικρά πράγματα γύρω από το ταμείο, σε ένα plugin: «Είναι δώρο» με αφιέρωση και προαιρετική χρέωση συσκευασίας, μήνυμα και προτεινόμενα προϊόντα στη σελίδα ευχαριστίας, κουπόνι ευχαριστίας για την επόμενη παραγγελία, μόνο σε πληρωμένες παραγγελίες, με μέτρηση χρήσης και καθαρισμό των ληγμένων, και διακοπές καταστήματος: το site μένει ανοιχτό, οι αγορές κλείνουν (ή γίνονται δεκτές για αποστολή μετά), με ημερομηνίες που ανοίγουν και κλείνουν μόνες τους.
- * Version:              1.3.0
+ * Version:              1.4.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -41,6 +41,9 @@
  *                    the WordPress Abilities API (WordPress 6.9+)
  *  - CKE_Emails    → the WooCommerce emails "Thank-you coupon" and
  *                    "Coupon reminder" (class-email-classes.php, templates/)
+ *  - CKE_Privacy   → personal data exporter / eraser (gift messages,
+ *                    thank-you coupons, abandoned carts) and the privacy
+ *                    policy text (1.4.0)
  *  - CKE_Admin_UI  → menu, settings page (gift, thank-you page, coupon,
  *                    vacation, stats, tools), backup, footer
  *
@@ -83,7 +86,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CKE_VERSION', '1.3.0' );
+define( 'CKE_VERSION', '1.4.0' );
 define( 'CKE_FILE', __FILE__ );
 define( 'CKE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CKE_URL', plugin_dir_url( __FILE__ ) );
@@ -133,6 +136,7 @@ final class Checkout_Extras {
 		require_once CKE_PATH . 'includes/class-emails.php';
 		require_once CKE_PATH . 'includes/class-vacation.php';
 		require_once CKE_PATH . 'includes/class-abilities.php';
+		require_once CKE_PATH . 'includes/class-privacy.php';
 
 		// Orders that already carry a gift or a coupon keep showing them
 		// (admin screens, emails, the background jobs), whatever the mode.
@@ -142,6 +146,7 @@ final class Checkout_Extras {
 		CKE_Emails::init();
 		CKE_Vacation::init_display();
 		CKE_Abilities::init();
+		CKE_Privacy::init();
 
 		// Emergency switch (Bible §14): no checkout or thank-you hooks at all.
 		if ( ! self::killed() ) {

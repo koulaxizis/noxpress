@@ -26,6 +26,7 @@ final class VLG_Admin_UI {
 	const PRIORITY    = 395;
 
 	public static function init(): void {
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), self::PRIORITY );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
@@ -430,5 +431,15 @@ final class VLG_Admin_UI {
 			</a>
 		</p>
 		<?php
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy), Bible §12. */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Αν αγοράσεις από την αγγλική εκδοχή του site (/en/), η παραγγελία θυμάται μόνο ότι έγινε στα αγγλικά, για να σου στέλνουμε τα email της στα αγγλικά.', 'visitor-language' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Η γλώσσα φαίνεται από τη διεύθυνση της σελίδας: δεν χρησιμοποιούμε cookie γλώσσας και δεν κρατάμε άλλα δεδομένα για αυτό.', 'visitor-language' ) . '</p>';
+		wp_add_privacy_policy_content( 'Visitor Language', wp_kses_post( $text ) );
 	}
 }

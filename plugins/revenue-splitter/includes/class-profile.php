@@ -919,6 +919,32 @@ final class RS_Profile {
 		exit;
 	}
 
+	/**
+	 * 1.22.0: removes a beneficiary's closed requests and their photos
+	 * (personal data eraser, RS_Privacy). Open requests stay until closed.
+	 *
+	 * @return int Requests removed.
+	 */
+	public static function erase_closed( string $ben ): int {
+		if ( '' === $ben ) {
+			return 0;
+		}
+		$keep = array();
+		$gone = 0;
+		foreach ( self::requests() as $r ) {
+			if ( $r['ben'] === $ben && 'new' !== $r['state'] ) {
+				self::delete_photo( (string) ( $r['photo'] ?? '' ) );
+				++$gone;
+				continue;
+			}
+			$keep[] = $r;
+		}
+		if ( $gone > 0 ) {
+			self::write_json( self::OPT_REQ, $keep );
+		}
+		return $gone;
+	}
+
 	/** Daily: photos 30 days after closing, closed requests after 12 months. */
 	public static function cleanup(): void {
 		$all     = self::requests();

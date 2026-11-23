@@ -78,6 +78,9 @@ final class VLG_Lang {
 		'σύντομο' => 'short',
 		'τίτλος' => 'title',
 		'♡ Στήριξε το Noxpress' => '♡ Support Noxpress',
+		// privacy policy text.
+		'Αν αγοράσεις από την αγγλική εκδοχή του site (/en/), η παραγγελία θυμάται μόνο ότι έγινε στα αγγλικά, για να σου στέλνουμε τα email της στα αγγλικά.' => 'If you buy from the English version of the site (/en/), the order only remembers that it was placed in English, so that its e-mails reach you in English.',
+		'Η γλώσσα φαίνεται από τη διεύθυνση της σελίδας: δεν χρησιμοποιούμε cookie γλώσσας και δεν κρατάμε άλλα δεδομένα για αυτό.' => 'The language comes from the page address: we use no language cookie and keep no other data for it.',
 	);
 
 	public static function init(): void {

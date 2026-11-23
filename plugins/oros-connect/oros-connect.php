@@ -3,7 +3,7 @@
  * Plugin Name:          orOS Connect
  * Plugin URI:           https://noxpress.tech
  * Description:          Σύνδεση του site με το orOS (useoros.online). Modules που ενεργοποιείς ένα-ένα· το πρώτο είναι το Newsletter: φόρμα εγγραφής (μπλοκ, shortcode, widget, popup) και ατσέκαρτο κουτάκι στο ταμείο, που στέλνουν τους νέους συνδρομητές στη λίστα σου στο orOS Newsletter· και οι Προσφορές: τα αιτήματα «Ενδιαφέρομαι» του Publishing Quote γίνονται πρόχειρες προσφορές στο orOS. Δουλεύει με ή χωρίς WooCommerce.
- * Version:              1.4.1
+ * Version:              1.5.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Author:               Christos Koulaxizis
@@ -44,6 +44,8 @@
  *                     that hands orOS the shop's figures (sales, titles,
  *                     stock, splits, costs, bookstores) from the suite's
  *                     own read-only abilities; no customer data
+ *  - ORC_Privacy    → personal data exporter / eraser for the newsletter
+ *                     consent kept with orders (1.5.0)
  *  - ORC_Admin_UI   → menu, modules, Newsletter and Offers settings, tools
  *
  * Deviations from the Bible (with reason):
@@ -74,7 +76,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ORC_VERSION', '1.4.1' );
+define( 'ORC_VERSION', '1.5.0' );
 define( 'ORC_FILE', __FILE__ );
 define( 'ORC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ORC_URL', plugin_dir_url( __FILE__ ) );
@@ -98,6 +100,7 @@ add_action(
 require_once ORC_PATH . 'includes/class-lang.php';
 require_once ORC_PATH . 'includes/class-settings.php';
 require_once ORC_PATH . 'includes/class-relay.php';
+require_once ORC_PATH . 'includes/class-privacy.php';
 
 final class Oros_Connect {
 
@@ -114,6 +117,9 @@ final class Oros_Connect {
 		// Queued checkout sign-ups run even if the module was switched off
 		// after they were queued: the handler then drops them (logged).
 		add_action( 'orc_nl_send', array( __CLASS__, 'run_send' ), 10, 2 );
+
+		// Old orders keep their consent whatever modules are on.
+		ORC_Privacy::init();
 
 		if ( ORC_Settings::module( 'newsletter' ) ) {
 			require_once ORC_PATH . 'includes/class-newsletter.php';

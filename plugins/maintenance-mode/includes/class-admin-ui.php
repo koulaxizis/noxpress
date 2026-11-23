@@ -25,6 +25,7 @@ final class MMD_Admin_UI {
 	const PRIORITY    = 390;
 
 	public static function init(): void {
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), self::PRIORITY );
 		add_action( 'admin_init', array( __CLASS__, 'route' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
@@ -723,5 +724,15 @@ final class MMD_Admin_UI {
 			</a>
 		</p>
 		<?php
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy), Bible §12. */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Όσο το site είναι κλειστό για συντήρηση, όποιος ανοίξει σύνδεσμο προεπισκόπησης παίρνει ένα απαραίτητο cookie (mmd_preview) μέχρι να λήξει ο σύνδεσμος. Δεν περιέχει προσωπικά δεδομένα.', 'maintenance-mode' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Η διεύθυνση IP σου ελέγχεται σε κάθε επίσκεψη απέναντι στη λίστα επιτρεπόμενων διευθύνσεων του καταστήματος και δεν αποθηκεύεται.', 'maintenance-mode' ) . '</p>';
+		wp_add_privacy_policy_content( 'Maintenance Mode', wp_kses_post( $text ) );
 	}
 }

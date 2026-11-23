@@ -197,6 +197,14 @@ final class ORC_Lang {
 		'Βιβλιοπωλεία και παρακαταθήκες' => 'Bookstores and consignments',
 		'Τα σύνολα του καταστήματος για το orOS (areas=sales,titles,stock,splits,costs,bookstores, fresh=1). Μόνο ανάγνωση, μόνο για διαχειριστές.' => 'The shop\'s totals for orOS (areas=sales,titles,stock,splits,costs,bookstores, fresh=1). Read only, managers only.',
 		'Ποιες περιοχές είναι ανοιχτές και ποια plugins τις δίνουν.' => 'Which areas are on and which plugins provide them.',
+		// 1.5.0: privacy.
+		'orOS Connect: η διεύθυνση μπορεί να είναι εγγεγραμμένη στη λίστα του orOS Newsletter. Το site δεν έχει πρόσβαση εκεί: διάγραψέ την από τη λίστα στο orOS.' => 'orOS Connect: the address may be subscribed to the orOS Newsletter list. The site cannot reach it: remove the address from the list in orOS.',
+		'orOS Connect: κρατήθηκε η συναίνεση για το newsletter σε %d παραγγελίες, ως απόδειξη της συναίνεσης (ΓΚΠΔ άρθρο 7 παρ. 1). Σβήνεται μαζί με την παραγγελία, ή αμέσως αν ενεργοποιήσεις τη διαγραφή προσωπικών δεδομένων από τις παραγγελίες στις ρυθμίσεις του WooCommerce.' => 'orOS Connect: the newsletter consent was kept on %d orders, as proof of consent (GDPR art. 7(1)). It goes with the order, or at once if you turn on removing personal data from orders in the WooCommerce settings.',
+		'orOS Connect: συναίνεση newsletter' => 'orOS Connect: newsletter consent',
+		'Γλώσσα' => 'Language',
+		'Κείμενο συναίνεσης' => 'Consent text',
+		'Στάλθηκε στο orOS Newsletter' => 'Sent to orOS Newsletter',
+		'Συναίνεση' => 'Consent',
 	);
 
 	public static function init(): void {

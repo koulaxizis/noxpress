@@ -880,5 +880,21 @@ class RS_Lang {
 		'Είσπραξη από %s. Το μερίδιό σου περιλαμβάνεται ήδη στα μερίδια από πωλήσεις.' => 'Received from %s. Your share is already included in the sales shares.',
 		'Είσπραξη παρακαταθήκης' => 'Consignment receipt',
 		'Βιβλιοπωλείο' => 'Bookstore',
+		// 1.22.0 privacy.
+		'Revenue Splitter: δικαιούχοι' => 'Revenue Splitter: beneficiaries',
+		'Revenue Splitter: τα συμβόλαια, οι εγγραφές καθολικού, οι μηνιαίες καταστάσεις και το email του δικαιούχου κρατήθηκαν ως συμβατικά και λογιστικά αρχεία (ΓΚΠΔ άρθρο 17 παρ. 3 β και ε, φορολογική διατήρηση). Τα κλειστά αιτήματα προφίλ και ανανέωσης σβήστηκαν· τα ανοιχτά μένουν μέχρι να κλείσουν.' => 'Revenue Splitter: the beneficiary\'s contracts, ledger entries, monthly statements and e-mail were kept as contract and accounting records (GDPR art. 17(3)(b) and (e), tax retention). Closed profile and renewal requests were deleted; open ones stay until they are closed.',
+		'Όνομα' => 'Name',
+		'Όχι' => 'No',
+		'Ναι' => 'Yes',
+		'Αιτήματα ανανέωσης' => 'Renewal requests',
+		'Αιτήματα προφίλ' => 'Profile requests',
+		'Απάντηση' => 'Reply',
+		'Από τους πελάτες το plugin δεν κρατά δικά του δεδομένα· διαβάζει μόνο τις παραγγελίες του WooCommerce για να βγάλει τα σύνολα πωλήσεων.' => 'The plugin keeps no customer data of its own; it only reads WooCommerce\'s orders to work out sales totals.',
+		'Για τους δικαιούχους (συγγραφείς, μεταφραστές, συνεργάτες) κρατάμε το όνομα, το email, τα συμβόλαια, τις εγγραφές καθολικού και τις μηνιαίες καταστάσεις, για να υπολογίζουμε και να πληρώνουμε το μερίδιό τους από τις πωλήσεις. Αυτά είναι συμβατικά και λογιστικά αρχεία και κρατιούνται όσο ορίζει η φορολογική νομοθεσία.' => 'For beneficiaries (authors, translators, partners) we keep the name, e-mail, contracts, ledger entries and monthly statements, to work out and pay their share of sales. These are contract and accounting records and are kept as long as tax law requires.',
+		'Κλειδί Author Portal' => 'Author Portal key',
+		'Προς' => 'To',
+		'Στο Author Portal το κλειδί πρόσβασης κρατιέται μόνο ως κρυπτογραφημένο αποτύπωμα. Τα αιτήματα αλλαγής προφίλ (βιογραφικό, σύνδεσμοι, φωτογραφία) σβήνονται 12 μήνες αφού κλείσουν και η φωτογραφία 30 ημέρες αφού κλείσει το αίτημα. Τα κλειστά αιτήματα ανανέωσης συμβολαίου σβήνονται όταν ο δικαιούχος ζητήσει διαγραφή των δεδομένων του. Για τα όρια αιτημάτων η διεύθυνση IP κρατιέται για λίγο μόνο ως κρυπτογραφημένο αποτύπωμα.' => 'In the Author Portal the access key is kept only as a hash. Profile change requests (bio, links, photo) are deleted 12 months after they close, and the photo 30 days after the request closes. Closed contract renewal requests are deleted when the beneficiary asks for their data to be erased. For request limits the IP address is kept briefly, only as a hash.',
+		'Συμβόλαια' => 'Contracts',
+		'Σύνδεσμοι' => 'Links',
 	);
 }

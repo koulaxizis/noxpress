@@ -55,10 +55,7 @@ REQUIRED = {
 }
 
 # Being completed in open work (compliance audit 2026-11): warnings only.
-PENDING = {
-    'checkout-extras', 'live-operator', 'maintenance-mode', 'oros-connect',
-    'revenue-splitter', 'site-bridge', 'visitor-language',
-}
+PENDING = set()
 
 # Checked: no personal data of customers, visitors or users is stored.
 NONE = {

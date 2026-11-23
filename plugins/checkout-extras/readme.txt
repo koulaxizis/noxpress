@@ -5,7 +5,7 @@ Tags: woocommerce, gift, thank you page, coupon, vacation mode
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -111,6 +111,10 @@ The settings, the transients and the background jobs are removed. The gift and t
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.4.0 =
+* Privacy (Bible §12 «Προσωπικά δεδομένα»): Tools → Export / Erase Personal Data now cover Checkout Extras. The export lists the address's gift messages and thank-you coupon codes per order, its thank-you coupons (code, expiry, used) and, when Cart Abandonment Recovery for WooCommerce is there, its tracked carts (time, status, total). The eraser deletes the gift messages of orders that are no longer open (an open order keeps it for packing, with a message), the address's thank-you coupons (the statistics read order meta and stay) and its tracked carts with their e-mail history rows. When WooCommerce anonymises an order, the gift message goes with it.
+* Suggested privacy policy text (Settings → Privacy) for the gift message, the thank-you coupon and abandoned carts.
 
 = 1.3.0 =
 * New: cart retention for Cart Abandonment Recovery for WooCommerce (Tools → «Εγκαταλελειμμένα καλάθια», off by default). A daily Action Scheduler job deletes the carts older than the days set, with their e-mail history, because that plugin keeps them forever.
