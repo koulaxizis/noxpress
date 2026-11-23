@@ -33,6 +33,12 @@ final class EWD_Lang {
 	private static $force = '';
 
 	private static $dict = array(
+		// Privacy exporter / eraser.
+		'Easy Withdrawal: αιτήματα υπαναχώρησης' => 'Easy Withdrawal: withdrawal requests',
+		'Αιτήματα υπαναχώρησης' => 'Withdrawal requests',
+		'Ημερομηνία' => 'Date',
+		'Λόγος' => 'Reason',
+		'Κρατήθηκαν %d αιτήματα υπαναχώρησης: είναι το αρχείο του καταστήματος για τη δήλωση υπαναχώρησης και την επιστροφή χρημάτων, και μένουν με την παραγγελία.' => '%d withdrawal requests were kept: they are the store\'s record of the withdrawal statement and the refund, and stay with the order.',
 		'Το Easy Withdrawal χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Easy Withdrawal requires WooCommerce to be active — the plugin stays inactive until it is activated.',
 		'Easy Withdrawal'                                         => 'Easy Withdrawal',
 		'Easy Withdrawal:'                                        => 'Easy Withdrawal:',

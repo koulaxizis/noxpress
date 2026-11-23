@@ -5,7 +5,7 @@ Tags: woocommerce, gift card, store credit, voucher, pdf
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -83,6 +83,9 @@ The settings, the attempt counters, the transients and the background jobs are r
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use. Ask your accountant how gift cards are recorded and taxed in your country.
 
 == Changelog ==
+
+= 1.1.0 =
+* Personal data: WordPress's exporter and eraser (Tools → Export / Erase Personal Data). The export lists the cards the address bought or received; the eraser blanks the buyer e-mail, recipient, sender and message of finished cards and keeps cards that can still be spent (money owed) with a message. Amounts and the ledger always stay.
 
 = 1.0.4 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

@@ -5,7 +5,7 @@ Tags: wholesale, trade, bookstores, api, woocommerce
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.10.1
+Stable tag: 1.11.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -97,6 +97,9 @@ The settings, the call log, the plugin's user and product meta, its Application 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.11.0 =
+* Personal data: WordPress's exporter and eraser (Tools → Export / Erase Personal Data). The export lists the trade account (discount, API access) and its feed calls; the eraser deletes the feed log lines and the last call, and keeps the trade account itself (business terms) with a message.
 
 = 1.10.1 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

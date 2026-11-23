@@ -22,6 +22,14 @@ final class TRA_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		// Privacy exporter / eraser.
+		'Trade Accounts: λογαριασμός χονδρικής' => 'Trade Accounts: trade account',
+		'Λογαριασμός χονδρικής' => 'Trade account',
+		'Πρόσβαση στο API' => 'API access',
+		'Όχι' => 'No',
+		'Κλήσεις στο API χονδρικής' => 'Trade API calls',
+		'Απάντηση' => 'Response',
+		'Ο λογαριασμός χονδρικής (ρόλος, έκπτωση, πρόσβαση στο API) κρατήθηκε: είναι οι όροι μιας επαγγελματικής συνεργασίας. Τον αφαιρείς από το Trade Accounts → Λογαριασμοί.' => 'The trade account (role, discount, API access) was kept: these are the terms of a business relationship. Remove it in Trade Accounts → Accounts.',
 		// 1.9.0: consignments overview.
 		'τεμάχια' => 'copies',
 		'%1$d παρακαταθήκες σε %2$d βιβλιοπωλεία · επιστράφηκαν %3$d' => '%1$d consignments at %2$d bookstores · %3$d returned',

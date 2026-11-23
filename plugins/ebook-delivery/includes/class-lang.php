@@ -23,6 +23,11 @@ final class EBD_Lang {
 	private static $lang = null;
 
 	private static $dict = array(
+		// Privacy exporter / eraser.
+		'Ebook Delivery: προσωποποιημένα αντίτυπα' => 'Ebook Delivery: personalised copies',
+		'Προσωποποιημένα αντίτυπα' => 'Personalised copies',
+		'Δημιουργία' => 'Created',
+		'Κάποια αντίτυπα δεν σβήστηκαν (δικαιώματα αρχείων). Σβήνονται μόνα τους με τον ημερήσιο καθαρισμό.' => 'Some copies could not be deleted (file permissions). The daily cleanup deletes them.',
 		'Το Ebook Delivery χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Ebook Delivery needs WooCommerce to be active — the plugin stays inactive until it is activated.',
 		'Κρυπτογραφημένο αρχείο ή DRM: στάλθηκε το αρχικό' => 'Encrypted file or DRM: the original was sent',
 		'Χαλασμένο αρχείο: στάλθηκε το αρχικό' => 'Damaged file: the original was sent',

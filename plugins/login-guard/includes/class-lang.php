@@ -26,6 +26,15 @@ final class LGD_Lang {
 	private static $forced = null;
 
 	private static $dict = array(
+		// Privacy exporter / eraser.
+		'Login Guard: ασφάλεια σύνδεσης' => 'Login Guard: login security',
+		'Ασφάλεια σύνδεσης' => 'Login security',
+		'Ημερομηνία' => 'Date',
+		'Συμβάν' => 'Event',
+		'Διεύθυνση IP (συντομευμένη)' => 'IP address (shortened)',
+		'Γνωστές συσκευές' => 'Known devices',
+		'Επαλήθευση δύο βημάτων' => 'Two-step verification',
+		'Η επαλήθευση δύο βημάτων του λογαριασμού κρατήθηκε, για να μη μείνει ο λογαριασμός λιγότερο προστατευμένος. Απενεργοποιείται από το προφίλ του χρήστη.' => 'The account\'s two-step verification was kept, so the account does not become less protected. It is turned off in the user\'s profile.',
 		'Επαλήθευση σε δύο βήματα' => 'Two-step verification',
 		'Οι κωδικοί ανάκτησης φαίνονται μόνο τώρα.' => 'The recovery codes are shown only now.',
 		'Γράψε τους ή τύπωσέ τους και κράτησέ τους μακριά από τον υπολογιστή. Καθένας δουλεύει μία φορά, αν χάσεις το κινητό.' => 'Write them down or print them and keep them away from the computer. Each one works once, if you lose your phone.',

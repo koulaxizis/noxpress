@@ -3,7 +3,7 @@
  * Plugin Name:          Ebook Delivery
  * Plugin URI:           https://noxpress.tech
  * Description:          Υδατογράφημα του αγοραστή σε κάθε PDF και EPUB τη στιγμή της λήψης (social DRM), με κρυφό κωδικό που δείχνει ποια παραγγελία μοιράστηκε ένα αρχείο, καθαρά ονόματα αρχείων και σελίδα «Η βιβλιοθήκη μου» στον λογαριασμό. Πάνω στις λήψεις του WooCommerce: τα όρια, η λήξη και το ιστορικό μένουν δικά του.
- * Version:              1.0.3
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -83,7 +83,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'EBD_VERSION', '1.0.3' );
+define( 'EBD_VERSION', '1.1.0' );
 define( 'EBD_FILE', __FILE__ );
 define( 'EBD_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EBD_URL', plugin_dir_url( __FILE__ ) );
@@ -131,6 +131,10 @@ final class Ebook_Delivery {
 
 		EBD_Store::init();
 		EBD_Limits::init();
+
+		// Personal data exporter / eraser (Tools → Export / Erase Personal Data).
+		require_once EBD_PATH . 'includes/class-privacy.php';
+		EBD_Privacy::init();
 
 		if ( ! self::killed() ) {
 			require_once EBD_PATH . 'includes/class-delivery.php';
