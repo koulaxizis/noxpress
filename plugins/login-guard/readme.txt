@@ -5,7 +5,7 @@ Tags: login, security, two-factor, brute force, xml-rpc
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -63,6 +63,7 @@ Nothing a visitor sees changes after activation: the plugin starts switched off.
 **Log and privacy**
 
 * The log keeps 30 days and at most 5,000 rows: the event, the time, a truncated IP (203.0.113.x) and a keyed hash, never a full address or a password. The privacy text for your policy page is in the Tools tab and in Settings → Privacy.
+* Tools → Export / Erase Personal Data: the log rows of a user account, its known devices and whether two-step verification is on. The eraser deletes the log rows and the known devices and keeps two-step verification (it protects the account; the user turns it off from the profile).
 * Counters and lockouts live in transients that expire by themselves.
 
 **Also**
@@ -119,6 +120,9 @@ The log table and the options are removed, unless you ticked «Keep settings and
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.2.0 =
+* Privacy: personal data exporter and eraser for user accounts (log rows, known administrator devices, two-step verification status). Two-step verification is kept on erasure and the reason is reported.
 
 = 1.1.3 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

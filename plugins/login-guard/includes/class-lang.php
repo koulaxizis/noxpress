@@ -253,6 +253,16 @@ final class LGD_Lang {
 		'Κωδικός από την εφαρμογή ή κωδικός ανάκτησης' => 'Code from the app or recovery code',
 		'Γράψε έναν κωδικό από την εφαρμογή ή έναν κωδικό ανάκτησης.' => 'Enter a code from the app or a recovery code.',
 		'Έγιναν νέοι κωδικοί ανάκτησης για τον λογαριασμό %1$s στο %2$s. Οι παλιοί δεν δουλεύουν πια.' => 'New recovery codes were made for the account %1$s on %2$s. The old ones no longer work.',
+		// 1.2.0: privacy.
+		'IP (χωρίς το τελευταίο μέρος)' => 'IP (without its last part)',
+		'Login Guard: ασφάλεια σύνδεσης' => 'Login Guard: login security',
+		'Login Guard: η επαλήθευση σε δύο βήματα του λογαριασμού κρατήθηκε, γιατί η διαγραφή της θα άφηνε τον λογαριασμό λιγότερο προστατευμένο. Ο χρήστης την απενεργοποιεί από το προφίλ του και σβήνεται μαζί με τον λογαριασμό.' => 'Login Guard: the account\'s two-step verification was kept, because erasing it would leave the account less protected. The user turns it off from their profile, and it goes with the account.',
+		'Login Guard: ημερολόγιο' => 'Login Guard: log',
+		'Login Guard: λογαριασμός' => 'Login Guard: account',
+		'Γνωστές συσκευές (τελευταία σύνδεση)' => 'Known devices (last login)',
+		'Συμβάν' => 'Event',
+		'ανενεργή' => 'off',
+		'ενεργή' => 'on',
 	);
 
 	public static function init(): void {

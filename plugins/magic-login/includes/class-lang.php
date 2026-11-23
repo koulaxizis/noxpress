@@ -149,6 +149,11 @@ final class MGL_Lang {
 		'Noxpress Dashboard' => 'Noxpress Dashboard',
 		// Bootstrap.
 		'Το Magic Login χρειάζεται το WooCommerce ενεργό — το plugin παραμένει ανενεργό μέχρι να ενεργοποιηθεί.' => 'Magic Login needs WooCommerce to be active — the plugin stays inactive until it is activated.',
+		// 1.1.0: privacy.
+		'Magic Login: ημερολόγιο' => 'Magic Login: log',
+		'Magic Login: σύνδεση με σύνδεσμο' => 'Magic Login: sign-in links',
+		'Συμβάν' => 'Event',
+		'Σύνδεσμος σε αναμονή, λήγει' => 'Pending link, expires',
 	);
 
 	public static function init(): void {

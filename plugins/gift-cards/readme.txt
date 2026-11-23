@@ -5,7 +5,7 @@ Tags: woocommerce, gift card, store credit, voucher, pdf
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -42,6 +42,13 @@ Digital gift cards sold as a WooCommerce product, sent by email with a printable
 * Admin: list with search by last 4 characters, email, name or order; the card page with its history and actions (approve, send now, disable, enable, new code and send, adjust with a reason, void an unused card, unlock); a card issued by hand to an email; a summary of what the store owes (open balances) and the movements of a period.
 * My account › Gift cards: the cards the customer bought (the balance only for cards bought for themselves) and the orders a card paid.
 * Optional expiry in months, with a reminder email before it (no expiry by default).
+
+**Privacy**
+
+* Tools → Export Personal Data lists the cards of an address, as buyer or as recipient (amounts, status, dates, names, message).
+* Tools → Erase Personal Data keeps cards that still have a balance (money the store owes, and their emails are needed for delivery and reminders) and says why; on a used-up, expired or voided card it clears what belongs to that address (email, names, message) and keeps the amounts and the ledger as the accounting record. When WooCommerce removes an order's personal data, the gift card lines of that order are cleaned the same way.
+* The names and the message of a closed card are cleared 365 days after it closed (setting, 0 = never).
+* Suggested text for the privacy policy (Settings → Privacy → Policy guide).
 
 **Everything else**
 
@@ -83,6 +90,9 @@ The settings, the attempt counters, the transients and the background jobs are r
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use. Ask your accountant how gift cards are recorded and taxed in your country.
 
 == Changelog ==
+
+= 1.1.0 =
+* Privacy: personal data exporter and eraser for gift cards (open cards are kept with the reason, closed cards lose the address's email, names and message), the same clean-up of gift card order lines when WooCommerce removes an order's personal data, a retention setting for names and messages of closed cards (365 days by default), and suggested privacy policy text.
 
 = 1.0.4 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

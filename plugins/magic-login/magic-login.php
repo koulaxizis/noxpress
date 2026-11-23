@@ -3,7 +3,7 @@
  * Plugin Name:          Magic Login
  * Plugin URI:           https://noxpress.tech
  * Description:          Σύνδεση πελατών χωρίς κωδικό: κουμπί στη φόρμα σύνδεσης του «Ο λογαριασμός μου» και του ταμείου που στέλνει με email σύνδεσμο μίας χρήσης, με λήξη, όριο αιτημάτων και σελίδα επιβεβαίωσης. Ο κωδικός μένει ως εναλλακτική· οι διαχειριστές συνδέονται μόνο με κωδικό.
- * Version:              1.0.9
+ * Version:              1.1.0
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -35,6 +35,8 @@
  *                    the link opens, the login on its POST
  *  - MGL_Emails    → registers MGL_Email_Link (WooCommerce → Settings →
  *                    Emails) and sends it in the visitor's language
+ *  - MGL_Privacy   → personal data exporter / eraser (log entries, pending
+ *                    link of an account)
  *  - MGL_Admin_UI  → menu, settings, log, tools (backup, developers),
  *                    privacy text, footer
  *  - MGL_Abilities → magic-login/status in the Abilities API (read only)
@@ -82,7 +84,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MGL_VERSION', '1.0.9' );
+define( 'MGL_VERSION', '1.1.0' );
 define( 'MGL_FILE', __FILE__ );
 define( 'MGL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MGL_URL', plugin_dir_url( __FILE__ ) );
@@ -127,9 +129,11 @@ final class Magic_Login {
 		require_once MGL_PATH . 'includes/class-settings.php';
 		require_once MGL_PATH . 'includes/class-tokens.php';
 		require_once MGL_PATH . 'includes/class-emails.php';
+		require_once MGL_PATH . 'includes/class-privacy.php';
 
 		MGL_Tokens::init();
 		MGL_Emails::init();
+		MGL_Privacy::init();
 
 		// Emergency switch (Bible §14): no front-end hook at all.
 		if ( ! self::killed() && ! is_admin() ) {

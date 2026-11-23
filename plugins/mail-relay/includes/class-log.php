@@ -29,6 +29,17 @@ final class MRL_Log {
 	public static function init(): void {
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_exporter' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'register_eraser' ) );
+		add_action( 'admin_init', array( __CLASS__, 'policy' ) );
+	}
+
+	/** Suggested text for the privacy policy (Settings → Privacy → Policy guide). */
+	public static function policy(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . esc_html__( 'Τα email που στέλνει το site (παραγγελίες, λογαριασμός, φόρμες) φεύγουν μέσω του παρόχου email που έχουμε ορίσει. Για κάθε email κρατάμε σε ημερολόγιο τον παραλήπτη, το θέμα, την ώρα και αν στάλθηκε, για όσες ημέρες ορίζει ο διαχειριστής (30 από προεπιλογή), ώστε να ελέγχουμε ότι τα μηνύματα φτάνουν.', 'mail-relay' ) . '</p>';
+		$text .= '<p>' . esc_html__( 'Αν ο διαχειριστής το ενεργοποιήσει, κρατάμε και το περιεχόμενο των email για 7 ημέρες, κρυπτογραφημένο, για επανάληψη αποστολής. Email με κωδικούς ή συνδέσμους σύνδεσης δεν αποθηκεύονται ποτέ με το περιεχόμενό τους.', 'mail-relay' ) . '</p>';
+		wp_add_privacy_policy_content( 'Mail Relay', wp_kses_post( $text ) );
 	}
 
 	public static function table(): string {

@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, check-in, event schema
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -33,7 +33,7 @@ Events (book presentations, readings, signings, concerts, workshops, online even
 * Each paid ticket gets its own code (ABCDE-FGHJK) and a QR code, under the order items, in the order e-mails, on a ticket page that works without an account and in the «Tickets» tab of My account. Refunds and cancellations cancel the extra tickets.
 * Check-in from a phone: the role «Event cashier» opens only the door page, where the code is typed or read with the camera. A ticket can be used once.
 * Attendee list with print and CSV, undo of a check-in, and «Notify the buyers» (an e-mail to every order with a valid ticket, off by default in WooCommerce → Emails).
-* Optional attendee names per event (off by default), deleted a set number of days after the event, and in the privacy export and erasure.
+* Optional attendee names per event (off by default), deleted a set number of days after the event, and in the privacy export and erasure. Suggested privacy policy text (Settings → Privacy → Policy guide).
 
 **Rules**
 
@@ -57,6 +57,9 @@ The settings, the role «Event cashier» and the scheduled jobs are removed. The
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.1.4 =
+* Suggested privacy policy text for tickets and attendee names (Settings → Privacy → Policy guide).
 
 = 1.1.3 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

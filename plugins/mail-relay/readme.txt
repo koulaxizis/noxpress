@@ -5,7 +5,7 @@ Tags: smtp, email, mail log, proton mail, deliverability
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -75,6 +75,9 @@ What is not in 1.0.0: OAuth sign-in for Gmail and Microsoft 365 (their SMTP with
 3. Tools → Test email. When it arrives, deactivate your old mail plugin, then Connection → Turn on.
 
 == Changelog ==
+
+= 1.0.4 =
+* Suggested privacy policy text for the sent log and the optional email content (Settings → Privacy → Policy guide).
 
 = 1.0.3 =
 * Support links (the footer pill and the Donate link) point to noxpress.tech/support/ instead of Ko-fi, with the label «♡ Support Noxpress». Noxpress Core 1.6.0: the same link in the hub, and Visitor Language in the suite catalogue.

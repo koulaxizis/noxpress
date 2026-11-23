@@ -233,6 +233,9 @@ final class EVT_Lang {
 		'Events: εισιτήρια που εκδόθηκαν: %d.' => 'Events: tickets issued: %d.',
 		'Ποσότητα' => 'Quantity',
 		'Εισιτήρια εκδηλώσεων' => 'Event tickets',
+		// 1.1.4: privacy policy text.
+		'Όταν αγοράζεις εισιτήριο για εκδήλωση, κάθε εισιτήριο συνδέεται με την παραγγελία και τον λογαριασμό σου. Αν γράψεις το όνομα κάθε συμμετέχοντα, το κρατάμε για τον έλεγχο στην είσοδο και το σβήνουμε μερικές ημέρες μετά το τέλος της εκδήλωσης. Κρατάμε επίσης την ώρα που χρησιμοποιήθηκε το εισιτήριο στην είσοδο.' => 'When you buy a ticket for an event, each ticket is linked to the order and to your account. If you write the name of each attendee, we keep it for the check at the door and delete it a few days after the event ends. We also keep the time the ticket was used at the door.',
+		'Ο κωδικός του εισιτηρίου δεν αποθηκεύεται ως κείμενο: φτιάχνεται κάθε φορά από ένα κρυπτογραφικό κλειδί του site. Τα εισιτήρια μένουν με την παραγγελία όσο την κρατάμε.' => 'The ticket code is not stored as text: it is derived each time from a cryptographic key of the site. The tickets stay with the order for as long as we keep it.',
 	);
 
 	public static function init(): void {

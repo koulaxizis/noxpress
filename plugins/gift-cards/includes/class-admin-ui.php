@@ -707,6 +707,14 @@ final class GFC_Admin_UI {
 				<p class="description"><?php esc_html_e( 'Η λήξη ισχύει για κάρτες που στέλνονται μετά την αλλαγή· όσες στάλθηκαν κρατούν τη δική τους.', 'gift-cards' ); ?></p>
 			</div>
 
+			<h2 class="gfc-h2"><?php esc_html_e( 'Απόρρητο', 'gift-cards' ); ?></h2>
+			<div class="gfc-zone">
+				<?php
+				self::input( 'gfc_keep_days', (string) $s['keep_days'], __( 'Ονόματα και μήνυμα', 'gift-cards' ), __( 'σβήνονται τόσες ημέρες αφού η κάρτα εξαντληθεί, λήξει ή ακυρωθεί (0 = ποτέ)', 'gift-cards' ), 'number' );
+				?>
+				<p class="description"><?php esc_html_e( 'Τα ποσά και οι κινήσεις μένουν ως λογιστικό αρχείο. Τα email σβήνονται όταν ο πελάτης ζητήσει διαγραφή από τα Εργαλεία → Διαγραφή προσωπικών δεδομένων.', 'gift-cards' ); ?></p>
+			</div>
+
 			<h2 class="gfc-h2"><?php esc_html_e( 'Ταμείο', 'gift-cards' ); ?></h2>
 			<div class="gfc-zone">
 				<?php
@@ -1008,7 +1016,7 @@ final class GFC_Admin_UI {
 
 	private static function do_save_settings(): array {
 		$raw = GFC_Settings::get();
-		foreach ( array( 'mode', 'delay_hours', 'expiry_months', 'remind_days', 'max_cards', 'pending_hours', 'limit_n', 'limit_min', 'site_fail_hour', 'pdf_size' ) as $k ) {
+		foreach ( array( 'mode', 'delay_hours', 'expiry_months', 'remind_days', 'keep_days', 'max_cards', 'pending_hours', 'limit_n', 'limit_min', 'site_fail_hour', 'pdf_size' ) as $k ) {
 			$raw[ $k ] = self::post( 'gfc_' . $k );
 		}
 		$raw['paid_statuses'] = array_map( 'sanitize_key', self::post_array( 'gfc_paid_statuses' ) );
