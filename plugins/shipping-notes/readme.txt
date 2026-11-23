@@ -5,7 +5,7 @@ Tags: woocommerce, free shipping, progress bar, delivery time, printful
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -108,6 +108,9 @@ The free shipping bar does. The parcel names, the "two parcels" message and the 
 Use at your own risk. This plugin is free software, provided "as is", without warranty of any kind (MIT licence). Test it on a staging copy first and keep a full backup of your site and database before you install, update or remove any plugin. To the fullest extent permitted by law, there is no liability for any loss of data, orders, revenue or any other damage arising from its use.
 
 == Changelog ==
+
+= 1.5.1 =
+* Shipping rules: the product page no longer says a product does not count toward free shipping when the product cannot be bought yet (e.g. a forthcoming title with no price), since it never reaches a cart.
 
 = 1.5.0 =
 * New module «Κανόνες αποστολής» (Shipping rules, tab of its own, off by default, test mode for shop managers). Made-to-order (partner) products, from chosen shipping classes and the Printful parcel, always pay one flat fee per order whatever the quantity, with a higher fee when the cart holds a large product (classes of their own). The fee replaces the partner's live rates on the partner's package and keeps the cheapest partner rate's id, so the partner's order import reads the order as before; tax included in the fee or none. When the cart is not split (partner API outage), the fee is added to every rate.
