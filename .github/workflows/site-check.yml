@@ -10,6 +10,8 @@ on:
     paths:
       - 'index.html'
       - 'supporters/index.html'
+      - 'support/index.html'
+      - 'privacy/index.html'
       - 'plugins/**'
       - 'apps/*/app/build.gradle.kts'
       - 'media/videos/**'
