@@ -277,8 +277,10 @@ final class TP_Settings {
 		if ( null !== self::$cache ) {
 			return self::$cache;
 		}
-		$raw     = get_option( self::OPT, '' );
-		$decoded = is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null;
+		$raw = get_option( self::OPT, '' );
+		// JSON string (own writes); an array is accepted too (written by an
+		// option tool such as Site Bridge). The next save stores JSON again.
+		$decoded = is_array( $raw ) ? $raw : ( is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null );
 		// Stored data was validated on write; sanitize again anyway (cheap, defensive).
 		self::$cache = is_array( $decoded ) ? self::sanitize_all( $decoded ) : self::defaults();
 		return self::$cache;
@@ -385,7 +387,7 @@ final class TP_Settings {
 			return $all;
 		}
 		$raw    = get_option( self::OPT, '' );
-		$stored = is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null;
+		$stored = is_array( $raw ) ? $raw : ( is_string( $raw ) && '' !== $raw ? json_decode( $raw, true ) : null );
 		$stored = is_array( $stored ) ? self::sanitize_all( $stored ) : self::defaults();
 		$kept   = array();
 		foreach ( $stored['themes'] as $theme ) {
