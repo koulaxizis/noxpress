@@ -3,7 +3,7 @@
  * Plugin Name:          Shipping Notes
  * Plugin URI:           https://noxpress.tech
  * Description:          Μηνύματα αποστολής για τον πελάτη, χωρίς plugins τρίτων: «Απομένουν Χ € για δωρεάν αποστολή» με μπάρα προόδου σε καλάθι, mini-cart και ταμείο και μια γραμμή κάτω από το κουμπί του προϊόντος (όριο από τις ζώνες αποστολής του WooCommerce, κλασικό και block καλάθι), και «Παράδοση σε Χ–Ψ εργάσιμες» στη σελίδα προϊόντος, ανά μέθοδο αποστολής, κατηγορία και προϊόν, με cut-off, εργάσιμες και αργίες. Για καλάθια σε δύο δέματα (π.χ. Printful): ονόματα δεμάτων, μήνυμα, ελληνικές ετικέτες και τα δέματα στην παραγγελία. Κανόνες αποστολής: σταθερή χρέωση για τα προϊόντα κατά παραγγελία και δωρεάν αποστολή μόνο για τις κατηγορίες που διαλέγεις.
- * Version:              1.5.0
+ * Version:              1.5.1
  * Requires at least:    6.0
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -69,7 +69,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SHN_VERSION', '1.5.0' );
+define( 'SHN_VERSION', '1.5.1' );
 define( 'SHN_FILE', __FILE__ );
 define( 'SHN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SHN_URL', plugin_dir_url( __FILE__ ) );

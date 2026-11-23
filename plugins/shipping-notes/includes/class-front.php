@@ -408,7 +408,9 @@ final class SHN_Front {
 			return '';
 		}
 		if ( $product->needs_shipping() && SHN_Rules::on() && ! SHN_Rules::counts( $product ) ) {
-			return self::rules_product_html( $product );
+			// A product that cannot be bought yet (forthcoming title with no
+			// price, 1.5.1) is not in any cart: saying it does not count is wrong.
+			return $product->is_purchasable() ? self::rules_product_html( $product ) : '';
 		}
 		$st = SHN_Threshold::for_product( $product );
 		if ( null === $st ) {
