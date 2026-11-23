@@ -1,6 +1,6 @@
 {
-  "display": 1974,
-  "total": 1974,
+  "display": 1975,
+  "total": 1975,
   "offset": 5,
   "updated": "2026-11-23",
   "assets": {
@@ -2450,7 +2450,7 @@
     },
     "782367891": {
       "file": "nox-pq-1.1.9/publishing-quote.zip",
-      "count": 2
+      "count": 3
     },
     "782368150": {
       "file": "nox-ce-1.4.1/checkout-extras.zip",
@@ -2476,7 +2476,7 @@
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 136,
+      "github": 139,
       "manager": 3
     },
     "net.glarolykoi.android": {
@@ -2588,7 +2588,8 @@
     },
     "online.useoros.passwords": {
       "estimate": 6,
-      "github": 2
+      "github": 2,
+      "manager": 1
     },
     "online.useoros.photolab": {
       "estimate": 6,
@@ -2680,7 +2681,7 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 100
+      "github": 103
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
