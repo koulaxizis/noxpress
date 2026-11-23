@@ -1,6 +1,6 @@
 {
-  "display": 1895,
-  "total": 1895,
+  "display": 1899,
+  "total": 1899,
   "offset": 5,
   "updated": "2026-11-23",
   "assets": {
@@ -2354,17 +2354,21 @@
     },
     "781898120": {
       "file": "nox-pb-1.2.0/product-bundles.zip",
-      "count": 0
+      "count": 2
     },
     "781901242": {
       "file": "nox-tp-1.8.0/theme-patcher.zip",
+      "count": 2
+    },
+    "781948369": {
+      "file": "nox-ew-1.3.0/easy-withdrawal.zip",
       "count": 0
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 126,
+      "github": 130,
       "manager": 3
     },
     "net.glarolykoi.android": {
