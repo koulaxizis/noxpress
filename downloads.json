@@ -2476,7 +2476,7 @@
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 134,
+      "github": 136,
       "manager": 3
     },
     "net.glarolykoi.android": {
@@ -2680,7 +2680,7 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 95
+      "github": 100
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
