@@ -39,6 +39,7 @@ final class TP_Care_Admin {
 			'tab'    => __( 'Τίτλος καρτέλας', 'theme-patcher' ),
 			'care'   => __( 'Επικεφαλίδα φροντίδας', 'theme-patcher' ),
 			'safety' => __( 'Επικεφαλίδα ασφάλειας', 'theme-patcher' ),
+			'ident'  => __( 'Ετικέτα κωδικού προϊόντος', 'theme-patcher' ),
 			'maker'  => __( 'Επικεφαλίδα κατασκευαστή', 'theme-patcher' ),
 			'eu'     => __( 'Επικεφαλίδα υπευθύνου στην ΕΕ', 'theme-patcher' ),
 			'more'   => __( 'Τελευταία γραμμή ({terms} = σύνδεσμος)', 'theme-patcher' ),
@@ -180,11 +181,27 @@ final class TP_Care_Admin {
 					<input type="text" class="regular-text" name="tp_care[eu][name]" value="<?php echo esc_attr( $c['eu']['name'] ); ?>" maxlength="<?php echo esc_attr( (string) TP_Care::MAX_LINE_LEN ); ?>" />
 				</label>
 				<label class="tp-field">
+					<span><?php esc_html_e( 'Ταχυδρομική διεύθυνση', 'theme-patcher' ); ?></span>
+					<textarea rows="2" cols="36" name="tp_care[eu][address]"><?php echo esc_textarea( $c['eu']['address'] ); ?></textarea>
+				</label>
+				<label class="tp-field">
 					<span><?php esc_html_e( 'Email', 'theme-patcher' ); ?></span>
 					<input type="email" class="regular-text" name="tp_care[eu][email]" value="<?php echo esc_attr( $c['eu']['email'] ); ?>" />
 				</label>
 			</div>
-			<p class="description tp-mt-8"><?php esc_html_e( 'Εμφανίζεται σε κάθε προϊόν, εκτός αν ο κατασκευαστής του έχει δικό του υπεύθυνο στην ΕΕ. Κενό όνομα = η ενότητα δεν εμφανίζεται.', 'theme-patcher' ); ?></p>
+			<p class="description tp-mt-8"><?php esc_html_e( 'Εμφανίζεται σε κάθε προϊόν, εκτός αν ο κατασκευαστής του έχει δικό του υπεύθυνο στην ΕΕ. Κενό όνομα = η ενότητα δεν εμφανίζεται. Ο GPSR (άρθρο 19) ζητά όνομα, ταχυδρομική και ηλεκτρονική διεύθυνση.', 'theme-patcher' ); ?></p>
+			<?php if ( '' !== $c['eu']['name'] && ( '' === $c['eu']['address'] || '' === $c['eu']['email'] ) ) : ?>
+				<p class="tp-warn"><?php esc_html_e( 'Λείπει η ταχυδρομική διεύθυνση ή το email του υπευθύνου στην ΕΕ.', 'theme-patcher' ); ?></p>
+			<?php endif; ?>
+
+			<h3 class="tp-h3"><?php esc_html_e( 'Κωδικός προϊόντος', 'theme-patcher' ); ?></h3>
+			<div class="tp-zone">
+				<label class="tp-check">
+					<input type="checkbox" name="tp_care[ident]" value="1" <?php checked( $c['ident'] ); ?> />
+					<?php esc_html_e( 'Εμφάνιση του κωδικού προϊόντος (SKU και GTIN / EAN / ISBN) στην καρτέλα', 'theme-patcher' ); ?>
+				</label>
+				<span class="tp-hint"><?php esc_html_e( 'Ο GPSR ζητά στοιχεία που επιτρέπουν την αναγνώριση του προϊόντος. Χωρίς SKU και GTIN η γραμμή δεν εμφανίζεται.', 'theme-patcher' ); ?></span>
+			</div>
 
 			<h3 class="tp-h3"><?php esc_html_e( 'Σύνδεσμος όρων και εμφάνιση', 'theme-patcher' ); ?></h3>
 			<div class="tp-zone tp-row">
@@ -218,8 +235,22 @@ final class TP_Care_Admin {
 		foreach ( $c['makers'] as $m ) {
 			$names[ $m['key'] ] = $m['name'];
 		}
+		$no_maker = array();
+		foreach ( $c['profiles'] as $p ) {
+			if ( $p['enabled'] && ( '' === $p['maker'] || ! isset( $names[ $p['maker'] ] ) ) ) {
+				$no_maker[] = $p['label'];
+			}
+		}
 		?>
 		<h3 class="tp-h3"><?php esc_html_e( 'Προφίλ', 'theme-patcher' ); ?></h3>
+		<?php if ( $no_maker ) : ?>
+			<p class="tp-warn">
+				<?php
+				/* translators: %s: profile names */
+				echo esc_html( sprintf( __( 'Προφίλ χωρίς κατασκευαστή: %s. Τα προϊόντα τους δείχνουν κατασκευαστή μόνο από την κλάση αποστολής ή τη ρύθμιση του προϊόντος· ο GPSR ζητά πάντα τον κατασκευαστή.', 'theme-patcher' ), implode( ', ', $no_maker ) ) );
+				?>
+			</p>
+		<?php endif; ?>
 		<p class="description"><?php esc_html_e( 'Με «Αυτόματο» στο προϊόν ισχύει το πρώτο ενεργό προφίλ του οποίου κάποιο είδος ταιριάζει στο προϊόν, αλλιώς το πρώτο του οποίου το πρόθεμα ταιριάζει στο SKU. Εξωτερικά, ομαδοποιημένα και εικονικά προϊόντα (και όσα είναι μόνο για λήψη) παίρνουν καρτέλα μόνο με ρητό προφίλ.', 'theme-patcher' ); ?></p>
 		<form method="post">
 			<?php self::action_fields( 'care_save_profiles' ); ?>
@@ -290,6 +321,22 @@ final class TP_Care_Admin {
 		}
 		?>
 		<h3 class="tp-h3"><?php esc_html_e( 'Κατασκευαστές', 'theme-patcher' ); ?></h3>
+		<?php
+		$thin = array();
+		foreach ( TP_Care::get()['makers'] as $m ) {
+			if ( '' === $m['address'] || ( '' === $m['email'] && '' === $m['url'] ) ) {
+				$thin[] = $m['name'];
+			}
+		}
+		if ( $thin ) :
+			?>
+			<p class="tp-warn">
+				<?php
+				/* translators: %s: manufacturer names */
+				echo esc_html( sprintf( __( 'Λείπει ταχυδρομική ή ηλεκτρονική διεύθυνση (email ή ιστότοπος) από: %s. Ο GPSR (άρθρο 19) τις ζητά και τις δύο.', 'theme-patcher' ), implode( ', ', $thin ) ) );
+				?>
+			</p>
+		<?php endif; ?>
 		<form method="post">
 			<?php self::action_fields( 'care_save_makers' ); ?>
 			<div class="tp-care-makers">
@@ -413,6 +460,9 @@ final class TP_Care_Admin {
 				);
 				?>
 			</p>
+			<?php if ( null !== $r['profile'] && null === $r['maker'] ) : ?>
+				<p class="tp-warn"><?php esc_html_e( 'Χωρίς κατασκευαστή: ο GPSR ζητά όνομα και διεύθυνση του κατασκευαστή.', 'theme-patcher' ); ?></p>
+			<?php endif; ?>
 			<?php $html = TP_Care::html( $product, $r ); ?>
 			<?php if ( '' !== $html ) : ?>
 				<p><strong><?php echo esc_html( TP_Care::title( $product ) ); ?></strong></p>
@@ -647,6 +697,7 @@ final class TP_Care_Admin {
 			}
 		}
 		$c['enabled'] = ! empty( $raw['enabled'] );
+		$c['ident']   = ! empty( $raw['ident'] );
 		foreach ( array( 'terms_url', 'anchor', 'color' ) as $k ) {
 			$c[ $k ] = isset( $raw[ $k ] ) ? (string) $raw[ $k ] : '';
 		}
@@ -876,6 +927,9 @@ final class TP_Care_Admin {
 		</p>
 		<?php if ( '' !== $auto ) : ?>
 			<p class="description"><?php echo esc_html( $auto ); ?></p>
+		<?php endif; ?>
+		<?php if ( isset( $r ) && null !== $r['profile'] && null === $r['maker'] ) : ?>
+			<p class="tp-warn"><?php esc_html_e( 'Η καρτέλα δεν δείχνει κατασκευαστή. Ο GPSR ζητά όνομα και διεύθυνση του κατασκευαστή: διάλεξε έναν παραπάνω ή όρισέ τον στο προφίλ.', 'theme-patcher' ); ?></p>
 		<?php endif; ?>
 		<?php if ( ! $c['enabled'] ) : ?>
 			<p class="description"><?php esc_html_e( 'Η καρτέλα είναι ανενεργή στις ρυθμίσεις του Theme Patcher.', 'theme-patcher' ); ?></p>

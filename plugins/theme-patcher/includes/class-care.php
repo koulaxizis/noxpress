@@ -15,7 +15,11 @@
  *                    "maker": manufacturer key | "", "enabled": bool } ],
  *    "makers":   [ { "key", "name", "address", "email", "url", "eu" } ],
  *    "class_makers": { shipping class slug: manufacturer key },
- *    "eu":       { "name", "email" },       global EU responsible person
+ *    "eu":       { "name", "address", "email" }, global EU responsible person
+ *                                           (address: 1.9.0, GPSR art. 19)
+ *    "ident":    bool,                      product identifier line (SKU, GTIN;
+ *                                           1.9.0: on for new installs, off
+ *                                           for stored settings without it)
  *    "texts":    { "<id>": {el,en} },       headings and the terms line
  *    "terms_url": url | "",  "anchor": str,  "color": "#hex" | "",
  *    "delete_meta": bool                    uninstall also deletes the product meta
@@ -74,7 +78,7 @@ final class TP_Care {
 	const MAX_TEXT_LEN = 120;
 
 	/** Visitor text ids => default { el, en }. */
-	const TEXT_IDS = array( 'tab', 'care', 'safety', 'maker', 'eu', 'more', 'terms' );
+	const TEXT_IDS = array( 'tab', 'care', 'safety', 'ident', 'maker', 'eu', 'more', 'terms' );
 
 	/** Per-request cache of the decoded option. */
 	private static $cache = null;
@@ -108,9 +112,11 @@ final class TP_Care {
 			'makers'       => self::default_makers(),
 			'class_makers' => array(),
 			'eu'           => array(
-				'name'  => '',
-				'email' => '',
+				'name'    => '',
+				'address' => '',
+				'email'   => '',
 			),
+			'ident'        => true,
 			'texts'        => self::default_texts(),
 			'terms_url'    => '',
 			'anchor'       => 'gpsr',
@@ -145,6 +151,10 @@ final class TP_Care {
 			'safety' => array(
 				'el' => 'Ασφάλεια προϊόντος',
 				'en' => 'Product safety',
+			),
+			'ident'  => array(
+				'el' => 'Κωδικός προϊόντος',
+				'en' => 'Product code',
 			),
 			'maker'  => array(
 				'el' => 'Κατασκευαστής',
@@ -304,6 +314,8 @@ final class TP_Care {
 
 		$out['enabled']     = ! empty( $raw['enabled'] );
 		$out['delete_meta'] = ! empty( $raw['delete_meta'] );
+		// 1.9.0: settings stored before have no key and keep the tab as it was.
+		$out['ident'] = ! empty( $raw['ident'] );
 
 		if ( isset( $raw['attrs'] ) && is_array( $raw['attrs'] ) ) {
 			foreach ( array( 'type', 'material', 'method' ) as $k ) {
@@ -362,8 +374,9 @@ final class TP_Care {
 
 		if ( isset( $raw['eu'] ) && is_array( $raw['eu'] ) ) {
 			$out['eu'] = array(
-				'name'  => self::line( isset( $raw['eu']['name'] ) ? $raw['eu']['name'] : '' ),
-				'email' => self::email( isset( $raw['eu']['email'] ) ? $raw['eu']['email'] : '' ),
+				'name'    => self::line( isset( $raw['eu']['name'] ) ? $raw['eu']['name'] : '' ),
+				'address' => self::multiline( isset( $raw['eu']['address'] ) ? $raw['eu']['address'] : '' ),
+				'email'   => self::email( isset( $raw['eu']['email'] ) ? $raw['eu']['email'] : '' ),
 			);
 		}
 
@@ -748,6 +761,26 @@ final class TP_Care {
 		return implode( '<br>', $out );
 	}
 
+	/**
+	 * 1.9.0: the product's identifier for GPSR art. 19 (c): its SKU and,
+	 * when it differs, its GTIN / EAN / ISBN (WooCommerce 9.2+). '' when
+	 * the product has neither.
+	 */
+	public static function ident( WC_Product $product ): string {
+		$parts = array();
+		$sku   = trim( (string) $product->get_sku( 'edit' ) );
+		if ( '' !== $sku ) {
+			$parts[] = $sku;
+		}
+		if ( is_callable( array( $product, 'get_global_unique_id' ) ) ) {
+			$gtin = trim( (string) $product->get_global_unique_id( 'edit' ) );
+			if ( '' !== $gtin && $gtin !== $sku ) {
+				$parts[] = 'GTIN ' . $gtin;
+			}
+		}
+		return implode( ' · ', $parts );
+	}
+
 	/** Tab HTML for a resolved product ('' = no tab). */
 	public static function html( WC_Product $product, ?array $resolved = null ): string {
 		$product  = self::base( $product );
@@ -775,6 +808,13 @@ final class TP_Care {
 			}
 		}
 
+		if ( $c['ident'] ) {
+			$ident = self::ident( $product );
+			if ( '' !== $ident ) {
+				$out .= '<p class="tp-care__ident"><strong>' . esc_html( self::label( 'ident' ) ) . ':</strong> ' . esc_html( $ident ) . '</p>';
+			}
+		}
+
 		if ( null !== $maker ) {
 			$lines = array( esc_html( $maker['name'] ) );
 			if ( '' !== $maker['address'] ) {
@@ -795,6 +835,9 @@ final class TP_Care {
 			$eu[] = self::lines( $maker['eu'] );
 		} elseif ( '' !== $c['eu']['name'] ) {
 			$eu[] = esc_html( $c['eu']['name'] );
+			if ( '' !== $c['eu']['address'] ) {
+				$eu[] = self::lines( $c['eu']['address'] );
+			}
 			if ( '' !== $c['eu']['email'] ) {
 				$eu[] = '<a href="' . esc_url( 'mailto:' . $c['eu']['email'] ) . '">' . esc_html( $c['eu']['email'] ) . '</a>';
 			}
