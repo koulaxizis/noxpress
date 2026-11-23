@@ -1,8 +1,8 @@
 {
-  "display": 1866,
-  "total": 1866,
+  "display": 1895,
+  "total": 1895,
   "offset": 5,
-  "updated": "2026-11-22",
+  "updated": "2026-11-23",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -2154,7 +2154,7 @@
     },
     "768691558": {
       "file": "nox-pf-1.3.4/product-formats.zip",
-      "count": 2
+      "count": 3
     },
     "768691784": {
       "file": "nox-ew-1.2.9/easy-withdrawal.zip",
@@ -2182,11 +2182,11 @@
     },
     "768692964": {
       "file": "nox-vp-1.1.6/variation-picker.zip",
-      "count": 3
+      "count": 4
     },
     "768693199": {
       "file": "nox-gl-1.3.4/greeklish-permalinks.zip",
-      "count": 2
+      "count": 3
     },
     "768693352": {
       "file": "nox-oc-1.4.1/oros-connect.zip",
@@ -2194,7 +2194,7 @@
     },
     "768693547": {
       "file": "nox-pb-1.1.8/product-bundles.zip",
-      "count": 3
+      "count": 4
     },
     "768693744": {
       "file": "nox-sb-1.13.4/site-bridge.zip",
@@ -2210,11 +2210,11 @@
     },
     "768694431": {
       "file": "nox-ws-1.2.9/wish-shelf.zip",
-      "count": 3
+      "count": 4
     },
     "768694624": {
       "file": "nox-ce-1.2.4/checkout-extras.zip",
-      "count": 2
+      "count": 3
     },
     "768694803": {
       "file": "nox-nm-1.3.4/data-migrator.zip",
@@ -2238,15 +2238,15 @@
     },
     "768696134": {
       "file": "nox-fp-1.0.11/fast-pages.zip",
-      "count": 2
+      "count": 3
     },
     "768696411": {
       "file": "nox-br-1.4.6/broadcast.zip",
-      "count": 2
+      "count": 3
     },
     "768696689": {
       "file": "nox-ml-1.0.9/magic-login.zip",
-      "count": 2
+      "count": 3
     },
     "768696942": {
       "file": "nox-ti-1.0.8/trade-feed-import.zip",
@@ -2258,71 +2258,71 @@
     },
     "768697429": {
       "file": "nox-rd-1.0.10/redirects.zip",
-      "count": 2
+      "count": 3
     },
     "768697689": {
       "file": "nox-ss-1.1.3/search-signals.zip",
-      "count": 2
+      "count": 3
     },
     "768697924": {
       "file": "nox-pl-1.3.2/production-ledger.zip",
-      "count": 2
+      "count": 3
     },
     "768698145": {
       "file": "nox-pt-1.0.4/product-tabs.zip",
-      "count": 2
+      "count": 3
     },
     "768698345": {
       "file": "nox-fd-1.0.4/product-feed.zip",
-      "count": 2
+      "count": 3
     },
     "768698554": {
       "file": "nox-iv-1.1.3/invoice-details.zip",
-      "count": 2
+      "count": 3
     },
     "768698774": {
       "file": "nox-al-1.0.3/activity-log.zip",
-      "count": 2
+      "count": 3
     },
     "768699007": {
       "file": "nox-mr-1.0.3/mail-relay.zip",
-      "count": 2
+      "count": 3
     },
     "768699198": {
       "file": "nox-lg-1.1.3/login-guard.zip",
-      "count": 3
+      "count": 4
     },
     "768699448": {
       "file": "nox-fm-1.0.3/forms.zip",
-      "count": 2
+      "count": 3
     },
     "768699628": {
       "file": "nox-lv-1.0.4/live-search.zip",
-      "count": 3
+      "count": 4
     },
     "768699867": {
       "file": "nox-bs-1.0.3/back-in-stock.zip",
-      "count": 2
+      "count": 3
     },
     "768700093": {
       "file": "nox-ev-1.1.3/events.zip",
-      "count": 2
+      "count": 3
     },
     "768700375": {
       "file": "nox-gc-1.0.4/gift-cards.zip",
-      "count": 3
+      "count": 4
     },
     "768700680": {
       "file": "nox-ed-1.0.3/ebook-delivery.zip",
-      "count": 2
+      "count": 3
     },
     "768700942": {
       "file": "nox-mm-1.0.3/maintenance-mode.zip",
-      "count": 2
+      "count": 3
     },
     "768701174": {
       "file": "nox-dr-1.1.3/discount-rules.zip",
-      "count": 2
+      "count": 3
     },
     "768701371": {
       "file": "nox-vl-1.0.0/visitor-language.zip",
@@ -2350,13 +2350,17 @@
     },
     "780691934": {
       "file": "nox-sn-1.5.0/shipping-notes.zip",
+      "count": 3
+    },
+    "781898120": {
+      "file": "nox-pb-1.2.0/product-bundles.zip",
       "count": 0
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 116,
+      "github": 126,
       "manager": 3
     },
     "net.glarolykoi.android": {
