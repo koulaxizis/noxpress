@@ -1,6 +1,6 @@
 {
-  "display": 1953,
-  "total": 1953,
+  "display": 1956,
+  "total": 1956,
   "offset": 5,
   "updated": "2026-11-23",
   "assets": {
@@ -2434,13 +2434,17 @@
     },
     "782116373": {
       "file": "nox-tp-1.8.1/theme-patcher.zip",
+      "count": 3
+    },
+    "782328917": {
+      "file": "nox-tp-1.9.0/theme-patcher.zip",
       "count": 0
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 130,
+      "github": 134,
       "manager": 3
     },
     "net.glarolykoi.android": {
