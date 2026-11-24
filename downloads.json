@@ -1,8 +1,8 @@
 {
-  "display": 1975,
-  "total": 1975,
+  "display": 2026,
+  "total": 2026,
   "offset": 5,
-  "updated": "2026-11-23",
+  "updated": "2026-11-24",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -2102,7 +2102,7 @@
     },
     "763059284": {
       "file": "nox-sba-1.8.1/site-bridge.apk",
-      "count": 13
+      "count": 14
     },
     "763059286": {
       "file": "nox-sba-1.8.1/site-bridge.apk.sha256",
@@ -2114,7 +2114,7 @@
     },
     "763092733": {
       "file": "nox-loa-2.0.2/live-operator.apk",
-      "count": 13
+      "count": 14
     },
     "763180608": {
       "file": "nox-oc-1.4.0/oros-connect.zip",
@@ -2138,7 +2138,7 @@
     },
     "768690809": {
       "file": "nox-sp-1.9.3/store-pulse.zip",
-      "count": 3
+      "count": 4
     },
     "768690974": {
       "file": "nox-sf-1.5.6/smart-formatter.zip",
@@ -2150,11 +2150,11 @@
     },
     "768691354": {
       "file": "nox-sh-1.3.7/shop-filters.zip",
-      "count": 3
+      "count": 4
     },
     "768691558": {
       "file": "nox-pf-1.3.4/product-formats.zip",
-      "count": 3
+      "count": 4
     },
     "768691784": {
       "file": "nox-ew-1.2.9/easy-withdrawal.zip",
@@ -2166,27 +2166,27 @@
     },
     "768692227": {
       "file": "nox-bp-1.3.4/book-preview.zip",
-      "count": 4
+      "count": 5
     },
     "768692466": {
       "file": "nox-cr-1.3.7/featured-creators.zip",
-      "count": 3
+      "count": 4
     },
     "768692599": {
       "file": "nox-pk-1.2.6/store-pickup.zip",
-      "count": 2
+      "count": 3
     },
     "768692753": {
       "file": "nox-hc-1.1.7/hide-catalog.zip",
-      "count": 3
+      "count": 4
     },
     "768692964": {
       "file": "nox-vp-1.1.6/variation-picker.zip",
-      "count": 4
+      "count": 5
     },
     "768693199": {
       "file": "nox-gl-1.3.4/greeklish-permalinks.zip",
-      "count": 3
+      "count": 4
     },
     "768693352": {
       "file": "nox-oc-1.4.1/oros-connect.zip",
@@ -2206,11 +2206,11 @@
     },
     "768694111": {
       "file": "nox-po-1.1.8/pre-orders.zip",
-      "count": 3
+      "count": 4
     },
     "768694431": {
       "file": "nox-ws-1.2.9/wish-shelf.zip",
-      "count": 4
+      "count": 5
     },
     "768694624": {
       "file": "nox-ce-1.2.4/checkout-extras.zip",
@@ -2218,15 +2218,15 @@
     },
     "768694803": {
       "file": "nox-nm-1.3.4/data-migrator.zip",
-      "count": 3
+      "count": 4
     },
     "768695074": {
       "file": "nox-hs-1.4.9/home-sections.zip",
-      "count": 3
+      "count": 4
     },
     "768695360": {
       "file": "nox-bf-1.13.8/book-feed.zip",
-      "count": 4
+      "count": 5
     },
     "768695630": {
       "file": "nox-lo-1.6.1/live-operator.zip",
@@ -2238,11 +2238,11 @@
     },
     "768696134": {
       "file": "nox-fp-1.0.11/fast-pages.zip",
-      "count": 3
+      "count": 4
     },
     "768696411": {
       "file": "nox-br-1.4.6/broadcast.zip",
-      "count": 3
+      "count": 4
     },
     "768696689": {
       "file": "nox-ml-1.0.9/magic-login.zip",
@@ -2250,39 +2250,39 @@
     },
     "768696942": {
       "file": "nox-ti-1.0.8/trade-feed-import.zip",
-      "count": 2
+      "count": 3
     },
     "768697200": {
       "file": "nox-li-1.0.6/lean-images.zip",
-      "count": 2
+      "count": 3
     },
     "768697429": {
       "file": "nox-rd-1.0.10/redirects.zip",
-      "count": 3
+      "count": 5
     },
     "768697689": {
       "file": "nox-ss-1.1.3/search-signals.zip",
-      "count": 3
+      "count": 4
     },
     "768697924": {
       "file": "nox-pl-1.3.2/production-ledger.zip",
-      "count": 3
+      "count": 4
     },
     "768698145": {
       "file": "nox-pt-1.0.4/product-tabs.zip",
-      "count": 3
+      "count": 4
     },
     "768698345": {
       "file": "nox-fd-1.0.4/product-feed.zip",
-      "count": 3
+      "count": 4
     },
     "768698554": {
       "file": "nox-iv-1.1.3/invoice-details.zip",
-      "count": 3
+      "count": 4
     },
     "768698774": {
       "file": "nox-al-1.0.3/activity-log.zip",
-      "count": 3
+      "count": 4
     },
     "768699007": {
       "file": "nox-mr-1.0.3/mail-relay.zip",
@@ -2298,11 +2298,11 @@
     },
     "768699628": {
       "file": "nox-lv-1.0.4/live-search.zip",
-      "count": 4
+      "count": 5
     },
     "768699867": {
       "file": "nox-bs-1.0.3/back-in-stock.zip",
-      "count": 3
+      "count": 4
     },
     "768700093": {
       "file": "nox-ev-1.1.3/events.zip",
@@ -2354,7 +2354,7 @@
     },
     "781898120": {
       "file": "nox-pb-1.2.0/product-bundles.zip",
-      "count": 3
+      "count": 4
     },
     "781901242": {
       "file": "nox-tp-1.8.0/theme-patcher.zip",
@@ -2374,7 +2374,7 @@
     },
     "781972534": {
       "file": "nox-lg-1.2.0/login-guard.zip",
-      "count": 3
+      "count": 4
     },
     "781972815": {
       "file": "nox-gc-1.1.0/gift-cards.zip",
@@ -2382,7 +2382,7 @@
     },
     "781972976": {
       "file": "nox-ed-1.1.0/ebook-delivery.zip",
-      "count": 3
+      "count": 4
     },
     "781974920": {
       "file": "nox-ce-1.3.0/checkout-extras.zip",
@@ -2390,11 +2390,11 @@
     },
     "781991283": {
       "file": "nox-mr-1.0.4/mail-relay.zip",
-      "count": 3
+      "count": 4
     },
     "781991513": {
       "file": "nox-ev-1.1.4/events.zip",
-      "count": 3
+      "count": 4
     },
     "781991754": {
       "file": "nox-gc-1.2.0/gift-cards.zip",
@@ -2406,7 +2406,7 @@
     },
     "782047042": {
       "file": "nox-rs-1.22.0/revenue-splitter.zip",
-      "count": 3
+      "count": 4
     },
     "782047441": {
       "file": "nox-oc-1.5.0/oros-connect.zip",
@@ -2414,7 +2414,7 @@
     },
     "782047659": {
       "file": "nox-sb-1.13.5/site-bridge.zip",
-      "count": 3
+      "count": 4
     },
     "782047834": {
       "file": "nox-ce-1.4.0/checkout-extras.zip",
@@ -2422,15 +2422,15 @@
     },
     "782047970": {
       "file": "nox-lo-1.6.2/live-operator.zip",
-      "count": 3
+      "count": 4
     },
     "782048370": {
       "file": "nox-mm-1.0.4/maintenance-mode.zip",
-      "count": 3
+      "count": 4
     },
     "782048603": {
       "file": "nox-vl-1.0.5/visitor-language.zip",
-      "count": 3
+      "count": 4
     },
     "782116373": {
       "file": "nox-tp-1.8.1/theme-patcher.zip",
@@ -2438,7 +2438,7 @@
     },
     "782328917": {
       "file": "nox-tp-1.9.0/theme-patcher.zip",
-      "count": 2
+      "count": 3
     },
     "782367136": {
       "file": "nox-ew-1.3.1/easy-withdrawal.zip",
@@ -2446,23 +2446,23 @@
     },
     "782367484": {
       "file": "nox-oc-1.5.1/oros-connect.zip",
-      "count": 2
+      "count": 3
     },
     "782367891": {
       "file": "nox-pq-1.1.9/publishing-quote.zip",
-      "count": 3
+      "count": 4
     },
     "782368150": {
       "file": "nox-ce-1.4.1/checkout-extras.zip",
-      "count": 2
+      "count": 3
     },
     "782368484": {
       "file": "nox-ml-1.1.1/magic-login.zip",
-      "count": 2
+      "count": 3
     },
     "782368887": {
       "file": "nox-fm-1.0.4/forms.zip",
-      "count": 2
+      "count": 3
     },
     "782369156": {
       "file": "nox-gc-1.2.1/gift-cards.zip",
@@ -2470,222 +2470,232 @@
     },
     "782369405": {
       "file": "nox-dr-1.2.1/discount-rules.zip",
-      "count": 2
+      "count": 3
     },
     "783456623": {
       "file": "nox-sn-1.5.1/shipping-notes.zip",
-      "count": 0
+      "count": 4
     }
   },
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 139,
+      "github": 162,
       "manager": 3
     },
     "net.glarolykoi.android": {
-      "github": 5,
+      "github": 6,
       "manager": 2,
       "play_appilix": 10
     },
+    "online.useoros.assistant": {
+      "manager": 2
+    },
     "online.useoros.base": {
       "estimate": 2,
-      "github": 2,
+      "github": 3,
       "manager": 1
     },
     "online.useoros.bookmarks": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.budget": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.calculator": {
       "estimate": 6,
-      "github": 2,
-      "manager": 4
+      "github": 3,
+      "manager": 7
     },
     "online.useoros.calendar": {
       "estimate": 6,
-      "github": 2,
-      "manager": 2
+      "github": 3,
+      "manager": 5
     },
     "online.useoros.contacts": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.crm": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.cycle": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.diary": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.drive": {
       "estimate": 25,
-      "github": 2
+      "github": 3
     },
     "online.useoros.files": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.forms": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.games": {
       "estimate": 6,
-      "github": 2,
-      "manager": 2
+      "github": 3,
+      "manager": 5
     },
     "online.useoros.habits": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.health": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.invoices": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.kanban": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.library": {
       "estimate": 2,
-      "github": 2
+      "github": 3
     },
     "online.useoros.mail": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.maps": {
       "estimate": 6,
-      "github": 2
+      "github": 3,
+      "manager": 1
     },
     "online.useoros.mindmap": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.mood": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.music": {
       "estimate": 6,
-      "github": 2,
-      "manager": 4
+      "github": 4,
+      "manager": 6
+    },
+    "online.useoros.music_8096000": {
+      "manager": 1
     },
     "online.useoros.notes": {
       "estimate": 6,
-      "github": 2,
-      "manager": 2
+      "github": 3,
+      "manager": 5
     },
     "online.useoros.passwords": {
       "estimate": 6,
-      "github": 2,
-      "manager": 1
+      "github": 3,
+      "manager": 4
     },
     "online.useoros.photolab": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.podcasts": {
       "estimate": 6,
-      "github": 2,
-      "manager": 2
+      "github": 3,
+      "manager": 5
     },
     "online.useoros.radio": {
       "estimate": 6,
-      "github": 2,
-      "manager": 3
+      "github": 3,
+      "manager": 6
     },
     "online.useoros.reader": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.scanner": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.slides": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.spreadsheet": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.stock": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.studioremote": {
       "estimate": 15,
-      "github": 6
+      "github": 7
     },
     "online.useoros.time": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.timesheet": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.todo": {
       "estimate": 6,
-      "github": 2,
-      "manager": 4
+      "github": 3,
+      "manager": 7
     },
     "online.useoros.transfer": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.twa": {
       "estimate": 120,
-      "github": 2,
-      "manager": 5
+      "github": 3,
+      "manager": 7
+    },
+    "online.useoros.twa_8091000": {
+      "manager": 1
     },
     "online.useoros.water": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.weather": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.wiki": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.workouts": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "online.useoros.writer": {
       "estimate": 6,
-      "github": 2
+      "github": 3
     },
     "tech.noxpress.liveoperator": {
       "estimate": 10,
-      "github": 49
+      "github": 50
     },
     "tech.noxpress.sitebridge": {
       "estimate": 14,
-      "github": 66
+      "github": 67
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 103
+      "github": 104
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
