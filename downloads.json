@@ -1,8 +1,8 @@
 {
-  "display": 2026,
-  "total": 2026,
+  "display": 2031,
+  "total": 2031,
   "offset": 5,
-  "updated": "2026-11-24",
+  "updated": "2026-11-25",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -2114,7 +2114,7 @@
     },
     "763092733": {
       "file": "nox-loa-2.0.2/live-operator.apk",
-      "count": 14
+      "count": 15
     },
     "763180608": {
       "file": "nox-oc-1.4.0/oros-connect.zip",
@@ -2210,7 +2210,7 @@
     },
     "768694431": {
       "file": "nox-ws-1.2.9/wish-shelf.zip",
-      "count": 5
+      "count": 6
     },
     "768694624": {
       "file": "nox-ce-1.2.4/checkout-extras.zip",
@@ -2366,7 +2366,7 @@
     },
     "781971994": {
       "file": "nox-ta-1.11.0/trade-accounts.zip",
-      "count": 3
+      "count": 4
     },
     "781972134": {
       "file": "nox-ml-1.1.0/magic-login.zip",
@@ -2458,7 +2458,7 @@
     },
     "782368484": {
       "file": "nox-ml-1.1.1/magic-login.zip",
-      "count": 3
+      "count": 4
     },
     "782368887": {
       "file": "nox-fm-1.0.4/forms.zip",
@@ -2466,7 +2466,7 @@
     },
     "782369156": {
       "file": "nox-gc-1.2.1/gift-cards.zip",
-      "count": 2
+      "count": 3
     },
     "782369405": {
       "file": "nox-dr-1.2.1/discount-rules.zip",
@@ -2480,7 +2480,7 @@
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 162,
+      "github": 168,
       "manager": 3
     },
     "net.glarolykoi.android": {
@@ -2687,7 +2687,7 @@
     },
     "tech.noxpress.liveoperator": {
       "estimate": 10,
-      "github": 50
+      "github": 51
     },
     "tech.noxpress.sitebridge": {
       "estimate": 14,
@@ -2695,7 +2695,7 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 104
+      "github": 106
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
