@@ -2,7 +2,7 @@
   "display": 2039,
   "total": 2039,
   "offset": 5,
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -2480,7 +2480,7 @@
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 168,
+      "github": 174,
       "manager": 3
     },
     "net.glarolykoi.android": {
@@ -2489,35 +2489,37 @@
       "play_appilix": 10
     },
     "online.useoros.assistant": {
-      "manager": 2
+      "manager": 3
     },
     "online.useoros.base": {
       "estimate": 2,
       "github": 3,
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.bookmarks": {
       "estimate": 6,
       "github": 3,
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.budget": {
       "estimate": 6,
-      "github": 3
+      "github": 3,
+      "manager": 1
     },
     "online.useoros.calculator": {
       "estimate": 6,
       "github": 3,
-      "manager": 7
+      "manager": 9
     },
     "online.useoros.calendar": {
       "estimate": 6,
       "github": 3,
-      "manager": 5
+      "manager": 6
     },
     "online.useoros.contacts": {
       "estimate": 6,
-      "github": 3
+      "github": 3,
+      "manager": 2
     },
     "online.useoros.crm": {
       "estimate": 6,
@@ -2533,11 +2535,13 @@
     },
     "online.useoros.drive": {
       "estimate": 25,
-      "github": 3
+      "github": 3,
+      "manager": 3
     },
     "online.useoros.files": {
       "estimate": 6,
-      "github": 3
+      "github": 3,
+      "manager": 2
     },
     "online.useoros.forms": {
       "estimate": 6,
@@ -2558,7 +2562,8 @@
     },
     "online.useoros.invoices": {
       "estimate": 6,
-      "github": 3
+      "github": 3,
+      "manager": 1
     },
     "online.useoros.kanban": {
       "estimate": 6,
@@ -2570,7 +2575,8 @@
     },
     "online.useoros.mail": {
       "estimate": 6,
-      "github": 4
+      "github": 4,
+      "manager": 2
     },
     "online.useoros.maps": {
       "estimate": 6,
@@ -2579,7 +2585,8 @@
     },
     "online.useoros.mindmap": {
       "estimate": 6,
-      "github": 3
+      "github": 3,
+      "manager": 1
     },
     "online.useoros.mood": {
       "estimate": 6,
@@ -2591,17 +2598,17 @@
       "manager": 6
     },
     "online.useoros.music_8096000": {
-      "manager": 1
+      "manager": 2
     },
     "online.useoros.notes": {
       "estimate": 6,
       "github": 3,
-      "manager": 5
+      "manager": 6
     },
     "online.useoros.passwords": {
       "estimate": 6,
       "github": 3,
-      "manager": 4
+      "manager": 5
     },
     "online.useoros.photolab": {
       "estimate": 6,
@@ -2615,7 +2622,7 @@
     "online.useoros.radio": {
       "estimate": 6,
       "github": 3,
-      "manager": 6
+      "manager": 7
     },
     "online.useoros.reader": {
       "estimate": 6,
@@ -2623,7 +2630,8 @@
     },
     "online.useoros.scanner": {
       "estimate": 6,
-      "github": 3
+      "github": 3,
+      "manager": 2
     },
     "online.useoros.slides": {
       "estimate": 6,
@@ -2639,7 +2647,8 @@
     },
     "online.useoros.studioremote": {
       "estimate": 15,
-      "github": 7
+      "github": 13,
+      "manager": 1
     },
     "online.useoros.time": {
       "estimate": 6,
@@ -2661,7 +2670,7 @@
     "online.useoros.twa": {
       "estimate": 120,
       "github": 3,
-      "manager": 7
+      "manager": 8
     },
     "online.useoros.twa_8091000": {
       "manager": 1
@@ -2696,11 +2705,13 @@
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 106
+      "github": 115,
+      "manager": 1
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
-      "github": 61
+      "github": 64,
+      "manager": 1
     }
   }
 }
