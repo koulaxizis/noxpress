@@ -1,8 +1,8 @@
 {
-  "display": 2039,
-  "total": 2039,
+  "display": 2042,
+  "total": 2042,
   "offset": 5,
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "assets": {
     "588348470": {
       "file": "nox-rs-1.5.0/revenue-splitter.zip",
@@ -2102,7 +2102,7 @@
     },
     "763059284": {
       "file": "nox-sba-1.8.1/site-bridge.apk",
-      "count": 14
+      "count": 16
     },
     "763059286": {
       "file": "nox-sba-1.8.1/site-bridge.apk.sha256",
@@ -2114,7 +2114,7 @@
     },
     "763092733": {
       "file": "nox-loa-2.0.2/live-operator.apk",
-      "count": 15
+      "count": 16
     },
     "763180608": {
       "file": "nox-oc-1.4.0/oros-connect.zip",
@@ -2480,237 +2480,244 @@
   "android": {
     "gr.koulaxizis.apps": {
       "estimate": 10,
-      "github": 174,
-      "manager": 3
+      "github": 212,
+      "manager": 4
     },
     "net.glarolykoi.android": {
       "github": 6,
-      "manager": 2,
+      "manager": 3,
       "play_appilix": 10
     },
     "online.useoros.assistant": {
-      "manager": 3
+      "manager": 7
     },
     "online.useoros.base": {
       "estimate": 2,
-      "github": 3,
+      "github": 4,
       "manager": 2
     },
     "online.useoros.bookmarks": {
       "estimate": 6,
-      "github": 3,
-      "manager": 2
+      "github": 4,
+      "manager": 5
     },
     "online.useoros.budget": {
       "estimate": 6,
-      "github": 3,
+      "github": 4,
       "manager": 1
     },
     "online.useoros.calculator": {
       "estimate": 6,
-      "github": 3,
-      "manager": 9
+      "github": 4,
+      "manager": 14
     },
     "online.useoros.calendar": {
       "estimate": 6,
-      "github": 3,
-      "manager": 6
+      "github": 4,
+      "manager": 11
     },
     "online.useoros.contacts": {
       "estimate": 6,
-      "github": 3,
+      "github": 4,
       "manager": 2
     },
     "online.useoros.crm": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.cycle": {
       "estimate": 6,
-      "github": 4
+      "github": 5,
+      "manager": 1
     },
     "online.useoros.diary": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.drive": {
       "estimate": 25,
-      "github": 3,
-      "manager": 3
+      "github": 4,
+      "manager": 7
     },
     "online.useoros.files": {
       "estimate": 6,
-      "github": 3,
-      "manager": 2
+      "github": 4,
+      "manager": 3
     },
     "online.useoros.forms": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.games": {
       "estimate": 6,
-      "github": 3,
-      "manager": 5
+      "github": 4,
+      "manager": 10
     },
     "online.useoros.habits": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.health": {
       "estimate": 6,
-      "github": 4
+      "github": 5
     },
     "online.useoros.invoices": {
-      "estimate": 6,
-      "github": 3,
-      "manager": 1
-    },
-    "online.useoros.kanban": {
-      "estimate": 6,
-      "github": 3
-    },
-    "online.useoros.library": {
-      "estimate": 2,
-      "github": 3
-    },
-    "online.useoros.mail": {
       "estimate": 6,
       "github": 4,
       "manager": 2
     },
+    "online.useoros.kanban": {
+      "estimate": 6,
+      "github": 4
+    },
+    "online.useoros.library": {
+      "estimate": 2,
+      "github": 4
+    },
+    "online.useoros.mail": {
+      "estimate": 6,
+      "github": 5,
+      "manager": 3
+    },
     "online.useoros.maps": {
-      "estimate": 6,
-      "github": 3,
-      "manager": 1
-    },
-    "online.useoros.mindmap": {
-      "estimate": 6,
-      "github": 3,
-      "manager": 1
-    },
-    "online.useoros.mood": {
-      "estimate": 6,
-      "github": 3
-    },
-    "online.useoros.music": {
       "estimate": 6,
       "github": 4,
       "manager": 6
+    },
+    "online.useoros.mindmap": {
+      "estimate": 6,
+      "github": 4,
+      "manager": 2
+    },
+    "online.useoros.mood": {
+      "estimate": 6,
+      "github": 4,
+      "manager": 1
+    },
+    "online.useoros.music": {
+      "estimate": 6,
+      "github": 5,
+      "manager": 11
     },
     "online.useoros.music_8096000": {
       "manager": 2
     },
     "online.useoros.notes": {
       "estimate": 6,
-      "github": 3,
-      "manager": 6
+      "github": 4,
+      "manager": 10
     },
     "online.useoros.passwords": {
       "estimate": 6,
-      "github": 3,
-      "manager": 5
+      "github": 4,
+      "manager": 10
     },
     "online.useoros.photolab": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.podcasts": {
       "estimate": 6,
-      "github": 3,
-      "manager": 5
+      "github": 4,
+      "manager": 9
     },
     "online.useoros.radio": {
       "estimate": 6,
-      "github": 3,
-      "manager": 7
+      "github": 4,
+      "manager": 11
     },
     "online.useoros.reader": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.scanner": {
       "estimate": 6,
-      "github": 3,
+      "github": 4,
       "manager": 2
     },
     "online.useoros.slides": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.spreadsheet": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.stock": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.studioremote": {
       "estimate": 15,
-      "github": 13,
-      "manager": 1
+      "github": 15,
+      "manager": 2
     },
     "online.useoros.time": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.timesheet": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.todo": {
       "estimate": 6,
-      "github": 3,
-      "manager": 7
+      "github": 4,
+      "manager": 10
+    },
+    "online.useoros.todo_9009001": {
+      "manager": 1
     },
     "online.useoros.transfer": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.twa": {
       "estimate": 120,
-      "github": 3,
-      "manager": 8
+      "github": 4,
+      "manager": 11
     },
     "online.useoros.twa_8091000": {
       "manager": 1
     },
     "online.useoros.water": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.weather": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.wiki": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.workouts": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "online.useoros.writer": {
       "estimate": 6,
-      "github": 3
+      "github": 4
     },
     "tech.noxpress.liveoperator": {
       "estimate": 10,
-      "github": 51
+      "github": 52,
+      "manager": 1
     },
     "tech.noxpress.sitebridge": {
       "estimate": 14,
-      "github": 67
+      "github": 69,
+      "manager": 3
     },
     "tech.nulljsfx.remote.daws": {
       "estimate": 12,
-      "github": 115,
-      "manager": 1
+      "github": 121,
+      "manager": 2
     },
     "tech.nulljsfx.remote.mixers": {
       "estimate": 11,
-      "github": 64,
+      "github": 67,
       "manager": 1
     }
   }
